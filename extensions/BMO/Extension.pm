@@ -2737,8 +2737,6 @@ sub app_startup {
       ->to( 'CGI#enter_bug_cgi' => { 'product' => 'Infrastructure & Operations', 'format' => 'itrequest' } );
     $r->any( '/:REWRITE_mozlist' => [ REWRITE_mozlist => qr{form[\.:]mozlist} ] )
       ->to( 'CGI#enter_bug_cgi' => { 'product' => 'mozilla.org', 'format' => 'mozlist' } );
-    $r->any( '/:REWRITE_poweredby' => [ REWRITE_poweredby => qr{form[\.:]poweredby} ] )
-      ->to( 'CGI#enter_bug_cgi' => { 'product' => 'mozilla.org', 'format' => 'poweredby' } );
     $r->any( '/:REWRITE_presentation' => [ REWRITE_presentation => qr{form[\.:]presentation} ] )
       ->to( 'cgi#enter_bug_cgi' => { 'product' => 'mozilla.org', 'format' => 'presentation' } );
     $r->any( '/:REWRITE_trademark' => [ REWRITE_trademark => qr{form[\.:]trademark} ] )

@@ -320,7 +320,7 @@ check_page_load($sel, WAIT_TIME, q{http://HOSTNAME:8000/bmo/post_bug.cgi});
 $sel->title_is("Suspicious Action");
 $sel->is_text_present_ok("you have no valid token for the create_bug action");
 $sel->click_ok('//input[@value="Confirm Changes"]');
-check_page_load($sel, WAIT_TIME, q{http://HOSTNAME:8000/bmo/show_bug.cgi?id=15});
+check_page_load($sel, WAIT_TIME, q{http://HOSTNAME:8000/bmo/show_bug.cgi?id=14});
 $sel->is_text_present_ok('has been added to the database', 'Bug created');
 $sel->type_ok("comment", "New comment not allowed");
 $sel->click_ok("commit");

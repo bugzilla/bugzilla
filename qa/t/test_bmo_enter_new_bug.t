@@ -228,22 +228,6 @@ $sel->wait_for_page_to_load_ok(WAIT_TIME);
 $sel->is_text_present_ok('has been added to the database', 'Bug created');
 my $legal_bug_id = $sel->get_value('//input[@name="id" and @type="hidden"]');
 
-# poweredby
-
-_check_product('Websites', 'other');
-_check_component('Websites', 'www.mozilla.org');
-_check_user('liz@mozilla.com');
-
-$sel->open_ok("/$config->{bugzilla_installation}/enter_bug.cgi?product=Websites&format=poweredby");
-$sel->wait_for_page_to_load_ok(WAIT_TIME);
-$sel->title_is("Powered by Mozilla Logo Requests", "Open custom bug entry form - poweredby");
-$sel->type_ok("short_desc", "Bug created by Selenium", "Enter bug summary");
-$sel->type_ok("comment", "--- Bug created by Selenium ---", "Enter bug description");
-$sel->click_ok("commit", undef, "Submit bug data to post_bug.cgi");
-$sel->wait_for_page_to_load_ok(WAIT_TIME);
-$sel->is_text_present_ok('has been added to the database', 'Bug created');
-my $poweredby_bug_id = $sel->get_value('//input[@name="id" and @type="hidden"]');
-
 set_parameters($sel, { "Bug Fields" => {"useclassification-on" => undef} });
 logout($sel);
 

@@ -974,3 +974,34 @@ function show_comment_edit() {
     YAHOO.util.Dom.addClass(comment_tab, 'active_comment_tab');
     comment_tab.setAttribute('aria-selected', 'true');
 }
+
+/**
+ * Comment form keyboard shortcuts
+ */
+
+window.addEventListener('DOMContentLoaded', () => {
+  const on_mac = navigator.platform === 'MacIntel';
+  const $comment = document.querySelector('#comment');
+  const $save_button = document.querySelector('.save-btn, #commit');
+
+  if (!$comment || !$save_button) {
+    return;
+  }
+
+  $comment.addEventListener('keydown', event => {
+    const { isComposing, key, altKey, ctrlKey, metaKey, shiftKey } = event;
+    const accelKey = on_mac ? metaKey && !ctrlKey : ctrlKey;
+    const has_value = /\S/.test($comment.value);
+
+    if (isComposing) {
+      return;
+    }
+
+    // Accel + Enter = Save
+    if (has_value && key === 'Enter' && accelKey && !altKey && !shiftKey) {
+      event.preventDefault();
+      // Click the Save button to trigger the `submit` event handler
+      $save_button.click();
+    }
+  });
+}, { once: true });

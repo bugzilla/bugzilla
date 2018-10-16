@@ -101,7 +101,7 @@
 
 [% IF ! showbugcounts %]
 
-  <p><a href="editmilestones.cgi?product=[% product.name FILTER uri %]&amp;showbugcounts=1">
+  <p><a href="[% basepath FILTER none %]editmilestones.cgi?product=[% product.name FILTER uri %]&amp;showbugcounts=1">
       Redisplay table with [% terms.bug %] counts (slower)</a></p>
 
 [% END %]

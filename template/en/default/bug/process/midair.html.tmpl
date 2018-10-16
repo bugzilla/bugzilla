@@ -78,7 +78,7 @@ You have the following choices:
 
 <ul>
   <li>
-    <form method="post" action="process_bug.cgi">
+    <form method="post" action="[% basepath FILTER none %]process_bug.cgi">
       <input type="hidden" name="delta_ts"
              value="[% bug.delta_ts FILTER html %]">
       [% PROCESS "global/hidden-fields.html.tmpl"
@@ -90,7 +90,7 @@ You have the following choices:
   </li>
   [% IF cgi.param("comment") %]
     <li>
-      <form method="post" action="process_bug.cgi">
+      <form method="post" action="[% basepath FILTER none %]process_bug.cgi">
         <input type="hidden" name="id" value="[% cgi.param("id") FILTER html %]">
         <input type="hidden" name="delta_ts" value="[% bug.delta_ts FILTER html %]">
         <input type="hidden" name="comment" value="[% cgi.param("comment") FILTER html %]">

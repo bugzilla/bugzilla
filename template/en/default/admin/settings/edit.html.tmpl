@@ -47,7 +47,7 @@ page, and the Default Value will automatically apply to everyone.
 <hr>
 
 [% IF settings.size %]
-    <form name="adminsettingform" method="post" action="editsettings.cgi">
+    <form name="adminsettingform" method="post" action="[% basepath FILTER none %]editsettings.cgi">
       <table border="1" cellpadding="4">
       <tr>
         <th>Preference Text</th>

@@ -25,7 +25,7 @@ var fields_data = $.parseJSON("[% fields_json FILTER js %]");
 var default_query = '[% default_query FILTER js %]';
 </script>
 
-<form action="page.cgi" method="get" onSubmit="return onFormSubmit()">
+<form action="[% basepath FILTER none %]page.cgi" method="get" onSubmit="return onFormSubmit()">
 <input type="hidden" name="id" value="release_tracking_report.html">
 <input type="hidden" name="q" id="q" value="">
 <table>
@@ -59,10 +59,10 @@ var default_query = '[% default_query FILTER js %]';
     </span>
     <span id="custom_range" style="display:none;">
       <input class="date_field" name="from" id="from" onChange="serialiseForm()">
-      <img class="date_field-img" id="from-img" src="extensions/BugModal/web/calendar.png" width="16" height="16">
+      <img class="date_field-img" id="from-img" src="[% basepath FILTER none %]extensions/BugModal/web/calendar.png" width="16" height="16">
       and
       <input class="date_field" name="to" id="to" onChange="serialiseForm()">
-      <img class="date_field-img" id="to-img" src="extensions/BugModal/web/calendar.png" width="16" height="16">
+      <img class="date_field-img" id="to-img" src="[% basepath FILTER none %]extensions/BugModal/web/calendar.png" width="16" height="16">
     </span>
     <input type="checkbox" id="is_custom" onchange="selectRangeType()" [% "checked" IF is_custom %]>
     <label for="is_custom">Custom</label>

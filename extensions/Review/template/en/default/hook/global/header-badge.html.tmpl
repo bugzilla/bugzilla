@@ -32,7 +32,7 @@
         <div class="empty">You’re all caught up!</div>
       [%- END -%]
       <footer>
-        <div><a href="request.cgi?action=queue&amp;requestee=[% user.login FILTER uri %]&amp;group=type"
+        <div><a href="[% basepath FILTER none %]request.cgi?action=queue&amp;requestee=[% user.login FILTER uri %]&amp;group=type"
                 role="menuitem" tabindex="-1">See All</a></div>
       </footer>
     </section>

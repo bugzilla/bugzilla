@@ -78,7 +78,7 @@ function toggle_display(link) {
                      IF attachment.isobsolete %]">
         <td class="bz_attach_desc" valign="top">
           [% IF attachment.datasize %]
-            <a href="attachment.cgi?id=[% attachment.id %]"
+            <a href="[% basepath FILTER none %]attachment.cgi?id=[% attachment.id %]"
                title="View the content of the attachment">
           [% END %]
           <b>[% attachment.description FILTER html FILTER obsolete(attachment.isobsolete) %]</b>
@@ -141,9 +141,9 @@ function toggle_display(link) {
         [% END %]
 
         <td class="bz_attach_actions" valign="top">
-          <a href="attachment.cgi?id=[% attachment.id %]&amp;action=edit">Details</a>
+          <a href="[% basepath FILTER none %]attachment.cgi?id=[% attachment.id %]&amp;action=edit">Details</a>
           [% IF attachment.ispatch && feature_enabled('patch_viewer') %]
-            | <a href="attachment.cgi?id=[% attachment.id %]&amp;action=diff">Diff</a>
+            | <a href="[% basepath FILTER none %]attachment.cgi?id=[% attachment.id %]&amp;action=diff">Diff</a>
           [% END %]
           [% Hook.process("action") %]
         </td>
@@ -160,13 +160,13 @@ function toggle_display(link) {
               Obsolete</a> ([% obsolete_attachments %])
           [% END %]
           [% IF Param("allow_attachment_display") %]
-            <a id="view_all" href="attachment.cgi?bugid=
+            <a id="view_all" href="[% basepath FILTER none %]attachment.cgi?bugid=
                   [%- bugid %]&amp;action=viewall
                   [%- "&amp;hide_obsolete=1" IF obsolete_attachments %]">View All</a>
           [% END %]
         </span>
       [% END %]
-      <a href="attachment.cgi?bugid=[% bugid %]&amp;action=enter">Add an attachment</a>
+      <a href="[% basepath FILTER none %]attachment.cgi?bugid=[% bugid %]&amp;action=enter">Add an attachment</a>
       (proposed patch, testcase, etc.)
     </td>
   </tr>

@@ -50,7 +50,7 @@
   Do you wish to do this?
 </p>
 
-<form method="post" action="process_bug.cgi">
+<form method="post" action="[% basepath FILTER none %]process_bug.cgi">
 
 [% PROCESS "global/hidden-fields.html.tmpl" exclude="^Bugzilla_(login|password)$" %]
 

@@ -41,7 +41,7 @@
   [% END %]
   [% IF ids.size > 1 %]
     <div class="bz_query_buttons">
-      <form method="post" action="buglist.cgi">
+      <form method="post" action="[% basepath FILTER none %]buglist.cgi">
         <input type="hidden" name="bug_id" value="[% ids.join(",") FILTER html %]">
         <input type="submit" id="short_format" value="Short Format">
       </form>
@@ -64,9 +64,9 @@
 [% BLOCK bug_display %]
   <h1>
     [% terms.Bug %]
-    <a href="show_bug.cgi?id=[% bug.bug_id FILTER html %]">[% bug.bug_id FILTER html %]</a>
+    <a href="[% basepath FILTER none %]show_bug.cgi?id=[% bug.bug_id FILTER html %]">[% bug.bug_id FILTER html %]</a>
     [% IF Param("usebugaliases") AND bug.alias AND NOT bug.error %]
-      (<a href="show_bug.cgi?id=[% bug.alias FILTER uri %]">
+      (<a href="[% basepath FILTER none %]show_bug.cgi?id=[% bug.alias FILTER uri %]">
         [% bug.alias FILTER html %]</a>)
     [% END %]
   </h1>
@@ -268,7 +268,7 @@
               [% FOREACH attachment = bug.attachments %]
                 <tr>
                   <td>
-                    <a href="attachment.cgi?id=[% attachment.id %]">
+                    <a href="[% basepath FILTER none %]attachment.cgi?id=[% attachment.id %]">
                       [% attachment.description FILTER html %]
                     </a>[% "<br>" IF not loop.last() %]
                   </td>
@@ -290,7 +290,7 @@
             </table>
           [% ELSE %]
             [% FOREACH attachment = bug.attachments %]
-              <a href="attachment.cgi?id=[% attachment.id %]">
+              <a href="[% basepath FILTER none %]attachment.cgi?id=[% attachment.id %]">
                 [% attachment.description FILTER html %]
               </a>[% "<br>" IF not loop.last() %]
             [% END %]

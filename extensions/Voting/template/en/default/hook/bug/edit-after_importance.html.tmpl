@@ -21,7 +21,7 @@
   <span id="votes_container">
     [% IF bug.votes %]
       with
-      <a href="page.cgi?id=voting/bug.html&amp;bug_id=
+      <a href="[% basepath FILTER none %]page.cgi?id=voting/bug.html&amp;bug_id=
                [%- bug.id FILTER uri %]">
         [%- bug.votes FILTER html %]
         [% IF bug.votes == 1 %]
@@ -33,7 +33,7 @@
           including you
         [% END %]
     [% END %]
-    (<a href="page.cgi?id=voting/user.html&amp;bug_id=
+    (<a href="[% basepath FILTER none %]page.cgi?id=voting/user.html&amp;bug_id=
               [%- bug.id FILTER uri %]#vote_
               [%- bug.id FILTER uri %]">vote</a>)
   </span>

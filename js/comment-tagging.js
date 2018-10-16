@@ -38,7 +38,7 @@ YAHOO.bugzilla.commentTagging = {
             appendTo: $('#main-inner'),
             forceFixPosition: true,
             serviceUrl: function(query) {
-                return 'rest/bug/comment/tags/' + encodeURIComponent(query);
+                return `${BUGZILLA.config.basepath}rest/bug/comment/tags/${encodeURIComponent(query)}`;
             },
             params: {
                 Bugzilla_api_token: BUGZILLA.api_token
@@ -309,7 +309,7 @@ YAHOO.bugzilla.commentTagging = {
     rpcRefresh : function(comment_id, comment_no, noRefreshOnError) {
         this.incPending(comment_id);
         YAHOO.util.Connect.setDefaultPostHeader('application/json', true);
-        YAHOO.util.Connect.asyncRequest('POST', 'jsonrpc.cgi',
+        YAHOO.util.Connect.asyncRequest('POST', `${BUGZILLA.config.basepath}jsonrpc.cgi`,
         {
             success: function(res) {
                 YAHOO.bugzilla.commentTagging.decPending(comment_id);
@@ -345,7 +345,7 @@ YAHOO.bugzilla.commentTagging = {
     rpcUpdate : function(comment_id, comment_no, add, remove) {
         this.incPending(comment_id);
         YAHOO.util.Connect.setDefaultPostHeader('application/json', true);
-        YAHOO.util.Connect.asyncRequest('POST', 'jsonrpc.cgi',
+        YAHOO.util.Connect.asyncRequest('POST', `${BUGZILLA.config.basepath}jsonrpc.cgi`,
         {
             success: function(res) {
                 YAHOO.bugzilla.commentTagging.decPending(comment_id);

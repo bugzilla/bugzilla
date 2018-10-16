@@ -69,7 +69,7 @@ $(function() {
                 appendTo: $('#main-inner'),
                 forceFixPosition: true,
                 serviceUrl: function(query) {
-                    return 'rest/prod_comp_search/' + encodeURIComponent(query);
+                    return `${BUGZILLA.config.basepath}rest/prod_comp_search/${encodeURIComponent(query)}`;
                 },
                 params: params,
                 deferRequestBy: 250,

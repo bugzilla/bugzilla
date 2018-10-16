@@ -56,7 +56,7 @@
   which are available to at least one component of the product are shown.
 </p>
 
-<form id="flagtype_form" name="flagtype_form" action="editflagtypes.cgi" method="get">
+<form id="flagtype_form" name="flagtype_form" action="[% basepath FILTER none %]editflagtypes.cgi" method="get">
   <table>
     <tr>
       <th><label for="product">Product:</label></th>
@@ -96,7 +96,7 @@
 [% PROCESS display_flag_types types=bug_types types_id='bugs' %]
 
 <p>
-  <a href="editflagtypes.cgi?action=enter&amp;target_type=bug">Create Flag Type for [% terms.Bugs %]</a>
+  <a href="[% basepath FILTER none %]editflagtypes.cgi?action=enter&amp;target_type=bug">Create Flag Type for [% terms.Bugs %]</a>
 </p>
 
 <h3>Flag Types for Attachments</h3>
@@ -104,7 +104,7 @@
 [% PROCESS display_flag_types types=attachment_types types_id='attachments' %]
 
 <p>
-  <a href="editflagtypes.cgi?action=enter&amp;target_type=attachment">Create Flag Type For Attachments</a>
+  <a href="[% basepath FILTER none %]editflagtypes.cgi?action=enter&amp;target_type=attachment">Create Flag Type For Attachments</a>
 </p>
 
 [% PROCESS global/footer.html.tmpl %]
@@ -131,7 +131,7 @@
     [% FOREACH type = types %]
 
       <tr class="[% IF type.is_active %]active[% ELSE %]inactive[% END %]">
-        <td><a href="editflagtypes.cgi?action=edit&amp;id=[% type.id %]">[% type.name FILTER html FILTER no_break %]</a></td>
+        <td><a href="[% basepath FILTER none %]editflagtypes.cgi?action=edit&amp;id=[% type.id %]">[% type.name FILTER html FILTER no_break %]</a></td>
         <td>[% type.description FILTER html %]</td>
         <td align="right">[% type.sortkey FILTER html %]</td>
         <td>
@@ -152,7 +152,7 @@
             [% FOREACH state = ['granted', 'pending', 'denied'] %]
               [% bug_list = bug_lists.${type.id}.$state || [] %]
               [% IF bug_list.size %]
-                <a href="buglist.cgi?bug_id=[% bug_list.unique.nsort.join(",") FILTER html %]">
+                <a href="[% basepath FILTER none %]buglist.cgi?bug_id=[% bug_list.unique.nsort.join(",") FILTER html %]">
                   [% bug_list.size FILTER html %] [%+ state_desc.$state FILTER html %]
                 </a>
                 <br>
@@ -163,8 +163,8 @@
           </td>
         [% END %]
         <td>
-          <a href="editflagtypes.cgi?action=copy&amp;id=[% type.id %]">Copy</a>
-          | <a href="editflagtypes.cgi?action=confirmdelete&amp;id=[% type.id %]">Delete</a>
+          <a href="[% basepath FILTER none %]editflagtypes.cgi?action=copy&amp;id=[% type.id %]">Copy</a>
+          | <a href="[% basepath FILTER none %]editflagtypes.cgi?action=confirmdelete&amp;id=[% type.id %]">Delete</a>
         </td>
       </tr>
 

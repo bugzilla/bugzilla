@@ -31,10 +31,10 @@
 [% ELSIF error == "remo_payment_cancel_dupe" %]
    [% title = "Already filed payment request" %]
    You already used the form to file
-   <a href="[% urlbase FILTER html %]attachment.cgi?id=[% attachid FILTER uri %]&action=edit">
+   <a href="[% basepath FILTER html %]attachment.cgi?id=[% attachid FILTER uri %]&action=edit">
    attachment [% attachid FILTER uri %]</a>.<br>
    <br>
-   You can either <a href="[% urlbase FILTER html %]page.cgi?id=remo-form-payment.html">
+   You can either <a href="[% basepath FILTER html %]page.cgi?id=remo-form-payment.html">
    create a new payment request</a> or [% "go back to $terms.bug $bugid" FILTER bug_link(bugid) FILTER none %].
 
 [% ELSIF error == "remo_missing_voucher" %]

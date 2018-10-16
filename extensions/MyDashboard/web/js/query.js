@@ -48,7 +48,7 @@ $(function() {
             }
         }
 
-        var bugQuery = new Y.DataSource.IO({ source: 'jsonrpc.cgi' });
+        var bugQuery = new Y.DataSource.IO({ source: `${BUGZILLA.config.basepath}jsonrpc.cgi` });
 
         bugQuery.plug(Y.Plugin.DataSourceJSONSchema, {
             schema: {
@@ -82,8 +82,8 @@ $(function() {
                     Y.one("#query_container .query_description").setHTML(e.response.meta.description);
                     Y.one("#query_container .query_heading").setHTML(e.response.meta.heading);
                     Y.one("#query_bugs_found").setHTML(
-                        '<a href="buglist.cgi?' + e.response.meta.buffer +
-                        '" target="_blank">' + e.response.results.length + ' bugs found</a>');
+                        `<a href="${BUGZILLA.config.basepath}buglist.cgi?${e.response.meta.buffer}" target="_blank">` +
+                        `${e.response.results.length} bugs found</a>`);
                     bugQueryTable.set('data', e.response.results);
 
                     var mark_read = e.response.meta.mark_read;
@@ -148,7 +148,7 @@ $(function() {
         };
 
 
-        lastChangesQuery = new Y.DataSource.IO({ source: 'jsonrpc.cgi' });
+        lastChangesQuery = new Y.DataSource.IO({ source: `${BUGZILLA.config.basepath}jsonrpc.cgi` });
 
         lastChangesQuery.plug(Y.Plugin.DataSourceJSONSchema, {
             schema: {
@@ -171,7 +171,7 @@ $(function() {
             columns: [
                 { key: Y.Plugin.DataTableRowExpansion.column_key, label: ' ', sortable: false },
                 { key: "bug_id", label: "Bug", allowHTML: true, sortable: true,
-                formatter: '<a href="show_bug.cgi?id={value}" target="_blank">{value}</a>' },
+                formatter: `<a href="${BUGZILLA.config.basepath}show_bug.cgi?id={value}" target="_blank">{value}</a>` },
                 { key: "changeddate", label: "Updated", formatter: updatedFormatter,
                 allowHTML: true, sortable: true },
                 { key: "bug_status", label: "Status", sortable: true },
@@ -286,7 +286,7 @@ $(function() {
             for (var i = 0, l = data.size(); i < l; i++) {
                 ids.push(data.item(i).get('bug_id'));
             }
-            var url = 'buglist.cgi?bug_id=' + ids.join('%2C');
+            var url = `${BUGZILLA.config.basepath}buglist.cgi?bug_id=${ids.join('%2C')}`;
             window.open(url, '_blank');
         });
     });

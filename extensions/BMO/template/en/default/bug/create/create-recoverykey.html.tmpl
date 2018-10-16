@@ -33,7 +33,7 @@
   <li>The asset tag number is located on a sticker typically on the bottom of the device.</li>
 </ul>
 
-<form method="post" action="post_bug.cgi" id="recoveryKeyForm" enctype="multipart/form-data">
+<form method="post" action="[% basepath FILTER none %]post_bug.cgi" id="recoveryKeyForm" enctype="multipart/form-data">
   <input type="hidden" name="product" value="mozilla.org">
   <input type="hidden" name="component" value="Server Operations: Desktop Issues">
   <input type="hidden" name="rep_platform" value="All">

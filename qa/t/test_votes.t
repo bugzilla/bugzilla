@@ -240,7 +240,7 @@ go_to_admin($sel);
 $sel->click_ok("link=Products");
 $sel->wait_for_page_to_load_ok(WAIT_TIME);
 $sel->title_is("Select product");
-$sel->click_ok('//a[@href="editproducts.cgi?action=del&product=Eureka"]');
+$sel->click_ok('//a[contains(@href,"/editproducts.cgi?action=del&product=Eureka")]');
 $sel->wait_for_page_to_load_ok(WAIT_TIME);
 $sel->title_is("Delete Product 'Eureka'");
 $full_text = trim($sel->get_body_text());

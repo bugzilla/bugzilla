@@ -151,7 +151,7 @@ var REVIEW = {
     find_form: function() {
         for (var i = 0; i < document.forms.length; i++) {
             var action = document.forms[i].getAttribute('action');
-            if (action == 'attachment.cgi' || action == 'post_bug.cgi')
+            if (action.match(/\/(attachment|post_bug).cgi$/))
                 return document.forms[i];
         }
         return false;

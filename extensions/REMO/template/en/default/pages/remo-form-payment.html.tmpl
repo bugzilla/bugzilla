@@ -34,7 +34,7 @@
 
 <h1>Mozilla Reps - Payment Form</h1>
 
-<form method="post" action="page.cgi" id="paymentForm" enctype="multipart/form-data"
+<form method="post" action="[% basepath FILTER none %]page.cgi" id="paymentForm" enctype="multipart/form-data"
       onSubmit="return validateAndSubmit();">
 <input type="hidden" id="id" name="id" value="remo-form-payment.html">
 <input type="hidden" id="token" name="token" value="[% token FILTER html %]">

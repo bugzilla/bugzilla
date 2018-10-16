@@ -23,9 +23,9 @@
   <div id="custom_form_list_text">
     Other task-specific [% terms.bug %] forms exist that should be used if appropriate:
     <ul>
-      <li><a href="enter_bug.cgi?product=Mozilla%20Foundation%20Operations">Mozilla Foundation Vendor Request</a></li>
-      <li><a href="form.name.clearance">Name Clearance Request</a></li>
-      <li><a href="form.nda">NDA Request</a></li>
+      <li><a href="[% basepath FILTER none %]enter_bug.cgi?product=Mozilla%20Foundation%20Operations">Mozilla Foundation Vendor Request</a></li>
+      <li><a href="[% basepath FILTER none %]form.name.clearance">Name Clearance Request</a></li>
+      <li><a href="[% basepath FILTER none %]form.nda">NDA Request</a></li>
     </ul>
   </div>
 </div>
@@ -47,7 +47,7 @@
   <span class="required_explanation">Required Field</span>)
 </p>
 
-<form method="post" action="post_bug.cgi" id="mozProjectForm" enctype="multipart/form-data">
+<form method="post" action="[% basepath FILTER none %]post_bug.cgi" id="mozProjectForm" enctype="multipart/form-data">
   <input type="hidden" id="product" name="product" value="Legal">
   <input type="hidden" id="component" name="component" value="General">
   <input type="hidden" id="rep_platform" name="rep_platform" value="All">
@@ -482,7 +482,7 @@
         <span class="field_data">
           <input class="date-field" name="sow_start_date" id="sow_start_date">
           <img class="date-field-img" id="sow_start_date-img"
-               src="extensions/BugModal/web/calendar.png" width="16" height="16">
+               src="[% basepath FILTER none %]extensions/BugModal/web/calendar.png" width="16" height="16">
         </span>
       </div>
 
@@ -491,7 +491,7 @@
         <span class="field_data">
           <input class="date-field" name="sow_end_date" id="sow_end_date">
           <img class="date-field-img" id="sow_end_date-img"
-               src="extensions/BugModal/web/calendar.png" width="16" height="16">
+               src="[% basepath FILTER none %]extensions/BugModal/web/calendar.png" width="16" height="16">
         </span>
       </div>
 

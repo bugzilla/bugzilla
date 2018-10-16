@@ -35,7 +35,7 @@
       <tr>
         <td>
           [% IF user.in_group("editcomponents", component.product_id) %]
-            <a href="editcomponents.cgi?action=edit&amp;product=
+            <a href="[% basepath FILTER none %]editcomponents.cgi?action=edit&amp;product=
                      [% item.product.name FILTER uri %]&amp;component=
                      [% component.name FILTER uri %]">
           [% END %]

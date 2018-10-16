@@ -63,7 +63,7 @@ When you are logged out, all pending requests that are not restricted
 to some group are shown by default.
 </p>
 
-<form id="request_form" name="request_form" action="request.cgi" method="get">
+<form id="request_form" name="request_form" action="[% basepath FILTER none %]request.cgi" method="get">
   <input type="hidden" name="action" value="queue">
 
   <table id="filtering">
@@ -221,7 +221,7 @@ to some group are shown by default.
   [% END %]
   [% PROCESS display_buglist %]
   <br><br>
-  <a href="request.cgi?[% urlquerypart FILTER html %]&amp;ctype=csv">(view entire list as CSV)</a>
+  <a href="[% basepath FILTER none %]request.cgi?[% urlquerypart FILTER html %]&amp;ctype=csv">(view entire list as CSV)</a>
 [% END %]
 
 [% PROCESS global/footer.html.tmpl %]
@@ -249,16 +249,16 @@ to some group are shown by default.
 [% END %]
 
 [% BLOCK display_bug %]
-  <a href="show_bug.cgi?id=[% request.bug_id %]"
+  <a href="[% basepath FILTER none %]show_bug.cgi?id=[% request.bug_id %]"
      [%- ' class="bz_secure"' IF request.restricted %]>
     [% request.bug_id %] ([% request.priority FILTER html %]/[% request.bug_severity FILTER html %]): [%+ request.bug_summary FILTER html %]</a>
 [% END %]
 
 [% BLOCK display_attachment %]
   [% IF request.attach_id %]
-    <a href="attachment.cgi?id=[% request.attach_id %]">
+    <a href="[% basepath FILTER none %]attachment.cgi?id=[% request.attach_id %]">
       [% request.attach_id %]: [%+ request.attach_summary FILTER html %]</a>
-    [<a href="attachment.cgi?id=[% request.attach_id %]&amp;action=edit">details</a>]
+    [<a href="[% basepath FILTER none %]attachment.cgi?id=[% request.attach_id %]&amp;action=edit">details</a>]
   [% ELSE %]
     N/A
   [% END %]
@@ -279,7 +279,7 @@ to some group are shown by default.
 [% BLOCK display_buglist %]
   </table>
   [% NEXT UNLESS buglist.keys.size %]
-  <a href="buglist.cgi?bug_id=
+  <a href="[% basepath FILTER none %]buglist.cgi?bug_id=
            [%- buglist.keys.nsort.join(",") FILTER html %]">(view as
   [%+ terms.bug %] list)</a>
 [% END %]

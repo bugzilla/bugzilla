@@ -133,7 +133,7 @@ function onSubmit() {
       and Communications Terms of Use</a> for more information.
     </li>
     <li>
-      You understand that your conduct on this site is subject to both <a href="page.cgi?id=etiquette.html">[% terms.Bugzilla %] Etiquette</a>,
+      You understand that your conduct on this site is subject to both <a href="[% basepath FILTER none %]page.cgi?id=etiquette.html">[% terms.Bugzilla %] Etiquette</a>,
       and the <a href="https://www.mozilla.org/about/governance/policies/participation/">Mozilla Community Participation Guidelines</a>.
       By creating an account, you agree to abide by them.
     </li>
@@ -146,7 +146,7 @@ function onSubmit() {
 
   <h2 class="column-header">Create an account</h2>
 
-  <form method="post" action="createaccount.cgi" onsubmit="return onSubmit()">
+  <form method="post" action="[% basepath FILTER none %]createaccount.cgi" onsubmit="return onSubmit()">
     <table id="create-account-form">
     <tr>
     <td class="label">Email Address:</td>
@@ -158,7 +158,7 @@ function onSubmit() {
     <td colspan="2">
       <input type="checkbox" id="etiquette" value="agreed">
       <label for="etiquette">
-      I have read <a href="page.cgi?id=etiquette.html">[% terms.Bugzilla %] Etiquette</a>
+      I have read <a href="[% basepath FILTER none %]page.cgi?id=etiquette.html">[% terms.Bugzilla %] Etiquette</a>
       and the <a href="https://www.mozilla.org/about/governance/policies/participation/">Mozilla Community Participation Guidelines</a>
       and agree to abide by them.
       </label>
@@ -192,7 +192,7 @@ function onSubmit() {
   <tr>
   <td valign="top">
     <a href="[% url FILTER none %]"><img
-    src="extensions/BMO/web/producticons/[% icon FILTER uri %].png"
+    src="[% basepath FILTER none %]extensions/BMO/web/producticons/[% icon FILTER uri %].png"
     border="0" width="64" height="64"></a>
   </td>
   <td valign="top">

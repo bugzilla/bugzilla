@@ -158,7 +158,7 @@
       <tr id="cr-[% comment.count FILTER none %]" [%= IF comment.collapsed %]style="display:none"[% END %]>
         <td colspan="2">
           <h3 class="change-name">
-            <a href="show_bug.cgi?id=[% bug.bug_id FILTER none %]#c[% comment.count FILTER none %]">
+            <a href="[% basepath FILTER none %]show_bug.cgi?id=[% bug.bug_id FILTER none %]#c[% comment.count FILTER none %]">
               [% comment.count == 0 ? "Description" : "Comment " _ comment.count ~%]
             </a>
           </h3>
@@ -231,7 +231,7 @@
       <tr id="ar-[% id FILTER none %]">
         <td colspan="2">
           <h3 class="change-name">
-            <a href="show_bug.cgi?id=[% bug.bug_id FILTER none %]#[% id FILTER none %]">Updated</a>
+            <a href="[% basepath FILTER none %]show_bug.cgi?id=[% bug.bug_id FILTER none %]#[% id FILTER none %]">Updated</a>
           </h3>
           &bull;
           <div class="change-time">
@@ -248,9 +248,9 @@
     [% IF comment.collapsed +%] style="display:none"[% END ~%]
   >[% FILTER collapse %]
     [% IF comment.is_about_attachment && comment.attachment.is_image ~%]
-      <a href="attachment.cgi?id=[% comment.attachment.id FILTER none %]"
+      <a href="[% basepath FILTER none %]attachment.cgi?id=[% comment.attachment.id FILTER none %]"
         title="[% comment.attachment.description FILTER html %]"
-        class="lightbox"><img src="extensions/BugModal/web/image.png" width="16" height="16"></a>
+        class="lightbox"><img src="[% basepath FILTER none %]extensions/BugModal/web/image.png" width="16" height="16"></a>
     [% END %]
   [% END %]
   [%~ comment.body_full FILTER quoteUrls(bug, comment) ~%]</pre>
@@ -278,7 +278,7 @@
 
       IF change.attachid;
         %]
-        <a href="attachment.cgi?id=[% change.attachid FILTER none %]&amp;action=edit"
+        <a href="[% basepath FILTER none %]attachment.cgi?id=[% change.attachid FILTER none %]&amp;action=edit"
            title="[% change.attach.description FILTER html %]"
            class="[% "bz_obsolete" IF change.attach.isobsoletee %]"
         >Attachment #[% change.attachid FILTER none %]</a> -

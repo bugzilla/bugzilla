@@ -35,7 +35,7 @@
                                       serviceNowText;
 
   compdesc['Mailing List'] = 'Mailing list requests should be filed ' +
-                             '<a href="enter_bug.cgi?product=mozilla.org&amp;format=mozlist">here</a> instead.';
+                             '<a href="[% basepath FILTER none %]enter_bug.cgi?product=mozilla.org&amp;format=mozlist">here</a> instead.';
 
   function setcompdesc(theRadio) {
     if (theRadio.id == 'component_service_desk') {
@@ -89,9 +89,9 @@
 [% USE Bugzilla %]
 
 <p><strong>Please use this form for IT requests only!</strong></p>
-<p>If you have a [% terms.bug %] to file, go <a href="enter_bug.cgi">here</a>.</p>
+<p>If you have a [% terms.bug %] to file, go <a href="[% basepath FILTER none %]enter_bug.cgi">here</a>.</p>
 
-<form method="post" action="post_bug.cgi" id="itRequestForm" enctype="multipart/form-data"
+<form method="post" action="[% basepath FILTER none %]post_bug.cgi" id="itRequestForm" enctype="multipart/form-data"
       onsubmit="return on_submit()">
   <input type="hidden" id="product" name="product" value="Infrastructure & Operations">
   <input type="hidden" name="rep_platform" value="All">

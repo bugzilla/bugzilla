@@ -27,7 +27,7 @@
    title = title
 %]
 
-<form method="post" action="editproducts.cgi">
+<form method="post" action="[% basepath FILTER none %]editproducts.cgi">
   <input type="hidden" name="action" value="updategroupcontrols">
   <input type="hidden" name="product" value="[% product.name FILTER html %]">
   <input type="hidden" name="token" value="[% token FILTER html %]">

@@ -28,8 +28,8 @@
 <p><b>Last Updated:</b> [% date.format(template.modtime, "%d-%b-%Y %H:%M %Z") %]</p>
 
 <p>On Friday, July 9, 2010, at 11:40pm PDT (0640 UTC), bugzilla.mozilla.org was
-  <a href="show_bug.cgi?id=558044">upgraded</a> to Bugzilla 3.6.1+.  Please
-  <a href="enter_bug.cgi?product=mozilla.org&amp;component=Bugzilla:+Other+b.m.o+Issues&amp;blocked=bmo-regressions">file
+  <a href="[% basepath FILTER none %]show_bug.cgi?id=558044">upgraded</a> to Bugzilla 3.6.1+.  Please
+  <a href="[% basepath FILTER none %]enter_bug.cgi?product=mozilla.org&amp;component=Bugzilla:+Other+b.m.o+Issues&amp;blocked=bmo-regressions">file
   any regressions</a> for tracking purposes.</p>
 
 <h3>Known Issues</h3>
@@ -81,7 +81,7 @@
   [%+ terms.Bugzilla %] and in the header/footer of every page
   is now simplified and made more powerful. There is a
   <kbd>[?]</kbd> link next to the box that will take you to
-  the simplified <a href="page.cgi?id=quicksearch.html">Quicksearch Help</a>,
+  the simplified <a href="[% basepath FILTER none %]page.cgi?id=quicksearch.html">Quicksearch Help</a>,
   which describes every single feature of the system in a simple layout,
   including new features such as the ability to use partial field names
   when searching.</p>

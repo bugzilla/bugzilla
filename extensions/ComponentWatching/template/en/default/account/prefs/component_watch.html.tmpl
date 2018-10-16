@@ -120,7 +120,7 @@ YAHOO.util.Event.onDOMReady(onRemoveChange);
   etc.  If a new component is added which starts with "Developer Tools", you'll
   automatically start watching that too.
   <br>
-  Use <a href="userprefs.cgi?tab=email">Email Preferences</a> to filter which
+  Use <a href="[% basepath FILTER none %]userprefs.cgi?tab=email">Email Preferences</a> to filter which
   notification emails you receive.
 </p>
 
@@ -198,14 +198,14 @@ YAHOO.util.Event.onDOMReady(onRemoveChange);
       </td>
       <td>&nbsp;
         [% IF (watch.component) %]
-          <a href="buglist.cgi?product=[% watch.product.name FILTER uri ~%]
+          <a href="[% basepath FILTER none %]buglist.cgi?product=[% watch.product.name FILTER uri ~%]
                   &component=[% watch.component.name FILTER uri %]&resolution=---">
           [% watch.component.name FILTER html %]
           </a>
         [% ELSIF watch.component_prefix %]
           <i>starts with:</i> [% watch.component_prefix FILTER html %]
         [% ELSE %]
-          <a href="describecomponents.cgi?product=[% watch.product.name FILTER uri %]">
+          <a href="[% basepath FILTER none %]describecomponents.cgi?product=[% watch.product.name FILTER uri %]">
           __Any__
           </a>
         [% END %]
@@ -243,7 +243,7 @@ YAHOO.util.Event.onDOMReady(onRemoveChange);
       <td>[% watch.user.login FILTER html %]</td>
       <td>&nbsp;[% watch.component.product.name FILTER html %]</td>
       <td>&nbsp;
-        <a href="buglist.cgi?product=[% watch.product.name FILTER uri ~%]
+        <a href="[% basepath FILTER none %]buglist.cgi?product=[% watch.product.name FILTER uri ~%]
                 &component=[% watch.component.name FILTER uri %]&resolution=---">
         [% watch.component.name FILTER html %]
         </a>
@@ -253,7 +253,7 @@ YAHOO.util.Event.onDOMReady(onRemoveChange);
   </table>
 
   <p>
-    Use <a href="userprefs.cgi?tab=email#new_watched_by_you">Email Preferences</a>
+    Use <a href="[% basepath FILTER none %]userprefs.cgi?tab=email#new_watched_by_you">Email Preferences</a>
     to manage this list.
   </p>
 

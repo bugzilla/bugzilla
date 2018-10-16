@@ -129,7 +129,7 @@ function validateAndSubmit() {
 [% USE Bugzilla %]
 [% cgi = Bugzilla.cgi %]
 
-<form id="bounty_form" method="post" action="page.cgi"
+<form id="bounty_form" method="post" action="[% basepath FILTER none %]page.cgi"
   enctype="multipart/form-data" onSubmit="return validateAndSubmit();">
 
   <input type="hidden" name="bug_id" value="[% bug.id FILTER html %]">

@@ -90,7 +90,7 @@ foreach my $user ('', 'unprivileged') {
 
 # A powerless user can comment on attachments he doesn't own.
 
-$sel->click_ok('//a[@href="attachment.cgi?id=' . $attachment1_id . '&action=edit"]');
+$sel->click_ok('//a[contains(@href,"/attachment.cgi?id=' . $attachment1_id . '&action=edit")]');
 $sel->wait_for_page_to_load_ok(WAIT_TIME);
 $sel->title_like(qr/^Attachment $attachment1_id Details for Bug $bug1_id/);
 $sel->is_text_present_ok("created by QA Admin");
@@ -132,7 +132,7 @@ logout($sel);
 
 log_in($sel, $config, 'admin');
 go_to_bug($sel, $bug1_id);
-$sel->click_ok('//a[@href="attachment.cgi?id=' . $attachment2_id . '&action=edit"]');
+$sel->click_ok('//a[contains(@href,"/attachment.cgi?id=' . $attachment2_id . '&action=edit")]');
 $sel->wait_for_page_to_load_ok(WAIT_TIME);
 $sel->title_like(qr/^Attachment $attachment2_id Details for Bug $bug1_id/);
 $sel->check_ok("isprivate");
@@ -173,7 +173,7 @@ logout($sel);
 
 log_in($sel, $config, 'admin');
 go_to_bug($sel, $bug1_id);
-$sel->click_ok('//a[@href="attachment.cgi?id=' . $attachment2_id . '&action=edit"]');
+$sel->click_ok('//a[contains(@href,"/attachment.cgi?id=' . $attachment2_id . '&action=edit")]');
 $sel->wait_for_page_to_load_ok(WAIT_TIME);
 $sel->title_like(qr/^Attachment $attachment2_id Details for Bug $bug1_id/);
 $sel->click_ok("link=Delete");

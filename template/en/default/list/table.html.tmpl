@@ -91,7 +91,7 @@
       [% END %]
       <th colspan="[% splitheader ? 2 : 1 %]" class="first-child
                    sorted_[% lsearch(order_columns, 'bug_id') FILTER html %]">
-        <a href="buglist.cgi?
+        <a href="[% basepath FILTER none %]buglist.cgi?
                   [% urlquerypart FILTER html %]&amp;order=
                   [% PROCESS new_order id='bug_id' %]
                   [%-#%]&amp;query_based_on=
@@ -137,7 +137,7 @@
   <th colspan="[% splitheader ? 2 : 1 %]"
       class="sortable_column_[% key FILTER html %]
              sorted_[% lsearch(order_columns, id) FILTER html %]">
-    <a href="buglist.cgi?[% urlquerypart FILTER html %]&amp;order=
+    <a href="[% basepath FILTER none %]buglist.cgi?[% urlquerypart FILTER html %]&amp;order=
       [% PROCESS new_order %]
       [%-#%]&amp;query_based_on=
       [% defaultsavename OR searchname FILTER uri %]">
@@ -196,7 +196,7 @@
     </td>
     [% END %]
     <td class="first-child bz_id_column">
-      <a href="show_bug.cgi?id=[% bug.bug_id %]">[% bug.bug_id %]</a>
+      <a href="[% basepath FILTER none %]show_bug.cgi?id=[% bug.bug_id %]">[% bug.bug_id %]</a>
       <span style="display: none">[%+ '[SEC]' IF bug.secure_mode %]</span>
     </td>
 
@@ -229,11 +229,11 @@
         [% bug.${login_column}.truncate(col_abbrev.maxlength,
                                         col_abbrev.ellipsis) FILTER html %]
       [% ELSIF column == 'short_desc' || column == "short_short_desc" %]
-        <a href="show_bug.cgi?id=[% bug.bug_id FILTER html %]">
+        <a href="[% basepath FILTER none %]show_bug.cgi?id=[% bug.bug_id FILTER html %]">
           [%- bug.$column.truncate(col_abbrev.maxlength, col_abbrev.ellipsis) FILTER html FILTER wbr -%]
         </a>
       [% ELSIF bug_fields.$column.type == constants.FIELD_TYPE_BUG_ID %]
-        <a href="show_bug.cgi?id=[% bug.$column FILTER html %]">
+        <a href="[% basepath FILTER none %]show_bug.cgi?id=[% bug.$column FILTER html %]">
           [%- bug.$column.truncate(col_abbrev.maxlength, col_abbrev.ellipsis) FILTER html -%]
         </a>
       [% ELSE %]

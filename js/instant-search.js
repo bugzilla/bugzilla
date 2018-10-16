@@ -46,7 +46,7 @@ YAHOO.bugzilla.instantSearch = {
   },
 
   initDataTable: function() {
-    var dataSource = new YAHOO.util.XHRDataSource("jsonrpc.cgi");
+    var dataSource = new YAHOO.util.XHRDataSource(`${BUGZILLA.config.basepath}jsonrpc.cgi`);
     dataSource.connTimeout = 15000;
     dataSource.connMethodPost = true;
     dataSource.connXhrMode = "cancelStaleRequests";
@@ -86,7 +86,7 @@ YAHOO.bugzilla.instantSearch = {
   },
 
   formatId: function(el, oRecord, oColumn, oData) {
-    el.innerHTML = '<a href="show_bug.cgi?id=' + oData + '" target="_blank">' + oData + '</a>';
+    el.innerHTML = `<a href="${BUGZILLA.config.basepath}show_bug.cgi?id=${oData}" target="_blank">${oData}</a>`;
   },
 
   formatStatus: function(el, oRecord, oColumn, oData) {
@@ -138,7 +138,7 @@ YAHOO.bugzilla.instantSearch = {
 
       YAHOO.bugzilla.instantSearch.dataTable.showTableMessage(
         'Searching...&nbsp;&nbsp;&nbsp;' +
-        '<img src="extensions/GuidedBugEntry/web/images/throbber.gif"' +
+        `<img src="${BUGZILLA.config.basepath}extensions/GuidedBugEntry/web/images/throbber.gif"` +
         ' width="16" height="11">',
         YAHOO.widget.DataTable.CLASS_LOADING
       );

@@ -35,7 +35,7 @@
   </p>
 [% END %]
 
-<form method="get" action="chart.cgi" name="chartform">
+<form method="get" action="[% basepath FILTER none %]chart.cgi" name="chartform">
 
   [% PROCESS reports/series.html.tmpl
      button_name = "Change Data Set" %]
@@ -63,9 +63,9 @@ set.
 </p>
 
 <p>
-  <a href="query.cgi?[% default.query FILTER html %]">View
+  <a href="[% basepath FILTER none %]query.cgi?[% default.query FILTER html %]">View
     series search parameters</a> |
-  <a href="buglist.cgi?cmdtype=dorem&amp;namedcmd=
+  <a href="[% basepath FILTER none %]buglist.cgi?cmdtype=dorem&amp;namedcmd=
     [% default.category FILTER uri %]-
     [% default.subcategory FILTER uri %]-
     [% default.name FILTER uri %]&amp;remaction=runseries&amp;series_id=

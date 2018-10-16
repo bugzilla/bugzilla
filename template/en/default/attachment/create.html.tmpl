@@ -41,7 +41,7 @@
 
 [% Hook.process('before_form') %]
 
-<form name="entryform" method="post" action="attachment.cgi" enctype="multipart/form-data">
+<form name="entryform" method="post" action="[% basepath FILTER none %]attachment.cgi" enctype="multipart/form-data">
   <input type="hidden" name="bugid" value="[% bug.bug_id %]">
   <input type="hidden" name="action" value="insert">
   <input type="hidden" name="token" value="[% token FILTER html %]">
@@ -59,7 +59,7 @@
             [% IF ((attachment.isprivate == 0) || user.is_insider) %]
               <input type="checkbox" id="[% attachment.id %]"
                    name="obsolete" value="[% attachment.id %]">
-              <a href="attachment.cgi?id=[% attachment.id %]&amp;action=edit">[% attachment.id %]: [% attachment.description FILTER html %]</a><br>
+              <a href="[% basepath FILTER none %]attachment.cgi?id=[% attachment.id %]&amp;action=edit">[% attachment.id %]: [% attachment.description FILTER html %]</a><br>
             [% END %]
           [% END %]
         [% ELSE %]

@@ -28,7 +28,7 @@
   subheader = "This page allows you to add a new keyword."
 %]
 
-<form method="post" action="editkeywords.cgi">
+<form method="post" action="[% basepath FILTER none %]editkeywords.cgi">
   <table border="0" cellpadding="4" cellspacing="0">
     <tr>
       <th align="right">Name:</th>
@@ -53,6 +53,6 @@
   <input type="hidden" name="token" value="[% token FILTER html %]">
 </form>
 
-<p><a href="editkeywords.cgi">Edit other keywords</a>.</p>
+<p><a href="[% basepath FILTER none %]editkeywords.cgi">Edit other keywords</a>.</p>
 
 [% PROCESS global/footer.html.tmpl %]

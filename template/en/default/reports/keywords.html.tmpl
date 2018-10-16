@@ -57,7 +57,7 @@
 </script>
 
 <p>
-  <a href="[% urlbase FILTER html %]?show_inactive_keywords=[% show_inactive_keywords ? "1" : "0" FILTER none %]"
+  <a href="[% basepath FILTER html %]?show_inactive_keywords=[% show_inactive_keywords ? "1" : "0" FILTER none %]"
      id="keywords_show_hide">[% show_inactive_keywords ? "Show" : "Hide" FILTER html %] inactive keywords</a>
 </p>
 
@@ -80,7 +80,7 @@
     <td>[% keyword.is_active ? "Yes" : "No" FILTER html %]</td>
     <td align="center">
       [% IF keyword.bug_count > 0 %]
-        <a href="buglist.cgi?keywords=[% keyword.name FILTER uri %]&amp;resolution=---">
+        <a href="[% basepath FILTER none %]buglist.cgi?keywords=[% keyword.name FILTER uri %]&amp;resolution=---">
           Search</a>
       [% ELSE %]
         none
@@ -88,7 +88,7 @@
     </td>
     <td align="right">
       [% IF keyword.bug_count > 0 %]
-        <a href="buglist.cgi?keywords=[% keyword.name FILTER uri %]">
+        <a href="[% basepath FILTER none %]buglist.cgi?keywords=[% keyword.name FILTER uri %]">
           [% keyword.bug_count %]</a>
       [% ELSE %]
         none
@@ -101,7 +101,7 @@
 
 [% IF caneditkeywords %]
   <p>
-    <a href="editkeywords.cgi">Edit keywords</a>.
+    <a href="[% basepath FILTER none %]editkeywords.cgi">Edit keywords</a>.
   </p>
 [% END %]
 

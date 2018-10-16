@@ -58,7 +58,7 @@
   has too many votes for [% terms.abug %]...<br>
   [% IF changes._too_many_votes.size %]
     [% FOREACH detail = changes._too_many_votes %]
-      &rarr;removed votes for [% terms.bug %] <a href="show_bug.cgi?id=
+      &rarr;removed votes for [% terms.bug %] <a href="[% basepath FILTER none %]show_bug.cgi?id=
      [%- detail.id FILTER uri %]">
      [%- detail.id FILTER html %]</a> from [% detail.name FILTER html %]<br>
     [% END %]
@@ -71,7 +71,7 @@
   who now has too many total votes...<br>
   [% IF changes._too_many_total_votes.size %]
     [% FOREACH detail = changes._too_many_total_votes %]
-      &rarr;removed votes for [% terms.bug %] <a href="show_bug.cgi?id=
+      &rarr;removed votes for [% terms.bug %] <a href="[% basepath FILTER none %]show_bug.cgi?id=
      [%- detail.id FILTER uri %]">
      [%- detail.id FILTER html %]</a> from [% detail.name FILTER html %]<br>
     [% END %]

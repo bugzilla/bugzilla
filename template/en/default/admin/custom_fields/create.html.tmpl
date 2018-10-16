@@ -53,7 +53,7 @@ YAHOO.util.Event.onDOMReady(function() {onChangeType(document.getElementById('ty
       used as the label for this field in the user interface.</li>
 </ul>
 
-<form id="add_field" action="editfields.cgi" method="GET">
+<form id="add_field" action="[% basepath FILTER none %]editfields.cgi" method="GET">
   <table border="0" cellspacing="0" cellpadding="5" id="edit_custom_field">
     <tr>
       <th class="narrow_label"><label for="name">Name:</label></th>
@@ -170,7 +170,7 @@ YAHOO.util.Event.onDOMReady(function() {onChangeType(document.getElementById('ty
 </form>
 
 <p>
-  <a href="editfields.cgi">Back to the list of existing custom fields</a>
+  <a href="[% basepath FILTER none %]editfields.cgi">Back to the list of existing custom fields</a>
 </p>
 
 [% PROCESS global/footer.html.tmpl %]

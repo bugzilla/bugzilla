@@ -88,9 +88,9 @@ sub attachment_id_is_patch {
 sub get_review_base {
     my $base = Bugzilla->params->{'splinter_base'};
     $base =~ s!/$!!;
-    my $urlbase = Bugzilla->localconfig->{urlbase};
-    $urlbase =~ s!/$!! if $base =~ "^/";
-    $base = $urlbase . $base;
+    my $basepath = Bugzilla->localconfig->{basepath};
+    $basepath =~ s!/$!! if $base =~ "^/";
+    $base = $basepath . $base;
     return $base;
 }
 

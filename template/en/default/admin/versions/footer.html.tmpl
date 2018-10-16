@@ -37,7 +37,7 @@
 
 [% UNLESS no_add_version_link %]
   <a title="Add a version to product '[% product.name FILTER html %]'"
-     href="editversions.cgi?action=add&amp;product=
+     href="[% basepath FILTER none %]editversions.cgi?action=add&amp;product=
           [%- product.name FILTER uri %]">Add</a> a version.
 [% END %]
 
@@ -45,7 +45,7 @@
   Edit version <a
   title="Edit Version '[% version.name FILTER html %]' of product '
          [%- product.name FILTER html %]'"
-  href="editversions.cgi?action=edit&amp;product=
+  href="[% basepath FILTER none %]editversions.cgi?action=edit&amp;product=
         [%- product.name FILTER uri %]&amp;version=
         [%- version.name FILTER uri %]">
         '[% version.name FILTER html %]'</a>.
@@ -53,13 +53,13 @@
 
 [% UNLESS no_edit_other_versions_link %]
   Edit other versions of product <a
-  href="editversions.cgi?product=
+  href="[% basepath FILTER none %]editversions.cgi?product=
         [%- product.name FILTER uri %]">'[% product.name FILTER html %]'</a>.
 
 [% END %]
 
   Edit product <a
-  href="editproducts.cgi?action=edit&amp;product=
+  href="[% basepath FILTER none %]editproducts.cgi?action=edit&amp;product=
         [%- product.name FILTER uri %]">'[% product.name FILTER html %]'</a>.
 
 </p>

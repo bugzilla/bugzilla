@@ -11,8 +11,8 @@
 <p>
   [% UNLESS cloned_bug_id || no_guided_bug_link %]
     Consider using the
-    <a href="enter_bug.cgi?product=[% product.name FILTER html %]&amp;format=guided"
-    ><img src="extensions/BMO/web/images/guided.png" width="16" height="16" align="absmiddle" border="0">
+    <a href="[% basepath FILTER none %]enter_bug.cgi?product=[% product.name FILTER html %]&amp;format=guided"
+    ><img src="[% basepath FILTER none %]extensions/BMO/web/images/guided.png" width="16" height="16" align="absmiddle" border="0">
     [%+ terms.Bugzilla %] Helper</a> instead of this form.
   [% END +%]
   [% UNLESS no_bug_guidelines %]
@@ -37,7 +37,7 @@
 %]
 
 <div id="custom_form_list">
-  <img src="extensions/BMO/web/images/notice.png" width="48" height="48" id="custom_form_list_image">
+  <img src="[% basepath FILTER none %]extensions/BMO/web/images/notice.png" width="48" height="48" id="custom_form_list_image">
   <div id="custom_form_list_text">
     This product has task-specific [% terms.bug %] forms that should be used if
     appropriate:

@@ -31,7 +31,7 @@
   generate_api_token = 1
 %]
 
-<form method="post" action="editcomponents.cgi">
+<form method="post" action="[% basepath FILTER none %]editcomponents.cgi">
   <table border="0" cellpadding="4" cellspacing="0">
 
     [% PROCESS "admin/components/edit-common.html.tmpl" %]

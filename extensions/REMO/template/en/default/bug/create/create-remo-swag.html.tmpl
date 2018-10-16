@@ -68,7 +68,7 @@ function validateAndSubmit() {
 <p>Review the <a href="https://wiki.mozilla.org/ReMo/SOPs/Swag_Requests" target="_blank" rel="noopener noreferrer">
   Swag Requests SOP</a> before you complete this form.</p>
 
-<form method="post" action="post_bug.cgi" id="swagRequestForm" enctype="multipart/form-data"
+<form method="post" action="[% basepath FILTER none %]post_bug.cgi" id="swagRequestForm" enctype="multipart/form-data"
       onSubmit="return validateAndSubmit();">
 
   <input type="hidden" name="format" value="remo-swag">

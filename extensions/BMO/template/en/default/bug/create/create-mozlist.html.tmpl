@@ -60,7 +60,7 @@
 </div>
 <br>
 
-<form method="post" action="post_bug.cgi" id="mozListRequestForm"
+<form method="post" action="[% basepath FILTER none %]post_bug.cgi" id="mozListRequestForm"
       enctype="multipart/form-data" onSubmit="return trySubmit();">
   <input type="hidden" id="format" name="format" value="mozlist">
   <input type="hidden" id="product" name="product" value="mozilla.org">

@@ -58,6 +58,6 @@
           bz_status_[% bug.bug_status FILTER css_class_quote %]
           [% ' bz_closed' IF !bug.isopened %]"
    title="[% link_title FILTER collapse FILTER html %]"
-   href="[% urlbase FILTER html IF full_url %]show_bug.cgi?id=
+   href="[% full_url ? urlbase : basepath FILTER html %]show_bug.cgi?id=
          [%~ bug.id FILTER uri %][% anchor FILTER html %]">
   [%~ link_text FILTER html %]</a>

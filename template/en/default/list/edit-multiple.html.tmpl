@@ -221,7 +221,7 @@
 
       [% INCLUDE "bug/field-label.html.tmpl"
          field = bug_fields.keywords, editable = 1
-         desc_url = "describekeywords.cgi"
+         desc_url = basepath _ "describekeywords.cgi"
       %]
       <td colspan="3">
         [% INCLUDE bug/field.html.tmpl

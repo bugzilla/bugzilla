@@ -120,7 +120,7 @@ function toggleTypeOther(element) {
 [% USE Bugzilla %]
 [% cgi = Bugzilla.cgi %]
 
-<form id="creative_form" method="post" action="post_bug.cgi" enctype="multipart/form-data"
+<form id="creative_form" method="post" action="[% basepath FILTER none %]post_bug.cgi" enctype="multipart/form-data"
       onSubmit="return validateAndSubmit();">
   <input type="hidden" name="format" value="creative">
   <input type="hidden" name="product" value="Marketing">
@@ -133,7 +133,7 @@ function toggleTypeOther(element) {
   <input type="hidden" name="status_whiteboard" id="status_whiteboard" value="">
   <input type="hidden" name="token" value="[% token FILTER html %]">
 
-<img title="Creative Initiation Form" src="extensions/BMO/web/images/creative.png">
+<img title="Creative Initiation Form" src="[% basepath FILTER none %]extensions/BMO/web/images/creative.png">
 
 <div class="head_desc">
   Have a new project or campaign that requires copy, design, video or other awesomeness

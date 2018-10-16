@@ -32,7 +32,7 @@ Edit
 [% IF comp && !no_edit_component_link %]
   component <a
   title="Edit Component '[% comp.name FILTER html %]'"
-  href="editcomponents.cgi?action=edit&amp;product=
+  href="[% basepath FILTER none %]editcomponents.cgi?action=edit&amp;product=
   [%- product.name FILTER uri %]&amp;component=[% comp.name FILTER uri %]">
    '[% comp.name FILTER html %]'</a>
   or edit
@@ -41,14 +41,14 @@ Edit
 [% IF !no_edit_other_components_link %]
 other components of product <a
   title="Choose a component from product '[% product.name FILTER html %]' to edit"
-  href="editcomponents.cgi?product=
+  href="[% basepath FILTER none %]editcomponents.cgi?product=
   [%- product.name FILTER uri %]">'[% product.name FILTER html %]'</a>,
   or edit
 [% END %]
 
 product <a
   title="Edit Product '[% product.name FILTER html %]'"
-  href="editproducts.cgi?action=edit&amp;product=
+  href="[% basepath FILTER none %]editproducts.cgi?action=edit&amp;product=
   [%- product.name FILTER uri %]">'[% product.name FILTER html %]'</a>.
 
 </p>

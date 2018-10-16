@@ -49,7 +49,7 @@ END;
             data-show-edit="[% user.in_group('editusers') || user.in_group('disableusers') || user.bless_groups.size > 0 ? 1 : 0 %]"
             title="[% u.identity FILTER html %]"
           [% ELSE %]
-            href="user_profile?user_id=[% u.id FILTER none %]"
+            href="[% basepath FILTER none %]user_profile?user_id=[% u.id FILTER none %]"
           [% END %]
           >
           <span class="[% user.id ? 'fn' : 'fna' %]">[% nick_only ? u.nick : (u.name || u.nick) FILTER html %]</span>

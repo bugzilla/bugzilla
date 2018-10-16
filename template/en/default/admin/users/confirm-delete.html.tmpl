@@ -111,7 +111,7 @@
         [% IF attachments %]
           <li>
             [% otheruser.login FILTER html %]
-            <a href="buglist.cgi?field0-0-0=attachments.submitter&type0-0-0=equals&value0-0-0=
+            <a href="[% basepath FILTER none %]buglist.cgi?field0-0-0=attachments.submitter&type0-0-0=equals&value0-0-0=
                [%- otheruser.login FILTER uri %]">has submitted
             [% IF attachments == 1 %]
               one attachment
@@ -131,7 +131,7 @@
         [% IF reporter %]
           <li>
             [% otheruser.login FILTER html %]
-            <a href="buglist.cgi?emailreporter1=1&amp;emailtype1=exact&amp;email1=
+            <a href="[% basepath FILTER none %]buglist.cgi?emailreporter1=1&amp;emailtype1=exact&amp;email1=
                [%- otheruser.login FILTER uri %]">has reported
             [% IF reporter == 1 %]
               one [% terms.bug %]
@@ -169,7 +169,7 @@
         [% IF flags.setter %]
           <li>
             [% otheruser.login FILTER html %] has
-            <a href="buglist.cgi?field0-0-0=setters.login_name&amp;type0-0-0=equals&amp;value0-0-0=
+            <a href="[% basepath FILTER none %]buglist.cgi?field0-0-0=setters.login_name&amp;type0-0-0=equals&amp;value0-0-0=
                [%- otheruser.login FILTER uri %]">set
             or requested
             [% IF flags.setter == 1 %]
@@ -190,7 +190,7 @@
         [% IF longdescs %]
           <li>
             [% otheruser.login FILTER html %] has
-            <a href="buglist.cgi?emaillongdesc1=1&amp;emailtype1=exact&amp;email1=
+            <a href="[% basepath FILTER none %]buglist.cgi?emaillongdesc1=1&amp;emailtype1=exact&amp;email1=
                [%- otheruser.login FILTER uri %]">commented
             [% IF longdescs == 1 %]
               once on [% terms.abug %]
@@ -236,7 +236,7 @@
         [% IF assignee_or_qa %]
           <li>
             [% otheruser.login FILTER html %]
-            <a href="buglist.cgi?emailassigned_to1=1&amp;emailqa_contact1=1&amp;emailtype1=exact&amp;email1=
+            <a href="[% basepath FILTER none %]buglist.cgi?emailassigned_to1=1&amp;emailqa_contact1=1&amp;emailtype1=exact&amp;email1=
                [%- otheruser.login FILTER uri %]">is
             the assignee or the QA contact of
             [% IF assignee_or_qa == 1 %]
@@ -251,7 +251,7 @@
         [% IF cc %]
           <li>
             [% otheruser.login FILTER html %]
-            <a href="buglist.cgi?emailcc1=1&amp;emailtype1=exact&amp;email1=
+            <a href="[% basepath FILTER none %]buglist.cgi?emailcc1=1&amp;emailtype1=exact&amp;email1=
                [%- otheruser.login FILTER uri %]">is
             on the CC list of
             [% IF cc == 1 %]
@@ -282,7 +282,7 @@
         [% IF flags.requestee %]
           <li>
             [% otheruser.login FILTER html %] has been
-            <a href="buglist.cgi?field0-0-0=requestees.login_name&amp;type0-0-0=equals&amp;value0-0-0=
+            <a href="[% basepath FILTER none %]buglist.cgi?field0-0-0=requestees.login_name&amp;type0-0-0=equals&amp;value0-0-0=
                [%- otheruser.login FILTER uri %]">asked
             to set
             [% IF flags.requestee == 1 %]
@@ -446,7 +446,7 @@
       </p>
       <p>Do you really want to delete this user account?</p>
 
-      <form method="post" action="editusers.cgi">
+      <form method="post" action="[% basepath FILTER none %]editusers.cgi">
         <p>
           <input type="submit" id="delete" value="Yes, delete">
           <input type="hidden" name="action" value="delete">
@@ -463,16 +463,16 @@
   [% END %]
 [% END %]
 
-  <a href="editusers.cgi?action=edit&amp;userid=[% otheruser.id %]
+  <a href="[% basepath FILTER none %]editusers.cgi?action=edit&amp;userid=[% otheruser.id %]
            [% INCLUDE listselectionurlparams %]">edit the user</a>,
   go
- <a href="editusers.cgi?action=list[% INCLUDE listselectionurlparams %]">back
+ <a href="[% basepath FILTER none %]editusers.cgi?action=list[% INCLUDE listselectionurlparams %]">back
   to the user list</a>,
   [% IF editusers %]
-    <a href="editusers.cgi?action=add[% INCLUDE listselectionurlparams %]">add
+    <a href="[% basepath FILTER none %]editusers.cgi?action=add[% INCLUDE listselectionurlparams %]">add
     a new user</a>,
   [% END %]
-  or <a href="editusers.cgi">find other users</a>.
+  or <a href="[% basepath FILTER none %]editusers.cgi">find other users</a>.
 </p>
 
 [% PROCESS global/footer.html.tmpl %]

@@ -24,7 +24,7 @@
     [% count = count + 1 %]
     <tr class="report_item [% count % 2 == 1 ? "report_row_odd" : "report_row_even" %]">
       <td>
-        <a href="editproducts.cgi?action=editgroupcontrols&product=[% product.name FILTER uri %]" target="_blank">
+        <a href="[% basepath FILTER none %]editproducts.cgi?action=editgroupcontrols&product=[% product.name FILTER uri %]" target="_blank">
           [% product.name FILTER html %]
         </a>
       </td>

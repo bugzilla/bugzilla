@@ -45,7 +45,7 @@ a {
 </style>
 </head>
 <body>
-<img src="images/buggie.png" id="buggie" alt="buggie">
+<img src="[% basepath FILTER none %]images/buggie.png" id="buggie" alt="buggie">
 <div id="content">
 <h1>[% terms.Bug %] Updates Temporarily Suspended</h1>
 
@@ -64,7 +64,7 @@ complete, your change will succeed and you won't get this page any more.
 
 <p>
 Only updates to [% terms.bugs %] are being blocked by this page, any other
-activities in [% terms.Bugzilla %] are still fair game. <a href="index.cgi"
+activities in [% terms.Bugzilla %] are still fair game. <a href="[% basepath FILTER none %]index.cgi"
 target="_blank">Open [% terms.Bugzilla %] in a new tab/window</a> if you'd
 like, to continue working on other things while waiting.
 </p>

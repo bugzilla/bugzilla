@@ -34,7 +34,7 @@
   listselectionvalues = listselectionvalues
 %]
 
-<form name="f" method="get" action="editusers.cgi">
+<form name="f" method="get" action="[% basepath FILTER none %]editusers.cgi">
 <input type="hidden" name="action" value="list">
 <p><label for="matchvalue">List users with</label>
 <select id="matchvalue" name="matchvalue">
@@ -69,10 +69,10 @@
 
 [% IF editusers %]
   <p>
-    You can also <a href="editusers.cgi?action=add">add a new user</a>
+    You can also <a href="[% basepath FILTER none %]editusers.cgi?action=add">add a new user</a>
     [%- IF listselectionvalues %],
       or
-      <a href="editusers.cgi?action=list[% INCLUDE listselectionurlparams %]">show
+      <a href="[% basepath FILTER none %]editusers.cgi?action=list[% INCLUDE listselectionurlparams %]">show
       the user list again</a>
     [%- END %].
   </p>

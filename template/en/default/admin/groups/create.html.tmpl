@@ -33,7 +33,7 @@
   javascript_urls = [ "js/field.js" ]
 %]
 
-<form method="post" action="editgroups.cgi">
+<form method="post" action="[% basepath FILTER none %]editgroups.cgi">
   <table border="1" cellpadding="4" cellspacing="0"><tr>
     <th>New Name</th>
     <th>New Description</th>
@@ -118,6 +118,6 @@ visible only when its controls have been added to a product.</p>
 
 <p>Back to the <a href="./">main [% terms.bugs %] page</a>
 
-or to the <a href="editgroups.cgi">group list</a>.
+or to the <a href="[% basepath FILTER none %]editgroups.cgi">group list</a>.
 
 [% PROCESS global/footer.html.tmpl %]

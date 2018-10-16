@@ -35,7 +35,7 @@
   [% Param('passwdqc_desc') FILTER html_light %]
 </p>
 
-<form id="confirm_account_form" method="post" action="token.cgi">
+<form id="confirm_account_form" method="post" action="[% basepath FILTER none %]token.cgi">
   <input type="hidden" name="t" value="[% token FILTER html %]">
   <input type="hidden" name="a" value="confirm_new_account">
   <div class="flex">
@@ -80,7 +80,7 @@
   cancel account button below and your details will be forgotten.
 </p>
 
-<form id="cancel_account_form" method="post" action="token.cgi">
+<form id="cancel_account_form" method="post" action="[% basepath FILTER none %]token.cgi">
   <input type="hidden" name="t" value="[% token FILTER html %]">
   <input type="hidden" name="a" value="cancel_new_account">
   <input type="submit" id="confirm" value="Cancel Account">

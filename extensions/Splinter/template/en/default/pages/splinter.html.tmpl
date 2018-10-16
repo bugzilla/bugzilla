@@ -39,9 +39,9 @@
 
 <script [% script_nonce FILTER none %]>
   Splinter.configBase = '[% Bugzilla.splinter_review_base FILTER js %]';
-  Splinter.configBugUrl = '[% urlbase FILTER js %]';
+  Splinter.configBugUrl = '[% basepath FILTER js %]';
   Splinter.configHaveExtension = true;
-  Splinter.configHelp = '[% urlbase FILTER js %]page.cgi?id=splinter/help.html';
+  Splinter.configHelp = '[% basepath FILTER js %]page.cgi?id=splinter/help.html';
   Splinter.configNote = '';
   Splinter.readOnly = [% user.id FILTER none %] == 0;
 
@@ -118,7 +118,7 @@
       [reviews]</a>
   [% END %]
   <a id='helpLink' target='splinterHelp'
-     href="[% urlbase FILTER none %]page.cgi?id=splinter/help.html">
+     href="[% basepath FILTER none %]page.cgi?id=splinter/help.html">
     [help]</a>
 </div>
 
@@ -136,10 +136,10 @@
   <span id="attachCreator"></span> -
   <span id="attachDate"></span>
   [% IF feature_enabled('patch_viewer') %]
-    <a href="[% urlbase FILTER none %]attachment.cgi?id=[% attach_id FILTER uri %]&amp;action=diff"
+    <a href="[% basepath FILTER none %]attachment.cgi?id=[% attach_id FILTER uri %]&amp;action=diff"
        target="_blank">[diff]</a>
   [% END %]
-  <a href="[% urlbase FILTER none %]attachment.cgi?id=[% attach_id FILTER uri %]&amp;action=edit"
+  <a href="[% basepath FILTER none %]attachment.cgi?id=[% attach_id FILTER uri %]&amp;action=edit"
      target="_blank">[details]</a>
   <p>
     <b>Comment:</b><br>
@@ -181,7 +181,7 @@
     <li>When the review is complete and you publish it, the overview comment and all line specific comments with their context,
         will be combined together into a single review comment on the [% terms.bug %] report.</li>
     <li>For more detailed instructions, read the Splinter
-        <a id='helpLink' target='splinterHelp' href="[% urlbase FILTER none %]page.cgi?id=splinter/help.html">help page</a>.
+        <a id='helpLink' target='splinterHelp' href="[% basepath FILTER none %]page.cgi?id=splinter/help.html">help page</a>.
     </li>
   </ul>
 </div>
@@ -204,7 +204,7 @@
         <div id="emptyCommentNotice">&lt;Overall Comment&gt;</div>
       </div>
       <div id="myPatchComments"></div>
-      <form id="publish" method="post" action="attachment.cgi" onsubmit="normalizeComments();">
+      <form id="publish" method="post" action="[% basepath FILTER none %]attachment.cgi" onsubmit="normalizeComments();">
         <input type="hidden" id="publish_token" name="token" value="">
         <input type="hidden" id="publish_action" name="action" value="update">
         <input type="hidden" id="publish_review" name="comment" value="">

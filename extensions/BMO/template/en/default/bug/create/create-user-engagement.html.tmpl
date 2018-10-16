@@ -86,7 +86,7 @@ function toggleGoalOther() {
 [% USE Bugzilla %]
 [% cgi = Bugzilla.cgi %]
 
-<form id="engagement_form" method="post" action="post_bug.cgi" enctype="multipart/form-data"
+<form id="engagement_form" method="post" action="[% basepath FILTER none %]post_bug.cgi" enctype="multipart/form-data"
       onSubmit="return validateAndSubmit();">
   <input type="hidden" name="format" value="user-engagement">
   <input type="hidden" name="product" value="Marketing">
@@ -97,7 +97,7 @@ function toggleGoalOther() {
   <input type="hidden" name="bug_severity" id="bug_severity" value="normal">
   <input type="hidden" name="token" value="[% token FILTER html %]">
 
-<img title="User Engagement Form" src="extensions/BMO/web/images/user-engagement.png">
+<img title="User Engagement Form" src="[% basepath FILTER none %]extensions/BMO/web/images/user-engagement.png">
 
 <div class="head_desc">
   Have something that you think our users should know about? Is there a campaign that you

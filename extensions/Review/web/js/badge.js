@@ -114,6 +114,7 @@ Bugzilla.Review.Badge = class Badge {
     get_link(req) {
         const dup = req.dup_count > 1;
         const splinter_base = BUGZILLA.param.splinter_base;
+        const basepath = BUGZILLA.config.basepath;
         const x_types = ['github-pull-request', 'review-board-request', 'phabricator-request', 'google-doc'];
         const is_patch = req.attach_ispatch;
         const [is_ghpr, is_rbr, is_phr, is_gdoc] = x_types.map(type => req.attach_mimetype === `text/x-${type}`);
@@ -122,9 +123,9 @@ Bugzilla.Review.Badge = class Badge {
 
         const link = (is_patch && !dup && splinter_base)
             ? `${splinter_base}&bug=${req.bug_id}&attachment=${req.attach_id}`
-            : (is_redirect && !dup) ? `attachment.cgi?id=${req.attach_id}` // external redirect
-                : ((is_patch || is_file) && !dup) ? `attachment.cgi?id=${req.attach_id}&action=edit`
-                    : `show_bug.cgi?id=${req.bug_id}`;
+            : (is_redirect && !dup) ? `${basepath}attachment.cgi?id=${req.attach_id}` // external redirect
+                : ((is_patch || is_file) && !dup) ? `${basepath}attachment.cgi?id=${req.attach_id}&action=edit`
+                    : `${basepath}show_bug.cgi?id=${req.bug_id}`;
 
         const attach_label = (is_patch || is_rbr || is_phr) ? (dup ? `${req.dup_count} patches` : 'a patch')
             : is_ghpr ? (dup ? `${req.dup_count} pull requests` : 'a pull request')

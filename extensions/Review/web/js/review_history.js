@@ -48,7 +48,7 @@ $(function () {
         }
 
         var flagDS, bugDS, attachmentDS, historyTable;
-        flagDS = new Y.DataSource.IO({ source: 'jsonrpc.cgi' });
+        flagDS = new Y.DataSource.IO({ source: `${BUGZILLA.config.basepath}jsonrpc.cgi` });
         flagDS.plug(Y.Plugin.DataSourceJSONSchema, {
             schema: {
                 resultListLocator: 'result',
@@ -66,7 +66,7 @@ $(function () {
             }
         });
 
-        bugDS = new Y.DataSource.IO({ source: 'jsonrpc.cgi' });
+        bugDS = new Y.DataSource.IO({ source: `${BUGZILLA.config.basepath}jsonrpc.cgi` });
         bugDS.plug(Y.Plugin.DataSourceJSONSchema, {
             schema: {
                 resultListLocator: 'result.bugs',
@@ -77,7 +77,7 @@ $(function () {
             }
         });
 
-        attachmentDS = new Y.DataSource.IO({ source: 'jsonrpc.cgi' });
+        attachmentDS = new Y.DataSource.IO({ source: `${BUGZILLA.config.basepath}jsonrpc.cgi` });
         attachmentDS.plug(Y.Plugin.DataSourceJSONSchema, {
             schema: {
                 metaFields: { 'attachments': 'result.attachments' }
@@ -92,7 +92,7 @@ $(function () {
                 { key: "action", label: "Action", sortable: true,  formatter: format_action },
                 { key: "duration", label: "Duration", sortable: true, formatter: format_duration },
                 { key: "bug_id", label: "Bug", sortable: true, allowHTML: true,
-                  formatter: '<a href="show_bug.cgi?id={value}" target="_blank">{value}</a>' },
+                  formatter: `<a href="${BUGZILLA.config.basepath}show_bug.cgi?id={value}" target="_blank">{value}</a>` },
                 { key: 'bug_summary', label: 'Summary' }
             ]
         });

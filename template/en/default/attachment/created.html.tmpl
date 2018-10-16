@@ -41,7 +41,7 @@
 <dl>
   <dt>
     <a title="[% attachment.description FILTER html %]"
-       href="attachment.cgi?id=[% attachment.id %]&amp;action=edit">Attachment #[% attachment.id %]</a>
+       href="[% basepath FILTER none %]attachment.cgi?id=[% attachment.id %]&amp;action=edit">Attachment #[% attachment.id %]</a>
     to [% "$terms.bug $attachment.bug_id" FILTER bug_link(attachment.bug_id) FILTER none %] created
   </dt>
   <dd>
@@ -57,7 +57,7 @@
         <b>Note:</b> [% terms.Bugzilla %] automatically detected the content type
         <em>[% attachment.contenttype FILTER html %]</em> for this attachment.  If this is
         incorrect, correct the value by editing the attachment's
-        <a href="attachment.cgi?id=[% attachment.id %]&amp;action=edit">details</a>.
+        <a href="[% basepath FILTER none %]attachment.cgi?id=[% attachment.id %]&amp;action=edit">details</a>.
       </p>
     [% END %]
 
@@ -67,7 +67,7 @@
 </dl>
 
 <p>
-<a href="attachment.cgi?bugid=[% attachment.bug_id %]&amp;action=enter">Create
+<a href="[% basepath FILTER none %]attachment.cgi?bugid=[% attachment.bug_id %]&amp;action=enter">Create
  Another Attachment to [% terms.Bug %] [%+ attachment.bug_id %]</a>
 </p>
 

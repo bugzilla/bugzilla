@@ -62,7 +62,7 @@
 
 <p>
   Searches come from saved searches, which are created by executing a <a
-  href="query.cgi">search</a>, then telling [% terms.Bugzilla %] to remember
+  href="[% basepath FILTER none %]query.cgi">search</a>, then telling [% terms.Bugzilla %] to remember
   the search under a particular name.  Add a query by clicking "Add a new
   query", and select the desired saved search name under "Search" and add a
   title for the [% terms.bug %] table.  The optional number entered under
@@ -75,7 +75,7 @@
   All times are server local time ([% local_timezone FILTER html %]).
 </p>
 
-<form method="post" action="editwhines.cgi">
+<form method="post" action="[% basepath FILTER none %]editwhines.cgi">
 [%# This hidden submit button must be here to set default behavior when
     the user presses return on a form input field #%]
 <input type="submit" value="Update / Commit" name="commit"
@@ -337,7 +337,7 @@
     </select>
 
   [% ELSE %]
-    Please visit the <a href="query.cgi">Search</a> page and save a query
+    Please visit the <a href="[% basepath FILTER none %]query.cgi">Search</a> page and save a query
   [% END %]
 
 [%+ END %]

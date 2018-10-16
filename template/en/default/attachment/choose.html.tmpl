@@ -25,7 +25,7 @@
    onload = "document.forms['choose-id'].id.focus()"
  %]
 
-<form name="choose-id" method="get" action="attachment.cgi">
+<form name="choose-id" method="get" action="[% basepath FILTER none %]attachment.cgi">
   <p>Access an attachment by entering its ID into the form below:</p>
   <p>Attachment ID: <input name="id" size="6">
   <button name="action" value="edit" id="edit">Details</button>
@@ -33,7 +33,7 @@
   </p>
 </form>
 
-<form method="get" action="show_bug.cgi">
+<form method="get" action="[% basepath FILTER none %]show_bug.cgi">
   <p>Or, access it from the list of attachments in its associated [% terms.bug %] report:</p>
   <p>[% terms.Bug %] ID: <input name="id" size="6">
   <input type="submit" name="action" value="View" id="action">

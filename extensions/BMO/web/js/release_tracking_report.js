@@ -161,8 +161,8 @@ function serialiseForm() {
 
   $('#q').val(q);
   var is_custom = $('#is_custom').is(':checked') ? 1 : 0;
-  $('#bookmark').attr('href', 'page.cgi?id=release_tracking_report.html&is_custom=' +
-                               is_custom + '&q=' + encodeURIComponent(q));
+  $('#bookmark').attr('href', `${BUGZILLA.config.basepath}page.cgi?id=release_tracking_report.html&is_custom=` +
+                              `${is_custom}&q=${encodeURIComponent(q)}`);
 }
 
 function deserialiseForm(q) {

@@ -1325,7 +1325,7 @@
     <kbd>text/plain</kbd> attachments as HTML.</li>
   <li>If you receive a Whine mail that is empty, there will now be a brief
     message explaining that your search found no results.</li>
-  <li>The <a href="page.cgi?id=fields.html">Field Help Page</a> now
+  <li>The <a href="[% basepath FILTER none %]page.cgi?id=fields.html">Field Help Page</a> now
     contains a description of every single field that can be on
     [%+ terms.abug %] in [% terms.Bugzilla %].</li>
 </ul>
@@ -1616,7 +1616,7 @@
 
 <h2 id="v40_previous">Release Notes For Previous Versions</h2>
 
-<p><a href="page.cgi?id=release-notes3.html">Release Notes for
+<p><a href="[% basepath FILTER none %]page.cgi?id=release-notes3.html">Release Notes for
   [%+ terms.Bugzilla %] 3.x and Earlier</a></p>
 
 [% INCLUDE global/footer.html.tmpl %]

@@ -70,7 +70,7 @@
 [% END %]
 
 [% IF products.size %]
-  <form name="voting_form" method="post" action="page.cgi?id=voting/user.html">
+  <form name="voting_form" method="post" action="[% basepath FILTER none %]page.cgi?id=voting/user.html">
     <input type="hidden" name="action" value="vote">
     <input type="hidden" name="token" value="[% issue_hash_token(['vote']) FILTER html %]">
     <table cellspacing="4">
@@ -91,7 +91,7 @@
         [% END %]
         <tr>
           <th>[% product.name FILTER html %]</th>
-          <td colspan="2"><a href="buglist.cgi?bug_id=
+          <td colspan="2"><a href="[% basepath FILTER none %]buglist.cgi?bug_id=
               [%- product.bug_ids.join(",") FILTER uri %]">([% terms.bug %] list)</a>
           </td>
           <td>
@@ -135,7 +135,7 @@
             </td>
             <td>
               [% bug.short_desc FILTER html %]
-              (<a href="page.cgi?id=voting/bug.html&amp;bug_id=[% bug.id FILTER none %]">Show Votes</a>)
+              (<a href="[% basepath FILTER none %]page.cgi?id=voting/bug.html&amp;bug_id=[% bug.id FILTER none %]">Show Votes</a>)
             </td>
           </tr>
         [% END %]
@@ -154,7 +154,7 @@
 
     [% IF canedit %]
       <input type="submit" value="Change My Votes" id="change"> or
-      <a href="buglist.cgi?bug_id=[% all_bug_ids.join(",") FILTER uri %]">view all
+      <a href="[% basepath FILTER none %]buglist.cgi?bug_id=[% all_bug_ids.join(",") FILTER uri %]">view all
         as [% terms.bug %] list</a>
       <br>
       <br>
@@ -168,7 +168,7 @@
       [% END %]
       and then click <b>Change My Votes</b>.
     [% ELSE %]
-       <a href="buglist.cgi?bug_id=[% all_bug_ids.join(",") FILTER uri %]">View all
+       <a href="[% basepath FILTER none %]buglist.cgi?bug_id=[% all_bug_ids.join(",") FILTER uri %]">View all
          as [% terms.bug %] list</a>
     [% END %]
   </form>
@@ -184,7 +184,7 @@
 [% END %]
 
 <p>
-  <a href="page.cgi?id=voting.html">Help with voting</a>.
+  <a href="[% basepath FILTER none %]page.cgi?id=voting.html">Help with voting</a>.
 </p>
 
 [% PROCESS global/footer.html.tmpl %]

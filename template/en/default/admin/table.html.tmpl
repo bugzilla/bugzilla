@@ -151,7 +151,7 @@
               [% link_uri = link_uri.replace("%%$m%%", replacement_value) %]
             [% END %]
           [% END %]
-          <a href="[% link_uri %]">
+          <a href="[% basepath FILTER none %][% link_uri %]">
         [% END %]
 
         [% IF content_use_field && field_descs.exists(row.${c.name}) %]

@@ -88,7 +88,7 @@ $(function () {
             for (var i = 0, l = data.size(); i < l; i++) {
                 ids.push(data.item(i).get('bug_id'));
             }
-            var url = 'buglist.cgi?bug_id=' + ids.join('%2C');
+            var url = `${BUGZILLA.config.basepath}buglist.cgi?bug_id=${ids.join('%2C')}`;
             window.open(url, '_blank');
         };
 
@@ -100,10 +100,9 @@ $(function () {
             if (o.data.bug_status == 'RESOLVED' || o.data.bug_status == 'VERIFIED') {
                 bug_closed = "bz_closed";
             }
-            return '<a href="show_bug.cgi?id=' + encodeURIComponent(o.data.bug_id) +
-                '" target="_blank" ' + 'title="' + Y.Escape.html(o.data.bug_status) + ' - ' +
-                Y.Escape.html(o.data.bug_summary) + '" class="' + bug_closed +
-                '">' + o.data.bug_id + '</a>';
+            return `<a href="${BUGZILLA.config.basepath}show_bug.cgi?id=${encodeURIComponent(o.data.bug_id)}" ` +
+                   `target="_blank" title="${o.data.bug_status.htmlEncode()} - ${o.data.bug_summary.htmlEncode()}" ` +
+                   `class="${bug_closed}">${o.data.bug_id}</a>`;
         };
 
         var updatedFormatter = function(o) {
@@ -135,7 +134,7 @@ $(function () {
         };
 
         // Requestee
-        dataSource.requestee = new Y.DataSource.IO({ source: 'jsonrpc.cgi' });
+        dataSource.requestee = new Y.DataSource.IO({ source: `${BUGZILLA.config.basepath}jsonrpc.cgi` });
         dataSource.requestee.on('error', function(e) {
             try {
                 var response = Y.JSON.parse(e.data.responseText);
@@ -184,7 +183,7 @@ $(function () {
         });
 
         // Requester
-        dataSource.requester = new Y.DataSource.IO({ source: 'jsonrpc.cgi' });
+        dataSource.requester = new Y.DataSource.IO({ source: `${BUGZILLA.config.basepath}jsonrpc.cgi` });
         dataSource.requester.on('error', function(e) {
             try {
                 var response = Y.JSON.parse(e.data.responseText);

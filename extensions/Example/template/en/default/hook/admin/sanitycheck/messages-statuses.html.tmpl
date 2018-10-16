@@ -24,10 +24,10 @@
 [% ELSIF san_tag == "example_check_au_user_alert" %]
   User &lt;[% login FILTER html %]&gt; isn't Australian.
   [% IF user.in_group('editusers') %]
-    <a href="editusers.cgi?id=[% userid FILTER none %]">Edit this user</a>.
+    <a href="[% basepath FILTER none %]editusers.cgi?id=[% userid FILTER none %]">Edit this user</a>.
   [% END %]
 [% ELSIF san_tag == "example_check_au_user_prompt" %]
-  <a href="sanitycheck.cgi?example_repair_au_user=1&amp;token=
+  <a href="[% basepath FILTER none %]sanitycheck.cgi?example_repair_au_user=1&amp;token=
      [%- issue_hash_token(['sanitycheck']) FILTER uri %]">Fix these users</a>.
 [% ELSIF san_tag == "example_repair_au_user_start" %]
   <em>EXAMPLE PLUGIN</em> - OK, would now make users Australian.

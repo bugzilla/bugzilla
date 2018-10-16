@@ -173,12 +173,12 @@ strong.required:before {
    javascript_urls = [ 'extensions/BMO/web/js/form_validate.js' ]
 %]
 
-<iframe id="yui-history-iframe" src="extensions/BMO/web/yui-history-iframe.txt"></iframe>
+<iframe id="yui-history-iframe" src="[% basepath FILTER none %]extensions/BMO/web/yui-history-iframe.txt"></iframe>
 <input id="yui-history-field" type="hidden">
 
 <h1>MDN Web Docs Feedback</h1>
 
-<form method="post" action="post_bug.cgi" enctype="multipart/form-data"
+<form method="post" action="[% basepath FILTER none %]post_bug.cgi" enctype="multipart/form-data"
       onSubmit="return mdn.validateAndSubmit();">
   <input type="hidden" name="format" value="mdn">
   <input type="hidden" name="product" value="developer.mozilla.org">
@@ -365,9 +365,9 @@ strong.required:before {
 </form>
 
 <div id="standard">
-  <a href="enter_bug.cgi?format=__standard__&product=[% product.name FILTER uri %]">
-    <img src="extensions/BMO/web/images/advanced.png" width="16" height="16" border="0"></a>
-  <a href="enter_bug.cgi?format=__standard__&product=[% product.name FILTER uri %]">
+  <a href="[% basepath FILTER none %]enter_bug.cgi?format=__standard__&product=[% product.name FILTER uri %]">
+    <img src="[% basepath FILTER none %]extensions/BMO/web/images/advanced.png" width="16" height="16" border="0"></a>
+  <a href="[% basepath FILTER none %]enter_bug.cgi?format=__standard__&product=[% product.name FILTER uri %]">
     Switch to the standard [% terms.bug %] entry form</a>
 </div>
 

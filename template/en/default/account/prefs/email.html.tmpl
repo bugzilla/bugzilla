@@ -306,7 +306,7 @@ You are currently not watching any users.
         <td>
           <input type="checkbox" name="remove_ignored_bug_[% bug.id FILTER html %]" value="1">
         </td>
-        <td><a href="[% urlbase FILTER html %]show_bug.cgi?id=[% bug.id FILTER uri %]">
+        <td><a href="[% basepath FILTER html %]show_bug.cgi?id=[% bug.id FILTER uri %]">
           [% bug.id FILTER html %]</a>
         </td>
         <td>[% bug.status FILTER html %]</td>

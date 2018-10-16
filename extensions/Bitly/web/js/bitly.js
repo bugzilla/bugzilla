@@ -18,9 +18,9 @@ $(function() {
         }
 
         $('#bitly-url').val('');
-        var request = 'rest/bitly/' + type +
-            '?url=' + encodeURIComponent($('#bitly-shorten').data('url')) +
-            '&Bugzilla_api_token=' + encodeURIComponent(BUGZILLA.api_token);
+        var request = `${BUGZILLA.config.basepath}rest/bitly/${type}?` +
+                      `url=${encodeURIComponent($('#bitly-shorten').data('url'))}&` +
+                      `Bugzilla_api_token=${encodeURIComponent(BUGZILLA.api_token)}`;
         $.ajax(request)
             .done(function(data) {
                 urls[type] = data.url;

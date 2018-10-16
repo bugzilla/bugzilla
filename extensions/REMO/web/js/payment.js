@@ -42,8 +42,8 @@ function getBugInfo (evt) {
 
     div.text('Getting bug info...');
 
-    var url = ("rest/bug/" + bug_id +
-               "?include_fields=product,component,status,summary&Bugzilla_api_token=" + BUGZILLA.api_token);
+    var url = `${BUGZILLA.config.basepath}rest/bug/${bug_id}?` +
+              `include_fields=product,component,status,summary&Bugzilla_api_token=${BUGZILLA.api_token}`;
     $.getJSON(url).done(function(data) {
         var bug_message = "";
         if (data) {

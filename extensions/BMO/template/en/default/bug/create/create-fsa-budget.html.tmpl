@@ -83,7 +83,7 @@ function validateAndSubmit() {
   <span class="required_star">*</span> - <span class="required_explanation">Required Fields</span>
 </p>
 
-<form method="post" action="post_bug.cgi" id="fsa_form" enctype="multipart/form-data"
+<form method="post" action="[% basepath FILTER none %]post_bug.cgi" id="fsa_form" enctype="multipart/form-data"
       onSubmit="return validateAndSubmit();">
   <input type="hidden" name="format" value="fsa-budget">
   <input type="hidden" name="product" value="FSA">

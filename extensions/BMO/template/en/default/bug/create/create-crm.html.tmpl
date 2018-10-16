@@ -90,7 +90,7 @@ $(document).ready(function() {
   <p>Tell us more and then join our weekly meeting for next steps (we’ll send you
     the invite details once you submit the [% terms.bug %]):</p>
 
-  <form method="post" action="post_bug.cgi" id="crmForm">
+  <form method="post" action="[% basepath FILTER none %]post_bug.cgi" id="crmForm">
     <input type="hidden" id="short_desc" name="short_desc" value="CRM/Email Marketing Request">
     <input type="hidden" name="product" value="Marketing">
     <input type="hidden" name="component" value="Email">

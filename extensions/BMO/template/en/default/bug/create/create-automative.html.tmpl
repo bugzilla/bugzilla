@@ -92,7 +92,7 @@ function validateAndSubmit() {
 [% USE Bugzilla %]
 [% cgi = Bugzilla.cgi %]
 
-<form id="automative_form" method="post" action="post_bug.cgi"
+<form id="automative_form" method="post" action="[% basepath FILTER none %]post_bug.cgi"
   enctype="multipart/form-data" onSubmit="return validateAndSubmit();">
   <input type="hidden" name="format" value="automative">
   <input type="hidden" name="product" value="Testing">

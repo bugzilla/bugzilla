@@ -50,7 +50,7 @@
   software, to see whether it has already been fixed.
   </li>
 
-  <li><a href="query.cgi?format=specific">Search</a>
+  <li><a href="[% basepath FILTER none %]query.cgi?format=specific">Search</a>
   [% terms.Bugzilla %], to see whether your [% terms.bug %] has
   already been reported.</li>
 </ol>
@@ -62,7 +62,7 @@ no-one else appears to have reported it, then:</p>
 
 <ol>
  <li>Choose
- "<a href="enter_bug.cgi">Enter a new [% terms.bug %]</a>"</li>
+ "<a href="[% basepath FILTER none %]enter_bug.cgi">Enter a new [% terms.bug %]</a>"</li>
  <li>Select the product in which you've found the [% terms.bug %]</li>
  <li>Fill out the form. Here is some help understanding it:</li>
 </ol>

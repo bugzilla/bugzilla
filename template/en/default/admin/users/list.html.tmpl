@@ -119,10 +119,10 @@
 
 <p>
   If you do not wish to modify a user account at this time, you can
-  <a href="editusers.cgi">find other users</a>
+  <a href="[% basepath FILTER none %]editusers.cgi">find other users</a>
   [% IF editusers %]
     or
-    <a href="editusers.cgi?action=add[% INCLUDE listselectionurlparams %]">add
+    <a href="[% basepath FILTER none %]editusers.cgi?action=add[% INCLUDE listselectionurlparams %]">add
     a new user</a>
   [% END %].
 </p>

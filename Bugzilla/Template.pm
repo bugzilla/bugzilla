@@ -285,8 +285,8 @@ sub get_attachment_link {
 
         $link_text =~ s/ \[details\]$//;
         $link_text =~ s/ \[diff\]$//;
-        state $urlbase = Bugzilla->localconfig->{urlbase};
-        my $linkval = "${urlbase}attachment.cgi?id=$attachid";
+        state $basepath = Bugzilla->localconfig->{basepath};
+        my $linkval = "${basepath}attachment.cgi?id=$attachid";
 
         # If the attachment is a patch and patch_viewer feature is
         # enabled, add link to the diff.
@@ -368,7 +368,7 @@ sub multiline_sprintf {
 
 sub version_filter {
     my ($file_url) = @_;
-    return "static/v" . Bugzilla->VERSION . "/$file_url";
+    return Bugzilla->localconfig->{basepath} . "static/v" . Bugzilla->VERSION . "/$file_url";
 }
 
 # Set up the skin CSS cascade:
@@ -927,6 +927,9 @@ sub create {
 
             # Allow templates to access the "corect" URLBase value
             'urlbase' => sub { return Bugzilla->localconfig->{urlbase}; },
+
+            # Allow templates to get the absolute path of the URLBase value
+            'basepath' => sub { return Bugzilla->localconfig->{basepath}; },
 
             # Allow templates to access docs url with users' preferred language
             'docs_urlbase' => sub {

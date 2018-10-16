@@ -8,5 +8,5 @@
 
 [% RETURN UNLESS user.mfa %]
 
-<img src="images/mfa.png" class="mfa-protected" width="16" height="16"
+<img src="[% basepath FILTER none %]images/mfa.png" class="mfa-protected" width="16" height="16"
      alt="2FA" title="Protected by Two-factor Authentication">

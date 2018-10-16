@@ -93,9 +93,9 @@ var guided = {
   },
 
   setAdvancedLink: function() {
-    var href = 'enter_bug.cgi?format=__default__' +
-      '&product=' + encodeURIComponent(product.getName()) +
-      '&short_desc=' + encodeURIComponent(dupes.getSummary());
+    var href = `${BUGZILLA.config.basepath}enter_bug.cgi?format=__default__` +
+               `&product=${encodeURIComponent(product.getName())}` +
+               `&short_desc=${encodeURIComponent(dupes.getSummary())}`;
     Dom.get('advanced_img').href = href;
     Dom.get('advanced_link').href = href;
   }
@@ -181,7 +181,8 @@ var product = {
     Dom.get('product').value = productName;
     Dom.get('product_label').innerHTML = YAHOO.lang.escapeHTML(productName);
     Dom.get('dupes_product_name').innerHTML = YAHOO.lang.escapeHTML(productName);
-    Dom.get('list_comp').href = 'describecomponents.cgi?product=' + encodeURIComponent(productName);
+    Dom.get('list_comp').href = `${BUGZILLA.config.basepath}describecomponents.cgi?` +
+                                `product=${encodeURIComponent(productName)}`;
     guided.setAdvancedLink();
 
     if (productName == '') {
@@ -217,7 +218,7 @@ var product = {
     YAHOO.util.Connect.setDefaultPostHeader('application/json; charset=UTF-8');
     YAHOO.util.Connect.asyncRequest(
       'POST',
-      'jsonrpc.cgi',
+      `${BUGZILLA.config.basepath}jsonrpc.cgi`,
       {
         success: function(res) {
           try {
@@ -225,7 +226,7 @@ var product = {
             if (data.error)
               throw(data.error.message);
             if (data.result.products.length == 0)
-              document.location.href = 'enter_bug.cgi?format=guided';
+              document.location.href = `${BUGZILLA.config.basepath}enter_bug.cgi?format=guided`;
             product.details = data.result.products[0];
             bugForm.onProductUpdated();
           } catch (err) {
@@ -310,7 +311,7 @@ var dupes = {
   },
 
   _initDataTable: function() {
-    var dataSource = new YAHOO.util.XHRDataSource("jsonrpc.cgi");
+    var dataSource = new YAHOO.util.XHRDataSource(`${BUGZILLA.config.basepath}jsonrpc.cgi`);
     dataSource.connTimeout = 15000;
     dataSource.connMethodPost = true;
     dataSource.connXhrMode = "cancelStaleRequests";
@@ -351,8 +352,7 @@ var dupes = {
   },
 
   _formatId: function(el, oRecord, oColumn, oData) {
-    el.innerHTML = '<a href="show_bug.cgi?id=' + oData +
-      '" target="_blank">' + oData + '</a>';
+    el.innerHTML = `<a href="${BUGZILLA.config.basepath}show_bug.cgi?id=${oData}" target="_blank">${oData}</a>`;
   },
 
   _formatStatus: function(el, oRecord, oColumn, oData) {
@@ -426,7 +426,7 @@ var dupes = {
     YAHOO.util.Connect.setDefaultPostHeader('application/json; charset=UTF-8');
     YAHOO.util.Connect.asyncRequest(
       'POST',
-      'jsonrpc.cgi',
+      `${BUGZILLA.config.basepath}jsonrpc.cgi`,
       {
         success: function(res) {
           var data = YAHOO.lang.JSON.parse(res.responseText);
@@ -545,7 +545,7 @@ var dupes = {
 
       dupes._dataTable.showTableMessage(
         'Searching for similar issues...&nbsp;&nbsp;&nbsp;' +
-        '<img src="extensions/GuidedBugEntry/web/images/throbber.gif"' +
+        `<img src="${BUGZILLA.config.basepath}extensions/GuidedBugEntry/web/images/throbber.gif"` +
         ' width="16" height="11">',
         YAHOO.widget.DataTable.CLASS_LOADING
       );
@@ -626,9 +626,10 @@ var bugForm = {
     var visibleCount = 0;
     if (products[productName] && products[productName].format) {
         Dom.addClass('advanced', 'hidden');
-        document.location.href = 'enter_bug.cgi?format=' + encodeURIComponent(products[productName].format) +
-                                 '&product=' + encodeURIComponent(productName) +
-                                 '&short_desc=' + encodeURIComponent(dupes.getSummary());
+        document.location.href = `${BUGZILLA.config.basepath}enter_bug.cgi?` +
+                                 `format=${encodeURIComponent(products[productName].format)}` +
+                                 `&product=${encodeURIComponent(productName)}` +
+                                 `&short_desc=${encodeURIComponent(dupes.getSummary())}`;
         guided.updateStep = false;
         return;
     }

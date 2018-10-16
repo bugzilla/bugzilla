@@ -6,6 +6,6 @@
   # defined by the Mozilla Public License, v. 2.0.
   #%]
 
-<a href="rest/bug?include_fields=id,summary,status&amp;
+<a href="[% basepath FILTER none %]rest/bug?include_fields=id,summary,status&amp;
    [%- cgi.new(urlquerypart).canonicalise_query('list_id','query_format') FILTER html %]"
    title="Query as a REST API request">REST</a> |

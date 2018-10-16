@@ -297,7 +297,7 @@
     but [% terms.Bugzilla %] is unable to trust your request. Make sure
     your web browser accepts cookies and that you haven't been redirected
     here from an external web site.
-    <a href="index.cgi?GoAheadAndLogIn=1">Click here</a> if you really want
+    <a href="[% basepath FILTER none %]index.cgi?GoAheadAndLogIn=1">Click here</a> if you really want
     to log in.
 
   [% ELSIF error == "auth_invalid_token" %]
@@ -323,7 +323,7 @@
     [% docslinks = {'myaccount.html' => 'Creating an account'} %]
     You are not authorized to access [% terms.bug %] [%= bug_id FILTER html %].
     To see this [% terms.bug %], you must
-    first <a href="show_bug.cgi?id=
+    first <a href="[% basepath FILTER none %]show_bug.cgi?id=
                    [% bug_id FILTER uri %]&amp;GoAheadAndLogIn=1">log
     in to an account</a> with the appropriate permissions.
 
@@ -668,7 +668,7 @@
     the '[% field.description FILTER html %]' field and cannot be deleted
     or disabled.
     [% IF user.in_group('tweakparams') %]
-      You have to <a href="editparams.cgi?section=bugfields#
+      You have to <a href="[% basepath FILTER none %]editparams.cgi?section=bugfields#
       [%- param_name FILTER uri %]">change</a> the default value first.
     [% END %]
 
@@ -867,7 +867,7 @@
     [% title = "Cannot Delete Group" %]
     The <em>[% group.name FILTER html %]</em> group cannot be deleted because
     there are
-    <a href="editgroups.cgi?action=del&amp;group=
+    <a href="[% basepath FILTER none %]editgroups.cgi?action=del&amp;group=
              [%- group.id FILTER uri %]">records</a>
     in the database which refer to it. All references to this group must
     be removed before you can remove it.
@@ -1316,7 +1316,7 @@
     has to have at least one active component in order for you to
     enter [% terms.abug %] into it.<br>
     [% IF user.in_group("editcomponents", product.id) %]
-      <a href="editcomponents.cgi?action=add&amp;product=[% product.name FILTER uri %]">Create
+      <a href="[% basepath FILTER none %]editcomponents.cgi?action=add&amp;product=[% product.name FILTER uri %]">Create
       a new component</a>.
     [% ELSE %]
       Please contact [% Param("maintainer") %] and ask them
@@ -1339,7 +1339,7 @@
     [% title = "Missing Cookie" %]
     Sorry, I seem to have lost the cookie that recorded
     the results of your last search. I'm afraid you will have to start
-    again from the <a href="query.cgi">search page</a>.
+    again from the <a href="[% basepath FILTER none %]query.cgi">search page</a>.
 
   [% ELSIF error == "missing_datasets" %]
     [% title = "No Datasets Selected" %]
@@ -1383,7 +1383,7 @@
     has to have at least one active version in order for you to
     enter [% terms.abug %] into it.<br>
     [% IF user.in_group("editcomponents", product.id) %]
-      <a href="editversions.cgi?action=add&amp;product=[% product.name FILTER uri %]">Create
+      <a href="[% basepath FILTER none %]editversions.cgi?action=add&amp;product=[% product.name FILTER uri %]">Create
       a new version</a>.
     [% ELSE %]
       Please contact [% Param("maintainer") %] and ask them
@@ -1500,7 +1500,7 @@
       Either you mis-typed the name or that user has not yet registered
       for a [% terms.Bugzilla %] account.
     [% ELSIF class == "Bugzilla::Keyword" %]
-      The legal keyword names are <a href="describekeywords.cgi?show_inactive_keywords=1">listed
+      The legal keyword names are <a href="[% basepath FILTER none %]describekeywords.cgi?show_inactive_keywords=1">listed
       here</a>.
     [% END %]
 
@@ -1532,7 +1532,7 @@
     [% END %]
 
     [% IF locked_user %]
-      You must <a href="token.cgi?a=reqpw&amp;loginname=[% locked_user.email FILTER uri %]&amp;token=[% issue_hash_token(['reqpw']) FILTER uri %]">
+      You must <a href="[% basepath FILTER none %]token.cgi?a=reqpw&amp;loginname=[% locked_user.email FILTER uri %]&amp;token=[% issue_hash_token(['reqpw']) FILTER uri %]">
       request a new password</a> in order to log in again.
     [% END %]
 
@@ -1571,7 +1571,7 @@
     [% title = "Must define new default milestone" %]
     [% admindocslinks = {'products.html' => 'Administering products',
                          'milestones.html' => 'About Milestones'} %]
-    You must <a href="editmilestones.cgi?action=add&amp;product=[% product FILTER uri %]">
+    You must <a href="[% basepath FILTER none %]editmilestones.cgi?action=add&amp;product=[% product FILTER uri %]">
     create the milestone '[% milestone FILTER html %]'</a> before
     it can be made the default milestone for product '[% product FILTER html %]'.
 
@@ -1668,7 +1668,7 @@
 
     [% IF unknown.size %]
       <p>The valid field names are
-        <a href="page.cgi?id=quicksearch.html#fields">listed here</a>.</p>
+        <a href="[% basepath FILTER none %]page.cgi?id=quicksearch.html#fields">listed here</a>.</p>
     [% END %]
 
   [% ELSIF error == "reassign_to_empty" %]
@@ -1715,7 +1715,7 @@
     [% title = "Saved Search In Use" %]
     [% docslinks = {'whining.html' => 'About Whining'} %]
     The saved search <em>[% search_name FILTER html %]</em> is being used
-    by <a href="editwhines.cgi">Whining events</a> with the following subjects:
+    by <a href="[% basepath FILTER none %]editwhines.cgi">Whining events</a> with the following subjects:
     [%+ subjects FILTER html %]
 
   [% ELSIF error == "search_content_without_matches" %]
@@ -1790,14 +1790,14 @@
   [% ELSIF error == "sudo_password_required" %]
     [% title = "Password Required" %]
     Your [% terms.Bugzilla %] password is required to begin a sudo
-    session. Please <a href="relogin.cgi?action=prepare-sudo&amp;target_login=
+    session. Please <a href="[% basepath FILTER none %]relogin.cgi?action=prepare-sudo&amp;target_login=
     [%- target_login FILTER uri %]&amp;reason=
     [%- reason FILTER uri %]">go back</a> and enter your password.
 
   [% ELSIF error == "sudo_preparation_required" %]
     [% title = "Preparation Required" %]
     You may not start a sudo session directly.  Please
-    <a href="relogin.cgi?action=prepare-sudo&amp;target_login=
+    <a href="[% basepath FILTER none %]relogin.cgi?action=prepare-sudo&amp;target_login=
     [%- target_login FILTER uri %]&amp;reason=
     [%- reason FILTER uri %]">start your session normally</a>.
 
@@ -2031,12 +2031,12 @@
                AND !sharer_id %]
   <p>
     Alternatively, you can
-    <a href="buglist.cgi?cmdtype=dorem&amp;remaction=forget&amp;namedcmd=
+    <a href="[% basepath FILTER none %]buglist.cgi?cmdtype=dorem&amp;remaction=forget&amp;namedcmd=
                   [% namedcmd FILTER uri %]">forget</a>
 
     [% FOREACH q = Bugzilla.user.queries %]
       [% IF q.name == namedcmd %]
-        or <a href="query.cgi?[% q.url FILTER html %]">edit</a>
+        or <a href="[% basepath FILTER none %]query.cgi?[% q.url FILTER html %]">edit</a>
       [% END %]
     [% END %]
 

@@ -70,7 +70,7 @@
 [% BLOCK describe_comp %]
   <section id="[% comp.name FILTER html %]" class="component[%- IF comp.name == component_mark %] highlight[% END %]">
     <header>
-      <h2><a href="buglist.cgi?product=[%- product.name FILTER uri %]&amp;component=
+      <h2><a href="[% basepath FILTER none %]buglist.cgi?product=[%- product.name FILTER uri %]&amp;component=
                    [%- comp.name FILTER uri %]&amp;resolution=---">[% comp.name FILTER html %]</a></h2>
     </header>
     <div>

@@ -47,7 +47,7 @@ Bugzilla.NewBugFrequentComp = class NewBugFrequentComp {
         params.append('component', component);
 
         return {
-          href: `/enter_bug.cgi?${params.toString()}`,
+          href: `${BUGZILLA.config.basepath}enter_bug.cgi?${params.toString()}`,
           text: `${product} :: ${component}`,
         };
       });
@@ -83,7 +83,7 @@ Bugzilla.NewBugFrequentComp = class NewBugFrequentComp {
 
     return new Promise((resolve, reject) => {
       bugzilla_ajax({
-        url: `/rest/bug?${params.toString()}`
+        url: `${BUGZILLA.config.basepath}rest/bug?${params.toString()}`
       }, response => {
         if (!response.bugs) {
           reject(new Error('Your frequent components could not be retrieved.'));

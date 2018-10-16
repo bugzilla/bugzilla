@@ -129,7 +129,7 @@
                        { name => "line",  description => "Line" },
                        { name => "table", description => "Table" } ] %]
 
-        [% formaturl = "report.cgi?$switchbase&amp;width=$width" _
+        [% formaturl = basepath _ "report.cgi?$switchbase&amp;width=$width" _
                        "&amp;height=$height&amp;action=wrap" %]
         [% FOREACH other_format = formats %]
           [% NEXT IF other_format.name == "pie" AND row_field AND col_field %]
@@ -166,10 +166,10 @@
 
   <p>
     [% IF format == "table" %]
-      <a href="query.cgi?[% switchbase %]&amp;format=report-table">Edit
+      <a href="[% basepath FILTER none %]query.cgi?[% switchbase %]&amp;format=report-table">Edit
       this report</a>
     [% ELSE %]
-      <a href="query.cgi?[% switchbase %]&amp;chart_format=
+      <a href="[% basepath FILTER none %]query.cgi?[% switchbase %]&amp;chart_format=
         [% format FILTER uri %]&amp;format=report-graph&amp;cumulate=[% cumulate %]">
         Edit this report
       </a>

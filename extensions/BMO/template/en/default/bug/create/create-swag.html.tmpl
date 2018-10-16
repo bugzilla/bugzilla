@@ -533,7 +533,7 @@ function showGear() {
   target="_blank" rel="noopener noreferrer">their existing process</a>.
 </p>
 
-<form method="post" action="post_bug.cgi" id="swagRequestForm" enctype="multipart/form-data"
+<form method="post" action="[% basepath FILTER none %]post_bug.cgi" id="swagRequestForm" enctype="multipart/form-data"
       onSubmit="return validateAndSubmit();">
   <input type="hidden" name="format" value="swag">
   <input type="hidden" name="product" value="Marketing">

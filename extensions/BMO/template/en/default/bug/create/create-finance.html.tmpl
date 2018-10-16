@@ -75,7 +75,7 @@
 
 <p>All fields are mandatory</p>
 
-<form method="post" action="post_bug.cgi" id="bug_form" class="enter_bug_form"
+<form method="post" action="[% basepath FILTER none %]post_bug.cgi" id="bug_form" class="enter_bug_form"
       enctype="multipart/form-data" onsubmit="return onSubmit();">
 <input type="hidden" name="format" value="finance">
 <input type="hidden" name="product" value="Finance">

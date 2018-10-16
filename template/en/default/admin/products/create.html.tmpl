@@ -36,7 +36,7 @@
   product.allows_unconfirmed = 1
 %]
 
-<form method="post" action="editproducts.cgi">
+<form method="post" action="[% basepath FILTER none %]editproducts.cgi">
   <table border="0" cellpadding="4" cellspacing="0">
 
     [% PROCESS "admin/products/edit-common.html.tmpl" %]

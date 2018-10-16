@@ -38,14 +38,14 @@
                     ${constants.CONTROLMAPMANDATORY} => 'Mandatory'}
  %]
 
-<form method="post" action="editproducts.cgi">
+<form method="post" action="[% basepath FILTER none %]editproducts.cgi">
   <table border="0" cellpadding="4" cellspacing="0">
 
     [% PROCESS "admin/products/edit-common.html.tmpl" %]
 
     <tr>
       <th align="right" valign="top">
-        <a href="editcomponents.cgi?product=[% product.name FILTER uri %]">
+        <a href="[% basepath FILTER none %]editcomponents.cgi?product=[% product.name FILTER uri %]">
         Edit components:
         </a>
       </th>
@@ -67,7 +67,7 @@
     </tr>
     <tr>
       <th align="right" valign="top">
-        <a href="editversions.cgi?product=[% product.name FILTER uri %]">Edit
+        <a href="[% basepath FILTER none %]editversions.cgi?product=[% product.name FILTER uri %]">Edit
 versions:</a>
       </th>
       <td>
@@ -84,7 +84,7 @@ versions:</a>
     [% IF Param('usetargetmilestone') %]
       <tr>
         <th align="right" valign="top">
-          <a href="editmilestones.cgi?product=[% product.name FILTER uri %]">
+          <a href="[% basepath FILTER none %]editmilestones.cgi?product=[% product.name FILTER uri %]">
           Edit milestones:</a>
         </th>
         <td>
@@ -101,7 +101,7 @@ versions:</a>
     [% END %]
     <tr>
       <th align="right" valign="top">
-        <a href="editproducts.cgi?action=editgroupcontrols&product=
+        <a href="[% basepath FILTER none %]editproducts.cgi?action=editgroupcontrols&product=
           [%- product.name FILTER uri %]">
           Edit Group Access Controls:
         </a>
@@ -130,7 +130,7 @@ versions:</a>
     </tr>
     <tr>
       <th align="right">[% terms.Bugs %]:</th>
-      <td><a href="buglist.cgi?product=[% product.name FILTER uri %]">
+      <td><a href="[% basepath FILTER none %]buglist.cgi?product=[% product.name FILTER uri %]">
             [% product.bug_count FILTER html %]</a></td>
     </tr>
   </table>

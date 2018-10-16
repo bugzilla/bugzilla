@@ -258,7 +258,7 @@ sub edit_bug_and_return {
     my ($sel, $bug_id, $bug_summary, $options) = @_;
     my $ndash = NDASH;
     edit_bug($sel, $bug_id, $bug_summary, $options);
-    $sel->click_ok("//a[contains(\@href, 'show_bug.cgi?id=$bug_id')]");
+    $sel->click_ok("//a[contains(\@href, '/show_bug.cgi?id=$bug_id')]");
     $sel->wait_for_page_to_load_ok(WAIT_TIME);
     $sel->title_is("$bug_id $ndash $bug_summary", "Returning back to bug $bug_id");
 }
@@ -316,7 +316,7 @@ sub add_product {
     my $title = $sel->get_title();
     if ($title eq "Select Classification") {
         ok(1, "More than one enterable classification available. Display them in a list");
-        $sel->click_ok("//a[contains(\@href, 'editproducts.cgi?action=add&classification=$classification')]",
+        $sel->click_ok("//a[contains(\@href, '/editproducts.cgi?action=add&classification=$classification')]",
                        undef, "Add product to $classification");
     }
     else {

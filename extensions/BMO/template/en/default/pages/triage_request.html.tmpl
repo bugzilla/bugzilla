@@ -63,7 +63,7 @@
       Would you like to add "canconfirm" permissions to your account?
     </p>
 
-    <form method="post" action="page.cgi">
+    <form method="post" action="[% basepath FILTER none %]page.cgi">
       <input type="hidden" name="id" value="triage_request.html">
       <input type="hidden" name="update" value="1">
       <input type="submit" value="Yes, I want to help">

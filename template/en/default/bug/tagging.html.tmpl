@@ -14,7 +14,7 @@
   #%]
 
 [% IF user.id && user.settings.per_bug_queries.value == "on" %]
-      <form id="list_of_bugs" action="buglist.cgi" method="get">
+      <form id="list_of_bugs" action="[% basepath FILTER none %]buglist.cgi" method="get">
         <input type="hidden" name="cmdtype" value="doit">
         <input type="hidden" name="remtype" value="asnamed">
         <input type="hidden" name="list_of_bugs" value="1">

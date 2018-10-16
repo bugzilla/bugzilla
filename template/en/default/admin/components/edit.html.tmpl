@@ -37,7 +37,7 @@
   javascript_urls = [ "js/field.js" ]
 %]
 
-<form method="post" action="editcomponents.cgi">
+<form method="post" action="[% basepath FILTER none %]editcomponents.cgi">
   <table border="0" cellpadding="4" cellspacing="0">
 
     [% PROCESS "admin/components/edit-common.html.tmpl" %]
@@ -52,7 +52,7 @@
       <td>
 [% IF comp.bug_count > 0 %]
         <a title="[% terms.Bugs %] in component '[% comp.name FILTER html %]'"
-           href="buglist.cgi?component=
+           href="[% basepath FILTER none %]buglist.cgi?component=
                 [%- comp.name FILTER uri %]&amp;product=
                 [%- product.name FILTER uri %]">[% comp.bug_count %]</a>
 [% ELSE %]
@@ -68,7 +68,7 @@
    <input type="hidden" name="product" value="[% product.name FILTER html %]">
    <input type="hidden" name="token" value="[% token FILTER html %]">
    <input type="submit" value="Save Changes" id="update"> or <a
-        href="editcomponents.cgi?action=del&amp;product=
+        href="[% basepath FILTER none %]editcomponents.cgi?action=del&amp;product=
         [%- product.name FILTER uri %]&amp;component=
         [%- comp.name FILTER uri %]">Delete</a> this component.
 

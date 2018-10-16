@@ -19,7 +19,7 @@
     <ul>
       [% FOREACH tab = tabs %]
         <li [%= IF tab.name == current_tab_name %]class="selected"[% END %]>
-          <a href="[% tab.link FILTER html %]">[% tab.label FILTER html %]</a>
+          <a href="[% basepath _ tab.link FILTER html %]">[% tab.label FILTER html %]</a>
         </li>
       [% END %]
     </ul>

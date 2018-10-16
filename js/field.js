@@ -715,7 +715,7 @@ $(function() {
     var options_user = {
         appendTo: $('#main-inner'),
         forceFixPosition: true,
-        serviceUrl: 'rest/user/suggest',
+        serviceUrl: `${BUGZILLA.config.basepath}rest/user/suggest`,
         params: {
             Bugzilla_api_token: BUGZILLA.api_token,
         },
@@ -923,7 +923,7 @@ function show_comment_preview(bug_id) {
     Dom.removeClass('comment_preview_loading', 'bz_default_hidden');
 
     YAHOO.util.Connect.setDefaultPostHeader('application/json', true);
-    YAHOO.util.Connect.asyncRequest('POST', 'jsonrpc.cgi',
+    YAHOO.util.Connect.asyncRequest('POST', `${BUGZILLA.config.basepath}jsonrpc.cgi`,
     {
         success: function(res) {
             data = YAHOO.lang.JSON.parse(res.responseText);

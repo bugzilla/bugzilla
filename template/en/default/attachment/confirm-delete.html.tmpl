@@ -37,7 +37,7 @@
   <tr>
     <td valign="top">Attachment ID:</td>
     <td valign="top">
-      <a href="attachment.cgi?id=[% a.id FILTER html %]">[% a.id FILTER html %]</a>
+      <a href="[% basepath FILTER none %]attachment.cgi?id=[% a.id FILTER html %]">[% a.id FILTER html %]</a>
     </td>
   </tr>
   <tr>
@@ -74,7 +74,7 @@
 
 <p>Do you really want to delete this attachment?</p>
 
-<form action="attachment.cgi" method="POST">
+<form action="[% basepath FILTER none %]attachment.cgi" method="POST">
   <label for="reason">Reason of the deletion:</label>
   <input type="text" id="reason" name="reason" value="" size="80" maxlength="200">
   <br>

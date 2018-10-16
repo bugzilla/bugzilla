@@ -66,7 +66,7 @@
       <table id="menu">
         <tr>
           <td class="index">
-            <a href="editparams.cgi?section=index" title="Show all parameters">Index</a>
+            <a href="[% basepath FILTER none %]editparams.cgi?section=index" title="Show all parameters">Index</a>
           </td>
         </tr>
         [% FOREACH panel = panels %]
@@ -78,7 +78,7 @@
               </td>
             [% ELSE %]
               <td>
-                <a href="editparams.cgi?section=[% panel.name FILTER uri %]"
+                <a href="[% basepath FILTER none %]editparams.cgi?section=[% panel.name FILTER uri %]"
                    title="[% panel.desc FILTER html %]">[% panel.title FILTER html %]</a>
               </td>
             [% END %]
@@ -107,7 +107,7 @@
         </p>
 
         [%# CONTENT PANEL %]
-        <form method="post" action="editparams.cgi">
+        <form method="post" action="[% basepath FILTER none %]editparams.cgi">
           [% PROCESS admin/params/common.html.tmpl panel = current_panel %]
           <input type="hidden" name="section" value="[% current_panel.name FILTER html %]">
           <input type="hidden" name="action" value="save">

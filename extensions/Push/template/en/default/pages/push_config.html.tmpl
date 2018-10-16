@@ -28,7 +28,7 @@ var push_defaults = new Array();
 [% END %]
 </script>
 
-<form method="POST" action="page.cgi">
+<form method="POST" action="[% basepath FILTER none %]page.cgi">
 <input type="hidden" name="id" value="push_config.html">
 <input type="hidden" name="save" value="1">
 <input type="hidden" id="token" name="token" value="[% issue_hash_token(['push_config']) FILTER html %]">

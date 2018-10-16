@@ -46,7 +46,7 @@ var selected_components = [
   [% END %]
 </div>
 
-<form method="POST" action="page.cgi" onsubmit="return on_submit()">
+<form method="POST" action="[% basepath FILTER none %]page.cgi" onsubmit="return on_submit()">
 <input type="hidden" name="id" value="tracking_flags_admin_edit.html">
 <input type="hidden" name="mode" value="[% mode FILTER html %]">
 <input type="hidden" name="flag_id" value="[% flag ? flag.flag_id : 0 FILTER html %]">
@@ -195,7 +195,7 @@ var selected_components = [
 
 <hr>
 <p>
-Return to the <a href="page.cgi?id=tracking_flags_admin_list.html">list of Tracking Flags</a>.
+Return to the <a href="[% basepath FILTER none %]page.cgi?id=tracking_flags_admin_list.html">list of Tracking Flags</a>.
 </p>
 
 [% INCLUDE global/footer.html.tmpl %]

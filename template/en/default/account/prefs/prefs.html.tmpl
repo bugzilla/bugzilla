@@ -129,7 +129,7 @@
 <h3>[% current_tab.label %]</h3>
 
 [% IF current_tab.saveable %]
-  <form name="userprefsform" method="post" action="userprefs.cgi">
+  <form name="userprefsform" method="post" action="[% basepath FILTER none %]userprefs.cgi">
     <input type="hidden" name="tab" value="[% current_tab.name %]">
     <input type="hidden" name="token" value="[% token FILTER html %]">
 [% END %]

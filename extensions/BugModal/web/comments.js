@@ -287,7 +287,7 @@ $(function() {
         // update bugzilla
         bugzilla_ajax(
             {
-                url: 'rest/bug/comment/' + commentID + '/tags',
+                url: `${BUGZILLA.config.basepath}rest/bug/comment/${commentID}/tags`,
                 type: 'PUT',
                 data: { remove: [ tag ] },
                 hideError: true
@@ -332,7 +332,7 @@ $(function() {
         cancelRefresh();
         refreshXHR = bugzilla_ajax(
             {
-                url: 'rest/bug/comment/' + commentID + '?include_fields=tags',
+                url: `${BUGZILLA.config.basepath}rest/bug/comment/${commentID}?include_fields=tags`,
                 hideError: true
             },
             function(data) {
@@ -358,7 +358,7 @@ $(function() {
             appendTo: $('#main-inner'),
             forceFixPosition: true,
             serviceUrl: function(query) {
-                return 'rest/bug/comment/tags/' + encodeURIComponent(query);
+                return `${BUGZILLA.config.basepath}rest/bug/comment/tags/${encodeURIComponent(query)}`;
             },
             params: {
                 Bugzilla_api_token: (BUGZILLA.api_token ? BUGZILLA.api_token : '')
@@ -432,7 +432,7 @@ $(function() {
                 // update bugzilla
                 bugzilla_ajax(
                     {
-                        url: 'rest/bug/comment/' + commentID + '/tags',
+                        url: `${BUGZILLA.config.basepath}rest/bug/comment/${commentID}/tags`,
                         type: 'PUT',
                         data: { add: addTags },
                         hideError: true

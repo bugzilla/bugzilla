@@ -99,7 +99,7 @@
 //-->
 </script>
 
-<form name="changeform" id="changeform" method="post" action="process_bug.cgi">
+<form name="changeform" id="changeform" method="post" action="[% basepath FILTER none %]process_bug.cgi">
 
   <input type="hidden" name="delta_ts" value="[% bug.delta_ts %]">
   <input type="hidden" name="longdesclength" value="[% bug.comments.size %]">
@@ -244,7 +244,7 @@
        <a href="#c[% bug.comments.size - 1 %]"
           accesskey="l"><b>L</b>ast Comment</a>
      </span>
-     <a href="show_bug.cgi?id=[% bug.bug_id %]">
+     <a href="[% basepath FILTER none %]show_bug.cgi?id=[% bug.bug_id %]">
         [%-# %]<b>[% terms.Bug %]&nbsp;[% bug.bug_id FILTER html %]</b>
      [%-# %]</a> -<span id="summary_alias_container" class="bz_default_hidden">
       [% IF Param("usebugaliases") %]
@@ -417,7 +417,7 @@
     <tr>
       <th class="field_label">
         <label for="keywords" accesskey="k">
-          <a href="describekeywords.cgi"><u>K</u>eywords</a></label>:
+          <a href="[% basepath FILTER none %]describekeywords.cgi"><u>K</u>eywords</a></label>:
       </th>
       <td class="field_value" colspan="2">
         [% INCLUDE bug/field.html.tmpl
@@ -665,7 +665,7 @@
           [% dupe.id FILTER bug_link(dupe, use_alias => 1) FILTER none %][% " " %]
         [% END %]
       </span>
-      (<a href="buglist.cgi?bug_id=[% bug.duplicate_ids.join(",") FILTER html %]">
+      (<a href="[% basepath FILTER none %]buglist.cgi?bug_id=[% bug.duplicate_ids.join(",") FILTER html %]">
        [%-%]view as [% terms.bug %] list</a>)
     </td>
   </tr>
@@ -689,10 +689,10 @@
     <th>&nbsp;</th>
 
     <td colspan="2" align="left" id="show_dependency_tree_or_graph">
-      Show dependency <a href="showdependencytree.cgi?id=[% bug.bug_id %]&amp;hide_resolved=1">tree</a>
+      Show dependency <a href="[% basepath FILTER none %]showdependencytree.cgi?id=[% bug.bug_id %]&amp;hide_resolved=1">tree</a>
 
       [% IF Param('webdotbase') %]
-        /&nbsp;<a href="showdependencygraph.cgi?id=[% bug.bug_id %]">graph</a>
+        /&nbsp;<a href="[% basepath FILTER none %]showdependencygraph.cgi?id=[% bug.bug_id %]">graph</a>
       [% END %]
     </td>
   </tr>
@@ -815,7 +815,7 @@
     </th>
     <td>
       [% bug.delta_ts FILTER time("%Y-%m-%d %H:%M %Z") %]
-      (<a href="show_activity.cgi?id=[% bug.bug_id %]">[%# terms.Bug %]History</a>)
+      (<a href="[% basepath FILTER none %]show_activity.cgi?id=[% bug.bug_id %]">[%# terms.Bug %]History</a>)
     </td>
 
   </tr>
@@ -1163,7 +1163,7 @@
     </tr>
     <tr>
       <td colspan="7" class="bz_summarize_time">
-        <a href="summarize_time.cgi?id=[% bug.bug_id %]&amp;do_depends=1">
+        <a href="[% basepath FILTER none %]summarize_time.cgi?id=[% bug.bug_id %]&amp;do_depends=1">
         Summarize time (including time for [% terms.bugs %]
         blocking this [% terms.bug %])</a>
       </td>
@@ -1234,7 +1234,7 @@
             <fieldset>
               <legend>Note</legend>
               You need to
-              <a href="show_bug.cgi?id=
+              <a href="[% basepath FILTER none %]show_bug.cgi?id=
                       [%- bug.bug_id %]&amp;GoAheadAndLogIn=1">log in</a>
               before you can comment on or make changes to this [% terms.bug %].
             </fieldset>

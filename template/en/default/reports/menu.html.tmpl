@@ -39,25 +39,25 @@
 
 <ul>
   <li id="report_search">
-    <strong><a href="query.cgi">Search</a></strong> -
+    <strong><a href="[% basepath FILTER none %]query.cgi">Search</a></strong> -
     list sets of [% terms.bugs %].
   </li>
   <li id="report_tabular">
     <strong>
-      <a href="query.cgi?format=report-table">Tabular reports</a>
+      <a href="[% basepath FILTER none %]query.cgi?format=report-table">Tabular reports</a>
     </strong> -
     tables of [% terms.bug %] counts in 1, 2 or 3 dimensions, as HTML or CSV.
   </li>
   [% IF feature_enabled('graphical_reports') %]
     <li id="report_graphical">
       <strong>
-        <a href="query.cgi?format=report-graph">Graphical reports</a>
+        <a href="[% basepath FILTER none %]query.cgi?format=report-graph">Graphical reports</a>
       </strong> -
       line graphs, bar and pie charts.
     </li>
   [% END %]
   <li id="report_duplicates">
-    <strong><a href="duplicates.cgi">Duplicates</a></strong> -
+    <strong><a href="[% basepath FILTER none %]duplicates.cgi">Duplicates</a></strong> -
     list of most frequently reported [% terms.bugs %].
   </li>
   [% Hook.process('current_state') %]
@@ -69,14 +69,14 @@
   <ul>
     [% IF feature_enabled('old_charts') %]
       <li id="old_charts">
-        <strong><a href="reports.cgi">Old Charts</a></strong> -
+        <strong><a href="[% basepath FILTER none %]reports.cgi">Old Charts</a></strong> -
         plot the status and/or resolution of [% terms.bugs %] against
         time, for each product in your database.
       </li>
     [% END %]
     [% IF feature_enabled('new_charts') AND user.in_group(Param("chartgroup")) %]
       <li id="new_charts">
-        <strong><a href="chart.cgi">New Charts</a></strong> -
+        <strong><a href="[% basepath FILTER none %]chart.cgi">New Charts</a></strong> -
         plot any arbitrary search against time. Far more powerful.
       </li>
     [% END %]

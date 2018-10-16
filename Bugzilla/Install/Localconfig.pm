@@ -305,6 +305,13 @@ sub read_localconfig {
     # Use the site's URL as the default Canonical URL
     $config->{canonical_urlbase} //= $config->{urlbase};
 
+    # Get the absolute path of the URLBase value
+    $config->{basepath} = do {
+        my $path = $config->{urlbase};
+        $path =~ s/^https?:\/\/.*?\//\//;
+        $path;
+    };
+
     return $config;
 }
 

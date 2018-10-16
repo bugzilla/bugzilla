@@ -39,7 +39,7 @@
 
 [% UNLESS no_add_milestone_link %]
   <a title="Add a milestone to product '[% product.name FILTER html %]'"
-     href="editmilestones.cgi?action=add&amp;product=
+     href="[% basepath FILTER none %]editmilestones.cgi?action=add&amp;product=
           [%- product.name FILTER uri %]">Add</a> a milestone.
 [% END %]
 
@@ -47,7 +47,7 @@
   Edit milestone <a
   title="Edit Milestone '[% milestone.name FILTER html %]' of product '
          [%- product.name FILTER html %]'"
-  href="editmilestones.cgi?action=edit&amp;product=
+  href="[% basepath FILTER none %]editmilestones.cgi?action=edit&amp;product=
         [%- product.name FILTER uri %]&amp;milestone=
         [%- milestone.name FILTER uri %]">
         '[% milestone.name FILTER html %]'</a>.
@@ -55,13 +55,13 @@
 
 [% UNLESS no_edit_other_milestones_link %]
   Edit other milestones of product <a
-  href="editmilestones.cgi?product=
+  href="[% basepath FILTER none %]editmilestones.cgi?product=
         [%- product.name FILTER uri %]">'[% product.name FILTER html %]'</a>.
 
 [% END %]
 
   Edit product <a
-  href="editproducts.cgi?action=edit&amp;product=
+  href="[% basepath FILTER none %]editproducts.cgi?action=edit&amp;product=
         [%- product.name FILTER uri %]">'[% product.name FILTER html %]'</a>.
 
 </p>

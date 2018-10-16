@@ -97,7 +97,7 @@ edit_product($sel, "TestProduct");
 $sel->click_ok("link=Edit milestones:");
 $sel->wait_for_page_to_load(WAIT_TIME);
 $sel->title_is("Select milestone of product 'TestProduct'");
-$sel->click_ok('//a[@href="editmilestones.cgi?action=del&product=TestProduct&milestone=TM1"]',
+$sel->click_ok('//a[contains(@href,"/editmilestones.cgi?action=del&product=TestProduct&milestone=TM1")]',
                undef, "Deleting the TM1 milestone");
 $sel->wait_for_page_to_load_ok(WAIT_TIME);
 $sel->title_is("Delete Milestone of Product 'TestProduct'");

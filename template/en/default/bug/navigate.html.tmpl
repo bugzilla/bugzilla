@@ -24,15 +24,15 @@
 [% PROCESS global/variables.none.tmpl %]
 [% IF bottom_navigator == 1 %]
   <ul class="related_actions">
-    <li><a href="show_bug.cgi?format=multiple&amp;id=
+    <li><a href="[% basepath FILTER none %]show_bug.cgi?format=multiple&amp;id=
                 [% bug.bug_id FILTER uri %]">Format For Printing</a></li>
-    <li>&nbsp;-&nbsp;<a href="show_bug.cgi?ctype=xml&amp;id=
+    <li>&nbsp;-&nbsp;<a href="[% basepath FILTER none %]show_bug.cgi?ctype=xml&amp;id=
                         [% bug.bug_id  FILTER uri %]">XML</a></li>
     [% IF NOT bug.groups_in.size %]
-      <li>&nbsp;-&nbsp;<a href="rest/bug/[% bug.bug_id  FILTER uri %]">JSON</a></li>
+      <li>&nbsp;-&nbsp;<a href="[% basepath FILTER none %]rest/bug/[% bug.bug_id  FILTER uri %]">JSON</a></li>
     [% END %]
     <li>&nbsp;-&nbsp;
-      <a href="enter_bug.cgi?format=__default__&amp;cloned_bug_id=[% bug.bug_id  FILTER uri %]"
+      <a href="[% basepath FILTER none %]enter_bug.cgi?format=__default__&amp;cloned_bug_id=[% bug.bug_id  FILTER uri %]"
          id="clone_bug"
          onclick="return show_clone_menu(this, '[% bug.id FILTER js %]', '[% bug.product FILTER js %]', '[% bug.component FILTER js %]');">
          Clone This [% terms.Bug %]</a>
@@ -54,16 +54,16 @@
 
   ([% this_bug_idx + 1 %] of [% last_bug_list.size %])
 
-  <a href="show_bug.cgi?id=
+  <a href="[% basepath FILTER none %]show_bug.cgi?id=
            [%- last_bug_list.first FILTER uri %]&amp;list_id=
            [%- my_search.id FILTER uri %]">First</a>
-  <a href="show_bug.cgi?id=
+  <a href="[% basepath FILTER none %]show_bug.cgi?id=
            [%- last_bug_list.last FILTER uri %]&amp;list_id=
            [%- my_search.id FILTER uri %]">Last</a>
 
   [% IF this_bug_idx > 0 %]
     [% prev_bug = this_bug_idx - 1 %]
-    <a href="show_bug.cgi?id=
+    <a href="[% basepath FILTER none %]show_bug.cgi?id=
              [%- last_bug_list.$prev_bug FILTER uri %]&amp;list_id=
              [%- my_search.id FILTER uri %]">Prev</a>
   [% ELSE %]
@@ -72,14 +72,14 @@
 
   [% IF this_bug_idx + 1 < last_bug_list.size %]
     [% next_bug = this_bug_idx + 1 %]
-    <a href="show_bug.cgi?id=
+    <a href="[% basepath FILTER none %]show_bug.cgi?id=
              [%- last_bug_list.$next_bug FILTER uri %]&amp;list_id=
              [%- my_search.id FILTER uri %]">Next</a>
   [% ELSE %]
     <i><font color="#777777">Next</font></i>
   [% END %]
 
-  &nbsp;&nbsp;<a href="buglist.cgi?regetlastlist=
+  &nbsp;&nbsp;<a href="[% basepath FILTER none %]buglist.cgi?regetlastlist=
               [%- my_search.id FILTER uri %]">Show last search results</a>
   </div>
 [% END %]

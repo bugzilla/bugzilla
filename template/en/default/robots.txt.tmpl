@@ -1,23 +1,23 @@
 User-agent: *
-Disallow: /
+Disallow: [% basepath FILTER none %]
 Crawl-delay: 30
 
 [% IF NOT Bugzilla.localconfig.urlbase.matches("bugzilla-dev") %]
 
-Allow: /$
-Allow: /index.cgi
+Allow: [% basepath FILTER none %]$
+Allow: [% basepath FILTER none %]index.cgi
 
-Allow: /page.cgi
-Disallow: /page.cgi*id=voting*
-Disallow: /page.cgi*id=productdashboard*
-Disallow: /page.cgi*id=user_activity*
+Allow: [% basepath FILTER none %]page.cgi
+Disallow: [% basepath FILTER none %]page.cgi*id=voting*
+Disallow: [% basepath FILTER none %]page.cgi*id=productdashboard*
+Disallow: [% basepath FILTER none %]page.cgi*id=user_activity*
 
-Allow: /show_bug.cgi
-Disallow: /show_bug.cgi*ctype=*
-Disallow: /show_bug.cgi*format=multiple*
+Allow: [% basepath FILTER none %]show_bug.cgi
+Disallow: [% basepath FILTER none %]show_bug.cgi*ctype=*
+Disallow: [% basepath FILTER none %]show_bug.cgi*format=multiple*
 
-Allow: /describecomponents.cgi
-Allow: /describekeywords.cgi
+Allow: [% basepath FILTER none %]describecomponents.cgi
+Allow: [% basepath FILTER none %]describekeywords.cgi
 
 [% FILTER remove('#.*') %]
 [% Hook.process("end") %]

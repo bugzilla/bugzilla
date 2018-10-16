@@ -333,7 +333,7 @@ foreach my $flagtype ([$flagtype1_id, "selenium"], [$flagtype2_id, "selenium"],
 {
     my $flag_id = $flagtype->[0];
     my $flag_name = $flagtype->[1];
-    $sel->click_ok("//a[\@href='editflagtypes.cgi?action=confirmdelete&id=$flag_id']");
+    $sel->click_ok("//a[contains(\@href,'/editflagtypes.cgi?action=confirmdelete&id=$flag_id')]");
     $sel->wait_for_page_to_load_ok(WAIT_TIME);
     $sel->title_is("Confirm Deletion of Flag Type '$flag_name'");
     $sel->click_ok("link=Yes, delete");

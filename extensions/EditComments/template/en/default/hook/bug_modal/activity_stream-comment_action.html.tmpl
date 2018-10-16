@@ -17,7 +17,7 @@
 %]
 
 [% IF comment.edit_count %]
-  <a href="page.cgi?id=editcomments.html&bug_id=[% bug.id FILTER none %]&amp;comment_id=[% comment.id FILTER none %]"
+  <a href="[% basepath FILTER none %]page.cgi?id=editcomments.html&bug_id=[% bug.id FILTER none %]&amp;comment_id=[% comment.id FILTER none %]"
      title="[% comment.edit_count FILTER none %] edit[% "s" UNLESS comment.edit_count == 1 %]">(Edited)</a>
 [% END %]
 

@@ -156,8 +156,7 @@ function viewDiff(attachment_id, patchviewerinstalled)
     // If we have not viewed as diff before, set the view diff frame URL
     if (!has_viewed_as_diff) {
       var viewDiffFrame = document.getElementById('viewDiffFrame');
-      viewDiffFrame.src =
-          'attachment.cgi?id=' + attachment_id + '&action=diff&headers=0';
+      viewDiffFrame.src = `${BUGZILLA.config.basepath}attachment.cgi?id=${attachment_id}&action=diff&headers=0`;
       has_viewed_as_diff = 1;
     }
 }

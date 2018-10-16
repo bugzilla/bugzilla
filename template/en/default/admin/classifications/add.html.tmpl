@@ -22,7 +22,7 @@
   title = "Add new classification"
 %]
 
-<form method=post action="editclassifications.cgi">
+<form method=post action="[% basepath FILTER none %]editclassifications.cgi">
   <table border=0 cellpadding=4 cellspacing=0>
 
     [% PROCESS "admin/classifications/edit-common.html.tmpl" %]

@@ -28,7 +28,7 @@
  [% login_target = "index.cgi" %]
 [% END %]
 
-[% login_target = urlbase _ login_target %]
+[% login_target = basepath _ login_target %]
 
 <li id="mini_login_container[% qs_suffix %]">
   [% connector = "?" %]
@@ -92,7 +92,7 @@
      class='show_forgot_form'
      data-qs-suffix="[% qs_suffix FILTER html %]">Forgot Password</a>
   <div id="forgot_form[% qs_suffix %]" class="mini-popup mini_forgot bz_default_hidden">
-  <form action="token.cgi" method="post">
+  <form action="[% basepath FILTER none %]token.cgi" method="post">
     <input type="email" name="loginname" size="20" placeholder="Email" aria-label="Email" required>
     <input id="forgot_button[% qs_suffix %]" value="Reset Password"
            type="submit">

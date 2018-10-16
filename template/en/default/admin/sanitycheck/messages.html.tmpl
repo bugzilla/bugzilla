@@ -34,7 +34,7 @@
     [% errortext FILTER html %]: [% INCLUDE bug_list badbugs = badbugs %]
 
   [% ELSIF san_tag == "bug_check_repair" %]
-    <a href="sanitycheck.cgi?[% param FILTER uri %]=1&amp;token=
+    <a href="[% basepath FILTER none %]sanitycheck.cgi?[% param FILTER uri %]=1&amp;token=
        [%- issue_hash_token(['sanitycheck']) FILTER uri %]">[% text FILTER html %]</a>.
 
   [% ELSIF san_tag == "bug_check_creation_date" %]
@@ -137,12 +137,12 @@
     [% END %]
 
   [% ELSIF san_tag == "cross_check_attachment_has_references" %]
-    <a href="sanitycheck.cgi?remove_invalid_attach_references=1&amp;token=
+    <a href="[% basepath FILTER none %]sanitycheck.cgi?remove_invalid_attach_references=1&amp;token=
        [%- issue_hash_token(['sanitycheck']) FILTER uri %]">Remove
     invalid references to non existent attachments.</a>
 
   [% ELSIF san_tag == "cross_check_bug_has_references" %]
-    <a href="sanitycheck.cgi?remove_invalid_bug_references=1&amp;token=
+    <a href="[% basepath FILTER none %]sanitycheck.cgi?remove_invalid_bug_references=1&amp;token=
        [%- issue_hash_token(['sanitycheck']) FILTER uri %]">Remove
     invalid references to non existent [% terms.bugs %].</a>
 
@@ -189,7 +189,7 @@
     [%+ PROCESS bug_link bug_id = bug_id %].
 
   [% ELSIF san_tag == "flag_fix" %]
-    <a href="sanitycheck.cgi?remove_invalid_flags=1&amp;token=
+    <a href="[% basepath FILTER none %]sanitycheck.cgi?remove_invalid_flags=1&amp;token=
        [%- issue_hash_token(['sanitycheck']) FILTER uri %]">Click
     here to delete invalid flags</a>
 
@@ -254,7 +254,7 @@
     half an hour: [% INCLUDE bug_list badbugs = badbugs %]
 
   [% ELSIF san_tag == "unsent_bugmail_fix" %]
-    <a href="sanitycheck.cgi?rescanallBugMail=1&amp;token=
+    <a href="[% basepath FILTER none %]sanitycheck.cgi?rescanallBugMail=1&amp;token=
        [%- issue_hash_token(['sanitycheck']) FILTER uri %]">Send these mails</a>.
 
   [% ELSIF san_tag == "whines_obsolete_target_deletion_start" %]
@@ -273,7 +273,7 @@
     [% END %]
 
   [% ELSIF san_tag == "whines_obsolete_target_fix" %]
-    <a href="sanitycheck.cgi?remove_old_whine_targets=1&amp;token=
+    <a href="[% basepath FILTER none %]sanitycheck.cgi?remove_old_whine_targets=1&amp;token=
        [%- issue_hash_token(['sanitycheck']) FILTER uri %]">Click here to
     remove old users/groups</a>
 
@@ -305,12 +305,12 @@
      # which itself calls this template again, generating a recursion error.
      # I doubt having a tooltip with the bug status and summary is so
      # important here anyway, as you can click the "(as buglist)" link. %]
-    <a href="show_bug.cgi?id=[% bug_id FILTER uri %]">[% bug_id FILTER html %]</a>
+    <a href="[% basepath FILTER none %]show_bug.cgi?id=[% bug_id FILTER uri %]">[% bug_id FILTER html %]</a>
     [% ", " IF !loop.last %]
   [% END %]
-  (<a href="buglist.cgi?bug_id=[% badbugs.join(",") FILTER uri %]">as [% terms.bug %] list</a>).
+  (<a href="[% basepath FILTER none %]buglist.cgi?bug_id=[% badbugs.join(",") FILTER uri %]">as [% terms.bug %] list</a>).
 [% END %]
 
 [% BLOCK bug_link %]
-  <a href="show_bug.cgi?id=[% bug_id FILTER uri %]">[% terms.bug %] [%+ bug_id FILTER html %]</a>
+  <a href="[% basepath FILTER none %]show_bug.cgi?id=[% bug_id FILTER uri %]">[% terms.bug %] [%+ bug_id FILTER html %]</a>
 [% END %]

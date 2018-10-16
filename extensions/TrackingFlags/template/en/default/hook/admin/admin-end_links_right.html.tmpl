@@ -8,7 +8,7 @@
 
 [% IF user.in_group('admin') %]
   <dt id="push">
-    <a href="page.cgi?id=tracking_flags_admin_list.html">Release Tracking Flags</a>
+    <a href="[% basepath FILTER none %]page.cgi?id=tracking_flags_admin_list.html">Release Tracking Flags</a>
   </dt>
   <dd>
     Tracking flags are special multi-value fields used to aid tracking releases

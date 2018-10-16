@@ -30,7 +30,7 @@
   listselectionvalues = listselectionvalues
 %]
 
-<form name="f" method="post" action="editusers.cgi">
+<form name="f" method="post" action="[% basepath FILTER none %]editusers.cgi">
 <table class="main">
   [% PROCESS admin/users/userdata.html.tmpl
     editform  = 0
@@ -47,10 +47,10 @@
 </form>
 
 <p>
-  You can also <a href="editusers.cgi">find a user</a>
+  You can also <a href="[% basepath FILTER none %]editusers.cgi">find a user</a>
   [% IF listselectionvalues %],
     or
-    <a href="editusers.cgi?action=list[% INCLUDE listselectionurlparams %]">go
+    <a href="[% basepath FILTER none %]editusers.cgi?action=list[% INCLUDE listselectionurlparams %]">go
     back to the user list</a>
   [% END %].
 </p>

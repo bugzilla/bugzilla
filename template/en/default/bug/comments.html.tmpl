@@ -218,7 +218,7 @@
 
         <span role="heading" aria-level="2" class="bz_comment_number">
           <a
-             href="show_bug.cgi?id=[% bug.bug_id %]#c[% comment.count %]">
+             href="[% basepath FILTER none %]show_bug.cgi?id=[% bug.bug_id %]#c[% comment.count %]">
             [%- comment_label FILTER html %]</a>
         </span>
 

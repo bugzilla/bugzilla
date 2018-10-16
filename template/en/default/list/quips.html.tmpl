@@ -71,7 +71,7 @@
     [% END %]
   </p>
 
-  <form method="post" action="quips.cgi">
+  <form method="post" action="[% basepath FILTER none %]quips.cgi">
     <input type="hidden" name="action" value="add">
     <input type="hidden" name="token"
            value="[% issue_hash_token(['create-quips']) FILTER html %]">
@@ -103,7 +103,7 @@
       If the parameter 'quip_list_entry_control' is set to <q>open</q>,
       entered quips are automatically approved.
     </p>
-    <form name="editform" method="post" action="quips.cgi">
+    <form name="editform" method="post" action="[% basepath FILTER none %]quips.cgi">
       <input type="hidden" name="action" value="approve">
       <input type="hidden" name="token"
              value="[% issue_hash_token(['approve-quips']) FILTER html %]">
@@ -123,7 +123,7 @@
               [% "Unknown" IF NOT users.$userid %]
             </td>
             <td>
-              <a href="quips.cgi?action=delete&amp;quipid=[% quipid FILTER uri %]&amp;token=
+              <a href="[% basepath FILTER none %]quips.cgi?action=delete&amp;quipid=[% quipid FILTER uri %]&amp;token=
                  [%- issue_hash_token(['quips', quipid]) FILTER uri %]">
                 Delete
               </a>
@@ -162,7 +162,7 @@
 [% ELSE %]
   <p>
     Those who like their wisdom in large doses can
-    <a href="quips.cgi?action=show">view
+    <a href="[% basepath FILTER none %]quips.cgi?action=show">view
     [% IF user.in_group('bz_quip_moderators') %]
       and edit
     [% END %]

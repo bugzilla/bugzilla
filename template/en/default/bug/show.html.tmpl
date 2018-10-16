@@ -35,7 +35,7 @@
   <hr>
   <p>
     The next [% terms.bug %] in your list is [% terms.bug %]
-    <a href="show_bug.cgi?id=[% bug.bug_id %]">[% bug.bug_id %]</a>:
+    <a href="[% basepath FILTER none %]show_bug.cgi?id=[% bug.bug_id %]">[% bug.bug_id %]</a>:
   </p>
   <hr>
 [% END %]

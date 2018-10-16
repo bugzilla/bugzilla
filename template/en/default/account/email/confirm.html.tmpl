@@ -29,7 +29,7 @@
   To change your email address, please enter the old email address:
 </p>
 
-<form method="post" action="token.cgi">
+<form method="post" action="[% basepath FILTER none %]token.cgi">
   <input type="hidden" name="t" value="[% token FILTER html %]">
   <input type="hidden" name="a" value="chgem">
   <table>

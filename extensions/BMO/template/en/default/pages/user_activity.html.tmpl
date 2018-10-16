@@ -23,7 +23,7 @@
 [% PROCESS "global/field-descs.none.tmpl" %]
 [% PROCESS bug/time.html.tmpl %]
 
-<form id="activity_form" name="activity_form" action="page.cgi" method="get">
+<form id="activity_form" name="activity_form" action="[% basepath FILTER none %]page.cgi" method="get">
 <input type="hidden" name="id" value="user_activity.html">
 <input type="hidden" name="action" value="run">
 <table id="parameters">
@@ -151,7 +151,7 @@
           [% END %]
           <td>
             [% IF change.attachid %]
-              <a href="attachment.cgi?id=[% change.attachid FILTER uri %]"
+              <a href="[% basepath FILTER none %]attachment.cgi?id=[% change.attachid FILTER uri %]"
                  title="[% change.attach.description FILTER html %]
                         [%- %] - [% change.attach.filename FILTER html %]"
               >Attachment #[% change.attachid FILTER html %]</a>
@@ -175,7 +175,7 @@
     [% END %]
   </table>
   <p>
-    <a href="buglist.cgi?bug_id=[% bug_ids.join(',') FILTER uri %]">
+    <a href="[% basepath FILTER none %]buglist.cgi?bug_id=[% bug_ids.join(',') FILTER uri %]">
     Show as a [% terms.Bug %] List</a>
   </p>
 
@@ -215,7 +215,7 @@
 [% INCLUDE global/footer.html.tmpl %]
 
 [% BLOCK group_when_link %]
-  <a href="page.cgi?id=user_activity.html&amp;action=run&amp;
+  <a href="[% basepath FILTER none %]page.cgi?id=user_activity.html&amp;action=run&amp;
     [%~%]who=[% who FILTER uri %]&amp;
     [%~%]from=[% from FILTER uri %]&amp;
     [%~%]to=[% to FILTER uri %]&amp;
@@ -223,7 +223,7 @@
 [% END %]
 
 [% BLOCK group_bug_link %]
-  <a href="page.cgi?id=user_activity.html&amp;action=run&amp;
+  <a href="[% basepath FILTER none %]page.cgi?id=user_activity.html&amp;action=run&amp;
     [%~%]who=[% who FILTER uri %]&amp;
     [%~%]from=[% from FILTER uri %]&amp;
     [%~%]to=[% to FILTER uri %]&amp;

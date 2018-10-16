@@ -21,12 +21,12 @@
    style_urls = [ 'extensions/GuidedBugEntry/web/style/guided.css' ]
 %]
 
-<iframe id="yui-history-iframe" src="extensions/GuidedBugEntry/web/yui-history-iframe.txt"></iframe>
+<iframe id="yui-history-iframe" src="[% basepath FILTER none %]extensions/GuidedBugEntry/web/yui-history-iframe.txt"></iframe>
 <input id="yui-history-field" type="hidden">
 
 <noscript>
 You require JavaScript to use this [% terms.bug %] entry form.<br><br>
-Please use the <a href="enter_bug.cgi?format=__default__">advanced [% terms.bug %] entry form</a>.
+Please use the <a href="[% basepath FILTER none %]enter_bug.cgi?format=__default__">advanced [% terms.bug %] entry form</a>.
 </noscript>
 
 <div id="loading" class="hidden">
@@ -45,9 +45,9 @@ YAHOO.util.Dom.removeClass('loading', 'hidden');
 </div>
 
 <div id="advanced">
-  <a id="advanced_img" href="enter_bug.cgi?format=__default__"><img
-  src="extensions/GuidedBugEntry/web/images/advanced.png" width="16" height="16" border="0"></a>
-  <a id="advanced_link" href="enter_bug.cgi?format=__default__">Switch to the advanced [% terms.bug %] entry form</a>
+  <a id="advanced_img" href="[% basepath FILTER none %]enter_bug.cgi?format=__default__"><img
+  src="[% basepath FILTER none %]extensions/GuidedBugEntry/web/images/advanced.png" width="16" height="16" border="0"></a>
+  <a id="advanced_link" href="[% basepath FILTER none %]enter_bug.cgi?format=__default__">Switch to the advanced [% terms.bug %] entry form</a>
 </div>
 
 <script [% script_nonce FILTER none %]>
@@ -69,7 +69,7 @@ dupes.setLabels(
   }
 );
 </script>
-<script src="page.cgi?id=guided_products.js[% "&amp;format_forced=1" IF format_forced %]"></script>
+<script src="[% basepath FILTER none %]page.cgi?id=guided_products.js[% "&amp;format_forced=1" IF format_forced %]"></script>
 [% PROCESS global/footer.html.tmpl %]
 
 [%############################################################################%]
@@ -170,7 +170,7 @@ Other Mozilla products which aren't listed here
       onclick="product.select('[% name FILTER js %]')"
       [% END %]>
       <span class="product-item">
-      <img src="extensions/BMO/web/producticons/[% icon FILTER uri %]" class="product-icon">
+      <img src="[% basepath FILTER none %]extensions/BMO/web/producticons/[% icon FILTER uri %]" class="product-icon">
       <a href="javascript:void(0)">[% caption FILTER html %]</a>
       <p>
         [% IF content %]
@@ -237,7 +237,7 @@ Other Mozilla products which aren't listed here
     <td>
       <div class="exit_img">
         <a href="https://support.mozilla.org/">
-        <img src="extensions/GuidedBugEntry/web/images/support.png" width="32" height="32"></a>
+        <img src="[% basepath FILTER none %]extensions/GuidedBugEntry/web/images/support.png" width="32" height="32"></a>
       </div>
     </td>
     <td class="exit_text">
@@ -249,7 +249,7 @@ Other Mozilla products which aren't listed here
     <td>
       <div class="exit_img">
         <a href="https://input.mozilla.org/feedback/">
-        <img src="extensions/GuidedBugEntry/web/images/input.png" width="32" height="32">
+        <img src="[% basepath FILTER none %]extensions/GuidedBugEntry/web/images/input.png" width="32" height="32">
         </a>
       </div>
     </td>
@@ -261,7 +261,7 @@ Other Mozilla products which aren't listed here
   <tr>
     <td>
       <div class="exit_img">
-        <img src="extensions/GuidedBugEntry/web/images/webbug.png" width="32" height="32">
+        <img src="[% basepath FILTER none %]extensions/GuidedBugEntry/web/images/webbug.png" width="32" height="32">
       </div>
     </td>
     <td class="exit_text_last">
@@ -294,7 +294,7 @@ Product: <b><span id="dupes_product_name">?</span></b>:
 <table border="0" cellpadding="5" cellspacing="0" id="product_support" class="hidden">
   <tr>
     <td>
-      <img src="extensions/GuidedBugEntry/web/images/message.png" width="24" height="24">
+      <img src="[% basepath FILTER none %]extensions/GuidedBugEntry/web/images/message.png" width="24" height="24">
     </td>
     <td id="product_support_message">&nbsp;</td>
   </tr>
@@ -303,7 +303,7 @@ Product: <b><span id="dupes_product_name">?</span></b>:
 <table border="0" cellpadding="5" cellspacing="0" id="l10n_message">
   <tr>
     <td>
-      <img src="extensions/BMO/web/producticons/localization.png" width="24" height="24">
+      <img src="[% basepath FILTER none %]extensions/BMO/web/producticons/localization.png" width="24" height="24">
     </td>
     <td>
       <a href="javascript:void(0)" id="l10n_link">
@@ -339,7 +339,7 @@ Product: <b><span id="dupes_product_name">?</span></b>:
 
 [% INCLUDE page_title %]
 
-<form method="post" action="post_bug.cgi" enctype="multipart/form-data" onsubmit="return bugForm.validate()">
+<form method="post" action="[% basepath FILTER none %]post_bug.cgi" enctype="multipart/form-data" onsubmit="return bugForm.validate()">
 <input type="hidden" name="token" value="[% token FILTER html %]">
 <input type="hidden" name="product" id="product" value="">
 <input type="hidden" name="component" id="component" value="">
@@ -400,7 +400,7 @@ explain how to write effective [% terms.bug %] reports.</li>
     <div class="label">
     Component:
     </div>
-    (<a id="list_comp" href="describecomponents.cgi" target="_blank"
+    (<a id="list_comp" href="[% basepath FILTER none %]describecomponents.cgi" target="_blank"
     title="Show a list of all components and descriptions (in a new window)."
     >List</a>)
   </td>
@@ -545,7 +545,7 @@ explain how to write effective [% terms.bug %] reports.</li>
 [%############################################################################%]
 
 [% BLOCK help %]
-<img src="extensions/GuidedBugEntry/web/images/help.png" width="16" height="16" class="help_image"
+<img src="[% basepath FILTER none %]extensions/GuidedBugEntry/web/images/help.png" width="16" height="16" class="help_image"
  helpid="[% id FILTER html %]" onMouseOver="bugForm.showHelp(this)" onMouseOut="bugForm.hideHelp(this)"
  >
 [% END %]

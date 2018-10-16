@@ -38,7 +38,7 @@
 
 <p>
   Someone else has made changes to
-  <a href="attachment.cgi?id=[% attachment.id %]&amp;action=edit">attachment [% attachment.id %]</a>
+  <a href="[% basepath FILTER none %]attachment.cgi?id=[% attachment.id %]&amp;action=edit">attachment [% attachment.id %]</a>
   of [% "$terms.bug $attachment.bug_id" FILTER bug_link(attachment.bug_id) FILTER none %]
   at the same time you were trying to. The changes made were:
 </p>
@@ -62,7 +62,7 @@ You have the following choices:
 
 <ul>
   <li>
-    <form method="post" action="attachment.cgi">
+    <form method="post" action="[% basepath FILTER none %]attachment.cgi">
       [% PROCESS "global/hidden-fields.html.tmpl" exclude="^Bugzilla_(login|password)$" %]
       <input type="submit" id="process" value="Submit my changes anyway">
         This will cause all of the above changes to be overwritten.
@@ -70,7 +70,7 @@ You have the following choices:
   </li>
   <li>
     Throw away my changes, and
-    <a href="attachment.cgi?id=[% attachment.id %]&amp;action=edit">revisit
+    <a href="[% basepath FILTER none %]attachment.cgi?id=[% attachment.id %]&amp;action=edit">revisit
     attachment [% attachment.id %]</a>
   </li>
 </ul>

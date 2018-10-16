@@ -49,7 +49,7 @@
   <a title="List of [% terms.bugs %] where '
             [%- field.description FILTER html %]' is '
             [%- value.name FILTER html %]'"
-     href="buglist.cgi?[% field.name FILTER uri %]=
+     href="[% basepath FILTER none %]buglist.cgi?[% field.name FILTER uri %]=
            [%- value.name FILTER uri %]">
    [%- value.bug_count FILTER html %]</a>
 [% ELSE %]
@@ -75,7 +75,7 @@
       <li>'[% value.name FILTER html %]' is the default value for
         the '[% field.description FILTER html %]' field.
         [% IF user.in_group('tweakparams') %]
-          You first have to <a href="editparams.cgi?section=bugfields">change
+          You first have to <a href="[% basepath FILTER none %]editparams.cgi?section=bugfields">change
           the default value</a> for this field before you can delete
           this value.
         [% END %]
@@ -94,7 +94,7 @@
           <a title="List of [% terms.bugs %] where '
                     [%- field.description FILTER html %]' is '
                     [%- value.name FILTER html %]'"
-             href="buglist.cgi?[% field.name FILTER uri %]=
+             href="[% basepath FILTER none %]buglist.cgi?[% field.name FILTER uri %]=
                    [%- value.name FILTER uri %]">
             [% IF value.bug_count > 1 %]
               those [% terms.bugs %]
@@ -115,7 +115,7 @@
     [% IF value.controls_visibility_of_fields.size %]
       <li>This value controls the visibility of the following fields:<br>
         [% FOREACH field = value.controls_visibility_of_fields %]
-          <a href="editfields.cgi?action=edit&name=
+          <a href="[% basepath FILTER none %]editfields.cgi?action=edit&name=
                    [%- field.name FILTER uri %]">
             [%- field.description FILTER html %]
             ([% field.name FILTER html %])</a><br>
@@ -128,7 +128,7 @@
         other fields:<br>
        [% FOREACH field_name = value.controlled_values.keys %]
          [% FOREACH controlled = value.controlled_values.${field_name} %]
-           <a href="editvalues.cgi?action=edit&field=
+           <a href="[% basepath FILTER none %]editvalues.cgi?action=edit&field=
                     [%- controlled.field.name FILTER uri %]&value=
                     [%- controlled.name FILTER uri %]">
              [% controlled.field.description FILTER html %]
@@ -144,7 +144,7 @@
 
   <p>Do you really want to delete this value?</p>
 
-  <form method="post" action="editvalues.cgi">
+  <form method="post" action="[% basepath FILTER none %]editvalues.cgi">
     <input type="submit" value="Yes, delete" id="delete">
     <input type="hidden" name="action" value="delete">
     <input type="hidden" name="field" value="[% field.name FILTER html %]">

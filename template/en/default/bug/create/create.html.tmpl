@@ -193,7 +193,7 @@ TUI_hide_default('expert_fields');
 -->
 </script>
 
-<form name="Create" id="Create" method="post" action="post_bug.cgi"
+<form name="Create" id="Create" method="post" action="[% basepath FILTER none %]post_bug.cgi"
       class="enter_bug_form" enctype="multipart/form-data"
       onsubmit="return validateEnterBug(this)">
 <input type="hidden" name="product" value="[% product.name FILTER html %]">
@@ -239,7 +239,7 @@ TUI_hide_default('expert_fields');
   [%# We can't use the select block in these two cases for various reasons. %]
   <tr>
     [% component_desc_url = BLOCK -%]
-      describecomponents.cgi?product=[% product.name FILTER uri %]
+      [% basepath FILTER none %]describecomponents.cgi?product=[% product.name FILTER uri %]
     [% END %]
     [% INCLUDE "bug/field-label.html.tmpl"
       field = bug_fields.component editable = 1
@@ -612,7 +612,7 @@ TUI_hide_default('expert_fields');
       <tr>
         [% INCLUDE bug/field.html.tmpl
            bug = default, field = bug_fields.keywords, editable = 1,
-           value = keywords, desc_url = "describekeywords.cgi",
+           value = keywords, desc_url = basepath _ "describekeywords.cgi",
            value_span = 3
         %]
       </tr>
@@ -781,11 +781,11 @@ TUI_hide_default('expert_fields');
 [% Hook.process("end") %]
 
 <div id="guided">
-  <a id="guided_img" href="enter_bug.cgi?format=guided&amp;product=[% product.name FILTER uri %]"><img
-   src="extensions/BMO/web/images/guided.png" width="16" height="16" border="0" align="absmiddle"></a>
-  <a id="guided_link" href="enter_bug.cgi?format=guided&amp;product=[% product.name FILTER uri %]"
+  <a id="guided_img" href="[% basepath FILTER none %]enter_bug.cgi?format=guided&amp;product=[% product.name FILTER uri %]"><img
+   src="[% basepath FILTER none %]extensions/BMO/web/images/guided.png" width="16" height="16" border="0" align="absmiddle"></a>
+  <a id="guided_link" href="[% basepath FILTER none %]enter_bug.cgi?format=guided&amp;product=[% product.name FILTER uri %]"
    >Switch to the [% terms.Bugzilla %] Helper</a>
-  | <a href="page.cgi?id=custom_forms.html">Custom [% terms.bug %] entry forms</a>
+  | <a href="[% basepath FILTER none %]page.cgi?id=custom_forms.html">Custom [% terms.bug %] entry forms</a>
 </div>
 
 [% PROCESS global/footer.html.tmpl %]

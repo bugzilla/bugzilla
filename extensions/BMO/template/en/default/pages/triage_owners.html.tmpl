@@ -35,7 +35,7 @@
 
 [% PROCESS "global/field-descs.none.tmpl" %]
 
-<form id="triageOwners" name="triageOwners" action="page.cgi" method="GET">
+<form id="triageOwners" name="triageOwners" action="[% basepath FILTER none %]page.cgi" method="GET">
   <input type="hidden" name="id" value="triage_owners.html">
   <input type="hidden" name="json_data" id="json_data" data-json_data="[% json_data FILTER html %]">
 
@@ -116,7 +116,7 @@
         </td>
         <td>
           [% IF r.buglist_url %]
-            <a href="[% urlbase FILTER none %]buglist.cgi?product=[% r.product FILTER uri %]&component=[% r.component FILTER uri %]&[% r.buglist_url FILTER none %]">
+            <a href="[% basepath FILTER none %]buglist.cgi?product=[% r.product FILTER uri %]&component=[% r.component FILTER uri %]&[% r.buglist_url FILTER none %]">
               [% r.bug_count FILTER html +%] [%+ terms.bugs %] found.
             </a>
           [% ELSE %]

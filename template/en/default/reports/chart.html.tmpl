@@ -33,7 +33,7 @@
 
 <div align="center">
 
-  [% imageurl = BLOCK %]chart.cgi?
+  [% imageurl = BLOCK %][% basepath FILTER none %]chart.cgi?
     [% imagebase FILTER html %]&amp;ctype=png&amp;action=plot&amp;width=
     [% width %]&amp;height=[% height -%]
   [% END %]
@@ -55,9 +55,9 @@
   </p>
 
   <p>
-    <a href="chart.cgi?
+    <a href="[% basepath FILTER none %]chart.cgi?
       [% imagebase FILTER html %]&amp;ctype=csv&amp;action=plot">CSV</a> |
-    <a href="chart.cgi?[% imagebase FILTER html %]&amp;action=assemble">Edit
+    <a href="[% basepath FILTER none %]chart.cgi?[% imagebase FILTER html %]&amp;action=assemble">Edit
     this chart</a>
   </p>
 

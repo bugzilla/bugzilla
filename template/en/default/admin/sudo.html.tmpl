@@ -41,7 +41,7 @@
   Your actions may be logged more carefully than normal.
 </p>
 
-<form action="relogin.cgi" method="POST">
+<form action="[% basepath FILTER none %]relogin.cgi" method="POST">
   <p>
     To begin,
     [% IF Param('usemenuforusers') %]

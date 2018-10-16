@@ -68,7 +68,7 @@ document.addEventListener("DOMContentLoaded", function(event) {
 
 [% gttext = "Grand Total" %]
 
-<form method="get" action="chart.cgi" name="chartform">
+<form method="get" action="[% basepath FILTER none %]chart.cgi" name="chartform">
 
   <table cellpadding="2" cellspacing="2" border="0">
     [% IF NOT category OR category.size == 0 %]
@@ -180,12 +180,12 @@ document.addEventListener("DOMContentLoaded", function(event) {
 
             <td align="center">
               [% IF user.id == series.creator_id OR user.in_group("admin") %]
-               <a href="chart.cgi?action=edit&amp;series_id=
+               <a href="[% basepath FILTER none %]chart.cgi?action=edit&amp;series_id=
                        [% series.series_id %]">Edit</a> |
-               <a href="chart.cgi?action=confirm-delete&amp;series_id=
+               <a href="[% basepath FILTER none %]chart.cgi?action=confirm-delete&amp;series_id=
                        [%- series.series_id %]">Delete</a> |
               [% END %]
-              <a href="buglist.cgi?cmdtype=dorem&amp;namedcmd=
+              <a href="[% basepath FILTER none %]buglist.cgi?cmdtype=dorem&amp;namedcmd=
                 [% series.category FILTER uri %]%20/%20
                 [% series.subcategory FILTER uri %]%20/%20
                 [% series.name FILTER uri -%]&amp;series_id=
@@ -260,7 +260,7 @@ document.addEventListener("DOMContentLoaded", function(event) {
     or start with a clean slate.
   </p>
 
-  <form action="chart.cgi" id="create_series" name="create_series" method="GET">
+  <form action="[% basepath FILTER none %]chart.cgi" id="create_series" name="create_series" method="GET">
     <input type="hidden" name="action" value="convert_search">
     <label for="series_from_search">Based on:</label>
     <select id="series_from_search" name="series_from_search">

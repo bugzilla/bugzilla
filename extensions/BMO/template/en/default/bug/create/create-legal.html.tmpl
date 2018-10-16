@@ -75,7 +75,7 @@ label.required:before {
 
 <p>[ <span class="required_star">*</span> Required Field ]</p>
 
-<form method="post" action="post_bug.cgi" id="legalRequestForm" enctype="multipart/form-data">
+<form method="post" action="[% basepath FILTER none %]post_bug.cgi" id="legalRequestForm" enctype="multipart/form-data">
   <input type="hidden" name="product" value="Legal">
   <input type="hidden" name="rep_platform" value="All">
   <input type="hidden" name="op_sys" value="Other">

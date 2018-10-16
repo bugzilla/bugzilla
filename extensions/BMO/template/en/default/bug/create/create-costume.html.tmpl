@@ -150,7 +150,7 @@ YAHOO.util.Event.onDOMReady(function() {
   costume will be sent, and details about the actual costumes.
 </p>
 
-<form method="post" action="post_bug.cgi" enctype="multipart/form-data"
+<form method="post" action="[% basepath FILTER none %]post_bug.cgi" enctype="multipart/form-data"
       onSubmit="return validateAndSubmit();">
   <input type="hidden" name="format" value="costume">
   <input type="hidden" name="product" value="Marketing">

@@ -20,8 +20,8 @@
   #   byron jones <glob@mozilla.com>
   #%]
 
-<link rel="stylesheet" href="extensions/FlagTypeComment/web/styles/ftc.css">
-<script [% script_nonce FILTER none %] src="extensions/FlagTypeComment/web/js/ftc.js"></script>
+<link rel="stylesheet" href="[% basepath FILTER none %]extensions/FlagTypeComment/web/styles/ftc.css">
+<script [% script_nonce FILTER none %] src="[% basepath FILTER none %]extensions/FlagTypeComment/web/js/ftc.js"></script>
 
 [% IF ftc_flags.keys.size %]
   [%# plaintext templates from database %]

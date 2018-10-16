@@ -249,7 +249,7 @@ const focus_main_content = () => {
 const detect_blocked_gravatars = () => {
     document.querySelectorAll('img[src^="https://secure.gravatar.com/avatar/"]').forEach($img => {
         if (!$img.complete || !$img.naturalHeight) {
-            $img.src = 'extensions/Gravatar/web/default.jpg';
+            $img.src = `${BUGZILLA.config.basepath}extensions/Gravatar/web/default.jpg`;
         }
     });
 }

@@ -10,14 +10,15 @@ function show_usermenu(id, email, show_edit) {
         {
             name: "Profile",
             callback: function () {
-                var href = "user_profile?user_id=" + id;
+                var href = `${BUGZILLA.config.basepath}user_profile?user_id=${id}`;
                 window.open(href, "_blank");
             }
         },
         {
             name: "Activity",
             callback: function () {
-                var href = "page.cgi?id=user_activity.html&action=run&from=-14d&who=" + encodeURIComponent(email);
+                var href = `${BUGZILLA.config.basepath}page.cgi?` +
+                           `id=user_activity.html&action=run&from=-14d&who=${encodeURIComponent(email)}`;
                 window.open(href, "_blank");
             }
         },
@@ -33,7 +34,7 @@ function show_usermenu(id, email, show_edit) {
         items.push({
             name: "Edit",
             callback: function () {
-                var href = "editusers.cgi?action=edit&userid=" + id;
+                var href = `${BUGZILLA.config.basepath}editusers.cgi?action=edit&userid=${id}`;
                 window.open(href, "_blank");
             }
         });

@@ -102,8 +102,8 @@ $(function() {
             $('#mfa-totp-throbber').show();
             $('#mfa-totp-issued').hide();
 
-            var url = 'rest/user/mfa/totp/enroll' +
-                '?Bugzilla_api_token=' + encodeURIComponent(BUGZILLA.api_token);
+            var url = `${BUGZILLA.config.basepath}rest/user/mfa/totp/enroll` +
+                `?Bugzilla_api_token=${encodeURIComponent(BUGZILLA.api_token)}`;
             $.ajax({
                 "url": url,
                 "contentType": "application/json",

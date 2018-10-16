@@ -22,14 +22,14 @@
   title = "Edit classification"
 %]
 
-<form method=post action="editclassifications.cgi">
+<form method=post action="[% basepath FILTER none %]editclassifications.cgi">
   <table  border=0 cellpadding=4 cellspacing=0>
 
     [% PROCESS "admin/classifications/edit-common.html.tmpl" %]
 
     <tr valign=top>
       <th align="right">
-        <a href="editproducts.cgi?classification=[% classification.name FILTER uri %]">
+        <a href="[% basepath FILTER none %]editproducts.cgi?classification=[% classification.name FILTER uri %]">
         Edit Products</a>:
       </th>
       <td>

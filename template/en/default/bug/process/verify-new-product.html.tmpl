@@ -36,7 +36,7 @@
 [% PROCESS global/header.html.tmpl
   title = 'Verify New Product Details...' %]
 
-<form action="process_bug.cgi" method="post">
+<form action="[% basepath FILTER none %]process_bug.cgi" method="post">
 
 [% SET exclude_items = ['version', 'component', 'target_milestone'] %]
 [% IF verify_bug_groups %]
@@ -201,7 +201,7 @@
   [% id = cgi.param('id') %]
   Cancel and Return to [% "$terms.bug $id" FILTER bug_link(id) FILTER none %]
 [% ELSE %]
-  Cancel and Return to <a href="buglist.cgi?regetlastlist=1">the last search results</a>
+  Cancel and Return to <a href="[% basepath FILTER none %]buglist.cgi?regetlastlist=1">the last search results</a>
 [% END %]
 
 [% PROCESS global/footer.html.tmpl %]

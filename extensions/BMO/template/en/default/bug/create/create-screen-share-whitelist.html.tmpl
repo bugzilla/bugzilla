@@ -92,7 +92,7 @@ function fieldValue(elem_id) {
   whitelist requests
 </div>
 
-<form id="whitelist_form" method="post" action="post_bug.cgi" enctype="multipart/form-data"
+<form id="whitelist_form" method="post" action="[% basepath FILTER none %]post_bug.cgi" enctype="multipart/form-data"
       onSubmit="return validateAndSubmit();">
   <input type="hidden" name="format" value="screen-share-whitelist">
   <input type="hidden" name="product" value="Firefox">

@@ -37,7 +37,7 @@ Bugzilla.ComponentWatching = class ComponentWatching {
    * @returns {Promise<Object|String>} Response data or error message.
    */
   async fetch(request = {}, path = '') {
-    request.url = `/rest/component-watching${path}`;
+    request.url = `${BUGZILLA.config.basepath}rest/component-watching${path}`;
 
     return new Promise((resolve, reject) => bugzilla_ajax(request, data => resolve(data), error => reject(error)));
   }

@@ -56,11 +56,11 @@
   and has never been used in [% terms.abug FILTER html %].</em>
 </p>
 
-<a href="editfields.cgi?action=delete&amp;name=[% field.name FILTER html %]&amp;token=[% token FILTER html %]">
+<a href="[% basepath FILTER none %]editfields.cgi?action=delete&amp;name=[% field.name FILTER html %]&amp;token=[% token FILTER html %]">
   Delete field '[% field.description FILTER html %]'</a>
 
 <p>
-  <a href="editfields.cgi">Back to the list of existing custom fields</a>
+  <a href="[% basepath FILTER none %]editfields.cgi">Back to the list of existing custom fields</a>
 </p>
 
 [% PROCESS global/footer.html.tmpl %]

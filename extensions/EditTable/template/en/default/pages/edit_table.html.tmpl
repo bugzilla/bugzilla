@@ -26,7 +26,7 @@
 
 <div id="edit_table"></div>
 <br>
-<form method="post" action="page.cgi" enctype="multipart/form-data"
+<form method="post" action="[% basepath FILTER none %]page.cgi" enctype="multipart/form-data"
       onsubmit="editTable.to_json('table_data')">
 <input type="hidden" name="id" value="edit_table.html">
 <input type="hidden" name="table" value="[% table_name FILTER html %]">

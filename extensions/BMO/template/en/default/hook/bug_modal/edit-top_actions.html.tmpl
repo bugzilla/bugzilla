@@ -16,6 +16,6 @@
     END;
   END;
 %]
-| <a href="page.cgi?id=attachment_bounty_form.html&amp;bug_id=[% bug.id FILTER none %]">
+| <a href="[% basepath FILTER none %]page.cgi?id=attachment_bounty_form.html&amp;bug_id=[% bug.id FILTER none %]">
   [% has_bounty_attachment ? "Edit" : "Add" %] Bounty Tracking Attachment
 </a>

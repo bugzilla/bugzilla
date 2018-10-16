@@ -34,13 +34,13 @@
   your installation correctly.</p>
 
   <p>As an administrator, you have access to all administrative pages, accessible from
-  the <a href="admin.cgi">Administration</a> link visible at the bottom of this page.
+  the <a href="[% basepath FILTER none %]admin.cgi">Administration</a> link visible at the bottom of this page.
   This link will always be visible, on all pages. From there, you must visit at least
-  the <a href="editparams.cgi">Parameters</a> page, from where you can set all important
+  the <a href="[% basepath FILTER none %]editparams.cgi">Parameters</a> page, from where you can set all important
   parameters for this installation; among others:</p>
 
   <ul>
-    <li><a href="editparams.cgi?section=general#maintainer_desc">maintainer</a>,
+    <li><a href="[% basepath FILTER none %]editparams.cgi?section=general#maintainer_desc">maintainer</a>,
       the person responsible for this installation if something is
       running wrongly.</li>
   </ul>
@@ -48,12 +48,12 @@
   <p>Also important are the following parameters:</p>
 
   <ul>
-    <li><a href="editparams.cgi?section=auth#requirelogin_desc">requirelogin</a>, if turned
+    <li><a href="[% basepath FILTER none %]editparams.cgi?section=auth#requirelogin_desc">requirelogin</a>, if turned
     on, will protect your installation from users having no account on this installation.
     In other words, users who are not explicitly authenticated with a valid account
     cannot see any data. This is what you want if you want to keep your data private.</li>
 
-    <li><a href="editparams.cgi?section=auth#createemailregexp_desc">createemailregexp</a>
+    <li><a href="[% basepath FILTER none %]editparams.cgi?section=auth#createemailregexp_desc">createemailregexp</a>
     defines which users are allowed to create an account on this installation. If set
     to ".*" (the default), everybody is free to create his own account. If set to
     "@mycompany.com$", only users having an account @mycompany.com will be allowed to
@@ -62,7 +62,7 @@
     installation, you must absolutely set this parameter to something different from
     the default.</li>
 
-    <li><a href="editparams.cgi?section=mta#mail_delivery_method_desc">mail_delivery_method</a>
+    <li><a href="[% basepath FILTER none %]editparams.cgi?section=mta#mail_delivery_method_desc">mail_delivery_method</a>
     defines the method used to send emails, such as sendmail or SMTP. You have to set
     it correctly to send emails.</li>
   </ul>

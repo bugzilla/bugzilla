@@ -7,7 +7,7 @@ var component_load = function(product) {
     $('#component').attr('disabled', true);
     bugzilla_ajax(
         {
-            url: 'rest/bug_modal/product_info?product=' + encodeURIComponent(product)
+            url: `${BUGZILLA.config.basepath}rest/bug_modal/product_info?product=${encodeURIComponent(product)}`
         },
         function(data) {
             $('#product-throbber').hide();
@@ -40,7 +40,7 @@ $(document).ready(function() {
     var product_name = window.location.hash? window.location.hash.substr(1) : null;
     bugzilla_ajax(
             {
-                url: 'rest/bug_modal/initial_field_values'
+                url: `${BUGZILLA.config.basepath}rest/bug_modal/initial_field_values`
             },
             function(data) {
                 initial = data

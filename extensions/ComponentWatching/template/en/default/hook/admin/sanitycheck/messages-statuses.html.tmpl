@@ -7,7 +7,7 @@
   #%]
 
 [% IF san_tag == "component_watching_repair" %]
-    <a href="sanitycheck.cgi?component_watching_repair=1&amp;token=
+    <a href="[% basepath FILTER none %]sanitycheck.cgi?component_watching_repair=1&amp;token=
        [%- issue_hash_token(['sanitycheck']) FILTER uri %]"
     >Repair invalid product_id values in the component_watch table</a>
 

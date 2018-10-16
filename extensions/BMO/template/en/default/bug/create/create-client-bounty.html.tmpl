@@ -111,7 +111,7 @@ function validateAndSubmit() {
 
 <h1>Client [% terms.Bug %] Bounty Form</h1>
 
-<form id="client_bounty_form" method="post" action="post_bug.cgi" enctype="multipart/form-data"
+<form id="client_bounty_form" method="post" action="[% basepath FILTER none %]post_bug.cgi" enctype="multipart/form-data"
       onSubmit="return validateAndSubmit();">
   <input type="hidden" name="product" value="Firefox">
   <input type="hidden" name="component" value="Security">

@@ -71,7 +71,7 @@ my $flagtype1_id = $1;
 
 # Clone the flag type, but set the request group to 'editbugs' and the sortkey to 950.
 
-$sel->click_ok("//a[\@href='editflagtypes.cgi?action=copy&id=$flagtype1_id']");
+$sel->click_ok("//a[contains(\@href,'/editflagtypes.cgi?action=copy&id=$flagtype1_id')]");
 $sel->wait_for_page_to_load_ok(WAIT_TIME);
 $sel->title_is("Create Flag Type for Bugs Based on SeleniumBugFlag1Test");
 $sel->type_ok("name", "SeleniumBugFlag2Test");
@@ -101,7 +101,7 @@ my $flagtype2_id = $1;
 
 # Clone the first flag type again, but with different attributes.
 
-$sel->click_ok("//a[\@href='editflagtypes.cgi?action=copy&id=$flagtype1_id']");
+$sel->click_ok("//a[contains(\@href,'/editflagtypes.cgi?action=copy&id=$flagtype1_id')]");
 $sel->wait_for_page_to_load_ok(WAIT_TIME);
 $sel->title_is("Create Flag Type for Bugs Based on SeleniumBugFlag1Test");
 $sel->type_ok("name", "SeleniumBugFlag3Test");
@@ -155,7 +155,7 @@ my $aflagtype1_id = $1;
 
 # Clone the flag type.
 
-$sel->click_ok("//a[\@href='editflagtypes.cgi?action=copy&id=$aflagtype1_id']");
+$sel->click_ok("//a[contains(\@href,'/editflagtypes.cgi?action=copy&id=$aflagtype1_id')]");
 $sel->wait_for_page_to_load_ok(WAIT_TIME);
 $sel->title_is("Create Flag Type for Attachments Based on SeleniumAttachmentFlag1Test");
 $sel->type_ok("name", "SeleniumAttachmentFlag2Test");
@@ -178,7 +178,7 @@ my $aflagtype2_id = $1;
 
 # Clone the flag type again, and set it as inactive.
 
-$sel->click_ok("//a[\@href='editflagtypes.cgi?action=copy&id=$aflagtype1_id']");
+$sel->click_ok("//a[contains(\@href,'/editflagtypes.cgi?action=copy&id=$aflagtype1_id')]");
 $sel->wait_for_page_to_load_ok(WAIT_TIME);
 $sel->title_is("Create Flag Type for Attachments Based on SeleniumAttachmentFlag1Test");
 $sel->type_ok("name", "SeleniumAttachmentFlag3Test");
@@ -409,7 +409,7 @@ ok(grep($_ eq '?', @flag_states), "Flag state '?' available");
 
 # A powerless user cannot edit someone else's attachment flags.
 
-$sel->click_ok("//a[\@href='attachment.cgi?id=$attachment2_id&action=edit']");
+$sel->click_ok("//a[contains(\@href,'/attachment.cgi?id=$attachment2_id&action=edit')]");
 $sel->wait_for_page_to_load_ok(WAIT_TIME);
 $sel->title_like(qr/^Attachment $attachment2_id Details for Bug $bug1_id/);
 $sel->is_element_present_ok('//select[@title="attachmentflag2"][@disabled]',
@@ -450,7 +450,7 @@ logout($sel);
 
 log_in($sel, $config, 'admin');
 go_to_bug($sel, $bug1_id);
-$sel->click_ok("//a[\@href='attachment.cgi?id=${attachment3_id}&action=edit']");
+$sel->click_ok("//a[contains(\@href,'/attachment.cgi?id=${attachment3_id}&action=edit')]");
 $sel->wait_for_page_to_load_ok(WAIT_TIME);
 $sel->title_like(qr/^Attachment $attachment3_id Details for Bug $bug1_id/);
 $sel->select_ok('//select[@title="attachmentflag1"]', "label=+");
@@ -471,7 +471,7 @@ foreach my $flagtype ([$flagtype1_id, "SeleniumBugFlag1Test"], [$flagtype2_id, "
 {
     my $flag_id = $flagtype->[0];
     my $flag_name = $flagtype->[1];
-    $sel->click_ok("//a[\@href='editflagtypes.cgi?action=confirmdelete&id=$flag_id']");
+    $sel->click_ok("//a[contains(\@href,'/editflagtypes.cgi?action=confirmdelete&id=$flag_id')]");
     $sel->wait_for_page_to_load_ok(WAIT_TIME);
     $sel->title_is("Confirm Deletion of Flag Type '$flag_name'");
     $sel->click_ok("link=Yes, delete");

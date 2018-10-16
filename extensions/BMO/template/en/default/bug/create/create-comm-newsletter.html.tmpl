@@ -86,7 +86,7 @@ function toggleAreaOther() {
 [% USE Bugzilla %]
 [% cgi = Bugzilla.cgi %]
 
-<form id="newsletter_form" method="post" action="post_bug.cgi" enctype="multipart/form-data"
+<form id="newsletter_form" method="post" action="[% basepath FILTER none %]post_bug.cgi" enctype="multipart/form-data"
       onSubmit="return validateAndSubmit();">
   <input type="hidden" name="format" value="comm-newsletter">
   <input type="hidden" name="product" value="Marketing">

@@ -209,14 +209,14 @@ $(function() {
 
     function ccListLoading() {
         $('#cc-list').html(
-            '<img src="extensions/BugModal/web/throbber.gif" width="16" height="11"> Loading...'
+            `<img src="${BUGZILLA.config.basepath}extensions/BugModal/web/throbber.gif" width="16" height="11"> Loading...`
         );
     }
 
     function ccListUpdate() {
         bugzilla_ajax(
             {
-                url: 'rest/bug_modal/cc/' + BUGZILLA.bug_id
+                url: `${BUGZILLA.config.basepath}rest/bug_modal/cc/${BUGZILLA.bug_id}`
             },
             function(data) {
                 $('#cc-list').html(data.html);
@@ -410,7 +410,7 @@ $(function() {
     $('#action-history')
         .click(function(event) {
             event.preventDefault();
-            document.location.href = 'show_activity.cgi?id=' + BUGZILLA.bug_id;
+            document.location.href = `${BUGZILLA.config.basepath}show_activity.cgi?id=${BUGZILLA.bug_id}`;
         });
 
     // use scrollTo for in-page activity links
@@ -480,7 +480,7 @@ $(function() {
             // load the missing select data
             bugzilla_ajax(
                 {
-                    url: 'rest/bug_modal/edit/' + BUGZILLA.bug_id
+                    url: `${BUGZILLA.config.basepath}rest/bug_modal/edit/${BUGZILLA.bug_id}`
                 },
                 function(data) {
                     $('#mode-btn').hide();
@@ -651,7 +651,7 @@ $(function() {
 
             bugzilla_ajax(
                 {
-                    url: 'rest/bug/' + BUGZILLA.bug_id,
+                    url: `${BUGZILLA.config.basepath}rest/bug/${BUGZILLA.bug_id}`,
                     type: 'PUT',
                     data: JSON.stringify({ cc: cc_change })
                 },
@@ -889,7 +889,8 @@ $(function() {
     $('#vote-btn')
         .click(function(event) {
             event.preventDefault();
-            window.location.href = 'page.cgi?id=voting/user.html&bug_id=' + BUGZILLA.bug_id + '#vote_' + BUGZILLA.bug_id;
+            window.location.href = `${BUGZILLA.config.basepath}page.cgi?` +
+                                   `id=voting/user.html&bug_id=${BUGZILLA.bug_id}#vote_${BUGZILLA.bug_id}`;
         });
 
     // user-story
@@ -1132,7 +1133,7 @@ $(function() {
         preview.html('');
         bugzilla_ajax(
             {
-                url: 'rest/bug/comment/render',
+                url: `${BUGZILLA.config.basepath}rest/bug/comment/render`,
                 type: 'POST',
                 data: { text: comment.val() },
                 hideError: true
@@ -1217,7 +1218,7 @@ function confirmUnsafeURL(url) {
 if (history && history.replaceState) {
     var href = document.location.href;
     if (!href.match(/new-bug/) && !href.match(/show_bug\.cgi/)) {
-        history.replaceState(null, BUGZILLA.bug_title, 'show_bug.cgi?id=' + BUGZILLA.bug_id);
+        history.replaceState(null, BUGZILLA.bug_title, `${BUGZILLA.config.basepath}show_bug.cgi?id=${BUGZILLA.bug_id}`);
         document.title = BUGZILLA.bug_title;
     }
     if (href.match(/show_bug\.cgi\?.*list_id=/)) {

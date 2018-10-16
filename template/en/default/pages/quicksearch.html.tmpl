@@ -30,7 +30,7 @@
 
 <p>Type in one or more words (or pieces of words) to search for:</p>
 
-<form name="f" action="buglist.cgi" method="get"
+<form name="f" action="[% basepath FILTER none %]buglist.cgi" method="get"
       class='quicksearch_check_empty' data-no-csrf>
   <input type="text" size="40" name="quicksearch">
   <input type="submit" value="Search" id="find">
@@ -372,7 +372,7 @@
 
 <p>It is pretty easy to write rather complex queries without too much effort.
   For very complex queries, you have to use the
-  <a href="query.cgi?format=advanced">Advanced Search</a> form.</p>
+  <a href="[% basepath FILTER none %]query.cgi?format=advanced">Advanced Search</a> form.</p>
 
 <ul class="qs_help">
   <li>All [% terms.bugs %] reported by userA@company.com or assigned to him

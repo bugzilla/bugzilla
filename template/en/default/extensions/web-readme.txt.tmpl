@@ -12,4 +12,4 @@ if you have a file called "style.css" and your extension is called
 "Foo", you would put it in "extensions/Foo/web/style.css", and then
 you could link to it in HTML like:
 
-<link href="extensions/Foo/web/style.css" rel="stylesheet" type="text/css">
+<link href="[% basepath FILTER none %]extensions/Foo/web/style.css" rel="stylesheet" type="text/css">

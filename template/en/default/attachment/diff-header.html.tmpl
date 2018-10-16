@@ -46,7 +46,7 @@ Interdiff of #[% oldid %] and #[% newid %] for [% terms.bug %] #[% bugid %]
       and
        #[% newid %]: <a href="[% PROCESS diffurl id=newid %]">[% new_desc FILTER html %]</a>
     [% END %]
-    for <a href="show_bug.cgi?id=[% bugid %]">[% terms.bug %] #[% bugid %]</a>
+    for <a href="[% basepath FILTER none %]show_bug.cgi?id=[% bugid %]">[% terms.bug %] #[% bugid %]</a>
   [% END %]
   [% subheader = BLOCK %]
     [% bugsummary FILTER html %]
@@ -76,7 +76,7 @@ Interdiff of #[% oldid %] and #[% newid %] for [% terms.bug %] #[% bugid %]
   [% IF other_patches.size > 0 %]
     [% IF headers %] |[%END%]
     Differences between
-    <form style="display: inline" action="attachment.cgi">
+    <form style="display: inline" action="[% basepath FILTER none %]attachment.cgi">
       <select name="oldid">
       [% FOREACH patch = other_patches %]
         <option value="[% patch.id %]"
@@ -94,7 +94,7 @@ Interdiff of #[% oldid %] and #[% newid %] for [% terms.bug %] #[% bugid %]
   <br>
 [% ELSE %]
   [% IF headers %]
-    <a href="attachment.cgi?oldid=[% oldid %]&amp;newid=[% newid %]&amp;action=interdiff&amp;format=raw">Raw Unified</a>
+    <a href="[% basepath FILTER none %]attachment.cgi?oldid=[% oldid %]&amp;newid=[% newid %]&amp;action=interdiff&amp;format=raw">Raw Unified</a>
     | Return to [% "$terms.bug $bugid" FILTER bug_link(bugid) FILTER none %]
     |
   [% END %]
@@ -128,7 +128,7 @@ Interdiff of #[% oldid %] and #[% newid %] for [% terms.bug %] #[% bugid %]
     [% context = 3 %]
   [% END %]
   [%# textbox for context %]
-  <form style="display: inline" action="attachment.cgi"><input type="hidden" name="action" value="diff"><input type="hidden" name="id" value="[% attachid %]"><input type="hidden" name="collapsed" value="[% collapsed FILTER html %]"><input type="hidden" name="headers" value="[% headers FILTER html %]"><input type="text" name="context" value="[% context FILTER html %]" size="3"></form>)
+  <form style="display: inline" action="[% basepath FILTER none %]attachment.cgi"><input type="hidden" name="action" value="diff"><input type="hidden" name="id" value="[% attachid %]"><input type="hidden" name="collapsed" value="[% collapsed FILTER html %]"><input type="hidden" name="headers" value="[% headers FILTER html %]"><input type="text" name="context" value="[% context FILTER html %]" size="3"></form>)
 [% END %]
 
 [% IF warning %]
@@ -151,7 +151,7 @@ Interdiff of #[% oldid %] and #[% newid %] for [% terms.bug %] #[% bugid %]
 [% END %]
 
 [%# Restore Stuff %]
-<form name="checkboxform" action="attachment.cgi">
+<form name="checkboxform" action="[% basepath FILTER none %]attachment.cgi">
 <input type="checkbox" name="restore_indicator" style="display: none">
 
 

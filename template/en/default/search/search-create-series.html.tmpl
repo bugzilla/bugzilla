@@ -40,7 +40,7 @@
   doc_section = "reporting.html#charts-new-series"
 %]
 
-<form method="get" action="chart.cgi" name="chartform">
+<form method="get" action="[% basepath FILTER none %]chart.cgi" name="chartform">
 
 [% PROCESS search/form.html.tmpl %]
 

@@ -48,7 +48,7 @@
     [% total = total + voter.vote_count %]
     <tr>
       <td>
-          <a href="page.cgi?id=voting/user.html&amp;user_id=
+          <a href="[% basepath FILTER none %]page.cgi?id=voting/user.html&amp;user_id=
                   [%- voter.id FILTER uri %]">
           [% voter.login_name FILTER email FILTER html %]
         </a>

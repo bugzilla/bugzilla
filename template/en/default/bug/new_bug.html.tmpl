@@ -17,7 +17,7 @@
 [% PROCESS global/header.html.tmpl %]
 
 <div style="display: none" id="xhr-error"></div>
-<form name="newbugform" id="newbugform" method="post" action="new_bug.cgi" enctype="multipart/form-data">
+<form name="newbugform" id="newbugform" method="post" action="[% basepath FILTER none %]new_bug.cgi" enctype="multipart/form-data">
   <input type="hidden" value="[% issue_hash_token(['new_bug']) FILTER html %]" name="token">
   <div class="new-bug-container">
     <div class="new-bug">
@@ -80,7 +80,7 @@
               field_type   = constants.FIELD_TYPE_SINGLE_SELECT
               edit_only = 1
               editable = 1
-              help         = "describecomponents.cgi?product=$filtered_product"
+              help         = basepath _ "describecomponents.cgi?product=$filtered_product"
           %]
 
             <span aria-owns="product-name product-latch">
@@ -102,13 +102,13 @@
               hide_on_view   = 1
               hide_on_edit   = !can_edit_product
               append_content = 1
-              help           = "describecomponents.cgi?product=$filtered_product" %]
+              help           = basepath _ "describecomponents.cgi?product=$filtered_product" %]
 
           [%# component %]
           [% WRAPPER bug_modal/field.html.tmpl
               field      = bug_fields.component
               field_type = constants.FIELD_TYPE_SINGLE_SELECT
-              help       = "describecomponents.cgi?product=$filtered_product&component=$filtered_component#$filtered_component"
+              help       = basepath _ "describecomponents.cgi?product=$filtered_product&component=$filtered_component#$filtered_component"
               edit_only = 1
               editable = 1
           %]
@@ -121,7 +121,7 @@
               </div>
               <div id="component-info" style="display:none">
                 <div>[% bug.component_obj.description FILTER html_light %]</div>
-                <a href="buglist.cgi?component=[% bug.component FILTER uri %]&amp;
+                <a href="[% basepath FILTER none %]buglist.cgi?component=[% bug.component FILTER uri %]&amp;
                         [%~ %]product=[% bug.product FILTER uri %]&amp;
                         [%~ %]bug_status=__open__" target="_blank">Other [% terms.Bugs %]</a>
               </div>
@@ -143,7 +143,7 @@
               field_type = constants.FIELD_TYPE_MULTI_SELECT
               edit_only = 1
               editable = 1
-              help = "describekeywords.cgi"
+              help = basepath _ "describekeywords.cgi"
           %]
 
           [% WRAPPER bug_modal/field.html.tmpl
@@ -237,7 +237,7 @@
     </li>
     <li id="comment-preview-tab" role="tab" tabindex="-1" aria-controls="comment-preview-tabpanel" aria-selected="false">
       Preview
-      <img id="preview-throbber" src="extensions/BugModal/web/throbber.gif" width="16" height="11" style="display:none">
+      <img id="preview-throbber" src="[% basepath FILTER none %]extensions/BugModal/web/throbber.gif" width="16" height="11" style="display:none">
     </li>
   </ul>
   <div id="comment-edit-tabpanel" class="comment-tabpanel" role="tabpanel" aria-labelledby="comment-edit-tab">

@@ -35,7 +35,7 @@
 
     <div class="[% class_name FILTER html %]">
       <span role="heading" aria-level="2" class="bz_comment_number">
-        <a href="show_bug.cgi?id=[% public_bug.bug_id FILTER none %]#c[% count %]">
+        <a href="[% basepath FILTER none %]show_bug.cgi?id=[% public_bug.bug_id FILTER none %]#c[% count %]">
           [%- comment_label FILTER html %]</a>
       </span>
 

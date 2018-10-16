@@ -162,7 +162,7 @@
 </div>
 
 [% tab_footer = BLOCK %]
-  <form action="token.cgi" method="post" id="forgot-form">
+  <form action="[% basepath FILTER none %]token.cgi" method="post" id="forgot-form">
     <input type="hidden" name="loginname" value="[% user.login FILTER html %]">
     <input type="hidden" name="a" value="reqpw">
     <input type="hidden" name="token" value="[% issue_hash_token(['reqpw']) FILTER html %]">

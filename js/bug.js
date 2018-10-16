@@ -76,8 +76,7 @@ YAHOO.bugzilla.dupTable = {
             600);
     },
     formatBugLink: function(el, oRecord, oColumn, oData) {
-        el.innerHTML = '<a href="show_bug.cgi?id=' + oData + '">'
-                       + oData + '</a>';
+        el.innerHTML = `<a href="${BUGZILLA.config.basepath}show_bug.cgi?id=${oData}">${oData}</a>`;
     },
     formatStatus: function(el, oRecord, oColumn, oData) {
         var resolution = oRecord.getData('resolution');
@@ -91,8 +90,8 @@ YAHOO.bugzilla.dupTable = {
         }
     },
     formatCcButton: function(el, oRecord, oColumn, oData) {
-        var url = 'process_bug.cgi?id=' + oRecord.getData('id')
-                  + '&addselfcc=1&token=' + escape(oData);
+        var url = `${BUGZILLA.config.basepath}process_bug.cgi?` +
+                  `id=${oRecord.getData('id')}&addselfcc=1&token=${escape(oData)}`;
         var button = document.createElement('a');
         button.setAttribute('href',  url);
         button.innerHTML = YAHOO.bugzilla.dupTable.addCcMessage;
@@ -100,7 +99,7 @@ YAHOO.bugzilla.dupTable = {
         new YAHOO.widget.Button(button);
     },
     init_ds: function() {
-        var new_ds = new YAHOO.util.XHRDataSource("jsonrpc.cgi");
+        var new_ds = new YAHOO.util.XHRDataSource(`${BUGZILLA.config.basepath}jsonrpc.cgi`);
         new_ds.connTimeout = 30000;
         new_ds.connMethodPost = true;
         new_ds.connXhrMode = "cancelStaleRequests";
@@ -158,7 +157,7 @@ YAHOO.bugzilla.dupTable = {
             };
 
             YAHOO.util.Connect.setDefaultPostHeader('application/json', true);
-            YAHOO.util.Connect.asyncRequest('POST', 'jsonrpc.cgi', callbacks,
+            YAHOO.util.Connect.asyncRequest('POST', `${BUGZILLA.config.basepath}jsonrpc.cgi`, callbacks,
                 args)
         },
 
@@ -179,7 +178,7 @@ YAHOO.bugzilla.dupTable = {
                 },
             };
             YAHOO.util.Connect.setDefaultPostHeader('application/json', true);
-            YAHOO.util.Connect.asyncRequest('POST', 'jsonrpc.cgi', callbacks, args)
+            YAHOO.util.Connect.asyncRequest('POST', `${BUGZILLA.config.basepath}jsonrpc.cgi`, callbacks, args)
         },
     };
 
@@ -201,7 +200,7 @@ YAHOO.bugzilla.dupTable = {
                 },
             };
             YAHOO.util.Connect.setDefaultPostHeader('application/json', true);
-            YAHOO.util.Connect.asyncRequest('POST', 'jsonrpc.cgi', callbacks, args)
+            YAHOO.util.Connect.asyncRequest('POST', `${BUGZILLA.config.basepath}jsonrpc.cgi`, callbacks, args)
         },
     };
 })();

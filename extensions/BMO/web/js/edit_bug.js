@@ -6,7 +6,7 @@
  * defined by the Mozilla Public License, v. 2.0. */
 
 function show_clone_menu(el, bug_id, product, component) {
-  var base_url = 'enter_bug.cgi?format=__default__&cloned_bug_id=' + bug_id;
+  var base_url = `${BUGZILLA.config.basepath}enter_bug.cgi?format=__default__&cloned_bug_id=${bug_id}`;
   var items = {
     curr_prod : {
       name: 'Clone to the current product',

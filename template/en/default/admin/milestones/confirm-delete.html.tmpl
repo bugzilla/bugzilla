@@ -52,7 +52,7 @@
 [% IF milestone.bug_count %]
   <a title="List of [% terms.bugs %] targetted at milestone '
            [% milestone.name FILTER html %]'"
-     href="buglist.cgi?target_milestone=[% milestone.name FILTER uri %]&amp;product=
+     href="[% basepath FILTER none %]buglist.cgi?target_milestone=[% milestone.name FILTER uri %]&amp;product=
           [%- product.name FILTER uri %]">
           [% milestone.bug_count FILTER none %]</a>
 [% ELSE %]
@@ -85,7 +85,7 @@
 
 <p>Do you really want to delete this milestone?<p>
 
-<form method="post" action="editmilestones.cgi">
+<form method="post" action="[% basepath FILTER none %]editmilestones.cgi">
   <input type="submit" id="delete" value="Yes, delete">
   <input type="hidden" name="action" value="delete">
   <input type="hidden" name="product" value="[% product.name FILTER html %]">

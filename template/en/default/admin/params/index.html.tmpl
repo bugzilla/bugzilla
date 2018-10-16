@@ -34,7 +34,7 @@
       [% FOREACH param = panel.param_list.sort('name') %]
         <tr>
           <td>
-            <a href="editparams.cgi?section=
+            <a href="[% basepath FILTER none %]editparams.cgi?section=
               [%- panel.name FILTER uri %]#[% param.name FILTER uri %]_desc">
               [% param.name FILTER html %]</a>
           </td>

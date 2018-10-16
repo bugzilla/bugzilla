@@ -48,13 +48,13 @@
   </tr>
 </table>
 
-<form method="post" action="editgroups.cgi">
+<form method="post" action="[% basepath FILTER none %]editgroups.cgi">
   [% IF group.members_non_inherited.size %]
     <p><b>[% group.members_non_inherited.size FILTER html %] users belong
       directly to this group. You cannot delete this group while there are
       users in it.</b>
 
-    <br><a href="editusers.cgi?action=list&amp;groupid=
+    <br><a href="[% basepath FILTER none %]editusers.cgi?action=list&amp;groupid=
                  [%- group.id FILTER uri %]&amp;grouprestrict=1">Show
     me which users</a> - <label><input type="checkbox" name="removeusers">Remove
     all users from this group for me.</label></p>
@@ -74,7 +74,7 @@
      visible only to this group. You cannot delete this group while any
      [%+ terms.bugs %] are using it.</b>
 
-    <br><a href="buglist.cgi?field0-0-0=bug_group&amp;type0-0-0=equals&amp;value0-0-0=
+    <br><a href="[% basepath FILTER none %]buglist.cgi?field0-0-0=bug_group&amp;type0-0-0=equals&amp;value0-0-0=
                  [%- group.name FILTER uri %]">Show me
     which [% terms.bugs %]</a> -
     <label><input type="checkbox" name="removebugs">Remove
@@ -118,7 +118,7 @@
           [% SET hidden = 1 %]
         [% END %]
 
-        <li><a href="editproducts.cgi?action=editgroupcontrols&amp;product=
+        <li><a href="[% basepath FILTER none %]editproducts.cgi?action=editgroupcontrols&amp;product=
                     [%- data.product.name FILTER uri %]">
           [%- data.product.name FILTER html %]</a>
           ([% active.join(', ') FILTER html %])
@@ -138,7 +138,7 @@
     <p><b>This group restricts who can make changes to flags of certain types.
     You cannot delete this group while there are flag types using it.</b>
 
-    <br><a href="editflagtypes.cgi?action=list&amp;group=
+    <br><a href="[% basepath FILTER none %]editflagtypes.cgi?action=list&amp;group=
                  [%- group.id FILTER uri %]">Show
     me which types</a> -
     <label><input type="checkbox" name="removeflags">Remove all
@@ -182,6 +182,6 @@
   </p>
 </form>
 
-Go back to the <a href="editgroups.cgi">group list</a>.
+Go back to the <a href="[% basepath FILTER none %]editgroups.cgi">group list</a>.
 
 [% PROCESS global/footer.html.tmpl %]

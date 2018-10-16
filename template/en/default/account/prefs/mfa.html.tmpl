@@ -8,7 +8,7 @@
 
 [% SET MFA_HOWTO = "https://wiki.mozilla.org/BMO/UserGuide/Two-Factor_Authentication" %]
 [% tab_footer = BLOCK %]
-  <form action="token.cgi" method="post" id="forgot-form">
+  <form action="[% basepath FILTER none %]token.cgi" method="post" id="forgot-form">
     <input type="hidden" name="loginname" value="[% user.login FILTER html %]">
     <input type="hidden" name="a" value="reqpw">
     <input type="hidden" name="token" value="[% issue_hash_token(['reqpw']) FILTER html %]">
@@ -50,7 +50,7 @@
 
     [% INCLUDE recovery_blurb %]
     <iframe id="mfa-recovery-frame" tabindex="-1"
-            src="userprefs.cgi?tab=mfa&frame=recovery&t=[% mfa_recovery_token FILTER uri %]">
+            src="[% basepath FILTER none %]userprefs.cgi?tab=mfa&frame=recovery&t=[% mfa_recovery_token FILTER uri %]">
     </iframe>
 
   [% ELSIF user.mfa %]
@@ -77,16 +77,16 @@
     <p class="mfa-api-blurb">
       [% IF user.settings.api_key_only.value == 'on' %]
         Enabling two-factor authentication has also required systems that
-        interface with [% terms.Bugzilla %]'s API to use <a href="userprefs.cgi?tab=apikey">API keys</a>
+        interface with [% terms.Bugzilla %]'s API to use <a href="[% basepath FILTER none %]userprefs.cgi?tab=apikey">API keys</a>
         for authentication.<br>
         <br>
         While not recommended, this limitation can be lifted by changing the
-        <a href="userprefs.cgi?tab=settings#api_key_only">Require API key authentication for API requests</a>
+        <a href="[% basepath FILTER none %]userprefs.cgi?tab=settings#api_key_only">Require API key authentication for API requests</a>
         preference.
       [% ELSE %]
         Systems that interface with [% terms.Bugzilla %]'s API are not required to use API keys.<br>
         Change the
-        <a href="userprefs.cgi?tab=settings#api_key_only">Require API key authentication for API requests</a>
+        <a href="[% basepath FILTER none %]userprefs.cgi?tab=settings#api_key_only">Require API key authentication for API requests</a>
         preference to enforce API key usage.
       [% END %]
     </p>
@@ -95,7 +95,7 @@
       <p class="mfa-disable-blurb">
         You will need to disable your two-factor authentication in order to change to a different method.
         There will be a small amount of time when your account will not be as secure, so you may use the
-        <a href="userprefs.cgi?tab=sessions">sessions</a> page to log out all other sessions other
+        <a href="[% basepath FILTER none %]userprefs.cgi?tab=sessions">sessions</a> page to log out all other sessions other
         than the current one after setting up the new method.
       </p>
     [% END %]
@@ -136,7 +136,7 @@
       [% ELSIF user.mfa == "Duo" %]
 
         <p>
-          <img src="images/duo.png" id="duo-logo" width="32" height="32">
+          <img src="[% basepath FILTER none %]images/duo.png" id="duo-logo" width="32" height="32">
           Verification with Duo Security will be performed before your account is updated.
         </p>
 
@@ -205,7 +205,7 @@
       </div>
 
       <div id="mfa-totp-issued" style="display:none">
-        <iframe id="mfa-enable-totp-frame" src="userprefs.cgi?tab=mfa&frame=totp" tabindex="-1"></iframe>
+        <iframe id="mfa-enable-totp-frame" src="[% basepath FILTER none %]userprefs.cgi?tab=mfa&frame=totp" tabindex="-1"></iframe>
         <div id="mfa-totp-blurb">
           Scan this QR code with your <a href="#" id="mfa-totp-apps">TOTP App</a>,
           then enter the six digit code the app generates.<br>
@@ -255,7 +255,7 @@
         </p>
 
         <p>
-          <img src="images/duo.png" id="duo-logo" width="32" height="32">
+          <img src="[% basepath FILTER none %]images/duo.png" id="duo-logo" width="32" height="32">
           Verification with Duo Security will be performed before your account is updated.<br>
 
           You must be <a href="https://mana.mozilla.org/wiki/display/SD/DuoSecurity" target="_blank" rel="noopener noreferrer">
@@ -275,9 +275,9 @@
 
     <p class="mfa-api-blurb" style="display:none">
       Enabling two-factor authentication will also require systems that
-      interface with [% terms.Bugzilla %]'s API to use <a href="userprefs.cgi?tab=apikey">API keys</a>
+      interface with [% terms.Bugzilla %]'s API to use <a href="[% basepath FILTER none %]userprefs.cgi?tab=apikey">API keys</a>
       for authentication.  While not recommended, this limitation can be lifted by changing the
-      <a href="userprefs.cgi?tab=settings#api_key_only">Require API key authentication for API requests</a>
+      <a href="[% basepath FILTER none %]userprefs.cgi?tab=settings#api_key_only">Require API key authentication for API requests</a>
       preference after 2FA is enabled.
     </p>
   </div>

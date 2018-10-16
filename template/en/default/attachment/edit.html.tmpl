@@ -49,7 +49,7 @@
 [% can_edit = attachment.validate_can_edit %]
 [% editable_or_hide = can_edit ? "" : " bz_hidden_option" %]
 
-<form method="post" action="attachment.cgi" onsubmit="normalizeComments();">
+<form method="post" action="[% basepath FILTER none %]attachment.cgi" onsubmit="normalizeComments();">
   <input type="hidden" name="id" value="[% attachment.id %]">
   <input type="hidden" name="action" value="update">
   <input type="hidden" name="contenttypemethod" value="manual">
@@ -170,7 +170,7 @@
             </b></p>
             <p><b>
               In order to view the attachment, you first have to
-              <a href="attachment.cgi?id=[% attachment.id %]">download it</a>.
+              <a href="[% basepath FILTER none %]attachment.cgi?id=[% attachment.id %]">download it</a>.
             </b></p>
           </div>
         [% ELSIF attachment.is_viewable %]
@@ -213,10 +213,10 @@
                   readonly = 'readonly'
                 %]
               [% ELSE %]
-                <iframe id="viewFrame" src="attachment.cgi?id=[% attachment.id %]
+                <iframe id="viewFrame" src="[% basepath FILTER none %]attachment.cgi?id=[% attachment.id %]
                   [%- "&amp;content_type=text/plain" IF attachment.contenttype.match('^text/x-') %]" sandbox>
                   <b>You cannot view the attachment while viewing its details because your browser does not support IFRAMEs.
-                  <a href="attachment.cgi?id=[% attachment.id %]">View the attachment on a separate page</a>.</b>
+                  <a href="[% basepath FILTER none %]attachment.cgi?id=[% attachment.id %]">View the attachment on a separate page</a>.</b>
                 </iframe>
               [% END %]
               <script [% script_nonce FILTER none %]>
@@ -254,7 +254,7 @@
               able to display.
             </b></p>
             <p><b>
-              <a href="attachment.cgi?id=[% attachment.id %]">Download the attachment</a>.
+              <a href="[% basepath FILTER none %]attachment.cgi?id=[% attachment.id %]">Download the attachment</a>.
             </b></p>
           </div>
         [% END %]
@@ -297,14 +297,14 @@
 
 <div id="attachment_actions">
   <span class="label">Actions:</span>
-  <a href="attachment.cgi?id=[% attachment.id %]">View</a>
+  <a href="[% basepath FILTER none %]attachment.cgi?id=[% attachment.id %]">View</a>
   [% IF use_patchviewer %]
-    | <a href="attachment.cgi?id=[% attachment.id %]&amp;action=diff">Diff</a>
+    | <a href="[% basepath FILTER none %]attachment.cgi?id=[% attachment.id %]&amp;action=diff">Diff</a>
   [% END %]
   [% IF Param("allow_attachment_deletion")
         && user.in_group('admin')
         && attachment.datasize > 0 %]
-    | <a href="attachment.cgi?id=[% attachment.id %]&amp;action=delete">Delete</a>
+    | <a href="[% basepath FILTER none %]attachment.cgi?id=[% attachment.id %]&amp;action=delete">Delete</a>
   [% END %]
   [% Hook.process('action') %]
 </div>
@@ -318,7 +318,7 @@
     [% IF a.id == attachment.id %]
       [%+ a.id FILTER html %]
     [% ELSE %]
-      <a href="attachment.cgi?id=[% a.id FILTER uri %]&amp;action=edit"
+      <a href="[% basepath FILTER none %]attachment.cgi?id=[% a.id FILTER uri %]&amp;action=edit"
          title="[% a.description FILTER html %]">[% a.id FILTER html %]</a>
     [% END %]
     [% IF a.isobsolete %]

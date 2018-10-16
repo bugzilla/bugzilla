@@ -153,7 +153,7 @@
 %]
 
 [% IF user.id %]
-  <form name="changeform" id="changeform" method="post" action="process_bug.cgi"[% IF bug.groups_in.size %] autocomplete="nope"[% END %]>
+  <form name="changeform" id="changeform" method="post" action="[% basepath FILTER none %]process_bug.cgi"[% IF bug.groups_in.size %] autocomplete="nope"[% END %]>
   <input type="hidden" name="delta_ts" value="[% bug.delta_ts FILTER html %]">
   <input type="hidden" name="longdesclength" value="[% bug.comments.size FILTER html %]">
   <input type="hidden" name="id" id="bug_id" value="[% bug.bug_id FILTER html %]">
@@ -182,7 +182,7 @@
         view_only = 1
     %]
       <div id="field-value-bug_id">
-        [% this_bug_href = "show_bug.cgi?id=$bug.id" %]
+        [% this_bug_href = basepath _ "show_bug.cgi?id=$bug.id" %]
         [% IF cgi.param("format") %]
           [% format_uri = cgi.param("format") FILTER uri %]
           [% this_bug_href = this_bug_href _ "&format=" _ format_uri %]
@@ -299,7 +299,7 @@
         <button type="button" id="mode-btn" class="major">
           <span id="mode-btn-readonly" title="Enable editing fields for [% terms.bug %] metadata">Edit [% terms.Bug %]</span>
           <span id="mode-btn-loading">
-            <img id="edit-throbber" src="extensions/BugModal/web/throbber.gif" width="16" height="11">
+            <img id="edit-throbber" src="[% basepath FILTER none %]extensions/BugModal/web/throbber.gif" width="16" height="11">
             Fetching
           </span>
         </button>
@@ -374,7 +374,7 @@
         field        = bug_fields.product
         field_type   = constants.FIELD_TYPE_SINGLE_SELECT
         hide_on_edit = can_edit_product
-        help         = "describecomponents.cgi?product=$filtered_product"
+        help         = basepath _ "describecomponents.cgi?product=$filtered_product"
     %]
       <div class="name-info-outer dropdown">
         <span id="product-name" class="dropdown-button" tabindex="0" role="button"
@@ -390,9 +390,9 @@
           </header>
           <li role="separator"></li>
           <div class="actions">
-            <div><a href="buglist.cgi?product=[% bug.product FILTER uri %]&amp;bug_status=__open__"
+            <div><a href="[% basepath FILTER none %]buglist.cgi?product=[% bug.product FILTER uri %]&amp;bug_status=__open__"
                     target="_blank" role="menuitem" tabindex="-1">See Open [% terms.Bugs %] in This Product</a></div>
-            <div><a href="enter_bug.cgi?product=[% bug.product FILTER uri %]"
+            <div><a href="[% basepath FILTER none %]enter_bug.cgi?product=[% bug.product FILTER uri %]"
                     target="_blank" role="menuitem" tabindex="-1">File New [% terms.Bug %] in This Product</a></div>
             <div><button disabled type="button" class="minor component-watching" role="menuitem" tabindex="-1"
                          data-product="[% bug.product FILTER html %]"
@@ -408,7 +408,7 @@
         hide_on_view   = 1
         hide_on_edit   = !can_edit_product
         append_content = 1
-        help           = "describecomponents.cgi?product=$filtered_product"
+        help           = basepath _ "describecomponents.cgi?product=$filtered_product"
     %]
       <span id="product-search-container">
         [% INCLUDE prodcompsearch/form.html.tmpl
@@ -419,9 +419,9 @@
         %]
         <button id="product-search" type="button" class="minor">Search</button>
         <button id="product-search-cancel" type="button" class="minor" style="display:none">X</button>
-        <img id="product-throbber" src="extensions/BugModal/web/throbber.gif"
+        <img id="product-throbber" src="[% basepath FILTER none %]extensions/BugModal/web/throbber.gif"
           width="16" height="11" style="display:none">
-        <img id="product-search-error" class="tt" src="extensions/BugModal/web/error.png"
+        <img id="product-search-error" class="tt" src="[% basepath FILTER none %]extensions/BugModal/web/error.png"
           width="16" height="16" style="display:none">
       </span>
     [% END %]
@@ -430,7 +430,7 @@
     [% WRAPPER bug_modal/field.html.tmpl
         field      = bug_fields.component
         field_type = constants.FIELD_TYPE_SINGLE_SELECT
-        help       = "describecomponents.cgi?product=$filtered_product&component=$filtered_component#$filtered_component"
+        help       = basepath _ "describecomponents.cgi?product=$filtered_product&component=$filtered_component#$filtered_component"
 
     %]
       <div class="name-info-outer dropdown">
@@ -447,10 +447,10 @@
           </header>
           <li role="separator"></li>
           <div class="actions">
-            <div><a href="buglist.cgi?product=[% bug.product FILTER uri %]&amp;
+            <div><a href="[% basepath FILTER none %]buglist.cgi?product=[% bug.product FILTER uri %]&amp;
                           [%~ %]component=[% bug.component FILTER uri %]&amp;bug_status=__open__"
                     target="_blank" role="menuitem" tabindex="-1">See Open [% terms.Bugs %] in This Component</a></div>
-            <div><a href="enter_bug.cgi?product=[% bug.product FILTER uri %]&amp;
+            <div><a href="[% basepath FILTER none %]enter_bug.cgi?product=[% bug.product FILTER uri %]&amp;
                           [%~ %]component=[% bug.component FILTER uri %]"
                     target="_blank" role="menuitem" tabindex="-1">File New [% terms.Bug %] in This Component</a></div>
             <div><button disabled type="button" class="minor component-watching" role="menuitem" tabindex="-1"
@@ -872,7 +872,7 @@
         field = bug_fields.keywords
         field_type = constants.FIELD_TYPE_KEYWORDS
         hide_on_view = bug.keyword_objects.size == 0
-        help = "describekeywords.cgi"
+        help = basepath _ "describekeywords.cgi"
     %]
       [% bug.keyword_objects.pluck("name").join(", ") || "---" FILTER html %]
     [% END %]
@@ -952,8 +952,8 @@
           label = ""
           hide_on_edit = 1
       %]
-        Dependency <a href="showdependencytree.cgi?id=[% bug.bug_id FILTER none %]&amp;hide_resolved=1">tree</a>
-        / <a href="showdependencygraph.cgi?id=[% bug.bug_id FILTER none %]">graph</a>
+        Dependency <a href="[% basepath FILTER none %]showdependencytree.cgi?id=[% bug.bug_id FILTER none %]&amp;hide_resolved=1">tree</a>
+        / <a href="[% basepath FILTER none %]showdependencygraph.cgi?id=[% bug.bug_id FILTER none %]">graph</a>
       [% END %]
     [% END %]
 
@@ -1283,7 +1283,7 @@
          help = "https://wiki.mozilla.org/BMO/UserGuide/BugFields#deadline"
       %]
       <div>
-        <a href="summarize_time.cgi?id=[% bug.bug_id FILTER none %]&amp;do_depends=1">
+        <a href="[% basepath FILTER none %]summarize_time.cgi?id=[% bug.bug_id FILTER none %]&amp;do_depends=1">
           Summarize time (including time for [% terms.bugs %]
           blocking this [% terms.bug %])</a>
       </div>
@@ -1329,7 +1329,7 @@
 
 [% IF user.id %]
   <div id="top-actions">
-    <a href="attachment.cgi?bugid=[% bug.id FILTER uri %]&amp;action=enter" id="attachments-add-link">Attach File</a>
+    <a href="[% basepath FILTER none %]attachment.cgi?bugid=[% bug.id FILTER uri %]&amp;action=enter" id="attachments-add-link">Attach File</a>
     [%+ Hook.process('top_actions') %]
     <button type="submit" class="save-btn major" id="top-save-btn" style="display:none">Save Changes</button>
   </div>
@@ -1359,17 +1359,17 @@
         aria-expanded="false" aria-controls="format-menu" class="dropdown-button minor">Format [% terms.Bug %] &#9652;</button>
       <ul class="dropdown-content left menu-up" id="format-menu" role="menu" style="display:none;">
         <li role="presentation">
-          <a href="show_bug.cgi?format=multiple&amp;id=[% bug.id FILTER uri %]" role="menuitem" tabindex="-1">For Printing</a>
+          <a href="[% basepath FILTER none %]show_bug.cgi?format=multiple&amp;id=[% bug.id FILTER uri %]" role="menuitem" tabindex="-1">For Printing</a>
         </li>
         <li role="presentation">
-          <a href="show_bug.cgi?ctype=xml&amp;id=[% bug.id FILTER uri %]" role="menuitem" tabindex="-1">XML</a>
+          <a href="[% basepath FILTER none %]show_bug.cgi?ctype=xml&amp;id=[% bug.id FILTER uri %]" role="menuitem" tabindex="-1">XML</a>
         </li>
         <li role="presentation">
-          <a href="show_bug.cgi?format=default&amp;id=[% bug.id FILTER uri %]" role="menuitem" tabindex="-1">Legacy</a>
+          <a href="[% basepath FILTER none %]show_bug.cgi?format=default&amp;id=[% bug.id FILTER uri %]" role="menuitem" tabindex="-1">Legacy</a>
         </li>
         [% IF bug.groups_in.size == 0 %]
           <li role="presentation">
-            <a href="rest/bug/[% bug.id FILTER uri %]" role="menuitem" tabindex="-1">JSON</a>
+            <a href="[% basepath FILTER none %]rest/bug/[% bug.id FILTER uri %]" role="menuitem" tabindex="-1">JSON</a>
           </li>
         [% END %]
       </ul>
@@ -1380,33 +1380,33 @@
           aria-expanded="false" aria-controls="new-bug-menu" class="dropdown-button minor">New/Clone [% terms.Bug %] &#9652;</button>
         <ul class="dropdown-content left menu-up" id="new-bug-menu" role="menu" style="display:none;">
           <li role="presentation">
-            <a href="enter_bug.cgi" role="menuitem" tabindex="-1" target="_blank">
+            <a href="[% basepath FILTER none %]enter_bug.cgi" role="menuitem" tabindex="-1" target="_blank">
               Create a new [% terms.bug %]</a>
           </li>
           <li role="presentation">
-            <a href="enter_bug.cgi?product=[% bug.product FILTER uri %]"
+            <a href="[% basepath FILTER none %]enter_bug.cgi?product=[% bug.product FILTER uri %]"
                role="menuitem" tabindex="-1" target="_blank">&#8230; in this product</a>
           </li>
           <li role="presentation">
-            <a href="enter_bug.cgi?product=[% bug.product FILTER uri %]&amp;component=[% bug.component FILTER uri %]"
+            <a href="[% basepath FILTER none %]enter_bug.cgi?product=[% bug.product FILTER uri %]&amp;component=[% bug.component FILTER uri %]"
                role="menuitem" tabindex="-1" target="_blank">&#8230; in this component</a>
           </li>
           <li role="separator"></li>
           <li role="presentation">
-            <a href="enter_bug.cgi?format=__default__&amp;product=[% bug.product FILTER uri %]&amp;blocked=[% bug.id FILTER uri %]"
+            <a href="[% basepath FILTER none %]enter_bug.cgi?format=__default__&amp;product=[% bug.product FILTER uri %]&amp;blocked=[% bug.id FILTER uri %]"
                role="menuitem" tabindex="-1" target="_blank">&#8230; that blocks this [% terms.bug %]</a>
           </li>
           <li role="presentation">
-            <a href="enter_bug.cgi?format=__default__&amp;product=[% bug.product FILTER uri %]&amp;dependson=[% bug.id FILTER uri %]"
+            <a href="[% basepath FILTER none %]enter_bug.cgi?format=__default__&amp;product=[% bug.product FILTER uri %]&amp;dependson=[% bug.id FILTER uri %]"
                role="menuitem" tabindex="-1" target="_blank">&#8230; that depends on this [% terms.bug %]</a>
           </li>
           <li role="separator"></li>
           <li role="presentation">
-            <a href="enter_bug.cgi?format=__default__&amp;product=[% bug.product FILTER uri %]&amp;cloned_bug_id=[% bug.id FILTER uri %]"
+            <a href="[% basepath FILTER none %]enter_bug.cgi?format=__default__&amp;product=[% bug.product FILTER uri %]&amp;cloned_bug_id=[% bug.id FILTER uri %]"
                role="menuitem" tabindex="-1" target="_blank">&#8230; as a clone of this [% terms.bug %]</a>
           </li>
           <li role="presentation">
-            <a href="enter_bug.cgi?format=__default__&amp;cloned_bug_id=[% bug.id FILTER uri %]"
+            <a href="[% basepath FILTER none %]enter_bug.cgi?format=__default__&amp;cloned_bug_id=[% bug.id FILTER uri %]"
                role="menuitem" tabindex="-1" target="_blank">&#8230; as a clone, in a different product</a>
           </li>
         </ul>
@@ -1433,7 +1433,7 @@
     ELSE;
       %]
         <div id="new-comment-notice">
-          You need to <a href="show_bug.cgi?id=[% bug.bug_id FILTER none %]&amp;GoAheadAndLogIn=1">log in</a>
+          You need to <a href="[% basepath FILTER none %]show_bug.cgi?id=[% bug.bug_id FILTER none %]&amp;GoAheadAndLogIn=1">log in</a>
           before you can comment on or make changes to this [% terms.bug %].
         </div>
       [%

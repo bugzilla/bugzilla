@@ -9,5 +9,5 @@
 [% RETURN UNLESS is_shadow_bug %]
 
 <br>
-<a href="show_bug.cgi?id=[% bug.cf_shadow_bug FILTER none %]#comment">Add public comment</a>
+<a href="[% basepath FILTER none %]show_bug.cgi?id=[% bug.cf_shadow_bug FILTER none %]#comment">Add public comment</a>
 

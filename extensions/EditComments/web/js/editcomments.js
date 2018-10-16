@@ -36,7 +36,7 @@ $(function() {
             // load original comment text
             bugzilla_ajax(
                 {
-                    url: 'rest/editcomments/comment/' + id,
+                    url: `${BUGZILLA.config.basepath}rest/editcomments/comment/${id}`,
                     hideError: true
                 },
                 function(data) {

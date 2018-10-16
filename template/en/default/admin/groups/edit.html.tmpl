@@ -49,7 +49,7 @@
   javascript_urls = [ "js/field.js" ]
 %]
 
-<form method="post" action="editgroups.cgi">
+<form method="post" action="[% basepath FILTER none %]editgroups.cgi">
   <input type="hidden" name="action" value="postchanges">
   <input type="hidden" name="group_id" value="[% group.id FILTER html %]">
 
@@ -220,7 +220,7 @@
   2.16.</p>
 
 <table><tr><td>
-<form method="post" action="editgroups.cgi">
+<form method="post" action="[% basepath FILTER none %]editgroups.cgi">
   <fieldset>
     <legend>Remove all explicit memberships from users whose login names
       match the following regular expression:</legend>
@@ -236,7 +236,7 @@
 </form>
 </td></tr></table>
 
-<p>Back to the <a href="editgroups.cgi">group list</a>.</p>
+<p>Back to the <a href="[% basepath FILTER none %]editgroups.cgi">group list</a>.</p>
 
 [% PROCESS global/footer.html.tmpl %]
 

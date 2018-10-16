@@ -27,7 +27,7 @@
 <h3>Release Notes For Newer Versions</h3>
 
 <p>Release notes for versions of [% terms.Bugzilla %] of the 4.x series are
-  available <a href="page.cgi?id=release-notes.html">here</a>.</p>
+  available <a href="[% basepath FILTER none %]page.cgi?id=release-notes.html">here</a>.</p>
 
 <h1>[% title FILTER html %]</h1>
 
@@ -503,7 +503,7 @@
   [%+ terms.Bugzilla %] and in the header/footer of every page
   is now simplified and made more powerful. There is a
   <kbd>[?]</kbd> link next to the box that will take you to
-  the simplified <a href="page.cgi?id=quicksearch.html">Quicksearch Help</a>,
+  the simplified <a href="[% basepath FILTER none %]page.cgi?id=quicksearch.html">Quicksearch Help</a>,
   which describes every single feature of the system in a simple layout,
   including new features such as the ability to use partial field names
   when searching.</p>
@@ -845,7 +845,7 @@
   <li><a href="https://bugzilla.mozilla.org/show_bug.cgi?id=69621">
     [%- terms.Bug %] 69621</a>: If you rename or remove a keyword that is
     in use on [% terms.bugs %], you will need to rebuild the "keyword cache"
-    by running <a href="sanitycheck.cgi">sanitycheck.cgi</a> and choosing
+    by running <a href="[% basepath FILTER none %]sanitycheck.cgi">sanitycheck.cgi</a> and choosing
     the option to rebuild the cache when it asks. Otherwise keywords may
     not show up properly in search results.</li>
   <li><a href="https://bugzilla.mozilla.org/show_bug.cgi?id=89822">
@@ -1047,7 +1047,7 @@
     is now no longer allowed, as it would break [% terms.Bugzilla %]. If you
     created such a custom field, you should delete it by first marking it
     obsolete and then clicking "Delete" in the custom field list, using
-    <a href="editfields.cgi">editfields.cgi</a>.
+    <a href="[% basepath FILTER none %]editfields.cgi">editfields.cgi</a>.
     (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=525025">[% terms.Bug %] 525025</a>)
   </li>
   <li>Clicking "submit only my comment" on the "mid-air collisions" page
@@ -1406,7 +1406,7 @@
   background. This requires the administrator to run a daemon
   that comes with [% terms.Bugzilla %], named
   <a href="[% docs_urlbase FILTER html %]api/jobqueue.html">jobqueue.pl</a>,
-  and to enable the <a href="editparams.cgi?section=mta#use_mailer_queue">
+  and to enable the <a href="[% basepath FILTER none %]editparams.cgi?section=mta#use_mailer_queue">
   use_mailer_queue</a> parameter.</p>
 
 <p>Using the background email-sending daemon instead of sending mail directly
@@ -1476,7 +1476,7 @@
   other installation.</p>
 
 <p>If your installation does not need this field, you can hide it by disabling
-  the <a href="editparams.cgi?section=bugfields#use_see_also">use_see_also
+  the <a href="[% basepath FILTER none %]editparams.cgi?section=bugfields#use_see_also">use_see_also
   parameter</a>.</p>
 
 <h3 id="v34_feat_cols">Re-order Columns in Search Results</h3>
@@ -1623,7 +1623,7 @@
   <li><a href="https://bugzilla.mozilla.org/show_bug.cgi?id=69621">
     [%- terms.Bug %] 69621</a>: If you rename or remove a keyword that is
     in use on [% terms.bugs %], you will need to rebuild the "keyword cache"
-    by running <a href="sanitycheck.cgi">sanitycheck.cgi</a> and choosing
+    by running <a href="[% basepath FILTER none %]sanitycheck.cgi">sanitycheck.cgi</a> and choosing
     the option to rebuild the cache when it asks. Otherwise keywords may
     not show up properly in search results.</li>
   <li><a href="https://bugzilla.mozilla.org/show_bug.cgi?id=89822">
@@ -1702,7 +1702,7 @@
   <li>We no longer delete environment variables like <kbd>$ENV{PATH}</kbd>
     automatically unless we're actually running in taint mode.</li>
   <li>We are now using YUI 2.6.0.</li>
-  <li>In <a href="config.cgi?ctype=rdf">the RDF format of config.cgi</a>,
+  <li>In <a href="[% basepath FILTER none %]config.cgi?ctype=rdf">the RDF format of config.cgi</a>,
     the "resource" attribute for flags now contains "flag.cgi" instead
     of "flags.cgi".</li>
 </ul>
@@ -2307,7 +2307,7 @@
   <li><a href="https://bugzilla.mozilla.org/show_bug.cgi?id=69621">
     [%- terms.Bug %] 69621</a>: If you rename or remove a keyword that is
     in use on [% terms.bugs %], you will need to rebuild the "keyword cache"
-    by running <a href="sanitycheck.cgi">sanitycheck.cgi</a> and choosing
+    by running <a href="[% basepath FILTER none %]sanitycheck.cgi">sanitycheck.cgi</a> and choosing
     the option to rebuild the cache when it asks. Otherwise keywords may
     not show up properly in search results.</li>
   <li><a href="https://bugzilla.mozilla.org/show_bug.cgi?id=89822">
@@ -3048,7 +3048,7 @@
 <p>Firefox 2 users and Internet Explorer 7 users will be presented
   with the option to add [% terms.Bugzilla %] to their search bar.
   This uses the
-  <a href="page.cgi?id=quicksearch.html">QuickSearch syntax</a>.</p>
+  <a href="[% basepath FILTER none %]page.cgi?id=quicksearch.html">QuickSearch syntax</a>.</p>
 
 <h3 id="v30_feat_other">Other Enhancements and Changes</h3>
 
@@ -3164,7 +3164,7 @@
   <li><a href="https://bugzilla.mozilla.org/show_bug.cgi?id=69621">
     [%- terms.Bug %] 69621</a>: If you rename or remove a keyword that is
     in use on [% terms.bugs %], you will need to rebuild the "keyword cache"
-    by running <a href="sanitycheck.cgi">sanitycheck.cgi</a> and choosing
+    by running <a href="[% basepath FILTER none %]sanitycheck.cgi">sanitycheck.cgi</a> and choosing
     the option to rebuild the cache when it asks. Otherwise keywords may
     not show up properly in search results.</li>
   <li><a href="https://bugzilla.mozilla.org/show_bug.cgi?id=99215">

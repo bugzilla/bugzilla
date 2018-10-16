@@ -31,7 +31,7 @@
 
 [% UNLESS no_add_link %]
   <a title="Add a value for the '[% field.description FILTER html %]' field."
-     href="editvalues.cgi?action=add&amp;field=
+     href="[% basepath FILTER none %]editvalues.cgi?action=add&amp;field=
           [%- field.name FILTER uri %]">Add</a> a value.
 [% END %]
 
@@ -39,7 +39,7 @@
   Edit value <a
   title="Edit value '[% value.name FILTER html %]' for the '
          [%- field.name FILTER html %]' field"
-  href="editvalues.cgi?action=edit&amp;field=
+  href="[% basepath FILTER none %]editvalues.cgi?action=edit&amp;field=
         [%- field.name FILTER uri %]&amp;value=
         [%- value.name FILTER uri %]">
         '[% value.name FILTER html %]'</a>.
@@ -47,7 +47,7 @@
 
 [% UNLESS no_edit_other_link %]
   Edit other values for the <a
-  href="editvalues.cgi?field=
+  href="[% basepath FILTER none %]editvalues.cgi?field=
         [%- field.name FILTER uri %]">'[% field.description FILTER html %]'</a> field.
 
 [% END %]

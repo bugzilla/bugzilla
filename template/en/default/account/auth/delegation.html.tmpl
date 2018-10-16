@@ -25,7 +25,7 @@
   account?</p>
 
 <div>
-  <form action="auth.cgi" method="post">
+  <form action="[% basepath FILTER none %]auth.cgi" method="post">
     <input type="hidden" name="confirm"     value="1">
     <input type="hidden" name="callback"    value="[% callback FILTER html %]">
     <input type="hidden" name="description" value="[% description FILTER html %]">

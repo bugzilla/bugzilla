@@ -64,7 +64,7 @@ $(function() {
   privilege and confidentiality, legal [% terms.bugs %] are only visible to the reporter,
   the legal team, and the cc list.</p>
 
-<form method="post" action="post_bug.cgi" id="ndaForm">
+<form method="post" action="[% basepath FILTER none %]post_bug.cgi" id="ndaForm">
   <input type="hidden" id="short_desc" name="short_desc" value="New NDA Request">
   <input type="hidden" name="product" value="Legal">
   <input type="hidden" name="component" value="NDA">

@@ -25,13 +25,13 @@
 
 [% WRAPPER global/tabs.html.tmpl
      tabs = [ { name => 'instant', label => "Instant Search",
-                link => "query.cgi?format=instant" },
+                link => basepath _ "query.cgi?format=instant" },
               { name => 'specific', label => "Simple Search",
-                link => "query.cgi?format=specific" },
+                link => basepath _ "query.cgi?format=specific" },
               { name => 'advanced', label => "Advanced Search",
-                link => "query.cgi?format=advanced" },
+                link => basepath _ "query.cgi?format=advanced" },
               { name => 'google',  label => 'Google Search',
-                link => "query.cgi?format=google" } ]
+                link => basepath _ "query.cgi?format=google" } ]
      current_tab_name = query_format || format || "advanced"
 %]
 

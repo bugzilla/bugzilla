@@ -287,7 +287,7 @@ function validate_form() {
 [% USE Bugzilla %]
 [% cgi = Bugzilla.cgi %]
 
-<form id="pr_form" name="pr_form" method="post" action="post_bug.cgi"
+<form id="pr_form" name="pr_form" method="post" action="[% basepath FILTER none %]post_bug.cgi"
       enctype="multipart/form-data" onSubmit="return validate_form()">
 <input type="hidden" name="format" value="mozpr">
 <input type="hidden" name="product" value="Mozilla PR">

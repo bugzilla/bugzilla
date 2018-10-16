@@ -287,7 +287,7 @@ go_to_admin($sel);
 $sel->click_ok("link=Groups");
 $sel->wait_for_page_to_load(WAIT_TIME);
 $sel->title_is("Edit Groups");
-$sel->click_ok("//a[\@href='editgroups.cgi?action=del&group=${group_id}']");
+$sel->click_ok("//a[contains(\@href,'/editgroups.cgi?action=del&group=${group_id}')]");
 $sel->wait_for_page_to_load(WAIT_TIME);
 $sel->title_is("Delete group");
 $sel->is_text_present_ok("Do you really want to delete this group?");

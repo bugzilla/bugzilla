@@ -40,7 +40,7 @@
   the label for this field in the user interface.
 </p>
 
-<form id="edit_field" action="editfields.cgi" method="GET">
+<form id="edit_field" action="[% basepath FILTER none %]editfields.cgi" method="GET">
   <table border="0" cellspacing="0" cellpadding="5" id="edit_custom_field">
     <tr>
       <th class="narrow_label">Name:</th>
@@ -139,7 +139,7 @@
       <tr>
         <th>&nbsp;</th>
         <td>
-          <a href="editvalues.cgi?field=[% field.name FILTER uri %]">Edit
+          <a href="[% basepath FILTER none %]editvalues.cgi?field=[% field.name FILTER uri %]">Edit
             legal values for this field</a>.
         </td>
 
@@ -176,7 +176,7 @@
 
 [% IF field.obsolete %]
 <p>
-  <a href="editfields.cgi?action=del&amp;name=[% field.name FILTER html %]">Remove
+  <a href="[% basepath FILTER none %]editfields.cgi?action=del&amp;name=[% field.name FILTER html %]">Remove
     this custom field from the database.</a><br>
   This action will only be successful if the custom field has never been used
   in [% terms.abug %].<br>
@@ -184,7 +184,7 @@
 [% END %]
 
 <p>
-  <a href="editfields.cgi">Back to the list of existing custom fields</a>
+  <a href="[% basepath FILTER none %]editfields.cgi">Back to the list of existing custom fields</a>
 </p>
 
 [% PROCESS global/footer.html.tmpl %]

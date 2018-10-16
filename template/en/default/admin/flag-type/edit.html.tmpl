@@ -49,7 +49,7 @@
   doc_section = doc_section
 %]
 
-<form id="flagtype_properties" method="post" action="editflagtypes.cgi">
+<form id="flagtype_properties" method="post" action="[% basepath FILTER none %]editflagtypes.cgi">
   <input type="hidden" name="action" value="[% action FILTER html %]">
   <input type="hidden" name="can_fully_edit" value="[% can_fully_edit FILTER html %]">
   <input type="hidden" name="id" value="[% type.id FILTER html %]">

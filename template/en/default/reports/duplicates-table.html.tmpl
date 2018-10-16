@@ -80,7 +80,7 @@
             [% column.reverse_sort = reverse ? 0 : 1 %]
           [% END %]
           <th class="[% column.name FILTER html %]">
-            <a href="duplicates.cgi?sortby=[% column.name FILTER uri %]
+            <a href="[% basepath FILTER none %]duplicates.cgi?sortby=[% column.name FILTER uri %]
                      [% IF column.reverse_sort.defined %]
                       [%- %]&amp;reverse=[% column.reverse_sort FILTER uri %]
                      [% END %]

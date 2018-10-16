@@ -65,7 +65,7 @@ var queryform = "reportform"
 
 [% button_name = "Generate Report" %]
 
-<form method="get" action="report.cgi" name="reportform" id="reportform">
+<form method="get" action="[% basepath FILTER none %]report.cgi" name="reportform" id="reportform">
 
 <table align="center">
   <tr>

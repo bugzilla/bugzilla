@@ -11,7 +11,7 @@ function add_bounty_attachment(bug_id) {
         var existing = document.getElementById('bounty_attachment');
         var td = nodes[0];
         var a  = document.createElement('a');
-        a.href = 'page.cgi?id=attachment_bounty_form.html&bug_id=' + bug_id;
+        a.href = `${BUGZILLA.config.basepath}page.cgi?id=attachment_bounty_form.html&bug_id=${bug_id}`;
         a.appendChild(document.createTextNode(existing
             ? 'Edit bounty tracking attachment'
             : 'Add bounty tracking attachment'));

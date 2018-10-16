@@ -59,7 +59,7 @@
 <tr>
   <th class="report-header">Actions</th>
   <td>
-    <form class="action-button" method="post" action="page.cgi" id="deleteMessage" enctype="multipart/form-data">
+    <form class="action-button" method="post" action="[% basepath FILTER none %]page.cgi" id="deleteMessage" enctype="multipart/form-data">
       <input type="hidden" name="token" value="[% issue_hash_token(['deleteMessage']) FILTER html %]">
       <input type="hidden" name="id" value="push_queues_view.html">
       <input type="hidden" name="delete" value="1">
@@ -67,7 +67,7 @@
       <input type="hidden" name="connector" value="[% message_obj.connector FILTER html %]">
       <input type="submit" value="Delete">
     </form>
-    <form class="action-button" method="post" action="page.cgi" id="returnQueue" enctype="multipart/form-data">
+    <form class="action-button" method="post" action="[% basepath FILTER none %]page.cgi" id="returnQueue" enctype="multipart/form-data">
       <input type="hidden" name="id" value="push_queues.html">
       <input type="submit" value="Return">
     </form>

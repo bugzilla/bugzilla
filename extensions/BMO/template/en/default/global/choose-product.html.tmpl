@@ -134,11 +134,11 @@
     %]
     <section class="product other">
       <h3>
-        <a href="[% target FILTER uri %]?full=1
+        <a href="[% basepath FILTER none %][% target FILTER uri %]?full=1
             [%- IF cloned_bug_id %]&amp;cloned_bug_id=[% cloned_bug_id FILTER uri %][% END -%]
             [%- IF classification %]&amp;classification=[% classification FILTER uri %][% END -%]
             [%- IF format %]&amp;format=[% format FILTER uri %][% END %]">
-          <img src="extensions/BMO/web/producticons/other.png" height="64" width="64" alt="">
+          <img src="[% basepath FILTER none %]extensions/BMO/web/producticons/other.png" height="64" width="64" alt="">
           <span>Other Products</span>
         </a>
       </h3>
@@ -170,11 +170,11 @@
         [%- IF has_entry_groups %] title="This product requires one or more group memberships in order to enter [% terms.bugs %] in it. You have them,  but be aware not everyone else does."[% END %]>
           <th align="right" valign="top">
           [% IF p.name == "Mozilla PR" AND target == "enter_bug.cgi" AND NOT format AND NOT cgi.param("debug") %]
-            <a href="[% target FILTER uri %]?product=[% p.name FILTER uri -%]
+            <a href="[% basepath FILTER none %][% target FILTER uri %]?product=[% p.name FILTER uri -%]
                   [%- IF cloned_bug_id %]&amp;cloned_bug_id=[% cloned_bug_id FILTER uri %][% END %]&amp;format=mozpr">
             [% p.name FILTER html FILTER no_break %]</a>:&nbsp;
           [% ELSE %]
-            <a href="[% target FILTER uri %]?product=[% p.name FILTER uri -%]
+            <a href="[% basepath FILTER none %][% target FILTER uri %]?product=[% p.name FILTER uri -%]
                   [%- IF cloned_bug_id %]&amp;cloned_bug_id=[% cloned_bug_id FILTER uri %][% END -%]
                   [%- IF format %]&amp;format=[% format FILTER uri %][% END %]">
             [% p.name FILTER html FILTER no_break %]</a>:&nbsp;
@@ -188,7 +188,7 @@
   <br>
   [% IF target == "enter_bug.cgi" AND user.settings.product_chooser.value != 'full_product_chooser' %]
     <p>You can choose to get this screen by default when you click "New [% terms.Bug %]"
-    by changing your <a href="userprefs.cgi?tab=settings">preferences</a>.</p>
+    by changing your <a href="[% basepath FILTER none %]userprefs.cgi?tab=settings">preferences</a>.</p>
   [% END %]
 [% END %]
 
@@ -197,10 +197,10 @@
 
 [% IF NOT is_describe %]
 <div id="guided">
-  <a href="enter_bug.cgi?format=guided">
-    <img src="extensions/BMO/web/images/guided.png" width="16" height="16">
+  <a href="[% basepath FILTER none %]enter_bug.cgi?format=guided">
+    <img src="[% basepath FILTER none %]extensions/BMO/web/images/guided.png" width="16" height="16">
     Switch to the [% terms.Bugzilla %] Helper</a> |
-  <a href="page.cgi?id=custom_forms.html">Custom [% terms.bug %] entry forms</a>
+  <a href="[% basepath FILTER none %]page.cgi?id=custom_forms.html">Custom [% terms.bug %] entry forms</a>
 </div>
 [% END %]
 
@@ -216,10 +216,10 @@
       [% IF p.name == name %]
         <section class="product major">
           <h3>
-            <a href="[% target FILTER uri %]?product=[% p.name FILTER uri %]
+            <a href="[% basepath FILTER none %][% target FILTER uri %]?product=[% p.name FILTER uri %]
                 [%- IF cloned_bug_id %]&amp;cloned_bug_id=[% cloned_bug_id FILTER uri %][% END -%]
                 [%- IF format %]&amp;format=[% format FILTER uri %][% END %]">
-              <img src="extensions/BMO/web/producticons/[% icon FILTER uri %]" height="64" width="64" alt="">
+              <img src="[% basepath FILTER none %]extensions/BMO/web/producticons/[% icon FILTER uri %]" height="64" width="64" alt="">
               <span>[% caption || name FILTER html %]</span>
             </a>
           </h3>

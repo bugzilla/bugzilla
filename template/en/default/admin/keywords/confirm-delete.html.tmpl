@@ -40,7 +40,7 @@
   the <code>[% keyword.name FILTER html %]</code> keyword?
 </p>
 
-<form method="post" action="editkeywords.cgi">
+<form method="post" action="[% basepath FILTER none %]editkeywords.cgi">
   <input type="hidden" name="id" value="[% keyword.id FILTER html %]">
   <input type="hidden" name="action" value="delete">
   <input type="hidden" name="token" value="[% token FILTER html %]">
@@ -48,6 +48,6 @@
          value="Yes, really delete the keyword">
 </form>
 
-<p><a href="editkeywords.cgi">Edit other keywords</a>.</p>
+<p><a href="[% basepath FILTER none %]editkeywords.cgi">Edit other keywords</a>.</p>
 
 [% PROCESS global/footer.html.tmpl %]

@@ -31,7 +31,7 @@
              [% loop.count % 2 == 1 ? " odd_row" : " even_row" %]
              [% " is_disabled" UNLESS flag.is_active %]">
     <td [% 'class="disabled"' UNLESS flag.is_active %]>
-      <a href="page.cgi?id=tracking_flags_admin_edit.html&amp;mode=edit&amp;flag_id=[% flag.flag_id FILTER uri %]">
+      <a href="[% basepath FILTER none %]page.cgi?id=tracking_flags_admin_edit.html&amp;mode=edit&amp;flag_id=[% flag.flag_id FILTER uri %]">
         [% flag.name FILTER html %]
       </a>
     </td>
@@ -53,7 +53,7 @@
       </td>
     [% END %]
     <td>
-      <a href="page.cgi?id=tracking_flags_admin_edit.html&amp;mode=copy&amp;copy_from=[% flag.flag_id FILTER uri %]">Copy</a>
+      <a href="[% basepath FILTER none %]page.cgi?id=tracking_flags_admin_edit.html&amp;mode=copy&amp;copy_from=[% flag.flag_id FILTER uri %]">Copy</a>
     </td>
   </tr>
 [% END %]
@@ -61,9 +61,9 @@
 </table>
 
 <div id="new_flag">
-  <a href="page.cgi?id=tracking_flags_admin_edit.html">Add Flag</a> |
+  <a href="[% basepath FILTER none %]page.cgi?id=tracking_flags_admin_edit.html">Add Flag</a> |
   [% IF !show_bug_counts %]
-    <a href="page.cgi?id=tracking_flags_admin_list.html&amp;show_bug_counts=1">
+    <a href="[% basepath FILTER none %]page.cgi?id=tracking_flags_admin_list.html&amp;show_bug_counts=1">
       Show [% terms.bug %] counts (slower)</a> |
   [% END %]
   <input type="checkbox" onclick="filter_flag_list(this.checked)" id="filter">

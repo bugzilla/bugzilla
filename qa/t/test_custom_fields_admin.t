@@ -42,7 +42,7 @@ foreach my $type (@types) {
     $sel->click_ok("create");
     $sel->wait_for_page_to_load_ok(WAIT_TIME);
     $sel->title_is("Custom Field Created");
-    $sel->click_ok("//a[\@href='editfields.cgi?action=del&name=$fname']");
+    $sel->click_ok("//a[contains(\@href,'/editfields.cgi?action=del&name=$fname')]");
     $sel->wait_for_page_to_load_ok(WAIT_TIME);
     $sel->title_is("Delete the Custom Field '$fname' ($fdesc)");
     $sel->click_ok("link=Delete field '$fdesc'");

@@ -7,7 +7,7 @@
   #%]
 
 [% IF san_tag == "tracking_flags_repair" %]
-    <a href="sanitycheck.cgi?tracking_flags_repair=1&amp;token=
+    <a href="[% basepath FILTER none %]sanitycheck.cgi?tracking_flags_repair=1&amp;token=
        [%- issue_hash_token(['sanitycheck']) FILTER uri %]"
     >Repair invalid product_id values in the tracking_flags_visibility table</a>
 

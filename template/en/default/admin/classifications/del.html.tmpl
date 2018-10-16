@@ -51,7 +51,7 @@
 <h2>Confirmation</h2>
 
 <p>Do you really want to delete this classification?</p>
-<form method=post action="editclassifications.cgi">
+<form method=post action="[% basepath FILTER none %]editclassifications.cgi">
   <input type=submit value="Yes, delete">
   <input type=hidden name="action" value="delete">
   <input type=hidden name="classification" value="[% classification.name FILTER html %]">

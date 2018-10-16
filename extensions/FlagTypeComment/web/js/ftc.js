@@ -26,6 +26,9 @@ Bugzilla.FlagTypeComment = class FlagTypeComment {
     if (this.$flags && this.$comment) {
       this.selects = [...this.$flags.querySelectorAll('.flag_select')];
       this.selects.forEach($select => $select.addEventListener('change', () => this.flag_onselect($select)));
+      this.$fieldset_wrapper = this.$flags.parentElement.appendChild(document.createElement('div'));
+      this.$fieldset_wrapper.id = 'approval-request-fieldset-wrapper';
+      this.$comment_wrapper = document.querySelector('#smallCommentFrame') || this.$comment.parentElement;
       this.$comment.form.addEventListener('submit', () => this.form_onsubmit());
     }
   }
@@ -49,7 +52,7 @@ Bugzilla.FlagTypeComment = class FlagTypeComment {
    * @type {Array<HTMLFieldSetElement>}
    */
   get inserted_fieldsets() {
-    return [...this.$flags.parentElement.querySelectorAll('fieldset.approval-request')];
+    return [...this.$fieldset_wrapper.querySelectorAll('fieldset.approval-request')];
   }
 
   /**
@@ -120,7 +123,7 @@ Bugzilla.FlagTypeComment = class FlagTypeComment {
       $fieldset = this.find_available_fieldset(name);
 
       if ($fieldset) {
-        this.$flags.parentElement.appendChild($fieldset);
+        this.$fieldset_wrapper.appendChild($fieldset);
       }
     }
 
@@ -133,6 +136,9 @@ Bugzilla.FlagTypeComment = class FlagTypeComment {
         this.add_comment(text);
       }
     }
+
+    // Hide the original comment form when one or more `<fieldset>`s are inserted
+    this.$comment_wrapper.hidden = this.inserted_fieldsets.length > 0;
   }
 
   /**

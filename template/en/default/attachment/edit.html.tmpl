@@ -260,6 +260,11 @@
         [% END %]
       </div>
       <div id="attachment_comments_and_flags">
+        <div id="attachment_flags">
+          [% IF attachment.flag_types.size > 0 %]
+            [% PROCESS "flag/list.html.tmpl" flag_types = attachment.flag_types, read_only_flags = !can_edit %]
+          [% END %]
+        </div>
         [% IF user.id %]
           <div id="smallCommentFrame">
             <label for="comment">Comment (on the [% terms.bug %]):</label>
@@ -274,25 +279,17 @@
             [% Hook.process('after_comment_textarea') %]
           </div>
         [% END %]
-        <div id="attachment_flags">
-          [% IF attachment.flag_types.size > 0 %]
-              [% PROCESS "flag/list.html.tmpl" flag_types = attachment.flag_types
-                                               read_only_flags = !can_edit
-              %]
-
-          [% END %]
-        </div>
-
-        [% Hook.process('form_before_submit') %]
-
-        [% IF user.id %]
-          <div id="update_container">
-            <input type="submit" value="Submit" id="update">
-          </div>
-        [% END %]
       </div>
     </div>
   </div>
+
+  [% Hook.process('form_before_submit') %]
+
+  [% IF user.id %]
+    <div id="update_container">
+      <input type="submit" value="Submit" id="update">
+    </div>
+  [% END %]
 </form>
 
 <div id="attachment_actions">

@@ -8,3 +8,8 @@
 .mentor {
     font-weight: bold;
 }
+
+.reviewer-suggestions {
+  display: block;
+  margin: 4px 0;
+}

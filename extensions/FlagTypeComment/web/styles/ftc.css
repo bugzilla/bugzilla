@@ -5,12 +5,28 @@
  * This Source Code Form is "Incompatible With Secondary Licenses", as
  * defined by the Mozilla Public License, v. 2.0. */
 
+#approval-request-fieldset-wrapper {
+  margin: 0 0 0 16px;
+}
+
+#approval-request-fieldset-wrapper:empty {
+  display: none;
+}
+
 fieldset.approval-request {
-  margin: 1em 0;
+  margin: 0 0 8px;
+}
+
+fieldset.approval-request:last-child {
+  margin: 0;
 }
 
 fieldset.approval-request legend {
   font-weight: bold;
+}
+
+fieldset.approval-request table {
+  width: 100%;
 }
 
 fieldset.approval-request th {
@@ -36,11 +52,11 @@ fieldset.approval-request input[type="text"] {
 }
 
 fieldset.approval-request input.long[type="text"] {
-  width: 40em;
+  width: 100%;
 }
 
 fieldset.approval-request textarea {
-  width: 40em;
+  width: 100%;
   min-height: 5em;
   font-size: inherit;
   line-height: inherit;
@@ -55,4 +71,10 @@ fieldset.approval-request div {
 fieldset.approval-request table ~ p:last-child {
   margin: .4em;
   text-align: right;
+}
+
+@media screen and (max-width: 1023px) {
+  #approval-request-fieldset-wrapper {
+    margin: 16px 0 0 0;
+  }
 }

@@ -133,13 +133,20 @@ table.attachment_info td {
     display: block;
 }
 
-#smallCommentFrame {
-    margin-right: 1.5em;
-}
-
-#attachment_comments_and_flags, #attachment_actions {
+#attachment_actions {
     clear: both;
     margin-bottom: 1ex;
+}
+
+#attachment_comments_and_flags {
+    display: flex;
+    overflow: hidden;
+    clear: both;
+    margin: 16px 0;
+}
+
+#attachment_comments_and_flags > * {
+    flex: auto;
 }
 
 #attachment_information_read_only .title {
@@ -187,8 +194,15 @@ table.attachment_info td {
     float: left;
 }
 
-#smallCommentFrame textarea {
+#smallCommentFrame {
+  margin: 0 0 0 16px;
+}
+
+#smallCommentFrame #comment,
+#smallCommentFrame #comment_preview {
     display: block;
+    box-sizing: border-box;
+    width: 100% !important;
 }
 
 textarea.bz_private {
@@ -206,7 +220,11 @@ div#update_container {
 }
 
 #attachment_flags {
-    margin-bottom: 1em;
+    display: flex;
+}
+
+#attachment_flags > * {
+    flex: auto;
 }
 
 #attachment_flags p {
@@ -473,4 +491,15 @@ div#update_container {
 
 #att-error-message:empty {
   margin: 0;
+}
+
+@media screen and (max-width: 1023px) {
+  #attachment_comments_and_flags,
+  #attachment_flags {
+    display: block;
+  }
+
+  #smallCommentFrame {
+    margin: 16px 0 0 0;
+  }
 }

@@ -13,7 +13,7 @@ use Capture::Tiny qw(capture_merged);
 
 use Bugzilla::Test::MockLocalconfig (
     db_driver => 'sqlite',
-    db_name => ':memory:',
+    db_name => $ENV{test_db_name} // ':memory:',
 );
 use Bugzilla;
 BEGIN { Bugzilla->extensions };

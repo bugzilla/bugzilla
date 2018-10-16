@@ -1280,8 +1280,9 @@ sub bz_rollback_transaction {
     if (!$self->bz_in_transaction) {
         ThrowCodeError("not_in_transaction");
     } else {
-        $self->rollback();
         $self->{private_bz_transaction_count} = 0;
+        # the next line may fail if somehow we're connected but not in a txn
+        $self->rollback() if $self->connector->connected;
     }
 }
 

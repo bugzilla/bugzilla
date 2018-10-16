@@ -23,6 +23,7 @@ use Bugzilla::Constants;
 use Bugzilla::Install::Util qw(bin_loc install_string);
 use Bugzilla::Util qw(generate_random_password wrap_hard);
 
+use Mojo::JSON qw(encode_json);
 use Data::Dumper;
 use File::Basename qw(dirname);
 use English qw($EGID);
@@ -148,8 +149,12 @@ use constant LOCALCONFIG_VARS => (
         },
     },
     {
-        name    => 'apache_size_limit',
-        default => 600000,
+        name   => 'setrlimit',
+        default => encode_json({ RLIMIT_AS => 2e9 }),
+    },
+    {
+        name    => 'size_limit',
+        default => 750000,
     },
     {
         name    => 'memcached_servers',

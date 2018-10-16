@@ -272,9 +272,12 @@ and you cannot set this up any other way. YOU HAVE BEEN WARNED!
 If you set this to anything other than "", you will need to run checksetup.pl
 as ##root## or as a user who is a member of the specified group.
 END
-    localconfig_apache_size_limit => <<EOT,
-This is the max amount of unshared memory the apache process is allowed to use
-before Apache::SizeLimit kills it. This is only applicable when run under mod_perl.
+    localconfig_setrlimit => <<EOT,
+This a json object whose keys are the named constants for the setrlimit(1) C library
+function. The default sets RLIMIT_AS to 2GiB.
+EOT
+    localconfig_size_limit => <<EOT,
+This is the max amount of unshared memory the worker processes are allowed to use before they will exit.
 EOT
     localconfig_shadowdb_user => <<EOT,
 The username used to authenticate to the shadow db.

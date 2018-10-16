@@ -1,0 +1,18 @@
+--- /app/local/lib/perl5/Mojo/IOLoop/Stream.pm	2018-09-09 17:42:26.000000000 +0000
++++ /app/local/lib/perl5/Mojo/IOLoop/Stream.pm.new	2018-10-16 20:10:06.620747000 +0000
+@@ -34,6 +34,7 @@
+ sub is_writing {
+   my $self = shift;
+   return undef unless $self->{handle};
++  no warnings 'uninitialized';
+   return !!length($self->{buffer}) || $self->has_subscribers('drain');
+ }
+
+@@ -112,6 +113,7 @@
+
+ sub _write {
+   my $self = shift;
++  no warnings 'uninitialized';
+
+   # Handle errors only when reading (to avoid timing problems)
+   my $handle = $self->{handle};

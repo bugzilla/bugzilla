@@ -50,9 +50,9 @@ sub startup {
       heartbeat_interval => $ENV{MOJO_HEARTBEAT_INTERVAL} // 10,
       heartbeat_timeout  => $ENV{MOJO_HEARTBEAT_TIMEOUT} // 120,
       inactivity_timeout => $ENV{MOJO_INACTIVITY_TIMEOUT} // 120,
-      workers            => $ENV{MOJO_WORKERS} // 15,
-      clients            => $ENV{MOJO_CLIENTS} // 10,
-      spare              => $ENV{MOJO_SPARE} // 5,
+      workers            => $ENV{MOJO_WORKERS} // 1,
+      clients            => $ENV{MOJO_CLIENTS} // 200,
+      spare              => $ENV{MOJO_SPARE} // 1,
       listen             => [$ENV{MOJO_LISTEN} // 'http://*:3000'],
     },
   );

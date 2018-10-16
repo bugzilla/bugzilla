@@ -287,7 +287,7 @@ MOJO_CLIENTS
   that high concurrency works best with applications that perform mostly
   non-blocking operations, to optimize for blocking operations you can decrease
   this value and increase "MOJO_WORKERS" instead for better performance.
-  Default: 10
+  Default: 200
 
 BUGZILLA_UNSAFE_AUTH_DELEGATION
   This should never be set in production. It allows auth delegation over http.

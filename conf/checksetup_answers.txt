@@ -25,4 +25,4 @@ $answer{'insidergroup'}         = 'admin';
 $answer{'defaultpriority'}      = '--';
 $answer{'defaultseverity'}      = 'normal';
 $answer{'skin'}                 = 'Mozilla';
-$answer{'docs_urlbase'}         = 'https://bmo.readthedocs.org/en/latest/';
+$answer{'docs_urlbase'}         = 'https://bmo.readthedocs.io/en/latest/';

@@ -18,7 +18,7 @@
     ],
     "participate": {
         "home": "https://wiki.mozilla.org/BMO",
-        "docs": "https://bmo.readthedocs.org",
+        "docs": "https://bmo.readthedocs.io",
         "irc": "irc://irc.mozilla.org/#bmo",
         "irc-contacts": [
             "dkl",

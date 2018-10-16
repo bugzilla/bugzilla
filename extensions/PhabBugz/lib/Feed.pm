@@ -44,6 +44,33 @@ use Bugzilla::Extension::PhabBugz::Util qw(
 has 'is_daemon' => ( is => 'rw', default => 0 );
 
 my $Invocant = class_type { class => __PACKAGE__ };
+my $CURRENT_QUERY = 'none';
+
+sub run_query {
+    my ( $self, $name ) = @_;
+    my $method = $name . '_query';
+    try {
+        with_writable_database {
+            alarm(PHAB_TIMEOUT);
+            $CURRENT_QUERY = $name;
+            $self->$method;
+        };
+    }
+    catch {
+        FATAL($_);
+    }
+    finally {
+        alarm(0);
+        $CURRENT_QUERY = 'none';
+        try {
+            Bugzilla->_cleanup();
+        }
+        catch {
+            FATAL("Error in _cleanup: $_");
+            exit 1;
+        }
+    };
+}
 
 sub start {
     my ($self) = @_;
@@ -51,30 +78,17 @@ sub start {
     my $sig_alarm =  IO::Async::Signal->new(
         name => 'ALRM',
         on_receipt => sub {
-            FATAL("Timeout reached");
-            exit;
+            FATAL("Timeout reached while executing $CURRENT_QUERY query");
+            exit 1;
         },
     );
+
     # Query for new revisions or changes
     my $feed_timer = IO::Async::Timer::Periodic->new(
         first_interval => 0,
         interval       => PHAB_FEED_POLL_SECONDS,
         reschedule     => 'drift',
-        on_tick        => sub {
-            try {
-                with_writable_database {
-                    alarm(PHAB_TIMEOUT);
-                    $self->feed_query();
-                };
-            }
-            catch {
-                FATAL($_);
-            }
-            finally {
-                alarm(0);
-                Bugzilla->_cleanup();
-            };
-        },
+        on_tick        => sub { $self->run_query('feed') },
     );
 
     # Query for new users
@@ -82,21 +96,7 @@ sub start {
         first_interval => 0,
         interval       => PHAB_USER_POLL_SECONDS,
         reschedule     => 'drift',
-        on_tick        => sub {
-            try {
-                with_writable_database {
-                    alarm(PHAB_TIMEOUT);
-                    $self->user_query();
-                };
-            }
-            catch {
-                FATAL($_);
-            }
-            finally {
-                alarm(0);
-                Bugzilla->_cleanup();
-            };
-        },
+        on_tick        => sub { $self->run_query('user') },
     );
 
     # Update project membership in Phabricator based on Bugzilla groups
@@ -104,22 +104,7 @@ sub start {
         first_interval => 0,
         interval       => PHAB_GROUP_POLL_SECONDS,
         reschedule     => 'drift',
-        on_tick        => sub {
-            try {
-                with_writable_database {
-                    alarm(PHAB_TIMEOUT);
-                    $self->group_query();
-                };
-            }
-            catch {
-                FATAL($_);
-            }
-            finally {
-                alarm(0);
-                Bugzilla->_cleanup();
-            };
-
-        },
+        on_tick        => sub { $self->run_query('group') },
     );
 
     my $loop = IO::Async::Loop->new;
@@ -127,9 +112,11 @@ sub start {
     $loop->add($user_timer);
     $loop->add($group_timer);
     $loop->add($sig_alarm);
+
     $feed_timer->start;
     $user_timer->start;
     $group_timer->start;
+
     $loop->run;
 }
 

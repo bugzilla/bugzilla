@@ -1,0 +1,15 @@
+[% PROCESS global/variables.none.tmpl %]
+
+[% title = "Too Many Requests" %]
+
+[% PROCESS global/header.html.tmpl
+           robots = 'noindex' %]
+
+<h1>[% title FILTER html %]</h1>
+
+<p>
+    We’re sorry, but you have sent too many requests to us recently.
+    You will be unblocked in [% block_timeout / 60 FILTER none %] minutes.
+</p>
+
+[% PROCESS global/footer.html.tmpl %]

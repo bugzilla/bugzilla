@@ -195,6 +195,9 @@ is_private        boolean  ``true`` if the attachment should be private
                            not specified.
 flags             array    Flags objects to add to the attachment. The object
                            format is described in the Flag object below.
+bug_flags         array    Flag objects to add to the attachment's bug. See the
+                           ``flags`` param for :ref:`rest_create_bug` for the
+                           object format.
 ================  =======  ======================================================
 
 Flag object:
@@ -312,6 +315,9 @@ is_obsolete   boolean  ``true`` if the attachment is obsolete, ``false``
                        otherwise.
 flags         array    An array of Flag objects with changes to the flags. The
                        object format is described in the Flag object below.
+bug_flags     array    An optional array of Flag objects with changes to the
+                       flags of the attachment's bug. See the ``flags`` param
+                       for :ref:`rest_update_bug` for the object format.
 ============  =======  ==========================================================
 
 Flag object:

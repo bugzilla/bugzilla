@@ -934,6 +934,10 @@ sub add_attachment {
     my $timestamp = $dbh->selectrow_array('SELECT LOCALTIMESTAMP(0)');
 
     my $flags = delete $params->{flags};
+    my $comment = delete $params->{comment};
+    my $bug_flags = delete $params->{bug_flags};
+
+    $comment = $comment ? trim($comment) : '';
 
     foreach my $bug (@bugs) {
         my $attachment = Bugzilla::Attachment->create({
@@ -953,11 +957,18 @@ sub add_attachment {
         }
 
         $attachment->update($timestamp);
-        my $comment = $params->{comment} || '';
-        $attachment->bug->add_comment($comment,
+
+        # The comment has to be added even if it's empty
+        $bug->add_comment($comment,
             { isprivate  => $attachment->isprivate,
               type       => CMT_ATTACHMENT_CREATED,
               extra_data => $attachment->id });
+
+        if ($bug_flags) {
+            my ($old_flags, $new_flags) = extract_flags($bug_flags, $bug);
+            $bug->set_flags($old_flags, $new_flags);
+        }
+
         push(@created, $attachment);
     }
     $_->bug->update($timestamp) foreach @created;
@@ -1002,6 +1013,9 @@ sub update_attachment {
 
     my $flags = delete $params->{flags};
     my $comment = delete $params->{comment};
+    my $bug_flags = delete $params->{bug_flags};
+
+    $comment = $comment ? trim($comment) : '';
 
     # Update the values
     foreach my $attachment (@attachments) {
@@ -1041,12 +1055,18 @@ sub update_attachment {
     my @result;
     foreach my $attachment (@attachments) {
         my $changes = $attachment->update();
+        my $bug = $attachment->bug;
 
-        if ($comment = trim($comment)) {
-            $attachment->bug->add_comment($comment,
+        if ($comment) {
+            $bug->add_comment($comment,
                 { isprivate  => $attachment->isprivate,
                   type       => CMT_ATTACHMENT_UPDATED,
                   extra_data => $attachment->id });
+        }
+
+        if ($bug_flags) {
+            my ($old_flags, $new_flags) = extract_flags($bug_flags, $bug);
+            $bug->set_flags($old_flags, $new_flags);
         }
 
         $changes = translate($changes, ATTACHMENT_MAPPED_RETURNS);
@@ -3680,6 +3700,11 @@ C<string> The login of the requestee if the flag type is requestable to a specif
 
 =back
 
+=item C<bug_flags>
+
+C<array> An optional array of hashes with flags to add to the attachment's
+bug. See the C<flags> param for the L</update> method for the object format.
+
 =back
 
 =item B<Returns>
@@ -3853,6 +3878,11 @@ if more than one flag is set of the same name.
 C<boolean> Set to true if you specifically want a new flag to be created.
 
 =back
+
+=item C<bug_flags>
+
+C<array> An optional array of hashes with changes to the flags of the attachment's
+bug. See the C<flags> param for the L</update> method for the object format.
 
 =item B<Returns>
 

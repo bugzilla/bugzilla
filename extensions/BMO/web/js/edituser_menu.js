@@ -5,15 +5,8 @@
  * This Source Code Form is "Incompatible With Secondary Licenses", as
  * defined by the Mozilla Public License, v. 2.0. */
 
-function show_usermenu(id, email, show_edit) {
+function show_usermenu(id, email, show_edit, hide_profile) {
     var items = [
-        {
-            name: "Profile",
-            callback: function () {
-                var href = `${BUGZILLA.config.basepath}user_profile?user_id=${id}`;
-                window.open(href, "_blank");
-            }
-        },
         {
             name: "Activity",
             callback: function () {
@@ -30,6 +23,15 @@ function show_usermenu(id, email, show_edit) {
             }
         }
     ];
+    if (!hide_profile) {
+        items.push({
+            name: "Profile",
+            callback: function () {
+                var href = `${BUGZILLA.config.basepath}user_profile?user_id=${id}`;
+                window.open(href, "_blank");
+            }
+        });
+    }
     if (show_edit) {
         items.push({
             name: "Edit",
@@ -49,6 +51,6 @@ function show_usermenu(id, email, show_edit) {
 $(function() {
   $('.show_usermenu').on("click", function (event) {
     var $this = $(this);
-    return show_usermenu($this.data('user-id'), $this.data('user-email'), $this.data('show-edit'));
+    return show_usermenu($this.data('user-id'), $this.data('user-email'), $this.data('show-edit'), $this.data('hide-profile'));
   });
 });

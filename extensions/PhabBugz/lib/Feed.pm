@@ -79,6 +79,12 @@ sub start {
         name => 'ALRM',
         on_receipt => sub {
             FATAL("Timeout reached while executing $CURRENT_QUERY query");
+
+            if (my $dd = Bugzilla->datadog) {
+                my $lcname = lc $CURRENT_QUERY;
+                $dd->increment("bugzilla.phabbugz.${lcname}_query_timeouts");
+            }
+
             exit 1;
         },
     );

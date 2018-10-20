@@ -64,6 +64,12 @@
 
 /* fixed global header (begin) */
     @media screen and (min-width: 800px) {
+        html, body {
+            overflow: hidden; /* Disable bounce effect (Safari) */
+            overscroll-behavior: none;
+            height: 100%;
+        }
+
         #wrapper {
             overflow: hidden;
             width: 100%;
@@ -75,6 +81,8 @@
             overflow-y: scroll;
             -webkit-overflow-scrolling: touch; /* Enable momentum scrolling on iOS */
             scroll-behavior: smooth;
+            overscroll-behavior: contain;
+            will-change: transform; /* Enable smooth scrolling (Safari) */
         }
     }
 /* fixed global header (end) */

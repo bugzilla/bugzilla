@@ -55,7 +55,7 @@
       if(!document.location.href.match(/show_bug\.cgi/)) {
         history.replaceState( null,
                              "[% unfiltered_title FILTER js %]",
-                             "show_bug.cgi?id=[% bug.bug_id FILTER js %]" );
+                             "[% basepath FILTER js %]show_bug.cgi?id=[% bug.bug_id FILTER js %]" );
         document.title = "[% unfiltered_title FILTER js %]";
       }
       if (document.location.href.match(/show_bug\.cgi\?.*list_id=/)) {

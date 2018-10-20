@@ -317,7 +317,7 @@
        [% INCLUDE bug/field.html.tmpl
             bug = bug, field = bug_fields.product,
             override_legal_values = bug.choices.product
-            desc_url = 'describecomponents.cgi', value = bug.product
+            desc_url = basepath _ 'describecomponents.cgi', value = bug.product
             editable = bug.check_can_change_field('product', 0, 1) %]
     </tr>
 
@@ -340,7 +340,7 @@
       [% INCLUDE bug/field.html.tmpl
           bug = bug, field = bug_fields.component, value = bug.component
           override_legal_values = bug.choices.component
-          desc_url = "describecomponents.cgi?product=$bug.product"
+          desc_url = basepath _ "describecomponents.cgi?product=$bug.product"
           editable = bug.check_can_change_field('component', 0, 1)
       %]
     </tr>

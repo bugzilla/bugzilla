@@ -11,10 +11,10 @@
 %]
 
 [% param_descs = {
-    report_secbugs_active => "Enable or disable the security $terms.bugs report feature."
+    report_secbugs_active => "Enable or disable the security $terms.bugs report feature.",
     report_secbugs_emails =>
       "Comma delimited list of the email addresses that the security $terms.bugs report will be sent to.",
-    report_secbugs_products =>
-      "JSON array of the products the security $terms.bugs report will report on. e.g [\"Prod1\", \"Prod2\"]",
+    report_secbugs_teams =>
+      "JSON dictionary of the teams the security $terms.bugs report will report on. e.g {\"Team1\": { \"Product\": { \"all_components\": false, \"prefixed_components\": [\"Prefix\"], \"named_components\": [\"Component1\"]}, \"Team2\": { ... } }",
   }
 %]

@@ -69,8 +69,8 @@ $t->json_is('/id' => $api_user->id);
 
 # Each time you call $t->get_ok, post_ok, etc the previous request is cleared.
 $t->get_ok('/rest/whoami');
-$t->status_is(200);
-$t->json_is('/name' => '');
-$t->json_is('/id' => 0);
+$t->status_is(401);
+$t->json_is('/name' => undef);
+$t->json_is('/id' => undef);
 
 done_testing;

@@ -18,6 +18,8 @@ Disallow: [% basepath FILTER none %]show_bug.cgi*format=multiple*
 
 Allow: [% basepath FILTER none %]describecomponents.cgi
 Allow: [% basepath FILTER none %]describekeywords.cgi
+Disallow: [% basepath FILTER none %]showdependency*
+Disallow: [% basepath FILTER none %]banmyipforever.cgi
 
 [% FILTER remove('#.*') %]
 [% Hook.process("end") %]

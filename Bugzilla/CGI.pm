@@ -561,6 +561,10 @@ sub header {
     # the MIME type away from the declared Content-Type.
     $headers{'-x_content_type_options'} = 'nosniff';
 
+    # Add Referrer-Policy (sic) header to prevent browsers sending
+    # Referer (sic) headers to external websites.
+    $headers{'-referrer_policy'} = 'same-origin';
+
     Bugzilla::Hook::process('cgi_headers',
         { cgi => $self, headers => \%headers }
     );

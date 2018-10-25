@@ -57,7 +57,7 @@ declare BounceNotification,
   as Dict [
   bounce => Dict [
     bouncedRecipients => BouncedRecipients,
-    reportingMTA      => Str,
+    reportingMTA      => Optional[Str],
     bounceSubType     => Str,
     bounceType        => Str,
     slurpy Any,

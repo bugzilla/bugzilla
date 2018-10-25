@@ -129,6 +129,11 @@ if ($OSNAME eq 'linux' && -f '/etc/debian_version') {
 }
 
 my %optional_features = (
+  better_xff => {
+    description => 'Improved behavior of MOJO_REVERSE_PROXY',
+    prereqs =>
+      {runtime => {requires => {'Mojolicious::Plugin::ForwardedFor' => 0}}}
+  },
   alien_cmark => {
     description => 'Support GitHub-flavored markdown',
     prereqs     => {runtime => {requires => {'Alien::libcmark_gfm' => '3'},},},
@@ -300,7 +305,10 @@ my %optional_features = (
   },
   linux_smaps => {
     description => 'Linux::Smaps::Tiny for limiting memory usage',
-    prereqs     => {runtime => {requires => {'Linux::Smaps::Tiny' => '0', 'BSD::Resource' => 0}}},
+    prereqs     => {
+      runtime =>
+        {requires => {'Linux::Smaps::Tiny' => '0', 'BSD::Resource' => 0}}
+    },
   },
   linux_pdeath => {
     description => 'Linux::Pdeathsig for a good parent/child relationships',

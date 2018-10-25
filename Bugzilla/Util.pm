@@ -323,21 +323,16 @@ sub do_ssl_redirect_if_required {
 
 # Returns the real remote address of the client,
 sub remote_ip {
-    my $remote_ip       = $ENV{'REMOTE_ADDR'} || '127.0.0.1';
-    my @proxies         = split(/[\s,]+/, Bugzilla->localconfig->{inbound_proxies});
-    my @x_forwarded_for = split(/[\s,]+/, $ENV{HTTP_X_FORWARDED_FOR} // '');
-
-    return $remote_ip unless @x_forwarded_for;
-    return $x_forwarded_for[0] if @proxies && $proxies[0] eq '*';
-    return $remote_ip if none { $_ eq $remote_ip } @proxies;
-
-    foreach my $ip (reverse @x_forwarded_for) {
-        if (none { $_ eq $ip } @proxies) {
-            # Keep the original IP address if the remote IP is invalid.
-            return validate_ip($ip) || $remote_ip;
-        }
+    if ($ENV{SERVER_SOFTWARE} eq 'Bugzilla::Quantum::CGI') {
+        my $c = $Bugzilla::Quantum::CGI::C
+            or LOGDIE("Cannot find controller!");
+        state $better_xff = Bugzilla->has_feature('better_xff');
+        return $better_xff ? $c->forwarded_for : $c->tx->remote_address;
     }
-    return $remote_ip;
+    else {
+        WARN("remote_ip() called outside CGI controller!");
+        return "";
+    }
 }
 
 sub validate_ip {

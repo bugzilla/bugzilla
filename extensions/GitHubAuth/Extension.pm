@@ -24,14 +24,17 @@ use URI::QueryParam;
 our $VERSION = '0.01';
 
 BEGIN {
-    # Monkey-patch can() on Bugzilla::Auth::Login::CGI so that our own fail_nodata gets called.
+    # Monkey-patch can() on Bugzilla::Auth::Login::CGI so that our own fail_nodata gets called
+    # if GitHubAuth is enabled in user_info_class.
     # Our fail_nodata behaves like CGI's, so this shouldn't be a problem for CGI-based logins.
-
     *Bugzilla::Auth::Login::CGI::can = sub {
         my ($stack, $method) = @_;
-
-        return undef if $method eq 'fail_nodata';
-        return $stack->SUPER::can($method);
+        if (Bugzilla->params->{user_info_class} !~ /\bGitHubAuth\b/
+            || $method ne 'fail_nodata')
+        {
+            return $stack->SUPER::can($method);
+        }
+        return undef;
     };
 }
 

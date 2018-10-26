@@ -2738,11 +2738,11 @@ sub app_startup {
     $r->any( '/:REWRITE_mozlist' => [ REWRITE_mozlist => qr{form[\.:]mozlist} ] )
       ->to( 'CGI#enter_bug_cgi' => { 'product' => 'mozilla.org', 'format' => 'mozlist' } );
     $r->any( '/:REWRITE_presentation' => [ REWRITE_presentation => qr{form[\.:]presentation} ] )
-      ->to( 'cgi#enter_bug_cgi' => { 'product' => 'mozilla.org', 'format' => 'presentation' } );
+      ->to( 'CGI#enter_bug_cgi' => { 'product' => 'mozilla.org', 'format' => 'presentation' } );
     $r->any( '/:REWRITE_trademark' => [ REWRITE_trademark => qr{form[\.:]trademark} ] )
-      ->to( 'cgi#enter_bug_cgi' => { 'product' => 'mozilla.org', 'format' => 'trademark' } );
+      ->to( 'CGI#enter_bug_cgi' => { 'product' => 'mozilla.org', 'format' => 'trademark' } );
     $r->any( '/:REWRITE_recoverykey' => [ REWRITE_recoverykey => qr{form[\.:]recoverykey} ] )
-      ->to( 'cgi#enter_bug_cgi' => { 'product' => 'mozilla.org', 'format' => 'recoverykey' } );
+      ->to( 'CGI#enter_bug_cgi' => { 'product' => 'mozilla.org', 'format' => 'recoverykey' } );
     $r->any( '/:REWRITE_legal' => [ REWRITE_legal => qr{form[\.:]legal} ] )
       ->to( 'CGI#enter_bug_cgi' => { 'product' => 'Legal', 'format' => 'legal' }, );
     $r->any( '/:REWRITE_recruiting' => [ REWRITE_recruiting => qr{form[\.:]recruiting} ] )

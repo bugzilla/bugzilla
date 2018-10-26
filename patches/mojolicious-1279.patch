@@ -1,0 +1,79 @@
+From b304a328dbe45061c919e7fb71bac2046886e7fc Mon Sep 17 00:00:00 2001
+From: Doug Bell <doug@preaction.me>
+Date: Sun, 21 Oct 2018 20:25:27 -0500
+Subject: [PATCH 1/2] fix uninitialized warnings in stream
+
+After `undef $self->{buffer}`, we can no longer call `length` on it in
+Perl 5.10 (later Perls more usefully treat `undef` as empty without
+warning). But, according to #1256, we can't just set `$self->{buffer}`
+to the empty string without causing Perl to hold on to all the memory it
+allocated for our buffer. So, we have to first `undef`, then set to
+a defined value to prevent warnings from `length` on Perl 5.10.
+---
+ lib/Mojo/IOLoop/Stream.pm | 5 +++--
+ 1 file changed, 3 insertions(+), 2 deletions(-)
+
+diff --git a/lib/Mojo/IOLoop/Stream.pm b/lib/Mojo/IOLoop/Stream.pm
+index 79e920fb2..068fa28a4 100644
+--- a/lib/Mojo/IOLoop/Stream.pm
++++ b/lib/Mojo/IOLoop/Stream.pm
+@@ -37,7 +37,7 @@ sub is_writing {
+   return !!length($self->{buffer}) || $self->has_subscribers('drain');
+ }
+ 
+-sub new { shift->SUPER::new(handle => shift, timeout => 15) }
++sub new { shift->SUPER::new(handle => shift, buffer => '', timeout => 15) }
+ 
+ sub start {
+   my $self = shift;
+@@ -122,7 +122,8 @@ sub _write {
+   }
+ 
+   # Clear the buffer to free the underlying SV* memory
+-  undef $self->{buffer}, $self->emit('drain') unless length $self->{buffer};
++  undef $self->{buffer}, $self->{buffer} = '', $self->emit('drain')
++    unless length $self->{buffer};
+   return if $self->is_writing;
+   return $self->close if $self->{graceful};
+   $self->reactor->watch($handle, !$self->{paused}, 0) if $self->{handle};
+
+From fa06afe69c2025c698a54901643f160aeba3acad Mon Sep 17 00:00:00 2001
+From: Doug Bell <doug@preaction.me>
+Date: Sun, 21 Oct 2018 20:28:28 -0500
+Subject: [PATCH 2/2] fix uninitialized warnings on Perl 5.10
+
+Perl 5.10 warns when `length` is called on uninitialized values, so we
+need to check for definedness first
+---
+ lib/Mojo/DOM/CSS.pm                     | 4 +++-
+ lib/Mojolicious/Validator/Validation.pm | 2 +-
+ 2 files changed, 4 insertions(+), 2 deletions(-)
+
+diff --git a/lib/Mojo/DOM/CSS.pm b/lib/Mojo/DOM/CSS.pm
+index 463c50130..960cb5ab1 100644
+--- a/lib/Mojo/DOM/CSS.pm
++++ b/lib/Mojo/DOM/CSS.pm
+@@ -120,7 +120,9 @@ sub _compile {
+     # Tag
+     elsif ($css =~ /\G((?:$ESCAPE_RE\s|\\.|[^,.#:[ >~+])+)/gco) {
+       my $alias = (my $name = $1) =~ s/^([^|]*)\|// && $1 ne '*' ? $1 : undef;
+-      my $ns = length $alias ? $ns{$alias} // return [['invalid']] : $alias;
++      my $ns = defined $alias && length $alias
++        ? $ns{$alias} // return [['invalid']]
++        : $alias;
+       push @$last, ['tag', $name eq '*' ? undef : _name($name), _unescape($ns)];
+     }
+ 
+diff --git a/lib/Mojolicious/Validator/Validation.pm b/lib/Mojolicious/Validator/Validation.pm
+index 600e9e056..f505e800e 100644
+--- a/lib/Mojolicious/Validator/Validation.pm
++++ b/lib/Mojolicious/Validator/Validation.pm
+@@ -75,7 +75,7 @@ sub optional {
+     @input = map { $self->$cb($name, $_) } @input;
+   }
+   $self->output->{$name} = ref $input eq 'ARRAY' ? \@input : $input[0]
+-    if @input && !grep { !length } @input;
++    if @input && !grep { !defined || !length } @input;
+ 
+   return $self->topic($name);
+ }

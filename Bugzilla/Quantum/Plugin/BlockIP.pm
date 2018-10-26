@@ -6,7 +6,8 @@ use Bugzilla::Memcached;
 
 use constant BLOCK_TIMEOUT => 60 * 60;
 
-my $MEMCACHED = Bugzilla::Memcached->new()->{memcached};
+my $MEMCACHED    = Bugzilla::Memcached->new()->{memcached};
+my $BLOCKED_HTML = "";
 
 sub register {
   my ($self, $app, $conf) = @_;
@@ -14,6 +15,13 @@ sub register {
   $app->hook(before_routes => \&_before_routes);
   $app->helper(block_ip   => \&_block_ip);
   $app->helper(unblock_ip => \&_unblock_ip);
+
+  my $template = Bugzilla::Template->create();
+  $template->process('global/ip-blocked.html.tmpl',
+    {block_timeout => BLOCK_TIMEOUT},
+    \$BLOCKED_HTML);
+  undef $template;
+  utf8::encode($BLOCKED_HTML);
 }
 
 sub _block_ip {
@@ -35,7 +43,8 @@ sub _before_routes {
     $c->block_ip($ip);
     $c->res->code(429);
     $c->res->message('Too Many Requests');
-    $c->render(handler => 'bugzilla', template => 'global/ip-blocked', block_timeout => BLOCK_TIMEOUT);
+    $c->write($BLOCKED_HTML);
+    $c->finish;
   }
 }
 

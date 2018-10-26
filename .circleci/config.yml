@@ -62,6 +62,9 @@ defaults:
       command: |
         [[ -f build_info/only_version_changed.txt ]] && exit 0
         mv /opt/bmo/local /app/local
+        for file in patches/*.patch; do
+            patch -p0 < $file
+        done
         perl -MSys::Hostname -i -pE 's/bmo.test/hostname() . ":$ENV{PORT}"/ges' $BZ_QA_CONF_FILE
         perl checksetup.pl --no-database --default-localconfig
         mkdir artifacts

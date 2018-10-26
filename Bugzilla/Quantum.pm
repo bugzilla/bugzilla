@@ -37,13 +37,13 @@ sub startup {
   my ($self) = @_;
 
   DEBUG('Starting up');
+  $self->plugin('Bugzilla::Quantum::Plugin::BlockIP');
   $self->plugin('Bugzilla::Quantum::Plugin::Glue');
   $self->plugin('Bugzilla::Quantum::Plugin::Hostage')
     unless $ENV{BUGZILLA_DISABLE_HOSTAGE};
   $self->plugin('Bugzilla::Quantum::Plugin::SizeLimit')
     unless $ENV{BUGZILLA_DISABLE_SIZELIMIT};
   $self->plugin('ForwardedFor') if Bugzilla->has_feature('better_xff');
-  $self->plugin('Bugzilla::Quantum::Plugin::BlockIP');
   $self->plugin('Bugzilla::Quantum::Plugin::Helpers');
 
   # hypnotoad is weird and doesn't look for MOJO_LISTEN itself.

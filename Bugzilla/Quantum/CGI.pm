@@ -61,6 +61,7 @@ sub load_one {
     $c->stash->{cleanup_guard}->dismiss;
     Bugzilla->usage_mode(USAGE_MODE_BROWSER);
     try {
+      CGI::initialize_globals();
       Bugzilla->init_page();
       $inner->();
     }
@@ -72,7 +73,6 @@ sub load_one {
       untie *STDOUT;
       $c->finish if !$error || _is_exit($error);
       Bugzilla->cleanup;
-      CGI::initialize_globals();
     };
   };
 

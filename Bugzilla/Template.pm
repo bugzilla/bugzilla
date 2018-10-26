@@ -49,7 +49,7 @@ use constant FORMAT_3_SIZE => [19,28,28];
 use constant FORMAT_DOUBLE => '%19s %-55s';
 use constant FORMAT_2_SIZE => [19,55];
 
-my %SHARED_PROVIDERS;
+our %SHARED_PROVIDERS;
 
 # Pseudo-constant.
 sub SAFE_URL_REGEXP {

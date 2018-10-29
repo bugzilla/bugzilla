@@ -16,6 +16,15 @@
     white-space: nowrap;
 }
 
+#user_profile_table .vcard {
+  display: inline-block;
+  font-weight: bold;
+}
+
+#user_profile_table .vcard a.disabled {
+  color: #888;
+}
+
 #user_profile_table .numeric {
     text-align: right;
 }

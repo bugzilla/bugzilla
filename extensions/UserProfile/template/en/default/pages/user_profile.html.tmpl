@@ -60,6 +60,7 @@
   <th>User</th>
   <td colspan="2">
     [% INCLUDE bug_modal/user.html.tmpl u = target hide_profile = 1 %]
+    [% " (disabled)" UNLESS target.is_enabled %]
   </td>
 </tr>
 

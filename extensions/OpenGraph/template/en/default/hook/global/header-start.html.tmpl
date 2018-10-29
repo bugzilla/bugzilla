@@ -9,8 +9,8 @@
 [% USE Bugzilla %]
 <meta property="og:type" content="website">
 <meta property="og:title" content="[% title FILTER none %]">
-<meta property="og:url" content="[% Bugzilla.cgi.self_url FILTER html %]">
 [% IF bug %]
+<meta property="og:url" content="[% Bugzilla.localconfig.canonical_urlbase FILTER none %]show_bug.cgi?id=[% bug.bug_id FILTER uri %]">
 <meta property="og:description"
       content="[% bug.bug_status FILTER html %] ([% bug.assigned_to.login FILTER email FILTER html %]) in [% bug.product FILTER html %] - [% bug.component FILTER html %]. Last updated [% bug.delta_ts FILTER time('%Y-%m-%d') %].">
 [% ELSIF error_message %]

@@ -92,7 +92,7 @@
   BUGZILLA.bug_id = [% bug.id FILTER none %];
   BUGZILLA.bug_title = '[% unfiltered_title FILTER js %]';
   BUGZILLA.bug_summary = '[% bug.short_desc FILTER js %]';
-  BUGZILLA.bug_url = '[% Bugzilla.cgi.self_url FILTER js %]';
+  BUGZILLA.bug_url = '[% Bugzilla.localconfig.canonical_urlbase _ "show_bug.cgi?id=" _ bug.id FILTER js %]';
   BUGZILLA.user = {
     id: [% user.id FILTER none %],
     login: '[% user.login FILTER js %]',

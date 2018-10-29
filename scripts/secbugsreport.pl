@@ -48,19 +48,21 @@ my $report       = Bugzilla::Report::SecurityRisk->new(
 );
 
 my $bugs_by_team = $report->results->[-1]->{bugs_by_team};
-my @sorted_team_names = sort { ## no critic qw(BuiltinFunctions::ProhibitReverseSortBlock
-  @{$bugs_by_team->{$b}->{open}} <=> @{$bugs_by_team->{$a}->{open}} ## no critic qw(Freenode::DollarAB)
+my @sorted_team_names = sort {    ## no critic qw(BuiltinFunctions::ProhibitReverseSortBlock
+  @{$bugs_by_team->{$b}->{open}} <=> @{$bugs_by_team->{$a}->{open}}    ## no critic qw(Freenode::DollarAB)
     || $a cmp $b
 } keys %$teams;
 
 my $vars = {
-  urlbase         => Bugzilla->localconfig->{urlbase},
-  report_week     => $report_week,
-  teams           => \@sorted_team_names,
-  sec_keywords    => $sec_keywords,
-  results         => $report->results,
-  deltas          => $report->deltas,
-  build_bugs_link => \&build_bugs_link,
+  urlbase            => Bugzilla->localconfig->{urlbase},
+  report_week        => $report_week,
+  teams              => \@sorted_team_names,
+  sec_keywords       => $sec_keywords,
+  results            => $report->results,
+  deltas             => $report->deltas,
+  missing_products   => $report->missing_products,
+  missing_components => $report->missing_components,
+  build_bugs_link    => \&build_bugs_link,
 };
 
 $template->process('reports/email/security-risk.html.tmpl', $vars, \$html) or ThrowTemplateError($template->error());

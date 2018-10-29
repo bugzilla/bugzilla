@@ -76,6 +76,10 @@ has 'sec_keywords' => (is => 'ro', required => 1, isa => ArrayRef [Str],);
 
 has 'products' => (is => 'lazy', isa => ArrayRef [Str],);
 
+has 'missing_products' => (is => 'lazy', isa => ArrayRef [Str],);
+
+has 'missing_components' => (is => 'lazy', isa => ArrayRef [Str],);
+
 has 'initial_bug_ids' => (is => 'lazy', isa => ArrayRef [Int],);
 
 has 'initial_bugs' => (
@@ -144,6 +148,65 @@ sub _build_products {
   }
   @products = uniq @products;
   return \@products;
+}
+
+sub _build_missing_products {
+  my ($self) = @_;
+  my $dbh = Bugzilla->dbh;
+  my @products = map { $dbh->quote($_) } @{$self->products};
+  my $query = qq{
+        SELECT
+            name
+        FROM
+            products
+         WHERE
+            @{[$dbh->sql_in('products.name', \@products)]}
+    };
+  my $found_products = Bugzilla->dbh->selectcol_arrayref($query);
+  return (diff_arrays($self->products, $found_products))[0];
+}
+
+sub _build_missing_components {
+  my ($self) = @_;
+  my $dbh = Bugzilla->dbh;
+  my $products           = join ', ', map { $dbh->quote($_) } @{$self->products};
+  my @named_components   = ();
+  my @missing_components = ();
+  foreach my $team (values %{$self->teams}) {
+    foreach my $product (keys %$team) {
+      if (exists $team->{$product}->{named_components}) {
+        foreach my $component (@{$team->{$product}->{named_components}}) {
+          push @named_components, [$product, $component];
+        }
+      }
+    }
+  }
+
+  my @components = map { $dbh->quote($_->[1]) } @named_components;
+  my $query = qq{
+      SELECT
+          product.name,
+          component.name
+      FROM
+          components AS component
+          JOIN products AS product ON component.product_id = product.id
+      WHERE
+          @{[$dbh->sql_in('component.name', \@components)]}
+  };
+  my $found_components = Bugzilla->dbh->selectall_arrayref($query);
+
+  foreach my $named_component (@named_components) {
+    my $found = 0;
+    foreach my $found_component (@$found_components) {
+      if (lc $named_component->[0] eq lc $found_component->[0] && lc $named_component->[1] eq lc $found_component->[1])
+      {
+        $found = 1;
+        last;
+      }
+    }
+    push @missing_components, "$named_component->[0]::$named_component->[1]" if !$found;
+  }
+  return \@missing_components;
 }
 
 sub _build_initial_bug_ids {

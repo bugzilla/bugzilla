@@ -7,6 +7,7 @@ Core API v1
    attachment
    bug
    bug-user-last-visit
+   flag-activity
    bugzilla
    classification
    comment

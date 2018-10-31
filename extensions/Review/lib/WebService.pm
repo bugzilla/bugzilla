@@ -447,7 +447,7 @@ An object with the following fields:
 
 =item C<id> (integer)
 
-The flag type id of the flag that changed
+The id of this activity event.
 
 =item C<name> (string)
 

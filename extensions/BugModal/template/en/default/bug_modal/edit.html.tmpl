@@ -1128,6 +1128,7 @@
         field = bug_fields.bug_file_loc
         field_type = constants.FIELD_TYPE_FREETEXT
         hide_on_view = bug.bug_file_loc == ""
+        default = "https://"
         help = "https://wiki.mozilla.org/BMO/UserGuide/BugFields#bug_file_loc"
     %]
       [% INCLUDE bug_url_link %]

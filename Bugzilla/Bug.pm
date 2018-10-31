@@ -1678,12 +1678,8 @@ sub _check_assigned_to {
 sub _check_bug_file_loc {
     my ($invocant, $url) = @_;
     $url = '' if !defined($url);
-    # On bug entry, if bug_file_loc is "http://", the default, use an
-    # empty value instead. However, on bug editing people can set that
-    # back if they *really* want to.
-    if (!ref $invocant && $url eq 'http://') {
-        $url = '';
-    }
+    # TODO: Add validation. It has to be loose, since we have accepted `data:`,
+    # `javascript:` and any other values on the URL field.
     return $url;
 }
 

@@ -306,7 +306,7 @@ else {
 
     $vars->{'alias'}          = formvalue('alias');
     $vars->{'short_desc'}     = formvalue('short_desc');
-    $vars->{'bug_file_loc'}   = formvalue('bug_file_loc', "http://");
+    $vars->{'bug_file_loc'}   = formvalue('bug_file_loc');
     $vars->{'keywords'}       = formvalue('keywords');
     $vars->{'dependson'}      = formvalue('dependson');
     $vars->{'blocked'}        = formvalue('blocked');

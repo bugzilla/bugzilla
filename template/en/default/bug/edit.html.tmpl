@@ -627,7 +627,13 @@
         </span>
       [% END %]
       <span id="bz_url_input_area">
-        [% url_output =  INCLUDE input no_td=1 inputname => "bug_file_loc" size => "40" colspan => 2 %]
+        [% url_output = INCLUDE input
+          no_td = 1
+          colspan = 2
+          inputname = "bug_file_loc"
+          size = "40"
+          placeholder = "https://"
+        %]
         [% IF NOT bug.check_can_change_field("bug_file_loc", 0, 1)
               AND is_safe_url(bug.bug_file_loc) %]
           <a href="[% bug.bug_file_loc FILTER html %]"
@@ -1295,6 +1301,7 @@
     [% IF bug.check_can_change_field(inputname, 0, 1) %]
        <input id="[% inputname %]" name="[% inputname %]" class="text_input"
               value="[% val FILTER html %]"[% " size=\"$size\"" IF size %]
+              [% IF placeholder %] placeholder="[% placeholder FILTER html %]"[% END %]
               [% " maxlength=\"$maxlength\"" IF maxlength %]
               [% " spellcheck=\"$spellcheck\"" IF spellcheck %]>
     [% ELSE %]

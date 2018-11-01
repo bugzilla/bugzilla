@@ -275,7 +275,6 @@ use constant REST_CONTENT_TYPE_WHITELIST => qw(
     application/json
     application/javascript
     text/javascript
-    text/html
 );
 
 sub WS_DISPATCH {

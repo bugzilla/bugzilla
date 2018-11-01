@@ -7,27 +7,13 @@ with Bugzilla. It provides a REST interface to various Bugzilla functions.
 Basic Information
 -----------------
 
-**Browsing**
-
-If the ``Accept`` header of a request is set to ``text/html`` (as it is by an
-ordinary web browser) then the API will return the JSON data as a HTML
-page which the browser can display. In other words, you can play with the
-API using just your browser to see results in a human-readable form.
-This is a good way to try out the various GET calls, even if you can't use
-it for POST or PUT.
-
 **Data Format**
 
 The REST API only supports JSON input, and either JSON or JSONP output.
 So objects sent and received must be in JSON format.
 
-On every request, you must set both the ``Accept`` and ``Content-Type`` HTTP
-headers to the MIME type of the data format you are using to communicate with
-the API. ``Content-Type`` tells the API how to interpret your request, and
-``Accept`` tells it how you want your data back. ``Content-Type`` must be
-``application/json``. ``Accept`` can be either that, or
-``application/javascript`` for JSONP. In the latter`case, add a ``callback``
-parameter to name your callback.
+If you need JSONP output, you must set the ``Accept: application/javascript``
+HTTP header and add a ``callback`` parameter to name your callback.
 
 Parameters may also be passed in as part of the query string for non-GET
 requests and will override any matching parameters in the request body.
@@ -38,7 +24,6 @@ Example request which returns the current version of Bugzilla:
 
    GET /rest/version HTTP/1.1
    Host: bugzilla.example.com
-   Accept: application/json
 
 Example response:
 

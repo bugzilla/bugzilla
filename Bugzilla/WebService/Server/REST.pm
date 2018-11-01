@@ -159,21 +159,7 @@ sub response {
     my $etag = $self->bz_etag;
     $self->bz_etag($result) if !$etag;
 
-    # If accessing through web browser, then display in readable format
-    if ($self->content_type eq 'text/html') {
-        $result = $self->json->pretty->canonical->allow_nonref->encode($result);
-
-        my $template = Bugzilla->template;
-        $content = "";
-        $template->process("rest.html.tmpl", { result => $result }, \$content)
-            || ThrowTemplateError($template->error());
-
-        $response->content_type('text/html');
-    }
-    else {
-        $content = $self->json->encode($result);
-    }
-
+    $content = $self->json->encode($result);
     utf8::encode($content) if utf8::is_utf8($content);
     disable_utf8();
 
@@ -550,15 +536,6 @@ Bugzilla is at C<bugzilla.yourdomain.com>, then your REST client would
 access the API via: C<http://bugzilla.yourdomain.com/rest/bug/35> which
 looks cleaner.
 
-=head1 BROWSING
-
-If the Accept: header of a request is set to text/html (as it is by an
-ordinary web browser) then the API will return the JSON data as a HTML
-page which the browser can display. In other words, you can play with the
-API using just your browser and see results in a human-readable form.
-This is a good way to try out the various GET calls, even if you can't use
-it for POST or PUT.
-
 =head1 DATA FORMAT
 
 The REST API only supports JSON input, and either JSON and JSONP output.
@@ -567,12 +544,8 @@ the REST API is a sub class of the JSONRPC API, you can refer to
 L<JSONRPC|Bugzilla::WebService::Server::JSONRPC> for more information
 on data types that are valid for REST.
 
-On every request, you must set both the "Accept" and "Content-Type" HTTP
-headers to the MIME type of the data format you are using to communicate with
-the API. Content-Type tells the API how to interpret your request, and Accept
-tells it how you want your data back. "Content-Type" must be "application/json".
-"Accept" can be either that, or "application/javascript" for JSONP - add a "callback"
-parameter to name your callback.
+If you need JSONP output, you must set the "Accept: application/javascript" HTTP
+header and add a "callback" parameter to name your callback.
 
 Parameters may also be passed in as part of the query string  for non-GET requests
 and will override any matching parameters in the request body.

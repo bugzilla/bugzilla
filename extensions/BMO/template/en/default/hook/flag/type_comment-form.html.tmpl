@@ -7,8 +7,10 @@
   #%]
 
 <template class="approval-request" data-flags="approval‑mozilla‑beta approval‑mozilla‑release">
-  <fieldset>
-    <legend>Beta/Release Uplift Approval Request</legend>
+  <section>
+    <header>
+      <h3>Beta/Release Uplift Approval Request</h3>
+    </header>
     <table>
       <tr>
         <th id="_ar_beta_i1_label">Feature/[% terms.Bug %] causing the regression</th>
@@ -73,12 +75,14 @@
         <td><input type="text" class="long" aria-labelledby="_ar_beta_i10_label"></td>
       </tr>
     </table>
-  </fieldset>
+  </section>
 </template>
 
 <template class="approval-request" data-flags="approval‑mozilla‑esr*">
-  <fieldset>
-    <legend>ESR Uplift Approval Request</legend>
+  <section>
+    <header>
+      <h3>ESR Uplift Approval Request</h3>
+    </header>
     <table>
       <tr>
         <th id="_ar_esr_i1_label">If this is not a sec:{high,crit} [% terms.bug %], please state case for ESR consideration</th>
@@ -111,13 +115,17 @@
         <td><input type="text" class="long" aria-labelledby="_ar_esr_i6_label"></td>
       </tr>
     </table>
-    <p>See <a href="https://wiki.mozilla.org/Release_Management/ESR_Landing_Process" target="_blank">ESR Landing Process</a> for more info.</p>
-  </fieldset>
+    <footer>
+      <p>See <a href="https://wiki.mozilla.org/Release_Management/ESR_Landing_Process" target="_blank">ESR Landing Process</a> for more info.</p>
+    </footer>
+  </section>
 </template>
 
 <template class="approval-request" data-flags="approval‑mozilla‑geckoview*">
-  <fieldset>
-    <legend>GeckoView Uplift Approval Request</legend>
+  <section>
+    <header>
+      <h3>GeckoView Uplift Approval Request</h3>
+    </header>
     <table>
       <tr>
         <th id="_ar_gkv_i1_label">If this is not a sec:{high,crit} [% terms.bug %], please state case for consideration</th>
@@ -150,13 +158,17 @@
         <td><input type="text" class="long" aria-labelledby="_ar_gkv_i6_label"></td>
       </tr>
     </table>
-    <p>See <a href="https://wiki.mozilla.org/Release_Management/Uplift_rules" target="_blank">Patch uplifting rules</a> for more info.</p>
-  </fieldset>
+    <footer>
+      <p>See <a href="https://wiki.mozilla.org/Release_Management/Uplift_rules" target="_blank">Patch uplifting rules</a> for more info.</p>
+    </footer>
+  </section>
 </template>
 
 <template class="approval-request" data-flags="sec‑approval">
-  <fieldset>
-    <legend>Security Approval Request</legend>
+  <section>
+    <header>
+      <h3>Security Approval Request</h3>
+    </header>
     <table>
       <tr>
         <th id="_ar_sec_i1_label">How easily could an exploit be constructed based on the patch?</th>
@@ -198,5 +210,5 @@
         <td><textarea aria-labelledby="_ar_sec_i7_label"></textarea></td>
       </tr>
     </table>
-  </fieldset>
+  </section>
 </template>

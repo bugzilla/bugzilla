@@ -13,23 +13,64 @@
   display: none;
 }
 
-fieldset.approval-request {
+section.approval-request {
+  overflow: hidden;
   margin: 0 0 8px;
+  padding: 0 8px 8px;
+  border: 1px solid #999;
+  border-radius: 3px;
 }
 
-fieldset.approval-request:last-child {
+section.approval-request:last-child {
   margin: 0;
 }
 
-fieldset.approval-request legend {
-  font-weight: bold;
+section.approval-request > header {
+  display: flex;
+  align-items: center;
+  margin: 0 -8px 8px;
+  border-bottom: 1px solid #999;
+  background-color: #CCC;
 }
 
-fieldset.approval-request table {
+section.approval-request h3 {
+  flex: auto;
+  margin: 0;
+  padding: 4px 8px;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+section.approval-request button.dismiss {
+  flex: none;
+  border: 0;
+  border-radius: 0;
+  padding: 4px;
+  color: #666;
+  background: none transparent;
+  box-shadow: none;
+  font-weight: normal;
+  text-shadow: none;
+  cursor: default;
+}
+
+section.approval-request button.dismiss .icon {
+  display: block;
+  font-size: 16px;
+  line-height: 100%;
+  font-family: "Material Icons";
+  font-style: normal;
+}
+
+section.approval-request button.dismiss .icon::before {
+  content: "\E5C9";
+}
+
+section.approval-request table {
   width: 100%;
 }
 
-fieldset.approval-request th {
+section.approval-request th {
   padding: .4em;
   width: 20em;
   line-height: 1.25;
@@ -39,23 +80,23 @@ fieldset.approval-request th {
   white-space: normal !important;
 }
 
-fieldset.approval-request td {
+section.approval-request td {
   vertical-align: middle;
 }
 
-fieldset.approval-request label {
+section.approval-request label {
   font-weight: normal !important;
 }
 
-fieldset.approval-request input[type="text"] {
+section.approval-request input[type="text"] {
   width: 10em;
 }
 
-fieldset.approval-request input.long[type="text"] {
+section.approval-request input.long[type="text"] {
   width: 100%;
 }
 
-fieldset.approval-request textarea {
+section.approval-request textarea {
   width: 100%;
   min-height: 5em;
   font-size: inherit;
@@ -64,12 +105,11 @@ fieldset.approval-request textarea {
   resize: vertical;
 }
 
-fieldset.approval-request div {
+section.approval-request div {
   padding: 0 !important;
 }
 
-fieldset.approval-request table ~ p:last-child {
-  margin: .4em;
+section.approval-request > footer {
   text-align: right;
 }
 

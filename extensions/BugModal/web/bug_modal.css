@@ -960,6 +960,25 @@ div.ui-tooltip {
   color: #666;
 }
 
+.name-info-popup header .description ul,
+.name-info-popup header .description ol {
+  margin: 12px 0;
+  padding: 0;
+}
+
+.name-info-popup header .description li {
+  margin-left: 16px;
+  padding-left: 4px;
+}
+
+.name-info-popup header .description ul li {
+  list-style-type: disc;
+}
+
+.name-info-popup header .description ol li {
+  list-style-type: decimal;
+}
+
 /* product search */
 
 #field-product {

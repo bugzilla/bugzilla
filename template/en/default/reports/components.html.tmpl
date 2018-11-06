@@ -71,12 +71,12 @@
   <section id="[% comp.name FILTER html %]" class="component[%- IF comp.name == component_mark %] highlight[% END %]">
     <header>
       <h2><a href="[% basepath FILTER none %]buglist.cgi?product=[%- product.name FILTER uri %]&amp;component=
-                   [%- comp.name FILTER uri %]&amp;resolution=---">[% comp.name FILTER html %]</a></h2>
+                   [%- comp.name FILTER uri %]&amp;resolution=---">[% comp.name FILTER html FILTER wbr %]</a></h2>
     </header>
     <div>
       <p class="description">[% comp.description FILTER html_light %]</p>
       [% IF show_default_people %]
-      <ul>
+      <ul class="people">
         <li>Assignee: [% INCLUDE global/user.html.tmpl who = comp.default_assignee %]</li>
         [% IF Param("useqacontact") %]
         <li>QA: [% INCLUDE global/user.html.tmpl who = comp.default_qa_contact %]</li>

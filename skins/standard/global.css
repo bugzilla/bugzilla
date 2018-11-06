@@ -260,6 +260,7 @@
         box-shadow: none;
         font-size: 14px !important;
         line-height: 32px;
+        cursor: text;
     }
 
     #header #quicksearch_top:hover {

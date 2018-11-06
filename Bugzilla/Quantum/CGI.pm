@@ -15,8 +15,7 @@ use Sys::Hostname;
 use Sub::Quote 2.005000;
 use Sub::Name;
 use Socket qw(AF_INET inet_aton);
-use File::Spec::Functions qw(catfile);
-use File::Slurper qw(read_text);
+use Mojo::File qw(path);
 use English qw(-no_match_vars);
 use Bugzilla::Quantum::Stdout;
 use Bugzilla::Constants qw(bz_locations USAGE_MODE_BROWSER);
@@ -37,7 +36,7 @@ sub load_all {
 sub load_one {
   my ($class, $name, $file) = @_;
   my $package = __PACKAGE__ . "::$name", my $inner_name = "_$name";
-  my $content = read_text(catfile(bz_locations->{cgi_path}, $file));
+  my $content = path(bz_locations->{cgi_path}, $file)->slurp;
   $content = "package $package; $content";
   untaint($content);
   my %options = (package => $package, file => $file, line => 1, no_defer => 1,);

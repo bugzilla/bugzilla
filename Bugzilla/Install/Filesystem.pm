@@ -32,8 +32,8 @@ use File::Path;
 use File::Basename;
 use File::Copy qw(move);
 use File::Spec;
+use Mojo::File qw(path);
 use Cwd ();
-use File::Slurp;
 use IO::File;
 use POSIX ();
 use English qw(-no_match_vars $OSNAME);
@@ -327,30 +327,30 @@ sub FILESYSTEM {
     my $yui_all_css = sub {
         return join("\n",
             map {
-                my $css = read_file($_);
+                my $css = path($_)->slurp;
                 _css_url_fix($css, $_, "skins/yui.css.list")
-            } read_file("skins/yui.css.list", { chomp => 1 })
+            } split(/\n/, path("skins/yui.css.list")->slurp)
         );
     };
 
     my $yui_all_js = sub {
         return join("\n",
-            map { scalar read_file($_) } read_file("js/yui.js.list", { chomp => 1 })
+            map { path($_)->slurp } split(/\n/, path("js/yui.js.list")->slurp)
         );
     };
 
     my $yui3_all_css = sub {
         return join("\n",
             map {
-                my $css = read_file($_);
+                my $css = path($_)->slurp;
                 _css_url_fix($css, $_, "skins/yui3.css.list")
-            } read_file("skins/yui3.css.list", { chomp => 1 })
+            } split(/\n/, path("skins/yui3.css.list")->slurp)
         );
     };
 
     my $yui3_all_js = sub {
         return join("\n",
-            map { scalar read_file($_) } read_file("js/yui3.js.list", { chomp => 1 })
+            map { path($_)->slurp } split(/\n/, path('js/yui3.js.list')->slurp)
         );
     };
 

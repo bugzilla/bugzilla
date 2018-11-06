@@ -28,9 +28,9 @@ use Bugzilla::Mailer;
 use Bugzilla::User;
 use Bugzilla::Util qw(format_time datetime_from);
 use Email::MIME;
-use File::Slurp qw(read_file);
+use Mojo::File qw(path);
 use File::Temp qw(tempfile);
-use JSON qw(encode_json decode_json);
+use Mojo::JSON qw(encode_json decode_json);
 use Sys::Hostname qw(hostname);
 
 Bugzilla->usage_mode(USAGE_MODE_CMDLINE);
@@ -39,7 +39,7 @@ my $DO_NOT_NAG = grep { $_ eq '-d' } @ARGV;
 @ARGV = grep { !/^-/ } @ARGV;
 
 if (my $filename = shift @ARGV) {
-    _send_email(decode_json(scalar read_file($filename)));
+    _send_email(decode_json(path($filename)->slurp));
     exit;
 }
 

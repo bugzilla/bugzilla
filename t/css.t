@@ -9,7 +9,7 @@ use warnings;
 use 5.10.1;
 use lib qw( . lib local/lib/perl5 );
 use File::Spec;
-use File::Slurp qw(read_file);
+use Mojo::File qw(path);
 use File::Find qw(find);
 use Cwd qw(realpath cwd);
 use Test::More;
@@ -21,7 +21,7 @@ find(
         wanted => sub {
             if (/\.css$/) {
                 my $css_file = $File::Find::name;
-                my $content = read_file($_);
+                my $content = path($_)->slurp;
                 while ($content =~ m{url\(["']?([^\?\)"']+)(?:\?.+)?['"]?\)}g) {
                     my $file = $1;
                     my $file_rel_root = File::Spec->abs2rel(realpath(File::Spec->rel2abs($file)), $root);

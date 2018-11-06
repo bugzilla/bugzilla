@@ -35,7 +35,6 @@ use Digest::MD5 qw(md5_hex);
 use File::Basename qw(basename dirname);
 use File::Find;
 use File::Path qw(rmtree mkpath);
-use File::Slurp;
 use File::Spec;
 use IO::Dir;
 use List::MoreUtils qw(firstidx);

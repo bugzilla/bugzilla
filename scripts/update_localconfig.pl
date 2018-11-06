@@ -17,7 +17,7 @@ use Bugzilla::Config qw( :admin );
 use Bugzilla::Constants;
 use Bugzilla::Install::Localconfig;
 
-use File::Slurp;
+use Mojo::File qw(path);
 
 Bugzilla->usage_mode(USAGE_MODE_CMDLINE);
 
@@ -28,7 +28,7 @@ die "Syntax: $0 param_name param_value\n" unless defined($param_value);
 die "Invalid param name: $param_name\n" unless exists $localconfig->{$param_name};
 
 if ($localconfig->{$param_name} ne $param_value) {
-    my @file = read_file('localconfig');
+    my @file = split(/\n/, path('localconfig')->slurp);
     my $updated = 0;
     foreach my $line (@file) {
         next unless $line =~ /^\s*\$([\w_]+)\s*=\s*'([^']*)'/;
@@ -39,7 +39,7 @@ if ($localconfig->{$param_name} ne $param_value) {
             $updated = 1;
         }
     }
-    write_file('localconfig', @file) if $updated;
+    path('localconfig')->spurt(join("\n", @file)) if $updated;
 } else {
     print "'$param_name' is already '$param_value'\n";
 }

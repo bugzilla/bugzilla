@@ -13,7 +13,7 @@ use warnings;
 
 use Bugzilla::Constants;
 use Algorithm::BloomFilter;
-use File::Slurper qw(write_binary read_binary read_lines);
+use Mojo::File qw(path);
 use File::Spec::Functions qw(catfile);
 
 sub _new_bloom_filter {
@@ -24,33 +24,33 @@ sub _new_bloom_filter {
     return Algorithm::BloomFilter->new($m, $k);
 }
 
-sub _filename {
+sub _file {
     my ($name, $type) = @_;
 
     my $datadir = bz_locations->{datadir};
 
-    return catfile($datadir, "$name.$type");
+    return path(catfile($datadir, "$name.$type"));
 }
 
 sub populate {
     my ($class, $name) = @_;
     my $memcached = Bugzilla->memcached;
-    my @items     = read_lines(_filename($name, 'list'));
+    my @items     = split(/\n/, _file($name, 'list')->slurp);
     my $filter    = _new_bloom_filter(@items + 0);
 
     $filter->add($_) foreach @items;
-    write_binary(_filename($name, 'bloom'), $filter->serialize);
+    _file($name, 'bloom')->spurt( $filter->serialize );
     $memcached->clear_bloomfilter({name => $name});
 }
 
 sub lookup {
     my ($class, $name) = @_;
     my $memcached   = Bugzilla->memcached;
-    my $filename    = _filename($name, 'bloom');
+    my $file        = _file($name, 'bloom');
     my $filter_data = $memcached->get_bloomfilter( { name => $name } );
 
-    if (!$filter_data && -f $filename) {
-        $filter_data = read_binary($filename);
+    if (!$filter_data && -f $file) {
+        $filter_data = $file->slurp;
         $memcached->set_bloomfilter({ name => $name, filter => $filter_data });
     }
 

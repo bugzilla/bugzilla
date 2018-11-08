@@ -632,7 +632,7 @@ sub search {
             return $data;
         }
         else {
-            return { bug_count => $self->type('int', scalar @$data) };
+            return { bug_count => $self->type('int', $data) };
         }
     }
 

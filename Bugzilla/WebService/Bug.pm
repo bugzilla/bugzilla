@@ -585,7 +585,7 @@ sub search {
 
     # Backwards compatibility with old method regarding role search
     $match_params->{'reporter'} = delete $match_params->{'creator'} if $match_params->{'creator'};
-    foreach my $role (qw(assigned_to reporter qa_contact commenter cc)) {
+    foreach my $role (qw(assigned_to reporter qa_contact triage_owner commenter cc)) {
         next if !exists $match_params->{$role};
         my $value = delete $match_params->{$role};
         $match_params->{"f${last_field_id}"} = $role;
@@ -1459,6 +1459,13 @@ sub _bug_to_hash {
         $item{'qa_contact'} = $self->type('email', $qa_login);
         if ($bug->qa_contact) {
             $item{'qa_contact_detail'} = $self->_user_to_hash($bug->qa_contact, $params, undef, 'qa_contact');
+        }
+    }
+    if (filter_wants $params, 'triage_owner', ['extra']) {
+        my $triage_owner = $bug->component_obj->triage_owner;
+        $item{'triage_owner'} = $self->type('email', $triage_owner->login);
+        if ($triage_owner->login) {
+            $item{'triage_owner_detail'} = $self->_user_to_hash($triage_owner, $params, ['extra'], 'triage_owner');
         }
     }
     if (filter_wants $params, 'see_also') {
@@ -2770,6 +2777,21 @@ C<string> The summary of this bug.
 C<string> The milestone that this bug is supposed to be fixed by, or for
 closed bugs, the milestone that it was fixed for.
 
+=item C<triage_owner>
+
+C<string> The login name of the Triage Owner of the bug's component.
+
+This is an B<extra> field returned only by specifying C<triage_owner> or
+C<_extra> in C<include_fields>.
+
+=item C<triage_owner_detail>
+
+C<hash> A hash containing detailed user information for the C<triage_owner>. To
+see the keys included in the user detail hash, see below.
+
+As with C<triage_owner>, this is an B<extra> field returned only by specifying
+C<triage_owner> or C<_extra> in C<include_fields>.
+
 =item C<update_token>
 
 C<string> The token that you would have to pass to the F<process_bug.cgi>
@@ -2939,7 +2961,7 @@ and all custom fields.
 =item The C<actual_time> item was added to the C<bugs> return value
 in Bugzilla B<4.4>.
 
-=item The C<duplicates> array was added in Bugzilla B<6.0>.
+=item The C<duplicates> and C<triage_owner> items were added in Bugzilla B<6.0>.
 
 =back
 
@@ -3284,6 +3306,10 @@ C<string> The login name of the bug's QA Contact. Note that even if
 this Bugzilla does not have the QA Contact field enabled, you can
 still search for bugs by QA Contact (though it is likely that no bug
 will have a QA Contact set, if the field is disabled).
+
+=item C<triage_owner>
+
+C<string> The login name of the Triage Owner of a bug's component.
 
 =item C<url>
 

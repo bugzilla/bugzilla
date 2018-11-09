@@ -62,7 +62,6 @@ name              type   description
          "resolution": "INVALID",
          "id": 35,
          "qa_contact": "",
-         "triage_owner": "",
          "version": "1.0",
          "status": "RESOLVED",
          "creator": "user@bugzilla.org",
@@ -215,11 +214,6 @@ summary                string    The summary of this bug.
 target_milestone       string    The milestone that this bug is supposed to be
                                  fixed by, or for closed bugs, the milestone that
                                  it was fixed for.
-triage_owner           string    The login name of the Triage Owner of the bug's
-                                 component.
-triage_owner_detail    object    An object containing detailed user information
-                                 for the triage_owner. To see the keys included
-                                 in the user detail object, see below.
 update_token           string    The token that you would have to pass to the
                                  ``process_bug.cgi`` page in order to update this
                                  bug. This changes every time the bug is updated.
@@ -534,8 +528,6 @@ qa_contact        string    The login name of the bug's QA Contact. Note that
                             field enabled, you can still search for bugs by QA
                             Contact (though it is likely that no bug will have a
                             QA Contact set, if the field is disabled).
-triage_owner      string    The login name of the Triage Owner of a bug's
-                            component.
 url               string    The "URL" field of a bug.
 version           string    The Version field of a bug.
 whiteboard        string    Search the "Status Whiteboard" field on bugs for a

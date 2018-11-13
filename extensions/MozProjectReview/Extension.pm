@@ -46,8 +46,7 @@ sub post_bug_after_creation {
         'Signing up for an online service',
         'Other'
     );
-    if ((any { $_ eq $params->{contract_type} } @sec_review_needed)
-        || $params->{mozilla_data} eq 'Yes') {
+    if (any { $_ eq $params->{contract_type} } @sec_review_needed) {
         $do_sec_review = 1;
     }
 

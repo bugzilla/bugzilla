@@ -212,7 +212,7 @@ sub members_report {
     foreach my $name (sort keys %$members) {
         push @types, {
             name    => ($name eq '_direct' ? 'direct' : $name),
-            members => _filter_userlist($members->{$name}),
+            members => _filter_userlist($members->{$name}, $include_disabled),
         }
     }
 

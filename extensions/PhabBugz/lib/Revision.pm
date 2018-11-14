@@ -10,6 +10,7 @@ package Bugzilla::Extension::PhabBugz::Revision;
 use 5.10.1;
 use Moo;
 
+use Mojo::JSON qw(true);
 use Scalar::Util qw(blessed);
 use Types::Standard -all;
 use Type::Utils;
@@ -261,6 +262,13 @@ sub update {
         }
     }
 
+    if ($self->{set_status}) {
+        push(@{$data->{transactions}}, {
+            type => $self->{set_status},
+            value => true
+        });
+    }
+
     if ($self->{add_projects}) {
         push(@{ $data->{transactions} }, {
             type => 'projects.add',
@@ -416,6 +424,11 @@ sub set_policy {
     my ( $self, $name, $policy ) = @_;
     $self->{set_policy} ||= {};
     $self->{set_policy}->{$name} = $policy;
+}
+
+sub set_status {
+    my ( $self, $status ) = @_;
+    $self->{set_status} = $status;
 }
 
 sub add_project {

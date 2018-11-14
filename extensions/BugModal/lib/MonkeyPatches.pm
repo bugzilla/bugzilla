@@ -16,11 +16,12 @@ use warnings;
 
 use Bugzilla::User;
 
-sub treeherder_user {
-    return Bugzilla->process_cache->{treeherder_user} //=
-        Bugzilla::User->new({ name => 'tbplbot@gmail.com', cache => 1 })
-        || Bugzilla::User->new({ name => 'orangefactor@bots.tld', cache => 1 })
-        || Bugzilla::User->new();
+sub treeherder_users {
+    return Bugzilla->process_cache->{treeherder_users} //=
+        [grep { defined $_ } (
+          Bugzilla::User->new({ name => 'tbplbot@gmail.com', cache => 1 }),
+          Bugzilla::User->new({ name => 'orangefactor@bots.tld', cache => 1 }),
+        )];
 }
 
 package Bugzilla::Bug;

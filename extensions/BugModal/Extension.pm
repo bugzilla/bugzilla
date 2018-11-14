@@ -289,10 +289,11 @@ sub template_before_process {
     $vars->{tracking_flags_table} = \@tracking_table;
 
     # for the "view -> hide treeherder comments" menu item
-    my $treeherder_id = Bugzilla->treeherder_user->id;
+    my @treeherder_ids = map { $_->id } @{Bugzilla->treeherder_users};
     foreach my $change_set (@{ $bug->activity_stream }) {
-        if ($change_set->{comment} && $change_set->{comment}->author->id == $treeherder_id) {
-            $vars->{treeherder} = Bugzilla->treeherder_user;
+        if ($change_set->{comment} &&
+              any { $change_set->{comment}->author->id == $_ } @treeherder_ids){
+            $vars->{treeherder_user_ids} = \@treeherder_ids;
             last;
         }
     }

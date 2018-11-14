@@ -159,15 +159,14 @@ $(function() {
     $('#view-toggle-cc')
         .click(function() {
             var that = $(this);
-            var item = $('.context-menu-item.hover');
             if (that.data('shown') === '1') {
                 that.data('shown', '0');
-                item.text('Show CC Changes');
+                that.text('Show CC Changes');
                 $('.cc-only').hide();
             }
             else {
                 that.data('shown', '1');
-                item.text('Hide CC Changes');
+                that.text('Hide CC Changes');
                 $('.cc-only').show();
             }
         });
@@ -175,17 +174,24 @@ $(function() {
     $('#view-toggle-treeherder')
         .click(function() {
             var that = $(this);
-            console.log(that.data('userid'));
-            var item = $('.context-menu-item.hover');
-            if (that.data('hidden') === '1') {
-                that.data('hidden', '0');
-                item.text('Hide Treeherder Comments');
-                $('.ca-' + that.data('userid')).show();
+            var userids = that.data('userids');
+            if (that.data('hidden') === '0') {
+                that.data('hidden', '1');
+                that.text('Show Treeherder Comments');
+                userids.forEach((id) => {
+                    $('.ca-' + id).each(function() {
+                        toggleChange($(this).find('.default-collapsed .change-spinner').first(), 'hide');
+                    });
+                });
             }
             else {
-                that.data('hidden', '1');
-                item.text('Show Treeherder Comments');
-                $('.ca-' + that.data('userid')).hide();
+                that.data('hidden', '0');
+                that.text('Hide Treeherder Comments');
+                userids.forEach((id) => {
+                    $('.ca-' + id).each(function() {
+                        toggleChange($(this).find('.default-collapsed .change-spinner').first(), 'show');
+                    });
+                });
             }
         });
 

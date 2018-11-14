@@ -42,9 +42,9 @@
       <li role="presentation">
         <a id="view-toggle-cc" role="menuitem" tabindex="-1">Show CC Changes</a>
       </li>
-      [% IF treeherder %]
+      [% IF treeherder_user_ids.size %]
         <li role="presentation">
-          <a id="view-toggle-treeherder" role="menuitem" data-userid="[% treeherder.id FILTER none %]">Hide Treeherder Comments</a>
+          <a id="view-toggle-treeherder" role="menuitem" data-userids="[[% treeherder_user_ids.join(',') FILTER none %]]">Show Treeherder Comments</a>
         </li>
       [% END %]
     </ul>

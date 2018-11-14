@@ -2776,7 +2776,7 @@ sub app_startup {
       ->to( 'CGI#enter_bug_cgi' => { 'product' => 'Developer Documentation', 'format' => 'doc' } );
     $r->any( '/:REWRITE_mdn' => [ REWRITE_mdn => qr{form[\.:]mdn?} ] )
       ->to( 'CGI#enter_bug_cgi' => { 'format' => 'mdn', 'product' => 'developer.mozilla.org' } );
-    $r->any( '/:REWRITE_swag_gear' => [ REWRITE_swag_gear => qr{form[\.:](swag|gear)} ] )
+    $r->any( '/:REWRITE_swag_gear' => [ REWRITE_swag_gear => qr{form[\.:](?:swag|gear)} ] )
       ->to( 'CGI#enter_bug_cgi' => { 'format' => 'swag', 'product' => 'Marketing' } );
     $r->any( '/:REWRITE_costume' => [ REWRITE_costume => qr{form[\.:]costume} ] )
       ->to( 'CGI#enter_bug_cgi' => { 'product' => 'Marketing', 'format' => 'costume' } );
@@ -2806,7 +2806,7 @@ sub app_startup {
       ->to( 'CGI#enter_bug_cgi' => { 'product' => 'FSA', 'format' => 'fsa-budget' } );
     $r->any( '/:REWRITE_triage_request' => [ REWRITE_triage_request => qr{form[\.:]triage[\.\-]request} ] )
       ->to( 'CGI#page_cgi' => { 'id' => 'triage_request.html' } );
-    $r->any( '/:REWRITE_crm_CRM' => [ REWRITE_crm_CRM => qr{form[\.:](crm|CRM)} ] )
+    $r->any( '/:REWRITE_crm_CRM' => [ REWRITE_crm_CRM => qr{form[\.:](?:crm|CRM)} ] )
       ->to( 'CGI#enter_bug_cgi' => { 'format' => 'crm', 'product' => 'Marketing' } );
     $r->any( '/:REWRITE_nda' => [ REWRITE_nda => qr{form[\.:]nda} ] )
       ->to( 'CGI#enter_bug_cgi' => { 'product' => 'Legal', 'format' => 'nda' } );

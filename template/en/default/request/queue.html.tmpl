@@ -265,11 +265,19 @@ to some group are shown by default.
 [% END %]
 
 [% BLOCK display_requestee %]
-  [% request.requestee FILTER email FILTER html %]
+  [% IF request.requestee.name %]
+    [% request.requestee.name _ ' <' _ request.requestee.email _ '>' FILTER email FILTER html %]
+  [% ELSE %]
+    [% request.requestee.email FILTER email FILTER html %]
+  [% END %]
 [% END %]
 
 [% BLOCK display_requester %]
-  [% request.requester FILTER email FILTER html %]
+  [% IF request.requester.name %]
+    [% request.requester.name _ ' <' _ request.requester.email _ '>' FILTER email FILTER html %]
+  [% ELSE %]
+    [% request.requester.email FILTER email FILTER html %]
+  [% END %]
 [% END %]
 
 [% BLOCK display_created %]

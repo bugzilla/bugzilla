@@ -84,15 +84,14 @@ Bugzilla.Review.Badge = class Badge {
         // Show up to 20 newest requests
         requests.slice(0, 20).forEach(req => {
             const $li = document.createElement('li');
-            const [, name, email] = req.requester.match(/^(?:(.*)\s<)?(.+?)>?$/);
-            const pretty_name = name ? name.replace(/([\[\(<‹].*?[›>\)\]]|\:[\w\-]+|\s+\-\s+.*)/g, '').trim() : email;
+            const { nick, gravatar } = req.requester;
             const [link, attach_label] = this.get_link(req);
 
             $li.setAttribute('role', 'none');
             $li.innerHTML = `<a href="${link.htmlEncode()}" role="menuitem" tabindex="-1" `
                 + `class="${(req.restricted ? 'secure' : '')}" data-type="${req.type}">`
-                + `<img src="https://secure.gravatar.com/avatar/${md5(email.toLowerCase())}?d=mm&amp;size=64" alt="">`
-                + `<label><strong>${pretty_name.htmlEncode()}</strong> asked for your `
+                + `<img src="${gravatar}" alt="">`
+                + `<label><strong>${nick.htmlEncode()}</strong> asked for your `
                 + (req.type === 'needinfo' ? 'info' : req.type) + (attach_label ? ` on ${attach_label}` : '')
                 + ' in ' + (req.restricted ? '<span class="icon" aria-label="secure"></span>&nbsp;' : '')
                 + `<strong>Bug ${req.bug_id} &ndash; ${req.bug_summary.htmlEncode()}</strong>.</label>`

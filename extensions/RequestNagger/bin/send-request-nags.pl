@@ -43,12 +43,11 @@ if (my $filename = shift @ARGV) {
     exit;
 }
 
-my $dbh     = Bugzilla->dbh;
-my $db_date = $dbh->selectrow_array('SELECT LOCALTIMESTAMP(0)');
+my $db_date = Bugzilla->dbh->selectrow_array('SELECT LOCALTIMESTAMP(0)');
 my $date    = format_time($db_date, '%a, %d %b %Y %T %z', 'UTC');
 
 # delete expired defers
-$dbh->do("DELETE FROM nag_defer WHERE defer_until <= CURRENT_DATE()");
+Bugzilla->dbh->do("DELETE FROM nag_defer WHERE defer_until <= CURRENT_DATE()");
 Bugzilla->switch_to_shadow_db();
 
 # send nags to requestees
@@ -77,9 +76,10 @@ sub send_nags {
     # get requests
 
     foreach my $report (@{ $args{reports} }) {
-
-        # collate requests
-        my $rows = $dbh->selectall_arrayref($args{$report . '_sql'}, { Slice => {} });
+        my $rows;
+        Bugzilla->dbh->connector->run(fixup => sub {
+            $rows = $_->selectall_arrayref($args{$report . '_sql'}, { Slice => {} });
+        });
         foreach my $request (@$rows) {
             next unless _include_request($request, $report);
 

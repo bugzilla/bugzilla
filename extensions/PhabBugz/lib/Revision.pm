@@ -36,6 +36,7 @@ has status           => ( is => 'ro',   isa => Str );
 has creation_ts      => ( is => 'ro',   isa => Str );
 has modification_ts  => ( is => 'ro',   isa => Str );
 has author_phid      => ( is => 'ro',   isa => Str );
+has diff_phid        => ( is => 'ro',   isa => Str );
 has bug_id           => ( is => 'ro',   isa => Str );
 has view_policy      => ( is => 'ro',   isa => Str );
 has edit_policy      => ( is => 'ro',   isa => Str );
@@ -65,9 +66,19 @@ has subscribers_raw => (
     ]
 );
 has projects_raw => (
-    is => 'ro',
+    is  => 'ro',
     isa => Dict [
         projectPHIDs => ArrayRef [Str]
+    ]
+);
+has reviewers_extra_raw => (
+    is  => 'ro',
+    isa => ArrayRef [
+        Dict [
+            reviewerPHID => Str,
+            voidedPHID   => Maybe [Str],
+            diffPHID     => Maybe [Str]
+        ]
     ]
 );
 
@@ -109,12 +120,14 @@ sub BUILDARGS {
     $params->{creation_ts}      = $params->{fields}->{dateCreated};
     $params->{modification_ts}  = $params->{fields}->{dateModified};
     $params->{author_phid}      = $params->{fields}->{authorPHID};
+    $params->{diff_phid}        = $params->{fields}->{diffPHID};
     $params->{bug_id}           = $params->{fields}->{'bugzilla.bug-id'};
     $params->{view_policy}      = $params->{fields}->{policy}->{view};
     $params->{edit_policy}      = $params->{fields}->{policy}->{edit};
     $params->{reviewers_raw}    = $params->{attachments}->{reviewers}->{reviewers} // [];
     $params->{subscribers_raw}  = $params->{attachments}->{subscribers};
     $params->{projects_raw}     = $params->{attachments}->{projects};
+    $params->{reviewers_extra_raw} = $params->{attachments}->{'reviewers-extra'}->{'reviewers-extra'} // [];
     $params->{subscriber_count} =
       $params->{attachments}->{subscribers}->{subscriberCount};
 
@@ -321,14 +334,28 @@ sub _build_reviews {
         }
     );
 
-    return [
-        map {
-            {
-                user => $_,
-                status => $by_phid{ $_->phid }{status},
+    my @reviewers;
+    foreach my $user (@{ $users }) {
+        my $reviewer_data = {
+            user   => $user,
+            status => $by_phid{ $user->phid }{status}
+        };
+        # Set to accepted-prior if the diffs reviewer are different and the reviewer status is accepted
+        foreach my $reviewer_extra (@{$self->reviewers_extra_raw}) {
+            if ($reviewer_extra->{reviewerPHID} eq $user->phid) {
+                if ($reviewer_extra->{diffPHID}) {
+                    if ( $reviewer_data->{status} eq 'accepted'
+                      && $reviewer_extra->{diffPHID} ne $self->diff_phid)
+                    {
+                        $reviewer_data->{status} = 'accepted-prior';
+                    }
+                }
             }
-        } @$users
-    ];
+        }
+        push @reviewers, $reviewer_data;
+    }
+
+    return \@reviewers;
 }
 
 sub _build_subscribers {

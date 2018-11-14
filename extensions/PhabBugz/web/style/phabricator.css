@@ -1,0 +1,180 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this file,
+ * You can obtain one at http://mozilla.org/MPL/2.0/.
+ *
+ * This Source Code Form is "Incompatible With Secondary Licenses", as
+ * defined by the Mozilla Public License, v. 2.0. */
+
+@font-face {
+  font-family: FontAwesome-DifferentialStatus;
+  font-style: normal;
+  font-weight: normal;
+  src: url(../fonts/FontAwesome-DifferentialStatus.woff2?v=4.7) format('woff2'),
+       url(../fonts/FontAwesome-DifferentialStatus.woff?v=4.7) format('woff');
+}
+
+.phabricator-table {
+    background: #fff;
+    border: none;
+    border-collapse: collapse;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.2);
+    box-shadow: 0 1px 1px rgba(0, 0, 0, 0.1);
+}
+
+.phabricator-table th {
+    text-align: left;
+    padding: 4px;
+}
+
+.phabricator-table td {
+    vertical-align: middle !important;
+    padding: 4px !important;
+}
+
+.phabricator-table thead, .phabricator-table tfoot {
+    background-color: #eee;
+    color: #404040;
+}
+
+.phabricator-revisions {
+    background: #fff;
+    border: none;
+    border-collapse: collapse;
+}
+
+.phabricator-revisions th {
+    padding: 2px;
+}
+
+.phabricator-revisions td {
+    padding: 2px;
+    vertical-align: top;
+}
+
+.phabricator-revisions .phabricator-reviewers td {
+    padding: 1px;
+}
+
+span[class^="revision-status-box-"] {
+    border: none;
+    font-weight: normal;
+    padding: 3px 9px;
+    border-radius: 3px;
+    white-space: nowrap;
+    font-size: 14px;
+    margin-bottom: 5px;
+}
+
+span[class^="revision-status-icon-"]::before,
+span[class^="review-status-icon-"]::before
+{
+    display: inline-block;
+    font-variant: normal;
+    text-rendering: auto;
+    font-family: FontAwesome-DifferentialStatus;
+}
+
+.revision-status-icon-needs-review::before {
+  content: "\f121";
+}
+
+.revision-status-icon-needs-revision::before {
+  content: "\f021";
+}
+
+.revision-status-icon-changes-planned::before {
+  content: "\f025";
+}
+
+.revision-status-icon-accepted::before {
+  content: "\f00C";
+}
+
+.revision-status-icon-published::before {
+  content: "\f046";
+}
+
+.revision-status-icon-abandoned::before {
+  content: "\f072";
+}
+
+.revision-status-icon-draft::before {
+  content: "\f110";
+}
+
+.revision-status-box-needs-review {
+    background: rgba(71,87,120,0.1);
+    color: inherit;
+}
+
+.revision-status-box-accepted {
+    background: #ddefdd;
+    color: #326d34;
+}
+
+.revision-status-box-changes-planned,
+.revision-status-box-needs-revision {
+    background: #f7e6e6;
+    color: #a53737;
+}
+
+.revision-status-box-abandoned {
+    background: #eae6f7;
+    color: #6e5cb6;
+}
+
+.review-status-icon-accepted::before {
+    color: green;
+    content: "\f058";
+}
+
+.review-status-icon-accepted-prior::before {
+    color: grey;
+    content: "\f058";
+}
+
+.review-status-icon-added::before {
+    color: grey;
+    content: "\f10c";
+}
+
+.review-status-icon-blocking::before {
+    color: red;
+    content: "\f056";
+}
+
+.review-status-icon-rejected::before {
+    color: red;
+    content: "\f05c";
+}
+
+.review-status-icon-resigned::before {
+    color: rgba(55,55,55,0.3);
+    content: "\f024";
+}
+
+/* bug-modal specific */
+
+#module-phabricator-revisions .module-content {
+    padding: 0;
+}
+
+.bug_modal .phabricator-table {
+    width: 100%;
+}
+
+.bug_modal .phabricator-revision td {
+    padding: 8px;
+    vertical-align: top;
+    border-bottom: 1px dotted silver;
+}
+
+.bug_modal .phabricator-revisions th {
+    text-align: left;
+    padding-left: 8px;
+}
+
+.bug_modal .phabricator-revision .phabricator-reviewers td {
+    padding: 1px;
+    border: 0px;
+}

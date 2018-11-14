@@ -186,6 +186,7 @@ do {
                     "authorPHID": "PHID-USER-4wigy3sh5fc5t74vapwm",
                     "dateCreated": 1507666113,
                     "dateModified": 1508514027,
+                    "diffPHID": "PHID-DIFF-x5fnvkz5rpco2pogzcrf",
                     "policy": {
                         "view": "public",
                         "edit": "admin"

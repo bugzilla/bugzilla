@@ -1,0 +1,29 @@
+[%# This Source Code Form is subject to the terms of the Mozilla Public
+  # License, v. 2.0. If a copy of the MPL was not distributed with this
+  # file, You can obtain one at http://mozilla.org/MPL/2.0/.
+  #
+  # This Source Code Form is "Incompatible With Secondary Licenses", as
+  # defined by the Mozilla Public License, v. 2.0.
+  #%]
+
+<table class="phabricator-revisions"
+       data-phabricator-base-uri="[% Param('phabricator_base_uri') FILTER html %]">
+  <thead>
+    <tr>
+      <th>ID</th>
+      <th>Title</th>
+      <th>Author</th>
+      <th>Status</th>
+      <th>Reviewers</th>
+    </tr>
+  </thead>
+  <tbody class="phabricator-revision">
+    <tr class="phabricator-loading-row">
+      <td colspan="4">Loading...</td>
+    </tr>
+    <tr class="phabricator-loading-error-row bz_default_hidden">
+      <td colspan="4">Error loading Phabricator revisions:
+        <span class="phabricator-load-error-string"></span></td>
+    </tr>
+  </tbody>
+</table>

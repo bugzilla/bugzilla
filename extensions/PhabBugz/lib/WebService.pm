@@ -13,24 +13,31 @@ use warnings;
 
 use base qw(Bugzilla::WebService);
 
+use Bugzilla::Bug;
 use Bugzilla::Constants;
 use Bugzilla::Error;
+use Bugzilla::Logging;
 use Bugzilla::User;
 use Bugzilla::Util qw(detaint_natural trick_taint);
 use Bugzilla::WebService::Constants;
+use Types::Standard qw(-types slurpy);
+use Type::Params qw(compile);
 
 use Bugzilla::Extension::PhabBugz::Constants;
+use Bugzilla::Extension::PhabBugz::Revision;
+use Bugzilla::Extension::PhabBugz::Util qw(request);
 
-use List::Util qw(first);
-use List::MoreUtils qw(any);
 use MIME::Base64 qw(decode_base64);
+use Try::Tiny;
 
 use constant READ_ONLY => qw(
+    bug_revisions
     check_user_enter_bug_permission
     check_user_permission_for_bug
 );
 
 use constant PUBLIC_METHODS => qw(
+    bug_revisions
     check_user_enter_bug_permission
     check_user_permission_for_bug
     set_build_target
@@ -122,13 +129,119 @@ sub set_build_target {
     trick_taint($build_target);
 
     Bugzilla->dbh->do(
-        "INSERT INTO phabbugz (name, value) VALUES (?, ?)",
+        'INSERT INTO phabbugz (name, value) VALUES (?, ?)',
         undef,
         'build_target_' . $revision_id,
         $build_target
     );
 
     return { result => 1 };
+}
+
+sub bug_revisions {
+    state $check = compile(Object, Dict[bug_id => Int]);
+    my ( $self, $params ) = $check->(@_);
+
+    $self->_check_phabricator();
+
+    my $user = Bugzilla->login(LOGIN_REQUIRED);
+
+    # Validate that a bug id and user id are provided
+    ThrowUserError('phabricator_invalid_request_params')
+        unless $params->{bug_id};
+
+    # Validate that the user can see the bug itself
+    my $bug = Bugzilla::Bug->check( { id => $params->{bug_id}, cache => 1 } );
+
+    my @revision_ids;
+    foreach my $attachment ( @{ $bug->attachments } ) {
+        next if $attachment->contenttype ne PHAB_CONTENT_TYPE;
+        my ($revision_id) = ( $attachment->filename =~ PHAB_ATTACHMENT_PATTERN );
+        next if !$revision_id;
+        push @revision_ids, int $revision_id;
+    }
+
+    my $response = request(
+        'differential.revision.search',
+        {
+            attachments => {
+                'projects'        => 1,
+                'reviewers'       => 1,
+                'subscribers'     => 1,
+                'reviewers-extra' => 1,
+            },
+            constraints => {
+                ids => \@revision_ids,
+            },
+            order => 'newest',
+        }
+    );
+
+    state $SearchResult = Dict[
+        result => Dict[
+            # HashRef below could be better,
+            # but ::Revision takes a lot of options.
+            data => ArrayRef[ HashRef ],
+            slurpy Any,
+        ],
+        slurpy Any,
+    ];
+
+    my $error = $SearchResult->validate($response);
+    ThrowCodeError( 'phabricator_api_error', { reason => $error } )
+        if defined $error;
+
+    my $revision_status_map = {
+        'abandoned'       => 'Abandoned',
+        'accepted'        => 'Accepted',
+        'changes-planned' => 'Changes Planned',
+        'needs-review'    => 'Needs Review',
+        'needs-revision'  => 'Needs Revision',
+    };
+
+    my $review_status_map = {
+        'accepted'       => 'Accepted',
+        'accepted-prior' => 'Accepted Prior Diff',
+        'added'          => 'Review Requested',
+        'blocking'       => 'Blocking Review',
+        'rejected'       => 'Requested Changes',
+        'resigned'       => 'Resigned'
+    };
+
+    my @revisions;
+    foreach my $revision ( @{ $response->{result}{data} } ) {
+        my $revision_obj = Bugzilla::Extension::PhabBugz::Revision->new($revision);
+        my $revision_data = {
+            id     => 'D' . $revision_obj->id,
+            author => $revision_obj->author->name,
+            status => $revision_obj->status,
+            long_status => $revision_status_map->{$revision_obj->status} || $revision_obj->status
+        };
+
+        my @reviews;
+        foreach my $review ( @{ $revision_obj->reviews } ) {
+            push @reviews, {
+                user        => $review->{user}->name,
+                status      => $review->{status},
+                long_status => $review_status_map->{$review->{status}} || $review->{status}
+            };
+        }
+        $revision_data->{reviews} = \@reviews;
+
+        if ( $revision_obj->view_policy ne 'public' ) {
+            $revision_data->{title} = '(secured)';
+        }
+        else {
+            $revision_data->{title} = $revision_obj->title;
+        }
+
+        push @revisions, $revision_data;
+    }
+
+    # sort by revision id
+    @revisions = sort { $a->{id} cmp $b->{id} } @revisions;
+
+    return { revisions => \@revisions };
 }
 
 sub rest_resources {
@@ -159,6 +272,14 @@ sub rest_resources {
                 method => 'check_user_enter_bug_permission',
                 params => sub {
                     return { product => $_[0], user_id => $_[1] };
+                },
+            },
+        },
+        qr{^/phabbugz/bug_revisions/(\d+)$}, {
+            GET => {
+                method => 'bug_revisions',
+                params => sub {
+                    return { bug_id => $_[0] };
                 },
             },
         },

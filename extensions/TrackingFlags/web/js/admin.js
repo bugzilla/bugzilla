@@ -16,8 +16,6 @@ Event.onDOMReady(function() {
         filter_flag_list(Dom.get('filter').checked);
     }
     else {
-        if (!JSON)
-            JSON = YAHOO.lang.JSON;
         Event.addListener('flag_name', 'change', change_flag_name, Dom.get('flag_name'));
         Event.addListener('flag_desc', 'change', change_string_value, Dom.get('flag_desc'));
         Event.addListener('flag_type', 'change', change_select_value, Dom.get('flag_type'));
@@ -118,7 +116,7 @@ function update_flag_values() {
             var group = groups[j];
             optionEl = document.createElement('option');
             optionEl.value = group.id;
-            optionEl.innerHTML = YAHOO.lang.escapeHTML(group.name);
+            optionEl.innerHTML = group.name.htmlEncode();
             optionEl.selected = group.id == value.setter_group_id;
             selectEl.appendChild(optionEl);
         }
@@ -426,7 +424,7 @@ function filter_flag_list(show_disabled) {
 // utils
 
 function change_string_value(e, o) {
-    o.value = YAHOO.lang.trim(o.value);
+    o.value = o.value.trim();
     tag_missing_value(o);
 }
 

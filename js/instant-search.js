@@ -158,7 +158,7 @@ YAHOO.bugzilla.instantSearch = {
       }
 
       YAHOO.bugzilla.instantSearch.dataTable.getDataSource().sendRequest(
-        YAHOO.lang.JSON.stringify(jsonObject),
+        JSON.stringify(jsonObject),
         {
           success: YAHOO.bugzilla.instantSearch.onSearchResults,
           failure: YAHOO.bugzilla.instantSearch.onSearchResults,
@@ -178,7 +178,7 @@ YAHOO.bugzilla.instantSearch = {
   },
 
   getContent: function() {
-    var content = YAHOO.lang.trim(this.elContent.value);
+    var content = this.elContent.value.trim();
     // work around chrome bug
     if (content == YAHOO.bugzilla.instantSearch.elContent.getAttribute('placeholder')) {
       return '';

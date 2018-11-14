@@ -22,9 +22,9 @@ $(function() {
                 patterns: { 'gallery-': {} }
             }
         }
-    }).use("node", "datatable", "datatable-sort", "datatable-message", "json-stringify",
+    }).use("node", "datatable", "datatable-sort", "datatable-message",
         "datatable-datasource", "datasource-io", "datasource-jsonschema", "cookie",
-        "gallery-datatable-row-expansion-bmo", "handlebars", "escape", function(Y) {
+        "gallery-datatable-row-expansion-bmo", "handlebars", function(Y) {
         var counter          = 0,
             bugQueryTable    = null,
             bugQuery         = null,
@@ -66,7 +66,7 @@ $(function() {
 
         bugQuery.on('error', function(e) {
             try {
-                var response = Y.JSON.parse(e.data.responseText);
+                var response = JSON.parse(e.data.responseText);
                 if (response.error)
                     e.error.message = response.error.message;
             } catch(ex) {
@@ -133,7 +133,7 @@ $(function() {
             };
 
             bugQuery.sendRequest({
-                request: Y.JSON.stringify(bugQueryParams),
+                request: JSON.stringify(bugQueryParams),
                 cfg: {
                     method:  "POST",
                     headers: { 'Content-Type': 'application/json' }
@@ -143,8 +143,8 @@ $(function() {
         };
 
         var updatedFormatter = function(o) {
-            return '<span title="' + Y.Escape.html(o.value) + '">' +
-                Y.Escape.html(o.data.changeddate_fancy) + '</span>';
+            return '<span title="' + o.value.htmlEncode() + '">' +
+                o.data.changeddate_fancy.htmlEncode() + '</span>';
         };
 
 
@@ -159,7 +159,7 @@ $(function() {
 
         lastChangesQuery.on('error', function(e) {
             try {
-                var response = Y.JSON.parse(e.data.responseText);
+                var response = JSON.parse(e.data.responseText);
                 if (response.error)
                     e.error.message = response.error.message;
             } catch(ex) {
@@ -224,7 +224,7 @@ $(function() {
                     };
 
                     lastChangesQuery.sendRequest({
-                        request: Y.JSON.stringify(lastChangesParams),
+                        request: JSON.stringify(lastChangesParams),
                         cfg: {
                             method:  "POST",
                             headers: { 'Content-Type': 'application/json' }

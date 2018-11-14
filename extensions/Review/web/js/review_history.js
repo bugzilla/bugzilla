@@ -121,7 +121,7 @@ $(function () {
                 };
 
                 flagDS.sendRequest({
-                    request: Y.JSON.stringify({
+                    request: JSON.stringify({
                         version: '1.1',
                         method: 'Review.flag_activity',
                         params: {
@@ -143,7 +143,7 @@ $(function () {
         function fetch_flags(flag_ids) {
             return new Y.Promise(function (resolve, reject) {
                 flagDS.sendRequest({
-                    request: Y.JSON.stringify({
+                    request: JSON.stringify({
                         version: '1.1',
                         method: 'Review.flag_activity',
                         params: {
@@ -182,7 +182,7 @@ $(function () {
                 }));
 
                 bugDS.sendRequest({
-                    request: Y.JSON.stringify({
+                    request: JSON.stringify({
                         version: '1.1',
                         method: 'Bug.get',
                         params: {
@@ -223,7 +223,7 @@ $(function () {
                 }));
 
                 attachmentDS.sendRequest({
-                    request: Y.JSON.stringify({
+                    request: JSON.stringify({
                         version: '1.1',
                         method: 'Bug.attachments',
                         params: {
@@ -385,9 +385,9 @@ $(function () {
 
     }, '0.0.1', {
         requires: [
-            "node", "datatype-date", "datatable", "datatable-sort", "datatable-message", "json-stringify",
+            "node", "datatype-date", "datatable", "datatable-sort", "datatable-message",
             "datatable-datasource", "datasource-io", "datasource-jsonschema", "cookie",
-            "gallery-datatable-row-expansion-bmo", "handlebars", "escape", "promise"
+            "gallery-datatable-row-expansion-bmo", "handlebars", "promise"
         ]
     });
 });

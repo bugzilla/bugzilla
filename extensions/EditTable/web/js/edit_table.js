@@ -10,7 +10,6 @@ function EditTable(parent_el, table_data) {
     this.parent_el = YAHOO.util.Dom.get(parent_el);
     this.table_data = table_data;
     this.field_count = table_data.fields.length;
-    if (!JSON) JSON = YAHOO.lang.JSON;
 
     this.render = function() {
         // create table

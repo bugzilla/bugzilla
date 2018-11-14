@@ -179,8 +179,8 @@ var product = {
 
     // display the product name
     Dom.get('product').value = productName;
-    Dom.get('product_label').innerHTML = YAHOO.lang.escapeHTML(productName);
-    Dom.get('dupes_product_name').innerHTML = YAHOO.lang.escapeHTML(productName);
+    Dom.get('product_label').innerHTML = productName.htmlEncode();
+    Dom.get('dupes_product_name').innerHTML = productName.htmlEncode();
     Dom.get('list_comp').href = `${BUGZILLA.config.basepath}describecomponents.cgi?` +
                                 `product=${encodeURIComponent(productName)}`;
     guided.setAdvancedLink();
@@ -222,7 +222,7 @@ var product = {
       {
         success: function(res) {
           try {
-            var data = YAHOO.lang.JSON.parse(res.responseText);
+            var data = JSON.parse(res.responseText);
             if (data.error)
               throw(data.error.message);
             if (data.result.products.length == 0)
@@ -252,7 +252,7 @@ var product = {
           }
         }
       },
-      YAHOO.lang.JSON.stringify({
+      JSON.stringify({
         version: "1.1",
         method: "Product.get",
         id: ++this._counter,
@@ -429,7 +429,7 @@ var dupes = {
       `${BUGZILLA.config.basepath}jsonrpc.cgi`,
       {
         success: function(res) {
-          var data = YAHOO.lang.JSON.parse(res.responseText);
+          var data = JSON.parse(res.responseText);
           if (data.error)
             throw(data.error.message);
           dupes._buildCcHTML(el, bugID, bugStatus, follow);
@@ -440,7 +440,7 @@ var dupes = {
             alert("Update failed:\n\n" + res.responseText);
         }
       },
-      YAHOO.lang.JSON.stringify({
+      JSON.stringify({
         version: "1.1",
         method: "Bug.update",
         id: ++this._counter,
@@ -521,7 +521,7 @@ var dupes = {
 
   _onSummaryKeyUp: function(e) {
     // disable search button until there's a query
-    dupes._elSearch.disabled = YAHOO.lang.trim(dupes._elSummary.value) == '';
+    dupes._elSearch.disabled = dupes._elSummary.value.trim() == '';
   },
 
   _doSearch: function() {
@@ -564,7 +564,7 @@ var dupes = {
       };
 
       dupes._dataTable.getDataSource().sendRequest(
-        YAHOO.lang.JSON.stringify(json_object),
+        JSON.stringify(json_object),
         {
           success: dupes._onDupeResults,
           failure: dupes._onDupeResults,
@@ -592,7 +592,7 @@ var dupes = {
   },
 
   getSummary: function() {
-    var summary = YAHOO.lang.trim(this._elSummary.value);
+    var summary = this._elSummary.value.trim();
     // work around chrome bug
     if (summary == dupes._elSummary.getAttribute('placeholder')) {
       return '';

@@ -119,7 +119,7 @@ YAHOO.util.Event.addListener(window, "load", function() {
          sortOptions: { defaultDir: YAHOO.widget.DataTable.CLASS_DESC, sortFunction:totalNumberSorter }}
       ];
   this.parseString = function(str) {
-    return YAHOO.lang.trim(str);
+    return str.trim();
   };
 
   this.parseNumber = function(str) {

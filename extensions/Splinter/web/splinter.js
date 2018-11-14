@@ -1204,7 +1204,7 @@ Splinter.ReviewStorage.LocalReviewStorage.prototype = {
         if (reviewInfosText == null) {
             this._reviewInfos = [];
         } else {
-            this._reviewInfos = YAHOO.lang.JSON.parse(reviewInfosText);
+            this._reviewInfos = JSON.parse(reviewInfosText);
         }
     },
 
@@ -1263,14 +1263,14 @@ Splinter.ReviewStorage.LocalReviewStorage.prototype = {
         }
 
         this._reviewInfos.push(reviewInfo);
-        localStorage.splinterReviews = YAHOO.lang.JSON.stringify(this._reviewInfos);
+        localStorage.splinterReviews = JSON.stringify(this._reviewInfos);
     },
 
     _deleteReviewInfo : function(bug, attachment) {
         var reviewIndex = this._findReview(bug, attachment);
         if (reviewIndex >= 0) {
             this._reviewInfos.splice(reviewIndex, 1);
-            localStorage.splinterReviews = YAHOO.lang.JSON.stringify(this._reviewInfos);
+            localStorage.splinterReviews = JSON.stringify(this._reviewInfos);
         }
     },
 

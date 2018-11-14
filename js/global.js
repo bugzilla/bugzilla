@@ -196,17 +196,6 @@ function bugzilla_ajax(request, done_fn, error_fn) {
         });
 }
 
-// polyfill .trim
-if (!String.prototype.trim) {
-    (function() {
-        // Make sure we trim BOM and NBSP
-        var rtrim = /^[\s\uFEFF\xA0]+|[\s\uFEFF\xA0]+$/g;
-        String.prototype.trim = function() {
-            return this.replace(rtrim, '');
-        };
-    })();
-}
-
 // html encoding
 if (!String.prototype.htmlEncode) {
     (function() {

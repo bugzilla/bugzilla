@@ -468,7 +468,7 @@ function showGear() {
     count += needed[id];
     html += '<tr>' +
             '<td>' + needed[id] + ' x&nbsp;</td>' +
-            '<td>' + YAHOO.lang.escapeHTML(item.name) + '</td>' +
+            '<td>' + item.name.htmlEncode() + '</td>' +
             '<td><button onclick="removeGear(\'' + id + '\');return false">Remove</button></td>' +
             '</tr>';
     text += needed[id] + ' x ' + id + ' ' + item.name + "\n";
@@ -478,7 +478,7 @@ function showGear() {
     count += item.quantity;
     html += '<tr>' +
             '<td>' + item.quantity + ' x&nbsp;</td>' +
-            '<td>(' + item.type + ') ' + YAHOO.lang.escapeHTML(item.name) + '</td>' +
+            '<td>(' + item.type + ') ' + item.name.htmlEncode() + '</td>' +
             '<td><button onclick="removeFreeform(\'' + i + '\');return false">Remove</button></td>' +
             '</tr>';
     text += item.quantity + ' x (' + item.type + ') ' + item.name + "\n";

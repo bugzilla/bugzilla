@@ -41,7 +41,7 @@ YAHOO.bugzilla.dupTable = {
                                    "update_token" ]
             }
         };
-        var post_data = YAHOO.lang.JSON.stringify(json_object);
+        var post_data = JSON.stringify(json_object);
 
         var callback = {
             success: dataTable.onDataReturnInitializeTable,
@@ -136,7 +136,6 @@ YAHOO.bugzilla.dupTable = {
 
 (function(){
     'use strict';
-    var JSON = YAHOO.lang.JSON;
 
     YAHOO.bugzilla.bugUserLastVisit = {
         update: function(bug_ids) {

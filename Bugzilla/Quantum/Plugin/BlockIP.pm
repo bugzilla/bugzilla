@@ -16,12 +16,16 @@ sub register {
   $app->helper(block_ip   => \&_block_ip);
   $app->helper(unblock_ip => \&_unblock_ip);
 
-  my $template = Bugzilla::Template->create();
-  $template->process('global/ip-blocked.html.tmpl',
-    {block_timeout => BLOCK_TIMEOUT},
-    \$BLOCKED_HTML);
-  undef $template;
-  utf8::encode($BLOCKED_HTML);
+  $app->hook(
+    before_server_start => sub {
+      my $template = Bugzilla::Template->create();
+      $template->process('global/ip-blocked.html.tmpl',
+        {block_timeout => BLOCK_TIMEOUT},
+        \$BLOCKED_HTML);
+      undef $template;
+      utf8::encode($BLOCKED_HTML);
+    }
+  );
 }
 
 sub _block_ip {

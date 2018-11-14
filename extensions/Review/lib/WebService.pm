@@ -71,6 +71,7 @@ sub suggestions {
             id    => $self->type('int', $reviewer->id),
             email => $self->type('email', $reviewer->login),
             name  => $self->type('string', $reviewer->name),
+            nick  => $self->type('string', $reviewer->nick),
             review_count => $self->type('int', $reviewer->review_count),
         };
     }
@@ -289,6 +290,7 @@ sub _user_to_hash {
     return {
         id        => $self->type('int',    $user->id),
         real_name => $self->type('string', $user->name),
+        nick      => $self->type('string', $user->nick),
         name      => $self->type('email',  $user->login),
     };
 }
@@ -488,6 +490,11 @@ The id of the bugzilla user. A unique integer value.
 =item C<real_name> (string)
 
 The real name of the bugzilla user.
+
+=item C<nick> (string)
+
+The user's nickname. Currently this is extracted from the real_name, name or
+email field.
 
 =item C<name> (string)
 

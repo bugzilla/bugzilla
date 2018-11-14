@@ -352,6 +352,8 @@ id                 int      The unique integer ID that Bugzilla uses to represen
                             this user. Even if the user's login name changes,
                             this will not change.
 real_name          string   The actual name of the user. May be blank.
+nick               string   The user's nickname. Currently this is extracted from
+                            the real_name, name or email field.
 email              string   The email address of the user.
 name               string   The login name of the user. Note that in some
                             situations this is different than their email.
@@ -398,11 +400,11 @@ query  string  The CGI parameters for the saved report.
 =====  ======  ==================================================================
 
 If you are not authenticated when you call this function, you will only be
-returned the ``id``, ``name``, and ``real_name`` items. If you are authenticated
-and not in 'editusers' group, you will only be returned the ``id``, ``name``,
-``real_name``, ``email``, ``can_login``, and ``groups`` items. The groups
-returned are filtered based on your permission to bless each group. The
-``saved_searches`` and ``saved_reports`` items are only returned if you are
+returned the ``id``, ``name``, ``real_name`` and ``nick`` items. If you are
+authenticated and not in 'editusers' group, you will only be returned the ``id``,
+``name``, ``real_name``, ``nick``, ``email``, ``can_login`` and ``groups`` items.
+The groups returned are filtered based on your permission to bless each group.
+The ``saved_searches`` and ``saved_reports`` items are only returned if you are
 querying your own account, even if you are in the editusers group.
 
 **Errors**
@@ -445,6 +447,7 @@ logged in user.
      "id" : "1234",
      "name" : "user@bugzulla.org",
      "real_name" : "Test User",
+     "nick" : "user"
    }
 
 ========== ======  =====================================================
@@ -454,5 +457,7 @@ id         int     The unique integer ID that Bugzilla uses to represent
                    this user. Even if the user's login name changes,
                    this will not change.
 real_name  string  The actual name of the user. May be blank.
+nick       string  The user's nickname. Currently this is extracted from
+                   the real_name, name or email field.
 name       string  string  The login name of the user.
 ========== ======  =====================================================

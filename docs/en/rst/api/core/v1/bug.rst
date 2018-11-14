@@ -45,6 +45,7 @@ name              type   description
          "assigned_to_detail": {
            "id": 2,
            "real_name": "Test User",
+           "nick": "user",
            "name": "user@bugzilla.org",
            "email": "user@bugzilla.org"
          },
@@ -76,6 +77,7 @@ name              type   description
            {
              "id": 786,
              "real_name": "Foo Bar",
+             "nick": "foo",
              "name": "foo@bar.com",
              "email": "foo@bar.com"
            },
@@ -113,6 +115,7 @@ name              type   description
          "creator_detail": {
            "id": 28,
            "real_name": "hello",
+           "nick": "namachi",
            "name": "user@bugzilla.org",
            "email": "namachi@netscape.com"
          },
@@ -260,6 +263,8 @@ name       type    description
 =========  ======  ==============================================================
 id         int     The user ID for this user.
 real_name  string  The 'real' name for this user, if any.
+nick       string  The user's nickname. Currently this is extracted from the
+                   real_name, name or email field.
 name       string  The user's Bugzilla login.
 email      string  The user's email address. Currently this is the same value as
                    the name.

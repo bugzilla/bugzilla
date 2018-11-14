@@ -223,6 +223,7 @@ membership  boolean  Set to 1 then a list of members of the passed groups names
          "membership": [
            {
              "real_name": "Bugzilla User",
+             "nick": "user",
              "can_login": true,
              "name": "user@bugzilla.org",
              "login_denied_text": "",
@@ -280,6 +281,8 @@ name           type     description
 =============  =======  =========================================================
 id             int      The ID of the user.
 real_name      string   The actual name of the user.
+nick           string   The user's nickname. Currently this is extracted from
+                        the real_name, name or email field.
 email          string   The email address of the user.
 name           string   The login name of the user. Note that in some situations
                         this is different than their email.

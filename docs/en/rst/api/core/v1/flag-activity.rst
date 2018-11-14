@@ -83,11 +83,13 @@ For example, to get the first 100 flag-activity entries that occurred on or afte
        "requestee": {
          "id": 123,
          "name": "user@mozilla.com",
+         "nick": "user",
          "real_name": "J. Random User"
        },
        "setter": {
          "id": 123,
          "name": "user@mozilla.com",
+         "nick": "user",
          "real_name": "J. Random User"
        },
        "status": "?",
@@ -127,6 +129,8 @@ name       type    description
 id         int     The unique ID of the user.
 name       string  The login of the user (typically an email address).
 real_name  string  The real name of the user, if set.
+nick       string  The user's nickname. Currently this is extracted
+                   the real_name, name or email field.
 =========  ======  ====================================================
 
 The type object has the following fields:

@@ -1548,6 +1548,7 @@ sub _user_to_hash {
     my $item = filter $filters, {
         id        => $self->type('int', $user->id),
         real_name => $self->type('string', $user->name),
+        nick      => $self->type('string', $user->nick),
         name      => $self->type('email', $user->login),
         email     => $self->type('email', $user->email),
     }, $types, $prefix;
@@ -2848,6 +2849,11 @@ C<int> The user id for this user.
 =item C<real_name>
 
 C<string> The 'real' name for this user, if any.
+
+=item C<nick>
+
+C<string> The user's nickname. Currently this is extracted from the real_name,
+name or email field.
 
 =item C<name>
 

@@ -210,6 +210,7 @@ sub _get_group_membership {
         map {{
             id                => $self->type('int', $_->id),
             real_name         => $self->type('string', $_->name),
+            nick              => $self->type('string', $_->nick),
             name              => $self->type('string', $_->login),
             email             => $self->type('string', $_->email),
             can_login         => $self->type('boolean', $_->is_enabled),
@@ -546,6 +547,11 @@ C<int> The id of the user.
 =item real_name
 
 C<string> The actual name of the user.
+
+=item nick
+
+C<string> The user's nickname. Currently this is extracted from the real_name,
+name or email field.
 
 =item email
 

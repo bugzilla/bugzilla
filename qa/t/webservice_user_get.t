@@ -141,8 +141,8 @@ sub post_success {
     }
     else {
         my @item_keys = sort keys %$item;
-        is_deeply(\@item_keys, ['id', 'name', 'real_name'],
-            'Only id, name, and real_name are returned to logged-out users');
+        is_deeply(\@item_keys, ['id', 'name', 'nick', 'real_name'],
+            'Only id, name, nick and real_name are returned to logged-out users');
         return;
     }
 
@@ -198,14 +198,14 @@ foreach my $rpc (@clients) {
     my $exclude_none = $rpc->bz_call_success('User.get', {
         names => [$get_user], exclude_fields => ['asdfasdfsdf'],
     }, 'User.get excluding only invalid fields');
-    is(scalar keys %{ $exclude_none->result->{users}->[0] }, 3,
+    is(scalar keys %{ $exclude_none->result->{users}->[0] }, 4,
        'All fields returned for user');
 
     my $exclude_one = $rpc->bz_call_success('User.get', {
         names => [$get_user], exclude_fields => ['id'],
     }, 'User.get excluding id');
-    is(scalar keys %{ $exclude_one->result->{users}->[0] }, 2,
-       'Only two fields returned for user');
+    is(scalar keys %{ $exclude_one->result->{users}->[0] }, 3,
+       'Only three fields returned for user');
 
     my $override = $rpc->bz_call_success('User.get', {
         names => [$get_user], include_fields => ['id', 'name'],

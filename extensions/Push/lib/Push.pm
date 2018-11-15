@@ -23,6 +23,8 @@ use Bugzilla::Extension::Push::Queue;
 use Bugzilla::Extension::Push::Util;
 use DateTime;
 use Try::Tiny;
+use IO::Async::Loop;
+use IO::Async::Timer::Periodic;
 
 has 'is_daemon' => (
     is      => 'rw',

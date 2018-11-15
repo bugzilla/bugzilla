@@ -21,7 +21,7 @@ use Bugzilla::Config::GroupSecurity;
 use Bugzilla::WebService::Bug;
 use Bugzilla::WebService::Util qw(filter_wants);
 
-our $VERSION = '0.01';
+our $VERSION = '1.0';
 
 ################
 # Installation #
@@ -43,6 +43,7 @@ sub db_schema_abstract_schema {
                                            DELETE => 'CASCADE'}},
             change_when => {TYPE => 'DATETIME', NOTNULL => 1},
             old_comment => {TYPE => 'LONGTEXT', NOTNULL => 1},
+            is_hidden   => {TYPE => 'BOOLEAN', NOTNULL => 1, DEFAULT => 0},
         ],
         INDEXES => [
             longdescs_activity_comment_id_idx => ['comment_id'],
@@ -55,6 +56,11 @@ sub db_schema_abstract_schema {
 sub install_update_db {
     my $dbh = Bugzilla->dbh;
     $dbh->bz_add_column('longdescs', 'edit_count', { TYPE => 'INT3', DEFAULT => 0 });
+    # Add the new `is_hidden` column to the `longdescs_activity` table, which
+    # has been introduced with the extension's version 1.0, defaulting to `true`
+    # because existing admin-edited revisions may contain sensitive info
+    $dbh->bz_add_column('longdescs_activity', 'is_hidden',
+                        { TYPE => 'BOOLEAN', NOTNULL => 1, DEFAULT => 1 });
 }
 
 ####################

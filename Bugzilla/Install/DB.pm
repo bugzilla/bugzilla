@@ -775,6 +775,9 @@ sub update_table_definitions {
                        {TYPE => 'FULLTEXT', FIELDS => ['realname']});
     _migrate_nicknames();
 
+    # Bug 1354589 - dkl@mozilla.com
+    _populate_oauth2_scopes();
+
     ################################################################
     # New --TABLE-- changes should go *** A B O V E *** this point #
     ################################################################
@@ -3933,6 +3936,17 @@ sub _migrate_preference_categories {
         $dbh->do('UPDATE setting SET category = ? WHERE name = ?',
                  undef, $params->{category}, $params->{name});
     }
+}
+
+sub _populate_oauth2_scopes {
+  my $dbh = Bugzilla->dbh;
+
+  # if there are no scopes, then we're creating a database from scratch
+  my ($scope_count)
+    = $dbh->selectrow_array('SELECT COUNT(*) FROM oauth2_scope');
+  return if $scope_count;
+  $dbh->do(
+    "INSERT INTO oauth2_scope (id, description) VALUES (1, 'user:read')");
 }
 
 1;

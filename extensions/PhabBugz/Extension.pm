@@ -23,6 +23,7 @@ sub template_before_process {
     my $file = $args->{'file'};
     my $vars = $args->{'vars'};
 
+    return unless Bugzilla->user->id;
     return unless Bugzilla->params->{phabricator_enabled};
     return unless Bugzilla->params->{phabricator_base_uri};
     return unless $file =~ /bug_modal\/(header|edit).html.tmpl$/;

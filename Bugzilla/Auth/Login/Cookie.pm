@@ -58,7 +58,7 @@ sub get_login_info {
         # it is valid.
         if (i_am_webservice()) {
             if (exists Bugzilla->input_params->{Bugzilla_api_token}) {
-                my $api_token = Bugzilla->input_params->{Bugzilla_api_token};
+                my $api_token = delete Bugzilla->input_params->{Bugzilla_api_token};
                 my ($token_user_id, undef, undef, $token_type)
                     = Bugzilla::Token::GetTokenData($api_token);
                 if (!defined $token_type

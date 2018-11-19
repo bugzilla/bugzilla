@@ -4,6 +4,6 @@
       && attachment && attachment.ispatch %]
 
 Review
-[%+ Bugzilla.splinter_review_url(bug.bug_id, attachment.id) FILTER none %]
+[%+ Bugzilla.splinter_review_url(bug.bug_id, attachment.id, 1) FILTER none %]
 [%- END %]
 

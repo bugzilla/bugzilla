@@ -33,8 +33,8 @@ BEGIN {
 }
 
 sub _get_review_url {
-    my ($class, $bug_id, $attach_id) = @_;
-    return get_review_url(Bugzilla::Bug->check({ id => $bug_id, cache => 1 }), $attach_id);
+    my ($class, $bug_id, $attach_id, $use_abs_url) = @_;
+    return get_review_url(Bugzilla::Bug->check({ id => $bug_id, cache => 1 }), $attach_id, $use_abs_url);
 }
 
 sub page_before_template {

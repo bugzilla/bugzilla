@@ -129,7 +129,7 @@ use constant VALIDATOR_DEPENDENCIES => {
 
 use constant EXTRA_REQUIRED_FIELDS => qw(is_enabled);
 
-with 'Bugzilla::Elastic::Role::Object';
+with 'Bugzilla::Elastic::Role::Object', 'Bugzilla::Role::Storable';
 
 sub ES_INDEX {
     my ($class) = @_;
@@ -232,6 +232,7 @@ sub es_document {
 
     return $doc;
 }
+
 ################################################################################
 # Functions
 ################################################################################

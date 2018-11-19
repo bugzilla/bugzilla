@@ -21,6 +21,10 @@
   text-align: center;
 }
 
+.bz_query_head h1 {
+  font-size: x-large;
+}
+
 .bz_query_timestamp {
   font-weight: bold;
 }

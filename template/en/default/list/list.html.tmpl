@@ -56,6 +56,13 @@
 %]
 
 <div class="bz_query_head">
+  [% IF searchname || defaultsavename || quicksearch %]
+    <h1>[% (searchname || defaultsavename || quicksearch) FILTER html %]</h1>
+  [% ELSIF title != "$terms.Bug List" %]
+    [%# Already filtered #%]
+    <h1>[% title FILTER none %]</h1>
+  [% END %]
+
   <span class="bz_query_timestamp">
     [% currenttime FILTER time('%a %b %e %Y %T %Z') FILTER html %]<br>
   </span>

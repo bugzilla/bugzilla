@@ -40,6 +40,25 @@ sub oauth2 {
     }
   );
 
+  # Manage the client list
+  my $r            = $self->routes;
+  my $client_route = $r->under(
+    '/admin/oauth' => sub {
+      my ($c) = @_;
+      my $user = $c->bugzilla->login(LOGIN_REQUIRED) || return undef;
+      $user->in_group('admin')
+        || ThrowUserError('auth_failure',
+        {group => 'admin', action => 'edit', object => 'oauth_clients'});
+      return 1;
+    }
+  );
+  $client_route->any('/list')->to('OAuth2::Clients#list')->name('list_clients');
+  $client_route->any('/create')->to('OAuth2::Clients#create')
+    ->name('create_client');
+  $client_route->any('/delete')->to('OAuth2::Clients#delete')
+    ->name('delete_client');
+  $client_route->any('/edit')->to('OAuth2::Clients#edit')->name('edit_client');
+
   $self->helper(
     'bugzilla.oauth' => sub {
         my ($c, @scopes) = @_;

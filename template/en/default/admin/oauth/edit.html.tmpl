@@ -1,0 +1,52 @@
+[% PROCESS global/header.html.tmpl
+  title = "Edit OAuth2 Client"
+  onload = "document.forms['f'].client_id.select()"
+%]
+
+<form name="f" method="post" action="[% basepath FILTER none %]admin/oauth/edit">
+  <table border="0" cellpadding="4" cellspacing="0">
+    <tr>
+      <th class="field_label"><label for="description">Client Description:</label></th>
+      <td><input id="description" size="20" maxlength="20" name="description" value="
+      [%- client.description FILTER html %]"></td>
+    </tr>
+    <tr>
+      <th class="field_label"><label for="id">Client ID:</label></th>
+      <td>[% client.id FILTER html %]</td>
+    </tr>
+    <tr>
+      <th class="field_label"><label for="secret">Client Secret:</label></th>
+      <td>[% client.secret FILTER html %]</td>
+    </tr>
+    <tr>
+      <th class="field_label"><label for="active">Active:</label></th>
+      <td><input id="active" name="active" type="checkbox" value="1"
+                 [%+ 'checked="checked"' IF client.active %]></td>
+    </tr>
+    <tr>
+      <th class="field_label"><label for="scopes">Scopes:</label></th>
+      <td>
+        <table>
+        [% FOREACH scope = scopes %]
+          <tr>
+            <td>
+              <input id="scope_[% scope.id FILTER html %]"
+                     name="scopes" type="checkbox" value="[% scope.id FILTER html %]"
+                 [% ' checked="checked"' IF client.scopes.contains(scope.id) %]>
+            </td>
+            <td>
+              [% scope.description FILTER html %]
+            </td>
+          </tr>
+        [% END %]
+        </table>
+      </td>
+    </tr>
+  </table>
+
+  <input type="hidden" name="id" value="[% client.id FILTER html %]">
+  <input type="hidden" name="token" value="[% token FILTER html %]">
+  <input type="submit" id="update" value="Save Changes">
+</form>
+
+[% PROCESS global/footer.html.tmpl %]

@@ -133,6 +133,10 @@
           <dd class="[% class %]">View the queue of undelivered/deferred jobs/emails.</dd>
         [% END %]
 
+        [% class = user.in_group('admin') ? "" : "forbidden" %]
+        <dt id="custom_fields" class="[% class %]"><a href="/admin/oauth/list">OAuth2 Clients</a></dt>
+        <dd class="[% class %]">Add, modify or remove OAuth2 clients.</dd>
+
         [% Hook.process('end_links_right') %]
       </dl>
     </td>

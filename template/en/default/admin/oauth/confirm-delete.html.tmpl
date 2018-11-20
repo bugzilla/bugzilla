@@ -1,0 +1,31 @@
+[% PROCESS global/header.html.tmpl
+  title = "Delete OAuth2 Client"
+%]
+
+<table border="1" cellpadding="4" cellspacing="0">
+<tr bgcolor="#6666FF">
+  <th valign="top" align="left">Field</th>
+  <th valign="top" align="left">Value</th>
+</tr>
+<tr>
+  <td valign="top">Client Description</td>
+  <td valign="top">[% client.description FILTER html %]</td>
+</tr>
+<tr>
+  <td valign="top">Client ID</td>
+  <td valign="top">[% client.id FILTER html %]</td>
+</tr>
+</table>
+
+<h2>Confirmation</h2>
+
+<p>Do you really want to delete this client?<p>
+
+<form method="post" action="[% basepath FILTER none %]admin/oauth/delete">
+  <input type="submit" id="delete" value="Yes, delete">
+  <input type="hidden" name="id" value="[% client.id FILTER html %]">
+  <input type="hidden" name="deleteme" value="delete">
+  <input type="hidden" name="token" value="[% token FILTER html %]">
+</form>
+
+[% PROCESS global/footer.html.tmpl %]

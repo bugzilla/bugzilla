@@ -1,0 +1,35 @@
+[% PROCESS global/header.html.tmpl
+  title = "Select OAuth2 Client"
+%]
+
+[% columns = [
+     {
+       name => "description"
+       heading => "Edit client..."
+       contentlink => "admin/oauth/edit?id=%%id%%"
+     },
+     {
+       name => "active"
+       heading => "Active"
+       yesno_field => 1
+     }
+     {
+       name => "action"
+       heading => "Action"
+       content => "Delete"
+       contentlink => "admin/oauth/delete?id=%%id%%"
+     }
+   ]
+%]
+
+[% Hook.process('before_table') %]
+
+[% PROCESS admin/table.html.tmpl
+     columns = columns
+     data = clients
+     overrides = overrides
+%]
+
+<a title="Add a client" href="[% basepath FILTER none %]admin/oauth/create">Add</a> a client.
+
+[% PROCESS global/footer.html.tmpl %]

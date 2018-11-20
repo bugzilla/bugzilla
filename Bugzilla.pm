@@ -379,6 +379,14 @@ sub login {
         $class->user->update_last_seen_date();
     }
 
+    # If Mojo native app is requesting login, we need to possibly redirect
+    my $C = $Bugzilla::Quantum::CGI::C;
+    if ($C->session->{override_login_target}) {
+      my $mojo_url = Mojo::URL->new($C->session->{override_login_target});
+      $mojo_url->query($C->session->{cgi_params});
+      $C->redirect_to($mojo_url);
+    }
+
     return $class->user;
 }
 

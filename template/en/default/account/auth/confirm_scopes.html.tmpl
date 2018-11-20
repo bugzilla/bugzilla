@@ -1,0 +1,44 @@
+[%# This Source Code Form is subject to the terms of the Mozilla Public
+  # License, v. 2.0. If a copy of the MPL was not distributed with this
+  # file, You can obtain one at http://mozilla.org/MPL/2.0/.
+  #
+  # This Source Code Form is "Incompatible With Secondary Licenses", as
+  # defined by the Mozilla Public License, v. 2.0.
+  #%]
+
+[% PROCESS global/header.html.tmpl
+   title = "Confirm OAuth2 Scopes" %]
+
+<h1>[% title FILTER html %] </h1>
+<p>
+  A third-party website <em>[% client.description FILTER html %]</em> would like to have
+  the following access to your [% terms.Bugzilla %] account.
+</p>
+
+<p>
+Scopes:
+<ul>
+  [% FOREACH scope = scopes %]
+    <li>
+      [% scope FILTER html %]
+    </li>
+  [% END %]
+</ul>
+</p>
+
+<p>Do you want this website to have the above access to your [% terms.Bugzilla %]
+  account?</p>
+
+<div>
+  <form action="/oauth/authorize" method="get">
+    <input type="hidden" name="oauth_confirm_[% client.id FILTER html %]" value="1">
+    <input type="hidden" name="token" value="[% token FILTER html %]">
+    <input type="submit" name="submit" value="Accept">
+    [% FOREACH field = c.req.params.names %]
+      <input type="hidden" name="[% field FILTER html %]"
+             value="[% c.param(field) FILTER html_linebreak %]">
+    [% END %]
+  </form>
+</div>
+
+[% PROCESS global/footer.html.tmpl %]

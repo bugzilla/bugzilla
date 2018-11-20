@@ -808,6 +808,15 @@
   [% ELSIF message_tag == "install_workflow_init" %]
     Setting up the default status workflow...
 
+  [% ELSIF message_tag == 'oauth_client_created' %]
+    The OAuth2 client <em>[% client.description FILTER html %]</em> has been created.
+
+  [% ELSIF message_tag == 'oauth_client_updated' %]
+    The OAuth2 client <em>[% client.description FILTER html %]</em> has been updated.
+
+  [% ELSIF message_tag == "oauth_client_deleted" %]
+    The OAuth2 client <em>[% client.description FILTER html %]</em> has been deleted.
+
   [% ELSIF message_tag == "product_created" %]
     [% title = "Product Created" %]
     The product <em>[% product.name FILTER html %]</em> has been created. You will need to

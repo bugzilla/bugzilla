@@ -12,10 +12,12 @@ use strict;
 use warnings;
 
 use base qw(Exporter);
-our @EXPORT = qw(create_user issue_api_key mock_useragent_tx);
+our @EXPORT
+  = qw(create_user create_oauth_client issue_api_key mock_useragent_tx);
 
 use Bugzilla::User;
 use Bugzilla::User::APIKey;
+use Bugzilla::Util qw(generate_random_password);
 use Mojo::Message::Response;
 use Test2::Tools::Mock qw(mock);
 
@@ -30,6 +32,33 @@ sub create_user {
         extern_id     => undef,
         %extra,
     });
+}
+
+sub create_oauth_client {
+  my ($description, $scopes) = @_;
+  my $dbh = Bugzilla->dbh;
+
+  my $id     = generate_random_password(20);
+  my $secret = generate_random_password(40);
+
+  $dbh->do(
+    'INSERT INTO oauth2_client (id, description, secret) VALUES (?, ?, ?)',
+    undef, $id, $description, $secret);
+
+  foreach my $scope (@{$scopes}) {
+    my $scope_id
+      = $dbh->selectrow_array('SELECT id FROM oauth2_scope WHERE description = ?',
+      undef, $scope);
+    if (!$scope_id) {
+      die "Scope $scope not found";
+    }
+    $dbh->do(
+      'INSERT INTO oauth2_client_scope (client_id, scope_id, allowed) VALUES (?, ?, 1)',
+      undef, $id, $scope_id
+    );
+  }
+
+  return $dbh->selectrow_hashref('SELECT * FROM oauth2_client WHERE id = ?', undef, $id);
 }
 
 sub issue_api_key {

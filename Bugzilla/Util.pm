@@ -323,7 +323,7 @@ sub do_ssl_redirect_if_required {
 
 # Returns the real remote address of the client,
 sub remote_ip {
-    if ($ENV{SERVER_SOFTWARE} eq 'Bugzilla::Quantum::CGI') {
+    if ( ( $ENV{SERVER_SOFTWARE} // '') eq 'Bugzilla::Quantum::CGI') {
         my $c = $Bugzilla::Quantum::CGI::C
             or LOGDIE("Cannot find controller!");
         state $better_xff = Bugzilla->has_feature('better_xff');

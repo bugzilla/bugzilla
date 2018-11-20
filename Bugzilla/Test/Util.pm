@@ -13,7 +13,7 @@ use warnings;
 
 use base qw(Exporter);
 our @EXPORT
-  = qw(create_user create_oauth_client issue_api_key mock_useragent_tx);
+  = qw(create_user create_bug create_oauth_client issue_api_key mock_useragent_tx);
 
 use Bugzilla::User;
 use Bugzilla::Bug;

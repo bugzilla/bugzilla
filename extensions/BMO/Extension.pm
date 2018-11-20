@@ -1326,60 +1326,6 @@ sub db_schema_abstract_schema {
             },
         ],
     };
-    $args->{schema}->{secbugs_BugHistory} = {
-        FIELDS => [
-            bugid      => { TYPE => 'BIGINT',      NOTNULL => 1 },
-            changetime => { TYPE => 'NATIVE_DATETIME' },
-            fieldname  => { TYPE => 'VARCHAR(32)', NOTNULL => 1 },
-            new        => { TYPE => 'VARCHAR(255)' },
-            old        => { TYPE => 'VARCHAR(255)' },
-        ],
-    };
-
-    $args->{schema}->{secbugs_Bugs} = {
-        FIELDS => [
-            bugid      => { TYPE => 'BIGINT',  NOTNULL => 1, PRIMARYKEY => 1 },
-            opendate   => { TYPE => 'NATIVE_DATETIME' },
-            closedate  => { TYPE => 'NATIVE_DATETIME', NOTNULL => 1 },
-            severity   => { TYPE => 'VARCHAR(16)' },
-            summary    => { TYPE => 'VARCHAR(255)' },
-            updated    => { TYPE => 'NATIVE_DATETIME' },
-        ],
-    };
-
-    $args->{schema}->{secbugs_Details} = {
-        FIELDS => [
-            did => {
-                TYPE => 'INTSERIAL',
-                NOTNULL => 1,
-                PRIMARYKEY => 1,
-            },
-            sid => {
-                TYPE => 'INT4',
-            },
-            product => {
-                TYPE => 'VARCHAR(255)',
-            },
-            component => {
-                TYPE => 'VARCHAR(255)',
-            },
-            count => { TYPE => 'INT4' },
-            bug_list => { TYPE => 'TEXT' },
-            date => { TYPE => 'NATIVE_DATETIME' },
-            avg_age_days => { TYPE => 'INT4' },
-            med_age_days => { TYPE => 'INT4' },
-        ]
-    };
-
-    $args->{schema}->{secbugs_Stats} = {
-        FIELDS => [
-            sid      => { TYPE => 'INTSERIAL', NOTNULL => 1, PRIMARYKEY => 1 },
-            category => { TYPE => 'VARCHAR(32)' },
-            count    => { TYPE => 'INT4' },
-            date     => { TYPE => 'NATIVE_DATETIME' },
-        ]
-    };
-
 }
 
 sub install_update_db {

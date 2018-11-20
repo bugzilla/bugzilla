@@ -27,23 +27,8 @@
 [% dontchange = "--do_not_change--" %]
 <input type="hidden" name="dontchange" value="[% dontchange FILTER html %]">
 <input type="hidden" name="token" value="[% token FILTER html %]">
-
-<script [% script_nonce FILTER none %]>
-  function SetCheckboxes(value) {
-      var elements = document.forms.changeform.getElementsByTagName('input'),
-          numelements = elements.length,
-          item, i;
-      for (i = 0; i < numelements; i++) {
-          item = elements[i];
-          if (item.type === 'checkbox' && item.name.match(/^id_/)) {
-            item.checked = value;
-          }
-      }
-  }
-  document.write(' <input type="button" name="uncheck_all" value="Uncheck All" onclick="SetCheckboxes(false);">');
-  document.write(' <input type="button" name="check_all" value="Check All" onclick="SetCheckboxes(true);">');
-</script>
-
+<input type="button" id="uncheck_all" name="uncheck_all" value="Uncheck All">
+<input type="button" id="check_all" name="check_all" value="Check All">
 <hr>
 
 <p style="font-size:smaller">

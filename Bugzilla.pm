@@ -638,16 +638,21 @@ sub fields {
 sub active_custom_fields {
     my (undef, $params) = @_;
     my $cache_id = 'active_custom_fields';
+    my $can_cache = ! exists $params->{bug_id};
     if ($params) {
         $cache_id .= ($params->{product} ? '_p' . $params->{product}->id : '') .
                      ($params->{component} ? '_c' . $params->{component}->id : '');
         $cache_id .= ':noext' if $params->{skip_extensions};
     }
-    if (!exists request_cache->{$cache_id}) {
+    if (!$can_cache || !exists request_cache->{$cache_id}) {
         my $fields = Bugzilla::Field->match({ custom => 1, obsolete => 0, skip_extensions => 1 });
         Bugzilla::Hook::process('active_custom_fields',
                                 { fields => \$fields, params => $params });
-        request_cache->{$cache_id} = $fields;
+        if ($can_cache) {
+            request_cache->{$cache_id} = $fields;
+        } else {
+            return @$fields;
+        }
     }
     return @{request_cache->{$cache_id}};
 }

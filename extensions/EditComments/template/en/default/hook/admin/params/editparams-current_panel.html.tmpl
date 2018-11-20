@@ -8,6 +8,7 @@
 
 [% IF panel.name == "groupsecurity" %]
   [% panel.param_descs.edit_comments_group =
-    'The name of the group of users who can edit comments. Leave blank to disable comment editing.'
+    'The name of the group of users who can edit their own comments. Leave it blank to disable comment editing. ' _
+    'Insiders can always edit any comment and hide revisions where needed.'
   %]
 [% END -%]

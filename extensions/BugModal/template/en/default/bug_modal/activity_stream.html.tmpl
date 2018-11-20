@@ -141,17 +141,23 @@
           [% Hook.process('comment_action', 'bug_modal/activity_stream.html.tmpl') %]
           [% IF user.id %]
             [% IF user.can_tag_comments %]
-              <button class="tag-btn minor" type="button"
-                data-id="[% comment.id FILTER none %]"
-                data-no="[% comment.count FILTER none %]"
-              >Tag</button>
+              <button type="button" class="tag-btn minor iconic" title="Add a tag to this comment" aria-label="Tag"
+                      data-id="[% comment.id FILTER none %]" data-no="[% comment.count FILTER none %]">
+                <span class="icon" aria-hidden="true"></span>
+              </button>
             [% END %]
-            <button type="button" class="reply-btn minor"
-              data-reply-id="[% comment.count FILTER none %]"
-              data-reply-name="[% comment.author.name || comment.author.nick FILTER html %]"
-              >Reply</button>
+            <button type="button" class="reply-btn minor iconic" title="Reply to this comment" aria-label="Reply"
+                    data-reply-id="[% comment.count FILTER none %]"
+                    data-reply-name="[% comment.author.name || comment.author.nick FILTER html %]">
+              <span class="icon" aria-hidden="true"></span>
+            </button>
           [% END %]
-          <button type="button" class="change-spinner minor" id="cs-[% comment.count FILTER none %]">-</button>
+          <button type="button" class="change-spinner minor iconic" id="cs-[% comment.count FILTER none %]"
+                  title="Collapse this comment" aria-label="Collapse" aria-expanded="true"
+                  data-strings='{ "collapse_label": "Collapse", "collapse_tooltip": "Collapse this comment",
+                                  "expand_label": "Expanded", "expand_tooltip": "Expanded this comment" }'>
+            <span class="icon" aria-hidden="true"></span>
+          </button>
         </td>
       </tr>
 
@@ -166,6 +172,7 @@
           <div class="change-time">
             [% INCLUDE bug_modal/rel_time.html.tmpl ts=comment.creation_ts %]
           </div>
+          [% Hook.process('comment_meta', 'bug_modal/activity_stream.html.tmpl') %]
         </td>
       </tr>
 
@@ -193,8 +200,13 @@
             Comment hidden ([% comment.collapsed_reason FILTER html %])
         </td>
         <td class="comment-actions">
-          <button type="button" class="change-spinner minor" id="ccs-[% comment.count FILTER none %]">
-            [%~ comment.collapsed ? "+" : "-" ~%]
+          <button type="button" class="change-spinner minor iconic" id="ccs-[% comment.count FILTER none %]"
+                  title="[% comment.collapsed ? 'Expand this comment' : 'Collapse this comment' %]"
+                  aria-label="[% comment.collapsed ? 'Expand' : 'Collapse' %]"
+                  aria-expanded="[% comment.collapsed ? 'false' : 'true' %]"
+                  data-strings='{ "collapse_label": "Collapse", "collapse_tooltip": "Collapse this comment",
+                                  "expand_label": "Expanded", "expand_tooltip": "Expanded this comment" }'>
+            <span class="icon" aria-hidden="true"></span>
           </button>
         </td>
       </tr>
@@ -225,7 +237,12 @@
           [% Hook.process('user', 'bug/changes.html.tmpl') %]
         </td>
         <td class="comment-actions">
-          <button type="button" class="change-spinner minor" id="as-[% id FILTER none %]">-</button>
+          <button type="button" class="change-spinner minor iconic" id="as-[% id FILTER none %]"
+                  title="Collapse this change" aria-label="Collapse" aria-expanded="true"
+                  data-strings='{ "collapse_label": "Collapse", "collapse_tooltip": "Collapse this change",
+                                  "expand_label": "Expanded", "expand_tooltip": "Expanded this change" }'>
+            <span class="icon" aria-hidden="true"></span>
+          </button>
         </td>
       </tr>
       <tr id="ar-[% id FILTER none %]">

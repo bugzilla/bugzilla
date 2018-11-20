@@ -1,0 +1,39 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this file,
+ * You can obtain one at http://mozilla.org/MPL/2.0/.
+ *
+ * This Source Code Form is "Incompatible With Secondary Licenses", as
+ * defined by the Mozilla Public License, v. 2.0. */
+
+.change-revisions {
+  display: inline;
+  font-size: small;
+}
+
+.comment-actions .edit-btn .icon::before {
+  content: '\E254';
+}
+
+.comment-editor-toolbar {
+  padding: 8px;
+  background-color: #EEE;
+  text-align: right;
+}
+
+.comment-editor-toolbar label {
+  margin: 0 8px;
+}
+
+.comment-editor-textarea {
+  border: 0;
+  border-radius: 0;
+  padding: 8px;
+  width: 100%;
+  min-height: 5em;
+  font: 13px/1.2 "Droid Sans Mono", Menlo, Monaco, "Courier New", Courier, monospace;
+  resize: vertical;
+}
+
+.comment-editor-textarea:disabled {
+  background-color: #F3F3F3;
+}

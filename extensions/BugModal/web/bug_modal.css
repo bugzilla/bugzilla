@@ -594,7 +594,7 @@ td.flag-requestee {
 }
 
 
-.change-name, .change-time, .comment-private {
+.change-name, .change-time {
     display: inline;
 }
 
@@ -604,9 +604,55 @@ h3.change-name {
 }
 
 .comment-actions {
+    display: flex;
+    align-items: center;
     white-space: nowrap;
     vertical-align: top;
     padding: 2px 2px 0 0 !important;
+}
+
+.comment-private {
+    display: inline-block;
+    margin: 0 8px;
+}
+
+.comment-actions button {
+    outline: 0;
+    margin: 0;
+}
+
+.comment-actions button:not(:first-of-type) {
+    border-top-left-radius: 0;
+    border-bottom-left-radius: 0;
+}
+
+.comment-actions button:not(:last-of-type) {
+    border-top-right-radius: 0;
+    border-bottom-right-radius: 0;
+}
+
+.comment-actions button.iconic:not(:disabled) {
+    color: #555;
+}
+
+.comment-actions button.iconic .icon::before {
+    font-family: 'Material Icons';
+}
+
+.comment-actions .tag-btn .icon::before {
+    content: '\E54E';
+}
+
+.comment-actions .reply-btn .icon::before {
+    content: '\E15E';
+}
+
+.comment-actions .change-spinner[aria-expanded="true"] .icon::before {
+    content: '\E15B';
+}
+
+.comment-actions .change-spinner[aria-expanded="false"] .icon::before {
+    content: '\E145';
 }
 
 .change-spinner {

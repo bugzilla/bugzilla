@@ -39,7 +39,8 @@ use File::Spec;
 use IO::Dir;
 use List::MoreUtils qw(firstidx);
 use Scalar::Util qw(blessed);
-use JSON::XS qw(encode_json);
+use Mojo::JSON qw(encode_json);
+use Encode qw(encode decode);
 
 use parent qw(Template);
 
@@ -888,7 +889,7 @@ sub create {
             },
 
             json_encode => sub {
-                return encode_json($_[0]);
+                return decode('UTF-8', encode_json($_[0]), Encode::FB_DEFAULT);
             },
 
             # Function to create date strings

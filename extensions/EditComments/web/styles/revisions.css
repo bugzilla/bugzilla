@@ -1,0 +1,33 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this file,
+ * You can obtain one at http://mozilla.org/MPL/2.0/.
+ *
+ * This Source Code Form is "Incompatible With Secondary Licenses", as
+ * defined by the Mozilla Public License, v. 2.0. */
+
+.revision header {
+  display: flex;
+  padding: 10px;
+  width: 50em;
+}
+
+.revision .metadata {
+  flex: auto;
+}
+
+.revision .metadata .vcard {
+  display: inline;
+}
+
+.revision .actions {
+  flex: none;
+}
+
+.revision .hidden-comment {
+  padding: 10px;
+  font-style: italic;
+}
+
+.revision .bz_comment_text {
+  font: 13px/1.2 "Droid Sans Mono", Menlo, Monaco, "Courier New", Courier, monospace;
+}

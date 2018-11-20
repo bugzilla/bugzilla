@@ -7,8 +7,11 @@
   #%]
 
 [%
-  IF Param('edit_comments_group') && user.in_group(Param('edit_comments_group'));
-    style_urls.push('extensions/EditComments/web/styles/editcomments.css');
-    javascript_urls.push('extensions/EditComments/web/js/editcomments.js');
-  END;
+  # Always load CSS to style the "Edited" revision link
+  style_urls.push('extensions/EditComments/web/styles/inline-editor.css');
+
+  RETURN UNLESS user.is_insider
+    || Param('edit_comments_group') && user.in_group(Param('edit_comments_group'));
+
+  javascript_urls.push('extensions/EditComments/web/js/inline-editor.js');
 %]

@@ -395,13 +395,6 @@ my @groups = (
         all_products => 1,
     },
     {
-        name         => 'can_edit_comments',
-        description  => 'Members of this group will be able to edit comments',
-        no_admin     => 0,
-        bug_group    => 0,
-        all_products => 0,
-    },
-    {
         name         => 'can_restrict_comments',
         description  => 'Members of this group will be able to restrict comments on bugs',
         no_admin     => 0,
@@ -528,7 +521,7 @@ my %set_params = (
                                  '&emailtype2=exact&order=Importance&keywords_type=allwords' .
                                  '&long_desc_type=substring',
     defaultseverity           => 'normal',
-    edit_comments_group       => 'can_edit_comments',
+    edit_comments_group       => 'editbugs',
     insidergroup              => 'core-security-release',
     last_visit_keep_days      => '28',
     lxr_url                   => 'http://mxr.mozilla.org/mozilla',

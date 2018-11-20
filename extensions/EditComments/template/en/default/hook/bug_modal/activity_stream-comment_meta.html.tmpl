@@ -1,0 +1,17 @@
+[%# This Source Code Form is subject to the terms of the Mozilla Public
+  # License, v. 2.0. If a copy of the MPL was not distributed with this
+  # file, You can obtain one at http://mozilla.org/MPL/2.0/.
+  #
+  # This Source Code Form is "Incompatible With Secondary Licenses", as
+  # defined by the Mozilla Public License, v. 2.0.
+  #%]
+
+[% RETURN UNLESS comment.edit_count %]
+
+&bull;
+<div class="change-revisions">
+  <a href="[% basepath FILTER none %]page.cgi?id=comment-revisions.html&amp;bug_id=
+           [%- bug.id FILTER none %]&amp;comment_id=[% comment.id FILTER none %]"
+     title="[% (comment.edit_count == 1 ? "%d revision" : "%d revisions")
+              FILTER replace('%d', comment.edit_count) %]">Edited</a>
+</div>

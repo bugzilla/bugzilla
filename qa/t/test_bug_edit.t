@@ -35,7 +35,7 @@ $sel->click_ok("link=Groups");
 check_page_load($sel, WAIT_TIME, q{http://HOSTNAME:8000/bmo/editgroups.cgi});
 $sel->title_is("Edit Groups");
 $sel->click_ok("link=Master");
-check_page_load($sel, WAIT_TIME, q{http://HOSTNAME:8000/bmo/editgroups.cgi?action=changeform&group=26});
+check_page_load($sel, WAIT_TIME, q{http://HOSTNAME:8000/bmo/editgroups.cgi?action=changeform&group=25});
 $sel->title_is("Change Group: Master");
 my $group_url = $sel->get_location();
 $group_url =~ /group=(\d+)$/;

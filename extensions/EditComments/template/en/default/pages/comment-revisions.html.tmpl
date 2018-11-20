@@ -1,0 +1,58 @@
+[%# This Source Code Form is subject to the terms of the Mozilla Public
+  # License, v. 2.0. If a copy of the MPL was not distributed with this
+  # file, You can obtain one at http://mozilla.org/MPL/2.0/.
+  #
+  # This Source Code Form is "Incompatible With Secondary Licenses", as
+  # defined by the Mozilla Public License, v. 2.0.
+  #%]
+
+[%
+  PROCESS global/variables.none.tmpl;
+  PROCESS global/header.html.tmpl
+    title           = "$terms.Bug $bug.id Comment $comment.count Edit History"
+    style_urls      = ['extensions/EditComments/web/styles/revisions.css']
+    javascript_urls = (user.is_insider ? ['extensions/EditComments/web/js/revisions.js'] : [])
+    generate_api_token = 1
+%]
+
+<h2>[% "$terms.Bug $bug.id Comment $comment.count" FILTER none %] Edit History</h2>
+
+<p>
+  <strong>Note</strong>: The actual edited comment in the [% terms.bug %] view
+  page will always show the original commentor’s name and original timestamp.
+</p>
+
+[% SET rev_count = 0 %]
+[% FOREACH a = comment.activity %]
+  <article class="revision" data-comment-id="[% comment.id FILTER html %]" data-revised-time="[% a.revised_time FILTER html %]">
+    <header>
+      <div class="metadata">
+        [% a.old ? "Revision $rev_count" : "Original comment" FILTER html %]
+        by [% INCLUDE bug_modal/user.html.tmpl u=a.author %]
+        on <time datetime="[% a.created_time FILTER html %]">[% a.created_time FILTER time %]</time>
+      </div>
+      [% IF user.is_insider && a.revised_time %]
+        <div class="actions">
+          <label><input type="checkbox" name="is_hidden" [% "checked" IF a.is_hidden %]> Hide</label>
+        </div>
+      [% END %]
+    </header>
+    <div class="body">
+      [% IF !user.is_insider && a.is_hidden %]
+        <div class="hidden-comment">(Hidden by Administrator)</div>
+      [% ELSE %]
+        <pre class="bz_comment_text">[% a.new FILTER quoteUrls(bug) %]</pre>
+      [% END %]
+    </div>
+  </article>
+  [% rev_count = rev_count + 1 %]
+[% END %]
+
+[% IF !comment.activity.size %]
+  <p><em>No changes have been made to this comment.</em></p>
+[% END %]
+
+<p>[% "Back to $terms.Bug $bug.id Comment $comment.count"
+      FILTER bug_link(bug, { comment_num => comment.count }) FILTER none %]</p>
+
+[% PROCESS global/footer.html.tmpl %]

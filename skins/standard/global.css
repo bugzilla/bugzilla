@@ -1669,7 +1669,9 @@ button.minor {
     box-shadow: 0 1px 0 0 rgba(0,0,0,0.1), inset 0 -1px 0 0 rgba(0,0,0,0.1), inset 0 0 1px 0 rgba(0,0,0,0.1);
 }
 
-button.minor:hover {
+button.minor:not(:disabled):hover,
+button.minor:not(:disabled):focus,
+button.minor:not(:disabled):active {
     -webkit-box-shadow: 0 1px 0 0 rgba(0,0,0,0.2), inset 0 -1px 0 0 rgba(0,0,0,0.3), inset 0 12px 24px 2px #ddd;
     -moz-box-shadow: 0 1px 0 0 rgba(0,0,0,0.2), inset 0 -1px 0 0 rgba(0,0,0,0.3), inset 0 12px 24px 2px #ddd;
     box-shadow: 0 1px 0 0 rgba(0,0,0,0.1), inset 0 -1px 0 0 rgba(0,0,0,0.1), inset 0 12px 24px 2px #ddd;
@@ -1677,6 +1679,10 @@ button.minor:hover {
 
 button.minor[disabled] {
     color: #999;
+}
+
+button::-moz-focus-inner {
+    border: 0;
 }
 
 .notransition {

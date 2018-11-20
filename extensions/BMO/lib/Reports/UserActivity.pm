@@ -12,9 +12,9 @@ use strict;
 use warnings;
 
 use Bugzilla::Error;
-use Bugzilla::Extension::BMO::Util;
 use Bugzilla::User;
 use Bugzilla::Util qw(trim);
+use Bugzilla::Util::DateTime;
 use DateTime;
 
 sub report {

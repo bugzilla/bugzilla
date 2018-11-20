@@ -19,6 +19,7 @@ use warnings;
 
 use Bugzilla::Error;
 use Bugzilla::Util;
+use Bugzilla::Util::DateTime;
 use Bugzilla::Series;
 
 use Date::Format;
@@ -87,7 +88,7 @@ sub init {
     # Make sure the dates are ones we are able to interpret
     foreach my $date ('datefrom', 'dateto') {
         if ($self->{$date}) {
-            $self->{$date} = str2time($self->{$date})
+            $self->{$date} = parse_date($self->{$date})
               || ThrowUserError("illegal_date", { date => $self->{$date}});
         }
     }

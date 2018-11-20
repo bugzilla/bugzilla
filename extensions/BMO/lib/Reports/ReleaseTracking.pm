@@ -13,7 +13,6 @@ use warnings;
 
 use Bugzilla::Constants;
 use Bugzilla::Error;
-use Bugzilla::Extension::BMO::Util;
 use Bugzilla::Field;
 use Bugzilla::FlagType;
 use Bugzilla::Util qw(trick_taint validate_date);
@@ -288,7 +287,7 @@ sub report {
     foreach my $product (@usable_products) {
         my @fields =
             sort { $a->sortkey <=> $b->sortkey }
-            grep { is_active_status_field($_) }
+            grep { _is_active_status_field($_) }
             Bugzilla->active_custom_fields({ product => $product });
         my @field_ids = map { $_->id } @fields;
         if (!scalar @fields) {
@@ -511,6 +510,20 @@ sub _parse_query {
     $query->{fields} = \@fields;
 
     return $query;
+}
+
+sub _is_active_status_field {
+    my ($field) = @_;
+
+    if ($field->type == FIELD_TYPE_EXTENSION
+        && $field->isa('Bugzilla::Extension::TrackingFlags::Flag')
+        && $field->flag_type eq 'tracking'
+        && $field->name =~ /_status_/
+    ) {
+        return $field->is_active;
+    }
+
+    return 0;
 }
 
 1;

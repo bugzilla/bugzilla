@@ -5,7 +5,7 @@
 # This Source Code Form is "Incompatible With Secondary Licenses", as
 # defined by the Mozilla Public License, v. 2.0.
 
-package Bugzilla::Extension::BMO::Util;
+package Bugzilla::Util::DateTime;
 
 use 5.10.1;
 use strict;
@@ -20,8 +20,7 @@ use base qw(Exporter);
 
 our @EXPORT = qw( string_to_datetime
                   time_to_datetime
-                  parse_date
-                  is_active_status_field );
+                  parse_date );
 
 sub string_to_datetime {
     my $input = shift;
@@ -73,20 +72,6 @@ sub parse_date {
         return undef;
     }
     return str2time($str);
-}
-
-sub is_active_status_field {
-    my ($field) = @_;
-
-    if ($field->type == FIELD_TYPE_EXTENSION
-        && $field->isa('Bugzilla::Extension::TrackingFlags::Flag')
-        && $field->flag_type eq 'tracking'
-        && $field->name =~ /_status_/
-    ) {
-        return $field->is_active;
-    }
-
-    return 0;
 }
 
 1;

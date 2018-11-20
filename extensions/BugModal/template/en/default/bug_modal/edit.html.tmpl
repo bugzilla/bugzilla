@@ -123,10 +123,6 @@
           IF firefox_fixed_versions.0 == "";
             firefox_fixed_versions.0 = "Firefox " _ flag_name.substr(7);
           END;
-        ELSIF flag_name.substr(0, 4) == "b2g-";
-          IF firefox_fixed_versions.1 == "";
-            firefox_fixed_versions.1 = "Firefox OS " _ flag_name.substr(4);
-          END;
         END;
       END;
     END;

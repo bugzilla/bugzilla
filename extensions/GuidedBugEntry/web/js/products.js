@@ -112,10 +112,6 @@ var products = {
     }
   },
 
-  "Marketplace": {
-    l10n: true
-  },
-
   "Penelope": {
     related: [ "Core", "Toolkit", "MailNews Core" ]
   },

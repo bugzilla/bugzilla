@@ -1438,7 +1438,6 @@ sub install_update_db {
                 "L20n"                          => 'l20n-security',
                 "Legal"                         => 'legal',
                 "Marketing"                     => 'marketing-private',
-                "Marketplace"                   => 'client-services-security',
                 "Mozilla Communities"           => 'mozilla-communities-security',
                 "Mozilla Corporation"           => 'mozilla-employee-confidential',
                 "Mozilla Developer Network"     => 'websites-security',

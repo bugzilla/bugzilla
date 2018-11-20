@@ -110,7 +110,6 @@ use Time::HiRes qw(gettimeofday tv_interval);
 
 # BMO - product aliases for searching
 use constant PRODUCT_ALIASES => {
-    'Boot2Gecko' => 'Firefox OS',
 };
 
 # When doing searches, NULL datetimes are treated as this date.

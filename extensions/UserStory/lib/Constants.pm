@@ -20,8 +20,8 @@ use constant USER_STORY_GROUP => 'editbugs';
 
 # Exclude showing the user story field for these products/components.
 # Examples:
-# Don't show User Story on any Firefox OS component:
-#   'Firefox OS' => [],
+# Don't show User Story on any Firefox component:
+#   'Firefox' => [],
 # Don't show User Story on Developer Tools component, visible on all other
 # Firefox components
 #   'Firefox'    => ['Developer Tools'],

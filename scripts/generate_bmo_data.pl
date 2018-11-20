@@ -126,7 +126,6 @@ my @oses= (
     'Windows Phone',
     'Mac OS X',
     'Linux',
-    'Gonk (Firefox OS)',
     'Android',
     'iOS',
     'iOS 7',

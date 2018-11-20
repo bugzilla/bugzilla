@@ -84,6 +84,8 @@ sub issue_api_key {
         return Bugzilla::User::APIKey->create_special($params);
     } else {
         return Bugzilla::User::APIKey->create($params);
+    }
+}
 
 sub create_bug {
   state $check = compile_named(

@@ -35,7 +35,7 @@ No requests.
     [% FOREACH column = display_columns %]
       [% IF column == 'created' %]
         [% request.$column FILTER time FILTER csv %]
-      [% ELSIF column.match('^requeste') %]
+      [% ELSIF column.match('^requeste') && request.$column %]
         [% IF request.$column.name %]
           [% request.$column.name _ ' <' _ request.$column.email _ '>' FILTER email FILTER csv %]
         [% ELSE %]

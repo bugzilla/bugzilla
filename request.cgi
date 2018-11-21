@@ -289,7 +289,7 @@ sub queue {
           'attach_id'       => $data->[7] ,
           'attach_summary'  => $data->[8] ,
           'requester'       => Bugzilla::User->new({ name => $data->[10], cache => 1 }) ,
-          'requestee'       => Bugzilla::User->new({ name => $data->[12], cache => 1 }) ,
+          'requestee'       => $data->[12] ? Bugzilla::User->new({ name => $data->[12], cache => 1 }) : undef ,
           'restricted'      => $data->[13] ? 1 : 0,
           'created'         => $data->[14],
           'attach_mimetype' => $data->[15],

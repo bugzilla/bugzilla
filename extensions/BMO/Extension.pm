@@ -724,13 +724,13 @@ sub bug_format_comment {
 
     # link github pull requests and issues
     push (@$regexes, {
-        match => qr/(?!\w+\/)([\w\.-]+)\/([\w\.-]+)\#(\d+)\b/,
+        match => qr/(\s)([A-Za-z0-9_\.-]+)\/([A-Za-z0-9_\.-]+)\#([0-9]+)\b/,
         replace => sub {
             my $args = shift;
-            my $owner = html_quote($args->{matches}->[0]);
-            my $repo = html_quote($args->{matches}->[1]);
-            my $number = html_quote($args->{matches}->[2]);
-            return qq#<a href="https://github.com/$owner/$repo/issues/$number">$owner/$repo\#$number</a>#;
+            my $owner = html_quote($args->{matches}->[1]);
+            my $repo = html_quote($args->{matches}->[2]);
+            my $number = html_quote($args->{matches}->[3]);
+            return qq# <a href="https://github.com/$owner/$repo/issues/$number">$owner/$repo\#$number</a>#;
         }
     });
 

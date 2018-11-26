@@ -156,6 +156,26 @@ sub get_config {
     }
 }
 
+sub set_params {
+    my ($self, $params) = @_;
+    return unless $self->{memcached};
+
+    return $self->_set($self->_params_prefix . ".params", $params);
+}
+
+sub get_params {
+    my ($self) = @_;
+    return unless $self->{memcached};
+
+    return $self->_get($self->_params_prefix . ".params");
+}
+
+sub clear_params {
+    my ($self, $args) = @_;
+    return unless $self->{memcached};
+    $self->_inc_prefix("params");
+}
+
 sub set_bloomfilter {
     my ($self, $args) = @_;
     return unless $self->{memcached};
@@ -270,6 +290,7 @@ sub clear_config {
 sub _prefix {
     my ($self, $name) = @_;
     # we don't want to change prefixes in the middle of a request
+    $name .= "/" . Bugzilla->VERSION;
     my $request_cache = Bugzilla->request_cache;
     my $request_cache_key = "memcached_prefix_$name";
     if (!$request_cache->{$request_cache_key}) {
@@ -293,6 +314,7 @@ sub _prefix {
 sub _inc_prefix {
     my ($self, $name) = @_;
     my $memcached = $self->{memcached};
+    $name .= "/" . Bugzilla->VERSION;
     if (!$memcached->incr($name, 1)) {
         $memcached->add($name, time());
     }
@@ -308,6 +330,10 @@ sub _global_prefix {
 
 sub _config_prefix {
     return $_[0]->_prefix("config");
+}
+
+sub _params_prefix {
+    return $_[0]->_prefix("params");
 }
 
 sub _bloomfilter_prefix {

@@ -51,19 +51,6 @@ sub _sensible_group {
     return scalar getgrgid($EGID);
 }
 
-sub _migrate_param {
-    my ( $name, $fallback_value ) = @_;
-
-    return sub {
-        if ( Bugzilla->can('params') ) {
-            return Bugzilla->params->{$name} // $fallback_value;
-        }
-        else {
-            return $fallback_value;
-        }
-    };
-}
-
 use constant LOCALCONFIG_VARS => (
     {
         name    => 'create_htaccess',
@@ -158,15 +145,15 @@ use constant LOCALCONFIG_VARS => (
     },
     {
         name    => 'memcached_servers',
-        default => _migrate_param( "memcached_servers", "" ),
+        default => '',
     },
     {
         name    => 'memcached_namespace',
-        default => _migrate_param( "memcached_namespace", "bugzilla:" ),
+        default => "bugzilla:",
     },
     {
         name    => 'urlbase',
-        default => _migrate_param( "urlbase", "" ),
+        default => '',
     },
     {
         name    => 'canonical_urlbase',
@@ -174,7 +161,7 @@ use constant LOCALCONFIG_VARS => (
     },
     {
         name    => 'attachment_base',
-        default => _migrate_param( "attachment_base", '' ),
+        default => '',
     },
     {
         name    => 'ses_username',
@@ -186,7 +173,7 @@ use constant LOCALCONFIG_VARS => (
     },
     {
         name => 'inbound_proxies',
-        default => _migrate_param( 'inbound_proxies', '' ),
+        default => '',
     },
     {
         name => 'shadowdb_user',

@@ -231,9 +231,9 @@ sub type {
 }
 
 sub datetime_format_outbound {
-    my $self = shift;
+    my ($self, $value) = @_;
     # YUI expects ISO8601 in UTC time; including TZ specifier
-    return $self->SUPER::datetime_format_outbound(@_) . 'Z';
+    return $value ? $self->SUPER::datetime_format_outbound($value) . 'Z' : '';
 }
 
 sub handle_login {

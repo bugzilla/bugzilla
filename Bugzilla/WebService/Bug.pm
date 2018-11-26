@@ -463,6 +463,10 @@ sub history {
     my $ids = $params->{ids};
     defined $ids || ThrowCodeError('param_required', { param => 'ids' });
 
+    my %api_type = (
+        %{{ map { $_ => 'double' } Bugzilla::Bug::NUMERIC_COLUMNS() }},
+        %{{ map { $_ => 'dateTime' } Bugzilla::Bug::DATE_COLUMNS() }},
+    );
     my %api_name = reverse %{ Bugzilla::Bug::FIELD_MAP() };
     $api_name{'bug_group'} = 'groups';
 
@@ -482,15 +486,16 @@ sub history {
             $bug_history{who}  = $self->type('email', $changeset->{who});
             $bug_history{changes} = [];
             foreach my $change (@{ $changeset->{changes} }) {
-                my $api_field = $api_name{$change->{fieldname}} || $change->{fieldname};
+                my $field_name = delete $change->{fieldname};
+                my $api_field_type = $api_type{$field_name} || 'string';
+                my $api_field_name = $api_name{$field_name} || $field_name;
                 my $attach_id = delete $change->{attachid};
                 if ($attach_id) {
                     $change->{attachment_id} = $self->type('int', $attach_id);
                 }
-                $change->{removed} = $self->type('string', $change->{removed});
-                $change->{added}   = $self->type('string', $change->{added});
-                $change->{field_name} = $self->type('string', $api_field);
-                delete $change->{fieldname};
+                $change->{removed} = $self->type($api_field_type, $change->{removed});
+                $change->{added}   = $self->type($api_field_type, $change->{added});
+                $change->{field_name} = $self->type('string', $api_field_name);
                 push (@{$bug_history{changes}}, $change);
             }
 

@@ -46,7 +46,7 @@
     <th>Product:</th>
     <td>
       <select name="product" id="product">
-        <option value="">__Any__</option>
+        <option value="">Firefox-related major products</option>
         [% FOREACH p = user.get_selectable_products %]
           <option value="[% p.name FILTER html %]"
             [% " selected" IF product == p.name %]>

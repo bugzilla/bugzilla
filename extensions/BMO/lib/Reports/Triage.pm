@@ -27,10 +27,14 @@ use constant MAX_NUMBER_BUGS => 4000;
 
 use constant DEFAULT_OWNER_PRODUCTS => (
     'Core',
+    'DevTools',
+    'External Software Affecting Firefox',
     'Firefox',
     'Firefox for Android',
-    'Firefox for iOS',
+    'Firefox Build System',
+    'Testing',
     'Toolkit',
+    'WebExtensions',
 );
 
 sub unconfirmed {

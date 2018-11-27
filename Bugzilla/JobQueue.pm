@@ -20,12 +20,15 @@ use IO::Async::Timer::Periodic;
 use IO::Async::Loop;
 use Future;
 use base qw(TheSchwartz);
+use Bugzilla::Types qw(Task);
+use Type::Params qw( compile Invocant );
 
 # This maps job names for Bugzilla::JobQueue to the appropriate modules.
 # If you add new types of jobs, you should add a mapping here.
 use constant JOB_MAP => {
     send_mail => 'Bugzilla::Job::Mailer',
     bug_mail  => 'Bugzilla::Job::BugMail',
+    run_task  => 'Bugzilla::Job::RunTask',
 };
 
 # Without a driver cache TheSchwartz opens a new database connection
@@ -75,6 +78,15 @@ sub bz_databases {
     my $self = shift;
     my @hashes = keys %{ $self->{databases} };
     return map { $self->driver_for($_) } @hashes;
+}
+
+sub run_task {
+  state $check = compile(Invocant, Task);
+  my ($self, $task) = $check->(@_);
+
+  $task->prepare;
+
+  return $self->insert(run_task => $task);
 }
 
 # inserts a job into the queue to be processed and returns immediately

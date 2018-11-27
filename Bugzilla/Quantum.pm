@@ -87,7 +87,7 @@ sub startup {
     $self->hook(
       after_static => sub {
         my ($c) = @_;
-        $c->res->headers->cache_control('public, max-age=31536000');
+        $c->res->headers->cache_control('public, max-age=31536000, immutable');
       }
     );
   }

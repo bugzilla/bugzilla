@@ -50,8 +50,7 @@ sub create_oauth_client {
   my $id     = generate_random_password(20);
   my $secret = generate_random_password(40);
 
-  $dbh->do(
-    'INSERT INTO oauth2_client (id, description, secret) VALUES (?, ?, ?)',
+  $dbh->do('INSERT INTO oauth2_client (id, description, secret) VALUES (?, ?, ?)',
     undef, $id, $description, $secret);
 
   foreach my $scope (@{$scopes}) {
@@ -67,24 +66,26 @@ sub create_oauth_client {
     );
   }
 
-  return $dbh->selectrow_hashref('SELECT * FROM oauth2_client WHERE id = ?', undef, $id);
+  return $dbh->selectrow_hashref('SELECT * FROM oauth2_client WHERE id = ?',
+    undef, $id);
 }
 
 sub issue_api_key {
-    my ($login, $given_api_key) = @_;
-    my $user = Bugzilla::User->check({ name => $login });
+  my ($login, $given_api_key) = @_;
+  my $user = Bugzilla::User->check({name => $login});
 
-    my $params = {
-        user_id     => $user->id,
-        description => 'Bugzilla::Test::Util::issue_api_key',
-        api_key     => $given_api_key,
-    };
+  my $params = {
+    user_id     => $user->id,
+    description => 'Bugzilla::Test::Util::issue_api_key',
+    api_key     => $given_api_key,
+  };
 
-    if ($given_api_key) {
-        return Bugzilla::User::APIKey->create_special($params);
-    } else {
-        return Bugzilla::User::APIKey->create($params);
-    }
+  if ($given_api_key) {
+    return Bugzilla::User::APIKey->create_special($params);
+  }
+  else {
+    return Bugzilla::User::APIKey->create($params);
+  }
 }
 
 sub create_bug {
@@ -138,24 +139,6 @@ sub create_bug {
   my ($option) = $check->(@_);
 
   return Bugzilla::Bug->create($option);
-}
-
-sub issue_api_key {
-  my ($login, $given_api_key) = @_;
-  my $user = Bugzilla::User->check({name => $login});
-
-  my $params = {
-    user_id     => $user->id,
-    description => 'Bugzilla::Test::Util::issue_api_key',
-    api_key     => $given_api_key,
-  };
-
-  if ($given_api_key) {
-    return Bugzilla::User::APIKey->create_special($params);
-  }
-  else {
-    return Bugzilla::User::APIKey->create($params);
-  }
 }
 
 sub _json_content_type { $_->headers->content_type('application/json') }

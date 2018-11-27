@@ -167,13 +167,13 @@ sub suggest {
     }
     else {
         if ($have_mysql && ( $s =~ /[[:space:]]/ || $s =~ /[^[:ascii:]]/ ) ) {
-            my $match = sprintf 'MATCH(realname) AGAINST (%s) ', $dbh->quote($s);
+            my $match = $dbh->sql_prefix_match_fulltext('realname', $s);
             push @select, "$match AS relevance";
             $order = 'relevance DESC';
             $where = $match;
         }
         elsif ($have_mysql && $s =~ /^[[:upper:]]/) {
-            my $match = sprintf 'MATCH(realname) AGAINST (%s) ', $dbh->quote($s);
+            my $match = $dbh->sql_prefix_match_fulltext('realname', $s);
             $where = join ' OR ',
                 $match,
                 $dbh->sql_prefix_match( nickname => $s ),

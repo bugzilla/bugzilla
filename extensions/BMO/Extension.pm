@@ -1874,9 +1874,6 @@ sub post_bug_after_creation {
     elsif ($format eq 'mozpr') {
         $self->_post_mozpr_bug($args);
     }
-    elsif ($format eq 'dev-engagement-event') {
-        $self->_post_dev_engagement($args);
-    }
     elsif ($format eq 'shield-studies') {
         $self->_post_shield_studies($args);
     }
@@ -2049,84 +2046,6 @@ sub _post_mozpr_bug {
         });
     }
     $bug->update($bug->creation_ts);
-}
-
-sub _post_dev_engagement {
-    my ($self, $args) = @_;
-    my $vars       = $args->{vars};
-    my $parent_bug = $vars->{bug};
-    my $template   = Bugzilla->template;
-    my $cgi        = Bugzilla->cgi;
-    my $params     = Bugzilla->input_params;
-    my $old_user   = Bugzilla->user;
-
-    my $error_mode_cache = Bugzilla->error_mode;
-    Bugzilla->error_mode(ERROR_MODE_DIE);
-
-    eval {
-        # Add attachment containing tab delimited field values for
-        # spreadsheet import.
-        my @columns = qw(event start_date end_date location attendees
-                         audience desc mozilla_attending_list);
-        my @attach_values;
-        foreach my $column(@columns) {
-            my $value = $params->{$column} || "";
-            $value =~ s/"/""/g;
-            push(@attach_values, qq{"$value"});
-        }
-
-        my @requested;
-        foreach my $param (grep(/^request_/, keys %$params)) {
-            next if !$params->{$param} || $param eq 'request_other_text';
-            $param =~ s/^request_//;
-            push(@requested, ucfirst($param));
-        }
-        push(@attach_values, '"' . join(",", @requested) . '"');
-
-        # we wrap the data inside a textarea to allow for the delimited data to
-        # be pasted directly into google docs.
-
-        my $values = html_quote(join("\t", @attach_values));
-        my $data = <<EOF;
-<!doctype html>
-<html>
-    <head>
-        <meta charset="utf-8">
-        <title>Spreadsheet Data</title>
-        <style>
-            * {
-                box-sizing: border-box;
-                height: 100%;
-                margin: 0;
-                padding: 0;
-                width: 100%;
-            }
-            body {
-                overflow: hidden;
-            }
-            textarea {
-                background: none;
-                border: 0;
-                padding: 1em;
-                resize: none;
-            }
-        </style>
-    </head>
-    <body>
-        <textarea>$values</textarea>
-    </body>
-</html>
-EOF
-
-        $self->_add_attachment($args, {
-            data        => $data,
-            description => 'Spreadsheet Data',
-            filename    => 'dev_engagement_submission.html',
-            mimetype    => 'text/html',
-        });
-    };
-
-    $parent_bug->update($parent_bug->creation_ts);
 }
 
 sub _post_shield_studies {
@@ -2731,9 +2650,6 @@ sub app_startup {
       ->to( 'CGI#enter_bug_cgi' => { 'format' => 'creative', 'product' => 'Marketing' } );
     $r->any( '/:REWRITE_user_engagement' => [ REWRITE_user_engagement => qr{form[\.:]user[\.\-:]engagement} ] )
       ->to( 'CGI#enter_bug_cgi' => { 'format' => 'user-engagement', 'product' => 'Marketing' } );
-    $r->any( '/:REWRITE_dev_engagement_event' =>
-          [ REWRITE_dev_engagement_event => qr{form[\.:]dev[\.\-:]engagement[\.\-\:]event} ] )
-      ->to( 'CGI#enter_bug_cgi' => { 'product' => 'Developer Engagement', 'format' => 'dev-engagement-event' } );
     $r->any( '/:REWRITE_mobile_compat' => [ REWRITE_mobile_compat => qr{form[\.:]mobile[\.\-:]compat} ] )
       ->to( 'CGI#enter_bug_cgi' => { 'product' => 'Tech Evangelism', 'format' => 'mobile-compat' } );
     $r->any( '/:REWRITE_web_bounty' => [ REWRITE_web_bounty => qr{form[\.:]web[\.:]bounty} ] )

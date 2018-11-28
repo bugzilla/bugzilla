@@ -121,14 +121,13 @@ my $access_data = $t->tx->res->json;
 # Using the access token (bearer) we are able to authenticate for an API call.
 
 # 1. Access API unauthenticated and should generate a login_required error
-$t->get_ok('/oauth/whoami')->status_is(401)
-  ->json_is('/error' => 'login_required');
+$t->get_ok('/api/user/profile')->status_is(401);
 
 # 2. Passing a Bearer header containing the access token, the server should
 # allow us to get data about our user
-$t->get_ok('/oauth/whoami' =>
+$t->get_ok('/api/user/profile' =>
     {Authorization => 'Bearer ' . $access_data->{access_token}})
-  ->status_is(200)->json_is('/name' => $oauth_login);
+  ->status_is(200)->json_is('/login' => $oauth_login);
 
 done_testing;
 
@@ -144,34 +143,5 @@ sub _setup_routes {
       return;
     }
   );
-
-  # API call for testing oauth authentication
-  $r->get(
-    '/oauth/whoami' => sub {
-      my $c = shift;
-
-      my $user = $c->bugzilla->oauth('user:read');
-
-      if ($user && $user->id) {
-        $c->render(
-          status => 200,
-          json   => {
-            id       => $user->id,
-            name     => $user->login,
-            realname => $user->name
-          }
-        );
-      }
-      else {
-        $c->render(
-          status => 401,
-          json   => {
-            error => 'login_required',
-            error_description =>
-              'You must log in before using this part of Bugzilla.'
-          }
-        );
-      }
-    }
-  );
 }
+

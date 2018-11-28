@@ -24,6 +24,7 @@ use Bugzilla::Quantum::CGI;
 use Bugzilla::Quantum::OAuth2 qw(oauth2);
 use Bugzilla::Quantum::SES;
 use Bugzilla::Quantum::Home;
+use Bugzilla::Quantum::API;
 use Bugzilla::Quantum::Static;
 use Mojo::Loader qw( find_modules );
 use Module::Runtime qw( require_module );
@@ -138,6 +139,8 @@ sub setup_routes {
   $r->get('/robots.txt')->to('CGI#robots_cgi');
   $r->any('/login')->to('CGI#index_cgi' => {'GoAheadAndLogIn' => '1'});
   $r->any('/:new_bug' => [new_bug => qr{new[-_]bug}])->to('CGI#new_bug_cgi');
+
+  $r->get('/api/user/profile')->to('API#user_profile');
 
   my $ses_auth = $r->under(
     '/ses' => sub {

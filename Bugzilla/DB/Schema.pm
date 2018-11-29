@@ -1418,6 +1418,7 @@ use constant ABSTRACT_SCHEMA => {
                                   NOTNULL => 1, DEFAULT => "'---'"},
             allows_unconfirmed => {TYPE => 'BOOLEAN', NOTNULL => 1,
                                    DEFAULT => 'TRUE'},
+            bug_description_template => {TYPE => 'MEDIUMTEXT'},
         ],
         INDEXES => [
             products_name_idx   => {FIELDS => ['name'],

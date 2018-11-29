@@ -778,6 +778,9 @@ sub update_table_definitions {
     # Bug 1354589 - dkl@mozilla.com
     _populate_oauth2_scopes();
 
+    # Bug 1510109 - kohei.yoshino@gmail.com
+    $dbh->bz_add_column('products', 'bug_description_template', {TYPE => 'MEDIUMTEXT'});
+
     ################################################################
     # New --TABLE-- changes should go *** A B O V E *** this point #
     ################################################################

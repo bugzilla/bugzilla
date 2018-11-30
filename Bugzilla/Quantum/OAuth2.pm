@@ -110,7 +110,7 @@ sub _resource_owner_confirm_scopes {
     my $vars = {
       client => $client,
       scopes => $scopes_ref,
-      token  => issue_session_token('oauth_confirm_scopes')
+      token  => scalar issue_session_token('oauth_confirm_scopes')
     };
     $c->stash(%$vars);
     $c->render(

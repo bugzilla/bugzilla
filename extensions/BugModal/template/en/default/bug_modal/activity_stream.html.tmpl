@@ -123,7 +123,7 @@
           [% Hook.process('user', 'bug/comments.html.tmpl') %]
         </td>
 
-        <td class="comment-actions">
+        <td rowspan="2" class="comment-actions"><div role="group">
           [% IF user.is_insider && bug.check_can_change_field('longdesc', 0, 1) %]
             [% IF comment.is_private %]
               <div class="comment-private edit-hide bz_private">
@@ -158,11 +158,11 @@
                                   "expand_label": "Expanded", "expand_tooltip": "Expanded this comment" }'>
             <span class="icon" aria-hidden="true"></span>
           </button>
-        </td>
+        </div></td>
       </tr>
 
       <tr id="cr-[% comment.count FILTER none %]" [%= IF comment.collapsed %]style="display:none"[% END %]>
-        <td colspan="2">
+        <td>
           <h3 class="change-name">
             <a href="[% basepath FILTER none %]show_bug.cgi?id=[% bug.bug_id FILTER none %]#c[% comment.count FILTER none %]">
               [% comment.count == 0 ? "Description" : "Comment " _ comment.count ~%]
@@ -236,17 +236,17 @@
           [% END %]
           [% Hook.process('user', 'bug/changes.html.tmpl') %]
         </td>
-        <td class="comment-actions">
+        <td rowspan="2" class="comment-actions"><div role="group">
           <button type="button" class="change-spinner minor iconic" id="as-[% id FILTER none %]"
                   title="Collapse this change" aria-label="Collapse" aria-expanded="true"
                   data-strings='{ "collapse_label": "Collapse", "collapse_tooltip": "Collapse this change",
                                   "expand_label": "Expanded", "expand_tooltip": "Expanded this change" }'>
             <span class="icon" aria-hidden="true"></span>
           </button>
-        </td>
+        </div></td>
       </tr>
       <tr id="ar-[% id FILTER none %]">
-        <td colspan="2">
+        <td>
           <h3 class="change-name">
             <a href="[% basepath FILTER none %]show_bug.cgi?id=[% bug.bug_id FILTER none %]#[% id FILTER none %]">Updated</a>
           </h3>

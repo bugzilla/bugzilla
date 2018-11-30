@@ -604,16 +604,19 @@ h3.change-name {
 }
 
 .comment-actions {
-    display: flex;
-    align-items: center;
-    white-space: nowrap;
-    vertical-align: top;
-    padding: 2px 2px 0 0 !important;
+    padding: 0 8px 0 0 !important;
+    vertical-align: middle;
 }
 
 .comment-private {
     display: inline-block;
     margin: 0 8px;
+}
+
+.comment-actions > [role="group"] {
+    display: flex;
+    align-items: center;
+    white-space: nowrap;
 }
 
 .comment-actions button {
@@ -637,6 +640,8 @@ h3.change-name {
 
 .comment-actions button.iconic .icon::before {
     font-family: 'Material Icons';
+    font-size: 16px;
+    vertical-align: middle;
 }
 
 .comment-actions .tag-btn .icon::before {
@@ -653,10 +658,6 @@ h3.change-name {
 
 .comment-actions .change-spinner[aria-expanded="false"] .icon::before {
     content: '\E145';
-}
-
-.change-spinner {
-    width: 29px;
 }
 
 .comment-text {
@@ -691,7 +692,7 @@ body.platform-Win32 .comment-text, body.platform-Win64 .comment-text {
 }
 
 .comment-tags {
-    padding: 0 8px 2px 8px !important;
+    padding: 0 8px !important;
 }
 
 .comment-tag {

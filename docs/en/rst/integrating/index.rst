@@ -21,3 +21,4 @@ explains how to use the available mechanisms for integration and customization.
    extensions
    apis
    auth-delegation
+   auth0

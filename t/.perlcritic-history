@@ -136,6 +136,6 @@ $VAR1 = [
             'Perl::Critic::Policy::Subroutines::ProhibitReturnSort' => 0,
             'Perl::Critic::Policy::ValuesAndExpressions::ProhibitQuotesAsQuotelikeOperatorDelimiters' => 0,
             'Perl::Critic::Policy::Variables::RequireNegativeIndices' => 0,
-            'Perl::Critic::Policy::InputOutput::RequireBriefOpen' => 3
+            'Perl::Critic::Policy::InputOutput::RequireBriefOpen' => 4,
           }
         ];

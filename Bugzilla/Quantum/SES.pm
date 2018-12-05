@@ -57,7 +57,7 @@ declare BounceNotification,
   as Dict [
   bounce => Dict [
     bouncedRecipients => BouncedRecipients,
-    reportingMTA      => Optional[Str],
+    reportingMTA      => Optional [Str],
     bounceSubType     => Str,
     bounceType        => Str,
     slurpy Any,
@@ -111,8 +111,7 @@ sub _main {
   }
 
   elsif ($message_type eq 'Notification') {
-    my $notification = $self->_decode_json_wrapper($message->{Message})
-      // return;
+    my $notification = $self->_decode_json_wrapper($message->{Message}) // return;
     unless (
 # https://docs.aws.amazon.com/ses/latest/DeveloperGuide/event-publishing-retrieving-sns-contents.html
       $self->_handle_notification($notification, 'eventType')
@@ -227,10 +226,8 @@ sub _process_complaint {
   my $template = Bugzilla->template_inner();
   my $json = JSON::MaybeXS->new(pretty => 1, utf8 => 1, canonical => 1,);
 
-  foreach my $recipient (@{$notification->{complaint}->{complainedRecipients}})
-  {
-    my $reason = $notification->{complaint}->{complaintFeedbackType}
-      // 'unknown';
+  foreach my $recipient (@{$notification->{complaint}->{complainedRecipients}}) {
+    my $reason  = $notification->{complaint}->{complaintFeedbackType} // 'unknown';
     my $address = $recipient->{emailAddress};
     Bugzilla->audit("complaint for <$address> for '$reason'");
     my $vars = {

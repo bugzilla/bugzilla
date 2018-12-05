@@ -16,23 +16,11 @@ use Bugzilla::Config::Common;
 our $sortkey = 1550;
 
 sub get_param_list {
-    return (
-        {
-            name    => 'elasticsearch',
-            type    => 'b',
-            default => 0,
-        },
-        {
-            name    => 'elasticsearch_nodes',
-            type    => 't',
-            default => 'localhost:9200',
-        },
-        {
-            name    => 'elasticsearch_index',
-            type    => 't',
-            default => 'bugzilla',
-        },
-    );
+  return (
+    {name => 'elasticsearch',       type => 'b', default => 0,},
+    {name => 'elasticsearch_nodes', type => 't', default => 'localhost:9200',},
+    {name => 'elasticsearch_index', type => 't', default => 'bugzilla',},
+  );
 }
 
 1;

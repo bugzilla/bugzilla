@@ -22,362 +22,361 @@ use Encode;
 use Sys::Syslog qw(:DEFAULT);
 
 # memcached keys have a maximum length of 250 bytes
-use constant MAX_KEY_LENGTH => 250;
+use constant MAX_KEY_LENGTH    => 250;
 use constant RATE_LIMIT_PREFIX => "rate:";
 
 *new = \&_new;
 
 sub _new {
-    my $invocant = shift;
-    my $class = ref($invocant) || $invocant;
-    my $self = {};
+  my $invocant = shift;
+  my $class    = ref($invocant) || $invocant;
+  my $self     = {};
 
-    # always return an object to simplify calling code when memcached is
-    # disabled.
-    my $servers = Bugzilla->localconfig->{memcached_servers};
-    if (Bugzilla->feature('memcached') && $servers) {
-        $self->{namespace} = Bugzilla->localconfig->{memcached_namespace};
-        TRACE("connecting servers: $servers, namespace: $self->{namespace}");
-        $self->{memcached} = Cache::Memcached::Fast->new(
-            {
-                servers         => [ _parse_memcached_server_list($servers) ],
-                namespace       => $self->{namespace},
-                max_size        => 1024 * 1024 * 4,
-                max_failures    => 1,
-                failure_timeout => 60,
-                io_timeout      => 0.2,
-                connect_timeout => 0.2,
-            }
-        );
-        my $versions = $self->{memcached}->server_versions;
-        if (keys %$versions) {
-            # this is needed to ensure forked processes don't start out with a connected memcached socket.
-            $self->{memcached}->disconnect_all;
-        }
-        else {
-            WARN("No memcached servers");
-        }
+  # always return an object to simplify calling code when memcached is
+  # disabled.
+  my $servers = Bugzilla->localconfig->{memcached_servers};
+  if (Bugzilla->feature('memcached') && $servers) {
+    $self->{namespace} = Bugzilla->localconfig->{memcached_namespace};
+    TRACE("connecting servers: $servers, namespace: $self->{namespace}");
+    $self->{memcached} = Cache::Memcached::Fast->new({
+      servers         => [_parse_memcached_server_list($servers)],
+      namespace       => $self->{namespace},
+      max_size        => 1024 * 1024 * 4,
+      max_failures    => 1,
+      failure_timeout => 60,
+      io_timeout      => 0.2,
+      connect_timeout => 0.2,
+    });
+    my $versions = $self->{memcached}->server_versions;
+    if (keys %$versions) {
+
+# this is needed to ensure forked processes don't start out with a connected memcached socket.
+      $self->{memcached}->disconnect_all;
     }
     else {
-        TRACE("memcached feature is not enabled");
+      WARN("No memcached servers");
     }
-    return bless($self, $class);
+  }
+  else {
+    TRACE("memcached feature is not enabled");
+  }
+  return bless($self, $class);
 }
 
 sub _parse_memcached_server_list {
-    my ($server_list) = @_;
-    my @servers = split(/[, ]+/, trim($server_list));
+  my ($server_list) = @_;
+  my @servers = split(/[, ]+/, trim($server_list));
 
-    return map { /:[0-9]+$/s ? $_ : "$_:11211" } @servers;
+  return map { /:[0-9]+$/s ? $_ : "$_:11211" } @servers;
 }
 
 sub enabled {
-    return $_[0]->{memcached} ? 1 : 0;
+  return $_[0]->{memcached} ? 1 : 0;
 }
 
 sub set {
-    my ($self, $args) = @_;
-    return unless $self->{memcached};
+  my ($self, $args) = @_;
+  return unless $self->{memcached};
 
-    # { key => $key, value => $value }
-    if (exists $args->{key}) {
-        $self->_set($args->{key}, $args->{value});
-    }
+  # { key => $key, value => $value }
+  if (exists $args->{key}) {
+    $self->_set($args->{key}, $args->{value});
+  }
 
-    # { table => $table, id => $id, name => $name, data => $data }
-    elsif (exists $args->{table} && exists $args->{id} && exists $args->{name}) {
-        # For caching of Bugzilla::Object, we have to be able to clear the
-        # cached values when given either the object's id or name.
-        my ($table, $id, $name, $data) = @$args{qw(table id name data)};
-        $self->_set("$table.id.$id", $data);
-        if (defined $name) {
-            $self->_set("$table.name_id.$name", $id);
-            $self->_set("$table.id_name.$id", $name);
-        }
-    }
+  # { table => $table, id => $id, name => $name, data => $data }
+  elsif (exists $args->{table} && exists $args->{id} && exists $args->{name}) {
 
-    else {
-        ThrowCodeError('params_required', { function => "Bugzilla::Memcached::set",
-                                            params   => [ 'key', 'table' ] });
+    # For caching of Bugzilla::Object, we have to be able to clear the
+    # cached values when given either the object's id or name.
+    my ($table, $id, $name, $data) = @$args{qw(table id name data)};
+    $self->_set("$table.id.$id", $data);
+    if (defined $name) {
+      $self->_set("$table.name_id.$name", $id);
+      $self->_set("$table.id_name.$id",   $name);
     }
+  }
+
+  else {
+    ThrowCodeError('params_required',
+      {function => "Bugzilla::Memcached::set", params => ['key', 'table']});
+  }
 }
 
 sub get {
-    my ($self, $args) = @_;
-    return unless $self->{memcached};
+  my ($self, $args) = @_;
+  return unless $self->{memcached};
 
-    # { key => $key }
-    if (exists $args->{key}) {
-        return $self->_get($args->{key});
-    }
+  # { key => $key }
+  if (exists $args->{key}) {
+    return $self->_get($args->{key});
+  }
 
-    # { table => $table, id => $id }
-    elsif (exists $args->{table} && exists $args->{id}) {
-        my ($table, $id) = @$args{qw(table id)};
-        return $self->_get("$table.id.$id");
-    }
+  # { table => $table, id => $id }
+  elsif (exists $args->{table} && exists $args->{id}) {
+    my ($table, $id) = @$args{qw(table id)};
+    return $self->_get("$table.id.$id");
+  }
 
-    # { table => $table, name => $name }
-    elsif (exists $args->{table} && exists $args->{name}) {
-        my ($table, $name) = @$args{qw(table name)};
-        return unless my $id = $self->_get("$table.name_id.$name");
-        return $self->_get("$table.id.$id");
-    }
+  # { table => $table, name => $name }
+  elsif (exists $args->{table} && exists $args->{name}) {
+    my ($table, $name) = @$args{qw(table name)};
+    return unless my $id = $self->_get("$table.name_id.$name");
+    return $self->_get("$table.id.$id");
+  }
 
-    else {
-        ThrowCodeError('params_required', { function => "Bugzilla::Memcached::get",
-                                            params   => [ 'key', 'table' ] });
-    }
+  else {
+    ThrowCodeError('params_required',
+      {function => "Bugzilla::Memcached::get", params => ['key', 'table']});
+  }
 }
 
 sub set_config {
-    my ($self, $args) = @_;
-    return unless $self->{memcached};
+  my ($self, $args) = @_;
+  return unless $self->{memcached};
 
-    if (exists $args->{key}) {
-        return $self->_set($self->_config_prefix . '.' . $args->{key}, $args->{data});
-    }
-    else {
-        ThrowCodeError('params_required', { function => "Bugzilla::Memcached::set_config",
-                                            params   => [ 'key' ] });
-    }
+  if (exists $args->{key}) {
+    return $self->_set($self->_config_prefix . '.' . $args->{key}, $args->{data});
+  }
+  else {
+    ThrowCodeError('params_required',
+      {function => "Bugzilla::Memcached::set_config", params => ['key']});
+  }
 }
 
 sub get_config {
-    my ($self, $args) = @_;
-    return unless $self->{memcached};
+  my ($self, $args) = @_;
+  return unless $self->{memcached};
 
-    if (exists $args->{key}) {
-        return $self->_get($self->_config_prefix . '.' . $args->{key});
-    }
-    else {
-        ThrowCodeError('params_required', { function => "Bugzilla::Memcached::get_config",
-                                            params   => [ 'key' ] });
-    }
+  if (exists $args->{key}) {
+    return $self->_get($self->_config_prefix . '.' . $args->{key});
+  }
+  else {
+    ThrowCodeError('params_required',
+      {function => "Bugzilla::Memcached::get_config", params => ['key']});
+  }
 }
 
 sub set_params {
-    my ($self, $params) = @_;
-    return unless $self->{memcached};
+  my ($self, $params) = @_;
+  return unless $self->{memcached};
 
-    return $self->_set($self->_params_prefix . ".params", $params);
+  return $self->_set($self->_params_prefix . ".params", $params);
 }
 
 sub get_params {
-    my ($self) = @_;
-    return unless $self->{memcached};
+  my ($self) = @_;
+  return unless $self->{memcached};
 
-    return $self->_get($self->_params_prefix . ".params");
+  return $self->_get($self->_params_prefix . ".params");
 }
 
 sub clear_params {
-    my ($self, $args) = @_;
-    return unless $self->{memcached};
-    $self->_inc_prefix("params");
+  my ($self, $args) = @_;
+  return unless $self->{memcached};
+  $self->_inc_prefix("params");
 }
 
 sub set_bloomfilter {
-    my ($self, $args) = @_;
-    return unless $self->{memcached};
-    if (exists $args->{name}) {
-        return $self->_set($self->_bloomfilter_prefix . '.' . $args->{name}, $args->{filter});
-    }
-    else {
-        ThrowCodeError('params_required', { function => "Bugzilla::Memcached::set_bloomfilter",
-                                            params   => [ 'name' ] });
-    }
+  my ($self, $args) = @_;
+  return unless $self->{memcached};
+  if (exists $args->{name}) {
+    return $self->_set($self->_bloomfilter_prefix . '.' . $args->{name},
+      $args->{filter});
+  }
+  else {
+    ThrowCodeError('params_required',
+      {function => "Bugzilla::Memcached::set_bloomfilter", params => ['name']});
+  }
 }
 
 sub get_bloomfilter {
-    my ($self, $args) = @_;
-    return unless $self->{memcached};
-    if (exists $args->{name}) {
-        return $self->_get($self->_bloomfilter_prefix . '.' . $args->{name});
-    }
-    else {
-        ThrowCodeError('params_required', { function => "Bugzilla::Memcached::set_bloomfilter",
-                                            params   => [ 'name' ] });
-    }
+  my ($self, $args) = @_;
+  return unless $self->{memcached};
+  if (exists $args->{name}) {
+    return $self->_get($self->_bloomfilter_prefix . '.' . $args->{name});
+  }
+  else {
+    ThrowCodeError('params_required',
+      {function => "Bugzilla::Memcached::set_bloomfilter", params => ['name']});
+  }
 }
 
 sub clear_bloomfilter {
-    my ($self, $args) = @_;
-    return unless $self->{memcached};
-    if ($args && exists $args->{name}) {
-        $self->_delete($self->_config_prefix . '.' . $args->{name});
-    }
-    else {
-        $self->_inc_prefix("bloomfilter");
-    }
+  my ($self, $args) = @_;
+  return unless $self->{memcached};
+  if ($args && exists $args->{name}) {
+    $self->_delete($self->_config_prefix . '.' . $args->{name});
+  }
+  else {
+    $self->_inc_prefix("bloomfilter");
+  }
 }
 
 sub clear {
-    my ($self, $args) = @_;
-    return unless $self->{memcached};
+  my ($self, $args) = @_;
+  return unless $self->{memcached};
 
-    # { key => $key }
-    if (exists $args->{key}) {
-        $self->_delete($args->{key});
-    }
+  # { key => $key }
+  if (exists $args->{key}) {
+    $self->_delete($args->{key});
+  }
 
-    # { table => $table, id => $id }
-    elsif (exists $args->{table} && exists $args->{id}) {
-        my ($table, $id) = @$args{qw(table id)};
-        my $name = $self->_get("$table.id_name.$id");
-        $self->_delete("$table.id.$id");
-        $self->_delete("$table.name_id.$name") if defined $name;
-        $self->_delete("$table.id_name.$id");
-    }
+  # { table => $table, id => $id }
+  elsif (exists $args->{table} && exists $args->{id}) {
+    my ($table, $id) = @$args{qw(table id)};
+    my $name = $self->_get("$table.id_name.$id");
+    $self->_delete("$table.id.$id");
+    $self->_delete("$table.name_id.$name") if defined $name;
+    $self->_delete("$table.id_name.$id");
+  }
 
-    # { table => $table, name => $name }
-    elsif (exists $args->{table} && exists $args->{name}) {
-        my ($table, $name) = @$args{qw(table name)};
-        return unless my $id = $self->_get("$table.name_id.$name");
-        $self->_delete("$table.id.$id");
-        $self->_delete("$table.name_id.$name");
-        $self->_delete("$table.id_name.$id");
-    }
+  # { table => $table, name => $name }
+  elsif (exists $args->{table} && exists $args->{name}) {
+    my ($table, $name) = @$args{qw(table name)};
+    return unless my $id = $self->_get("$table.name_id.$name");
+    $self->_delete("$table.id.$id");
+    $self->_delete("$table.name_id.$name");
+    $self->_delete("$table.id_name.$id");
+  }
 
-    else {
-        ThrowCodeError('params_required', { function => "Bugzilla::Memcached::clear",
-                                            params   => [ 'key', 'table' ] });
-    }
+  else {
+    ThrowCodeError('params_required',
+      {function => "Bugzilla::Memcached::clear", params => ['key', 'table']});
+  }
 }
 
 sub should_rate_limit {
-    my ($self, $name, $rate_max, $rate_seconds, $tries) = @_;
-    my $prefix    = RATE_LIMIT_PREFIX . $name . ':';
-    my $memcached = $self->{memcached};
+  my ($self, $name, $rate_max, $rate_seconds, $tries) = @_;
+  my $prefix    = RATE_LIMIT_PREFIX . $name . ':';
+  my $memcached = $self->{memcached};
 
-    return 0 unless $name;
-    return 0 unless $memcached;
+  return 0 unless $name;
+  return 0 unless $memcached;
 
-    $tries //= 4;
+  $tries //= 4;
 
-    for my $try (1 .. $tries) {
-        my $now = time;
-        my ($key, @keys) = map { $prefix . ( $now - $_ ) } 0 .. $rate_seconds;
-        $memcached->add($key, 0, $rate_seconds+1);
-        my $tokens = $memcached->get_multi(@keys);
-        my $cas    = $memcached->gets($key);
-        $tokens->{$key} = $cas->[1]++;
-        return 1 if sum(values %$tokens) >= $rate_max;
-        return 0 if $memcached->cas($key, @$cas, $rate_seconds+1);
-        WARN("retry for $prefix (try $try of $tries)");
-    }
-    return 0;
+  for my $try (1 .. $tries) {
+    my $now = time;
+    my ($key, @keys) = map { $prefix . ($now - $_) } 0 .. $rate_seconds;
+    $memcached->add($key, 0, $rate_seconds + 1);
+    my $tokens = $memcached->get_multi(@keys);
+    my $cas    = $memcached->gets($key);
+    $tokens->{$key} = $cas->[1]++;
+    return 1 if sum(values %$tokens) >= $rate_max;
+    return 0 if $memcached->cas($key, @$cas, $rate_seconds + 1);
+    WARN("retry for $prefix (try $try of $tries)");
+  }
+  return 0;
 }
 
 sub clear_all {
-    my ($self) = @_;
-    return unless $self->{memcached};
-    $self->_inc_prefix("global");
+  my ($self) = @_;
+  return unless $self->{memcached};
+  $self->_inc_prefix("global");
 }
 
 sub clear_config {
-    my ($self, $args) = @_;
-    return unless $self->{memcached};
-    if ($args && exists $args->{key}) {
-        $self->_delete($self->_config_prefix . '.' . $args->{key});
-    }
-    else {
-        $self->_inc_prefix("config");
-    }
+  my ($self, $args) = @_;
+  return unless $self->{memcached};
+  if ($args && exists $args->{key}) {
+    $self->_delete($self->_config_prefix . '.' . $args->{key});
+  }
+  else {
+    $self->_inc_prefix("config");
+  }
 }
 
 # in order to clear all our keys, we add a prefix to all our keys.  when we
 # need to "clear" all current keys, we increment the prefix.
 sub _prefix {
-    my ($self, $name) = @_;
-    # we don't want to change prefixes in the middle of a request
-    $name .= "/" . Bugzilla->VERSION;
-    my $request_cache = Bugzilla->request_cache;
-    my $request_cache_key = "memcached_prefix_$name";
-    if (!$request_cache->{$request_cache_key}) {
-        my $memcached = $self->{memcached};
-        my $prefix = $memcached->get($name);
-        if (!$prefix) {
-            $prefix = time();
-            if (!$memcached->add($name, $prefix)) {
-                # if this failed, either another process set the prefix, or
-                # memcached is down.  assume we lost the race, and get the new
-                # value.  if that fails, memcached is down so use a dummy
-                # prefix for this request.
-                $prefix = $memcached->get($name) || 0;
-            }
-        }
-        $request_cache->{$request_cache_key} = $prefix;
+  my ($self, $name) = @_;
+
+  # we don't want to change prefixes in the middle of a request
+  $name .= "/" . Bugzilla->VERSION;
+  my $request_cache     = Bugzilla->request_cache;
+  my $request_cache_key = "memcached_prefix_$name";
+  if (!$request_cache->{$request_cache_key}) {
+    my $memcached = $self->{memcached};
+    my $prefix    = $memcached->get($name);
+    if (!$prefix) {
+      $prefix = time();
+      if (!$memcached->add($name, $prefix)) {
+
+        # if this failed, either another process set the prefix, or
+        # memcached is down.  assume we lost the race, and get the new
+        # value.  if that fails, memcached is down so use a dummy
+        # prefix for this request.
+        $prefix = $memcached->get($name) || 0;
+      }
     }
-    return $request_cache->{$request_cache_key};
+    $request_cache->{$request_cache_key} = $prefix;
+  }
+  return $request_cache->{$request_cache_key};
 }
 
 sub _inc_prefix {
-    my ($self, $name) = @_;
-    my $memcached = $self->{memcached};
-    $name .= "/" . Bugzilla->VERSION;
-    if (!$memcached->incr($name, 1)) {
-        $memcached->add($name, time());
-    }
-    delete Bugzilla->request_cache->{"memcached_prefix_$name"};
+  my ($self, $name) = @_;
+  my $memcached = $self->{memcached};
+  $name .= "/" . Bugzilla->VERSION;
+  if (!$memcached->incr($name, 1)) {
+    $memcached->add($name, time());
+  }
+  delete Bugzilla->request_cache->{"memcached_prefix_$name"};
 
-    # BMO - log that we've wiped the cache
-    TRACE("$name cache cleared");
+  # BMO - log that we've wiped the cache
+  TRACE("$name cache cleared");
 }
 
 sub _global_prefix {
-    return $_[0]->_prefix("global");
+  return $_[0]->_prefix("global");
 }
 
 sub _config_prefix {
-    return $_[0]->_prefix("config");
+  return $_[0]->_prefix("config");
 }
 
 sub _params_prefix {
-    return $_[0]->_prefix("params");
+  return $_[0]->_prefix("params");
 }
 
 sub _bloomfilter_prefix {
-    return $_[0]->_prefix("bloomfilter");
+  return $_[0]->_prefix("bloomfilter");
 }
 
 sub _encode_key {
-    my ($self, $key) = @_;
-    $key = $self->_global_prefix . '.' . uri_escape_utf8($key);
-    trick_taint($key) if defined $key;
-    return length($self->{namespace} . $key) > MAX_KEY_LENGTH
-        ? undef
-        : $key;
+  my ($self, $key) = @_;
+  $key = $self->_global_prefix . '.' . uri_escape_utf8($key);
+  trick_taint($key) if defined $key;
+  return length($self->{namespace} . $key) > MAX_KEY_LENGTH ? undef : $key;
 }
 
 sub _set {
-    my ($self, $key, $value) = @_;
-    if (blessed($value)) {
-        # we don't support blessed objects
-        ThrowCodeError('param_invalid', { function => "Bugzilla::Memcached::set",
-                                          param    => "value" });
-    }
+  my ($self, $key, $value) = @_;
+  if (blessed($value)) {
 
-    my $enc_key = $self->_encode_key($key)
-        or return;
-    TRACE("set $enc_key");
-    return $self->{memcached}->set($enc_key, $value);
+    # we don't support blessed objects
+    ThrowCodeError('param_invalid',
+      {function => "Bugzilla::Memcached::set", param => "value"});
+  }
+
+  my $enc_key = $self->_encode_key($key) or return;
+  TRACE("set $enc_key");
+  return $self->{memcached}->set($enc_key, $value);
 }
 
 sub _get {
-    my ($self, $key) = @_;
+  my ($self, $key) = @_;
 
-    my $enc_key = $self->_encode_key($key)
-        or return;
-    my $val = $self->{memcached}->get($enc_key);
-    TRACE("get $enc_key: " . (defined $val ? "HIT" : "MISS"));
-    return $val;
+  my $enc_key = $self->_encode_key($key) or return;
+  my $val = $self->{memcached}->get($enc_key);
+  TRACE("get $enc_key: " . (defined $val ? "HIT" : "MISS"));
+  return $val;
 }
 
 sub _delete {
-    my ($self, $key) = @_;
-    $key = $self->_encode_key($key)
-        or return;
-    return $self->{memcached}->delete($key);
+  my ($self, $key) = @_;
+  $key = $self->_encode_key($key) or return;
+  return $self->{memcached}->delete($key);
 }
 
 1;

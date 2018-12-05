@@ -12,10 +12,15 @@ use warnings;
 
 use File::Basename;
 use File::Spec;
+
 BEGIN {
-    require lib;
-    my $dir = File::Spec->rel2abs(File::Spec->catdir(dirname(__FILE__), '..'));
-    lib->import($dir, File::Spec->catdir($dir, 'lib'), File::Spec->catdir($dir, qw(local lib perl5)));
+  require lib;
+  my $dir = File::Spec->rel2abs(File::Spec->catdir(dirname(__FILE__), '..'));
+  lib->import(
+    $dir,
+    File::Spec->catdir($dir, 'lib'),
+    File::Spec->catdir($dir, qw(local lib perl5))
+  );
 }
 
 use Bugzilla::DaemonControl qw(catch_signal);
@@ -28,25 +33,25 @@ $ENV{LOGGING_PORT} //= 5880;
 
 STDOUT->autoflush(1);
 
-my $loop = IO::Async::Loop->new;
+my $loop      = IO::Async::Loop->new;
 my $on_stream = sub {
-    my ($stream) = @_;
-    my $protocol = IO::Async::Protocol::LineStream->new(
-        transport    => $stream,
-        on_read_line => sub {
-            my ( $self, $line ) = @_;
-            say $line;
-        },
-    );
-    $loop->add($protocol);
+  my ($stream) = @_;
+  my $protocol = IO::Async::Protocol::LineStream->new(
+    transport    => $stream,
+    on_read_line => sub {
+      my ($self, $line) = @_;
+      say $line;
+    },
+  );
+  $loop->add($protocol);
 };
 my @signals = qw( TERM INT KILL );
 
 $loop->listen(
-    host      => '127.0.0.1',
-    service   => $ENV{LOGGING_PORT},
-    socktype  => 'stream',
-    on_stream => $on_stream,
+  host      => '127.0.0.1',
+  service   => $ENV{LOGGING_PORT},
+  socktype  => 'stream',
+  on_stream => $on_stream,
 )->get;
 
 exit Future->wait_any(map { catch_signal($_, 0) } @signals)->get;

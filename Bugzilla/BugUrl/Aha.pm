@@ -18,28 +18,28 @@ use base qw(Bugzilla::BugUrl);
 ###############################
 
 sub should_handle {
-    my ($class, $uri) = @_;
+  my ($class, $uri) = @_;
 
-    return $uri =~ m!^https?://[^.]+\.aha\.io/features/(\w+-\d+)!;
+  return $uri =~ m!^https?://[^.]+\.aha\.io/features/(\w+-\d+)!;
 }
 
 sub get_feature_id {
-    my ($self) = @_;
+  my ($self) = @_;
 
-    if ($self->{value} =~ m!^https?://[^.]+\.aha\.io/features/(\w+-\d+)!) {
-        return $1;
-    }
+  if ($self->{value} =~ m!^https?://[^.]+\.aha\.io/features/(\w+-\d+)!) {
+    return $1;
+  }
 }
 
 sub _check_value {
-    my ($class, $uri) = @_;
+  my ($class, $uri) = @_;
 
-    $uri = $class->SUPER::_check_value($uri);
+  $uri = $class->SUPER::_check_value($uri);
 
-    # Aha HTTP URLs redirect to HTTPS, so just use the HTTPS scheme.
-    $uri->scheme('https');
+  # Aha HTTP URLs redirect to HTTPS, so just use the HTTPS scheme.
+  $uri->scheme('https');
 
-    return $uri;
+  return $uri;
 }
 
 1;

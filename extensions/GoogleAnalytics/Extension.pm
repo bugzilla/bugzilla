@@ -15,9 +15,9 @@ use parent qw(Bugzilla::Extension);
 our $VERSION = '0.1';
 
 sub config_add_panels {
-    my ($self, $args) = @_;
-    my $modules = $args->{panel_modules};
-    $modules->{GoogleAnalytics} = "Bugzilla::Extension::GoogleAnalytics::Config";
+  my ($self, $args) = @_;
+  my $modules = $args->{panel_modules};
+  $modules->{GoogleAnalytics} = "Bugzilla::Extension::GoogleAnalytics::Config";
 }
 
 __PACKAGE__->NAME;

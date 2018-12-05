@@ -21,46 +21,46 @@ use Encode qw(encode_utf8);
 use Bugzilla::Constants qw(bz_locations);
 
 sub mailer_before_send {
-    my ($self, $args) = @_;
-    my $email = $args->{email};
-    my $header = $email->{header};
-    return if $header->header('to') eq '';
+  my ($self, $args) = @_;
+  my $email  = $args->{email};
+  my $header = $email->{header};
+  return if $header->header('to') eq '';
 
-    my $blocked = '';
-    if (!deliver_to($header->header('to'))) {
-        $blocked = $header->header('to');
-        $header->header_set(to => '');
-    }
+  my $blocked = '';
+  if (!deliver_to($header->header('to'))) {
+    $blocked = $header->header('to');
+    $header->header_set(to => '');
+  }
 
-    my $log_filename = bz_locations->{'datadir'} . '/mail.log';
-    my $fh = FileHandle->new(">>$log_filename");
-    if ($fh) {
-        print $fh encode_utf8(sprintf(
-            "[%s] %s%s %s : %s\n",
-            time2str('%D %T', time),
-            ($blocked eq '' ? '' : '(blocked) '),
-            ($blocked eq '' ? $header->header('to') : $blocked),
-            $header->header('X-Bugzilla-Reason') || '-',
-            $header->header('subject')
-        ));
-        $fh->close();
-    }
+  my $log_filename = bz_locations->{'datadir'} . '/mail.log';
+  my $fh           = FileHandle->new(">>$log_filename");
+  if ($fh) {
+    print $fh encode_utf8(sprintf(
+      "[%s] %s%s %s : %s\n",
+      time2str('%D %T', time),
+      ($blocked eq '' ? '' : '(blocked) '),
+      ($blocked eq '' ? $header->header('to') : $blocked),
+      $header->header('X-Bugzilla-Reason') || '-',
+      $header->header('subject')
+    ));
+    $fh->close();
+  }
 }
 
 sub deliver_to {
-    my $email = address_of(shift);
-    my $ra_filters = Bugzilla::Extension::LimitedEmail::FILTERS;
-    foreach my $re (@$ra_filters) {
-        if ($email =~ $re) {
-            return 1;
-        }
+  my $email      = address_of(shift);
+  my $ra_filters = Bugzilla::Extension::LimitedEmail::FILTERS;
+  foreach my $re (@$ra_filters) {
+    if ($email =~ $re) {
+      return 1;
     }
-    return 0;
+  }
+  return 0;
 }
 
 sub address_of {
-    my $email = shift;
-    return $email =~ /<([^>]+)>/ ? $1 : $email;
+  my $email = shift;
+  return $email =~ /<([^>]+)>/ ? $1 : $email;
 }
 
 __PACKAGE__->NAME;

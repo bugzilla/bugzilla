@@ -26,28 +26,26 @@ use warnings;
 
 use base qw(Exporter);
 our @EXPORT = qw(
-    FLAGTYPE_COMMENT_TEMPLATES
-    FLAGTYPE_COMMENT_STATES
-    FLAGTYPE_COMMENT_BUG_FLAGS
-    FLAGTYPE_COMMENT_ATTACHMENT_FLAGS
+  FLAGTYPE_COMMENT_TEMPLATES
+  FLAGTYPE_COMMENT_STATES
+  FLAGTYPE_COMMENT_BUG_FLAGS
+  FLAGTYPE_COMMENT_ATTACHMENT_FLAGS
 );
 
-use constant FLAGTYPE_COMMENT_STATES => ("?", "+", "-");
-use constant FLAGTYPE_COMMENT_BUG_FLAGS => 0;
+use constant FLAGTYPE_COMMENT_STATES           => ("?", "+", "-");
+use constant FLAGTYPE_COMMENT_BUG_FLAGS        => 0;
 use constant FLAGTYPE_COMMENT_ATTACHMENT_FLAGS => 1;
 
 sub FLAGTYPE_COMMENT_TEMPLATES {
-    my @result = ("admin/flag-type/edit.html.tmpl");
-    if (FLAGTYPE_COMMENT_BUG_FLAGS) {
-        push @result, ("bug/comments.html.tmpl");
-    }
-    if (FLAGTYPE_COMMENT_ATTACHMENT_FLAGS) {
-        push @result, (
-            "attachment/edit.html.tmpl",
-            "attachment/createformcontents.html.tmpl",
-        );
-    }
-    return @result;
+  my @result = ("admin/flag-type/edit.html.tmpl");
+  if (FLAGTYPE_COMMENT_BUG_FLAGS) {
+    push @result, ("bug/comments.html.tmpl");
+  }
+  if (FLAGTYPE_COMMENT_ATTACHMENT_FLAGS) {
+    push @result,
+      ("attachment/edit.html.tmpl", "attachment/createformcontents.html.tmpl",);
+  }
+  return @result;
 }
 
 1;

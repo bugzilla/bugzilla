@@ -64,8 +64,8 @@ $dbh->do("DELETE FROM bugs_fulltext");
 print "All done!\n";
 
 sub delete_from_table {
-    my $table = shift;
-    print "Deleting from $table...";
-    $dbh->do("DELETE FROM $table");
-    print "done.\n";
+  my $table = shift;
+  print "Deleting from $table...";
+  $dbh->do("DELETE FROM $table");
+  print "done.\n";
 }

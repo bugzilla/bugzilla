@@ -18,9 +18,9 @@ use Bugzilla::Constants;
 
 Bugzilla->login();
 
-my $cgi = Bugzilla->cgi;
+my $cgi      = Bugzilla->cgi;
 my $template = Bugzilla->template;
-my $vars = {};
+my $vars     = {};
 
 # Return the appropriate HTTP response headers.
 print $cgi->header('application/xml');

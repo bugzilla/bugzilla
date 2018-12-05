@@ -12,21 +12,16 @@ use strict;
 use warnings;
 
 use constant NAME => 'Example';
-use constant REQUIRED_MODULES => [
-    {
-        package => 'Data-Dumper',
-        module  => 'Data::Dumper',
-        version => 0,
-    },
-];
+use constant REQUIRED_MODULES =>
+  [{package => 'Data-Dumper', module => 'Data::Dumper', version => 0,},];
 
 use constant OPTIONAL_MODULES => [
-    {
-        package => 'Acme',
-        module  => 'Acme',
-        version => 1.11,
-        feature => ['example_acme'],
-    },
+  {
+    package => 'Acme',
+    module  => 'Acme',
+    version => 1.11,
+    feature => ['example_acme'],
+  },
 ];
 
 __PACKAGE__->NAME;

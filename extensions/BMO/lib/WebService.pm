@@ -32,26 +32,26 @@ use Bugzilla::WebService::Util qw(validate);
 use Bugzilla::Field;
 
 use constant PUBLIC_METHODS => qw(
-    getBugsConfirmer
-    getBugsVerifier
+  getBugsConfirmer
+  getBugsVerifier
 );
 
 sub getBugsConfirmer {
-    my ($self, $params) = validate(@_, 'names');
-    my $dbh = Bugzilla->dbh;
+  my ($self, $params) = validate(@_, 'names');
+  my $dbh = Bugzilla->dbh;
 
-    defined($params->{names})
-        || ThrowCodeError('params_required',
-               { function => 'BMO.getBugsConfirmer', params => ['names'] });
+  defined($params->{names})
+    || ThrowCodeError('params_required',
+    {function => 'BMO.getBugsConfirmer', params => ['names']});
 
-    my @user_objects = map { Bugzilla::User->check($_) } @{ $params->{names} };
+  my @user_objects = map { Bugzilla::User->check($_) } @{$params->{names}};
 
-    # start filtering to remove duplicate user ids
-    @user_objects = values %{{ map { $_->id => $_ } @user_objects }};
+  # start filtering to remove duplicate user ids
+  @user_objects = values %{{map { $_->id => $_ } @user_objects}};
 
-    my $fieldid = get_field_id('bug_status');
+  my $fieldid = get_field_id('bug_status');
 
-    my $query = "SELECT DISTINCT bugs_activity.bug_id
+  my $query = "SELECT DISTINCT bugs_activity.bug_id
                    FROM bugs_activity
                         LEFT JOIN bug_group_map
                         ON bugs_activity.bug_id = bug_group_map.bug_id
@@ -62,31 +62,31 @@ sub getBugsConfirmer {
                         AND bug_group_map.bug_id IS NULL
                ORDER BY bugs_activity.bug_id";
 
-    my %users;
-    foreach my $user (@user_objects) {
-        my $bugs = $dbh->selectcol_arrayref($query, undef, $fieldid, $user->id);
-        $users{$user->login} = $bugs;
-    }
+  my %users;
+  foreach my $user (@user_objects) {
+    my $bugs = $dbh->selectcol_arrayref($query, undef, $fieldid, $user->id);
+    $users{$user->login} = $bugs;
+  }
 
-    return \%users;
+  return \%users;
 }
 
 sub getBugsVerifier {
-    my ($self, $params) = validate(@_, 'names');
-    my $dbh = Bugzilla->dbh;
+  my ($self, $params) = validate(@_, 'names');
+  my $dbh = Bugzilla->dbh;
 
-    defined($params->{names})
-        || ThrowCodeError('params_required',
-               { function => 'BMO.getBugsVerifier', params => ['names'] });
+  defined($params->{names})
+    || ThrowCodeError('params_required',
+    {function => 'BMO.getBugsVerifier', params => ['names']});
 
-    my @user_objects = map { Bugzilla::User->check($_) } @{ $params->{names} };
+  my @user_objects = map { Bugzilla::User->check($_) } @{$params->{names}};
 
-    # start filtering to remove duplicate user ids
-    @user_objects = values %{{ map { $_->id => $_ } @user_objects }};
+  # start filtering to remove duplicate user ids
+  @user_objects = values %{{map { $_->id => $_ } @user_objects}};
 
-    my $fieldid = get_field_id('bug_status');
+  my $fieldid = get_field_id('bug_status');
 
-    my $query = "SELECT DISTINCT bugs_activity.bug_id
+  my $query = "SELECT DISTINCT bugs_activity.bug_id
                    FROM bugs_activity
                         LEFT JOIN bug_group_map
                         ON bugs_activity.bug_id = bug_group_map.bug_id
@@ -97,13 +97,13 @@ sub getBugsVerifier {
                         AND bug_group_map.bug_id IS NULL
                ORDER BY bugs_activity.bug_id";
 
-    my %users;
-    foreach my $user (@user_objects) {
-        my $bugs = $dbh->selectcol_arrayref($query, undef, $fieldid, $user->id);
-        $users{$user->login} = $bugs;
-    }
+  my %users;
+  foreach my $user (@user_objects) {
+    my $bugs = $dbh->selectcol_arrayref($query, undef, $fieldid, $user->id);
+    $users{$user->login} = $bugs;
+  }
 
-    return \%users;
+  return \%users;
 }
 
 1;

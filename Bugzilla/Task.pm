@@ -21,7 +21,7 @@ use Capture::Tiny qw(capture_stdout);
 
 requires 'prepare', 'run', 'subject', '_build_estimated_duration';
 
-my $Duration = class_type { class => 'DateTime::Duration' };
+my $Duration = class_type {class => 'DateTime::Duration'};
 
 has 'user' => (is => 'ro',   isa => User, required => 1);
 has 'name' => (is => 'lazy', isa => Str,  init_arg => undef);

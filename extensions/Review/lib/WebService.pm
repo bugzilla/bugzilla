@@ -20,279 +20,296 @@ use Bugzilla::Util qw(detaint_natural trick_taint);
 use Bugzilla::WebService::Util 'filter';
 
 use constant PUBLIC_METHODS => qw(
-    flag_activity
-    suggestions
+  flag_activity
+  suggestions
 );
 
 sub suggestions {
-    my ($self, $params) = @_;
-    my $dbh = Bugzilla->switch_to_shadow_db();
+  my ($self, $params) = @_;
+  my $dbh = Bugzilla->switch_to_shadow_db();
 
-    my ($bug, $product, $component);
-    if (exists $params->{bug_id}) {
-        $bug = Bugzilla::Bug->check($params->{bug_id});
-        $product = $bug->product_obj;
-        $component = $bug->component_obj;
+  my ($bug, $product, $component);
+  if (exists $params->{bug_id}) {
+    $bug       = Bugzilla::Bug->check($params->{bug_id});
+    $product   = $bug->product_obj;
+    $component = $bug->component_obj;
+  }
+  elsif (exists $params->{product}) {
+    $product = Bugzilla::Product->check($params->{product});
+    if (exists $params->{component}) {
+      $component
+        = Bugzilla::Component->check({
+        product => $product, name => $params->{component}
+        });
     }
-    elsif (exists $params->{product}) {
-        $product = Bugzilla::Product->check($params->{product});
-        if (exists $params->{component}) {
-            $component = Bugzilla::Component->check({
-                product => $product, name => $params->{component}
-            });
-        }
+  }
+  else {
+    ThrowUserError("reviewer_suggestions_param_required");
+  }
+
+  my @reviewers;
+  if ($bug) {
+
+    # we always need to be authentiated to perform user matching
+    my $user = Bugzilla->user;
+    if (!$user->id) {
+      Bugzilla->set_user(Bugzilla::User->check({name => 'nobody@mozilla.org'}));
+      push @reviewers, @{$bug->mentors};
+      Bugzilla->set_user($user);
     }
     else {
-        ThrowUserError("reviewer_suggestions_param_required");
+      push @reviewers, @{$bug->mentors};
     }
+  }
+  if ($component) {
+    push @reviewers, @{$component->reviewers_objs};
+  }
+  if (!$component || !@{$component->reviewers_objs}) {
+    push @reviewers, @{$product->reviewers_objs};
+  }
 
-    my @reviewers;
-    if ($bug) {
-        # we always need to be authentiated to perform user matching
-        my $user = Bugzilla->user;
-        if (!$user->id) {
-            Bugzilla->set_user(Bugzilla::User->check({ name => 'nobody@mozilla.org' }));
-            push @reviewers, @{ $bug->mentors };
-            Bugzilla->set_user($user);
-        } else {
-            push @reviewers, @{ $bug->mentors };
-        }
-    }
-    if ($component) {
-        push @reviewers, @{ $component->reviewers_objs };
-    }
-    if (!$component || !@{ $component->reviewers_objs }) {
-        push @reviewers, @{ $product->reviewers_objs };
-    }
-
-    my @result;
-    foreach my $reviewer (@reviewers) {
-        push @result, {
-            id    => $self->type('int', $reviewer->id),
-            email => $self->type('email', $reviewer->login),
-            name  => $self->type('string', $reviewer->name),
-            nick  => $self->type('string', $reviewer->nick),
-            review_count => $self->type('int', $reviewer->review_count),
-        };
-    }
-    return \@result;
+  my @result;
+  foreach my $reviewer (@reviewers) {
+    push @result,
+      {
+      id           => $self->type('int',    $reviewer->id),
+      email        => $self->type('email',  $reviewer->login),
+      name         => $self->type('string', $reviewer->name),
+      nick         => $self->type('string', $reviewer->nick),
+      review_count => $self->type('int',    $reviewer->review_count),
+      };
+  }
+  return \@result;
 }
 
 sub flag_activity {
-    my ($self, $params) = @_;
-    my $dbh = Bugzilla->switch_to_shadow_db();
-    my %match_criteria;
+  my ($self, $params) = @_;
+  my $dbh = Bugzilla->switch_to_shadow_db();
+  my %match_criteria;
 
-    if (my $flag_id = $params->{flag_id}) {
-        detaint_natural($flag_id)
-          or ThrowUserError('invalid_flag_id', { flag_id => $flag_id });
+  if (my $flag_id = $params->{flag_id}) {
+    detaint_natural($flag_id)
+      or ThrowUserError('invalid_flag_id', {flag_id => $flag_id});
 
-        $match_criteria{flag_id} = $flag_id;
+    $match_criteria{flag_id} = $flag_id;
+  }
+
+  if (my $flag_ids = $params->{flag_ids}) {
+    foreach my $flag_id (@$flag_ids) {
+      detaint_natural($flag_id)
+        or ThrowUserError('invalid_flag_id', {flag_id => $flag_id});
     }
 
-    if (my $flag_ids = $params->{flag_ids}) {
-        foreach my $flag_id (@$flag_ids) {
-            detaint_natural($flag_id)
-              or ThrowUserError('invalid_flag_id', { flag_id => $flag_id });
-        }
+    $match_criteria{flag_id} = $flag_ids;
+  }
 
-        $match_criteria{flag_id} = $flag_ids;
+  if (my $type_id = $params->{type_id}) {
+    detaint_natural($type_id)
+      or ThrowUserError('invalid_flag_type_id', {type_id => $type_id});
+
+    $match_criteria{type_id} = $type_id;
+  }
+
+  if (my $type_name = $params->{type_name}) {
+    trick_taint($type_name);
+    my $flag_types = Bugzilla::FlagType::match({name => $type_name});
+    $match_criteria{type_id} = [map { $_->id } @$flag_types];
+  }
+
+  foreach my $user_field (qw( requestee setter )) {
+    if (my $user_name = $params->{$user_field}) {
+      my $user = Bugzilla::User->check(
+        {name => $user_name, cache => 1, _error => 'invalid_username'});
+
+      $match_criteria{$user_field . "_id"} = $user->id;
     }
+  }
 
-    if (my $type_id = $params->{type_id}) {
-        detaint_natural($type_id)
-          or ThrowUserError('invalid_flag_type_id', { type_id => $type_id });
-
-        $match_criteria{type_id} = $type_id;
+  foreach my $field (qw( bug_id status )) {
+    if (exists $params->{$field}) {
+      $match_criteria{$field} = $params->{$field};
     }
+  }
 
-    if (my $type_name = $params->{type_name}) {
-        trick_taint($type_name);
-        my $flag_types = Bugzilla::FlagType::match({ name => $type_name });
-        $match_criteria{type_id} = [map { $_->id } @$flag_types];
-    }
+  ThrowCodeError('param_required',
+    {param => 'limit', function => 'Review.flag_activity()'})
+    if defined $params->{offset} && !defined $params->{limit};
 
-    foreach my $user_field (qw( requestee setter )) {
-        if (my $user_name = $params->{$user_field}) {
-            my $user = Bugzilla::User->check({ name => $user_name, cache => 1, _error => 'invalid_username' });
+  my $limit       = delete $params->{limit};
+  my $offset      = delete $params->{offset};
+  my $after       = delete $params->{after};
+  my $before      = delete $params->{before};
+  my $max_results = Bugzilla->params->{max_search_results};
 
-            $match_criteria{ $user_field . "_id" } = $user->id;
-        }
-    }
+  if (!$limit || $limit > $max_results) {
+    $limit = $max_results;
+  }
 
-    foreach my $field (qw( bug_id status )) {
-        if (exists $params->{$field}) {
-           $match_criteria{$field} = $params->{$field};
-        }
-    }
+  if ($after && $after =~ /^(\d{4}-\d{1,2}-\d{1,2})$/) {
+    $after = $1;
+  }
+  else {
+    my $now = DateTime->now;
+    $now->subtract(days => 30);
+    $after = $now->ymd('-');
+  }
 
-    ThrowCodeError('param_required', { param => 'limit', function => 'Review.flag_activity()' })
-      if defined $params->{offset} && !defined $params->{limit};
+  if ($before && $before =~ /^(\d{4}-\d{1,2}-\d{1,2})$/) {
+    $before = $1;
+  }
+  else {
+    my $now = DateTime->now;
+    $before = $now->ymd('-');
+  }
 
-    my $limit       = delete $params->{limit};
-    my $offset      = delete $params->{offset};
-    my $after       = delete $params->{after};
-    my $before      = delete $params->{before};
-    my $max_results = Bugzilla->params->{max_search_results};
+  $match_criteria{LIMIT} = $limit;
+  $match_criteria{OFFSET} = $offset if defined $offset;
+  $match_criteria{WHERE}
+    = {'date(flag_when) BETWEEN ? AND ?' => [$after, $before]};
 
-    if (!$limit || $limit > $max_results) {
-        $limit = $max_results;
-    }
+ # Throw error if no other parameters have been passed other than limit and offset
+  if (!grep(!/^(LIMIT|OFFSET)$/, keys %match_criteria)) {
+    ThrowUserError('flag_activity_parameters_required');
+  }
 
-    if ($after && $after =~ /^(\d{4}-\d{1,2}-\d{1,2})$/) {
-        $after = $1;
-    }
-    else {
-        my $now = DateTime->now;
-        $now->subtract(days => 30);
-        $after = $now->ymd('-');
-    }
-
-    if ($before && $before =~ /^(\d{4}-\d{1,2}-\d{1,2})$/) {
-        $before = $1;
-    }
-    else {
-        my $now = DateTime->now;
-        $before = $now->ymd('-');
-    }
-
-    $match_criteria{LIMIT} = $limit;
-    $match_criteria{OFFSET} = $offset if defined $offset;
-    $match_criteria{WHERE} = { 'date(flag_when) BETWEEN ? AND ?' => [$after, $before] };
-
-    # Throw error if no other parameters have been passed other than limit and offset
-    if (!grep(!/^(LIMIT|OFFSET)$/, keys %match_criteria)) {
-        ThrowUserError('flag_activity_parameters_required');
-    }
-
-    my $matches = Bugzilla::Extension::Review::FlagStateActivity->match(\%match_criteria);
-    my $user    = Bugzilla->user;
-    $user->visible_bugs([ map { $_->bug_id } @$matches ]);
-    my @results = map  { $self->_flag_state_activity_to_hash($_, $params) }
-                  grep { $user->can_see_bug($_->bug_id) && _can_see_attachment($user, $_) }
-                  @$matches;
-    return \@results;
+  my $matches
+    = Bugzilla::Extension::Review::FlagStateActivity->match(\%match_criteria);
+  my $user = Bugzilla->user;
+  $user->visible_bugs([map { $_->bug_id } @$matches]);
+  my @results
+    = map { $self->_flag_state_activity_to_hash($_, $params) }
+    grep { $user->can_see_bug($_->bug_id) && _can_see_attachment($user, $_) }
+    @$matches;
+  return \@results;
 }
 
 sub _can_see_attachment {
-    my ($user, $flag_state_activity) = @_;
+  my ($user, $flag_state_activity) = @_;
 
-    return 1 if !$flag_state_activity->attachment_id;
-    return 0 if $flag_state_activity->attachment->isprivate && !$user->is_insider;
-    return 1;
+  return 1 if !$flag_state_activity->attachment_id;
+  return 0 if $flag_state_activity->attachment->isprivate && !$user->is_insider;
+  return 1;
 }
 
 sub rest_resources {
-    return [
-        # bug-id
-        qr{^/review/suggestions/(\d+)$}, {
-            GET => {
-                method => 'suggestions',
-                params => sub {
-                    return { bug_id => $_[0] };
-                },
-            },
+  return [
+    # bug-id
+    qr{^/review/suggestions/(\d+)$},
+    {
+      GET => {
+        method => 'suggestions',
+        params => sub {
+          return {bug_id => $_[0]};
         },
-        # product/component
-        qr{^/review/suggestions/([^/]+)/(.+)$}, {
-            GET => {
-                method => 'suggestions',
-                params => sub {
-                    return { product => $_[0], component => $_[1] };
-                },
-            },
+      },
+    },
+
+    # product/component
+    qr{^/review/suggestions/([^/]+)/(.+)$},
+    {
+      GET => {
+        method => 'suggestions',
+        params => sub {
+          return {product => $_[0], component => $_[1]};
         },
-        # just product
-        qr{^/review/suggestions/([^/]+)$}, {
-            GET => {
-                method => 'suggestions',
-                params => sub {
-                    return { product => $_[0] };
-                },
-            },
+      },
+    },
+
+    # just product
+    qr{^/review/suggestions/([^/]+)$},
+    {
+      GET => {
+        method => 'suggestions',
+        params => sub {
+          return {product => $_[0]};
         },
-        # named parameters
-        qr{^/review/suggestions$}, {
-            GET => {
-                method => 'suggestions',
-            },
+      },
+    },
+
+    # named parameters
+    qr{^/review/suggestions$},
+    {GET => {method => 'suggestions',},},
+
+    # flag activity by flag id
+    qr{^/review/flag_activity/(\d+)$},
+    {
+      GET => {
+        method => 'flag_activity',
+        params => sub {
+          return {flag_id => $_[0]};
         },
-        # flag activity by flag id
-        qr{^/review/flag_activity/(\d+)$}, {
-            GET => {
-                method => 'flag_activity',
-                params => sub {
-                    return { flag_id => $_[0] }
-                },
-            },
+      },
+    },
+    qr{^/review/flag_activity/type_name/(\w+)$},
+    {
+      GET => {
+        method => 'flag_activity',
+        params => sub {
+          return {type_name => $_[0]};
         },
-        qr{^/review/flag_activity/type_name/(\w+)$}, {
-            GET => {
-                method => 'flag_activity',
-                params => sub {
-                    return { type_name => $_[0] }
-                },
-            },
+      },
+    },
+
+    # flag activity by user
+    qr{^/review/flag_activity/(requestee|setter|type_id)/(.*)$},
+    {
+      GET => {
+        method => 'flag_activity',
+        params => sub {
+          return {$_[0] => $_[1]};
         },
-        # flag activity by user
-        qr{^/review/flag_activity/(requestee|setter|type_id)/(.*)$}, {
-            GET => {
-                method => 'flag_activity',
-                params => sub {
-                    return { $_[0] => $_[1] };
-                },
-            },
-        },
-        # flag activity with only query strings
-        qr{^/review/flag_activity$}, {
-            GET => { method => 'flag_activity' },
-        },
-    ];
+      },
+    },
+
+    # flag activity with only query strings
+    qr{^/review/flag_activity$},
+    {GET => {method => 'flag_activity'},},
+  ];
 }
 
 sub _flag_state_activity_to_hash {
-    my ($self, $fsa, $params) = @_;
+  my ($self, $fsa, $params) = @_;
 
-    my %flag = (
-        id            => $self->type('int', $fsa->id),
-        creation_time => $self->type('string', $fsa->flag_when),
-        type          => $self->_flagtype_to_hash($fsa->type),
-        setter        => $self->_user_to_hash($fsa->setter),
-        bug_id        => $self->type('int',    $fsa->bug_id),
-        attachment_id => $self->type('int',    $fsa->attachment_id),
-        status        => $self->type('string', $fsa->status),
-    );
+  my %flag = (
+    id            => $self->type('int',    $fsa->id),
+    creation_time => $self->type('string', $fsa->flag_when),
+    type          => $self->_flagtype_to_hash($fsa->type),
+    setter        => $self->_user_to_hash($fsa->setter),
+    bug_id        => $self->type('int',    $fsa->bug_id),
+    attachment_id => $self->type('int',    $fsa->attachment_id),
+    status        => $self->type('string', $fsa->status),
+  );
 
-    $flag{requestee} = $self->_user_to_hash($fsa->requestee) if $fsa->requestee;
-    $flag{flag_id}   = $self->type('int', $fsa->flag_id) unless $params->{flag_id};
+  $flag{requestee} = $self->_user_to_hash($fsa->requestee) if $fsa->requestee;
+  $flag{flag_id} = $self->type('int', $fsa->flag_id) unless $params->{flag_id};
 
-    return filter($params, \%flag);
+  return filter($params, \%flag);
 }
 
 sub _flagtype_to_hash {
-    my ($self, $flagtype) = @_;
-    my $user = Bugzilla->user;
+  my ($self, $flagtype) = @_;
+  my $user = Bugzilla->user;
 
-    return {
-        id               => $self->type('int',     $flagtype->id),
-        name             => $self->type('string',  $flagtype->name),
-        description      => $self->type('string',  $flagtype->description),
-        type             => $self->type('string',  $flagtype->target_type),
-        is_active        => $self->type('boolean', $flagtype->is_active),
-        is_requesteeble  => $self->type('boolean', $flagtype->is_requesteeble),
-        is_multiplicable => $self->type('boolean', $flagtype->is_multiplicable),
-    };
+  return {
+    id               => $self->type('int',     $flagtype->id),
+    name             => $self->type('string',  $flagtype->name),
+    description      => $self->type('string',  $flagtype->description),
+    type             => $self->type('string',  $flagtype->target_type),
+    is_active        => $self->type('boolean', $flagtype->is_active),
+    is_requesteeble  => $self->type('boolean', $flagtype->is_requesteeble),
+    is_multiplicable => $self->type('boolean', $flagtype->is_multiplicable),
+  };
 }
 
 sub _user_to_hash {
-    my ($self, $user) = @_;
+  my ($self, $user) = @_;
 
-    return {
-        id        => $self->type('int',    $user->id),
-        real_name => $self->type('string', $user->name),
-        nick      => $self->type('string', $user->nick),
-        name      => $self->type('email',  $user->login),
-    };
+  return {
+    id        => $self->type('int',    $user->id),
+    real_name => $self->type('string', $user->name),
+    nick      => $self->type('string', $user->nick),
+    name      => $self->type('email',  $user->login),
+  };
 }
 
 1;

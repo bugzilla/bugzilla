@@ -14,14 +14,12 @@ use warnings;
 use base qw(Exporter);
 
 our @EXPORT = qw(
-    FLAGTYPE_TEMPLATES
+  FLAGTYPE_TEMPLATES
 );
 
 use constant FLAGTYPE_TEMPLATES => (
-    "attachment/edit.html.tmpl",
-    "attachment/createformcontents.html.tmpl",
-    "bug/edit.html.tmpl",
-    "bug/create/create.html.tmpl"
+  "attachment/edit.html.tmpl", "attachment/createformcontents.html.tmpl",
+  "bug/edit.html.tmpl",        "bug/create/create.html.tmpl"
 );
 
 1;

@@ -14,20 +14,17 @@ use warnings;
 use base qw(Exporter);
 
 our @EXPORT = qw(
-    EMAIL_FROM
-    ENABLED_PRODUCTS
+  EMAIL_FROM
+  ENABLED_PRODUCTS
 );
 
 use constant EMAIL_FROM => 'bugzilla-daemon@mozilla.org';
 
 use constant ENABLED_PRODUCTS => (
-    "Cloud Services",
-    "Core",
-    "Firefox for Android",
-    "Firefox for Metro",
-    "Firefox",
-    "Testing",
-    "Toolkit",
+  "Cloud Services",      "Core",
+  "Firefox for Android", "Firefox for Metro",
+  "Firefox",             "Testing",
+  "Toolkit",
 );
 
 1;

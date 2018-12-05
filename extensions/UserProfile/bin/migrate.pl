@@ -26,7 +26,7 @@ Bugzilla->usage_mode(USAGE_MODE_CMDLINE);
 my $dbh = Bugzilla->dbh;
 
 my $user_ids = $dbh->selectcol_arrayref(
-    "SELECT userid
+  "SELECT userid
        FROM profiles
       WHERE last_activity_ts IS NULL
       ORDER BY userid"
@@ -34,11 +34,9 @@ my $user_ids = $dbh->selectcol_arrayref(
 
 my ($current, $total) = (1, scalar(@$user_ids));
 foreach my $user_id (@$user_ids) {
-    indicate_progress({ current => $current++, total => $total, every => 25 });
-    my $ts = last_user_activity($user_id);
-    next unless $ts;
-    $dbh->do(
-        "UPDATE profiles SET last_activity_ts = ? WHERE userid = ?",
-        undef,
-        $ts, $user_id);
+  indicate_progress({current => $current++, total => $total, every => 25});
+  my $ts = last_user_activity($user_id);
+  next unless $ts;
+  $dbh->do("UPDATE profiles SET last_activity_ts = ? WHERE userid = ?",
+    undef, $ts, $user_id);
 }

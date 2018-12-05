@@ -21,19 +21,21 @@ use DateTime::TimeZone;
 use Time::Local qw(timelocal);
 
 sub date_str_to_time {
-    my ($date) = @_;
-    # avoid creating a DateTime object
-    if ($date =~ /^(\d{4})[\.\-](\d{2})[\.\-](\d{2}) (\d{2}):(\d{2}):(\d{2})$/) {
-        return timelocal($6, $5, $4, $3, $2 - 1, $1 - 1900);
-    }
-    state $tz //= DateTime::TimeZone->new( name => 'local' );
-    my $dt = datetime_from($date, $tz);
-    if (!$dt) {
-        # this should never happen
-        warn("invalid datetime '$date'");
-        return undef;
-    }
-    return $dt->epoch;
+  my ($date) = @_;
+
+  # avoid creating a DateTime object
+  if ($date =~ /^(\d{4})[\.\-](\d{2})[\.\-](\d{2}) (\d{2}):(\d{2}):(\d{2})$/) {
+    return timelocal($6, $5, $4, $3, $2 - 1, $1 - 1900);
+  }
+  state $tz //= DateTime::TimeZone->new(name => 'local');
+  my $dt = datetime_from($date, $tz);
+  if (!$dt) {
+
+    # this should never happen
+    warn("invalid datetime '$date'");
+    return undef;
+  }
+  return $dt->epoch;
 }
 
 1;

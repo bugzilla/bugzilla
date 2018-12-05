@@ -16,42 +16,41 @@ use Bugzilla::Config::Common;
 our $sortkey = 150;
 
 use constant get_param_list => (
-    {
-        name     => 'maintainer',
-        type     => 't',
-        no_reset => '1',
-        default  => '',
-        checker  => \&check_email
-    },
+  {
+    name     => 'maintainer',
+    type     => 't',
+    no_reset => '1',
+    default  => '',
+    checker  => \&check_email
+  },
 
-    {
-        name    => 'docs_urlbase',
-        type    => 't',
-        default => 'docs/%lang%/html/',
-        checker => \&check_url
-    },
+  {
+    name    => 'docs_urlbase',
+    type    => 't',
+    default => 'docs/%lang%/html/',
+    checker => \&check_url
+  },
 
-    {
-        name    => 'utf8',
-        type    => 's',
-        choices => [ '1', 'utf8', 'utf8mb4' ],
-        default => 'utf8',
-        checker => \&check_utf8
-    },
+  {
+    name    => 'utf8',
+    type    => 's',
+    choices => ['1', 'utf8', 'utf8mb4'],
+    default => 'utf8',
+    checker => \&check_utf8
+  },
 
-    {
-        name    => 'announcehtml',
-        type    => 'l',
-        default => ''
-    },
+  {name => 'announcehtml', type => 'l', default => ''},
 
-    {
-        name    => 'upgrade_notification',
-        type    => 's',
-        choices => [ 'development_snapshot', 'latest_stable_release', 'stable_branch_release', 'disabled' ],
-        default => 'latest_stable_release',
-        checker => \&check_notification
-    },
+  {
+    name    => 'upgrade_notification',
+    type    => 's',
+    choices => [
+      'development_snapshot',  'latest_stable_release',
+      'stable_branch_release', 'disabled'
+    ],
+    default => 'latest_stable_release',
+    checker => \&check_notification
+  },
 );
 
 1;

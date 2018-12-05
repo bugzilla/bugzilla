@@ -13,31 +13,34 @@ has 'params' => (is => 'ro', default => sub { {} });
 
 # we pretend to be Bugzilla::CGI at times.
 sub canonicalise_query {
-    return Bugzilla::CGI::canonicalise_query(@_);
+  return Bugzilla::CGI::canonicalise_query(@_);
 }
 
 sub delete {
-    my ($self, $key) = @_;
-    delete $self->params->{$key};
+  my ($self, $key) = @_;
+  delete $self->params->{$key};
 }
 
 sub redirect {
-    my ($self, @args) = @_;
+  my ($self, @args) = @_;
 
-    Bugzilla::Elastic::Search::Redirect->throw(redirect_args => \@args);
+  Bugzilla::Elastic::Search::Redirect->throw(redirect_args => \@args);
 }
 
 sub param {
-    my ($self, $key, $val, @rest) = @_;
-    if (@_ > 3) {
-        $self->params->{$key} = [$val, @rest];
-    } elsif (@_ == 3) {
-        $self->params->{$key} = $val;
-    } elsif (@_ == 2) {
-        return $self->params->{$key};
-    } else {
-        return $self->params
-    }
+  my ($self, $key, $val, @rest) = @_;
+  if (@_ > 3) {
+    $self->params->{$key} = [$val, @rest];
+  }
+  elsif (@_ == 3) {
+    $self->params->{$key} = $val;
+  }
+  elsif (@_ == 2) {
+    return $self->params->{$key};
+  }
+  else {
+    return $self->params;
+  }
 }
 
 1;

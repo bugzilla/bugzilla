@@ -8,7 +8,7 @@
 package Bugzilla::Extension::ShadowBugs;
 use strict;
 
-use constant NAME => 'ShadowBugs';
+use constant NAME             => 'ShadowBugs';
 use constant REQUIRED_MODULES => [];
 use constant OPTIONAL_MODULES => [];
 

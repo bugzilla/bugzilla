@@ -14,37 +14,36 @@ use strict;
 use warnings;
 
 sub parse_cvsroot {
-    my $cvsroot = $_[0];
-    # Format: :method:[user[:password]@]server[:[port]]/path
-    if ($cvsroot =~ /^:([^:]*):(.*?)(\/.*)$/) {
-        my %retval;
-        $retval{protocol} = $1;
-        $retval{rootdir} = $3;
-        my $remote = $2;
-        if ($remote =~ /^(([^\@:]*)(:([^\@]*))?\@)?([^:]*)(:(.*))?$/) {
-            $retval{user} = $2;
-            $retval{password} = $4;
-            $retval{server} = $5;
-            $retval{port} = $7;
-            return %retval;
-        }
-    }
+  my $cvsroot = $_[0];
 
-    return (
-        rootdir => $cvsroot
-    );
+  # Format: :method:[user[:password]@]server[:[port]]/path
+  if ($cvsroot =~ /^:([^:]*):(.*?)(\/.*)$/) {
+    my %retval;
+    $retval{protocol} = $1;
+    $retval{rootdir}  = $3;
+    my $remote = $2;
+    if ($remote =~ /^(([^\@:]*)(:([^\@]*))?\@)?([^:]*)(:(.*))?$/) {
+      $retval{user}     = $2;
+      $retval{password} = $4;
+      $retval{server}   = $5;
+      $retval{port}     = $7;
+      return %retval;
+    }
+  }
+
+  return (rootdir => $cvsroot);
 }
 
 sub cvs_co {
-    my ($cvsroot, @files) = @_;
-    my $cvs = $::cvsbin || "cvs";
-    return system($cvs, "-Q", "-d$cvsroot", "co", @files);
+  my ($cvsroot, @files) = @_;
+  my $cvs = $::cvsbin || "cvs";
+  return system($cvs, "-Q", "-d$cvsroot", "co", @files);
 }
 
 sub cvs_co_rev {
-    my ($cvsroot, $rev, @files) = @_;
-    my $cvs = $::cvsbin || "cvs";
-    return system($cvs, "-Q", "-d$cvsroot", "co", "-r$rev", @files);
+  my ($cvsroot, $rev, @files) = @_;
+  my $cvs = $::cvsbin || "cvs";
+  return system($cvs, "-Q", "-d$cvsroot", "co", "-r$rev", @files);
 }
 
 1

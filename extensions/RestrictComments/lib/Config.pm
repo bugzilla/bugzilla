@@ -17,26 +17,26 @@ use Bugzilla::Group;
 our $sortkey = 510;
 
 sub get_param_list {
-    my ($class) = @_;
+  my ($class) = @_;
 
-    my @param_list = (
-        {
-            name => 'restrict_comments_group',
-            type => 's',
-            choices => \&get_all_group_names,
-            default => '',
-            checker => \&check_group
-        },
-        {
-            name => 'restrict_comments_enable_group',
-            type => 's',
-            choices => \&get_all_group_names,
-            default => '',
-            checker => \&check_group
-        },
-    );
+  my @param_list = (
+    {
+      name    => 'restrict_comments_group',
+      type    => 's',
+      choices => \&get_all_group_names,
+      default => '',
+      checker => \&check_group
+    },
+    {
+      name    => 'restrict_comments_enable_group',
+      type    => 's',
+      choices => \&get_all_group_names,
+      default => '',
+      checker => \&check_group
+    },
+  );
 
-    return @param_list;
+  return @param_list;
 }
 
 1;

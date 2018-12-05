@@ -23,14 +23,17 @@ use Bugzilla::Component;
 
 # Make sure the user is logged in.
 my $user = Bugzilla->login();
-my $cgi = Bugzilla->cgi;
+my $cgi  = Bugzilla->cgi;
+
 # Force the script to run against the shadow DB. We already validated credentials.
 Bugzilla->switch_to_shadow_db;
 my $template = Bugzilla->template;
-my $action = $cgi->param('action') || '';
-my $format = $template->get_format('request/queue',
-                                   scalar($cgi->param('format')),
-                                   scalar($cgi->param('ctype')));
+my $action   = $cgi->param('action') || '';
+my $format   = $template->get_format(
+  'request/queue',
+  scalar($cgi->param('format')),
+  scalar($cgi->param('ctype'))
+);
 
 $cgi->set_dated_content_disp("inline", "requests", $format->{extension});
 print $cgi->header($format->{'ctype'});
@@ -41,37 +44,36 @@ print $cgi->header($format->{'ctype'});
 
 my $fields;
 $fields->{'requester'}->{'type'} = 'single';
+
 # If the user doesn't restrict his search to requests from the wind
 # (requestee ne '-'), include the requestee for completion.
-unless (defined $cgi->param('requestee')
-        && $cgi->param('requestee') eq '-')
-{
-    $fields->{'requestee'}->{'type'} = 'single';
+unless (defined $cgi->param('requestee') && $cgi->param('requestee') eq '-') {
+  $fields->{'requestee'}->{'type'} = 'single';
 }
 
 Bugzilla::User::match_field($fields);
 
 if ($action eq 'queue') {
-    queue($format);
+  queue($format);
 }
 else {
-    my $flagtypes = get_flag_types();
-    my @types = ('all', @$flagtypes);
+  my $flagtypes = get_flag_types();
+  my @types = ('all', @$flagtypes);
 
-    my $vars = {};
-    $vars->{'types'} = \@types;
-    $vars->{'requests'} = {};
+  my $vars = {};
+  $vars->{'types'}    = \@types;
+  $vars->{'requests'} = {};
 
-    my %components;
-    foreach my $prod (@{$user->get_selectable_products}) {
-        foreach my $comp (@{$prod->components}) {
-            $components{$comp->name} = 1;
-        }
+  my %components;
+  foreach my $prod (@{$user->get_selectable_products}) {
+    foreach my $comp (@{$prod->components}) {
+      $components{$comp->name} = 1;
     }
-    $vars->{'components'} = [ sort { $a cmp $b } keys %components ];
+  }
+  $vars->{'components'} = [sort { $a cmp $b } keys %components];
 
-    $template->process($format->{'template'}, $vars)
-        || ThrowTemplateError($template->error());
+  $template->process($format->{'template'}, $vars)
+    || ThrowTemplateError($template->error());
 }
 exit;
 
@@ -80,18 +82,19 @@ exit;
 ################################################################################
 
 sub queue {
-    my $format = shift;
-    my $cgi = Bugzilla->cgi;
-    my $dbh = Bugzilla->dbh;
-    my $template = Bugzilla->template;
-    my $user = Bugzilla->user;
-    my $userid = $user->id;
-    my $vars = {};
+  my $format   = shift;
+  my $cgi      = Bugzilla->cgi;
+  my $dbh      = Bugzilla->dbh;
+  my $template = Bugzilla->template;
+  my $user     = Bugzilla->user;
+  my $userid   = $user->id;
+  my $vars     = {};
 
-    my $status = validateStatus($cgi->param('status'));
-    my $form_group = validateGroup($cgi->param('group'));
+  my $status     = validateStatus($cgi->param('status'));
+  my $form_group = validateGroup($cgi->param('group'));
 
-    my $query =
+  my $query =
+
     # Select columns describing each flag, the bug/attachment on which
     # it has been set, who set it, and of whom they are requesting it.
     " SELECT    flags.id, flagtypes.name,
@@ -107,6 +110,7 @@ sub queue {
                 bugs.bug_status,
                 bugs.priority,
                 bugs.bug_severity " .
+
     # Use the flags and flagtypes tables for information about the flags,
     # the bugs and attachments tables for target info, the profiles tables
     # for setter and requestee info, the products/components tables
@@ -131,8 +135,7 @@ sub queue {
                   ON bugs.component_id = components.id
            LEFT JOIN bug_group_map AS bgmap
                   ON bgmap.bug_id = bugs.bug_id
-                 AND bgmap.group_id NOT IN (" .
-                     $user->groups_as_string . ")
+                 AND bgmap.group_id NOT IN (" . $user->groups_as_string . ")
            LEFT JOIN bug_group_map AS privs
                   ON privs.bug_id = bugs.bug_id
            LEFT JOIN cc AS ccmap
@@ -144,186 +147,194 @@ sub queue {
     " WHERE     ((bgmap.group_id IS NULL) OR
                  (ccmap.who IS NOT NULL AND cclist_accessible = 1) OR
                  (bugs.reporter = $userid AND bugs.reporter_accessible = 1) OR
-                 (bugs.assigned_to = $userid) " .
-                 (Bugzilla->params->{'useqacontact'} ? "OR
-                 (bugs.qa_contact = $userid))" : ")");
+                 (bugs.assigned_to = $userid) " . (
+    Bugzilla->params->{'useqacontact'}
+    ? "OR
+                 (bugs.qa_contact = $userid))"
+    : ")"
+  );
 
-    unless ($user->is_insider) {
-        $query .= " AND (attachments.attach_id IS NULL
+  unless ($user->is_insider) {
+    $query .= " AND (attachments.attach_id IS NULL
                          OR attachments.isprivate = 0
                          OR attachments.submitter_id = $userid)";
+  }
+
+  # Limit query to pending requests.
+  $query .= " AND flags.status = '?' " unless $status;
+
+  # The set of criteria by which we filter records to display in the queue.
+  my @criteria = ();
+
+  # A list of columns to exclude from the report because the report conditions
+  # limit the data being displayed to exact matches for those columns.
+  # In other words, if we are only displaying "pending" , we don't
+  # need to display a "status" column in the report because the value for that
+  # column will always be the same.
+  my @excluded_columns = ();
+  my $do_union         = $cgi->param('do_union');
+
+  # Filter results by exact email address of requester or requestee.
+  if (defined $cgi->param('requester') && $cgi->param('requester') ne "") {
+    my $requester = $dbh->quote($cgi->param('requester'));
+    trick_taint($requester);    # Quoted above
+    push(@criteria, $dbh->sql_istrcmp('requesters.login_name', $requester));
+    push(@excluded_columns, 'requester') unless $do_union;
+  }
+  if (defined $cgi->param('requestee') && $cgi->param('requestee') ne "") {
+    if ($cgi->param('requestee') ne "-") {
+      my $requestee = $dbh->quote($cgi->param('requestee'));
+      trick_taint($requestee);    # Quoted above
+      push(@criteria, $dbh->sql_istrcmp('requestees.login_name', $requestee));
     }
-
-    # Limit query to pending requests.
-    $query .= " AND flags.status = '?' " unless $status;
-
-    # The set of criteria by which we filter records to display in the queue.
-    my @criteria = ();
-
-    # A list of columns to exclude from the report because the report conditions
-    # limit the data being displayed to exact matches for those columns.
-    # In other words, if we are only displaying "pending" , we don't
-    # need to display a "status" column in the report because the value for that
-    # column will always be the same.
-    my @excluded_columns = ();
-    my $do_union = $cgi->param('do_union');
-
-    # Filter results by exact email address of requester or requestee.
-    if (defined $cgi->param('requester') && $cgi->param('requester') ne "") {
-        my $requester = $dbh->quote($cgi->param('requester'));
-        trick_taint($requester); # Quoted above
-        push(@criteria, $dbh->sql_istrcmp('requesters.login_name', $requester));
-        push(@excluded_columns, 'requester') unless $do_union;
+    else {
+      push(@criteria, "flags.requestee_id IS NULL");
     }
-    if (defined $cgi->param('requestee') && $cgi->param('requestee') ne "") {
-        if ($cgi->param('requestee') ne "-") {
-            my $requestee = $dbh->quote($cgi->param('requestee'));
-            trick_taint($requestee); # Quoted above
-            push(@criteria, $dbh->sql_istrcmp('requestees.login_name', $requestee));
-        }
-        else {
-            push(@criteria, "flags.requestee_id IS NULL");
-        }
-        push(@excluded_columns, 'requestee') unless $do_union;
+    push(@excluded_columns, 'requestee') unless $do_union;
+  }
+
+  # If the user wants requester = foo OR requestee = bar, we have to join
+  # these criteria separately as all other criteria use AND.
+  if (@criteria == 2 && $do_union) {
+    my $union = join(' OR ', @criteria);
+    @criteria = ("($union)");
+  }
+
+  # Filter requests by status: "pending", "granted", "denied", "all"
+  # (which means any), or "fulfilled" (which means "granted" or "denied").
+  if ($status) {
+    if ($status eq "+-") {
+      push(@criteria,         "flags.status IN ('+', '-')");
+      push(@excluded_columns, 'status');
     }
-
-    # If the user wants requester = foo OR requestee = bar, we have to join
-    # these criteria separately as all other criteria use AND.
-    if (@criteria == 2 && $do_union) {
-        my $union = join(' OR ', @criteria);
-        @criteria = ("($union)");
+    elsif ($status ne "all") {
+      push(@criteria,         "flags.status = '$status'");
+      push(@excluded_columns, 'status');
     }
+  }
 
-    # Filter requests by status: "pending", "granted", "denied", "all"
-    # (which means any), or "fulfilled" (which means "granted" or "denied").
-    if ($status) {
-        if ($status eq "+-") {
-            push(@criteria, "flags.status IN ('+', '-')");
-            push(@excluded_columns, 'status');
-        }
-        elsif ($status ne "all") {
-            push(@criteria, "flags.status = '$status'");
-            push(@excluded_columns, 'status');
-        }
+  # Filter results by exact product or component.
+  if (defined $cgi->param('product') && $cgi->param('product') ne "") {
+    my $product = Bugzilla::Product->check(scalar $cgi->param('product'));
+    push(@criteria,         "bugs.product_id = " . $product->id);
+    push(@excluded_columns, 'product');
+    if (defined $cgi->param('component') && $cgi->param('component') ne "") {
+      my $component
+        = Bugzilla::Component->check({
+        product => $product, name => scalar $cgi->param('component')
+        });
+      push(@criteria,         "bugs.component_id = " . $component->id);
+      push(@excluded_columns, 'component');
     }
+  }
 
-    # Filter results by exact product or component.
-    if (defined $cgi->param('product') && $cgi->param('product') ne "") {
-        my $product = Bugzilla::Product->check(scalar $cgi->param('product'));
-        push(@criteria, "bugs.product_id = " . $product->id);
-        push(@excluded_columns, 'product');
-        if (defined $cgi->param('component') && $cgi->param('component') ne "") {
-            my $component = Bugzilla::Component->check({ product => $product,
-                                                         name => scalar $cgi->param('component') });
-            push(@criteria, "bugs.component_id = " . $component->id);
-            push(@excluded_columns, 'component');
-        }
-    }
+  # Filter results by flag types.
+  my $form_type = $cgi->param('type');
+  if (defined $form_type && !grep($form_type eq $_, ("", "all"))) {
 
-    # Filter results by flag types.
-    my $form_type = $cgi->param('type');
-    if (defined $form_type && !grep($form_type eq $_, ("", "all"))) {
-        # Check if any matching types are for attachments.  If not, don't show
-        # the attachment column in the report.
-        my $has_attachment_type =
-            Bugzilla::FlagType::count({ 'name' => $form_type,
-                                        'target_type' => 'attachment' });
+    # Check if any matching types are for attachments.  If not, don't show
+    # the attachment column in the report.
+    my $has_attachment_type = Bugzilla::FlagType::count(
+      {'name' => $form_type, 'target_type' => 'attachment'});
 
-        if (!$has_attachment_type) { push(@excluded_columns, 'attachment') }
+    if (!$has_attachment_type) { push(@excluded_columns, 'attachment') }
 
-        my $quoted_form_type = $dbh->quote($form_type);
-        trick_taint($quoted_form_type); # Already SQL quoted
-        push(@criteria, "flagtypes.name = " . $quoted_form_type);
-        push(@excluded_columns, 'type');
-    }
+    my $quoted_form_type = $dbh->quote($form_type);
+    trick_taint($quoted_form_type);    # Already SQL quoted
+    push(@criteria,         "flagtypes.name = " . $quoted_form_type);
+    push(@excluded_columns, 'type');
+  }
 
-    $query .= ' AND ' . join(' AND ', @criteria) if scalar(@criteria);
+  $query .= ' AND ' . join(' AND ', @criteria) if scalar(@criteria);
 
-    # Group the records by flag ID so we don't get multiple rows of data
-    # for each flag.  This is only necessary because of the code that
-    # removes flags on bugs the user is unauthorized to access.
-    $query .= ' ' . $dbh->sql_group_by('flags.id',
-               'flagtypes.name, flags.status, flags.bug_id, bugs.short_desc,
+  # Group the records by flag ID so we don't get multiple rows of data
+  # for each flag.  This is only necessary because of the code that
+  # removes flags on bugs the user is unauthorized to access.
+  $query .= ' ' . $dbh->sql_group_by(
+    'flags.id', 'flagtypes.name, flags.status, flags.bug_id, bugs.short_desc,
                 products.name, components.name, flags.attach_id,
                 attachments.description, requesters.realname,
                 requesters.login_name, requestees.realname,
                 requestees.login_name, flags.modification_date, attachments.ispatch
                 cclist_accessible, bugs.reporter, bugs.reporter_accessible,
-                bugs.assigned_to, attachments.mimetype');
+                bugs.assigned_to, attachments.mimetype'
+  );
 
-    # Group the records, in other words order them by the group column
-    # so the loop in the display template can break them up into separate
-    # tables every time the value in the group column changes.
+  # Group the records, in other words order them by the group column
+  # so the loop in the display template can break them up into separate
+  # tables every time the value in the group column changes.
 
-    $form_group ||= "requestee";
-    if ($form_group eq "requester") {
-        $query .= " ORDER BY requesters.realname, requesters.login_name";
+  $form_group ||= "requestee";
+  if ($form_group eq "requester") {
+    $query .= " ORDER BY requesters.realname, requesters.login_name";
+  }
+  elsif ($form_group eq "requestee") {
+    $query .= " ORDER BY requestees.realname, requestees.login_name";
+  }
+  elsif ($form_group eq "category") {
+    $query .= " ORDER BY products.name, components.name";
+  }
+  elsif ($form_group eq "type") {
+    $query .= " ORDER BY flagtypes.name";
+  }
+
+  # Order the records (within each group).
+  $query .= " , flags.modification_date";
+
+  # Pass the query to the template for use when debugging this script.
+  $vars->{'query'} = $query;
+  $vars->{'debug'} = $cgi->param('debug') ? 1 : 0;
+
+  my $results  = $dbh->selectall_arrayref($query);
+  my @requests = ();
+  foreach my $data (@$results) {
+    my $request = {
+      'id'             => $data->[0],
+      'type'           => $data->[1],
+      'status'         => $data->[2],
+      'bug_id'         => $data->[3],
+      'bug_summary'    => $data->[4],
+      'category'       => "$data->[5]: $data->[6]",
+      'attach_id'      => $data->[7],
+      'attach_summary' => $data->[8],
+      'requester'      => Bugzilla::User->new({name => $data->[10], cache => 1}),
+      'requestee'      => $data->[12]
+      ? Bugzilla::User->new({name => $data->[12], cache => 1})
+      : undef,
+      'restricted'      => $data->[13] ? 1 : 0,
+      'created'         => $data->[14],
+      'attach_mimetype' => $data->[15],
+      'attach_ispatch'  => $data->[16],
+      'bug_status'      => $data->[17],
+      'priority'        => $data->[18],
+      'bug_severity'    => $data->[19],
+    };
+    push(@requests, $request);
+  }
+
+  # Get a list of request type names to use in the filter form.
+  my @types     = ("all");
+  my $flagtypes = get_flag_types();
+  push(@types, @$flagtypes);
+
+  $vars->{'excluded_columns'} = \@excluded_columns;
+  $vars->{'group_field'}      = $form_group;
+  $vars->{'requests'}         = \@requests;
+  $vars->{'types'}            = \@types;
+
+  my %components;
+  foreach my $prod (@{$user->get_selectable_products}) {
+    foreach my $comp (@{$prod->components}) {
+      $components{$comp->name} = 1;
     }
-    elsif ($form_group eq "requestee") {
-        $query .= " ORDER BY requestees.realname, requestees.login_name";
-    }
-    elsif ($form_group eq "category") {
-        $query .= " ORDER BY products.name, components.name";
-    }
-    elsif ($form_group eq "type") {
-        $query .= " ORDER BY flagtypes.name";
-    }
+  }
+  $vars->{'components'} = [sort { $a cmp $b } keys %components];
 
-    # Order the records (within each group).
-    $query .= " , flags.modification_date";
+  $vars->{'urlquerypart'} = $cgi->canonicalise_query('ctype');
 
-    # Pass the query to the template for use when debugging this script.
-    $vars->{'query'} = $query;
-    $vars->{'debug'} = $cgi->param('debug') ? 1 : 0;
-
-    my $results = $dbh->selectall_arrayref($query);
-    my @requests = ();
-    foreach my $data (@$results) {
-        my $request = {
-          'id'              => $data->[0] ,
-          'type'            => $data->[1] ,
-          'status'          => $data->[2] ,
-          'bug_id'          => $data->[3] ,
-          'bug_summary'     => $data->[4] ,
-          'category'        => "$data->[5]: $data->[6]" ,
-          'attach_id'       => $data->[7] ,
-          'attach_summary'  => $data->[8] ,
-          'requester'       => Bugzilla::User->new({ name => $data->[10], cache => 1 }) ,
-          'requestee'       => $data->[12] ? Bugzilla::User->new({ name => $data->[12], cache => 1 }) : undef ,
-          'restricted'      => $data->[13] ? 1 : 0,
-          'created'         => $data->[14],
-          'attach_mimetype' => $data->[15],
-          'attach_ispatch'  => $data->[16],
-          'bug_status'      => $data->[17],
-          'priority'        => $data->[18],
-          'bug_severity'    => $data->[19],
-        };
-        push(@requests, $request);
-    }
-
-    # Get a list of request type names to use in the filter form.
-    my @types = ("all");
-    my $flagtypes = get_flag_types();
-    push(@types, @$flagtypes);
-
-    $vars->{'excluded_columns'} = \@excluded_columns;
-    $vars->{'group_field'} = $form_group;
-    $vars->{'requests'} = \@requests;
-    $vars->{'types'} = \@types;
-
-    my %components;
-    foreach my $prod (@{$user->get_selectable_products}) {
-        foreach my $comp (@{$prod->components}) {
-            $components{$comp->name} = 1;
-        }
-    }
-    $vars->{'components'} = [ sort { $a cmp $b } keys %components ];
-
-    $vars->{'urlquerypart'} = $cgi->canonicalise_query('ctype');
-
-    # Generate and return the UI (HTML page) from the appropriate template.
-    $template->process($format->{'template'}, $vars)
-        || ThrowTemplateError($template->error());
+  # Generate and return the UI (HTML page) from the appropriate template.
+  $template->process($format->{'template'}, $vars)
+    || ThrowTemplateError($template->error());
 }
 
 ################################################################################
@@ -331,33 +342,35 @@ sub queue {
 ################################################################################
 
 sub validateStatus {
-    my $status = shift;
-    return if !defined $status;
+  my $status = shift;
+  return if !defined $status;
 
-    grep($status eq $_, qw(? +- + - all))
-      || ThrowUserError("flag_status_invalid", { status => $status });
-    trick_taint($status);
-    return $status;
+  grep($status eq $_, qw(? +- + - all))
+    || ThrowUserError("flag_status_invalid", {status => $status});
+  trick_taint($status);
+  return $status;
 }
 
 sub validateGroup {
-    my $group = shift;
-    return if !defined $group;
+  my $group = shift;
+  return if !defined $group;
 
-    grep($group eq $_, qw(requester requestee category type))
-      || ThrowUserError("request_queue_group_invalid", { group => $group });
-    trick_taint($group);
-    return $group;
+  grep($group eq $_, qw(requester requestee category type))
+    || ThrowUserError("request_queue_group_invalid", {group => $group});
+  trick_taint($group);
+  return $group;
 }
 
 # Returns all flag types which have at least one flag of this type.
 # If a flag type is inactive but still has flags, we want it.
 sub get_flag_types {
-    my $dbh = Bugzilla->dbh;
-    my $flag_types = $dbh->selectcol_arrayref('SELECT DISTINCT name
+  my $dbh        = Bugzilla->dbh;
+  my $flag_types = $dbh->selectcol_arrayref(
+    'SELECT DISTINCT name
                                                  FROM flagtypes
                                                 WHERE flagtypes.id IN
                                                       (SELECT DISTINCT type_id FROM flags)
-                                             ORDER BY name');
-    return $flag_types;
+                                             ORDER BY name'
+  );
+  return $flag_types;
 }

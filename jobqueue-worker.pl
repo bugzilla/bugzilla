@@ -14,10 +14,10 @@ use File::Basename qw(basename dirname);
 use File::Spec::Functions qw(catdir rel2abs);
 
 BEGIN {
-    require lib;
-    my $dir = rel2abs( dirname(__FILE__) );
-    lib->import( $dir, catdir( $dir, 'lib' ), catdir( $dir, qw(local lib perl5) ) );
-    chdir $dir or die "chdir $dir failed: $!";
+  require lib;
+  my $dir = rel2abs(dirname(__FILE__));
+  lib->import($dir, catdir($dir, 'lib'), catdir($dir, qw(local lib perl5)));
+  chdir $dir or die "chdir $dir failed: $!";
 
 }
 
@@ -31,17 +31,18 @@ use if $OSNAME eq 'linux', 'Linux::Pdeathsig', 'set_pdeathsig';
 BEGIN { Bugzilla->extensions }
 my $name = basename(__FILE__);
 
-GetOptions( 'name=s' => \$name );
+GetOptions('name=s' => \$name);
 
 if ($name) {
-    ## no critic (Variables::RequireLocalizedPunctuationVars)
-    $PROGRAM_NAME = $name;
-    ## use critic
+  ## no critic (Variables::RequireLocalizedPunctuationVars)
+  $PROGRAM_NAME = $name;
+  ## use critic
 }
 
 if ($OSNAME eq 'linux') {
-    # get SIGTEMR (15) when parent exits.
-    set_pdeathsig(15);
+
+  # get SIGTEMR (15) when parent exits.
+  set_pdeathsig(15);
 }
 
 Bugzilla::JobQueue::Worker->run('work');

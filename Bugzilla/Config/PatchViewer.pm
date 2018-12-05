@@ -40,39 +40,19 @@ use Bugzilla::Config::Common;
 our $sortkey = 1300;
 
 sub get_param_list {
-    my $class      = shift;
-    my @param_list = (
-        {
-            name    => 'cvsroot',
-            type    => 't',
-            default => '',
-        },
+  my $class      = shift;
+  my @param_list = (
+    {name => 'cvsroot', type => 't', default => '',},
 
-        {
-            name    => 'cvsroot_get',
-            type    => 't',
-            default => '',
-        },
+    {name => 'cvsroot_get', type => 't', default => '',},
 
-        {
-            name    => 'bonsai_url',
-            type    => 't',
-            default => ''
-        },
+    {name => 'bonsai_url', type => 't', default => ''},
 
-        {
-            name    => 'lxr_url',
-            type    => 't',
-            default => ''
-        },
+    {name => 'lxr_url', type => 't', default => ''},
 
-        {
-            name    => 'lxr_root',
-            type    => 't',
-            default => '',
-        }
-    );
-    return @param_list;
+    {name => 'lxr_root', type => 't', default => '',}
+  );
+  return @param_list;
 }
 
 1;

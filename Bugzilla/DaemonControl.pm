@@ -29,256 +29,250 @@ use POSIX qw(WEXITSTATUS);
 use base qw(Exporter);
 
 our @EXPORT_OK = qw(
-    run_httpd run_cereal run_jobqueue
-    run_cereal_and_httpd run_cereal_and_jobqueue
-    catch_signal on_finish on_exception
-    assert_httpd assert_database assert_selenium
+  run_httpd run_cereal run_jobqueue
+  run_cereal_and_httpd run_cereal_and_jobqueue
+  catch_signal on_finish on_exception
+  assert_httpd assert_database assert_selenium
 );
 
 our %EXPORT_TAGS = (
-    all   => \@EXPORT_OK,
-    run   => [grep { /^run_/ } @EXPORT_OK],
-    utils => [qw(catch_signal on_exception on_finish)],
+  all   => \@EXPORT_OK,
+  run   => [grep {/^run_/} @EXPORT_OK],
+  utils => [qw(catch_signal on_exception on_finish)],
 );
 
 my $BUGZILLA_DIR  = bz_locations->{cgi_path};
-my $JOBQUEUE_BIN  = catfile( $BUGZILLA_DIR, 'jobqueue.pl' );
-my $CEREAL_BIN    = catfile( $BUGZILLA_DIR, 'scripts', 'cereal.pl' );
-my $BUGZILLA_BIN  = catfile( $BUGZILLA_DIR, 'bugzilla.pl' );
-my $HYPNOTOAD_BIN = catfile( $BUGZILLA_DIR, 'local', 'bin', 'hypnotoad' );
-my @PERL5LIB      = ( $BUGZILLA_DIR, catdir($BUGZILLA_DIR, 'lib'), catdir($BUGZILLA_DIR, 'local', 'lib', 'perl5') );
+my $JOBQUEUE_BIN  = catfile($BUGZILLA_DIR, 'jobqueue.pl');
+my $CEREAL_BIN    = catfile($BUGZILLA_DIR, 'scripts', 'cereal.pl');
+my $BUGZILLA_BIN  = catfile($BUGZILLA_DIR, 'bugzilla.pl');
+my $HYPNOTOAD_BIN = catfile($BUGZILLA_DIR, 'local', 'bin', 'hypnotoad');
+my @PERL5LIB      = (
+  $BUGZILLA_DIR,
+  catdir($BUGZILLA_DIR, 'lib'),
+  catdir($BUGZILLA_DIR, 'local', 'lib', 'perl5')
+);
 
 my %HTTP_BACKENDS = (
-    hypnotoad => [ $HYPNOTOAD_BIN, $BUGZILLA_BIN, '-f' ],
-    simple    => [ $BUGZILLA_BIN, 'daemon' ],
+  hypnotoad => [$HYPNOTOAD_BIN, $BUGZILLA_BIN, '-f'],
+  simple    => [$BUGZILLA_BIN,  'daemon'],
 );
 
 sub catch_signal {
-    my ($name, @done)   = @_;
-    my $loop     = IO::Async::Loop->new;
-    my $signal_f = $loop->new_future;
-    my $signal   = IO::Async::Signal->new(
-        name       => $name,
-        on_receipt => sub {
-            my ($self) = @_;
-            my $l = IO::Async::Loop->new;
-            $signal_f->done(@done);
-            $l->remove($self);
-        }
-    );
-    $signal_f->on_cancel(
-        sub {
-            my $l = IO::Async::Loop->new;
-            $l->remove($signal);
-        },
-    );
+  my ($name, @done) = @_;
+  my $loop     = IO::Async::Loop->new;
+  my $signal_f = $loop->new_future;
+  my $signal   = IO::Async::Signal->new(
+    name       => $name,
+    on_receipt => sub {
+      my ($self) = @_;
+      my $l = IO::Async::Loop->new;
+      $signal_f->done(@done);
+      $l->remove($self);
+    }
+  );
+  $signal_f->on_cancel(
+    sub {
+      my $l = IO::Async::Loop->new;
+      $l->remove($signal);
+    },
+  );
 
-    $loop->add($signal);
+  $loop->add($signal);
 
-    return $signal_f;
+  return $signal_f;
 }
 
 sub run_cereal {
-    my $loop   = IO::Async::Loop->new;
-    my $exit_f = $loop->new_future;
-    my $cereal = IO::Async::Process->new(
-        command      => [$CEREAL_BIN],
-        on_finish    => on_finish($exit_f),
-        on_exception => on_exception( 'cereal', $exit_f ),
-    );
-    $exit_f->on_cancel( sub { $cereal->kill('TERM') } );
-    $exit_f->on_ready(
-        sub {
-            delete $ENV{LOG4PERL_STDERR_DISABLE};
-        }
-    );
-    $loop->add($cereal);
-    $ENV{LOG4PERL_STDERR_DISABLE} = 1;
+  my $loop   = IO::Async::Loop->new;
+  my $exit_f = $loop->new_future;
+  my $cereal = IO::Async::Process->new(
+    command      => [$CEREAL_BIN],
+    on_finish    => on_finish($exit_f),
+    on_exception => on_exception('cereal', $exit_f),
+  );
+  $exit_f->on_cancel(sub { $cereal->kill('TERM') });
+  $exit_f->on_ready(sub {
+    delete $ENV{LOG4PERL_STDERR_DISABLE};
+  });
+  $loop->add($cereal);
+  $ENV{LOG4PERL_STDERR_DISABLE} = 1;
 
-    return $exit_f;
+  return $exit_f;
 }
 
 sub run_httpd {
-    my (@args) = @_;
+  my (@args) = @_;
 
-    my $loop   = IO::Async::Loop->new;
-    my $exit_f = $loop->new_future;
-    my $httpd  = IO::Async::Process->new(
-        code => sub {
-            $ENV{BUGZILLA_HTTPD_ARGS} = encode_json(\@args);
-            $ENV{PERL5LIB} = join(':', @PERL5LIB);
-            my $backend = $ENV{HTTP_BACKEND} // 'hypnotoad';
-            my $command = $HTTP_BACKENDS{ $backend };
-            exec @$command
-              or die "failed to exec $command->[0] $!";
-        },
-        on_finish    => on_finish($exit_f),
-        on_exception => on_exception( 'httpd', $exit_f ),
-    );
-    $exit_f->on_cancel( sub { $httpd->kill('TERM') } );
-    $loop->add($httpd);
+  my $loop   = IO::Async::Loop->new;
+  my $exit_f = $loop->new_future;
+  my $httpd  = IO::Async::Process->new(
+    code => sub {
+      $ENV{BUGZILLA_HTTPD_ARGS} = encode_json(\@args);
+      $ENV{PERL5LIB} = join(':', @PERL5LIB);
+      my $backend = $ENV{HTTP_BACKEND} // 'hypnotoad';
+      my $command = $HTTP_BACKENDS{$backend};
+      exec @$command or die "failed to exec $command->[0] $!";
+    },
+    on_finish    => on_finish($exit_f),
+    on_exception => on_exception('httpd', $exit_f),
+  );
+  $exit_f->on_cancel(sub { $httpd->kill('TERM') });
+  $loop->add($httpd);
 
-    return $exit_f;
+  return $exit_f;
 }
 
 sub run_jobqueue {
-    my (@args) = @_;
+  my (@args) = @_;
 
-    my $loop     = IO::Async::Loop->new;
-    my $exit_f   = $loop->new_future;
-    my $jobqueue = IO::Async::Process->new(
-        command   => [ $JOBQUEUE_BIN, 'start', '-f', '-d', @args ],
-        on_finish => on_finish($exit_f),
-        on_exception => on_exception( 'httpd', $exit_f ),
-    );
-    $exit_f->on_cancel( sub { $jobqueue->kill('TERM') } );
-    $loop->add($jobqueue);
+  my $loop     = IO::Async::Loop->new;
+  my $exit_f   = $loop->new_future;
+  my $jobqueue = IO::Async::Process->new(
+    command      => [$JOBQUEUE_BIN, 'start', '-f', '-d', @args],
+    on_finish    => on_finish($exit_f),
+    on_exception => on_exception('httpd', $exit_f),
+  );
+  $exit_f->on_cancel(sub { $jobqueue->kill('TERM') });
+  $loop->add($jobqueue);
 
-    return $exit_f;
+  return $exit_f;
 }
 
 sub run_cereal_and_jobqueue {
-    my (@jobqueue_args) = @_;
+  my (@jobqueue_args) = @_;
 
-    my $signal_f      = catch_signal('TERM', 0);
-    my $cereal_exit_f = run_cereal();
+  my $signal_f = catch_signal('TERM', 0);
+  my $cereal_exit_f = run_cereal();
 
-    return assert_cereal()->then(
-        sub {
-            my $jobqueue_exit_f = run_jobqueue(@jobqueue_args);
-            return Future->wait_any($cereal_exit_f, $jobqueue_exit_f, $signal_f);
-        }
-    );
+  return assert_cereal()->then(sub {
+    my $jobqueue_exit_f = run_jobqueue(@jobqueue_args);
+    return Future->wait_any($cereal_exit_f, $jobqueue_exit_f, $signal_f);
+  });
 }
 
 sub run_cereal_and_httpd {
-    my @httpd_args = @_;
+  my @httpd_args = @_;
 
-    my $signal_f      = catch_signal('TERM', 0);
-    my $cereal_exit_f = run_cereal();
+  my $signal_f = catch_signal('TERM', 0);
+  my $cereal_exit_f = run_cereal();
 
-    return assert_cereal()->then(
-        sub {
-            push @httpd_args, '-DNETCAT_LOGS';
+  return assert_cereal()->then(sub {
+    push @httpd_args, '-DNETCAT_LOGS';
 
-            my $lc = Bugzilla::Install::Localconfig::read_localconfig();
-            if ( ($lc->{inbound_proxies} // '') eq '*' && $lc->{urlbase} =~ /^https/) {
-                push @httpd_args, '-DHTTPS';
-            }
-            elsif ($lc->{urlbase} =~ /^https/) {
-                WARN('HTTPS urlbase but inbound_proxies is not "*"');
-            }
-            my $httpd_exit_f  = run_httpd(@httpd_args);
+    my $lc = Bugzilla::Install::Localconfig::read_localconfig();
+    if (($lc->{inbound_proxies} // '') eq '*' && $lc->{urlbase} =~ /^https/) {
+      push @httpd_args, '-DHTTPS';
+    }
+    elsif ($lc->{urlbase} =~ /^https/) {
+      WARN('HTTPS urlbase but inbound_proxies is not "*"');
+    }
+    my $httpd_exit_f = run_httpd(@httpd_args);
 
-            return Future->wait_any($cereal_exit_f, $httpd_exit_f, $signal_f);
-        }
-    );
+    return Future->wait_any($cereal_exit_f, $httpd_exit_f, $signal_f);
+  });
 }
 
 sub assert_httpd {
-    my $loop = IO::Async::Loop->new;
-    my $port  = $ENV{PORT} // 8000;
-    my $repeat = repeat {
-        $loop->delay_future(after => 0.25)->then(
-            sub {
-                Future->wrap(get("http://localhost:$port/__lbheartbeat__") // '');
-            },
-        );
-    } until => sub {
-        my $f = shift;
-        ( $f->get =~ /^httpd OK/ );
-    };
-    my $timeout = $loop->timeout_future(after => 20)->else_fail('assert_httpd timeout');
-    return Future->wait_any($repeat, $timeout);
+  my $loop   = IO::Async::Loop->new;
+  my $port   = $ENV{PORT} // 8000;
+  my $repeat = repeat {
+    $loop->delay_future(after => 0.25)->then(
+      sub {
+        Future->wrap(get("http://localhost:$port/__lbheartbeat__") // '');
+      },
+    );
+  }
+  until => sub {
+    my $f = shift;
+    ($f->get =~ /^httpd OK/);
+  };
+  my $timeout
+    = $loop->timeout_future(after => 20)->else_fail('assert_httpd timeout');
+  return Future->wait_any($repeat, $timeout);
 }
 
 sub assert_selenium {
-    my ($host, $port) = @_;
-    $host //= 'localhost';
-    $port //= 4444;
+  my ($host, $port) = @_;
+  $host //= 'localhost';
+  $port //= 4444;
 
-    return assert_connect($host, $port, 'assert_selenium');
+  return assert_connect($host, $port, 'assert_selenium');
 }
 
 sub assert_cereal {
-    return assert_connect(
-        'localhost',
-        $ENV{LOGGING_PORT} // 5880,
-        'assert_cereal'
-    );
+  return assert_connect('localhost', $ENV{LOGGING_PORT} // 5880, 'assert_cereal');
 }
 
 sub assert_connect {
-    my ($host, $port, $name) = @_;
-    my $loop = IO::Async::Loop->new;
-    my $repeat = repeat {
-        $loop->delay_future(after => 1)->then(
-            sub {
-                my $sock = IO::Socket::INET->new( PeerAddr => $host, PeerPort => $port );
-                Future->wrap($sock ? 1 : 0);
-            },
-        );
-    } until => sub { shift->get };
-    my $timeout = $loop->timeout_future(after => 60)->else_fail("$name timeout");
-    return Future->wait_any($repeat, $timeout);
+  my ($host, $port, $name) = @_;
+  my $loop   = IO::Async::Loop->new;
+  my $repeat = repeat {
+    $loop->delay_future(after => 1)->then(
+      sub {
+        my $sock = IO::Socket::INET->new(PeerAddr => $host, PeerPort => $port);
+        Future->wrap($sock ? 1 : 0);
+      },
+    );
+  }
+  until => sub { shift->get };
+  my $timeout = $loop->timeout_future(after => 60)->else_fail("$name timeout");
+  return Future->wait_any($repeat, $timeout);
 }
 
 sub assert_database {
-    my $loop = IO::Async::Loop->new;
-    my $lc   = Bugzilla::Install::Localconfig::read_localconfig();
+  my $loop = IO::Async::Loop->new;
+  my $lc   = Bugzilla::Install::Localconfig::read_localconfig();
 
-    for my $var (qw(db_name db_host db_user db_pass)) {
-        return $loop->new_future->die("$var is not set!") unless $lc->{$var};
-    }
+  for my $var (qw(db_name db_host db_user db_pass)) {
+    return $loop->new_future->die("$var is not set!") unless $lc->{$var};
+  }
 
-    my $dsn    = "dbi:mysql:database=$lc->{db_name};host=$lc->{db_host}";
-    my $repeat = repeat {
-        $loop->delay_future( after => 0.25 )->then(
-            sub {
-                my $dbh = DBI->connect(
-                    $dsn,
-                    $lc->{db_user},
-                    $lc->{db_pass},
-                    { RaiseError => 0, PrintError => 0 },
-                );
-                Future->wrap($dbh);
-            }
+  my $dsn    = "dbi:mysql:database=$lc->{db_name};host=$lc->{db_host}";
+  my $repeat = repeat {
+    $loop->delay_future(after => 0.25)->then(sub {
+      my $dbh
+        = DBI->connect($dsn, $lc->{db_user}, $lc->{db_pass},
+        {RaiseError => 0, PrintError => 0},
         );
-    } until => sub { defined shift->get };
+      Future->wrap($dbh);
+    });
+  }
+  until => sub { defined shift->get };
 
-    my $timeout = $loop->timeout_future( after => 20 )->else_fail('assert_database timeout');
-    my $any_f = Future->wait_any( $repeat, $timeout );
-    return $any_f->transform(
-        done => sub { return },
-        fail => sub { "unable to connect to $dsn as $lc->{db_user}" },
-    );
+  my $timeout
+    = $loop->timeout_future(after => 20)->else_fail('assert_database timeout');
+  my $any_f = Future->wait_any($repeat, $timeout);
+  return $any_f->transform(
+    done => sub {return},
+    fail => sub {"unable to connect to $dsn as $lc->{db_user}"},
+  );
 }
 
 sub on_finish {
-    my ($f) = @_;
+  my ($f) = @_;
 
-    return sub {
-        my ($self, $exitcode) = @_;
-        $f->done(WEXITSTATUS($exitcode));
-    };
+  return sub {
+    my ($self, $exitcode) = @_;
+    $f->done(WEXITSTATUS($exitcode));
+  };
 }
 
 sub on_exception {
-    my ( $name, $f ) = @_;
+  my ($name, $f) = @_;
 
-    return sub {
-        my ( $self, $exception, $errno, $exitcode ) = @_;
+  return sub {
+    my ($self, $exception, $errno, $exitcode) = @_;
 
-        if ( length $exception ) {
-            $f->fail( "$name died with the exception $exception (errno was $errno)\n" );
-        }
-        elsif ( ( my $status = WEXITSTATUS($exitcode) ) == 255 ) {
-            $f->fail("$name failed to exec() - $errno\n");
-        }
-        else {
-            $f->fail("$name exited with exit status $status\n");
-        }
-    };
+    if (length $exception) {
+      $f->fail("$name died with the exception $exception (errno was $errno)\n");
+    }
+    elsif ((my $status = WEXITSTATUS($exitcode)) == 255) {
+      $f->fail("$name failed to exec() - $errno\n");
+    }
+    else {
+      $f->fail("$name exited with exit status $status\n");
+    }
+  };
 }
 
 1;

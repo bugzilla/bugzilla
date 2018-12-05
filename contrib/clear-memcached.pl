@@ -17,8 +17,9 @@ use Bugzilla::Constants;
 Bugzilla->usage_mode(USAGE_MODE_CMDLINE);
 
 if (Bugzilla->memcached->{memcached}) {
-    Bugzilla->memcached->clear_all();
-    print "memcached cleared\n";
-} else {
-    print "memcached is not enabled\n";
+  Bugzilla->memcached->clear_all();
+  print "memcached cleared\n";
+}
+else {
+  print "memcached is not enabled\n";
 }

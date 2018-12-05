@@ -18,65 +18,76 @@ use Bugzilla::Error;
 use Bugzilla::WebService::Util qw(filter validate params_to_objects);
 
 use constant READ_ONLY => qw(
-    get
+  get
 );
 
 use constant PUBLIC_METHODS => qw(
-    get
+  get
 );
 
 sub get {
-    my ($self, $params) = validate(@_, 'names', 'ids');
+  my ($self, $params) = validate(@_, 'names', 'ids');
 
-    defined $params->{names} || defined $params->{ids}
-        || ThrowCodeError('params_required', { function => 'Classification.get',
-                                               params => ['names', 'ids'] });
+  defined $params->{names}
+    || defined $params->{ids}
+    || ThrowCodeError('params_required',
+    {function => 'Classification.get', params => ['names', 'ids']});
 
-    my $user = Bugzilla->user;
+  my $user = Bugzilla->user;
 
-    Bugzilla->params->{'useclassification'}
-      || $user->in_group('editclassifications')
-      || ThrowUserError('auth_classification_not_enabled');
+  Bugzilla->params->{'useclassification'}
+    || $user->in_group('editclassifications')
+    || ThrowUserError('auth_classification_not_enabled');
 
-    Bugzilla->switch_to_shadow_db;
+  Bugzilla->switch_to_shadow_db;
 
-    my @classification_objs = @{ params_to_objects($params, 'Bugzilla::Classification') };
-    unless ($user->in_group('editclassifications')) {
-        my %selectable_class = map { $_->id => 1 } @{$user->get_selectable_classifications};
-        @classification_objs = grep { $selectable_class{$_->id} } @classification_objs;
-    }
+  my @classification_objs
+    = @{params_to_objects($params, 'Bugzilla::Classification')};
+  unless ($user->in_group('editclassifications')) {
+    my %selectable_class
+      = map { $_->id => 1 } @{$user->get_selectable_classifications};
+    @classification_objs = grep { $selectable_class{$_->id} } @classification_objs;
+  }
 
-    my @classifications = map { $self->_classification_to_hash($_, $params) } @classification_objs;
+  my @classifications
+    = map { $self->_classification_to_hash($_, $params) } @classification_objs;
 
-    return { classifications => \@classifications };
+  return {classifications => \@classifications};
 }
 
 sub _classification_to_hash {
-    my ($self, $classification, $params) = @_;
+  my ($self, $classification, $params) = @_;
 
-    my $user = Bugzilla->user;
-    return unless (Bugzilla->params->{'useclassification'} || $user->in_group('editclassifications'));
+  my $user = Bugzilla->user;
+  return
+    unless (Bugzilla->params->{'useclassification'}
+    || $user->in_group('editclassifications'));
 
-    my $products = $user->in_group('editclassifications') ?
-                     $classification->products : $user->get_selectable_products($classification->id);
+  my $products
+    = $user->in_group('editclassifications')
+    ? $classification->products
+    : $user->get_selectable_products($classification->id);
 
-    return filter $params, {
-        id          => $self->type('int',    $classification->id),
-        name        => $self->type('string', $classification->name),
-        description => $self->type('string', $classification->description),
-        sort_key    => $self->type('int',    $classification->sortkey),
-        products    => [ map { $self->_product_to_hash($_, $params) } @$products ],
+  return filter $params,
+    {
+    id          => $self->type('int',    $classification->id),
+    name        => $self->type('string', $classification->name),
+    description => $self->type('string', $classification->description),
+    sort_key    => $self->type('int',    $classification->sortkey),
+    products => [map { $self->_product_to_hash($_, $params) } @$products],
     };
 }
 
 sub _product_to_hash {
-    my ($self, $product, $params) = @_;
+  my ($self, $product, $params) = @_;
 
-    return filter $params, {
-       id          => $self->type('int', $product->id),
-       name        => $self->type('string', $product->name),
-       description => $self->type('string', $product->description),
-   }, undef, 'products';
+  return filter $params,
+    {
+    id          => $self->type('int',    $product->id),
+    name        => $self->type('string', $product->name),
+    description => $self->type('string', $product->description),
+    },
+    undef, 'products';
 }
 
 1;

@@ -27,10 +27,10 @@ use warnings;
 
 use base qw(Exporter);
 our @EXPORT = qw(
-    SITEMAP_AGE
-    SITEMAP_MAX
-    SITEMAP_DELAY
-    SITEMAP_URL
+  SITEMAP_AGE
+  SITEMAP_MAX
+  SITEMAP_DELAY
+  SITEMAP_URL
 );
 
 # This is the amount of hours a sitemap index and it's files are considered

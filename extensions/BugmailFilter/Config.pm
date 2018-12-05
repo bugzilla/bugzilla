@@ -11,7 +11,7 @@ use 5.10.1;
 use strict;
 use warnings;
 
-use constant NAME => 'BugmailFilter';
+use constant NAME             => 'BugmailFilter';
 use constant REQUIRED_MODULES => [];
 use constant OPTIONAL_MODULES => [];
 

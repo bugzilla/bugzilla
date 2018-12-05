@@ -21,37 +21,39 @@ use Bugzilla::Util;
 ###############################
 
 sub should_handle {
-    my ($class, $uri) = @_;
-    return ($uri->path =~ /show_bug\.cgi$/) ? 1 : 0;
+  my ($class, $uri) = @_;
+  return ($uri->path =~ /show_bug\.cgi$/) ? 1 : 0;
 }
 
 sub _check_value {
-    my ($class, $uri) = @_;
+  my ($class, $uri) = @_;
 
-    $uri = $class->SUPER::_check_value($uri);
+  $uri = $class->SUPER::_check_value($uri);
 
-    my $bug_id = $uri->query_param('id');
-    # We don't currently allow aliases, because we can't check to see
-    # if somebody's putting both an alias link and a numeric ID link.
-    # When we start validating the URL by accessing the other Bugzilla,
-    # we can allow aliases.
-    detaint_natural($bug_id);
-    if (!$bug_id) {
-        my $value = $uri->as_string;
-        ThrowUserError('bug_url_invalid', { url => $value, reason => 'id' });
-    }
+  my $bug_id = $uri->query_param('id');
 
-    # Make sure that "id" is the only query parameter.
-    $uri->query("id=$bug_id");
-    # And remove any # part if there is one.
-    $uri->fragment(undef);
+  # We don't currently allow aliases, because we can't check to see
+  # if somebody's putting both an alias link and a numeric ID link.
+  # When we start validating the URL by accessing the other Bugzilla,
+  # we can allow aliases.
+  detaint_natural($bug_id);
+  if (!$bug_id) {
+    my $value = $uri->as_string;
+    ThrowUserError('bug_url_invalid', {url => $value, reason => 'id'});
+  }
 
-    return $uri;
+  # Make sure that "id" is the only query parameter.
+  $uri->query("id=$bug_id");
+
+  # And remove any # part if there is one.
+  $uri->fragment(undef);
+
+  return $uri;
 }
 
 sub target_bug_id {
-    my ($self) = @_;
-    return new URI($self->name)->query_param('id');
+  my ($self) = @_;
+  return new URI($self->name)->query_param('id');
 }
 
 1;

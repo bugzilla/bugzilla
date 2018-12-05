@@ -31,20 +31,20 @@ use base qw(Template::Plugin);
 use Bugzilla::User;
 
 sub new {
-    my ($class, $context) = @_;
+  my ($class, $context) = @_;
 
-    return bless {}, $class;
+  return bless {}, $class;
 }
 
 sub AUTOLOAD {
-    my $class = shift;
-    our $AUTOLOAD;
+  my $class = shift;
+  our $AUTOLOAD;
 
-    $AUTOLOAD =~ s/^.*:://;
+  $AUTOLOAD =~ s/^.*:://;
 
-    return if $AUTOLOAD eq 'DESTROY';
+  return if $AUTOLOAD eq 'DESTROY';
 
-    return Bugzilla::User->$AUTOLOAD(@_);
+  return Bugzilla::User->$AUTOLOAD(@_);
 }
 
 1;

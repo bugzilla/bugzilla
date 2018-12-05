@@ -13,9 +13,9 @@ use Mojo::Base 'Mojo::Exception';
 has 'vars' => sub { {} };
 
 has 'template' => sub {
-    my $self = shift;
-    my $type = lc( (split(/::/, ref $self))[-1] );
-    return "global/$type-error";
+  my $self = shift;
+  my $type = lc((split(/::/, ref $self))[-1]);
+  return "global/$type-error";
 };
 
 1;

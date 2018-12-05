@@ -34,8 +34,9 @@ exit 0 unless Bugzilla->params->{report_secbugs_active};
 exit 0 unless defined $ARGV[0] && defined $ARGV[1] && defined $ARGV[2];
 
 my $html;
-my $template     = Bugzilla->template();
-my $end_date     = DateTime->new(year => $ARGV[0], month => $ARGV[1], day => $ARGV[2]);
+my $template = Bugzilla->template();
+my $end_date
+  = DateTime->new(year => $ARGV[0], month => $ARGV[1], day => $ARGV[2]);
 my $start_date   = $end_date->clone()->subtract(months => 12);
 my $report_week  = $end_date->ymd('-');
 my $teams        = decode_json(Bugzilla->params->{report_secbugs_teams});
@@ -48,8 +49,8 @@ my $report       = Bugzilla::Report::SecurityRisk->new(
 );
 
 my $bugs_by_team = $report->results->[-1]->{bugs_by_team};
-my @sorted_team_names = sort {    ## no critic qw(BuiltinFunctions::ProhibitReverseSortBlock
-  @{$bugs_by_team->{$b}->{open}} <=> @{$bugs_by_team->{$a}->{open}}    ## no critic qw(Freenode::DollarAB)
+my @sorted_team_names = sort { ## no critic qw(BuiltinFunctions::ProhibitReverseSortBlock
+  @{$bugs_by_team->{$b}->{open}} <=> @{$bugs_by_team->{$a}->{open}} ## no critic qw(Freenode::DollarAB)
     || $a cmp $b
 } keys %$teams;
 
@@ -65,13 +66,18 @@ my $vars = {
   build_bugs_link    => \&build_bugs_link,
 };
 
-$template->process('reports/email/security-risk.html.tmpl', $vars, \$html) or ThrowTemplateError($template->error());
+$template->process('reports/email/security-risk.html.tmpl', $vars, \$html)
+  or ThrowTemplateError($template->error());
 
 # For now, only send HTML email.
 my @parts = (
   Email::MIME->create(
-    attributes => {content_type => 'text/html', charset => 'UTF-8', encoding => 'quoted-printable',},
-    body_str   => $html,
+    attributes => {
+      content_type => 'text/html',
+      charset      => 'UTF-8',
+      encoding     => 'quoted-printable',
+    },
+    body_str => $html,
   ),
   map {
     Email::MIME->create(

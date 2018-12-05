@@ -14,15 +14,15 @@ use warnings;
 use base qw(Bugzilla::BugUrl);
 
 sub should_handle {
-    my ($class, $uri) = @_;
-    return $uri =~ m#^https?://[^.]+\.service-now\.com/nav_to\.do\?#;
+  my ($class, $uri) = @_;
+  return $uri =~ m#^https?://[^.]+\.service-now\.com/nav_to\.do\?#;
 }
 
 sub _check_value {
-    my ($class, $uri) = @_;
-    $uri = $class->SUPER::_check_value($uri);
-    $uri->scheme('https');
-    return $uri;
+  my ($class, $uri) = @_;
+  $uri = $class->SUPER::_check_value($uri);
+  $uri->scheme('https');
+  return $uri;
 }
 
 1;

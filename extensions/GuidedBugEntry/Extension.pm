@@ -23,111 +23,103 @@ use Bugzilla::Extension::BMO::Data;
 our $VERSION = '1';
 
 sub enter_bug_start {
-    my ($self, $args) = @_;
-    my $vars = $args->{vars};
-    my $template = Bugzilla->template;
-    my $cgi = Bugzilla->cgi;
-    my $user = Bugzilla->user;
+  my ($self, $args) = @_;
+  my $vars     = $args->{vars};
+  my $template = Bugzilla->template;
+  my $cgi      = Bugzilla->cgi;
+  my $user     = Bugzilla->user;
 
-    # hack for skipping old guided code when enabled
-    $vars->{'disable_guided'} = 1;
+  # hack for skipping old guided code when enabled
+  $vars->{'disable_guided'} = 1;
 
-    # force guided format for new users
-    my $format = $cgi->param('format') || '';
-    if ($cgi->param('maketemplate')) {
-        $format = '__default__';
+  # force guided format for new users
+  my $format = $cgi->param('format') || '';
+  if ($cgi->param('maketemplate')) {
+    $format = '__default__';
+  }
+
+  if ($format eq 'guided' || ($format eq '' && !$user->in_group('editbugs'))) {
+
+    # skip the first step if a product is provided
+    if ($cgi->param('product')) {
+      print $cgi->redirect('enter_bug.cgi?format=guided'
+          . ($cgi->param('format_forced') ? '&format_forced=1' : '')
+          . '#h=dupes' . '|'
+          . url_quote($cgi->param('product')) . '|'
+          . url_quote($cgi->param('component') || ''));
+      exit;
     }
 
-    if (
-        $format eq 'guided' ||
-        (
-            $format eq '' &&
-            !$user->in_group('editbugs')
-        )
-    ) {
-        # skip the first step if a product is provided
-        if ($cgi->param('product')) {
-            print $cgi->redirect('enter_bug.cgi?format=guided' .
-                ($cgi->param('format_forced') ? '&format_forced=1' : '') .
-                '#h=dupes' .
-                '|' . url_quote($cgi->param('product')) .
-                '|' . url_quote($cgi->param('component') || '')
-                );
-            exit;
-        }
+    # Do not redirect to product forms if we came from there already
+    $vars->{'format_forced'} = 1 if $cgi->param('format_forced');
 
-        # Do not redirect to product forms if we came from there already
-        $vars->{'format_forced'} = 1 if $cgi->param('format_forced');
+    $self->_init_vars($vars);
+    print $cgi->header();
+    $template->process('guided/guided.html.tmpl', $vars)
+      || ThrowTemplateError($template->error());
+    exit;
+  }
 
-        $self->_init_vars($vars);
-        print $cgi->header();
-        $template->process('guided/guided.html.tmpl', $vars)
-          || ThrowTemplateError($template->error());
-        exit;
-    }
-
-    # we use the __default__ format to bypass the guided entry
-    # it isn't understood upstream, so remove it once a product
-    # has been selected.
-    if (
-        ($cgi->param('format') && $cgi->param('format') eq "__default__")
-        && ($cgi->param('product') && $cgi->param('product') ne '')
-    ) {
-        $cgi->delete('format');
-    }
+  # we use the __default__ format to bypass the guided entry
+  # it isn't understood upstream, so remove it once a product
+  # has been selected.
+  if ( ($cgi->param('format') && $cgi->param('format') eq "__default__")
+    && ($cgi->param('product') && $cgi->param('product') ne ''))
+  {
+    $cgi->delete('format');
+  }
 }
 
 sub _init_vars {
-    my ($self, $vars) = @_;
-    my $user = Bugzilla->user;
+  my ($self, $vars) = @_;
+  my $user = Bugzilla->user;
 
-    my @enterable_products = @{$user->get_enterable_products};
-    ThrowUserError('no_products') unless scalar(@enterable_products);
+  my @enterable_products = @{$user->get_enterable_products};
+  ThrowUserError('no_products') unless scalar(@enterable_products);
 
-    my @classifications = ({object => undef, products => \@enterable_products});
+  my @classifications = ({object => undef, products => \@enterable_products});
 
-    my $class;
-    foreach my $product (@enterable_products) {
-        $class->{$product->classification_id}->{'object'} ||=
-            new Bugzilla::Classification($product->classification_id);
-        push(@{$class->{$product->classification_id}->{'products'}}, $product);
-    }
-    @classifications =
-        sort {
-            $a->{'object'}->sortkey <=> $b->{'object'}->sortkey
-            || lc($a->{'object'}->name) cmp lc($b->{'object'}->name)
-        } (values %$class);
-    $vars->{'classifications'} = \@classifications;
+  my $class;
+  foreach my $product (@enterable_products) {
+    $class->{$product->classification_id}->{'object'}
+      ||= new Bugzilla::Classification($product->classification_id);
+    push(@{$class->{$product->classification_id}->{'products'}}, $product);
+  }
+  @classifications = sort {
+    $a->{'object'}->sortkey <=> $b->{'object'}->sortkey
+      || lc($a->{'object'}->name) cmp lc($b->{'object'}->name)
+  } (values %$class);
+  $vars->{'classifications'} = \@classifications;
 
-    my @open_states = BUG_STATE_OPEN();
-    $vars->{'open_states'} = \@open_states;
+  my @open_states = BUG_STATE_OPEN();
+  $vars->{'open_states'} = \@open_states;
 
-    $vars->{'token'} = issue_session_token('create_bug');
+  $vars->{'token'} = issue_session_token('create_bug');
 
-    $vars->{'platform'} = detect_platform();
-    $vars->{'op_sys'} = detect_op_sys();
-    $vars->{'webdev'} = Bugzilla->cgi->param('webdev');
+  $vars->{'platform'} = detect_platform();
+  $vars->{'op_sys'}   = detect_op_sys();
+  $vars->{'webdev'}   = Bugzilla->cgi->param('webdev');
 }
 
 sub page_before_template {
-    my ($self, $args) = @_;
-    my $page = $args->{'page_id'};
-    my $vars = $args->{'vars'};
-    my $cgi  = Bugzilla->cgi;
+  my ($self, $args) = @_;
+  my $page = $args->{'page_id'};
+  my $vars = $args->{'vars'};
+  my $cgi  = Bugzilla->cgi;
 
-    return unless $page eq 'guided_products.js';
+  return unless $page eq 'guided_products.js';
 
-    if (!$cgi->param('format_forced')) {
-        my %bug_formats;
-        foreach my $product (keys %create_bug_formats) {
-            if (my $format = Bugzilla::Extension::BMO::forced_format($product)) {
-                $bug_formats{$product} = $format;
-            }
-        }
-        $vars->{'create_bug_formats'} = \%bug_formats;
+  if (!$cgi->param('format_forced')) {
+    my %bug_formats;
+    foreach my $product (keys %create_bug_formats) {
+      if (my $format = Bugzilla::Extension::BMO::forced_format($product)) {
+        $bug_formats{$product} = $format;
+      }
     }
+    $vars->{'create_bug_formats'} = \%bug_formats;
+  }
 
-    $vars->{'webdev'} = $cgi->param('webdev');
+  $vars->{'webdev'} = $cgi->param('webdev');
 }
 
 __PACKAGE__->NAME;

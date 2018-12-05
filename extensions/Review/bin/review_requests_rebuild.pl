@@ -24,7 +24,7 @@ use Bugzilla::Extension::Review::Util;
 
 Bugzilla->usage_mode(USAGE_MODE_CMDLINE);
 
-rebuild_review_counters(sub{
-    my ($count, $total) = @_;
-    indicate_progress({ current => $count, total => $total, every => 5 });
+rebuild_review_counters(sub {
+  my ($count, $total) = @_;
+  indicate_progress({current => $count, total => $total, every => 5});
 });

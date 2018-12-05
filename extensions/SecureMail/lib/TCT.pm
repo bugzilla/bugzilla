@@ -15,76 +15,64 @@ use Future::Utils qw(call);
 use Future;
 use IO::Async::Process;
 
-has 'public_key'      => ( is => 'ro', required => 1 );
-has 'public_key_file' => ( is => 'lazy' );
-has 'is_valid'        => ( is => 'lazy' );
-has 'command'         => ( is => 'ro', default  => 'tct' );
+has 'public_key'      => (is => 'ro', required => 1);
+has 'public_key_file' => (is => 'lazy');
+has 'is_valid'        => (is => 'lazy');
+has 'command'         => (is => 'ro', default => 'tct');
 
 sub _build_public_key_file {
-    my ($self) = @_;
-    my $fh = File::Temp->new(SUFFIX => '.pubkey');
-    $fh->print($self->public_key);
-    $fh->close;
-    return $fh;
+  my ($self) = @_;
+  my $fh = File::Temp->new(SUFFIX => '.pubkey');
+  $fh->print($self->public_key);
+  $fh->close;
+  return $fh;
 }
 
 sub _build_is_valid {
-    my ($self) = @_;
+  my ($self) = @_;
 
-    my $loop = IO::Async::Loop->new;
-    my $exit_f = $loop->new_future;
-    my ($stderr, $stdout);
-    my $process = IO::Async::Process->new(
-        command => [$self->command, 'check', '-k', $self->public_key_file ],
-        stderr => {
-            into => \$stderr,
-        },
-        stdout => {
-            into => \$stdout,
-        },
-        on_finish => on_finish($exit_f),
-        on_exception => on_exception($self->command, $exit_f),
-    );
-    $loop->add($process);
+  my $loop   = IO::Async::Loop->new;
+  my $exit_f = $loop->new_future;
+  my ($stderr, $stdout);
+  my $process = IO::Async::Process->new(
+    command      => [$self->command, 'check', '-k', $self->public_key_file],
+    stderr       => {into => \$stderr,},
+    stdout       => {into => \$stdout,},
+    on_finish    => on_finish($exit_f),
+    on_exception => on_exception($self->command, $exit_f),
+  );
+  $loop->add($process);
 
-    return $exit_f->then(
-        sub {
-            my ($rv) = @_;
-            Future->wrap($rv == 0);
-        }
-    );
+  return $exit_f->then(sub {
+    my ($rv) = @_;
+    Future->wrap($rv == 0);
+  });
 }
 
 sub encrypt {
-    my ($self, $input, $comment) = @_;
-    $self->is_valid->then(
-        sub {
-            my ($is_valid) = @_;
-            call {
-                die 'invalid public key!' unless $is_valid;
+  my ($self, $input, $comment) = @_;
+  $self->is_valid->then(sub {
+    my ($is_valid) = @_;
+    call {
+      die 'invalid public key!' unless $is_valid;
 
-                my $output;
-                my $loop = IO::Async::Loop->new;
-                my $exit_f = $loop->new_future;
-                my @command = ( $self->command, 'encrypt', '-k', $self->public_key_file );
-                push @command, '--comment', $comment if $comment;
-                my $process = IO::Async::Process->new(
-                    command => \@command,
-                    stdin => {
-                        from => $input,
-                    },
-                    stdout => {
-                        into => \$output,
-                    },
-                    on_finish => on_finish($exit_f),
-                    on_exception => on_exception($self->command, $exit_f),
-                );
-                $loop->add($process);
+      my $output;
+      my $loop    = IO::Async::Loop->new;
+      my $exit_f  = $loop->new_future;
+      my @command = ($self->command, 'encrypt', '-k', $self->public_key_file);
+      push @command, '--comment', $comment if $comment;
+      my $process = IO::Async::Process->new(
+        command      => \@command,
+        stdin        => {from => $input,},
+        stdout       => {into => \$output,},
+        on_finish    => on_finish($exit_f),
+        on_exception => on_exception($self->command, $exit_f),
+      );
+      $loop->add($process);
 
-                return $exit_f->then(sub { Future->wrap($output) });
-            }
-        }
-    );
+      return $exit_f->then(sub { Future->wrap($output) });
+    }
+  });
 }
 
 1;

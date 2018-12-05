@@ -26,9 +26,10 @@ pod2usage("No IPs given") unless @ARGV;
 my $app = Bugzilla::Quantum->new;
 
 if ($unblock) {
-    $app->unblock_ip($_) for @ARGV;
-} else {
-    $app->block_ip($_) for @ARGV;
+  $app->unblock_ip($_) for @ARGV;
+}
+else {
+  $app->block_ip($_) for @ARGV;
 }
 
 =head1 NAME

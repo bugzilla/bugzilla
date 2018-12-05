@@ -11,15 +11,15 @@ use 5.10.1;
 use strict;
 use warnings;
 
-use constant NAME => 'LimitedEmail';
-use constant REQUIRED_MODULES => [ ];
-use constant OPTIONAL_MODULES => [ ];
+use constant NAME             => 'LimitedEmail';
+use constant REQUIRED_MODULES => [];
+use constant OPTIONAL_MODULES => [];
 
 use constant FILTERS => [
-    qr/^(?:glob|dkl|justdave|shyam)\@mozilla\.com$/i,
-    qr/^byron\.jones\@gmail\.com$/i,
-    qr/^gerv\@mozilla\.org$/i,
-    qr/^reed\@reedloden\.com$/i,
+  qr/^(?:glob|dkl|justdave|shyam)\@mozilla\.com$/i,
+  qr/^byron\.jones\@gmail\.com$/i,
+  qr/^gerv\@mozilla\.org$/i,
+  qr/^reed\@reedloden\.com$/i,
 ];
 
 __PACKAGE__->NAME;

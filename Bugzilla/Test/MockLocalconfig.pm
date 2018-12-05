@@ -10,9 +10,9 @@ use strict;
 use warnings;
 
 sub import {
-    my ($class, %lc) = @_;
-    $ENV{LOCALCONFIG_ENV} = 'BMO';
-    $ENV{"BMO_$_"} = $lc{$_} for keys %lc;
+  my ($class, %lc) = @_;
+  $ENV{LOCALCONFIG_ENV} = 'BMO';
+  $ENV{"BMO_$_"} = $lc{$_} for keys %lc;
 }
 
 1;

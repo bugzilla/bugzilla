@@ -14,10 +14,11 @@ use lib qw(. lib local/lib/perl5);
 use Bugzilla;
 use Bugzilla::Field;
 
-my $dbh = Bugzilla->dbh;
+my $dbh               = Bugzilla->dbh;
 my $resolved_activity = $dbh->selectall_arrayref(
   'SELECT id, bug_id, bug_when FROM bugs_activity WHERE fieldid = ? ORDER BY bug_when',
-  undef, get_field_id('cf_last_resolved'));
+  undef, get_field_id('cf_last_resolved')
+);
 my %last_resolved;
 
 foreach my $activity (@$resolved_activity) {

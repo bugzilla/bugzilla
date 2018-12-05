@@ -11,18 +11,15 @@ use 5.10.1;
 use strict;
 use warnings;
 
-use Type::Library
-    -base,
-    -declare => qw( Revision LinkedPhabUser PhabUser Policy Project );
+use Type::Library -base,
+  -declare => qw( Revision LinkedPhabUser PhabUser Policy Project );
 use Type::Utils -all;
 use Types::Standard -all;
 
-class_type Revision, { class => 'Bugzilla::Extension::PhabBugz::Revision' };
-class_type Policy, { class => 'Bugzilla::Extension::PhabBugz::Policy' };
-class_type Project, { class => 'Bugzilla::Extension::PhabBugz::Project' };
-class_type PhabUser, { class => 'Bugzilla::Extension::PhabBugz::User' };
-declare LinkedPhabUser,
-    as PhabUser,
-    where { is_Int($_->bugzilla_id) };
+class_type Revision, {class => 'Bugzilla::Extension::PhabBugz::Revision'};
+class_type Policy,   {class => 'Bugzilla::Extension::PhabBugz::Policy'};
+class_type Project,  {class => 'Bugzilla::Extension::PhabBugz::Project'};
+class_type PhabUser, {class => 'Bugzilla::Extension::PhabBugz::User'};
+declare LinkedPhabUser, as PhabUser, where { is_Int($_->bugzilla_id) };
 
 1;

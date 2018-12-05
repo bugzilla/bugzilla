@@ -12,36 +12,32 @@ use strict;
 use warnings;
 
 BEGIN {
-    *Bugzilla::WebService::BugUserLastVisit::rest_resources = \&_rest_resources;
+  *Bugzilla::WebService::BugUserLastVisit::rest_resources = \&_rest_resources;
 }
 
 sub _rest_resources {
-    return [
-        # bug-id
-        qr{^/bug_user_last_visit/(\d+)$}, {
-            GET => {
-                method => 'get',
-                params => sub {
-                    return { ids => $_[0] };
-                },
-            },
-            POST => {
-                method => 'update',
-                params => sub {
-                    return { ids => $_[0] };
-                },
-            },
+  return [
+    # bug-id
+    qr{^/bug_user_last_visit/(\d+)$},
+    {
+      GET => {
+        method => 'get',
+        params => sub {
+          return {ids => $_[0]};
         },
-        # no bug-id
-        qr{^/bug_user_last_visit$}, {
-            GET => {
-                method => 'get',
-            },
-            POST => {
-                method => 'update',
-            },
+      },
+      POST => {
+        method => 'update',
+        params => sub {
+          return {ids => $_[0]};
         },
-    ];
+      },
+    },
+
+    # no bug-id
+    qr{^/bug_user_last_visit$},
+    {GET => {method => 'get',}, POST => {method => 'update',},},
+  ];
 }
 
 1;

@@ -20,27 +20,27 @@ use Mojo::Util qw(secure_compare);
 sub register {
   my ($self, $app, $conf) = @_;
 
-  $conf->{login_resource_owner}     = \&_resource_owner_logged_in;
-  $conf->{confirm_by_resource_owner}= \&_resource_owner_confirm_scopes;
-  $conf->{verify_client}            = \&_verify_client;
-  $conf->{store_auth_code}          = \&_store_auth_code;
-  $conf->{verify_auth_code}         = \&_verify_auth_code;
-  $conf->{store_access_token}       = \&_store_access_token;
-  $conf->{verify_access_token}      = \&_verify_access_token;
+  $conf->{login_resource_owner}      = \&_resource_owner_logged_in;
+  $conf->{confirm_by_resource_owner} = \&_resource_owner_confirm_scopes;
+  $conf->{verify_client}             = \&_verify_client;
+  $conf->{store_auth_code}           = \&_store_auth_code;
+  $conf->{verify_auth_code}          = \&_verify_auth_code;
+  $conf->{store_access_token}        = \&_store_access_token;
+  $conf->{verify_access_token}       = \&_verify_access_token;
 
   $app->helper(
     'bugzilla.oauth' => sub {
-        my ($c, @scopes) = @_;
+      my ($c, @scopes) = @_;
 
-        my $oauth = $c->oauth(@scopes);
+      my $oauth = $c->oauth(@scopes);
 
-        if ($oauth && $oauth->{user_id}) {
-          my $user = Bugzilla::User->check({id => $oauth->{user_id}, cache => 1});
-          Bugzilla->set_user($user);
-          return $user;
-        }
+      if ($oauth && $oauth->{user_id}) {
+        my $user = Bugzilla::User->check({id => $oauth->{user_id}, cache => 1});
+        Bugzilla->set_user($user);
+        return $user;
+      }
 
-        return undef;
+      return undef;
     }
   );
 
@@ -52,7 +52,7 @@ sub _resource_owner_logged_in {
   my $c = $args{mojo_controller};
 
   $c->session->{override_login_target} = $c->url_for('current');
-  $c->session->{cgi_params} = $c->req->params->to_hash;
+  $c->session->{cgi_params}            = $c->req->params->to_hash;
 
   $c->bugzilla->login(LOGIN_REQUIRED) || return;
 
@@ -73,8 +73,7 @@ sub _resource_owner_confirm_scopes {
   # access last time, we check [again] with the user for access
   if (!defined $is_allowed) {
     my $client
-      = Bugzilla->dbh->selectrow_hashref(
-      'SELECT * FROM oauth2_client WHERE id = ?',
+      = Bugzilla->dbh->selectrow_hashref('SELECT * FROM oauth2_client WHERE id = ?',
       undef, $client_id);
     my $vars = {
       client => $client,
@@ -82,10 +81,7 @@ sub _resource_owner_confirm_scopes {
       token  => scalar issue_session_token('oauth_confirm_scopes')
     };
     $c->stash(%$vars);
-    $c->render(
-      template => 'account/auth/confirm_scopes',
-      handler  => 'bugzilla'
-    );
+    $c->render(template => 'account/auth/confirm_scopes', handler => 'bugzilla');
     return undef;
   }
 
@@ -123,8 +119,8 @@ sub _verify_client {
       my $scope_allowed = $dbh->selectrow_array(
         'SELECT allowed FROM oauth2_client_scope
                 JOIN oauth2_scope ON oauth2_scope.id = oauth2_client_scope.scope_id
-          WHERE client_id = ? AND oauth2_scope.description = ?', undef,
-        $client_id, $rqd_scope
+          WHERE client_id = ? AND oauth2_scope.description = ?', undef, $client_id,
+        $rqd_scope
       );
       if (defined $scope_allowed) {
         if (!$scope_allowed) {
@@ -166,8 +162,7 @@ sub _store_auth_code {
 
   foreach my $rqd_scope (@{$scopes_ref}) {
     my $scope_id
-      = $dbh->selectrow_array(
-      'SELECT id FROM oauth2_scope WHERE description = ?',
+      = $dbh->selectrow_array('SELECT id FROM oauth2_scope WHERE description = ?',
       undef, $rqd_scope);
     if ($scope_id) {
       $dbh->do('INSERT INTO oauth2_auth_code_scope VALUES (?, ?, 1)',
@@ -184,8 +179,7 @@ sub _store_auth_code {
 sub _verify_auth_code {
   my (%args) = @_;
   my ($c, $client_id, $client_secret, $auth_code, $uri)
-    = @args{
-    qw/ mojo_controller client_id client_secret auth_code redirect_uri /};
+    = @args{qw/ mojo_controller client_id client_secret auth_code redirect_uri /};
   my $dbh = Bugzilla->dbh;
 
   my $client_data
@@ -219,12 +213,9 @@ sub _verify_auth_code {
         # and any associated access tokens (same client_id and user_id)
         INFO( 'Auth code already used to get access token, '
             . 'revoking all associated access tokens');
-        $dbh->do('DELETE FROM oauth2_auth_code WHERE auth_code = ?',
-          undef, $auth_code);
-        $dbh->do(
-          'DELETE FROM oauth2_access_token WHERE client_id = ? AND user_id = ?',
-          undef, $client_id, $auth_code_data->{user_id}
-        );
+        $dbh->do('DELETE FROM oauth2_auth_code WHERE auth_code = ?', undef, $auth_code);
+        $dbh->do('DELETE FROM oauth2_access_token WHERE client_id = ? AND user_id = ?',
+          undef, $client_id, $auth_code_data->{user_id});
       }
     }
 
@@ -259,6 +250,7 @@ sub _store_access_token {
   my ($user_id);
 
   if (!defined $auth_code && $old_refresh_token) {
+
     # must have generated an access token via a refresh token so revoke the
     # old access token and refresh token (also copy required data if missing)
     my $prev_refresh_token
@@ -278,7 +270,7 @@ sub _store_access_token {
               JOIN oauth2_access_token_scope ON scope.id = oauth2_access_token_scope.scope_id
         WHERE access_token = ?', undef, $old_refresh_token
     );
-    $scopes //= map { $_ => 1 } @{ $scope_descriptions };
+    $scopes //= map { $_ => 1 } @{$scope_descriptions};
 
     $user_id = $prev_refresh_token->{user_id};
   }
@@ -290,7 +282,7 @@ sub _store_access_token {
   }
 
   if (ref $client) {
-    $scopes //= $client->{scope};
+    $scopes  //= $client->{scope};
     $user_id //= $client->{user_id};
     $client = $client->{client_id};
   }
@@ -315,18 +307,15 @@ sub _store_access_token {
 
   foreach my $rqd_scope (keys %{$scopes}) {
     my $scope_id
-      = $dbh->selectrow_array(
-      'SELECT id FROM oauth2_scope WHERE description = ?',
+      = $dbh->selectrow_array('SELECT id FROM oauth2_scope WHERE description = ?',
       undef, $rqd_scope);
     if ($scope_id) {
       foreach my $related (qw/ access_token refresh_token /) {
         my $table = "oauth2_${related}_scope";
         $dbh->do(
           "INSERT INTO $table VALUES (?, ?, ?)",
-          undef,
-          $related eq 'access_token' ? $access_token : $refresh_token,
-          $scope_id,
-          $scopes->{$rqd_scope}
+          undef, $related eq 'access_token' ? $access_token : $refresh_token,
+          $scope_id, $scopes->{$rqd_scope}
         );
       }
     }

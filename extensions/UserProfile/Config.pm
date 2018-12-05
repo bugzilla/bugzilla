@@ -11,8 +11,8 @@ use 5.10.1;
 use strict;
 use warnings;
 
-use constant NAME => 'UserProfile';
-use constant REQUIRED_MODULES => [ ];
-use constant OPTIONAL_MODULES => [ ];
+use constant NAME             => 'UserProfile';
+use constant REQUIRED_MODULES => [];
+use constant OPTIONAL_MODULES => [];
 
 __PACKAGE__->NAME;

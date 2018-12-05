@@ -15,38 +15,35 @@ use Bugzilla::WebService::Constants;
 use Bugzilla::WebService::Group;
 
 BEGIN {
-    *Bugzilla::WebService::Group::rest_resources = \&_rest_resources;
-};
+  *Bugzilla::WebService::Group::rest_resources = \&_rest_resources;
+}
 
 sub _rest_resources {
-    my $rest_resources = [
-        qr{^/group$}, {
-            GET  => {
-                method => 'get'
-            },
-            POST => {
-                method => 'create',
-                success_code => STATUS_CREATED
-            }
-        },
-        qr{^/group/([^/]+)$}, {
-            GET => {
-                method => 'get',
-                params => sub {
-                    my $param = $_[0] =~ /^\d+$/ ? 'ids' : 'names';
-                    return { $param => [ $_[0] ] };
-                }
-            },
-            PUT => {
-                method => 'update',
-                params => sub {
-                    my $param = $_[0] =~ /^\d+$/ ? 'ids' : 'names';
-                    return { $param => [ $_[0] ] };
-                }
-            }
+  my $rest_resources = [
+    qr{^/group$},
+    {
+      GET  => {method => 'get'},
+      POST => {method => 'create', success_code => STATUS_CREATED}
+    },
+    qr{^/group/([^/]+)$},
+    {
+      GET => {
+        method => 'get',
+        params => sub {
+          my $param = $_[0] =~ /^\d+$/ ? 'ids' : 'names';
+          return {$param => [$_[0]]};
         }
-    ];
-    return $rest_resources;
+      },
+      PUT => {
+        method => 'update',
+        params => sub {
+          my $param = $_[0] =~ /^\d+$/ ? 'ids' : 'names';
+          return {$param => [$_[0]]};
+        }
+      }
+    }
+  ];
+  return $rest_resources;
 }
 
 1;

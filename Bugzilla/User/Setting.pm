@@ -13,12 +13,13 @@ use strict;
 use warnings;
 
 use base qw(Exporter);
+
 # Module stuff
 @Bugzilla::User::Setting::EXPORT = qw(
-    get_all_settings
-    get_defaults
-    add_setting
-    clear_settings_cache
+  get_all_settings
+  get_defaults
+  add_setting
+  clear_settings_cache
 );
 
 use Bugzilla::Error;
@@ -30,89 +31,86 @@ use Module::Runtime qw(require_module);
 ###############################
 
 sub new {
-    my $invocant = shift;
-    my $setting_name = shift;
-    my $user_id = shift;
+  my $invocant     = shift;
+  my $setting_name = shift;
+  my $user_id      = shift;
 
-    my $class = ref($invocant) || $invocant;
-    my $subclass = '';
+  my $class = ref($invocant) || $invocant;
+  my $subclass = '';
 
-    # Create a ref to an empty hash and bless it
-    my $self = {};
+  # Create a ref to an empty hash and bless it
+  my $self = {};
 
-    my $dbh = Bugzilla->dbh;
+  my $dbh = Bugzilla->dbh;
 
-    # Confirm that the $setting_name is properly formed;
-    # if not, throw a code error.
-    #
-    # NOTE: due to the way that setting names are used in templates,
-    # they must conform to to the limitations set for HTML NAMEs and IDs.
-    #
-    if ( !($setting_name =~ /^[a-zA-Z][-.:\w]*$/) ) {
-      ThrowCodeError("setting_name_invalid", { name => $setting_name });
-    }
+  # Confirm that the $setting_name is properly formed;
+  # if not, throw a code error.
+  #
+  # NOTE: due to the way that setting names are used in templates,
+  # they must conform to to the limitations set for HTML NAMEs and IDs.
+  #
+  if (!($setting_name =~ /^[a-zA-Z][-.:\w]*$/)) {
+    ThrowCodeError("setting_name_invalid", {name => $setting_name});
+  }
 
-    # If there were only two parameters passed in, then we need
-    # to retrieve the information for this setting ourselves.
-    if (scalar @_ == 0) {
+  # If there were only two parameters passed in, then we need
+  # to retrieve the information for this setting ourselves.
+  if (scalar @_ == 0) {
 
-        my ($default, $is_enabled, $value, $category);
-        ($default, $is_enabled, $value, $subclass, $category) =
-          $dbh->selectrow_array(
-             q{SELECT default_value, is_enabled, setting_value, subclass, category
+    my ($default, $is_enabled, $value, $category);
+    ($default, $is_enabled, $value, $subclass, $category) = $dbh->selectrow_array(
+      q{SELECT default_value, is_enabled, setting_value, subclass, category
                  FROM setting
             LEFT JOIN profile_setting
                    ON setting.name = profile_setting.setting_name
                 WHERE name = ?
-                  AND profile_setting.user_id = ?},
-             undef,
-             $setting_name, $user_id);
+                  AND profile_setting.user_id = ?}, undef, $setting_name, $user_id
+    );
 
-        # if not defined, then grab the default value
-        if (! defined $value) {
-            ($default, $is_enabled, $subclass, $category) =
-              $dbh->selectrow_array(
-                 q{SELECT default_value, is_enabled, subclass, category
+    # if not defined, then grab the default value
+    if (!defined $value) {
+      ($default, $is_enabled, $subclass, $category) = $dbh->selectrow_array(
+        q{SELECT default_value, is_enabled, subclass, category
                    FROM setting
-                   WHERE name = ?},
-              undef,
-              $setting_name);
-        }
+                   WHERE name = ?}, undef, $setting_name
+      );
+    }
 
-        $self->{'is_enabled'}    = $is_enabled;
-        $self->{'default_value'} = $default;
-        $self->{'category'}      = $category;
+    $self->{'is_enabled'}    = $is_enabled;
+    $self->{'default_value'} = $default;
+    $self->{'category'}      = $category;
 
-        # IF the setting is enabled, AND the user has chosen a setting
-        # THEN return that value
-        # ELSE return the site default, and note that it is the default.
-        if ( ($is_enabled) && (defined $value) ) {
-            $self->{'value'} = $value;
-        } else {
-            $self->{'value'} = $default;
-            $self->{'isdefault'} = 1;
-        }
+    # IF the setting is enabled, AND the user has chosen a setting
+    # THEN return that value
+    # ELSE return the site default, and note that it is the default.
+    if (($is_enabled) && (defined $value)) {
+      $self->{'value'} = $value;
     }
     else {
-        # If the values were passed in, simply assign them and return.
-        $self->{'is_enabled'}    = shift;
-        $self->{'default_value'} = shift;
-        $self->{'value'}         = shift;
-        $self->{'is_default'}    = shift;
-        $subclass                = shift;
-        $self->{'category'}      = shift;
+      $self->{'value'}     = $default;
+      $self->{'isdefault'} = 1;
     }
-    if ($subclass) {
-        eval { require_module( $class . '::' . $subclass ) }
-            || ThrowCodeError( 'setting_subclass_invalid', { 'subclass' => $subclass } );
-        $class = $class . '::' . $subclass;
-    }
-    bless($self, $class);
+  }
+  else {
+    # If the values were passed in, simply assign them and return.
+    $self->{'is_enabled'}    = shift;
+    $self->{'default_value'} = shift;
+    $self->{'value'}         = shift;
+    $self->{'is_default'}    = shift;
+    $subclass                = shift;
+    $self->{'category'}      = shift;
+  }
+  if ($subclass) {
+    eval { require_module($class . '::' . $subclass) }
+      || ThrowCodeError('setting_subclass_invalid', {'subclass' => $subclass});
+    $class = $class . '::' . $subclass;
+  }
+  bless($self, $class);
 
-    $self->{'_setting_name'} = $setting_name;
-    $self->{'_user_id'}      = $user_id;
+  $self->{'_setting_name'} = $setting_name;
+  $self->{'_user_id'}      = $user_id;
 
-    return $self;
+  return $self;
 }
 
 ###############################
@@ -120,203 +118,218 @@ sub new {
 ###############################
 
 sub add_setting {
-    my ($params) = @_;
-    my ($name, $options, $default, $subclass, $force_check, $silently, $category)
-        = @$params{qw( name options default subclass force_check silently category )};
-    my $dbh = Bugzilla->dbh;
+  my ($params) = @_;
+  my ($name, $options, $default, $subclass, $force_check, $silently, $category)
+    = @$params{qw( name options default subclass force_check silently category )};
+  my $dbh = Bugzilla->dbh;
 
-    # Categories were added later, so we need to check if the old
-    # setting has the correct category if provided
-    my $exists = _setting_exists($name);
-    if ($exists && $category) {
-        my $old_category = $dbh->selectrow_arrayref(
-            "SELECT category FROM setting WHERE name = ?", undef, $name);
-        if ($old_category ne $category) {
-            $dbh->do('UPDATE setting SET category = ? WHERE name = ?',
-                     undef, $category, $name);
-            Bugzilla->memcached->clear_config();
-        }
+  # Categories were added later, so we need to check if the old
+  # setting has the correct category if provided
+  my $exists = _setting_exists($name);
+  if ($exists && $category) {
+    my $old_category
+      = $dbh->selectrow_arrayref("SELECT category FROM setting WHERE name = ?",
+      undef, $name);
+    if ($old_category ne $category) {
+      $dbh->do('UPDATE setting SET category = ? WHERE name = ?',
+        undef, $category, $name);
+      Bugzilla->memcached->clear_config();
     }
+  }
 
-    return if ($exists && !$force_check);
+  return if ($exists && !$force_check);
 
-    ($name && $default)
-      ||  ThrowCodeError("setting_info_invalid");
+  ($name && $default) || ThrowCodeError("setting_info_invalid");
 
-    if ($exists) {
-        # If this setting exists, we delete it and regenerate it.
-        $dbh->do('DELETE FROM setting_value WHERE name = ?', undef, $name);
-        $dbh->do('DELETE FROM setting WHERE name = ?', undef, $name);
-        # Remove obsolete user preferences for this setting.
-        if (defined $options && scalar(@$options)) {
-            my $list = join(', ', map {$dbh->quote($_)} @$options);
-            $dbh->do("DELETE FROM profile_setting
-                      WHERE setting_name = ? AND setting_value NOT IN ($list)",
-                      undef, $name);
-        }
+  if ($exists) {
+
+    # If this setting exists, we delete it and regenerate it.
+    $dbh->do('DELETE FROM setting_value WHERE name = ?', undef, $name);
+    $dbh->do('DELETE FROM setting WHERE name = ?',       undef, $name);
+
+    # Remove obsolete user preferences for this setting.
+    if (defined $options && scalar(@$options)) {
+      my $list = join(', ', map { $dbh->quote($_) } @$options);
+      $dbh->do(
+        "DELETE FROM profile_setting
+                      WHERE setting_name = ? AND setting_value NOT IN ($list)", undef,
+        $name
+      );
     }
-    elsif (!$silently) {
-        print get_text('install_setting_new', { name => $name }) . "\n";
-    }
-    $dbh->do(q{INSERT INTO setting (name, default_value, is_enabled, subclass, category)
-                    VALUES (?, ?, 1, ?, ?)},
-             undef, ($name, $default, $subclass, $category));
+  }
+  elsif (!$silently) {
+    print get_text('install_setting_new', {name => $name}) . "\n";
+  }
+  $dbh->do(
+    q{INSERT INTO setting (name, default_value, is_enabled, subclass, category)
+                    VALUES (?, ?, 1, ?, ?)}, undef,
+    ($name, $default, $subclass, $category)
+  );
 
-    my $sth = $dbh->prepare(q{INSERT INTO setting_value (name, value, sortindex)
-                                    VALUES (?, ?, ?)});
+  my $sth = $dbh->prepare(
+    q{INSERT INTO setting_value (name, value, sortindex)
+                                    VALUES (?, ?, ?)}
+  );
 
-    my $sortindex = 5;
-    foreach my $key (@$options){
-        $sth->execute($name, $key, $sortindex);
-        $sortindex += 5;
-    }
+  my $sortindex = 5;
+  foreach my $key (@$options) {
+    $sth->execute($name, $key, $sortindex);
+    $sortindex += 5;
+  }
 }
 
 sub get_all_settings {
-    my ($user_id) = @_;
-    my $settings = {};
-    my $dbh = Bugzilla->dbh;
+  my ($user_id) = @_;
+  my $settings  = {};
+  my $dbh       = Bugzilla->dbh;
 
-    my $cache_key = "user_settings.$user_id";
-    my $rows = Bugzilla->memcached->get_config({ key => $cache_key });
-    if (!$rows) {
-        $rows = $dbh->selectall_arrayref(
-            q{SELECT name, default_value, is_enabled, setting_value, subclass, category
+  my $cache_key = "user_settings.$user_id";
+  my $rows = Bugzilla->memcached->get_config({key => $cache_key});
+  if (!$rows) {
+    $rows = $dbh->selectall_arrayref(
+      q{SELECT name, default_value, is_enabled, setting_value, subclass, category
                 FROM setting
            LEFT JOIN profile_setting
                      ON setting.name = profile_setting.setting_name
-                     AND profile_setting.user_id = ?}, undef, ($user_id));
-        Bugzilla->memcached->set_config({ key => $cache_key, data => $rows });
+                     AND profile_setting.user_id = ?}, undef, ($user_id)
+    );
+    Bugzilla->memcached->set_config({key => $cache_key, data => $rows});
+  }
+
+  foreach my $row (@$rows) {
+    my ($name, $default_value, $is_enabled, $value, $subclass, $category) = @$row;
+
+    my $is_default;
+
+    if (($is_enabled) && (defined $value)) {
+      $is_default = 0;
+    }
+    else {
+      $value      = $default_value;
+      $is_default = 1;
     }
 
-    foreach my $row (@$rows) {
-        my ($name, $default_value, $is_enabled, $value, $subclass, $category) = @$row;
+    $settings->{$name}
+      = new Bugzilla::User::Setting($name, $user_id, $is_enabled, $default_value,
+      $value, $is_default, $subclass, $category);
+  }
 
-        my $is_default;
-
-        if ( ($is_enabled) && (defined $value) ) {
-            $is_default = 0;
-        } else {
-            $value = $default_value;
-            $is_default = 1;
-        }
-
-        $settings->{$name} = new Bugzilla::User::Setting(
-           $name, $user_id, $is_enabled,
-           $default_value, $value, $is_default,
-           $subclass, $category);
-    }
-
-    return $settings;
+  return $settings;
 }
 
 sub clear_settings_cache {
-    my ($user_id) = @_;
-    Bugzilla->memcached->clear_config({ key => "user_settings.$user_id" });
+  my ($user_id) = @_;
+  Bugzilla->memcached->clear_config({key => "user_settings.$user_id"});
 }
 
 sub get_defaults {
-    my ($user_id) = @_;
-    my $dbh = Bugzilla->dbh;
-    my $default_settings = {};
+  my ($user_id)        = @_;
+  my $dbh              = Bugzilla->dbh;
+  my $default_settings = {};
 
-    $user_id ||= 0;
+  $user_id ||= 0;
 
-    my $rows = $dbh->selectall_arrayref(q{SELECT name, default_value, is_enabled, subclass, category
-                                            FROM setting});
+  my $rows = $dbh->selectall_arrayref(
+    q{SELECT name, default_value, is_enabled, subclass, category
+                                            FROM setting}
+  );
 
-    foreach my $row (@$rows) {
-        my ($name, $default_value, $is_enabled, $subclass, $category) = @$row;
+  foreach my $row (@$rows) {
+    my ($name, $default_value, $is_enabled, $subclass, $category) = @$row;
 
-        $default_settings->{$name} = new Bugzilla::User::Setting(
-            $name, $user_id, $is_enabled, $default_value, $default_value, 1,
-            $subclass, $category);
-    }
+    $default_settings->{$name}
+      = new Bugzilla::User::Setting($name, $user_id, $is_enabled, $default_value,
+      $default_value, 1, $subclass, $category);
+  }
 
-    return $default_settings;
+  return $default_settings;
 }
 
 sub set_default {
-    my ($setting_name, $default_value, $is_enabled) = @_;
-    my $dbh = Bugzilla->dbh;
+  my ($setting_name, $default_value, $is_enabled) = @_;
+  my $dbh = Bugzilla->dbh;
 
-    my $sth = $dbh->prepare(q{UPDATE setting
+  my $sth = $dbh->prepare(
+    q{UPDATE setting
                                  SET default_value = ?, is_enabled = ?
-                               WHERE name = ?});
-    $sth->execute($default_value, $is_enabled, $setting_name);
+                               WHERE name = ?}
+  );
+  $sth->execute($default_value, $is_enabled, $setting_name);
 }
 
 sub _setting_exists {
-    my ($setting_name) = @_;
-    my $dbh = Bugzilla->dbh;
-    return $dbh->selectrow_arrayref(
-        "SELECT 1 FROM setting WHERE name = ?", undef, $setting_name) || 0;
+  my ($setting_name) = @_;
+  my $dbh = Bugzilla->dbh;
+  return $dbh->selectrow_arrayref("SELECT 1 FROM setting WHERE name = ?",
+    undef, $setting_name)
+    || 0;
 }
 
 
 sub legal_values {
-    my ($self) = @_;
+  my ($self) = @_;
 
-    return $self->{'legal_values'} if defined $self->{'legal_values'};
+  return $self->{'legal_values'} if defined $self->{'legal_values'};
 
-    my $dbh = Bugzilla->dbh;
-    $self->{'legal_values'} = $dbh->selectcol_arrayref(
-              q{SELECT value
+  my $dbh = Bugzilla->dbh;
+  $self->{'legal_values'} = $dbh->selectcol_arrayref(
+    q{SELECT value
                   FROM setting_value
                  WHERE name = ?
-              ORDER BY sortindex},
-        undef, $self->{'_setting_name'});
+              ORDER BY sortindex}, undef, $self->{'_setting_name'}
+  );
 
-    return $self->{'legal_values'};
+  return $self->{'legal_values'};
 }
 
 sub validate_value {
-    my $self = shift;
+  my $self = shift;
 
-    if (grep(/^$_[0]$/, @{$self->legal_values()})) {
-        trick_taint($_[0]);
-    }
-    else {
-        ThrowCodeError('setting_value_invalid',
-                       {'name'  => $self->{'_setting_name'},
-                        'value' => $_[0]});
-    }
+  if (grep(/^$_[0]$/, @{$self->legal_values()})) {
+    trick_taint($_[0]);
+  }
+  else {
+    ThrowCodeError('setting_value_invalid',
+      {'name' => $self->{'_setting_name'}, 'value' => $_[0]});
+  }
 }
 
 sub reset_to_default {
-    my ($self) = @_;
+  my ($self) = @_;
 
-    my $dbh = Bugzilla->dbh;
-    my $sth = $dbh->do(q{ DELETE
+  my $dbh = Bugzilla->dbh;
+  my $sth = $dbh->do(
+    q{ DELETE
                             FROM profile_setting
                            WHERE setting_name = ?
-                             AND user_id = ?},
-                       undef, $self->{'_setting_name'}, $self->{'_user_id'});
-      $self->{'value'}       = $self->{'default_value'};
-      $self->{'is_default'}  = 1;
+                             AND user_id = ?}, undef, $self->{'_setting_name'},
+    $self->{'_user_id'}
+  );
+  $self->{'value'}      = $self->{'default_value'};
+  $self->{'is_default'} = 1;
 }
 
 sub set {
-    my ($self, $value) = @_;
-    my $dbh = Bugzilla->dbh;
-    my $query;
+  my ($self, $value) = @_;
+  my $dbh = Bugzilla->dbh;
+  my $query;
 
-    if ($self->{'is_default'}) {
-        $query = q{INSERT INTO profile_setting
+  if ($self->{'is_default'}) {
+    $query = q{INSERT INTO profile_setting
                    (setting_value, setting_name, user_id)
                    VALUES (?,?,?)};
-    } else {
-        $query = q{UPDATE profile_setting
+  }
+  else {
+    $query = q{UPDATE profile_setting
                       SET setting_value = ?
                     WHERE setting_name = ?
                       AND user_id = ?};
-    }
-    $dbh->do($query, undef, $value, $self->{'_setting_name'}, $self->{'_user_id'});
+  }
+  $dbh->do($query, undef, $value, $self->{'_setting_name'}, $self->{'_user_id'});
 
-    $self->{'value'}       = $value;
-    $self->{'is_default'}  = 0;
+  $self->{'value'}      = $value;
+  $self->{'is_default'} = 0;
 }
-
 
 
 1;

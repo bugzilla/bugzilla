@@ -16,22 +16,14 @@ use Bugzilla::Config::Common;
 our $sortkey = 1350;
 
 sub get_param_list {
-    my ($class) = @_;
+  my ($class) = @_;
 
-    my @params = (
-        {
-            name    => 'github_client_id',
-            type    => 't',
-            default => '',
-        },
-        {
-            name    => 'github_client_secret',
-            type    => 't',
-            default => '',
-        },
-    );
+  my @params = (
+    {name => 'github_client_id',     type => 't', default => '',},
+    {name => 'github_client_secret', type => 't', default => '',},
+  );
 
-    return @params;
+  return @params;
 }
 
 1;

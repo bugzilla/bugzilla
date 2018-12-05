@@ -3,9 +3,7 @@ use 5.10.1;
 use Mojo::Base 'Mojolicious::Plugin';
 use Bugzilla::Logging;
 
-my %HEALTH_CHECK_UA = (
-  "GoogleHC/1.0" => 1,
-);
+my %HEALTH_CHECK_UA = ("GoogleHC/1.0" => 1,);
 
 sub _attachment_root {
   my ($base) = @_;
@@ -47,7 +45,7 @@ sub _before_routes {
   my $hostname = $url->host;
 
   my $ua = $req->headers->user_agent;
-  if ($ua && $HEALTH_CHECK_UA{ $ua }) {
+  if ($ua && $HEALTH_CHECK_UA{$ua}) {
     $c->render(text => "Hello, $ua, I am healthy.", status => 200);
     return;
   }
@@ -71,8 +69,7 @@ sub _before_routes {
       my $new_uri = $url->clone;
       $new_uri->scheme($urlbase_uri->scheme);
       $new_uri->host($urlbase_host);
-      DEBUG(
-        "redirecting to $new_uri because $hostname matches attachment regex");
+      DEBUG("redirecting to $new_uri because $hostname matches attachment regex");
       $c->redirect_to($new_uri);
       return;
     }

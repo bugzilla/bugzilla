@@ -31,17 +31,13 @@ use Bugzilla::Config::Common;
 our $sortkey = 1350;
 
 sub get_param_list {
-    my ($class) = @_;
+  my ($class) = @_;
 
-    my @param_list = (
-        {
-            name => 'splinter_base',
-            type => 't',
-            default => 'page.cgi?id=splinter.html',
-        },
-    );
+  my @param_list = (
+    {name => 'splinter_base', type => 't', default => 'page.cgi?id=splinter.html',},
+  );
 
-    return @param_list;
+  return @param_list;
 }
 
 1;

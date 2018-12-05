@@ -41,78 +41,51 @@ use Bugzilla::Config::Common;
 # deprecated module. We have to set NO_CLUCK = 1 before loading Email::Send
 # to disable these warnings.
 BEGIN {
-    $Return::Value::NO_CLUCK = 1;
+  $Return::Value::NO_CLUCK = 1;
 }
 use Email::Send;
 
 our $sortkey = 1200;
 
 sub get_param_list {
-    my $class      = shift;
-    my @param_list = (
-        {
-            name => 'mail_delivery_method',
-            type => 's',
+  my $class      = shift;
+  my @param_list = (
+    {
+      name => 'mail_delivery_method',
+      type => 's',
 
-            # Bugzilla is not ready yet to send mails to newsgroups, and 'IO'
-            # is of no use for now as we already have our own 'Test' mode.
-            choices => [ grep { $_ ne 'NNTP' && $_ ne 'IO' } Email::Send->new()->all_mailers(), 'None' ],
-            default => 'Sendmail',
-            checker => \&check_mail_delivery_method
-        },
+      # Bugzilla is not ready yet to send mails to newsgroups, and 'IO'
+      # is of no use for now as we already have our own 'Test' mode.
+      choices => [
+        grep { $_ ne 'NNTP' && $_ ne 'IO' } Email::Send->new()->all_mailers(), 'None'
+      ],
+      default => 'Sendmail',
+      checker => \&check_mail_delivery_method
+    },
 
-        {
-            name    => 'mailfrom',
-            type    => 't',
-            default => 'bugzilla-daemon'
-        },
+    {name => 'mailfrom', type => 't', default => 'bugzilla-daemon'},
 
-        {
-            name    => 'use_mailer_queue',
-            type    => 'b',
-            default => 0,
-            checker => \&check_theschwartz_available,
-        },
+    {
+      name    => 'use_mailer_queue',
+      type    => 'b',
+      default => 0,
+      checker => \&check_theschwartz_available,
+    },
 
-        {
-            name    => 'smtpserver',
-            type    => 't',
-            default => 'localhost'
-        },
-        {
-            name    => 'smtp_username',
-            type    => 't',
-            default => '',
-            checker => \&check_smtp_auth
-        },
-        {
-            name    => 'smtp_password',
-            type    => 'p',
-            default => ''
-        },
-        {
-            name    => 'smtp_debug',
-            type    => 'b',
-            default => 0
-        },
-        {
-            name    => 'whinedays',
-            type    => 't',
-            default => 7,
-            checker => \&check_numeric
-        },
-        {
-            name    => 'globalwatchers',
-            type    => 't',
-            default => '',
-        },
-        {
-            name    => 'silent_users',
-            type    => 't',
-            default => '',
-        },
-    );
-    return @param_list;
+    {name => 'smtpserver', type => 't', default => 'localhost'},
+    {
+      name    => 'smtp_username',
+      type    => 't',
+      default => '',
+      checker => \&check_smtp_auth
+    },
+    {name => 'smtp_password', type => 'p', default => ''},
+    {name => 'smtp_debug',    type => 'b', default => 0},
+    {name => 'whinedays', type => 't', default => 7, checker => \&check_numeric},
+    {name => 'globalwatchers', type => 't', default => '',},
+    {name => 'silent_users',   type => 't', default => '',},
+  );
+  return @param_list;
 }
 
 1;

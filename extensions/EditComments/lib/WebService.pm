@@ -22,180 +22,209 @@ use Bugzilla::Util qw(trick_taint trim);
 use Bugzilla::WebService::Util qw(validate);
 
 use constant PUBLIC_METHODS => qw(
-    comments
-    update_comment
-    modify_revision
+  comments
+  update_comment
+  modify_revision
 );
 
 sub comments {
-    my ($self, $params) = validate(@_, 'comment_ids');
-    my $dbh  = Bugzilla->switch_to_shadow_db();
-    my $user = Bugzilla->user;
+  my ($self, $params) = validate(@_, 'comment_ids');
+  my $dbh  = Bugzilla->switch_to_shadow_db();
+  my $user = Bugzilla->user;
 
-    if (!defined $params->{comment_ids}) {
-        ThrowCodeError('param_required',
-                       { function => 'Bug.comments',
-                         param    => 'comment_ids' });
+  if (!defined $params->{comment_ids}) {
+    ThrowCodeError('param_required',
+      {function => 'Bug.comments', param => 'comment_ids'});
+  }
+
+  my @ids = map { trim($_) } @{$params->{comment_ids} || []};
+  my $comment_data = Bugzilla::Comment->new_from_list(\@ids);
+
+  # See if we were passed any invalid comment ids.
+  my %got_ids = map { $_->id => 1 } @$comment_data;
+  foreach my $comment_id (@ids) {
+    if (!$got_ids{$comment_id}) {
+      ThrowUserError('comment_id_invalid', {id => $comment_id});
     }
+  }
 
-    my @ids = map { trim($_) } @{ $params->{comment_ids} || [] };
-    my $comment_data = Bugzilla::Comment->new_from_list(\@ids);
+  # Now make sure that we can see all the associated bugs.
+  my %got_bug_ids = map { $_->bug_id => 1 } @$comment_data;
+  $user->visible_bugs([keys %got_bug_ids]);   # preload cache for visibility check
+  Bugzilla::Bug->check($_) foreach (keys %got_bug_ids);
 
-    # See if we were passed any invalid comment ids.
-    my %got_ids = map { $_->id => 1 } @$comment_data;
-    foreach my $comment_id (@ids) {
-        if (!$got_ids{$comment_id}) {
-            ThrowUserError('comment_id_invalid', { id => $comment_id });
-        }
+  my %comments;
+  foreach my $comment (@$comment_data) {
+    if ($comment->is_private && !$user->is_insider) {
+      ThrowUserError('comment_is_private', {id => $comment->id});
     }
+    $comments{$comment->id} = $comment->body;
+  }
 
-    # Now make sure that we can see all the associated bugs.
-    my %got_bug_ids = map { $_->bug_id => 1 } @$comment_data;
-    $user->visible_bugs([ keys %got_bug_ids ]); # preload cache for visibility check
-    Bugzilla::Bug->check($_) foreach (keys %got_bug_ids);
-
-    my %comments;
-    foreach my $comment (@$comment_data) {
-        if ($comment->is_private && !$user->is_insider) {
-            ThrowUserError('comment_is_private', { id => $comment->id });
-        }
-        $comments{$comment->id} = $comment->body;
-    }
-
-    return { comments => \%comments };
+  return {comments => \%comments};
 }
 
 # See Bugzilla::Extension::EditComments->bug_end_of_update for the original implementation.
 # This should be migrated to the standard API method at /rest/bug/comment/(comment_id)
 sub update_comment {
-    my ($self, $params) = @_;
-    my $user = Bugzilla->login(LOGIN_REQUIRED);
-    my $edit_comments_group = Bugzilla->params->{edit_comments_group};
+  my ($self, $params) = @_;
+  my $user                = Bugzilla->login(LOGIN_REQUIRED);
+  my $edit_comments_group = Bugzilla->params->{edit_comments_group};
 
-    # Validate group membership
-    ThrowUserError('auth_failure', { group => $edit_comments_group, action => 'view', object => 'editcomments' })
-        unless $user->is_insider || $edit_comments_group && $user->in_group($edit_comments_group);
+  # Validate group membership
+  ThrowUserError('auth_failure',
+    {group => $edit_comments_group, action => 'view', object => 'editcomments'})
+    unless $user->is_insider
+    || $edit_comments_group && $user->in_group($edit_comments_group);
 
-    my $comment_id = (defined $params->{comment_id} && $params->{comment_id} =~ /^(\d+)$/) ? $1 : undef;
+  my $comment_id
+    = (defined $params->{comment_id} && $params->{comment_id} =~ /^(\d+)$/)
+    ? $1
+    : undef;
 
-    # Validate parameters
-    ThrowCodeError('param_required', { function => 'EditComments.update_comment', param => 'comment_id' })
-        unless defined $comment_id;
-    ThrowCodeError('param_required', { function => 'EditComments.update_comment', param => 'new_comment' })
-        unless defined $params->{new_comment} && trim($params->{new_comment}) ne '';
+  # Validate parameters
+  ThrowCodeError('param_required',
+    {function => 'EditComments.update_comment', param => 'comment_id'})
+    unless defined $comment_id;
+  ThrowCodeError('param_required',
+    {function => 'EditComments.update_comment', param => 'new_comment'})
+    unless defined $params->{new_comment} && trim($params->{new_comment}) ne '';
 
-    my $comment = Bugzilla::Comment->new($comment_id);
+  my $comment = Bugzilla::Comment->new($comment_id);
 
-    # Validate comment visibility
-    ThrowUserError('comment_id_invalid', { id => $comment_id })
-        unless $comment;
-    ThrowUserError('comment_is_private', { id => $comment->id })
-        unless $user->is_insider || !$comment->is_private;
+  # Validate comment visibility
+  ThrowUserError('comment_id_invalid', {id => $comment_id}) unless $comment;
+  ThrowUserError('comment_is_private', {id => $comment->id})
+    unless $user->is_insider || !$comment->is_private;
 
-    # Insiders can edit any comment while unprivileged users can only edit their own comments
-    ThrowUserError('auth_failure', { group => 'insidergroup', action => 'view', object => 'editcomments' })
-        unless $user->is_insider || $comment->author->id == $user->id;
+# Insiders can edit any comment while unprivileged users can only edit their own comments
+  ThrowUserError('auth_failure',
+    {group => 'insidergroup', action => 'view', object => 'editcomments'})
+    unless $user->is_insider || $comment->author->id == $user->id;
 
-    my $bug = $comment->bug;
-    my $old_comment = $comment->body;
-    my $new_comment = $comment->_check_thetext($params->{new_comment});
+  my $bug         = $comment->bug;
+  my $old_comment = $comment->body;
+  my $new_comment = $comment->_check_thetext($params->{new_comment});
 
-    # Validate bug visibility
-    $bug->check_is_visible();
+  # Validate bug visibility
+  $bug->check_is_visible();
 
-    # Make sure there is any change in the comment
-    ThrowCodeError('param_no_changes', { function => 'EditComments.update_comment', param => 'new_comment' })
-        if $old_comment eq $new_comment;
+  # Make sure there is any change in the comment
+  ThrowCodeError('param_no_changes',
+    {function => 'EditComments.update_comment', param => 'new_comment'})
+    if $old_comment eq $new_comment;
 
-    my $dbh = Bugzilla->dbh;
-    my $change_when = $dbh->selectrow_array('SELECT NOW()');
+  my $dbh         = Bugzilla->dbh;
+  my $change_when = $dbh->selectrow_array('SELECT NOW()');
 
-    # Insiders can hide comment revisions where needed
-    my $is_hidden = ($user->is_insider && defined $params->{is_hidden} && $params->{is_hidden} == 1) ? 1 : 0;
+  # Insiders can hide comment revisions where needed
+  my $is_hidden
+    = (  $user->is_insider
+      && defined $params->{is_hidden}
+      && $params->{is_hidden} == 1) ? 1 : 0;
 
-    # Update the `longdescs` (comments) table
-    trick_taint($new_comment);
-    $dbh->do('UPDATE longdescs SET thetext = ?, edit_count = edit_count + 1 WHERE comment_id = ?',
-             undef, $new_comment, $comment_id);
-    Bugzilla->memcached->clear({ table => 'longdescs', id => $comment_id });
+  # Update the `longdescs` (comments) table
+  trick_taint($new_comment);
+  $dbh->do(
+    'UPDATE longdescs SET thetext = ?, edit_count = edit_count + 1 WHERE comment_id = ?',
+    undef, $new_comment, $comment_id
+  );
+  Bugzilla->memcached->clear({table => 'longdescs', id => $comment_id});
 
-    # Log old comment to the `longdescs_activity` (comment revisions) table
-    $dbh->do('INSERT INTO longdescs_activity (comment_id, who, change_when, old_comment, is_hidden)
-              VALUES (?, ?, ?, ?, ?)', undef, ($comment_id, $user->id, $change_when, $old_comment, $is_hidden));
+  # Log old comment to the `longdescs_activity` (comment revisions) table
+  $dbh->do(
+    'INSERT INTO longdescs_activity (comment_id, who, change_when, old_comment, is_hidden)
+              VALUES (?, ?, ?, ?, ?)', undef,
+    ($comment_id, $user->id, $change_when, $old_comment, $is_hidden)
+  );
 
-    $comment->{thetext} = $new_comment;
-    $bug->_sync_fulltext( update_comments => 1 );
+  $comment->{thetext} = $new_comment;
+  $bug->_sync_fulltext(update_comments => 1);
 
-    # Respond with the updated comment and number of revisions
-    return {
-        text  => $self->type('string', $new_comment),
-        html  => $self->type('string', Bugzilla::Template::quoteUrls($new_comment, $bug)),
-        count => $self->type('int', $dbh->selectrow_array('SELECT COUNT(*) FROM longdescs_activity
-                                                           WHERE comment_id = ?', undef, ($comment_id))),
-    };
+  # Respond with the updated comment and number of revisions
+  return {
+    text => $self->type('string', $new_comment),
+    html =>
+      $self->type('string', Bugzilla::Template::quoteUrls($new_comment, $bug)),
+    count => $self->type(
+      'int',
+      $dbh->selectrow_array(
+        'SELECT COUNT(*) FROM longdescs_activity
+                                                           WHERE comment_id = ?',
+        undef, ($comment_id)
+      )
+    ),
+  };
 }
 
 sub modify_revision {
-    my ($self, $params) = @_;
-    my $user = Bugzilla->login(LOGIN_REQUIRED);
+  my ($self, $params) = @_;
+  my $user = Bugzilla->login(LOGIN_REQUIRED);
 
-    # Only allow insiders to modify revisions
-    ThrowUserError('auth_failure', { group => 'insidergroup', action => 'view', object => 'editcomments' })
-        unless $user->is_insider;
+  # Only allow insiders to modify revisions
+  ThrowUserError('auth_failure',
+    {group => 'insidergroup', action => 'view', object => 'editcomments'})
+    unless $user->is_insider;
 
-    my $comment_id = (defined $params->{comment_id}
-        && $params->{comment_id} =~ /^(\d+)$/) ? $1 : undef;
-    my $change_when = (defined $params->{change_when}
-        && $params->{change_when} =~ /^(\d{4}-\d{2}-\d{2}\ \d{2}:\d{2}:\d{2})$/) ? $1 : undef;
-    my $is_hidden = defined $params->{is_hidden} && $params->{is_hidden} == 1 ? 1 : 0;
+  my $comment_id
+    = (defined $params->{comment_id} && $params->{comment_id} =~ /^(\d+)$/)
+    ? $1
+    : undef;
+  my $change_when
+    = (defined $params->{change_when}
+      && $params->{change_when} =~ /^(\d{4}-\d{2}-\d{2}\ \d{2}:\d{2}:\d{2})$/)
+    ? $1
+    : undef;
+  my $is_hidden
+    = defined $params->{is_hidden} && $params->{is_hidden} == 1 ? 1 : 0;
 
-    # Validate parameters
-    ThrowCodeError('param_required', { function => 'EditComments.modify_revision', param => 'comment_id' })
-        unless defined $comment_id;
-    ThrowCodeError('param_required', { function => 'EditComments.modify_revision', param => 'change_when' })
-        unless defined $change_when;
+  # Validate parameters
+  ThrowCodeError('param_required',
+    {function => 'EditComments.modify_revision', param => 'comment_id'})
+    unless defined $comment_id;
+  ThrowCodeError('param_required',
+    {function => 'EditComments.modify_revision', param => 'change_when'})
+    unless defined $change_when;
 
-    my $dbh = Bugzilla->dbh;
+  my $dbh = Bugzilla->dbh;
 
-    # Update revision visibility
-    $dbh->do('UPDATE longdescs_activity SET is_hidden = ? WHERE comment_id = ? AND change_when = ?',
-             undef, ($is_hidden, $comment_id, $change_when));
+  # Update revision visibility
+  $dbh->do(
+    'UPDATE longdescs_activity SET is_hidden = ? WHERE comment_id = ? AND change_when = ?',
+    undef,
+    ($is_hidden, $comment_id, $change_when)
+  );
 
-    # Respond with updated revision info
-    return {
-        change_when => $self->type('dateTime', $change_when),
-        is_hidden   => $self->type('boolean', $is_hidden),
-    };
+  # Respond with updated revision info
+  return {
+    change_when => $self->type('dateTime', $change_when),
+    is_hidden   => $self->type('boolean',  $is_hidden),
+  };
 }
 
 sub rest_resources {
-    return [
-        qr{^/editcomments/comment/(\d+)$}, {
-            GET => {
-                method => 'comments',
-                params => sub {
-                    return { comment_ids => $_[0] };
-                },
-            },
-            PUT => {
-                method => 'update_comment',
-                params => sub {
-                    return { comment_id => $_[0] };
-                },
-            },
+  return [
+    qr{^/editcomments/comment/(\d+)$},
+    {
+      GET => {
+        method => 'comments',
+        params => sub {
+          return {comment_ids => $_[0]};
         },
-        qr{^/editcomments/comment$}, {
-            GET => {
-                method => 'comments',
-            },
+      },
+      PUT => {
+        method => 'update_comment',
+        params => sub {
+          return {comment_id => $_[0]};
         },
-        qr{^/editcomments/revision$}, {
-            PUT => {
-                method => 'modify_revision',
-            },
-        },
-    ];
-};
+      },
+    },
+    qr{^/editcomments/comment$},
+    {GET => {method => 'comments',},},
+    qr{^/editcomments/revision$},
+    {PUT => {method => 'modify_revision',},},
+  ];
+}
 
 
 1;

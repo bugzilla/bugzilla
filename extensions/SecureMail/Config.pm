@@ -28,25 +28,19 @@ use warnings;
 use constant NAME => 'SecureMail';
 
 use constant REQUIRED_MODULES => [
-    {
-        package => 'Crypt-OpenPGP',
-        module  => 'Crypt::OpenPGP',
-        # 1.02 added the ability for new() to take KeyRing objects for the
-        # PubRing argument.
-        version => '1.02',
-        # 1.04 hangs - https://rt.cpan.org/Public/Bug/Display.html?id=68018
-        # blacklist => [ '1.04' ],
-    },
-    {
-        package => 'Crypt-SMIME',
-        module  => 'Crypt::SMIME',
-        version => 0,
-    },
-    {
-        package => 'HTML-Tree',
-        module  => 'HTML::Tree',
-        version => 0,
-    }
+  {
+    package => 'Crypt-OpenPGP',
+    module  => 'Crypt::OpenPGP',
+
+    # 1.02 added the ability for new() to take KeyRing objects for the
+    # PubRing argument.
+    version => '1.02',
+
+    # 1.04 hangs - https://rt.cpan.org/Public/Bug/Display.html?id=68018
+    # blacklist => [ '1.04' ],
+  },
+  {package => 'Crypt-SMIME', module => 'Crypt::SMIME', version => 0,},
+  {package => 'HTML-Tree',   module => 'HTML::Tree',   version => 0,}
 ];
 
 __PACKAGE__->NAME;

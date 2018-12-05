@@ -22,52 +22,54 @@ use Taint::Util qw(untaint);
 BEGIN { push @INC, \&INC_HOOK }
 
 sub INC_HOOK {
-    my (undef, $fake_file) = @_;
-    state $bz_locations = bz_locations();
-    my ($vol, $dir, $file) = File::Spec->splitpath($fake_file);
-    my @dirs = grep { length $_ } File::Spec->splitdir($dir);
+  my (undef, $fake_file) = @_;
+  state $bz_locations = bz_locations();
+  my ($vol, $dir, $file) = File::Spec->splitpath($fake_file);
+  my @dirs = grep { length $_ } File::Spec->splitdir($dir);
 
-    if (@dirs > 2 && $dirs[0] eq 'Bugzilla' && $dirs[1] eq 'Extension') {
-        my $extension = $dirs[2];
-        splice @dirs, 0, 3, File::Spec->splitdir($bz_locations->{extensionsdir}), $extension, "lib";
-        my $real_file = Cwd::realpath(File::Spec->catpath($vol, File::Spec->catdir(@dirs), $file));
+  if (@dirs > 2 && $dirs[0] eq 'Bugzilla' && $dirs[1] eq 'Extension') {
+    my $extension = $dirs[2];
+    splice @dirs, 0, 3, File::Spec->splitdir($bz_locations->{extensionsdir}),
+      $extension, "lib";
+    my $real_file
+      = Cwd::realpath(File::Spec->catpath($vol, File::Spec->catdir(@dirs), $file));
 
-        my $first = 1;
-        untaint($real_file);
-        $INC{$fake_file} = $real_file;
-        my $found = open my $fh, '<', $real_file;
-        unless ($found) {
-            require Carp;
-            Carp::croak "Can't locate $fake_file while looking for $real_file in \@INC (\@INC contains: @INC)";
-        }
-        return sub {
-            no warnings;
-            if ( !$first ) {
-                return 0 if eof $fh;
-                $_ = readline $fh
-                    or return 0;
-                untaint($_);
-                return 1;
-            }
-            else {
-                $_ = qq{# line 1 "$real_file"\n};
-                $first = 0;
-                return 1;
-            }
-        };
+    my $first = 1;
+    untaint($real_file);
+    $INC{$fake_file} = $real_file;
+    my $found = open my $fh, '<', $real_file;
+    unless ($found) {
+      require Carp;
+      Carp::croak
+        "Can't locate $fake_file while looking for $real_file in \@INC (\@INC contains: @INC)";
     }
-    return;
-};
+    return sub {
+      no warnings;
+      if (!$first) {
+        return 0 if eof $fh;
+        $_ = readline $fh or return 0;
+        untaint($_);
+        return 1;
+      }
+      else {
+        $_     = qq{# line 1 "$real_file"\n};
+        $first = 0;
+        return 1;
+      }
+    };
+  }
+  return;
+}
 
 ####################
 # Subclass Methods #
 ####################
 
 sub new {
-    my ($class, $params) = @_;
-    $params ||= {};
-    bless $params, $class;
-    return $params;
+  my ($class, $params) = @_;
+  $params ||= {};
+  bless $params, $class;
+  return $params;
 }
 
 #######################################
@@ -75,83 +77,80 @@ sub new {
 #######################################
 
 sub load {
-    my ($class, $extension_file, $config_file) = @_;
-    my $package;
+  my ($class, $extension_file, $config_file) = @_;
+  my $package;
 
-    # This is needed during checksetup.pl, because Extension packages can
-    # only be loaded once (they return "1" the second time they're loaded,
-    # instead of their name). During checksetup.pl, extensions are loaded
-    # once by Bugzilla::Install::Requirements, and then later again via
-    # Bugzilla->extensions (because of hooks).
-    my $map = Bugzilla->request_cache->{extension_requirement_package_map};
+  # This is needed during checksetup.pl, because Extension packages can
+  # only be loaded once (they return "1" the second time they're loaded,
+  # instead of their name). During checksetup.pl, extensions are loaded
+  # once by Bugzilla::Install::Requirements, and then later again via
+  # Bugzilla->extensions (because of hooks).
+  my $map = Bugzilla->request_cache->{extension_requirement_package_map};
 
-    if ($config_file) {
-        if ($map and defined $map->{$config_file}) {
-            $package = $map->{$config_file};
-        }
-        else {
-            my $name = require $config_file;
-            if ($name =~ /^\d+$/) {
-                ThrowCodeError('extension_must_return_name',
-                               { extension => $config_file,
-                                 returned  => $name });
-            }
-            $package = "${class}::$name";
-        }
-    }
-
-    if ($map and defined $map->{$extension_file}) {
-        $package = $map->{$extension_file};
+  if ($config_file) {
+    if ($map and defined $map->{$config_file}) {
+      $package = $map->{$config_file};
     }
     else {
-        my $name = require $extension_file;
-        if ($name =~ /^\d+$/) {
-            ThrowCodeError('extension_must_return_name',
-                           { extension => $extension_file, returned => $name });
-        }
-        $package = "${class}::$name";
+      my $name = require $config_file;
+      if ($name =~ /^\d+$/) {
+        ThrowCodeError('extension_must_return_name',
+          {extension => $config_file, returned => $name});
+      }
+      $package = "${class}::$name";
     }
+  }
 
-    $class->_validate_package($package, $extension_file);
-    return $package;
+  if ($map and defined $map->{$extension_file}) {
+    $package = $map->{$extension_file};
+  }
+  else {
+    my $name = require $extension_file;
+    if ($name =~ /^\d+$/) {
+      ThrowCodeError('extension_must_return_name',
+        {extension => $extension_file, returned => $name});
+    }
+    $package = "${class}::$name";
+  }
+
+  $class->_validate_package($package, $extension_file);
+  return $package;
 }
 
 sub _validate_package {
-    my ($class, $package, $extension_file) = @_;
+  my ($class, $package, $extension_file) = @_;
 
-    # For extensions from data/extensions/additional, we don't have a file
-    # name, so we fake it.
-    if (!$extension_file) {
-        $extension_file = $package;
-        $extension_file =~ s/::/\//g;
-        $extension_file .= '.pm';
-    }
+  # For extensions from data/extensions/additional, we don't have a file
+  # name, so we fake it.
+  if (!$extension_file) {
+    $extension_file = $package;
+    $extension_file =~ s/::/\//g;
+    $extension_file .= '.pm';
+  }
 
-    if (!eval { $package->NAME }) {
-        ThrowCodeError('extension_no_name',
-                       { filename => $extension_file, package => $package });
-    }
+  if (!eval { $package->NAME }) {
+    ThrowCodeError('extension_no_name',
+      {filename => $extension_file, package => $package});
+  }
 
-    if (!$package->isa($class)) {
-        ThrowCodeError('extension_must_be_subclass',
-                       { filename => $extension_file,
-                         package  => $package,
-                         class    => $class });
-    }
+  if (!$package->isa($class)) {
+    ThrowCodeError('extension_must_be_subclass',
+      {filename => $extension_file, package => $package, class => $class});
+  }
 }
 
 sub load_all {
-    my $class = shift;
-    state $EXTENSIONS = [];
-    return $EXTENSIONS if @$EXTENSIONS;
+  my $class = shift;
+  state $EXTENSIONS = [];
+  return $EXTENSIONS if @$EXTENSIONS;
 
-    my ($file_sets) = extension_code_files();
-    foreach my $file_set (@$file_sets) {
-        my $package = $class->load(@$file_set);
-        push(@$EXTENSIONS, $package);
-    }
+  my ($file_sets) = extension_code_files();
+  foreach my $file_set (@$file_sets) {
+    my $package = $class->load(@$file_set);
+    push(@$EXTENSIONS, $package);
+  }
 
-    return $EXTENSIONS;
+  return $EXTENSIONS;
 }
 
 ####################
@@ -160,21 +159,21 @@ sub load_all {
 
 use constant enabled => 1;
 
-sub package_dir  {
-    my ($class) = @_;
-    state $bz_locations = bz_locations();
-    my (undef, undef, $name) = split(/::/, $class);
-    return File::Spec->catdir($bz_locations->{extensionsdir}, $name);
+sub package_dir {
+  my ($class) = @_;
+  state $bz_locations = bz_locations();
+  my (undef, undef, $name) = split(/::/, $class);
+  return File::Spec->catdir($bz_locations->{extensionsdir}, $name);
 }
 
 sub template_dir {
-    my ($class) = @_;
-    return File::Spec->catdir($class->package_dir, "template");
+  my ($class) = @_;
+  return File::Spec->catdir($class->package_dir, "template");
 }
 
 sub web_dir {
-    my ($class) = @_;
-    return File::Spec->catdir($class->package_dir, "web");
+  my ($class) = @_;
+  return File::Spec->catdir($class->package_dir, "web");
 }
 
 1;

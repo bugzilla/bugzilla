@@ -26,19 +26,21 @@ use List::MoreUtils qw( any );
 #            https://wpdev.uservoice.com/forums/257854/suggestions/17420707
 #            https://wpdev.uservoice.com/forums/257854-microsoft-edge-developer/suggestions/17420707-implement-css-display-flow-root-modern-clearfi
 sub should_handle {
-    my ($class, $uri) = @_;
-    return any { lc($uri->authority) eq $_ } qw( developer.microsoft.com wpdev.uservoice.com );
+  my ($class, $uri) = @_;
+  return any { lc($uri->authority) eq $_ }
+  qw( developer.microsoft.com wpdev.uservoice.com );
 }
 
 sub _check_value {
-    my ($class, $uri) = @_;
+  my ($class, $uri) = @_;
 
-    $uri = $class->SUPER::_check_value($uri);
+  $uri = $class->SUPER::_check_value($uri);
 
-    return $uri if  $uri->path =~ m{^/en-us/microsoft-edge/platform/issues/\d+/$};
-    return $uri if $uri->path =~ m{^/forums/\d+(?:-[^/]+)?/suggestions/\d+(?:-[^/]+)?};
+  return $uri if $uri->path =~ m{^/en-us/microsoft-edge/platform/issues/\d+/$};
+  return $uri
+    if $uri->path =~ m{^/forums/\d+(?:-[^/]+)?/suggestions/\d+(?:-[^/]+)?};
 
-    ThrowUserError('bug_url_invalid', { url => "$uri" });
+  ThrowUserError('bug_url_invalid', {url => "$uri"});
 }
 
 1;

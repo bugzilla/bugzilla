@@ -17,7 +17,8 @@ sub sends_data_to {
   my $this = shift;
   if (defined($_[0])) {
     $this->{TARGET} = $_[0];
-  } else {
+  }
+  else {
     return $this->{TARGET};
   }
 }

@@ -49,137 +49,128 @@ our $VERSION = '1';
 # },
 
 sub EDITABLE_TABLES {
-    my $tables = {};
-    Bugzilla::Hook::process("editable_tables", { tables => $tables });
-    return $tables;
+  my $tables = {};
+  Bugzilla::Hook::process("editable_tables", {tables => $tables});
+  return $tables;
 }
 
 sub page_before_template {
-    my ($self, $args) = @_;
-    my ($vars, $page) = @$args{qw(vars page_id)};
-    return unless $page eq 'edit_table.html';
-    my $input = Bugzilla->input_params;
+  my ($self, $args) = @_;
+  my ($vars, $page) = @$args{qw(vars page_id)};
+  return unless $page eq 'edit_table.html';
+  my $input = Bugzilla->input_params;
 
-    # we only support editing a particular set of tables
-    my $table_name = $input->{table};
-    exists $self->EDITABLE_TABLES()->{$table_name}
-        || ThrowUserError('edittable_unsupported', { table => $table_name } );
-    my $table = $self->EDITABLE_TABLES()->{$table_name};
-    my $id_field = $table->{id_field};
-    my $order_by = $table->{order_by} || $id_field;
-    my $group    = $table->{group} || 'admin';
-    trick_taint($table_name);
+  # we only support editing a particular set of tables
+  my $table_name = $input->{table};
+  exists $self->EDITABLE_TABLES()->{$table_name}
+    || ThrowUserError('edittable_unsupported', {table => $table_name});
+  my $table    = $self->EDITABLE_TABLES()->{$table_name};
+  my $id_field = $table->{id_field};
+  my $order_by = $table->{order_by} || $id_field;
+  my $group    = $table->{group} || 'admin';
+  trick_taint($table_name);
 
-    Bugzilla->user->in_group($group)
-        || ThrowUserError('auth_failure', { group  => $group,
-                                            action => 'edit',
-                                            object => 'tables' });
+  Bugzilla->user->in_group($group)
+    || ThrowUserError('auth_failure',
+    {group => $group, action => 'edit', object => 'tables'});
 
-    # load columns
-    my $dbh = Bugzilla->dbh;
-    my @fields = sort
-                 grep { $_ ne $id_field && $_ ne $order_by; }
-                 $dbh->bz_table_columns($table_name);
-    if ($order_by ne $id_field) {
-        unshift @fields, $order_by;
-    }
+  # load columns
+  my $dbh = Bugzilla->dbh;
+  my @fields = sort grep { $_ ne $id_field && $_ ne $order_by; }
+    $dbh->bz_table_columns($table_name);
+  if ($order_by ne $id_field) {
+    unshift @fields, $order_by;
+  }
 
-    # update table
-    my $data = $input->{table_data};
-    my $edits = [];
-    if ($data) {
-        check_hash_token($input->{token}, [$table_name]);
+  # update table
+  my $data  = $input->{table_data};
+  my $edits = [];
+  if ($data) {
+    check_hash_token($input->{token}, [$table_name]);
 
-        $data = from_json($data)->{data};
-        $edits = dclone($data);
-        eval {
-            $dbh->bz_start_transaction;
+    $data  = from_json($data)->{data};
+    $edits = dclone($data);
+    eval {
+      $dbh->bz_start_transaction;
 
-            foreach my $row (@$data) {
-                map { trick_taint($_) } @$row;
-                if ($row->[0] eq '-') {
-                    # add
-                    shift @$row;
-                    next unless grep { $_ ne '' } @$row;
-                    my $placeholders = join(',', split(//, '?' x scalar(@fields)));
-                    $dbh->do(
-                        "INSERT INTO $table_name(" . join(',', @fields) . ") " .
-                        "VALUES ($placeholders)",
-                        undef,
-                        @$row
-                    );
-                }
-                elsif ($row->[0] < 0) {
-                    # delete
-                    $dbh->do(
-                        "DELETE FROM $table_name WHERE $id_field=?",
-                        undef,
-                        -$row->[0]
-                    );
-                }
-                else {
-                    # update
-                    my $id = shift @$row;
-                    $dbh->do(
-                        "UPDATE $table_name " .
-                        "SET " . join(',', map { "$_ = ?" } @fields) . " " .
-                        "WHERE $id_field = ?",
-                        undef,
-                        @$row, $id
-                    );
-                }
-            }
+      foreach my $row (@$data) {
+        map { trick_taint($_) } @$row;
+        if ($row->[0] eq '-') {
 
-            $dbh->bz_commit_transaction;
-            $vars->{updated} = 1;
-            $edits = [];
-        };
-        if ($@) {
-            my $error = $@;
-            $error =~ s/^DBD::[^:]+::db do failed: //;
-            $error =~ s/^(.+) \[for Statement ".+$/$1/s;
-            $vars->{error} = $error;
-            $dbh->bz_rollback_transaction;
+          # add
+          shift @$row;
+          next unless grep { $_ ne '' } @$row;
+          my $placeholders = join(',', split(//, '?' x scalar(@fields)));
+          $dbh->do(
+            "INSERT INTO $table_name("
+              . join(',', @fields) . ") "
+              . "VALUES ($placeholders)",
+            undef, @$row
+          );
         }
-    }
+        elsif ($row->[0] < 0) {
 
-    # load data from table
-    unshift @fields, $id_field;
-    $data = $dbh->selectall_arrayref(
-        "SELECT " . join(',', @fields) . " FROM $table_name ORDER BY $order_by"
-    );
-
-    # we don't support nulls currently
-    foreach my $row (@$data) {
-        if (grep { !defined($_) } @$row) {
-            ThrowUserError('edittable_nulls', { table => $table_name } );
-        }
-    }
-
-    # apply failed edits
-    foreach my $edit (@$edits) {
-        if ($edit->[0] eq '-') {
-            push @$data, $edit;
+          # delete
+          $dbh->do("DELETE FROM $table_name WHERE $id_field=?", undef, -$row->[0]);
         }
         else {
-            my $id = $edit->[0];
-            foreach my $row (@$data) {
-                if ($row->[0] == $id) {
-                    @$row = @$edit;
-                    last;
-                }
-            }
+          # update
+          my $id = shift @$row;
+          $dbh->do(
+            "UPDATE $table_name " . "SET "
+              . join(',', map {"$_ = ?"} @fields) . " "
+              . "WHERE $id_field = ?",
+            undef, @$row, $id
+          );
         }
-    }
+      }
 
-    $vars->{table_name} = $table_name;
-    $vars->{blurb}      = $table->{blurb};
-    $vars->{token}      = issue_hash_token([$table_name]);
-    $vars->{table_data} = to_json({
-        fields   => \@fields,
-        id_field => $id_field,
-        data     => $data,
-    });
+      $dbh->bz_commit_transaction;
+      $vars->{updated} = 1;
+      $edits = [];
+    };
+    if ($@) {
+      my $error = $@;
+      $error =~ s/^DBD::[^:]+::db do failed: //;
+      $error =~ s/^(.+) \[for Statement ".+$/$1/s;
+      $vars->{error} = $error;
+      $dbh->bz_rollback_transaction;
+    }
+  }
+
+  # load data from table
+  unshift @fields, $id_field;
+  $data = $dbh->selectall_arrayref(
+    "SELECT " . join(',', @fields) . " FROM $table_name ORDER BY $order_by");
+
+  # we don't support nulls currently
+  foreach my $row (@$data) {
+    if (grep { !defined($_) } @$row) {
+      ThrowUserError('edittable_nulls', {table => $table_name});
+    }
+  }
+
+  # apply failed edits
+  foreach my $edit (@$edits) {
+    if ($edit->[0] eq '-') {
+      push @$data, $edit;
+    }
+    else {
+      my $id = $edit->[0];
+      foreach my $row (@$data) {
+        if ($row->[0] == $id) {
+          @$row = @$edit;
+          last;
+        }
+      }
+    }
+  }
+
+  $vars->{table_name} = $table_name;
+  $vars->{blurb}      = $table->{blurb};
+  $vars->{token}      = issue_hash_token([$table_name]);
+  $vars->{table_data}
+    = to_json({fields => \@fields, id_field => $id_field, data => $data,});
 }
 
 __PACKAGE__->NAME;

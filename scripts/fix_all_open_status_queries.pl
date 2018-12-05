@@ -30,87 +30,88 @@ USAGE
 }
 
 sub do_namedqueries {
-    my ($new_status) = @_;
-    my $dbh = Bugzilla->dbh;
-    my $replace_count = 0;
+  my ($new_status)  = @_;
+  my $dbh           = Bugzilla->dbh;
+  my $replace_count = 0;
 
-    my $query = $dbh->selectall_arrayref("SELECT id, query FROM namedqueries");
+  my $query = $dbh->selectall_arrayref("SELECT id, query FROM namedqueries");
 
-    if ($query) {
-        $dbh->bz_start_transaction();
+  if ($query) {
+    $dbh->bz_start_transaction();
 
-        my $sth = $dbh->prepare("UPDATE namedqueries SET query = ? WHERE id = ?");
+    my $sth = $dbh->prepare("UPDATE namedqueries SET query = ? WHERE id = ?");
 
-        foreach my $row (@$query) {
-            my ($id, $old_query) = @$row;
-            my $new_query = all_open_states($new_status, $old_query);
-            if ($new_query) {
-                trick_taint($new_query);
-                $sth->execute($new_query, $id);
-                $replace_count++;
-            }
-        }
-
-        $dbh->bz_commit_transaction();
+    foreach my $row (@$query) {
+      my ($id, $old_query) = @$row;
+      my $new_query = all_open_states($new_status, $old_query);
+      if ($new_query) {
+        trick_taint($new_query);
+        $sth->execute($new_query, $id);
+        $replace_count++;
+      }
     }
 
-    print "namedqueries: $replace_count replacements made.\n";
+    $dbh->bz_commit_transaction();
+  }
+
+  print "namedqueries: $replace_count replacements made.\n";
 }
 
 # series
 sub do_series {
-    my ($new_status) = @_;
-    my $dbh = Bugzilla->dbh;
-    my $replace_count = 0;
+  my ($new_status)  = @_;
+  my $dbh           = Bugzilla->dbh;
+  my $replace_count = 0;
 
-    my $query = $dbh->selectall_arrayref("SELECT series_id, query FROM series");
+  my $query = $dbh->selectall_arrayref("SELECT series_id, query FROM series");
 
-    if ($query) {
-        $dbh->bz_start_transaction();
+  if ($query) {
+    $dbh->bz_start_transaction();
 
-        my $sth = $dbh->prepare("UPDATE series SET query = ? WHERE series_id = ?");
+    my $sth = $dbh->prepare("UPDATE series SET query = ? WHERE series_id = ?");
 
-        foreach my $row (@$query) {
-            my ($series_id, $old_query) = @$row;
-            my $new_query = all_open_states($new_status, $old_query);
-            if ($new_query) {
-                trick_taint($new_query);
-                $sth->execute($new_query, $series_id);
-                $replace_count++;
-            }
-        }
-
-        $dbh->bz_commit_transaction();
+    foreach my $row (@$query) {
+      my ($series_id, $old_query) = @$row;
+      my $new_query = all_open_states($new_status, $old_query);
+      if ($new_query) {
+        trick_taint($new_query);
+        $sth->execute($new_query, $series_id);
+        $replace_count++;
+      }
     }
 
-    print "series: $replace_count replacements made.\n";
+    $dbh->bz_commit_transaction();
+  }
+
+  print "series: $replace_count replacements made.\n";
 }
 
 sub all_open_states {
-    my ($new_status, $query) = @_;
+  my ($new_status, $query) = @_;
 
-    my @open_states = Bugzilla::Status::BUG_STATE_OPEN();
-    my $cgi = Bugzilla::CGI->new($query);
-    my @query_states = $cgi->param('bug_status');
+  my @open_states  = Bugzilla::Status::BUG_STATE_OPEN();
+  my $cgi          = Bugzilla::CGI->new($query);
+  my @query_states = $cgi->param('bug_status');
 
-    my ($removed, $added) = diff_arrays(\@query_states, \@open_states);
+  my ($removed, $added) = diff_arrays(\@query_states, \@open_states);
 
-    if (scalar @$added == 1 && $added->[0] eq $new_status) {
-        push(@query_states, $new_status);
-        $cgi->param('bug_status', @query_states);
-        return $cgi->canonicalise_query();
-    }
+  if (scalar @$added == 1 && $added->[0] eq $new_status) {
+    push(@query_states, $new_status);
+    $cgi->param('bug_status', @query_states);
+    return $cgi->canonicalise_query();
+  }
 
-    return '';
+  return '';
 }
 
 sub validate_status {
-    my ($status) = @_;
-    my $dbh = Bugzilla->dbh;
-    my $exists = $dbh->selectrow_array("SELECT 1 FROM bug_status
-                                        WHERE value = ?",
-                                       undef, $status);
-    return $exists ? 1 : 0;
+  my ($status) = @_;
+  my $dbh      = Bugzilla->dbh;
+  my $exists   = $dbh->selectrow_array(
+    "SELECT 1 FROM bug_status
+                                        WHERE value = ?", undef, $status
+  );
+  return $exists ? 1 : 0;
 }
 
 #############################################################################
@@ -120,8 +121,8 @@ sub validate_status {
 Bugzilla->usage_mode(USAGE_MODE_CMDLINE);
 
 if (scalar @ARGV < 1) {
-    usage();
-    exit(1);
+  usage();
+  exit(1);
 }
 
 my ($new_status) = @ARGV;
@@ -129,9 +130,9 @@ my ($new_status) = @ARGV;
 $new_status = uc($new_status);
 
 if (!validate_status($new_status)) {
-    print "Invalid status: $new_status\n\n";
-    usage();
-    exit(1);
+  print "Invalid status: $new_status\n\n";
+  usage();
+  exit(1);
 }
 
 print "Adding new status '$new_status'.\n\n";

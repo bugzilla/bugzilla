@@ -14,13 +14,13 @@ use warnings;
 use base qw(Exporter);
 
 our @EXPORT = qw(
-    MAX_SETTER_COUNT
-    MAX_REQUEST_AGE
-    FLAG_TYPES
-    REQUESTEE_NAG_SQL
-    SETTER_NAG_SQL
-    WATCHING_REQUESTEE_NAG_SQL
-    WATCHING_SETTER_NAG_SQL
+  MAX_SETTER_COUNT
+  MAX_REQUEST_AGE
+  FLAG_TYPES
+  REQUESTEE_NAG_SQL
+  SETTER_NAG_SQL
+  WATCHING_REQUESTEE_NAG_SQL
+  WATCHING_SETTER_NAG_SQL
 );
 
 # if there are more than this many requests that a user is waiting on, show a
@@ -29,33 +29,24 @@ use constant MAX_SETTER_COUNT => 7;
 
 # ignore any request older than this many days in the requestee emails
 # massively overdue requests will still be included in the 'watching' emails
-use constant MAX_REQUEST_AGE => 90; # about three months
+use constant MAX_REQUEST_AGE => 90;    # about three months
 
 # the order of this array determines the order used in email
 use constant FLAG_TYPES => (
-    {
-        type    => 'review',    # flag_type.name
-        group   => 'everyone',  # the user must be a member of this group to receive reminders
-    },
-    {
-        type    => 'superview',
-        group   => 'everyone',
-    },
-    {
-        type    => 'feedback',
-        group   => 'everyone',
-    },
-    {
-        type    => 'needinfo',
-        group   => 'editbugs',
-    },
+  {
+    type => 'review',                  # flag_type.name
+    group => 'everyone', # the user must be a member of this group to receive reminders
+  },
+  {type => 'superview', group => 'everyone',},
+  {type => 'feedback',  group => 'everyone',},
+  {type => 'needinfo',  group => 'editbugs',},
 );
 
 sub REQUESTEE_NAG_SQL {
-    my $dbh = Bugzilla->dbh;
-    my @flag_types_sql = map { $dbh->quote($_->{type}) } FLAG_TYPES;
+  my $dbh = Bugzilla->dbh;
+  my @flag_types_sql = map { $dbh->quote($_->{type}) } FLAG_TYPES;
 
-    return "
+  return "
     SELECT
         flagtypes.name AS flag_type,
         flags.id AS flag_id,
@@ -84,7 +75,8 @@ sub REQUESTEE_NAG_SQL {
         AND flags.status = '?'
         AND products.nag_interval != 0
         AND TIMESTAMPDIFF(HOUR, flags.modification_date, CURRENT_DATE()) >= products.nag_interval
-        AND TIMESTAMPDIFF(DAY, flags.modification_date, CURRENT_DATE()) <= " . MAX_REQUEST_AGE . "
+        AND TIMESTAMPDIFF(DAY, flags.modification_date, CURRENT_DATE()) <= "
+    . MAX_REQUEST_AGE . "
         AND (profile_setting.setting_value IS NULL OR profile_setting.setting_value = 'on')
         AND requestee.disable_mail = 0
         AND nag_defer.id IS NULL
@@ -96,10 +88,10 @@ sub REQUESTEE_NAG_SQL {
 }
 
 sub SETTER_NAG_SQL {
-    my $dbh = Bugzilla->dbh;
-    my @flag_types_sql = map { $dbh->quote($_->{type}) } FLAG_TYPES;
+  my $dbh = Bugzilla->dbh;
+  my @flag_types_sql = map { $dbh->quote($_->{type}) } FLAG_TYPES;
 
-    return "
+  return "
     SELECT
         flagtypes.name AS flag_type,
         flags.id AS flag_id,
@@ -128,7 +120,8 @@ sub SETTER_NAG_SQL {
         AND flags.status = '?'
         AND products.nag_interval != 0
         AND TIMESTAMPDIFF(HOUR, flags.modification_date, CURRENT_DATE()) >= products.nag_interval
-        AND TIMESTAMPDIFF(DAY, flags.modification_date, CURRENT_DATE()) <= " . MAX_REQUEST_AGE . "
+        AND TIMESTAMPDIFF(DAY, flags.modification_date, CURRENT_DATE()) <= "
+    . MAX_REQUEST_AGE . "
         AND (profile_setting.setting_value IS NULL OR profile_setting.setting_value = 'on')
         AND setter.disable_mail = 0
         AND nag_defer.id IS NULL
@@ -140,10 +133,10 @@ sub SETTER_NAG_SQL {
 }
 
 sub WATCHING_REQUESTEE_NAG_SQL {
-    my $dbh = Bugzilla->dbh;
-    my @flag_types_sql = map { $dbh->quote($_->{type}) } FLAG_TYPES;
+  my $dbh = Bugzilla->dbh;
+  my @flag_types_sql = map { $dbh->quote($_->{type}) } FLAG_TYPES;
 
-    return "
+  return "
     SELECT
         nag_watch.watcher_id,
         flagtypes.name AS flag_type,
@@ -192,10 +185,10 @@ sub WATCHING_REQUESTEE_NAG_SQL {
 }
 
 sub WATCHING_SETTER_NAG_SQL {
-    my $dbh = Bugzilla->dbh;
-    my @flag_types_sql = map { $dbh->quote($_->{type}) } FLAG_TYPES;
+  my $dbh = Bugzilla->dbh;
+  my @flag_types_sql = map { $dbh->quote($_->{type}) } FLAG_TYPES;
 
-    return "
+  return "
     SELECT
         nag_watch.watcher_id,
         flagtypes.name AS flag_type,

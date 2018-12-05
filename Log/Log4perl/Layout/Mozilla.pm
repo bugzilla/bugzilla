@@ -16,66 +16,64 @@ use constant LOGGING_FORMAT_VERSION => 2.0;
 
 extends 'Log::Log4perl::Layout';
 
-has 'name' => (
-    is      => 'ro',
-    default => 'Bugzilla',
-);
+has 'name' => (is => 'ro', default => 'Bugzilla',);
 
 has 'max_json_length' => (
-    is      => 'ro',
-    isa     => sub { die "must be at least 1024\n" if $_[0] < 1024 },
-    default => 4096,
+  is      => 'ro',
+  isa     => sub { die "must be at least 1024\n" if $_[0] < 1024 },
+  default => 4096,
 );
 
 sub BUILDARGS {
-    my ($class, $params) = @_;
+  my ($class, $params) = @_;
 
-    delete $params->{value};
-    foreach my $key (keys %$params) {
-        if (ref $params->{$key} eq 'HASH') {
-            $params->{$key} = $params->{$key}{value};
-        }
+  delete $params->{value};
+  foreach my $key (keys %$params) {
+    if (ref $params->{$key} eq 'HASH') {
+      $params->{$key} = $params->{$key}{value};
     }
-    return $params;
+  }
+  return $params;
 }
 
 sub render {
-    my ( $self, $msg, $category, $priority, $caller_level ) = @_;
+  my ($self, $msg, $category, $priority, $caller_level) = @_;
 
-    state $HOSTNAME = hostname();
-    state $JSON     = JSON::MaybeXS->new(
-        indent          => 0,    # to prevent newlines (and save space)
-        ascii           => 1,    # to avoid encoding issues downstream
-        allow_unknown   => 1,    # encode null on bad value (instead of exception)
-        convert_blessed => 1,    # call TO_JSON on blessed ref, if it exists
-        allow_blessed   => 1,    # encode null on blessed ref that can't be converted
-    );
+  state $HOSTNAME = hostname();
+  state $JSON     = JSON::MaybeXS->new(
+    indent          => 0,    # to prevent newlines (and save space)
+    ascii           => 1,    # to avoid encoding issues downstream
+    allow_unknown   => 1,    # encode null on bad value (instead of exception)
+    convert_blessed => 1,    # call TO_JSON on blessed ref, if it exists
+    allow_blessed   => 1,    # encode null on blessed ref that can't be converted
+  );
 
-    my $mdc = Log::Log4perl::MDC->get_context;
-    my $fields = $mdc->{fields} // {};
-    if ($mdc->{request_id}) {
-        $fields->{request_id} = $mdc->{request_id}
-    }
-    my %out = (
-        EnvVersion => LOGGING_FORMAT_VERSION,
-        Hostname   => $HOSTNAME,
-        Logger     => $self->name,
-        Pid        => $PID,
-        Severity   => $Log::Log4perl::Level::SYSLOG{$priority},
-        Timestamp  => time() * 1e9,
-        Type       => $category,
-        Fields     => { msg => $msg, %$fields },
-    );
+  my $mdc = Log::Log4perl::MDC->get_context;
+  my $fields = $mdc->{fields} // {};
+  if ($mdc->{request_id}) {
+    $fields->{request_id} = $mdc->{request_id};
+  }
+  my %out = (
+    EnvVersion => LOGGING_FORMAT_VERSION,
+    Hostname   => $HOSTNAME,
+    Logger     => $self->name,
+    Pid        => $PID,
+    Severity   => $Log::Log4perl::Level::SYSLOG{$priority},
+    Timestamp  => time() * 1e9,
+    Type       => $category,
+    Fields     => {msg => $msg, %$fields},
+  );
 
-    my $json_text = $JSON->encode(\%out) . "\n";
-    if (length($json_text) > $self->max_json_length) {
-        my $scary_msg = sprintf 'DANGER! LOG MESSAGE TOO BIG %d > %d', length($json_text), $self->max_json_length;
-        $out{Fields}   = { remote_ip => $mdc->{remote_ip}, msg => $scary_msg };
-        $out{Severity} = 1; # alert
-        $json_text     = $JSON->encode(\%out) . "\n";
-    }
+  my $json_text = $JSON->encode(\%out) . "\n";
+  if (length($json_text) > $self->max_json_length) {
+    my $scary_msg = sprintf 'DANGER! LOG MESSAGE TOO BIG %d > %d',
+      length($json_text), $self->max_json_length;
+    $out{Fields}   = {remote_ip => $mdc->{remote_ip}, msg => $scary_msg};
+    $out{Severity} = 1;                                                     # alert
+    $json_text     = $JSON->encode(\%out) . "\n";
+  }
 
-    return $json_text;
+  return $json_text;
 }
 
 1;

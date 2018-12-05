@@ -15,32 +15,30 @@ use Bugzilla;
 use Bugzilla::Extension::Push::Message;
 
 sub new {
-    my ($class) = @_;
-    my $self = {};
-    bless($self, $class);
-    return $self;
+  my ($class) = @_;
+  my $self = {};
+  bless($self, $class);
+  return $self;
 }
 
 sub count {
-    my ($self) = @_;
-    my $dbh = Bugzilla->dbh;
-    return $dbh->selectrow_array("SELECT COUNT(*) FROM push_log");
+  my ($self) = @_;
+  my $dbh = Bugzilla->dbh;
+  return $dbh->selectrow_array("SELECT COUNT(*) FROM push_log");
 }
 
 sub list {
-    my ($self, %args) = @_;
-    $args{limit} ||= 10;
-    $args{filter} ||= '';
-    my @result;
-    my $dbh = Bugzilla->dbh;
+  my ($self, %args) = @_;
+  $args{limit}  ||= 10;
+  $args{filter} ||= '';
+  my @result;
+  my $dbh = Bugzilla->dbh;
 
-    my $ids = $dbh->selectcol_arrayref("
+  my $ids = $dbh->selectcol_arrayref("
         SELECT id
           FROM push_log
-         ORDER BY processed_ts DESC " .
-         $dbh->sql_limit(100)
-    );
-    return Bugzilla::Extension::Push::LogEntry->new_from_list($ids);
+         ORDER BY processed_ts DESC " . $dbh->sql_limit(100));
+  return Bugzilla::Extension::Push::LogEntry->new_from_list($ids);
 }
 
 1;

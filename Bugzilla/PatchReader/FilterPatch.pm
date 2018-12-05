@@ -11,7 +11,7 @@ use Bugzilla::PatchReader::Base;
 sub new {
   my $class = shift;
   $class = ref($class) || $class;
-  my $this  = $class->SUPER::new();
+  my $this = $class->SUPER::new();
   bless $this, $class;
 
   return $this;

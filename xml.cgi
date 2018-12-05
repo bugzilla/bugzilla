@@ -35,7 +35,7 @@ my $cgi = Bugzilla->cgi;
 my @ids = ();
 
 if (defined $cgi->param('id')) {
-    @ids = split (/[, ]+/, $cgi->param('id'));
+  @ids = split(/[, ]+/, $cgi->param('id'));
 }
 
 my $ids = join('', map { $_ = "&id=" . $_ } @ids);

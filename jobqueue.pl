@@ -14,10 +14,10 @@ use File::Basename qw(dirname);
 use File::Spec::Functions qw(catdir rel2abs);
 
 BEGIN {
-    require lib;
-    my $dir = rel2abs( dirname(__FILE__) );
-    lib->import( $dir, catdir( $dir, 'lib' ), catdir( $dir, qw(local lib perl5) ) );
-    chdir $dir or die "chdir $dir failed: $!";
+  require lib;
+  my $dir = rel2abs(dirname(__FILE__));
+  lib->import($dir, catdir($dir, 'lib'), catdir($dir, qw(local lib perl5)));
+  chdir $dir or die "chdir $dir failed: $!";
 }
 
 use Bugzilla;

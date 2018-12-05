@@ -16,9 +16,9 @@ use Bugzilla;
 use Bugzilla::Error;
 use Bugzilla::Bug;
 
-my $cgi = Bugzilla->cgi;
+my $cgi      = Bugzilla->cgi;
 my $template = Bugzilla->template;
-my $vars = {};
+my $vars     = {};
 
 ###############################################################################
 # Begin Data/Security Validation
@@ -29,7 +29,7 @@ Bugzilla->login();
 
 # Make sure the bug ID is a positive integer representing an existing
 # bug that the user is authorized to access.
-my $id = $cgi->param('id');
+my $id  = $cgi->param('id');
 my $bug = Bugzilla::Bug->check($id);
 
 ###############################################################################
@@ -40,8 +40,8 @@ my $bug = Bugzilla::Bug->check($id);
 # visible immediately due to replication lag.
 Bugzilla->switch_to_shadow_db;
 
-($vars->{'operations'}, $vars->{'incomplete_data'}) =
-    Bugzilla::Bug::GetBugActivity($bug->id, undef, undef, 1);
+($vars->{'operations'}, $vars->{'incomplete_data'})
+  = Bugzilla::Bug::GetBugActivity($bug->id, undef, undef, 1);
 
 $vars->{'bug'} = $bug;
 

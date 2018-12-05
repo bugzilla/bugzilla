@@ -12,13 +12,8 @@ use strict;
 use warnings;
 
 use constant NAME => 'AntiSpam';
-use constant REQUIRED_MODULES => [
-    {
-        package => 'Email-Address',
-        module  => 'Email::Address',
-        version => 0,
-    },
-];
+use constant REQUIRED_MODULES =>
+  [{package => 'Email-Address', module => 'Email::Address', version => 0,},];
 use constant OPTIONAL_MODULES => [];
 
 __PACKAGE__->NAME;

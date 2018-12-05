@@ -17,78 +17,65 @@ use Bugzilla::Group;
 our $sortkey = 900;
 
 sub get_param_list {
-    my $class = shift;
+  my $class = shift;
 
-    my @param_list = (
-        {
-            name    => 'makeproductgroups',
-            type    => 'b',
-            default => 0
-        },
+  my @param_list = (
+    {name => 'makeproductgroups', type => 'b', default => 0},
 
-        {
-            name    => 'chartgroup',
-            type    => 's',
-            choices => \&get_all_group_names,
-            default => 'editbugs',
-            checker => \&check_group
-        },
+    {
+      name    => 'chartgroup',
+      type    => 's',
+      choices => \&get_all_group_names,
+      default => 'editbugs',
+      checker => \&check_group
+    },
 
-        {
-            name    => 'insidergroup',
-            type    => 's',
-            choices => \&get_all_group_names,
-            default => '',
-            checker => \&check_group
-        },
+    {
+      name    => 'insidergroup',
+      type    => 's',
+      choices => \&get_all_group_names,
+      default => '',
+      checker => \&check_group
+    },
 
-        {
-            name    => 'timetrackinggroup',
-            type    => 's',
-            choices => \&get_all_group_names,
-            default => 'editbugs',
-            checker => \&check_group
-        },
+    {
+      name    => 'timetrackinggroup',
+      type    => 's',
+      choices => \&get_all_group_names,
+      default => 'editbugs',
+      checker => \&check_group
+    },
 
-        {
-            name    => 'querysharegroup',
-            type    => 's',
-            choices => \&get_all_group_names,
-            default => 'editbugs',
-            checker => \&check_group
-        },
+    {
+      name    => 'querysharegroup',
+      type    => 's',
+      choices => \&get_all_group_names,
+      default => 'editbugs',
+      checker => \&check_group
+    },
 
-        {
-            name    => 'comment_taggers_group',
-            type    => 's',
-            choices => \&get_all_group_names,
-            default => 'editbugs',
-            checker => \&check_comment_taggers_group
-        },
+    {
+      name    => 'comment_taggers_group',
+      type    => 's',
+      choices => \&get_all_group_names,
+      default => 'editbugs',
+      checker => \&check_comment_taggers_group
+    },
 
-        {
-            name    => 'debug_group',
-            type    => 's',
-            choices => \&get_all_group_names,
-            default => 'admin',
-            checker => \&check_group
-        },
+    {
+      name    => 'debug_group',
+      type    => 's',
+      choices => \&get_all_group_names,
+      default => 'admin',
+      checker => \&check_group
+    },
 
-        {
-            name    => 'usevisibilitygroups',
-            type    => 'b',
-            default => 0
-        },
+    {name => 'usevisibilitygroups', type => 'b', default => 0},
 
-        {
-            name    => 'strict_isolation',
-            type    => 'b',
-            default => 0
-        }
-    );
-    return @param_list;
+    {name => 'strict_isolation', type => 'b', default => 0}
+  );
+  return @param_list;
 }
-
 
 
 1;

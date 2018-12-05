@@ -17,33 +17,30 @@ use Bugzilla::Product;
 use Bugzilla::Component;
 
 sub report {
-    my ($vars) = @_;
-    my $user = Bugzilla->user;
+  my ($vars) = @_;
+  my $user = Bugzilla->user;
 
-    $user->in_group('hr')
-        || ThrowUserError('auth_failure', { group  => 'hr',
-                                            action => 'run',
-                                            object => 'internship_dashboard' });
+  $user->in_group('hr')
+    || ThrowUserError('auth_failure',
+    {group => 'hr', action => 'run', object => 'internship_dashboard'});
 
-    my $product   = Bugzilla::Product->check({ name => 'Recruiting', cache => 1 });
-    my $component = Bugzilla::Component->new({ product => $product, name => 'Intern', cache => 1 });
+  my $product = Bugzilla::Product->check({name => 'Recruiting', cache => 1});
+  my $component = Bugzilla::Component->new(
+    {product => $product, name => 'Intern', cache => 1});
 
-    # find all open internship bugs
-    my $bugs = Bugzilla::Bug->match({
-        product_id   => $product->id,
-        component_id => $component->id,
-        resolution   => '',
-    });
+  # find all open internship bugs
+  my $bugs = Bugzilla::Bug->match({
+    product_id   => $product->id,
+    component_id => $component->id,
+    resolution   => '',
+  });
 
-    # filter bugs based on visibility and re-bless
-    $user->visible_bugs($bugs);
-    $bugs = [
-        map  { bless($_, 'InternshipBug') }
-        grep { $user->can_see_bug($_->id) }
-        @$bugs
-    ];
+  # filter bugs based on visibility and re-bless
+  $user->visible_bugs($bugs);
+  $bugs = [map { bless($_, 'InternshipBug') }
+      grep { $user->can_see_bug($_->id) } @$bugs];
 
-    $vars->{bugs} = $bugs;
+  $vars->{bugs} = $bugs;
 }
 
 1;
@@ -58,64 +55,62 @@ use Bugzilla::Comment;
 use Bugzilla::Util qw(trim);
 
 sub _extract {
-    my ($self) = @_;
-    return if exists $self->{internship_data};
-    $self->{internship_data} = {};
+  my ($self) = @_;
+  return if exists $self->{internship_data};
+  $self->{internship_data} = {};
 
-    # we only need the first comment
-    my $comment = Bugzilla::Comment->match({
-        bug_id => $self->id,
-        LIMIT  => 1,
-    })->[0]->body;
+  # we only need the first comment
+  my $comment
+    = Bugzilla::Comment->match({bug_id => $self->id, LIMIT => 1,})->[0]->body;
 
-    # extract just what we need
-    # changing the comment will break this
+  # extract just what we need
+  # changing the comment will break this
 
-    if ($comment =~ /Hiring Manager:\s+(.+)\nTeam:\n/s) {
-        $self->{internship_data}->{hiring_manager} = trim($1);
-    }
-    if ($comment =~ /\nVP Authority:\s+(.+)\nProduct Line:\n/s) {
-        $self->{internship_data}->{scvp} = trim($1);
-    }
-    if ($comment =~ /\nProduct Line:\s+(.+)\nLevel 1/s) {
-        $self->{internship_data}->{product_line} = trim($1);
-    }
-    if ($comment =~ /\nBusiness Need:\s+(.+)\nPotential Project:\n/s) {
-        $self->{internship_data}->{business_need} = trim($1);
-    }
-    if ($comment =~ /\nName:\s+(.+)$/s) {
-        $self->{internship_data}->{intern_name} = trim($1);
-    }
+  if ($comment =~ /Hiring Manager:\s+(.+)\nTeam:\n/s) {
+    $self->{internship_data}->{hiring_manager} = trim($1);
+  }
+  if ($comment =~ /\nVP Authority:\s+(.+)\nProduct Line:\n/s) {
+    $self->{internship_data}->{scvp} = trim($1);
+  }
+  if ($comment =~ /\nProduct Line:\s+(.+)\nLevel 1/s) {
+    $self->{internship_data}->{product_line} = trim($1);
+  }
+  if ($comment =~ /\nBusiness Need:\s+(.+)\nPotential Project:\n/s) {
+    $self->{internship_data}->{business_need} = trim($1);
+  }
+  if ($comment =~ /\nName:\s+(.+)$/s) {
+    $self->{internship_data}->{intern_name} = trim($1);
+  }
 }
 
 sub hiring_manager {
-    my ($self) = @_;
-    $self->_extract();
-    return $self->{internship_data}->{hiring_manager};
+  my ($self) = @_;
+  $self->_extract();
+  return $self->{internship_data}->{hiring_manager};
 }
 
 sub scvp {
-    my ($self) = @_;
-    $self->_extract();
-    return $self->{internship_data}->{scvp};
+  my ($self) = @_;
+  $self->_extract();
+  return $self->{internship_data}->{scvp};
 }
 
 sub business_need {
-    my ($self) = @_;
-    $self->_extract();
-    return $self->{internship_data}->{business_need};
+  my ($self) = @_;
+  $self->_extract();
+  return $self->{internship_data}->{business_need};
 }
 
 sub product_line {
-    my ($self) = @_;
-    $self->_extract();
-    return $self->{internship_data}->{product_line};
+  my ($self) = @_;
+  $self->_extract();
+  return $self->{internship_data}->{product_line};
 }
 
 sub intern_name {
-    my ($self) = @_;
-    $self->_extract();
-    return $self->{internship_data}->{intern_name};
+  my ($self) = @_;
+  $self->_extract();
+  return $self->{internship_data}->{intern_name};
 }
 
 1;

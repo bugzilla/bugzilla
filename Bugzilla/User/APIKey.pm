@@ -21,58 +21,60 @@ use Bugzilla::Error;
 # Overriden Constants that are used as methods
 #####################################################################
 
-use constant DB_TABLE       => 'user_api_keys';
-use constant DB_COLUMNS     => qw(
-    id
-    user_id
-    api_key
-    app_id
-    description
-    revoked
-    last_used
-    last_used_ip
+use constant DB_TABLE   => 'user_api_keys';
+use constant DB_COLUMNS => qw(
+  id
+  user_id
+  api_key
+  app_id
+  description
+  revoked
+  last_used
+  last_used_ip
 );
 
 use constant UPDATE_COLUMNS => qw(description revoked last_used last_used_ip);
 use constant VALIDATORS     => {
-    api_key     => \&_check_api_key,
-    app_id      => \&_check_app_id,
-    description => \&_check_description,
-    revoked     => \&Bugzilla::Object::check_boolean,
+  api_key     => \&_check_api_key,
+  app_id      => \&_check_app_id,
+  description => \&_check_description,
+  revoked     => \&Bugzilla::Object::check_boolean,
 };
-use constant LIST_ORDER     => 'id';
-use constant NAME_FIELD     => 'api_key';
+use constant LIST_ORDER => 'id';
+use constant NAME_FIELD => 'api_key';
 
 # turn off auditing and exclude these objects from memcached
-use constant { AUDIT_CREATES => 0,
-               AUDIT_UPDATES => 0,
-               AUDIT_REMOVES => 0,
-               USE_MEMCACHED => 0 };
+use constant {
+  AUDIT_CREATES => 0,
+  AUDIT_UPDATES => 0,
+  AUDIT_REMOVES => 0,
+  USE_MEMCACHED => 0
+};
 
 # Accessors
-sub id            { return $_[0]->{id}          }
-sub user_id       { return $_[0]->{user_id}     }
-sub api_key       { return $_[0]->{api_key}     }
-sub app_id        { return $_[0]->{app_id}      }
-sub description   { return $_[0]->{description} }
-sub revoked       { return $_[0]->{revoked}     }
-sub last_used     { return $_[0]->{last_used}   }
-sub last_used_ip  { return $_[0]->{last_used_ip}   }
+sub id           { return $_[0]->{id} }
+sub user_id      { return $_[0]->{user_id} }
+sub api_key      { return $_[0]->{api_key} }
+sub app_id       { return $_[0]->{app_id} }
+sub description  { return $_[0]->{description} }
+sub revoked      { return $_[0]->{revoked} }
+sub last_used    { return $_[0]->{last_used} }
+sub last_used_ip { return $_[0]->{last_used_ip} }
 
 # Helpers
 sub user {
-    my $self = shift;
-    $self->{user} //= Bugzilla::User->new({name => $self->user_id, cache => 1});
-    return $self->{user};
+  my $self = shift;
+  $self->{user} //= Bugzilla::User->new({name => $self->user_id, cache => 1});
+  return $self->{user};
 }
 
 sub update_last_used {
-    my $self = shift;
-    my $timestamp = shift
-        || Bugzilla->dbh->selectrow_array('SELECT LOCALTIMESTAMP(0)');
-    $self->set('last_used', $timestamp);
-    $self->set('last_used_ip', remote_ip());
-    $self->update;
+  my $self = shift;
+  my $timestamp
+    = shift || Bugzilla->dbh->selectrow_array('SELECT LOCALTIMESTAMP(0)');
+  $self->set('last_used',    $timestamp);
+  $self->set('last_used_ip', remote_ip());
+  $self->update;
 }
 
 # Setters
@@ -80,20 +82,22 @@ sub set_description { $_[0]->set('description', $_[1]); }
 sub set_revoked     { $_[0]->set('revoked',     $_[1]); }
 
 # Validators
-sub _check_api_key     { return generate_random_password(40); }
-sub _check_description { return trim($_[1]) || '';   }
+sub _check_api_key { return generate_random_password(40); }
+sub _check_description { return trim($_[1]) || ''; }
+
 sub _check_app_id {
-    my ($invocant, $app_id) = @_;
+  my ($invocant, $app_id) = @_;
 
-    ThrowCodeError("invalid_app_id", { app_id => $app_id }) unless $app_id =~ /^[[:xdigit:]]+$/;
+  ThrowCodeError("invalid_app_id", {app_id => $app_id})
+    unless $app_id =~ /^[[:xdigit:]]+$/;
 
-    return $app_id;
+  return $app_id;
 }
 
 sub create_special {
-    my ($class, @args) = @_;
-    local VALIDATORS->{api_key} = sub { return $_[1] };
-    return $class->create(@args);
+  my ($class, @args) = @_;
+  local VALIDATORS->{api_key} = sub { return $_[1] };
+  return $class->create(@args);
 }
 1;
 

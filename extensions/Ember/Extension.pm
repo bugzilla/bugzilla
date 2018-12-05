@@ -16,9 +16,9 @@ use parent qw(Bugzilla::Extension);
 our $VERSION = '0.01';
 
 sub webservice {
-    my ($self,  $args) = @_;
-    my $dispatch = $args->{dispatch};
-    $dispatch->{Ember} = "Bugzilla::Extension::Ember::WebService";
+  my ($self, $args) = @_;
+  my $dispatch = $args->{dispatch};
+  $dispatch->{Ember} = "Bugzilla::Extension::Ember::WebService";
 }
 
 __PACKAGE__->NAME;

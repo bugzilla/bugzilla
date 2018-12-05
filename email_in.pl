@@ -16,10 +16,11 @@ use lib qw(. lib local/lib/perl5);
 # run from this one so that it can find its modules.
 use Cwd qw(abs_path);
 use File::Basename qw(dirname);
+
 BEGIN {
-    # Untaint the abs_path.
-    my ($a) = abs_path($0) =~ /^(.*)$/;
-    chdir dirname($a);
+  # Untaint the abs_path.
+  my ($a) = abs_path($0) =~ /^(.*)$/;
+  chdir dirname($a);
 }
 
 use Data::Dumper;
@@ -60,213 +61,221 @@ our ($input_email, %switch);
 ####################
 
 sub parse_mail {
-    my ($mail_text) = @_;
-    debug_print('Parsing Email');
-    $input_email = Email::MIME->new($mail_text);
+  my ($mail_text) = @_;
+  debug_print('Parsing Email');
+  $input_email = Email::MIME->new($mail_text);
 
-    my %fields = %{ $switch{'default'} || {} };
-    Bugzilla::Hook::process('email_in_before_parse', { mail => $input_email,
-                                                       fields => \%fields });
+  my %fields = %{$switch{'default'} || {}};
+  Bugzilla::Hook::process('email_in_before_parse',
+    {mail => $input_email, fields => \%fields});
 
-    my $summary = $input_email->header('Subject');
-    if ($summary =~ /\[\S+ (\d+)\](.*)/i) {
-        $fields{'bug_id'} = $1;
-        $summary = trim($2);
+  my $summary = $input_email->header('Subject');
+  if ($summary =~ /\[\S+ (\d+)\](.*)/i) {
+    $fields{'bug_id'} = $1;
+    $summary = trim($2);
+  }
+
+  # Ignore automatic replies.
+  # XXX - Improve the way to detect such subjects in different languages.
+  my $auto_submitted = $input_email->header('Auto-Submitted') || '';
+  if ($summary =~ /out of( the)? office/i || $auto_submitted eq 'auto-replied') {
+    debug_print("Automatic reply detected: $summary");
+    exit;
+  }
+
+  my ($body, $attachments) = get_body_and_attachments($input_email);
+  if (@$attachments) {
+    $fields{'attachments'} = $attachments;
+  }
+
+  debug_print("Body:\n" . $body, 3);
+
+  $body = remove_leading_blank_lines($body);
+  my @body_lines = split(/\r?\n/s, $body);
+
+  # If there are fields specified.
+  if ($body =~ /^\s*@/s) {
+    my $current_field;
+    while (my $line = shift @body_lines) {
+
+      # If the sig is starting, we want to keep this in the
+      # @body_lines so that we don't keep the sig as part of the
+      # comment down below.
+      if ($line eq SIGNATURE_DELIMITER) {
+        unshift(@body_lines, $line);
+        last;
+      }
+
+      # Otherwise, we stop parsing fields on the first blank line.
+      $line = trim($line);
+      last if !$line;
+      if ($line =~ /^\@(\w+)\s*(?:=|\s|$)\s*(.*)\s*/) {
+        $current_field = lc($1);
+        $fields{$current_field} = $2;
+      }
+      else {
+        $fields{$current_field} .= " $line";
+      }
     }
+  }
 
-    # Ignore automatic replies.
-    # XXX - Improve the way to detect such subjects in different languages.
-    my $auto_submitted = $input_email->header('Auto-Submitted') || '';
-    if ($summary =~ /out of( the)? office/i || $auto_submitted eq 'auto-replied') {
-        debug_print("Automatic reply detected: $summary");
-        exit;
-    }
+  %fields = %{Bugzilla::Bug::map_fields(\%fields)};
 
-    my ($body, $attachments) = get_body_and_attachments($input_email);
-    if (@$attachments) {
-        $fields{'attachments'} = $attachments;
-    }
+  my ($reporter) = Email::Address->parse($input_email->header('From'));
+  $fields{'reporter'} = $reporter->address;
 
-    debug_print("Body:\n" . $body, 3);
+  # The summary line only affects us if we're doing a post_bug.
+  # We have to check it down here because there might have been
+  # a bug_id specified in the body of the email.
+  if (!$fields{'bug_id'} && !$fields{'short_desc'}) {
+    $fields{'short_desc'} = $summary;
+  }
 
-    $body = remove_leading_blank_lines($body);
-    my @body_lines = split(/\r?\n/s, $body);
+  my $comment = '';
 
-    # If there are fields specified.
-    if ($body =~ /^\s*@/s) {
-        my $current_field;
-        while (my $line = shift @body_lines) {
-            # If the sig is starting, we want to keep this in the
-            # @body_lines so that we don't keep the sig as part of the
-            # comment down below.
-            if ($line eq SIGNATURE_DELIMITER) {
-                unshift(@body_lines, $line);
-                last;
-            }
-            # Otherwise, we stop parsing fields on the first blank line.
-            $line = trim($line);
-            last if !$line;
-            if ($line =~ /^\@(\w+)\s*(?:=|\s|$)\s*(.*)\s*/) {
-                $current_field = lc($1);
-                $fields{$current_field} = $2;
-            }
-            else {
-                $fields{$current_field} .= " $line";
-            }
-        }
-    }
+  # Get the description, except the signature.
+  foreach my $line (@body_lines) {
+    last if $line eq SIGNATURE_DELIMITER;
+    $comment .= "$line\n";
+  }
+  $fields{'comment'} = $comment;
 
-    %fields = %{ Bugzilla::Bug::map_fields(\%fields) };
+  my %override = %{$switch{'override'} || {}};
+  foreach my $key (keys %override) {
+    $fields{$key} = $override{$key};
+  }
 
-    my ($reporter) = Email::Address->parse($input_email->header('From'));
-    $fields{'reporter'} = $reporter->address;
+  debug_print("Parsed Fields:\n" . Dumper(\%fields), 2);
 
-    # The summary line only affects us if we're doing a post_bug.
-    # We have to check it down here because there might have been
-    # a bug_id specified in the body of the email.
-    if (!$fields{'bug_id'} && !$fields{'short_desc'}) {
-        $fields{'short_desc'} = $summary;
-    }
-
-    my $comment = '';
-    # Get the description, except the signature.
-    foreach my $line (@body_lines) {
-        last if $line eq SIGNATURE_DELIMITER;
-        $comment .= "$line\n";
-    }
-    $fields{'comment'} = $comment;
-
-    my %override = %{ $switch{'override'} || {} };
-    foreach my $key (keys %override) {
-        $fields{$key} = $override{$key};
-    }
-
-    debug_print("Parsed Fields:\n" . Dumper(\%fields), 2);
-
-    return \%fields;
+  return \%fields;
 }
 
 sub check_email_fields {
-    my ($fields) = @_;
+  my ($fields) = @_;
 
-    my ($retval, $non_conclusive_fields) =
-      Bugzilla::User::match_field({
-        'assigned_to'   => { 'type' => 'single' },
-        'qa_contact'    => { 'type' => 'single' },
-        'cc'            => { 'type' => 'multi'  },
-        'newcc'         => { 'type' => 'multi'  }
-      }, $fields, MATCH_SKIP_CONFIRM);
+  my ($retval, $non_conclusive_fields) = Bugzilla::User::match_field(
+    {
+      'assigned_to' => {'type' => 'single'},
+      'qa_contact'  => {'type' => 'single'},
+      'cc'          => {'type' => 'multi'},
+      'newcc'       => {'type' => 'multi'}
+    },
+    $fields,
+    MATCH_SKIP_CONFIRM
+  );
 
-    if ($retval != USER_MATCH_SUCCESS) {
-        ThrowUserError('user_match_too_many', {fields => $non_conclusive_fields});
-    }
+  if ($retval != USER_MATCH_SUCCESS) {
+    ThrowUserError('user_match_too_many', {fields => $non_conclusive_fields});
+  }
 }
 
 sub post_bug {
-    my ($fields) = @_;
-    debug_print('Posting a new bug...');
+  my ($fields) = @_;
+  debug_print('Posting a new bug...');
 
-    my $user = Bugzilla->user;
+  my $user = Bugzilla->user;
 
-    check_email_fields($fields);
+  check_email_fields($fields);
 
-    my $bug = Bugzilla::Bug->create($fields);
-    debug_print("Created bug " . $bug->id);
-    return ($bug, $bug->comments->[0]);
+  my $bug = Bugzilla::Bug->create($fields);
+  debug_print("Created bug " . $bug->id);
+  return ($bug, $bug->comments->[0]);
 }
 
 sub process_bug {
-    my ($fields_in) = @_;
-    my %fields = %$fields_in;
+  my ($fields_in) = @_;
+  my %fields = %$fields_in;
 
-    my $bug_id = $fields{'bug_id'};
-    $fields{'id'} = $bug_id;
-    delete $fields{'bug_id'};
+  my $bug_id = $fields{'bug_id'};
+  $fields{'id'} = $bug_id;
+  delete $fields{'bug_id'};
 
-    debug_print("Updating Bug $fields{id}...");
+  debug_print("Updating Bug $fields{id}...");
 
-    my $bug = Bugzilla::Bug->check($bug_id);
+  my $bug = Bugzilla::Bug->check($bug_id);
 
-    if ($fields{'bug_status'}) {
-        $fields{'knob'} = $fields{'bug_status'};
-    }
-    # If no status is given, then we only want to change the resolution.
-    elsif ($fields{'resolution'}) {
-        $fields{'knob'} = 'change_resolution';
-        $fields{'resolution_knob_change_resolution'} = $fields{'resolution'};
-    }
-    if ($fields{'dup_id'}) {
-        $fields{'knob'} = 'duplicate';
-    }
+  if ($fields{'bug_status'}) {
+    $fields{'knob'} = $fields{'bug_status'};
+  }
 
-    # Move @cc to @newcc as @cc is used by process_bug.cgi to remove
-    # users from the CC list when @removecc is set.
-    $fields{'newcc'} = delete $fields{'cc'} if $fields{'cc'};
+  # If no status is given, then we only want to change the resolution.
+  elsif ($fields{'resolution'}) {
+    $fields{'knob'}                              = 'change_resolution';
+    $fields{'resolution_knob_change_resolution'} = $fields{'resolution'};
+  }
+  if ($fields{'dup_id'}) {
+    $fields{'knob'} = 'duplicate';
+  }
 
-    # Make it possible to remove CCs.
-    if ($fields{'removecc'}) {
-        $fields{'cc'} = [split(',', $fields{'removecc'})];
-        $fields{'removecc'} = 1;
-    }
+  # Move @cc to @newcc as @cc is used by process_bug.cgi to remove
+  # users from the CC list when @removecc is set.
+  $fields{'newcc'} = delete $fields{'cc'} if $fields{'cc'};
 
-    check_email_fields(\%fields);
+  # Make it possible to remove CCs.
+  if ($fields{'removecc'}) {
+    $fields{'cc'} = [split(',', $fields{'removecc'})];
+    $fields{'removecc'} = 1;
+  }
 
-    my $cgi = Bugzilla->cgi;
-    foreach my $field (keys %fields) {
-        $cgi->param(-name => $field, -value => $fields{$field});
-    }
-    $cgi->param('longdesclength', scalar @{ $bug->comments });
-    $cgi->param('token', issue_hash_token([$bug->id, $bug->delta_ts]));
+  check_email_fields(\%fields);
 
-    require 'process_bug.cgi';
-    debug_print("Bug processed.");
+  my $cgi = Bugzilla->cgi;
+  foreach my $field (keys %fields) {
+    $cgi->param(-name => $field, -value => $fields{$field});
+  }
+  $cgi->param('longdesclength', scalar @{$bug->comments});
+  $cgi->param('token', issue_hash_token([$bug->id, $bug->delta_ts]));
 
-    my $added_comment;
-    if (trim($fields{'comment'})) {
-        # The "old" bug object doesn't contain the comment we just added.
-        $added_comment = Bugzilla::Bug->check($bug_id)->comments->[-1];
-    }
-    return ($bug, $added_comment);
+  require 'process_bug.cgi';
+  debug_print("Bug processed.");
+
+  my $added_comment;
+  if (trim($fields{'comment'})) {
+
+    # The "old" bug object doesn't contain the comment we just added.
+    $added_comment = Bugzilla::Bug->check($bug_id)->comments->[-1];
+  }
+  return ($bug, $added_comment);
 }
 
 sub handle_attachments {
-    my ($bug, $attachments, $comment) = @_;
-    return if !$attachments;
-    debug_print("Handling attachments...");
-    my $dbh = Bugzilla->dbh;
-    $dbh->bz_start_transaction();
-    my ($update_comment, $update_bug);
-    foreach my $attachment (@$attachments) {
-        my $data = delete $attachment->{payload};
-        debug_print("Inserting Attachment: " . Dumper($attachment), 2);
-        $attachment->{content_type} ||= 'application/octet-stream';
-        my $obj = Bugzilla::Attachment->create({
-            bug         => $bug,
-            description => $attachment->{filename},
-            filename    => $attachment->{filename},
-            mimetype    => $attachment->{content_type},
-            data        => $data,
-        });
-        # If we added a comment, and our comment does not already have a type,
-        # and this is our first attachment, then we make the comment an
-        # "attachment created" comment.
-        if ($comment and !$comment->type and !$update_comment) {
-            $comment->set_all({ type       => CMT_ATTACHMENT_CREATED,
-                                extra_data => $obj->id });
-            $update_comment = 1;
-        }
-        else {
-            $bug->add_comment('', { type => CMT_ATTACHMENT_CREATED,
-                                    extra_data => $obj->id });
-            $update_bug = 1;
-        }
+  my ($bug, $attachments, $comment) = @_;
+  return if !$attachments;
+  debug_print("Handling attachments...");
+  my $dbh = Bugzilla->dbh;
+  $dbh->bz_start_transaction();
+  my ($update_comment, $update_bug);
+  foreach my $attachment (@$attachments) {
+    my $data = delete $attachment->{payload};
+    debug_print("Inserting Attachment: " . Dumper($attachment), 2);
+    $attachment->{content_type} ||= 'application/octet-stream';
+    my $obj = Bugzilla::Attachment->create({
+      bug         => $bug,
+      description => $attachment->{filename},
+      filename    => $attachment->{filename},
+      mimetype    => $attachment->{content_type},
+      data        => $data,
+    });
+
+    # If we added a comment, and our comment does not already have a type,
+    # and this is our first attachment, then we make the comment an
+    # "attachment created" comment.
+    if ($comment and !$comment->type and !$update_comment) {
+      $comment->set_all({type => CMT_ATTACHMENT_CREATED, extra_data => $obj->id});
+      $update_comment = 1;
     }
-    # We only update the comments and bugs at the end of the transaction,
-    # because doing so modifies bugs_fulltext, which is a non-transactional
-    # table.
-    $bug->update() if $update_bug;
-    $comment->update() if $update_comment;
-    $dbh->bz_commit_transaction();
+    else {
+      $bug->add_comment('', {type => CMT_ATTACHMENT_CREATED, extra_data => $obj->id});
+      $update_bug = 1;
+    }
+  }
+
+  # We only update the comments and bugs at the end of the transaction,
+  # because doing so modifies bugs_fulltext, which is a non-transactional
+  # table.
+  $bug->update()     if $update_bug;
+  $comment->update() if $update_comment;
+  $dbh->bz_commit_transaction();
 }
 
 ######################
@@ -274,116 +283,124 @@ sub handle_attachments {
 ######################
 
 sub debug_print {
-    my ($str, $level) = @_;
-    $level ||= 1;
-    print STDERR "$str\n" if $level <= $switch{'verbose'};
+  my ($str, $level) = @_;
+  $level ||= 1;
+  print STDERR "$str\n" if $level <= $switch{'verbose'};
 }
 
 sub get_body_and_attachments {
-    my ($email) = @_;
+  my ($email) = @_;
 
-    my $ct = $email->content_type || 'text/plain';
-    debug_print("Splitting Body and Attachments [Type: $ct]...");
+  my $ct = $email->content_type || 'text/plain';
+  debug_print("Splitting Body and Attachments [Type: $ct]...");
 
-    my $body;
-    my $attachments = [];
-    if ($ct =~ /^multipart\/(alternative|signed)/i) {
-        $body = get_text_alternative($email);
-    }
-    else {
-        my $stripper = new Email::MIME::Attachment::Stripper(
-            $email, force_filename => 1);
-        my $message = $stripper->message;
-        $body = get_text_alternative($message);
-        $attachments = [$stripper->attachments];
-    }
+  my $body;
+  my $attachments = [];
+  if ($ct =~ /^multipart\/(alternative|signed)/i) {
+    $body = get_text_alternative($email);
+  }
+  else {
+    my $stripper
+      = new Email::MIME::Attachment::Stripper($email, force_filename => 1);
+    my $message = $stripper->message;
+    $body        = get_text_alternative($message);
+    $attachments = [$stripper->attachments];
+  }
 
-    return ($body, $attachments);
+  return ($body, $attachments);
 }
 
 sub get_text_alternative {
-    my ($email) = @_;
+  my ($email) = @_;
 
-    my @parts = $email->parts;
-    my $body;
-    foreach my $part (@parts) {
-        my $ct = $part->content_type || 'text/plain';
-        my $charset = 'iso-8859-1';
-        # The charset may be quoted.
-        if ($ct =~ /charset="?([^;"]+)/) {
-            $charset= $1;
-        }
-        debug_print("Part Content-Type: $ct", 2);
-        debug_print("Part Character Encoding: $charset", 2);
-        if (!$ct || $ct =~ /^text\/plain/i) {
-            $body = $part->body;
-            if (Bugzilla->params->{'utf8'} && !utf8::is_utf8($body)) {
-                $body = Encode::decode($charset, $body);
-            }
-            last;
-        }
+  my @parts = $email->parts;
+  my $body;
+  foreach my $part (@parts) {
+    my $ct = $part->content_type || 'text/plain';
+    my $charset = 'iso-8859-1';
+
+    # The charset may be quoted.
+    if ($ct =~ /charset="?([^;"]+)/) {
+      $charset = $1;
     }
-
-    if (!defined $body) {
-        # Note that this only happens if the email does not contain any
-        # text/plain parts. If the email has an empty text/plain part,
-        # you're fine, and this message does NOT get thrown.
-        ThrowUserError('email_no_text_plain');
+    debug_print("Part Content-Type: $ct",            2);
+    debug_print("Part Character Encoding: $charset", 2);
+    if (!$ct || $ct =~ /^text\/plain/i) {
+      $body = $part->body;
+      if (Bugzilla->params->{'utf8'} && !utf8::is_utf8($body)) {
+        $body = Encode::decode($charset, $body);
+      }
+      last;
     }
+  }
 
-    return $body;
+  if (!defined $body) {
+
+    # Note that this only happens if the email does not contain any
+    # text/plain parts. If the email has an empty text/plain part,
+    # you're fine, and this message does NOT get thrown.
+    ThrowUserError('email_no_text_plain');
+  }
+
+  return $body;
 }
 
 sub remove_leading_blank_lines {
-    my ($text) = @_;
-    $text =~ s/^(\s*\n)+//s;
-    return $text;
+  my ($text) = @_;
+  $text =~ s/^(\s*\n)+//s;
+  return $text;
 }
 
 sub html_strip {
-    my ($var) = @_;
-    # Trivial HTML tag remover (this is just for error messages, really.)
-    $var =~ s/<[^>]*>//g;
-    # And this basically reverses the Template-Toolkit html filter.
-    $var =~ s/\&amp;/\&/g;
-    $var =~ s/\&lt;/</g;
-    $var =~ s/\&gt;/>/g;
-    $var =~ s/\&quot;/\"/g;
-    $var =~ s/&#64;/@/g;
-    # Also remove undesired newlines and consecutive spaces.
-    $var =~ s/[\n\s]+/ /gms;
-    return $var;
+  my ($var) = @_;
+
+  # Trivial HTML tag remover (this is just for error messages, really.)
+  $var =~ s/<[^>]*>//g;
+
+  # And this basically reverses the Template-Toolkit html filter.
+  $var =~ s/\&amp;/\&/g;
+  $var =~ s/\&lt;/</g;
+  $var =~ s/\&gt;/>/g;
+  $var =~ s/\&quot;/\"/g;
+  $var =~ s/&#64;/@/g;
+
+  # Also remove undesired newlines and consecutive spaces.
+  $var =~ s/[\n\s]+/ /gms;
+  return $var;
 }
 
 
 sub die_handler {
-    my ($msg) = @_;
+  my ($msg) = @_;
 
-    # In Template-Toolkit, [% RETURN %] is implemented as a call to "die".
-    # But of course, we really don't want to actually *die* just because
-    # the user-error or code-error template ended. So we don't really die.
-    return if blessed($msg) && $msg->isa('Template::Exception')
-              && $msg->type eq 'return';
+  # In Template-Toolkit, [% RETURN %] is implemented as a call to "die".
+  # But of course, we really don't want to actually *die* just because
+  # the user-error or code-error template ended. So we don't really die.
+  return
+       if blessed($msg)
+    && $msg->isa('Template::Exception')
+    && $msg->type eq 'return';
 
-    # If this is inside an eval, then we should just act like...we're
-    # in an eval (instead of printing the error and exiting).
-    die(@_) if $^S;
+  # If this is inside an eval, then we should just act like...we're
+  # in an eval (instead of printing the error and exiting).
+  die(@_) if $^S;
 
-    # We can't depend on the MTA to send an error message, so we have
-    # to generate one properly.
-    if ($input_email) {
-       $msg =~ s/at .+ line.*$//ms;
-       $msg =~ s/^Compilation failed in require.+$//ms;
-       $msg = html_strip($msg);
-       my $from = Bugzilla->params->{'mailfrom'};
-       my $reply = reply(to => $input_email, from => $from, top_post => 1,
-                         body => "$msg\n");
-       MessageToMTA($reply->as_string);
-    }
-    print STDERR "$msg\n";
-    # We exit with a successful value, because we don't want the MTA
-    # to *also* send a failure notice.
-    exit;
+  # We can't depend on the MTA to send an error message, so we have
+  # to generate one properly.
+  if ($input_email) {
+    $msg =~ s/at .+ line.*$//ms;
+    $msg =~ s/^Compilation failed in require.+$//ms;
+    $msg = html_strip($msg);
+    my $from = Bugzilla->params->{'mailfrom'};
+    my $reply
+      = reply(to => $input_email, from => $from, top_post => 1, body => "$msg\n");
+    MessageToMTA($reply->as_string);
+  }
+  print STDERR "$msg\n";
+
+  # We exit with a successful value, because we don't want the MTA
+  # to *also* send a failure notice.
+  exit;
 }
 
 ###############
@@ -400,18 +417,19 @@ pod2usage({-verbose => 0, -exitval => 1}) if $switch{'help'};
 
 Bugzilla->usage_mode(USAGE_MODE_EMAIL);
 
-my @mail_lines = <STDIN>;
-my $mail_text = join("", @mail_lines);
+my @mail_lines  = <STDIN>;
+my $mail_text   = join("", @mail_lines);
 my $mail_fields = parse_mail($mail_text);
 
-Bugzilla::Hook::process('email_in_after_parse', { fields => $mail_fields });
+Bugzilla::Hook::process('email_in_after_parse', {fields => $mail_fields});
 
 my $attachments = delete $mail_fields->{'attachments'};
 
 my $username = $mail_fields->{'reporter'};
+
 # If emailsuffix is in use, we have to remove it from the email address.
 if (my $suffix = Bugzilla->params->{'emailsuffix'}) {
-    $username =~ s/\Q$suffix\E$//i;
+  $username =~ s/\Q$suffix\E$//i;
 }
 
 my $user = Bugzilla::User->check($username);
@@ -419,10 +437,10 @@ Bugzilla->set_user($user);
 
 my ($bug, $comment);
 if ($mail_fields->{'bug_id'}) {
-    ($bug, $comment) = process_bug($mail_fields);
+  ($bug, $comment) = process_bug($mail_fields);
 }
 else {
-    ($bug, $comment) = post_bug($mail_fields);
+  ($bug, $comment) = post_bug($mail_fields);
 }
 
 handle_attachments($bug, $attachments, $comment);
@@ -434,7 +452,7 @@ handle_attachments($bug, $attachments, $comment);
 # to wait for $bug->update() to be fully used in email_in.pl first. So
 # currently, process_bug.cgi does the mail sending for bugs, and this does
 # any mail sending for attachments after the first one.
-Bugzilla::BugMail::Send($bug->id, { changer => Bugzilla->user });
+Bugzilla::BugMail::Send($bug->id, {changer => Bugzilla->user});
 debug_print("Sent bugmail");
 
 

@@ -15,22 +15,23 @@ use Bugzilla::WebService::Constants;
 use Bugzilla::WebService::Classification;
 
 BEGIN {
-    *Bugzilla::WebService::Classification::rest_resources = \&_rest_resources;
-};
+  *Bugzilla::WebService::Classification::rest_resources = \&_rest_resources;
+}
 
 sub _rest_resources {
-    my $rest_resources = [
-        qr{^/classification/([^/]+)$}, {
-            GET => {
-                method => 'get',
-                params => sub {
-                    my $param = $_[0] =~ /^\d+$/ ? 'ids' : 'names';
-                    return { $param => [ $_[0] ] };
-                }
-            }
+  my $rest_resources = [
+    qr{^/classification/([^/]+)$},
+    {
+      GET => {
+        method => 'get',
+        params => sub {
+          my $param = $_[0] =~ /^\d+$/ ? 'ids' : 'names';
+          return {$param => [$_[0]]};
         }
-    ];
-    return $rest_resources;
+      }
+    }
+  ];
+  return $rest_resources;
 }
 
 1;

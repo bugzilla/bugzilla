@@ -14,15 +14,15 @@ use warnings;
 use base qw(Bugzilla::BugUrl);
 
 sub should_handle {
-    my ($class, $uri) = @_;
-    return $uri =~ m#^https?://hellosplat\.com/s/beanbag/tickets/\d+#;
+  my ($class, $uri) = @_;
+  return $uri =~ m#^https?://hellosplat\.com/s/beanbag/tickets/\d+#;
 }
 
 sub _check_value {
-    my ($class, $uri) = @_;
-    $uri = $class->SUPER::_check_value($uri);
-    $uri->scheme('https');  # force https
-    return $uri;
+  my ($class, $uri) = @_;
+  $uri = $class->SUPER::_check_value($uri);
+  $uri->scheme('https');    # force https
+  return $uri;
 }
 
 1;

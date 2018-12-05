@@ -12,15 +12,9 @@ use strict;
 use warnings;
 use Moo;
 
-has 'file' => (
-    is       => 'ro',
-    required => 1,
-);
+has 'file' => (is => 'ro', required => 1,);
 
-has 'vars' => (
-    is      => 'ro',
-    default => sub { {} },
-);
+has 'vars' => (is => 'ro', default => sub { {} },);
 
 
 1;

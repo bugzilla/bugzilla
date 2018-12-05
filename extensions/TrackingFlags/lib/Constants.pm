@@ -14,31 +14,31 @@ use warnings;
 use base qw(Exporter);
 
 our @EXPORT = qw(
-    FLAG_TYPES
+  FLAG_TYPES
 );
 
 sub FLAG_TYPES {
-    my @flag_types = (
-        {
-            name        => 'project',
-            description => 'Project Flags',
-            collapsed   => 0,
-            sortkey     => 0
-        },
-        {
-            name        => 'tracking',
-            description => 'Tracking Flags',
-            collapsed   => 1,
-            sortkey     => 1
-        },
-        {
-            name        => 'blocking',
-            description => 'Blocking Flags',
-            collapsed   => 1,
-            sortkey     => 2
-        },
-    );
-    return [ sort { $a->{'sortkey'} <=> $b->{'sortkey'} } @flag_types ];
+  my @flag_types = (
+    {
+      name        => 'project',
+      description => 'Project Flags',
+      collapsed   => 0,
+      sortkey     => 0
+    },
+    {
+      name        => 'tracking',
+      description => 'Tracking Flags',
+      collapsed   => 1,
+      sortkey     => 1
+    },
+    {
+      name        => 'blocking',
+      description => 'Blocking Flags',
+      collapsed   => 1,
+      sortkey     => 2
+    },
+  );
+  return [sort { $a->{'sortkey'} <=> $b->{'sortkey'} } @flag_types];
 }
 
 1;

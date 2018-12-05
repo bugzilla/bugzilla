@@ -14,12 +14,12 @@ use Search::Elasticsearch;
 has 'client' => (is => 'lazy');
 
 sub _build_client {
-    my ($self) = @_;
+  my ($self) = @_;
 
-    return Search::Elasticsearch->new(
-        nodes => [ split(/\s+/, Bugzilla->params->{elasticsearch_nodes}) ],
-        cxn_pool => 'Sniff',
-    );
+  return Search::Elasticsearch->new(
+    nodes    => [split(/\s+/, Bugzilla->params->{elasticsearch_nodes})],
+    cxn_pool => 'Sniff',
+  );
 }
 
 1;

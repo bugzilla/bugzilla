@@ -21,20 +21,20 @@ use constant AUDIT_UPDATES => 0;
 use constant AUDIT_REMOVES => 0;
 
 use constant DB_COLUMNS => qw(
-    id
-    tag
-    weight
+  id
+  tag
+  weight
 );
 
 use constant UPDATE_COLUMNS => qw(
-    weight
+  weight
 );
 
 use constant DB_TABLE   => 'longdescs_tags_weights';
 use constant ID_FIELD   => 'id';
 use constant NAME_FIELD => 'tag';
 use constant LIST_ORDER => 'weight DESC';
-use constant VALIDATORS => { };
+use constant VALIDATORS => {};
 
 # There's no gain to caching these objects
 use constant USE_MEMCACHED => 0;

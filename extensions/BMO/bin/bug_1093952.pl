@@ -23,14 +23,17 @@ Bugzilla->usage_mode(USAGE_MODE_CMDLINE);
 
 my $dbh = Bugzilla->dbh;
 
-my $infra     = Bugzilla::Product->check({ name => 'Infrastructure & Operations' });
-my $relops_id = Bugzilla::Component->check({ product => $infra, name => 'RelOps' })->id;
-my $puppet_id = Bugzilla::Component->check({ product => $infra, name => 'RelOps: Puppet' })->id;
-my $infra_id  = $infra->id;
-my $components = $dbh->sql_in('component_id', [ $relops_id, $puppet_id ]);
+my $infra = Bugzilla::Product->check({name => 'Infrastructure & Operations'});
+my $relops_id
+  = Bugzilla::Component->check({product => $infra, name => 'RelOps'})->id;
+my $puppet_id
+  = Bugzilla::Component->check({product => $infra, name => 'RelOps: Puppet'})
+  ->id;
+my $infra_id = $infra->id;
+my $components = $dbh->sql_in('component_id', [$relops_id, $puppet_id]);
 
 print "Searching for bugs..\n";
-my $bugs = $dbh->selectall_arrayref(<<EOF, { Slice => {} });
+my $bugs = $dbh->selectall_arrayref(<<EOF, {Slice => {}});
     SELECT
         bug_id,
         product_id,
@@ -52,9 +55,9 @@ printf "About to fix %s bugs\n", scalar(@$bugs);
 print "Press <Ctrl-C> to stop or <Enter> to continue...\n";
 getc();
 
-my $nobody = Bugzilla::User->check({ name => 'nobody@mozilla.org' });
-my $field  = Bugzilla::Field->check({ name => 'status_whiteboard' });
-my $when   = $dbh->selectrow_array('SELECT LOCALTIMESTAMP(0)');
+my $nobody = Bugzilla::User->check({name => 'nobody@mozilla.org'});
+my $field = Bugzilla::Field->check({name => 'status_whiteboard'});
+my $when = $dbh->selectrow_array('SELECT LOCALTIMESTAMP(0)');
 
 my $sth_bugs = $dbh->prepare("
     UPDATE bugs
@@ -70,22 +73,25 @@ my $sth_activity = $dbh->prepare("
 
 $dbh->bz_start_transaction();
 foreach my $bug (@$bugs) {
-    my $bug_id = $bug->{bug_id};
-    my $whiteboard = $bug->{status_whiteboard};
-    print "bug $bug_id\n  $whiteboard\n";
+  my $bug_id     = $bug->{bug_id};
+  my $whiteboard = $bug->{status_whiteboard};
+  print "bug $bug_id\n  $whiteboard\n";
 
-    my $updated = $whiteboard;
-    $updated =~ s#\[kanban:engops:https://kanbanize\.com/ctrl_board/6/[^\]]*\]\s*##g;
-    if ($bug->{product_id} == $infra->id
-        && $bug->{component_id} != $relops_id
-        && $bug->{component_id} != $puppet_id
-    ) {
-        $updated =~ s#\[kanban:engops:https://mozilla\.kanbanize\.com/ctrl_board/6/[^\]]*\]\s*##g;
-    }
-    print "  $updated\n";
+  my $updated = $whiteboard;
+  $updated
+    =~ s#\[kanban:engops:https://kanbanize\.com/ctrl_board/6/[^\]]*\]\s*##g;
+  if ( $bug->{product_id} == $infra->id
+    && $bug->{component_id} != $relops_id
+    && $bug->{component_id} != $puppet_id)
+  {
+    $updated
+      =~ s#\[kanban:engops:https://mozilla\.kanbanize\.com/ctrl_board/6/[^\]]*\]\s*##g;
+  }
+  print "  $updated\n";
 
-    $sth_bugs->execute($updated, $when, $when, $bug_id);
-    $sth_activity->execute($bug_id, $nobody->id, $when, $field->id, $whiteboard, $updated);
+  $sth_bugs->execute($updated, $when, $when, $bug_id);
+  $sth_activity->execute($bug_id, $nobody->id, $when, $field->id, $whiteboard,
+    $updated);
 }
 $dbh->bz_commit_transaction();
 

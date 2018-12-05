@@ -25,6 +25,6 @@ use constant USER_STORY_GROUP => 'editbugs';
 # Don't show User Story on Developer Tools component, visible on all other
 # Firefox components
 #   'Firefox'    => ['Developer Tools'],
-use constant USER_STORY_EXCLUDE => { };
+use constant USER_STORY_EXCLUDE => {};
 
 1;

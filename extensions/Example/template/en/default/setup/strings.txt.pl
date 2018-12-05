@@ -17,8 +17,6 @@
 # Contributor(s):
 #   Max Kanat-Alexander <mkanat@bugzilla.org>
 
-%strings = (
-  feature_example_acme => 'Example Extension: Acme Feature',
-);
+%strings = (feature_example_acme => 'Example Extension: Acme Feature',);
 
 1;

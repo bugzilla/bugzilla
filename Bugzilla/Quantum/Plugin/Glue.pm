@@ -157,8 +157,7 @@ sub register {
   );
 
   $app->log(MojoX::Log::Log4perl::Tiny->new(
-    logger => Log::Log4perl->get_logger(ref $app)
-  ));
+    logger => Log::Log4perl->get_logger(ref $app)));
 }
 
 1;

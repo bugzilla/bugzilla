@@ -20,35 +20,41 @@ use Bugzilla::Util;
 ###############################
 
 sub should_handle {
-    my ($class, $uri) = @_;
-    return ($uri->authority =~ /^code.google.com$/i) ? 1 : 0;
+  my ($class, $uri) = @_;
+  return ($uri->authority =~ /^code.google.com$/i) ? 1 : 0;
 }
 
 sub _check_value {
-    my ($class, $uri) = @_;
+  my ($class, $uri) = @_;
 
-    $uri = $class->SUPER::_check_value($uri);
+  $uri = $class->SUPER::_check_value($uri);
 
-    my $value = $uri->as_string;
-    # Google Code URLs only have one form:
-    #   http(s)://code.google.com/p/PROJECT_NAME/issues/detail?id=1234
-    my $project_name;
-    if ($uri->path =~ m|^/p/([^/]+)/issues/detail$|) {
-        $project_name = $1;
-    } else {
-        ThrowUserError('bug_url_invalid', { url => $value });
-    }
-    my $bug_id = $uri->query_param('id');
-    detaint_natural($bug_id);
-    if (!$bug_id) {
-        ThrowUserError('bug_url_invalid', { url => $value, reason => 'id' });
-    }
-    # While Google Code URLs can be either HTTP or HTTPS,
-    # always go with the HTTP scheme, as that's the default.
-    $value = "http://code.google.com/p/" . $project_name .
-             "/issues/detail?id=" . $bug_id;
+  my $value = $uri->as_string;
 
-    return new URI($value);
+  # Google Code URLs only have one form:
+  #   http(s)://code.google.com/p/PROJECT_NAME/issues/detail?id=1234
+  my $project_name;
+  if ($uri->path =~ m|^/p/([^/]+)/issues/detail$|) {
+    $project_name = $1;
+  }
+  else {
+    ThrowUserError('bug_url_invalid', {url => $value});
+  }
+  my $bug_id = $uri->query_param('id');
+  detaint_natural($bug_id);
+  if (!$bug_id) {
+    ThrowUserError('bug_url_invalid', {url => $value, reason => 'id'});
+  }
+
+  # While Google Code URLs can be either HTTP or HTTPS,
+  # always go with the HTTP scheme, as that's the default.
+  $value
+    = "http://code.google.com/p/"
+    . $project_name
+    . "/issues/detail?id="
+    . $bug_id;
+
+  return new URI($value);
 }
 
 1;

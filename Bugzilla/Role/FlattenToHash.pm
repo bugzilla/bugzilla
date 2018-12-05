@@ -18,7 +18,7 @@ requires 'DB_TABLE', '_get_db_columns';
 my $_error = sub { die "cannot determine attribute name from $_[0]\n" };
 
 sub _get_db_keys {
-  my ($self, $object)  = @_;
+  my ($self, $object) = @_;
   my $class   = blessed($self) // $self;
   my $table   = $class->DB_TABLE;
   my @columns = $class->_get_db_columns;
@@ -35,7 +35,7 @@ sub flatten_to_hash {
   my ($self) = @_;
   my %hash;
   my @keys = $self->_get_db_keys();
-  @hash{ @keys } = @$self{ @keys };
+  @hash{@keys} = @$self{@keys};
   return \%hash;
 }
 

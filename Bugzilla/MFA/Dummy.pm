@@ -18,12 +18,12 @@ use base 'Bugzilla::MFA';
 # it provides no 2fa protection at all, but prevents crashing.
 
 sub prompt {
-    my ($self, $vars) = @_;
-    my $template = Bugzilla->template;
+  my ($self, $vars) = @_;
+  my $template = Bugzilla->template;
 
-    print Bugzilla->cgi->header();
-    $template->process('mfa/dummy/verify.html.tmpl', $vars)
-        || ThrowTemplateError($template->error());
+  print Bugzilla->cgi->header();
+  $template->process('mfa/dummy/verify.html.tmpl', $vars)
+    || ThrowTemplateError($template->error());
 }
 
 1;

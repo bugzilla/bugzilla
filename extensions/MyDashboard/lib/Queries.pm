@@ -25,11 +25,11 @@ use DateTime;
 
 use base qw(Exporter);
 our @EXPORT = qw(
-    QUERY_ORDER
-    SELECT_COLUMNS
-    QUERY_DEFS
-    query_bugs
-    query_flags
+  QUERY_ORDER
+  SELECT_COLUMNS
+  QUERY_DEFS
+  query_bugs
+  query_flags
 );
 
 # Default sort order
@@ -38,294 +38,300 @@ use constant QUERY_ORDER => ("changeddate desc", "bug_id");
 # List of columns that we will be selecting. In the future this should be configurable
 # Share with buglist.cgi?
 use constant SELECT_COLUMNS => qw(
-    bug_id
-    bug_status
-    short_desc
-    changeddate
+  bug_id
+  bug_status
+  short_desc
+  changeddate
 );
 
 sub QUERY_DEFS {
-    my $user = Bugzilla->user;
+  my $user = Bugzilla->user;
 
-    my @query_defs = (
-        {
-            name        => 'assignedbugs',
-            heading     => 'Assigned to You',
-            description => 'The bug has been assigned to you, and it is not resolved or closed.',
-            params      => {
-                'bug_status'        => ['__open__'],
-                'emailassigned_to1' => 1,
-                'emailtype1'        => 'exact',
-                'email1'            => $user->login
-            }
-        },
-        {
-            name        => 'newbugs',
-            heading     => 'New Reported by You',
-            description => 'You reported the bug; it\'s unconfirmed or new. No one has assigned themselves to fix it yet.',
-            params      => {
-                'bug_status'     => ['UNCONFIRMED', 'NEW'],
-                'emailreporter1' => 1,
-                'emailtype1'     => 'exact',
-                'email1'         => $user->login
-            }
-        },
-        {
-            name        => 'inprogressbugs',
-            heading     => "In Progress Reported by You",
-            description => 'A developer accepted your bug and is working on it. (It has someone in the "Assigned to" field.)',
-            params      => {
-                'bug_status'     => [ map { $_->name } grep($_->name ne 'UNCONFIRMED' && $_->name ne 'NEW', open_states()) ],
-                'emailreporter1' => 1,
-                'emailtype1'     => 'exact',
-                'email1'         => $user->login
-            }
-        },
-        {
-            name        => 'openccbugs',
-            heading     => "You Are CC'd On",
-            description => 'You are in the CC list of the bug, so you are watching it.',
-            params      => {
-                'bug_status' => ['__open__'],
-                'emailcc1'   => 1,
-                'emailtype1' => 'exact',
-                'email1'     => $user->login
-            }
-        },
-        {
-            name        => 'mentorbugs',
-            heading     => "You Are a Mentor",
-            description => 'You are one of the mentors for the bug.',
-            params      => {
-                'bug_status' => ['__open__'],
-                'emailbug_mentor1' => 1,
-                'emailtype1' => 'exact',
-                'email1'     => $user->login
-            }
-        },
-        {
-            name => 'lastvisitedbugs',
-            heading => 'Updated Since Last Visit',
-            description => 'Bugs updated since last visited',
-            mark_read => 'Mark Visited',
-            params => {
-                o1 => 'lessthan',
-                v1 => '%last_changed%',
-                f1 => 'last_visit_ts',
-            },
-        },
-        {
-            name        => 'interestingbugs',
-            heading     => 'Interesting Bugs',
-            description => 'Bugs that you may find interesting',
-            mark_read => 'Remove Interest',
-            params => {
-                j_top => 'OR',
-                f1    => 'bug_interest_ts',
-                o1    => 'isnotempty',
+  my @query_defs = (
+    {
+      name    => 'assignedbugs',
+      heading => 'Assigned to You',
+      description =>
+        'The bug has been assigned to you, and it is not resolved or closed.',
+      params => {
+        'bug_status'        => ['__open__'],
+        'emailassigned_to1' => 1,
+        'emailtype1'        => 'exact',
+        'email1'            => $user->login
+      }
+    },
+    {
+      name    => 'newbugs',
+      heading => 'New Reported by You',
+      description =>
+        'You reported the bug; it\'s unconfirmed or new. No one has assigned themselves to fix it yet.',
+      params => {
+        'bug_status'     => ['UNCONFIRMED', 'NEW'],
+        'emailreporter1' => 1,
+        'emailtype1'     => 'exact',
+        'email1'         => $user->login
+      }
+    },
+    {
+      name    => 'inprogressbugs',
+      heading => "In Progress Reported by You",
+      description =>
+        'A developer accepted your bug and is working on it. (It has someone in the "Assigned to" field.)',
+      params => {
+        'bug_status' => [
+          map { $_->name }
+          grep($_->name ne 'UNCONFIRMED' && $_->name ne 'NEW', open_states())
+        ],
+        'emailreporter1' => 1,
+        'emailtype1'     => 'exact',
+        'email1'         => $user->login
+      }
+    },
+    {
+      name        => 'openccbugs',
+      heading     => "You Are CC'd On",
+      description => 'You are in the CC list of the bug, so you are watching it.',
+      params      => {
+        'bug_status' => ['__open__'],
+        'emailcc1'   => 1,
+        'emailtype1' => 'exact',
+        'email1'     => $user->login
+      }
+    },
+    {
+      name        => 'mentorbugs',
+      heading     => "You Are a Mentor",
+      description => 'You are one of the mentors for the bug.',
+      params      => {
+        'bug_status'       => ['__open__'],
+        'emailbug_mentor1' => 1,
+        'emailtype1'       => 'exact',
+        'email1'           => $user->login
+      }
+    },
+    {
+      name        => 'lastvisitedbugs',
+      heading     => 'Updated Since Last Visit',
+      description => 'Bugs updated since last visited',
+      mark_read   => 'Mark Visited',
+      params => {o1 => 'lessthan', v1 => '%last_changed%', f1 => 'last_visit_ts',},
+    },
+    {
+      name        => 'interestingbugs',
+      heading     => 'Interesting Bugs',
+      description => 'Bugs that you may find interesting',
+      mark_read   => 'Remove Interest',
+      params      => {
+        j_top => 'OR',
+        f1    => 'bug_interest_ts',
+        o1    => 'isnotempty',
 
-                f2    => 'last_visit_ts',
-                o2    => 'lessthan',
-                v2    => '%last_changed%',
-            }
-        },
-        {
-            name => 'nevervisitbugs',
-            heading => 'Involved with and Never Visited',
-            description => "Bugs you've never visited, but are involved with",
-            mark_read => 'Mark Visited',
-            params => {
-                query_format => "advanced",
-                bug_status   => ['__open__'],,
-                o1           => "isempty",
-                f1           => "last_visit_ts",
-                j2           => "OR",
-                f2           => "OP",
-                f3           => "assigned_to",
-                o3           => "equals",
-                v3           => $user->login,
-                o4           => "equals",
-                f4           => "reporter",
-                v4           => $user->login,
-                v5           => $user->login,
-                f5           => "qa_contact",
-                o5           => "equals",
-                o6           => "equals",
-                f6           => "cc",
-                v6           => $user->login,
-                f7           => "bug_mentor",
-                o7           => "equals",
-                v7           => $user->login,
-                f9           => "CP",
-            },
-        },
+        f2 => 'last_visit_ts',
+        o2 => 'lessthan',
+        v2 => '%last_changed%',
+      }
+    },
+    {
+      name        => 'nevervisitbugs',
+      heading     => 'Involved with and Never Visited',
+      description => "Bugs you've never visited, but are involved with",
+      mark_read   => 'Mark Visited',
+      params      => {
+        query_format => "advanced",
+        bug_status   => ['__open__'],
+        ,
+        o1 => "isempty",
+        f1 => "last_visit_ts",
+        j2 => "OR",
+        f2 => "OP",
+        f3 => "assigned_to",
+        o3 => "equals",
+        v3 => $user->login,
+        o4 => "equals",
+        f4 => "reporter",
+        v4 => $user->login,
+        v5 => $user->login,
+        f5 => "qa_contact",
+        o5 => "equals",
+        o6 => "equals",
+        f6 => "cc",
+        v6 => $user->login,
+        f7 => "bug_mentor",
+        o7 => "equals",
+        v7 => $user->login,
+        f9 => "CP",
+      },
+    },
+  );
+
+  if (Bugzilla->params->{'useqacontact'}) {
+    push(
+      @query_defs,
+      {
+        name    => 'qacontactbugs',
+        heading => 'You Are QA Contact',
+        description =>
+          'You are the qa contact on this bug, and it is not resolved or closed.',
+        params => {
+          'bug_status'       => ['__open__'],
+          'emailqa_contact1' => 1,
+          'emailtype1'       => 'exact',
+          'email1'           => $user->login
+        }
+      }
     );
+  }
 
-    if (Bugzilla->params->{'useqacontact'}) {
-        push(@query_defs, {
-            name        => 'qacontactbugs',
-            heading     => 'You Are QA Contact',
-            description => 'You are the qa contact on this bug, and it is not resolved or closed.',
-            params      => {
-                'bug_status'       => ['__open__'],
-                'emailqa_contact1' => 1,
-                'emailtype1'       => 'exact',
-                'email1'           => $user->login
-            }
-        });
-    }
+  if ($user->showmybugslink) {
+    my $query = Bugzilla->params->{mybugstemplate};
+    my $login = $user->login;
+    $query =~ s/%userid%/$login/;
+    $query =~ s/^buglist.cgi\?//;
+    push(@query_defs,
+      {name => 'mybugs', heading => "My Bugs", saved => 1, params => $query,});
+  }
 
-    if ($user->showmybugslink) {
-        my $query = Bugzilla->params->{mybugstemplate};
-        my $login = $user->login;
-        $query =~ s/%userid%/$login/;
-        $query =~ s/^buglist.cgi\?//;
-        push(@query_defs, {
-            name        => 'mybugs',
-            heading     => "My Bugs",
-            saved       => 1,
-            params      => $query,
-        });
-    }
+  foreach my $q (@{$user->queries}) {
+    next if !$q->in_mydashboard;
+    push(@query_defs, {name => $q->name, saved => 1, params => $q->url});
+  }
 
-    foreach my $q (@{$user->queries}) {
-        next if !$q->in_mydashboard;
-        push(@query_defs, { name    => $q->name,
-                            saved   => 1,
-                            params  => $q->url });
-    }
-
-    return @query_defs;
+  return @query_defs;
 }
 
 sub query_bugs {
-    my $qdef         = shift;
-    my $dbh          = Bugzilla->dbh;
-    my $user         = Bugzilla->user;
-    my $datetime_now = DateTime->now(time_zone => $user->timezone);
+  my $qdef         = shift;
+  my $dbh          = Bugzilla->dbh;
+  my $user         = Bugzilla->user;
+  my $datetime_now = DateTime->now(time_zone => $user->timezone);
 
-    ## HACK to remove POST
-    delete $ENV{REQUEST_METHOD};
+  ## HACK to remove POST
+  delete $ENV{REQUEST_METHOD};
 
-    my $params = new Bugzilla::CGI($qdef->{params});
+  my $params = new Bugzilla::CGI($qdef->{params});
 
-    my $search = new Bugzilla::Search( fields => [ SELECT_COLUMNS ],
-                                       params => scalar $params->Vars,
-                                       order  => [ QUERY_ORDER ]);
-    my $data = $search->data;
+  my $search = new Bugzilla::Search(
+    fields => [SELECT_COLUMNS],
+    params => scalar $params->Vars,
+    order  => [QUERY_ORDER]
+  );
+  my $data = $search->data;
 
-    my @bugs;
-    foreach my $row (@$data) {
-        my $bug = {};
-        foreach my $column (SELECT_COLUMNS) {
-            $bug->{$column} = shift @$row;
-            if ($column eq 'changeddate') {
-                my $datetime = datetime_from($bug->{$column});
-                $datetime->set_time_zone($user->timezone);
-                $bug->{$column} = $datetime->strftime('%Y-%m-%d %T %Z');
-                $bug->{'changeddate_fancy'} = time_ago($datetime, $datetime_now);
+  my @bugs;
+  foreach my $row (@$data) {
+    my $bug = {};
+    foreach my $column (SELECT_COLUMNS) {
+      $bug->{$column} = shift @$row;
+      if ($column eq 'changeddate') {
+        my $datetime = datetime_from($bug->{$column});
+        $datetime->set_time_zone($user->timezone);
+        $bug->{$column} = $datetime->strftime('%Y-%m-%d %T %Z');
+        $bug->{'changeddate_fancy'} = time_ago($datetime, $datetime_now);
 
-                # Provide a version for use by Bug.history and also for looking up last comment.
-                # We have to set to server's timezone and also subtract one second.
-                $datetime->set_time_zone(Bugzilla->local_timezone);
-                $datetime->subtract(seconds => 1);
-                $bug->{changeddate_api} = $datetime->strftime('%Y-%m-%d %T');
-            }
-        }
-        push(@bugs, $bug);
+        # Provide a version for use by Bug.history and also for looking up last comment.
+        # We have to set to server's timezone and also subtract one second.
+        $datetime->set_time_zone(Bugzilla->local_timezone);
+        $datetime->subtract(seconds => 1);
+        $bug->{changeddate_api} = $datetime->strftime('%Y-%m-%d %T');
+      }
     }
+    push(@bugs, $bug);
+  }
 
-    return (\@bugs, $params->canonicalise_query());
+  return (\@bugs, $params->canonicalise_query());
 }
 
 sub query_flags {
-    my ($type) = @_;
-    my $user         = Bugzilla->user;
-    my $dbh          = Bugzilla->dbh;
-    my $datetime_now = DateTime->now(time_zone => $user->timezone);
+  my ($type) = @_;
+  my $user   = Bugzilla->user;
+  my $dbh    = Bugzilla->dbh;
+  my $datetime_now = DateTime->now(time_zone => $user->timezone);
 
-    ($type ne 'requestee' || $type ne 'requester')
-        || ThrowCodeError('param_required', { param => 'type' });
+  ($type ne 'requestee' || $type ne 'requester')
+    || ThrowCodeError('param_required', {param => 'type'});
 
-    my $match_params = { status => '?' };
+  my $match_params = {status => '?'};
 
-    if ($type eq 'requestee') {
-        $match_params->{'requestee_id'} = $user->id;
-    }
-    else {
-        $match_params->{'setter_id'} = $user->id;
-    }
+  if ($type eq 'requestee') {
+    $match_params->{'requestee_id'} = $user->id;
+  }
+  else {
+    $match_params->{'setter_id'} = $user->id;
+  }
 
-    my $matched = Bugzilla::Flag->match($match_params);
+  my $matched = Bugzilla::Flag->match($match_params);
 
-    return [] if !@$matched;
+  return [] if !@$matched;
 
-    my @unfiltered_flags;
-    my %all_bugs; # Use hash to filter out duplicates
-    foreach my $flag (@$matched) {
-        next if ($flag->attach_id && $flag->attachment->isprivate && !$user->is_insider);
+  my @unfiltered_flags;
+  my %all_bugs;    # Use hash to filter out duplicates
+  foreach my $flag (@$matched) {
+    next
+      if ($flag->attach_id && $flag->attachment->isprivate && !$user->is_insider);
 
-        my $data = {
-            id          => $flag->id,
-            type        => $flag->type->name,
-            status      => $flag->status,
-            attach_id   => $flag->attach_id,
-            is_patch    => $flag->attach_id ? $flag->attachment->ispatch : 0,
-            bug_id      => $flag->bug_id,
-            requester   => $flag->setter->login,
-            requestee   => $flag->requestee ? $flag->requestee->login : '',
-            updated     => $flag->modification_date,
-        };
-        push(@unfiltered_flags, $data);
+    my $data = {
+      id        => $flag->id,
+      type      => $flag->type->name,
+      status    => $flag->status,
+      attach_id => $flag->attach_id,
+      is_patch  => $flag->attach_id ? $flag->attachment->ispatch : 0,
+      bug_id    => $flag->bug_id,
+      requester => $flag->setter->login,
+      requestee => $flag->requestee ? $flag->requestee->login : '',
+      updated   => $flag->modification_date,
+    };
+    push(@unfiltered_flags, $data);
 
-        # Record bug id for later retrieval of status/summary
-        $all_bugs{$flag->{'bug_id'}}++;
-    }
+    # Record bug id for later retrieval of status/summary
+    $all_bugs{$flag->{'bug_id'}}++;
+  }
 
-    # Filter the bug list based on permission to see the bug
-    my %visible_bugs = map { $_ => 1 } @{ $user->visible_bugs([ keys %all_bugs ]) };
+  # Filter the bug list based on permission to see the bug
+  my %visible_bugs = map { $_ => 1 } @{$user->visible_bugs([keys %all_bugs])};
 
-    return [] if !scalar keys %visible_bugs;
+  return [] if !scalar keys %visible_bugs;
 
-    # Get all bug statuses and summaries in one query instead of loading
-    # many separate bug objects
-    my $bug_rows = $dbh->selectall_arrayref("SELECT bug_id, bug_status, short_desc
+  # Get all bug statuses and summaries in one query instead of loading
+  # many separate bug objects
+  my $bug_rows = $dbh->selectall_arrayref(
+    "SELECT bug_id, bug_status, short_desc
                                                FROM bugs
-                                              WHERE " . $dbh->sql_in('bug_id', [ keys %visible_bugs ]),
-                                            { Slice => {} });
-    foreach my $row (@$bug_rows) {
-        $visible_bugs{$row->{'bug_id'}} = {
-            bug_status => $row->{'bug_status'},
-            short_desc => $row->{'short_desc'}
-        };
-    }
+                                              WHERE "
+      . $dbh->sql_in('bug_id', [keys %visible_bugs]), {Slice => {}}
+  );
+  foreach my $row (@$bug_rows) {
+    $visible_bugs{$row->{'bug_id'}}
+      = {bug_status => $row->{'bug_status'}, short_desc => $row->{'short_desc'}};
+  }
 
-    # Now drop out any flags for bugs the user cannot see
-    # or if the user did not want to see closed bugs
-    my @filtered_flags;
-    foreach my $flag (@unfiltered_flags) {
-        # Skip this flag if the bug is not visible to the user
-        next if !$visible_bugs{$flag->{'bug_id'}};
+  # Now drop out any flags for bugs the user cannot see
+  # or if the user did not want to see closed bugs
+  my @filtered_flags;
+  foreach my $flag (@unfiltered_flags) {
 
-        # Include bug status and summary with each flag
-        $flag->{'bug_status'}  = $visible_bugs{$flag->{'bug_id'}}->{'bug_status'};
-        $flag->{'bug_summary'} = $visible_bugs{$flag->{'bug_id'}}->{'short_desc'};
+    # Skip this flag if the bug is not visible to the user
+    next if !$visible_bugs{$flag->{'bug_id'}};
 
-        # Format the updated date specific to the user's timezone
-        # and add the fancy human readable version
-        my $datetime = datetime_from($flag->{'updated'});
-        $datetime->set_time_zone($user->timezone);
-        $flag->{'updated'} = $datetime->strftime('%Y-%m-%d %T %Z');
-        $flag->{'updated_epoch'} = $datetime->epoch;
-        $flag->{'updated_fancy'} = time_ago($datetime, $datetime_now);
+    # Include bug status and summary with each flag
+    $flag->{'bug_status'}  = $visible_bugs{$flag->{'bug_id'}}->{'bug_status'};
+    $flag->{'bug_summary'} = $visible_bugs{$flag->{'bug_id'}}->{'short_desc'};
 
-        push(@filtered_flags, $flag);
-    }
+    # Format the updated date specific to the user's timezone
+    # and add the fancy human readable version
+    my $datetime = datetime_from($flag->{'updated'});
+    $datetime->set_time_zone($user->timezone);
+    $flag->{'updated'}       = $datetime->strftime('%Y-%m-%d %T %Z');
+    $flag->{'updated_epoch'} = $datetime->epoch;
+    $flag->{'updated_fancy'} = time_ago($datetime, $datetime_now);
 
-    return [] if !@filtered_flags;
+    push(@filtered_flags, $flag);
+  }
 
-    # Sort by most recently updated
-    return [ sort { $b->{'updated_epoch'} <=> $a->{'updated_epoch'} } @filtered_flags ];
+  return [] if !@filtered_flags;
+
+  # Sort by most recently updated
+  return [sort { $b->{'updated_epoch'} <=> $a->{'updated_epoch'} }
+      @filtered_flags];
 }
 
 1;

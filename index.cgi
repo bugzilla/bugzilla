@@ -21,7 +21,7 @@ use List::MoreUtils qw(any);
 
 # Check whether or not the user is logged in
 my $user = Bugzilla->login(LOGIN_OPTIONAL);
-my $cgi = Bugzilla->cgi;
+my $cgi  = Bugzilla->cgi;
 my $vars = {};
 
 # Yes, I really want to avoid two calls to the id method.
@@ -34,59 +34,65 @@ my $can_cache = 0;
 # And log out the user if requested. We do this first so that nothing
 # else accidentally relies on the current login.
 if ($cgi->param('logout')) {
-    Bugzilla->logout();
-    $user = Bugzilla->user;
-    $user_id = 0;
-    $can_cache = 0;
-    $vars->{'message'} = "logged_out";
-    # Make sure that templates or other code doesn't get confused about this.
-    $cgi->delete('logout');
+  Bugzilla->logout();
+  $user              = Bugzilla->user;
+  $user_id           = 0;
+  $can_cache         = 0;
+  $vars->{'message'} = "logged_out";
+
+  # Make sure that templates or other code doesn't get confused about this.
+  $cgi->delete('logout');
 }
 
 # our weak etag is based on the bugzilla version parameter (BMO customization) and the announcehtml
 # if either change, the cache will be considered invalid.
 my @etag_parts = (
-    Bugzilla->VERSION,
-    Bugzilla->params->{announcehtml},
-    Bugzilla->params->{createemailregexp},
+  Bugzilla->VERSION,
+  Bugzilla->params->{announcehtml},
+  Bugzilla->params->{createemailregexp},
 );
-my $weak_etag = q{W/"} . md5_hex(@etag_parts) . q{"};
+my $weak_etag     = q{W/"} . md5_hex(@etag_parts) . q{"};
 my $if_none_match = $cgi->http('If-None-Match');
 
 # load balancer (or client) will check back with us after max-age seconds
 # If the etag in If-None-Match is unchanged, we quickly respond without doing much work.
-my @cache_control = (
-    $can_cache ? 'public' : 'no-cache',
-    sprintf('max-age=%d', 60 * 5),
-);
+my @cache_control
+  = ($can_cache ? 'public' : 'no-cache', sprintf('max-age=%d', 60 * 5),);
 
-if ($can_cache && $if_none_match && any { $_ eq $weak_etag } split(/,\s*/, $if_none_match)) {
-    print $cgi->header(-status => '304 Not Modified', -ETag => $weak_etag);
+if (
+  $can_cache && $if_none_match && any { $_ eq $weak_etag }
+  split(/,\s*/, $if_none_match)
+  )
+{
+  print $cgi->header(-status => '304 Not Modified', -ETag => $weak_etag);
 }
 else {
-    my $template = Bugzilla->template;
-    $cgi->content_security_policy(script_src  => ['self', 'https://www.google-analytics.com']);
+  my $template = Bugzilla->template;
+  $cgi->content_security_policy(
+    script_src => ['self', 'https://www.google-analytics.com']);
 
-    # Return the appropriate HTTP response headers.
-    print $cgi->header(
-        -Cache_Control => join(', ', @cache_control),
-        $can_cache ? (-ETag => $weak_etag) : (),
-    );
+  # Return the appropriate HTTP response headers.
+  print $cgi->header(
+    -Cache_Control => join(', ', @cache_control),
+    $can_cache ? (-ETag => $weak_etag) : (),
+  );
 
-    if ($user_id && $user->in_group('admin')) {
-        # If 'urlbase' is not set, display the Welcome page.
-        unless (Bugzilla->localconfig->{'urlbase'}) {
-            $template->process('welcome-admin.html.tmpl')
-                or ThrowTemplateError($template->error());
-            exit;
-        }
-        # Inform the administrator about new releases, if any.
-        $vars->{'release'} = Bugzilla::Update::get_notifications();
+  if ($user_id && $user->in_group('admin')) {
+
+    # If 'urlbase' is not set, display the Welcome page.
+    unless (Bugzilla->localconfig->{'urlbase'}) {
+      $template->process('welcome-admin.html.tmpl')
+        or ThrowTemplateError($template->error());
+      exit;
     }
 
-    $vars->{use_login_page} = 1;
+    # Inform the administrator about new releases, if any.
+    $vars->{'release'} = Bugzilla::Update::get_notifications();
+  }
 
-    # Generate and return the UI (HTML page) from the appropriate template.
-    $template->process("index.html.tmpl", $vars)
-        or ThrowTemplateError( $template->error() );
+  $vars->{use_login_page} = 1;
+
+  # Generate and return the UI (HTML page) from the appropriate template.
+  $template->process("index.html.tmpl", $vars)
+    or ThrowTemplateError($template->error());
 }

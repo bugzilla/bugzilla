@@ -23,44 +23,44 @@ use Type::Params qw(compile);
 #    Initialization     #
 #########################
 
-has 'id'              => ( is => 'ro', isa => Int );
-has 'type'            => ( is => 'ro', isa => Str );
-has 'phid'            => ( is => 'ro', isa => Str );
-has 'name'            => ( is => 'ro', isa => Str );
-has 'realname'        => ( is => 'ro', isa => Str );
-has 'creation_ts'     => ( is => 'ro', isa => Int );
-has 'modification_ts' => ( is => 'ro', isa => Int );
-has 'roles'           => ( is => 'ro', isa => ArrayRef [Str] );
-has 'view_policy'     => ( is => 'ro', isa => Str );
-has 'edit_policy'     => ( is => 'ro', isa => Str );
-has 'bugzilla_id'     => ( is => 'ro', isa => Maybe [Int] );
-has 'bugzilla_user'   => ( is => 'lazy', isa => Maybe [User] );
+has 'id'              => (is => 'ro',   isa => Int);
+has 'type'            => (is => 'ro',   isa => Str);
+has 'phid'            => (is => 'ro',   isa => Str);
+has 'name'            => (is => 'ro',   isa => Str);
+has 'realname'        => (is => 'ro',   isa => Str);
+has 'creation_ts'     => (is => 'ro',   isa => Int);
+has 'modification_ts' => (is => 'ro',   isa => Int);
+has 'roles'           => (is => 'ro',   isa => ArrayRef [Str]);
+has 'view_policy'     => (is => 'ro',   isa => Str);
+has 'edit_policy'     => (is => 'ro',   isa => Str);
+has 'bugzilla_id'     => (is => 'ro',   isa => Maybe [Int]);
+has 'bugzilla_user'   => (is => 'lazy', isa => Maybe [User]);
 
-my $Invocant = class_type { class => __PACKAGE__ };
+my $Invocant = class_type {class => __PACKAGE__};
 
 sub BUILDARGS {
-    my ( $class, $params ) = @_;
+  my ($class, $params) = @_;
 
-    $params->{name}            = $params->{fields}->{username};
-    $params->{realname}        = $params->{fields}->{realName};
-    $params->{creation_ts}     = $params->{fields}->{dateCreated};
-    $params->{modification_ts} = $params->{fields}->{dateModified};
-    $params->{roles}           = $params->{fields}->{roles};
-    $params->{view_policy}     = $params->{fields}->{policy}->{view};
-    $params->{edit_policy}     = $params->{fields}->{policy}->{edit};
+  $params->{name}            = $params->{fields}->{username};
+  $params->{realname}        = $params->{fields}->{realName};
+  $params->{creation_ts}     = $params->{fields}->{dateCreated};
+  $params->{modification_ts} = $params->{fields}->{dateModified};
+  $params->{roles}           = $params->{fields}->{roles};
+  $params->{view_policy}     = $params->{fields}->{policy}->{view};
+  $params->{edit_policy}     = $params->{fields}->{policy}->{edit};
 
-    delete $params->{fields};
+  delete $params->{fields};
 
-    my $external_accounts =
-      $params->{attachments}{'external-accounts'}{'external-accounts'};
-    if ($external_accounts) {
-        my $bug_user = first { $_->{type} eq 'bmo' } @$external_accounts;
-        $params->{bugzilla_id} = $bug_user->{id};
-    }
+  my $external_accounts
+    = $params->{attachments}{'external-accounts'}{'external-accounts'};
+  if ($external_accounts) {
+    my $bug_user = first { $_->{type} eq 'bmo' } @$external_accounts;
+    $params->{bugzilla_id} = $bug_user->{id};
+  }
 
-    delete $params->{attachments};
+  delete $params->{attachments};
 
-    return $params;
+  return $params;
 }
 
 # {
@@ -110,45 +110,45 @@ sub BUILDARGS {
 # }
 
 sub new_from_query {
-    my ( $class, $params ) = @_;
-    my $matches = $class->match($params);
-    return $matches->[0];
+  my ($class, $params) = @_;
+  my $matches = $class->match($params);
+  return $matches->[0];
 }
 
 sub match {
-    state $check = compile( $Invocant | ClassName, Dict[ ids => ArrayRef[Int] ] | Dict[ phids => ArrayRef[Str] ] );
-    my ( $class, $params ) = $check->(@_);
+  state $check = compile($Invocant | ClassName,
+    Dict [ids => ArrayRef [Int]] | Dict [phids => ArrayRef [Str]]);
+  my ($class, $params) = $check->(@_);
 
-    # BMO id search takes precedence if bugzilla_ids is used.
-    my $bugzilla_ids = delete $params->{ids};
-    if ($bugzilla_ids) {
-        my $bugzilla_data =
-          $class->get_phab_bugzilla_ids( { ids => $bugzilla_ids } );
-        $params->{phids} = [ map { $_->{phid} } @$bugzilla_data ];
+  # BMO id search takes precedence if bugzilla_ids is used.
+  my $bugzilla_ids = delete $params->{ids};
+  if ($bugzilla_ids) {
+    my $bugzilla_data = $class->get_phab_bugzilla_ids({ids => $bugzilla_ids});
+    $params->{phids} = [map { $_->{phid} } @$bugzilla_data];
+  }
+
+  return [] if !@{$params->{phids}};
+
+  # Look for BMO external user id in external-accounts attachment
+  my $data = {
+    constraints => {phids               => $params->{phids}},
+    attachments => {'external-accounts' => 1}
+  };
+
+  # We can only fetch 100 users at a time so we need to do this in lumps
+  my $phab_users = [];
+  my $result;
+  do {
+    $result = request('user.search', $data)->{result};
+    if (exists $result->{data} && @{$result->{data}}) {
+      foreach my $user (@{$result->{data}}) {
+        push @$phab_users, $class->new($user);
+      }
     }
+    $data->{after} = $result->{cursor}->{after};
+  } while ($result->{cursor}->{after});
 
-    return [] if !@{ $params->{phids} };
-
-    # Look for BMO external user id in external-accounts attachment
-    my $data = {
-        constraints => { phids               => $params->{phids} },
-        attachments => { 'external-accounts' => 1 }
-    };
-
-    # We can only fetch 100 users at a time so we need to do this in lumps
-    my $phab_users = [];
-    my $result;
-    do {
-        $result = request( 'user.search', $data )->{result};
-        if ( exists $result->{data} && @{ $result->{data} } ) {
-            foreach my $user ( @{ $result->{data} } ) {
-                push @$phab_users, $class->new($user);
-            }
-        }
-        $data->{after} = $result->{cursor}->{after};
-    } while ($result->{cursor}->{after});
-
-    return $phab_users;
+  return $phab_users;
 }
 
 #################
@@ -156,48 +156,44 @@ sub match {
 #################
 
 sub _build_bugzilla_user {
-    my ($self) = @_;
-    return undef unless $self->bugzilla_id;
-    return Bugzilla::User->new( { id => $self->bugzilla_id, cache => 1 } );
+  my ($self) = @_;
+  return undef unless $self->bugzilla_id;
+  return Bugzilla::User->new({id => $self->bugzilla_id, cache => 1});
 }
 
 sub get_phab_bugzilla_ids {
-    state $check = compile($Invocant | ClassName, Dict[ids => ArrayRef[Int]]);
-    my ( $class, $params ) = $check->(@_);
+  state $check = compile($Invocant | ClassName, Dict [ids => ArrayRef [Int]]);
+  my ($class, $params) = $check->(@_);
 
-    my $memcache = Bugzilla->memcached;
+  my $memcache = Bugzilla->memcached;
 
-    # Try to find the values in memcache first
-    my @results;
-    my %bugzilla_ids = map { $_ => 1 } @{ $params->{ids} };
-    foreach my $bugzilla_id ( keys %bugzilla_ids ) {
-        my $phid =
-          $memcache->get( { key => "phab_user_bugzilla_id_" . $bugzilla_id } );
-        if ($phid) {
-            push @results, { id => $bugzilla_id, phid => $phid };
-            delete $bugzilla_ids{$bugzilla_id};
-        }
+  # Try to find the values in memcache first
+  my @results;
+  my %bugzilla_ids = map { $_ => 1 } @{$params->{ids}};
+  foreach my $bugzilla_id (keys %bugzilla_ids) {
+    my $phid = $memcache->get({key => "phab_user_bugzilla_id_" . $bugzilla_id});
+    if ($phid) {
+      push @results, {id => $bugzilla_id, phid => $phid};
+      delete $bugzilla_ids{$bugzilla_id};
     }
+  }
 
-    if (%bugzilla_ids) {
-        $params->{ids} = [ keys %bugzilla_ids ];
+  if (%bugzilla_ids) {
+    $params->{ids} = [keys %bugzilla_ids];
 
-        my $result = request( 'bugzilla.account.search', $params );
+    my $result = request('bugzilla.account.search', $params);
 
-        # Store new values in memcache for later retrieval
-        foreach my $user ( @{ $result->{result} } ) {
-            next if !$user->{phid};
-            $memcache->set(
-                {
-                    key   => "phab_user_bugzilla_id_" . $user->{id},
-                    value => $user->{phid}
-                }
-            );
-            push @results, $user;
-        }
+    # Store new values in memcache for later retrieval
+    foreach my $user (@{$result->{result}}) {
+      next if !$user->{phid};
+      $memcache->set({
+        key => "phab_user_bugzilla_id_" . $user->{id}, value => $user->{phid}
+      });
+      push @results, $user;
     }
+  }
 
-    return \@results;
+  return \@results;
 }
 
 1;

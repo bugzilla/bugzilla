@@ -26,8 +26,7 @@ sub work {
   my ($class, $job) = @_;
   my $task       = $job->arg;
   my $task_class = blessed($task) // '';
-  die "Invalid task class: $task_class"
-    unless $task_class =~ /^Bugzilla::Task::/;
+  die "Invalid task class: $task_class" unless $task_class =~ /^Bugzilla::Task::/;
   require_module($task_class);
 
   my $template = Bugzilla->template;

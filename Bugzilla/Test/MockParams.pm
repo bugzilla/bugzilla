@@ -16,60 +16,52 @@ use Bugzilla::Config;
 use Safe;
 
 our $Params;
+
 BEGIN {
-    our $Mock = mock 'Bugzilla::Config' => (
-        override => [
-            'read_param_file' => sub {
-                my ($class) = @_;
-                return {} unless $Params;
-                my $s = Safe->new;
-                $s->reval($Params);
-                die "Error evaluating params: $@" if $@;
-                return { %{ $s->varglob('param') } };
-            },
-            '_write_file' => sub {
-                my ($class, $str) = @_;
-                $Params = $str;
-            },
-        ],
-    );
+  our $Mock = mock 'Bugzilla::Config' => (
+    override => [
+      'read_param_file' => sub {
+        my ($class) = @_;
+        return {} unless $Params;
+        my $s = Safe->new;
+        $s->reval($Params);
+        die "Error evaluating params: $@" if $@;
+        return {%{$s->varglob('param')}};
+      },
+      '_write_file' => sub {
+        my ($class, $str) = @_;
+        $Params = $str;
+      },
+    ],
+  );
 }
 
 sub import {
-    my ($self, %answers) = @_;
-    state $first_time = 0;
+  my ($self, %answers) = @_;
+  state $first_time = 0;
 
-    require Bugzilla::Field;
-    require Bugzilla::Status;
-    require Bugzilla;
-    my $Bugzilla = mock 'Bugzilla' => (
-        override => [
-            installation_answers => sub { \%answers },
-        ],
-    );
-    my $BugzillaField = mock 'Bugzilla::Field' => (
-        override => [
-            get_legal_field_values => sub { [] },
-        ],
-    );
-    my $BugzillaStatus = mock 'Bugzilla::Status' => (
-        override => [
-            closed_bug_statuses => sub { die "no database" },
-        ],
-    );
+  require Bugzilla::Field;
+  require Bugzilla::Status;
+  require Bugzilla;
+  my $Bugzilla = mock 'Bugzilla' =>
+    (override => [installation_answers => sub { \%answers },],);
+  my $BugzillaField = mock 'Bugzilla::Field' =>
+    (override => [get_legal_field_values => sub { [] },],);
+  my $BugzillaStatus = mock 'Bugzilla::Status' =>
+    (override => [closed_bug_statuses => sub { die "no database" },],);
 
-    # prod-like defaults
-    $answers{user_info_class}   //= 'GitHubAuth,CGI';
-    $answers{user_verify_class} //= 'GitHubAuth,DB';
+  # prod-like defaults
+  $answers{user_info_class}   //= 'GitHubAuth,CGI';
+  $answers{user_verify_class} //= 'GitHubAuth,DB';
 
-    if ($first_time++) {
-        capture_merged {
-            Bugzilla::Config::update_params();
-        };
-    }
-    else {
-        Bugzilla::Config::SetParam($_, $answers{$_}) for keys %answers;
-    }
+  if ($first_time++) {
+    capture_merged {
+      Bugzilla::Config::update_params();
+    };
+  }
+  else {
+    Bugzilla::Config::SetParam($_, $answers{$_}) for keys %answers;
+  }
 }
 
 1;

@@ -30,7 +30,7 @@ sub user_profile {
     );
   }
   else {
-    $self->render( status => 401, text => 'Unauthorized');
+    $self->render(status => 401, text => 'Unauthorized');
   }
 }
 

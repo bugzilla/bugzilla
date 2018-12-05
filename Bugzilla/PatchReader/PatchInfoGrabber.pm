@@ -6,7 +6,8 @@ use 5.10.1;
 use strict;
 use warnings;
 
-@Bugzilla::PatchReader::PatchInfoGrabber::ISA = qw(Bugzilla::PatchReader::FilterPatch);
+@Bugzilla::PatchReader::PatchInfoGrabber::ISA
+  = qw(Bugzilla::PatchReader::FilterPatch);
 
 sub new {
   my $class = shift;
@@ -31,16 +32,18 @@ sub start_patch {
 sub start_file {
   my $this = shift;
   my ($file) = @_;
-  $this->{PATCH_INFO}{files}{$file->{filename}} = { %{$file} };
-  $this->{FILE} = { %{$file} };
+  $this->{PATCH_INFO}{files}{$file->{filename}} = {%{$file}};
+  $this->{FILE} = {%{$file}};
   $this->{TARGET}->start_file(@_) if $this->{TARGET};
 }
 
 sub next_section {
   my $this = shift;
   my ($section) = @_;
-  $this->{PATCH_INFO}{files}{$this->{FILE}{filename}}{plus_lines} += $section->{plus_lines};
-  $this->{PATCH_INFO}{files}{$this->{FILE}{filename}}{minus_lines} += $section->{minus_lines};
+  $this->{PATCH_INFO}{files}{$this->{FILE}{filename}}{plus_lines}
+    += $section->{plus_lines};
+  $this->{PATCH_INFO}{files}{$this->{FILE}{filename}}{minus_lines}
+    += $section->{minus_lines};
   $this->{TARGET}->next_section(@_) if $this->{TARGET};
 }
 

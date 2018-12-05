@@ -20,51 +20,46 @@ use Encode;
 use FileHandle;
 
 sub init {
-    my ($self) = @_;
+  my ($self) = @_;
 }
 
 sub options {
-    return (
-        {
-            name     => 'filename',
-            label    => 'Filename',
-            type     => 'string',
-            default  => 'push.log',
-            required => 1,
-            validate => sub {
-                my $filename = shift;
-                $filename =~ m#^/#
-                    && die "Absolute paths are not permitted\n";
-                $filename =~ m#\.\.#
-                    && die "Relative paths are not permitted\n";
-            },
-        },
-    );
+  return (
+    {
+      name     => 'filename',
+      label    => 'Filename',
+      type     => 'string',
+      default  => 'push.log',
+      required => 1,
+      validate => sub {
+        my $filename = shift;
+        $filename =~ m#^/#   && die "Absolute paths are not permitted\n";
+        $filename =~ m#\.\.# && die "Relative paths are not permitted\n";
+      },
+    },
+  );
 }
 
 sub should_send {
-    my ($self, $message) = @_;
-    return 1;
+  my ($self, $message) = @_;
+  return 1;
 }
 
 sub send {
-    my ($self, $message) = @_;
+  my ($self, $message) = @_;
 
-    # pretty-format json payload
-    my $payload = $message->payload_decoded;
-    $payload = to_json($payload, 1);
+  # pretty-format json payload
+  my $payload = $message->payload_decoded;
+  $payload = to_json($payload, 1);
 
-    my $filename = bz_locations()->{'datadir'} . '/' . $self->config->{filename};
-    Bugzilla->push_ext->logger->debug("File: Appending to $filename");
-    my $fh = FileHandle->new(">>$filename");
-    $fh->binmode(':utf8');
-    $fh->print(
-        "[" . scalar(localtime) . "]\n" .
-        $payload . "\n\n"
-    );
-    $fh->close;
+  my $filename = bz_locations()->{'datadir'} . '/' . $self->config->{filename};
+  Bugzilla->push_ext->logger->debug("File: Appending to $filename");
+  my $fh = FileHandle->new(">>$filename");
+  $fh->binmode(':utf8');
+  $fh->print("[" . scalar(localtime) . "]\n" . $payload . "\n\n");
+  $fh->close;
 
-    return PUSH_RESULT_OK;
+  return PUSH_RESULT_OK;
 }
 
 1;

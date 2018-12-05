@@ -17,14 +17,14 @@ use base qw(Bugzilla::Object);
 # Overriden Constants that are used as methods
 #####################################################################
 
-use constant DB_TABLE       => 'logincookies';
-use constant DB_COLUMNS     => qw(
-    cookie
-    userid
-    lastused
-    ipaddr
-    id
-    restrict_ipaddr
+use constant DB_TABLE   => 'logincookies';
+use constant DB_COLUMNS => qw(
+  cookie
+  userid
+  lastused
+  ipaddr
+  id
+  restrict_ipaddr
 );
 
 use constant UPDATE_COLUMNS => qw();
@@ -33,17 +33,19 @@ use constant LIST_ORDER     => 'lastused DESC';
 use constant NAME_FIELD     => 'cookie';
 
 # turn off auditing and exclude these objects from memcached
-use constant { AUDIT_CREATES => 0,
-               AUDIT_UPDATES => 0,
-               AUDIT_REMOVES => 0,
-               USE_MEMCACHED => 0 };
+use constant {
+  AUDIT_CREATES => 0,
+  AUDIT_UPDATES => 0,
+  AUDIT_REMOVES => 0,
+  USE_MEMCACHED => 0
+};
 
 # Accessors
-sub id              { return $_[0]->{id}              }
-sub userid          { return $_[0]->{userid}          }
-sub cookie          { return $_[0]->{cookie}          }
-sub lastused        { return $_[0]->{lastused}        }
-sub ipaddr          { return $_[0]->{ipaddr}          }
+sub id              { return $_[0]->{id} }
+sub userid          { return $_[0]->{userid} }
+sub cookie          { return $_[0]->{cookie} }
+sub lastused        { return $_[0]->{lastused} }
+sub ipaddr          { return $_[0]->{ipaddr} }
 sub restrict_ipaddr { return $_[0]->{restrict_ipaddr} }
 
 1;

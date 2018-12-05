@@ -11,10 +11,8 @@ use strict;
 
 use constant NAME => 'QA';
 
-use constant REQUIRED_MODULES => [
-];
+use constant REQUIRED_MODULES => [];
 
-use constant OPTIONAL_MODULES => [
-];
+use constant OPTIONAL_MODULES => [];
 
 __PACKAGE__->NAME;

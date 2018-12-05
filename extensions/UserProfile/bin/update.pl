@@ -26,56 +26,50 @@ my $user_ids;
 my $verbose = grep { $_ eq '-v' } @ARGV;
 
 $user_ids = $dbh->selectcol_arrayref(
-    "SELECT user_id
+  "SELECT user_id
        FROM profiles_statistics_recalc
-      ORDER BY user_id",
-    { Slice => {} }
+      ORDER BY user_id", {Slice => {}}
 );
 
 if (@$user_ids) {
-    print "recalculating last_user_activity\n";
-    my ($count, $total) = (0, scalar(@$user_ids));
-    foreach my $user_id (@$user_ids) {
-        if ($verbose) {
-            $count++;
-            my $login = user_id_to_login($user_id);
-            print "$count/$total $login ($user_id)\n";
-        }
-        $dbh->do(
-            "UPDATE profiles
-                SET last_activity_ts = ?,
-                    last_statistics_ts = NULL
-            WHERE userid = ?",
-            undef,
-            last_user_activity($user_id),
-            $user_id
-        );
-        Bugzilla->memcached->clear({ table => 'profiles', id => $user_id });
+  print "recalculating last_user_activity\n";
+  my ($count, $total) = (0, scalar(@$user_ids));
+  foreach my $user_id (@$user_ids) {
+    if ($verbose) {
+      $count++;
+      my $login = user_id_to_login($user_id);
+      print "$count/$total $login ($user_id)\n";
     }
     $dbh->do(
-        "DELETE FROM profiles_statistics_recalc WHERE " . $dbh->sql_in('user_id', $user_ids)
+      "UPDATE profiles
+                SET last_activity_ts = ?,
+                    last_statistics_ts = NULL
+            WHERE userid = ?", undef, last_user_activity($user_id), $user_id
     );
+    Bugzilla->memcached->clear({table => 'profiles', id => $user_id});
+  }
+  $dbh->do("DELETE FROM profiles_statistics_recalc WHERE "
+      . $dbh->sql_in('user_id', $user_ids));
 }
 
 $user_ids = $dbh->selectcol_arrayref(
-    "SELECT userid
+  "SELECT userid
        FROM profiles
       WHERE last_activity_ts IS NOT NULL
             AND (last_statistics_ts IS NULL
                  OR last_activity_ts > last_statistics_ts)
-      ORDER BY userid",
-    { Slice => {} }
+      ORDER BY userid", {Slice => {}}
 );
 
 if (@$user_ids) {
-    $verbose && print "updating statistics\n";
-    my ($count, $total) = (0, scalar(@$user_ids));
-    foreach my $user_id (@$user_ids) {
-        if ($verbose) {
-            $count++;
-            my $login = user_id_to_login($user_id);
-            print "$count/$total $login ($user_id)\n";
-        }
-        update_statistics_by_user($user_id);
+  $verbose && print "updating statistics\n";
+  my ($count, $total) = (0, scalar(@$user_ids));
+  foreach my $user_id (@$user_ids) {
+    if ($verbose) {
+      $count++;
+      my $login = user_id_to_login($user_id);
+      print "$count/$total $login ($user_id)\n";
     }
+    update_statistics_by_user($user_id);
+  }
 }

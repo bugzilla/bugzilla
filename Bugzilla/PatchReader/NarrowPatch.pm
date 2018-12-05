@@ -6,7 +6,8 @@ use 5.10.1;
 use strict;
 use warnings;
 
-@Bugzilla::PatchReader::NarrowPatch::ISA = qw(Bugzilla::PatchReader::FilterPatch);
+@Bugzilla::PatchReader::NarrowPatch::ISA
+  = qw(Bugzilla::PatchReader::FilterPatch);
 
 sub new {
   my $class = shift;
@@ -22,7 +23,9 @@ sub new {
 sub start_file {
   my $this = shift;
   my ($file) = @_;
-  if (grep { $_ eq substr($file->{filename}, 0, length($_)) } @{$this->{INCLUDE_FILES}}) {
+  if (grep { $_ eq substr($file->{filename}, 0, length($_)) }
+    @{$this->{INCLUDE_FILES}})
+  {
     $this->{IS_INCLUDED} = 1;
     $this->{TARGET}->start_file(@_) if $this->{TARGET};
   }

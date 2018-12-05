@@ -20,22 +20,22 @@ use Bugzilla::Util;
 ###############################
 
 sub should_handle {
-    my ($class, $uri) = @_;
-    return ($uri->path_query =~ m|view\.php\?id=\d+$|) ? 1 : 0;
+  my ($class, $uri) = @_;
+  return ($uri->path_query =~ m|view\.php\?id=\d+$|) ? 1 : 0;
 }
 
 sub _check_value {
-    my $class = shift;
+  my $class = shift;
 
-    my $uri = $class->SUPER::_check_value(@_);
+  my $uri = $class->SUPER::_check_value(@_);
 
-    # MantisBT URLs look like the following ('bugs' directory is optional):
-    #   http://www.mantisbt.org/bugs/view.php?id=1234
+  # MantisBT URLs look like the following ('bugs' directory is optional):
+  #   http://www.mantisbt.org/bugs/view.php?id=1234
 
-    # Remove any # part if there is one.
-    $uri->fragment(undef);
+  # Remove any # part if there is one.
+  $uri->fragment(undef);
 
-    return $uri;
+  return $uri;
 }
 
 1;

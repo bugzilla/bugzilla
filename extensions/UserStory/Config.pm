@@ -12,13 +12,8 @@ use strict;
 use warnings;
 
 use constant NAME => 'UserStory';
-use constant REQUIRED_MODULES => [
-    {
-        package => 'Text-Diff',
-        module  => 'Text::Diff',
-        version => 0,
-    },
-];
+use constant REQUIRED_MODULES =>
+  [{package => 'Text-Diff', module => 'Text::Diff', version => 0,},];
 use constant OPTIONAL_MODULES => [];
 
 __PACKAGE__->NAME;

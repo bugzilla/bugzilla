@@ -13,8 +13,8 @@ use 5.10.1;
 use lib qw(. lib local/lib/perl5);
 
 BEGIN {
-    use Bugzilla;
-    Bugzilla->extensions;
+  use Bugzilla;
+  Bugzilla->extensions;
 }
 
 use Bugzilla::Constants qw( USAGE_MODE_CMDLINE );
@@ -51,8 +51,8 @@ SQL
 
 my %visible;
 foreach my $row (@$tf_vis) {
-    my ($tracking_flag_id, $product_id, $component_id) = @$row;
-    $visible{$tracking_flag_id}{$product_id}{$component_id // 'ALL'} = 1;
+  my ($tracking_flag_id, $product_id, $component_id) = @$row;
+  $visible{$tracking_flag_id}{$product_id}{$component_id // 'ALL'} = 1;
 }
 
 my %bugs = map { $_->[0] => 1 } @$tf_bugs;
@@ -66,13 +66,16 @@ my $removed = 0;
 $dbh->bz_start_transaction();
 my ($timestamp) = $dbh->selectrow_array('SELECT LOCALTIMESTAMP(0)');
 foreach my $tf_bug (@$tf_bugs) {
-    my ($flag_name, $value, $bug_id, $tf_id, $product_id, $component_id) = @$tf_bug;
-    unless ($visible{$tf_id}{$product_id}{$component_id} || $visible{$tf_id}{$product_id}{ALL}) {
-        $dbh->do("DELETE FROM tracking_flags_bugs WHERE tracking_flag_id = ? AND bug_id = ?",
-                 undef, $tf_id, $bug_id);
-        LogActivityEntry($bug_id, $flag_name, $value, '---', $user->id, $timestamp);
-        $removed++;
-    }
+  my ($flag_name, $value, $bug_id, $tf_id, $product_id, $component_id) = @$tf_bug;
+  unless ($visible{$tf_id}{$product_id}{$component_id}
+    || $visible{$tf_id}{$product_id}{ALL})
+  {
+    $dbh->do(
+      "DELETE FROM tracking_flags_bugs WHERE tracking_flag_id = ? AND bug_id = ?",
+      undef, $tf_id, $bug_id);
+    LogActivityEntry($bug_id, $flag_name, $value, '---', $user->id, $timestamp);
+    $removed++;
+  }
 }
 $dbh->bz_commit_transaction();
 

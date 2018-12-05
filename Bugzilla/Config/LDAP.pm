@@ -16,51 +16,23 @@ use Bugzilla::Config::Common;
 our $sortkey = 1000;
 
 sub get_param_list {
-    my $class      = shift;
-    my @param_list = (
-        {
-            name    => 'LDAPserver',
-            type    => 't',
-            default => ''
-        },
+  my $class      = shift;
+  my @param_list = (
+    {name => 'LDAPserver', type => 't', default => ''},
 
-        {
-            name    => 'LDAPstarttls',
-            type    => 'b',
-            default => 0
-        },
+    {name => 'LDAPstarttls', type => 'b', default => 0},
 
-        {
-            name    => 'LDAPbinddn',
-            type    => 't',
-            default => ''
-        },
+    {name => 'LDAPbinddn', type => 't', default => ''},
 
-        {
-            name    => 'LDAPBaseDN',
-            type    => 't',
-            default => ''
-        },
+    {name => 'LDAPBaseDN', type => 't', default => ''},
 
-        {
-            name    => 'LDAPuidattribute',
-            type    => 't',
-            default => 'uid'
-        },
+    {name => 'LDAPuidattribute', type => 't', default => 'uid'},
 
-        {
-            name    => 'LDAPmailattribute',
-            type    => 't',
-            default => 'mail'
-        },
+    {name => 'LDAPmailattribute', type => 't', default => 'mail'},
 
-        {
-            name    => 'LDAPfilter',
-            type    => 't',
-            default => '',
-        }
-    );
-    return @param_list;
+    {name => 'LDAPfilter', type => 't', default => '',}
+  );
+  return @param_list;
 }
 
 1;

@@ -14,8 +14,8 @@ use 5.10.1;
 use lib qw(. lib local/lib/perl5);
 
 BEGIN {
-    use Bugzilla;
-    Bugzilla->extensions;
+  use Bugzilla;
+  Bugzilla->extensions;
 }
 
 use Bugzilla::Extension::Push::Daemon;

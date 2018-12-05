@@ -30,30 +30,28 @@ use Bugzilla::Error;
 use Bugzilla::WebService::Util qw(validate);
 use Bugzilla::Util qw(trim detaint_natural trick_taint);
 
-use constant READ_ONLY => qw( suggest_users );
+use constant READ_ONLY      => qw( suggest_users );
 use constant PUBLIC_METHODS => qw( suggest_users );
 
 sub suggest_users {
-    my ($self, $params) = @_;
+  my ($self, $params) = @_;
 
-    Bugzilla->switch_to_shadow_db();
+  Bugzilla->switch_to_shadow_db();
 
-    ThrowCodeError('params_required', { function => 'Elastic.suggest_users', params => ['match'] })
-      unless defined $params->{match};
+  ThrowCodeError('params_required',
+    {function => 'Elastic.suggest_users', params => ['match']})
+    unless defined $params->{match};
 
-    ThrowUserError('user_access_by_match_denied')
-      unless Bugzilla->user->id;
+  ThrowUserError('user_access_by_match_denied') unless Bugzilla->user->id;
 
-    trick_taint($params->{match});
-    my $results = Bugzilla->elastic->suggest_users($params->{match} . "");
-    my @users = map {
-        {
-            real_name => $self->type(string => $_->{real_name}),
-            name      => $self->type(email  => $_->{name}),
-        }
-    } @$results;
+  trick_taint($params->{match});
+  my $results = Bugzilla->elastic->suggest_users($params->{match} . "");
+  my @users = map { {
+    real_name => $self->type(string => $_->{real_name}),
+    name      => $self->type(email  => $_->{name}),
+  } } @$results;
 
-    return { users => \@users };
+  return {users => \@users};
 }
 
 1;

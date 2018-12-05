@@ -30,7 +30,7 @@ my $options = {};
 GetOptions($options, 'add=s', 'remove=s') or exit(1);
 my $url = URI->new(shift);
 unless ($url && ($options->{add} || $options->{remove})) {
-    die <<EOF;
+  die <<EOF;
 Syntax:
     update-bug-groups.pl [--add group-name] [--remove group-name] buglist-url
 
@@ -46,52 +46,56 @@ Synopsis:
 EOF
 }
 die "Invalid buglist.cgi query\n" unless $url->path =~ m#/buglist\.cgi$#;
-$url->query_param( limit => 0 );
+$url->query_param(limit => 0);
 
 my ($add_group, $remove_group);
-$add_group = Bugzilla::Group->check({ name => $options->{add} }) if $options->{add};
-$remove_group = Bugzilla::Group->check({ name => $options->{remove} }) if $options->{remove};
+$add_group = Bugzilla::Group->check({name => $options->{add}})
+  if $options->{add};
+$remove_group = Bugzilla::Group->check({name => $options->{remove}})
+  if $options->{remove};
 
-my $user = Bugzilla::User->check({ name => 'automation@bmo.tld' });
-$user->{groups} = [ Bugzilla::Group->get_all ];
-$user->{bless_groups} = [ Bugzilla::Group->get_all ];
+my $user = Bugzilla::User->check({name => 'automation@bmo.tld'});
+$user->{groups}       = [Bugzilla::Group->get_all];
+$user->{bless_groups} = [Bugzilla::Group->get_all];
 Bugzilla->set_user($user);
 
 # find the bugs
 
 my $params = Bugzilla::CGI->new($url->query);
 my $search = Bugzilla::Search->new(
-    fields => [ 'bug_id', 'short_desc' ],
-    params => scalar $params->Vars,
-    user   => $user,
+  fields => ['bug_id', 'short_desc'],
+  params => scalar $params->Vars,
+  user   => $user,
 );
-my $bugs = $search->data;
+my $bugs  = $search->data;
 my $count = scalar @$bugs;
 
 # update
 
 die "No bugs found\n" unless $count;
-print "Query matched $count bug(s)\nPress <Ctrl-C> to stop or <Enter> to continue..\n";
+print
+  "Query matched $count bug(s)\nPress <Ctrl-C> to stop or <Enter> to continue..\n";
 getc();
 
-my $dbh = Bugzilla->dbh;
+my $dbh     = Bugzilla->dbh;
 my $updated = 0;
 foreach my $ra (@$bugs) {
-    $dbh->bz_start_transaction;
-    my ($bug_id, $summary) = @$ra;
-    print "$bug_id - $summary\n";
-    my $bug = Bugzilla::Bug->check($bug_id);
-    $bug->add_group($add_group) if $add_group;
-    $bug->remove_group($remove_group) if $remove_group;
-    my $changes = $bug->update();
-    if (scalar keys %$changes) {
-        $dbh->do("UPDATE bugs SET lastdiffed = delta_ts WHERE bug_id = ?", undef, $bug->id);
-        $updated++;
-    }
-    $dbh->bz_commit_transaction;
+  $dbh->bz_start_transaction;
+  my ($bug_id, $summary) = @$ra;
+  print "$bug_id - $summary\n";
+  my $bug = Bugzilla::Bug->check($bug_id);
+  $bug->add_group($add_group)       if $add_group;
+  $bug->remove_group($remove_group) if $remove_group;
+  my $changes = $bug->update();
+  if (scalar keys %$changes) {
+    $dbh->do("UPDATE bugs SET lastdiffed = delta_ts WHERE bug_id = ?",
+      undef, $bug->id);
+    $updated++;
+  }
+  $dbh->bz_commit_transaction;
 
-    # drop cached user objects to avoid excessive memory usage
-    Bugzilla::User->object_cache_clearall();
+  # drop cached user objects to avoid excessive memory usage
+  Bugzilla::User->object_cache_clearall();
 }
 
 print "\nUpdated $updated bugs(s)\n";

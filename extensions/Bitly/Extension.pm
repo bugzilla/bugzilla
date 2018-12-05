@@ -17,17 +17,14 @@ our $VERSION = '1';
 use Bugzilla;
 
 sub webservice {
-    my ($self,  $args) = @_;
-    $args->{dispatch}->{Bitly} = "Bugzilla::Extension::Bitly::WebService";
+  my ($self, $args) = @_;
+  $args->{dispatch}->{Bitly} = "Bugzilla::Extension::Bitly::WebService";
 }
 
 sub config_modify_panels {
-    my ($self, $args) = @_;
-    push @{ $args->{panels}->{advanced}->{params} }, {
-        name    => 'bitly_token',
-        type    => 't',
-        default => '',
-    };
+  my ($self, $args) = @_;
+  push @{$args->{panels}->{advanced}->{params}},
+    {name => 'bitly_token', type => 't', default => '',};
 }
 
 __PACKAGE__->NAME;

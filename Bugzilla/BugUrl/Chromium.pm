@@ -21,29 +21,30 @@ use Bugzilla::Util;
 ###############################
 
 sub should_handle {
-    my ($class, $uri) = @_;
-    return ($uri->authority =~ /^bugs.chromium.org$/i) ? 1 : 0;
+  my ($class, $uri) = @_;
+  return ($uri->authority =~ /^bugs.chromium.org$/i) ? 1 : 0;
 }
 
 sub _check_value {
-    my ($class, $uri) = @_;
+  my ($class, $uri) = @_;
 
-    $uri = $class->SUPER::_check_value($uri);
+  $uri = $class->SUPER::_check_value($uri);
 
-    my $value = $uri->as_string;
-    my $project_name;
-    if ($uri->path =~ m|^/p/([^/]+)/issues/detail$|) {
-        $project_name = $1;
-    } else {
-        ThrowUserError('bug_url_invalid', { url => $value });
-    }
-    my $bug_id = $uri->query_param('id');
-    detaint_natural($bug_id);
-    if (!$bug_id) {
-        ThrowUserError('bug_url_invalid', { url => $value, reason => 'id' });
-    }
+  my $value = $uri->as_string;
+  my $project_name;
+  if ($uri->path =~ m|^/p/([^/]+)/issues/detail$|) {
+    $project_name = $1;
+  }
+  else {
+    ThrowUserError('bug_url_invalid', {url => $value});
+  }
+  my $bug_id = $uri->query_param('id');
+  detaint_natural($bug_id);
+  if (!$bug_id) {
+    ThrowUserError('bug_url_invalid', {url => $value, reason => 'id'});
+  }
 
-    return URI->new($value);
+  return URI->new($value);
 }
 
 1;

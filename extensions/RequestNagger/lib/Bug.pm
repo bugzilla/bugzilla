@@ -17,29 +17,29 @@ use feature 'state';
 use Bugzilla::User;
 
 sub short_desc {
-    my ($self) = @_;
-    return $self->{sanitise_bug} ? '(Secure bug)' : $self->SUPER::short_desc;
+  my ($self) = @_;
+  return $self->{sanitise_bug} ? '(Secure bug)' : $self->SUPER::short_desc;
 }
 
 sub is_private {
-    my ($self) = @_;
-    if (!exists $self->{is_private}) {
-        state $default_user //= Bugzilla::User->new();
-        $self->{is_private} = !$default_user->can_see_bug($self);
-    }
-    return $self->{is_private};
+  my ($self) = @_;
+  if (!exists $self->{is_private}) {
+    state $default_user //= Bugzilla::User->new();
+    $self->{is_private} = !$default_user->can_see_bug($self);
+  }
+  return $self->{is_private};
 }
 
 sub tooltip {
-    my ($self) = @_;
-    my $tooltip = $self->bug_status;
-    if ($self->bug_status eq 'RESOLVED') {
-        $tooltip .= '/' . $self->resolution;
-    }
-    if (!$self->{sanitise_bug}) {
-        $tooltip .= ' ' . $self->product . ' :: ' . $self->component;
-    }
-    return $tooltip;
+  my ($self) = @_;
+  my $tooltip = $self->bug_status;
+  if ($self->bug_status eq 'RESOLVED') {
+    $tooltip .= '/' . $self->resolution;
+  }
+  if (!$self->{sanitise_bug}) {
+    $tooltip .= ' ' . $self->product . ' :: ' . $self->component;
+  }
+  return $tooltip;
 }
 
 1;

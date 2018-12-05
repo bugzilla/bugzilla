@@ -10,6 +10,6 @@ use warnings;
 use 5.10.1;
 
 %strings = (
-    feature_push_amqp => 'Push: AMQP Support',
-    feature_push_stomp => 'Push: STOMP Support',
+  feature_push_amqp  => 'Push: AMQP Support',
+  feature_push_stomp => 'Push: STOMP Support',
 );

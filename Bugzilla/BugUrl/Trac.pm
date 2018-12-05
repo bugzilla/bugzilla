@@ -20,25 +20,26 @@ use Bugzilla::Util;
 ###############################
 
 sub should_handle {
-    my ($class, $uri) = @_;
-    return ($uri->path =~ m|/ticket/\d+$|) ? 1 : 0;
+  my ($class, $uri) = @_;
+  return ($uri->path =~ m|/ticket/\d+$|) ? 1 : 0;
 }
 
 sub _check_value {
-    my $class = shift;
+  my $class = shift;
 
-    my $uri = $class->SUPER::_check_value(@_);
+  my $uri = $class->SUPER::_check_value(@_);
 
-    # Trac URLs can look like various things:
-    #   http://dev.mutt.org/trac/ticket/1234
-    #   http://trac.roundcube.net/ticket/1484130
+  # Trac URLs can look like various things:
+  #   http://dev.mutt.org/trac/ticket/1234
+  #   http://trac.roundcube.net/ticket/1484130
 
-    # Make sure there are no query parameters.
-    $uri->query(undef);
-    # And remove any # part if there is one.
-    $uri->fragment(undef);
+  # Make sure there are no query parameters.
+  $uri->query(undef);
 
-    return $uri;
+  # And remove any # part if there is one.
+  $uri->fragment(undef);
+
+  return $uri;
 }
 
 1;

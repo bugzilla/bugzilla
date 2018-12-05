@@ -27,12 +27,12 @@ use JSON qw(encode_json decode_json);
 use base qw(Exporter);
 
 @Bugzilla::Token::EXPORT = qw(issue_api_token issue_session_token
-                              issue_short_lived_session_token
-                              issue_auth_delegation_token check_auth_delegation_token
-                              check_token_data delete_token
-                              issue_hash_token check_hash_token
-                              issue_hash_sig   check_hash_sig
-                              set_token_extra_data get_token_extra_data);
+  issue_short_lived_session_token
+  issue_auth_delegation_token check_auth_delegation_token
+  check_token_data delete_token
+  issue_hash_token check_hash_token
+  issue_hash_sig   check_hash_sig
+  set_token_extra_data get_token_extra_data);
 
 # 128 bits password:
 # 128 * log10(2) / log10(62) = 21.49, round up to 22.
@@ -45,407 +45,439 @@ use constant TOKEN_LENGTH => 22;
 
 # Create a token used for internal API authentication
 sub issue_api_token {
-    # Generates a random token, adds it to the tokens table if one does not
-    # already exist, and returns the token to the caller.
-    my $dbh  = Bugzilla->dbh;
-    my $user = Bugzilla->user;
-    my ($token) = $dbh->selectrow_array("
+
+  # Generates a random token, adds it to the tokens table if one does not
+  # already exist, and returns the token to the caller.
+  my $dbh     = Bugzilla->dbh;
+  my $user    = Bugzilla->user;
+  my ($token) = $dbh->selectrow_array("
         SELECT token FROM tokens
          WHERE userid = ? AND tokentype = 'api_token'
-               AND (" . $dbh->sql_date_math('issuedate', '+', (MAX_TOKEN_AGE * 24 - 12), 'HOUR') . ") > NOW()",
-        undef, $user->id);
-    return $token // _create_token($user->id, 'api_token', '');
+               AND ("
+      . $dbh->sql_date_math('issuedate', '+', (MAX_TOKEN_AGE * 24 - 12), 'HOUR')
+      . ") > NOW()", undef, $user->id);
+  return $token // _create_token($user->id, 'api_token', '');
 }
 
 sub issue_auth_delegation_token {
-    my ($uri) = @_;
-    my $dbh  = Bugzilla->dbh;
-    my $user = Bugzilla->user;
-    my $checksum = hmac_sha256_base64($user->id, $uri, Bugzilla->localconfig->{'site_wide_secret'});
+  my ($uri)    = @_;
+  my $dbh      = Bugzilla->dbh;
+  my $user     = Bugzilla->user;
+  my $checksum = hmac_sha256_base64($user->id, $uri,
+    Bugzilla->localconfig->{'site_wide_secret'});
 
-    return _create_token($user->id, 'auth_delegation', $checksum);
+  return _create_token($user->id, 'auth_delegation', $checksum);
 }
 
 sub check_auth_delegation_token {
-    my ($token, $uri) = @_;
-    my $dbh  = Bugzilla->dbh;
-    my $user = Bugzilla->user;
+  my ($token, $uri) = @_;
+  my $dbh  = Bugzilla->dbh;
+  my $user = Bugzilla->user;
 
-    my ($eventdata) = $dbh->selectrow_array("
+  my ($eventdata) = $dbh->selectrow_array("
         SELECT eventdata FROM tokens
          WHERE token = ? AND tokentype = 'auth_delegation'
-               AND (" . $dbh->sql_date_math('issuedate', '+', (MAX_TOKEN_AGE * 24 - 12), 'HOUR') . ") > NOW()",
-        undef, $token);
+               AND ("
+      . $dbh->sql_date_math('issuedate', '+', (MAX_TOKEN_AGE * 24 - 12), 'HOUR')
+      . ") > NOW()", undef, $token);
 
-    if ($eventdata) {
-        my $checksum = hmac_sha256_base64($user->id, $uri, Bugzilla->localconfig->{'site_wide_secret'});
-        if ($eventdata eq $checksum) {
-            delete_token($token);
-            return 1;
-        }
+  if ($eventdata) {
+    my $checksum = hmac_sha256_base64($user->id, $uri,
+      Bugzilla->localconfig->{'site_wide_secret'});
+    if ($eventdata eq $checksum) {
+      delete_token($token);
+      return 1;
     }
+  }
 
-    return 0;
+  return 0;
 }
 
 # Creates and sends a token to create a new user account.
 # It assumes that the login has the correct format and is not already in use.
 sub issue_new_user_account_token {
-    my $login_name = shift;
-    my $dbh = Bugzilla->dbh;
-    my $template = Bugzilla->template;
-    my $vars = {};
+  my $login_name = shift;
+  my $dbh        = Bugzilla->dbh;
+  my $template   = Bugzilla->template;
+  my $vars       = {};
 
-    # Is there already a pending request for this login name? If yes, do not throw
-    # an error because the user may have lost his email with the token inside.
-    # But to prevent using this way to mailbomb an email address, make sure
-    # the last request is at least 10 minutes old before sending a new email.
+  # Is there already a pending request for this login name? If yes, do not throw
+  # an error because the user may have lost his email with the token inside.
+  # But to prevent using this way to mailbomb an email address, make sure
+  # the last request is at least 10 minutes old before sending a new email.
 
-    my $pending_requests = $dbh->selectrow_array(
-        'SELECT COUNT(*)
+  my $pending_requests = $dbh->selectrow_array(
+    'SELECT COUNT(*)
            FROM tokens
           WHERE tokentype = ?
                 AND ' . $dbh->sql_istrcmp('eventdata', '?') . '
                 AND issuedate > '
-                    . $dbh->sql_date_math('NOW()', '-', 10, 'MINUTE'),
-        undef, ('account', $login_name));
+      . $dbh->sql_date_math('NOW()', '-', 10, 'MINUTE'), undef,
+    ('account', $login_name)
+  );
 
-    ThrowUserError('too_soon_for_new_token', {'type' => 'account'}) if $pending_requests;
+  ThrowUserError('too_soon_for_new_token', {'type' => 'account'})
+    if $pending_requests;
 
-    my ($token, $token_ts) = _create_token(undef, 'account', $login_name);
+  my ($token, $token_ts) = _create_token(undef, 'account', $login_name);
 
-    $vars->{'email'} = $login_name . Bugzilla->params->{'emailsuffix'};
-    $vars->{'expiration_ts'} = ctime($token_ts + MAX_TOKEN_AGE * 86400);
-    $vars->{'token'} = $token;
+  $vars->{'email'}         = $login_name . Bugzilla->params->{'emailsuffix'};
+  $vars->{'expiration_ts'} = ctime($token_ts + MAX_TOKEN_AGE * 86400);
+  $vars->{'token'}         = $token;
 
-    my $message;
-    $template->process('account/email/request-new.txt.tmpl', $vars, \$message)
-      || ThrowTemplateError($template->error());
+  my $message;
+  $template->process('account/email/request-new.txt.tmpl', $vars, \$message)
+    || ThrowTemplateError($template->error());
 
-    # In 99% of cases, the user getting the confirmation email is the same one
-    # who made the request, and so it is reasonable to send the email in the same
-    # language used to view the "Create a New Account" page (we cannot use his
-    # user prefs as the user has no account yet!).
-    MessageToMTA($message);
+  # In 99% of cases, the user getting the confirmation email is the same one
+  # who made the request, and so it is reasonable to send the email in the same
+  # language used to view the "Create a New Account" page (we cannot use his
+  # user prefs as the user has no account yet!).
+  MessageToMTA($message);
 }
 
 sub IssueEmailChangeToken {
-    my ($user, $new_email) = @_;
-    my $email_suffix = Bugzilla->params->{'emailsuffix'};
-    my $old_email = $user->login;
+  my ($user, $new_email) = @_;
+  my $email_suffix = Bugzilla->params->{'emailsuffix'};
+  my $old_email    = $user->login;
 
-    my ($token, $token_ts) = _create_token($user->id, 'emailold', $old_email . ":" . $new_email);
+  my ($token, $token_ts)
+    = _create_token($user->id, 'emailold', $old_email . ":" . $new_email);
 
-    my $newtoken = _create_token($user->id, 'emailnew', $old_email . ":" . $new_email);
+  my $newtoken
+    = _create_token($user->id, 'emailnew', $old_email . ":" . $new_email);
 
-    # Mail the user the token along with instructions for using it.
+  # Mail the user the token along with instructions for using it.
 
-    my $template = Bugzilla->template_inner($user->setting('lang'));
-    my $vars = {};
+  my $template = Bugzilla->template_inner($user->setting('lang'));
+  my $vars     = {};
 
-    $vars->{'oldemailaddress'} = $old_email . $email_suffix;
-    $vars->{'newemailaddress'} = $new_email . $email_suffix;
-    $vars->{'expiration_ts'} = ctime($token_ts + MAX_TOKEN_AGE * 86400);
-    $vars->{'token'} = $token;
-    # For SecureMail extension
-    $vars->{'to_user'} = $user;
-    $vars->{'emailaddress'} = $old_email . $email_suffix;
+  $vars->{'oldemailaddress'} = $old_email . $email_suffix;
+  $vars->{'newemailaddress'} = $new_email . $email_suffix;
+  $vars->{'expiration_ts'}   = ctime($token_ts + MAX_TOKEN_AGE * 86400);
+  $vars->{'token'}           = $token;
 
-    my $message;
-    $template->process("account/email/change-old.txt.tmpl", $vars, \$message)
-      || ThrowTemplateError($template->error());
+  # For SecureMail extension
+  $vars->{'to_user'}      = $user;
+  $vars->{'emailaddress'} = $old_email . $email_suffix;
 
-    MessageToMTA($message);
+  my $message;
+  $template->process("account/email/change-old.txt.tmpl", $vars, \$message)
+    || ThrowTemplateError($template->error());
 
-    $vars->{'token'} = $newtoken;
-    $vars->{'emailaddress'} = $new_email . $email_suffix;
+  MessageToMTA($message);
 
-    $message = "";
-    $template->process("account/email/change-new.txt.tmpl", $vars, \$message)
-      || ThrowTemplateError($template->error());
+  $vars->{'token'}        = $newtoken;
+  $vars->{'emailaddress'} = $new_email . $email_suffix;
 
-    MessageToMTA($message);
+  $message = "";
+  $template->process("account/email/change-new.txt.tmpl", $vars, \$message)
+    || ThrowTemplateError($template->error());
+
+  MessageToMTA($message);
 }
 
 # Generates a random token, adds it to the tokens table, and sends it
 # to the user with instructions for using it to change their password.
 sub IssuePasswordToken {
-    my $user = shift;
-    my $dbh = Bugzilla->dbh;
+  my $user = shift;
+  my $dbh  = Bugzilla->dbh;
 
-    my $too_soon = $dbh->selectrow_array(
-        'SELECT 1 FROM tokens
+  my $too_soon = $dbh->selectrow_array(
+    'SELECT 1 FROM tokens
           WHERE userid = ? AND tokentype = ?
                 AND issuedate > '
-                    . $dbh->sql_date_math('NOW()', '-', 10, 'MINUTE'),
-        undef, ($user->id, 'password'));
+      . $dbh->sql_date_math('NOW()', '-', 10, 'MINUTE'), undef,
+    ($user->id, 'password')
+  );
 
-    ThrowUserError('too_soon_for_new_token', {'type' => 'password'}) if $too_soon;
+  ThrowUserError('too_soon_for_new_token', {'type' => 'password'}) if $too_soon;
 
-    my ($token, $token_ts) = _create_token($user->id, 'password', remote_ip());
+  my ($token, $token_ts) = _create_token($user->id, 'password', remote_ip());
 
-    # Mail the user the token along with instructions for using it.
-    my $template = Bugzilla->template_inner($user->setting('lang'));
-    my $vars = {};
+  # Mail the user the token along with instructions for using it.
+  my $template = Bugzilla->template_inner($user->setting('lang'));
+  my $vars     = {};
 
-    $vars->{'token'} = $token;
-    $vars->{'emailaddress'} = $user->email;
-    $vars->{'expiration_ts'} = ctime($token_ts + MAX_TOKEN_AGE * 86400);
-    # The user is not logged in (else he wouldn't request a new password).
-    # So we have to pass this information to the template.
-    $vars->{'timezone'} = $user->timezone;
+  $vars->{'token'}         = $token;
+  $vars->{'emailaddress'}  = $user->email;
+  $vars->{'expiration_ts'} = ctime($token_ts + MAX_TOKEN_AGE * 86400);
 
-    my $message = "";
-    $template->process("account/password/forgotten-password.txt.tmpl",
-                                                               $vars, \$message)
-      || ThrowTemplateError($template->error());
+  # The user is not logged in (else he wouldn't request a new password).
+  # So we have to pass this information to the template.
+  $vars->{'timezone'} = $user->timezone;
 
-    MessageToMTA($message);
+  my $message = "";
+  $template->process("account/password/forgotten-password.txt.tmpl",
+    $vars, \$message)
+    || ThrowTemplateError($template->error());
+
+  MessageToMTA($message);
 }
 
 sub issue_session_token {
-    my ($data, $user) = @_;
-    # Generates a random token, adds it to the tokens table, and returns
-    # the token to the caller.
+  my ($data, $user) = @_;
 
-    $user //= Bugzilla->user;
-    return _create_token($user->id, 'session', $data);
+  # Generates a random token, adds it to the tokens table, and returns
+  # the token to the caller.
+
+  $user //= Bugzilla->user;
+  return _create_token($user->id, 'session', $data);
 }
 
 sub issue_short_lived_session_token {
-    my ($data, $user) = @_;
-    # Generates a random token, adds it to the tokens table, and returns
-    # the token to the caller.
+  my ($data, $user) = @_;
 
-    $user //= Bugzilla->user;
-    return _create_token($user->id ? $user->id : undef, 'session.short', $data);
+  # Generates a random token, adds it to the tokens table, and returns
+  # the token to the caller.
+
+  $user //= Bugzilla->user;
+  return _create_token($user->id ? $user->id : undef, 'session.short', $data);
 }
 
 sub issue_hash_sig {
-    my ($type, $data, $salt) = @_;
-    $data //= "";
-    $salt //= generate_random_password(16);
+  my ($type, $data, $salt) = @_;
+  $data //= "";
+  $salt //= generate_random_password(16);
 
-    my $hmac = hmac_sha256_base64(
-        $salt,
-        $type,
-        $data,
-        Bugzilla->localconfig->{site_wide_secret}
-    );
-    return sprintf("%s|%s|%x", $salt, $hmac, length($data));
+  my $hmac = hmac_sha256_base64($salt, $type, $data,
+    Bugzilla->localconfig->{site_wide_secret});
+  return sprintf("%s|%s|%x", $salt, $hmac, length($data));
 }
 
 sub check_hash_sig {
-    my ($type, $sig, $data) = @_;
-    return 0 unless defined $sig && defined $data;
-    my ($salt, undef, $len) = split(/\|/, $sig, 3);
-    return length($data) == hex($len) && $sig eq issue_hash_sig($type, $data, $salt);
+  my ($type, $sig, $data) = @_;
+  return 0 unless defined $sig && defined $data;
+  my ($salt, undef, $len) = split(/\|/, $sig, 3);
+  return
+    length($data) == hex($len) && $sig eq issue_hash_sig($type, $data, $salt);
 }
 
 sub issue_hash_token {
-    my ($data, $time) = @_;
-    $data ||= [];
-    $time ||= time();
+  my ($data, $time) = @_;
+  $data ||= [];
+  $time ||= time();
 
-    # For the user ID, use the actual ID if the user is logged in.
-    # Otherwise, use the remote IP, in case this is for something
-    # such as creating an account or logging in.
-    my $user_id = Bugzilla->user->id || remote_ip();
+  # For the user ID, use the actual ID if the user is logged in.
+  # Otherwise, use the remote IP, in case this is for something
+  # such as creating an account or logging in.
+  my $user_id = Bugzilla->user->id || remote_ip();
 
-    # The concatenated string is of the form
-    # token creation time + user ID (either ID or remote IP) + data
-    my @args = ($time, $user_id, @$data);
+  # The concatenated string is of the form
+  # token creation time + user ID (either ID or remote IP) + data
+  my @args = ($time, $user_id, @$data);
 
-    my $token = join('*', @args);
-    # $token needs to be a byte string.
-    utf8::encode($token);
-    $token = hmac_sha256_base64($token, Bugzilla->localconfig->{'site_wide_secret'});
-    $token =~ s/\+/-/g;
-    $token =~ s/\//_/g;
+  my $token = join('*', @args);
 
-    # Prepend the token creation time, unencrypted, so that the token
-    # lifetime can be validated.
-    return $time . '-' . $token;
+  # $token needs to be a byte string.
+  utf8::encode($token);
+  $token
+    = hmac_sha256_base64($token, Bugzilla->localconfig->{'site_wide_secret'});
+  $token =~ s/\+/-/g;
+  $token =~ s/\//_/g;
+
+  # Prepend the token creation time, unencrypted, so that the token
+  # lifetime can be validated.
+  return $time . '-' . $token;
 }
 
 sub check_hash_token {
-    my ($token, $data) = @_;
-    $data ||= [];
-    my ($time, $expected_token);
+  my ($token, $data) = @_;
+  $data ||= [];
+  my ($time, $expected_token);
 
-    if ($token) {
-        ($time, undef) = split(/-/, $token);
-        # Regenerate the token based on the information we have.
-        $expected_token = issue_hash_token($data, $time);
-    }
+  if ($token) {
+    ($time, undef) = split(/-/, $token);
 
-    if (!$token
-        || $expected_token ne $token
-        || time() - $time > MAX_TOKEN_AGE * 86400)
-    {
-        my $template = Bugzilla->template;
-        my $vars = {};
-        $vars->{'script_name'} = basename($0);
-        $vars->{'token'} = issue_hash_token($data);
-        $vars->{'reason'} = (!$token) ?                   'missing_token' :
-                            ($expected_token ne $token) ? 'invalid_token' :
-                                                          'expired_token';
-        print Bugzilla->cgi->header();
-        $template->process('global/confirm-action.html.tmpl', $vars)
-          || ThrowTemplateError($template->error());
-        exit;
-    }
+    # Regenerate the token based on the information we have.
+    $expected_token = issue_hash_token($data, $time);
+  }
 
-    # If we come here, then the token is valid and not too old.
-    return 1;
+  if (!$token
+    || $expected_token ne $token
+    || time() - $time > MAX_TOKEN_AGE * 86400)
+  {
+    my $template = Bugzilla->template;
+    my $vars     = {};
+    $vars->{'script_name'} = basename($0);
+    $vars->{'token'}       = issue_hash_token($data);
+    $vars->{'reason'}
+      = (!$token) ? 'missing_token'
+      : ($expected_token ne $token) ? 'invalid_token'
+      :                               'expired_token';
+    print Bugzilla->cgi->header();
+    $template->process('global/confirm-action.html.tmpl', $vars)
+      || ThrowTemplateError($template->error());
+    exit;
+  }
+
+  # If we come here, then the token is valid and not too old.
+  return 1;
 }
 
 sub CleanTokenTable {
-    my $dbh = Bugzilla->dbh;
-    $dbh->do("DELETE FROM tokens WHERE " .
-             $dbh->sql_date_math('issuedate', '+', '?', 'HOUR') . " <= NOW()",
-             undef, MAX_TOKEN_AGE * 24);
-    $dbh->do("DELETE FROM tokens WHERE tokentype = ? AND " .
-             $dbh->sql_date_math('issuedate', '+', '?', 'HOUR') . " <= NOW()",
-             undef, 'session.short', MAX_SHORT_TOKEN_HOURS);
+  my $dbh = Bugzilla->dbh;
+  $dbh->do(
+    "DELETE FROM tokens WHERE "
+      . $dbh->sql_date_math('issuedate', '+', '?', 'HOUR')
+      . " <= NOW()",
+    undef,
+    MAX_TOKEN_AGE * 24
+  );
+  $dbh->do(
+    "DELETE FROM tokens WHERE tokentype = ? AND "
+      . $dbh->sql_date_math('issuedate', '+', '?', 'HOUR')
+      . " <= NOW()",
+    undef, 'session.short', MAX_SHORT_TOKEN_HOURS
+  );
 }
 
 sub GenerateUniqueToken {
-    # Generates a unique random token.  Uses generate_random_password
-    # for the tokens themselves and checks uniqueness by searching for
-    # the token in the "tokens" table.  Gives up if it can't come up
-    # with a token after about one hundred tries.
-    my ($table, $column) = @_;
 
-    my $token;
-    my $duplicate = 1;
-    my $tries = 0;
-    $table ||= "tokens";
-    $column ||= "token";
+  # Generates a unique random token.  Uses generate_random_password
+  # for the tokens themselves and checks uniqueness by searching for
+  # the token in the "tokens" table.  Gives up if it can't come up
+  # with a token after about one hundred tries.
+  my ($table, $column) = @_;
 
-    my $dbh = Bugzilla->dbh;
-    my $sth = $dbh->prepare("SELECT 1 FROM $table WHERE $column = ?");
+  my $token;
+  my $duplicate = 1;
+  my $tries     = 0;
+  $table  ||= "tokens";
+  $column ||= "token";
 
-    while ($duplicate) {
-        ++$tries;
-        if ($tries > 100) {
-            ThrowCodeError("token_generation_error");
-        }
-        $token = generate_random_password(TOKEN_LENGTH);
-        $sth->execute($token);
-        $duplicate = $sth->fetchrow_array;
+  my $dbh = Bugzilla->dbh;
+  my $sth = $dbh->prepare("SELECT 1 FROM $table WHERE $column = ?");
+
+  while ($duplicate) {
+    ++$tries;
+    if ($tries > 100) {
+      ThrowCodeError("token_generation_error");
     }
-    return $token;
+    $token = generate_random_password(TOKEN_LENGTH);
+    $sth->execute($token);
+    $duplicate = $sth->fetchrow_array;
+  }
+  return $token;
 }
 
 # Cancels a previously issued token and notifies the user.
 # This should only happen when the user accidentally makes a token request
 # or when a malicious hacker makes a token request on behalf of a user.
 sub Cancel {
-    my ($token, $cancelaction, $vars) = @_;
-    my $dbh = Bugzilla->dbh;
-    $vars ||= {};
+  my ($token, $cancelaction, $vars) = @_;
+  my $dbh = Bugzilla->dbh;
+  $vars ||= {};
 
-    # Get information about the token being canceled.
-    trick_taint($token);
-    my ($db_token, $issuedate, $tokentype, $eventdata, $userid) =
-        $dbh->selectrow_array('SELECT token, ' . $dbh->sql_date_format('issuedate') . ',
+  # Get information about the token being canceled.
+  trick_taint($token);
+  my ($db_token, $issuedate, $tokentype, $eventdata, $userid)
+    = $dbh->selectrow_array(
+    'SELECT token, '
+      . $dbh->sql_date_format('issuedate') . ',
                                       tokentype, eventdata, userid
                                  FROM tokens
-                                WHERE token = ?',
-                                undef, $token);
+                                WHERE token = ?', undef, $token
+    );
 
-    # Some DBs such as MySQL are case-insensitive by default so we do
-    # a quick comparison to make sure the tokens are indeed the same.
-    (defined $db_token && $db_token eq $token)
-        || ThrowCodeError("cancel_token_does_not_exist");
+  # Some DBs such as MySQL are case-insensitive by default so we do
+  # a quick comparison to make sure the tokens are indeed the same.
+  (defined $db_token && $db_token eq $token)
+    || ThrowCodeError("cancel_token_does_not_exist");
 
-    # If we are canceling the creation of a new user account, then there
-    # is no entry in the 'profiles' table.
-    my $user = new Bugzilla::User($userid);
+  # If we are canceling the creation of a new user account, then there
+  # is no entry in the 'profiles' table.
+  my $user = new Bugzilla::User($userid);
 
-    $vars->{'emailaddress'} = $userid ? $user->email : $eventdata;
-    $vars->{'remoteaddress'} = remote_ip();
-    $vars->{'token'} = $token;
-    $vars->{'tokentype'} = $tokentype;
-    $vars->{'issuedate'} = $issuedate;
-    # The user is probably not logged in.
-    # So we have to pass this information to the template.
-    $vars->{'timezone'} = $user->timezone;
-    $vars->{'eventdata'} = $eventdata;
-    $vars->{'cancelaction'} = $cancelaction;
+  $vars->{'emailaddress'}  = $userid ? $user->email : $eventdata;
+  $vars->{'remoteaddress'} = remote_ip();
+  $vars->{'token'}         = $token;
+  $vars->{'tokentype'}     = $tokentype;
+  $vars->{'issuedate'}     = $issuedate;
 
-    # Notify the user via email about the cancellation.
-    my $template = Bugzilla->template_inner($user->setting('lang'));
+  # The user is probably not logged in.
+  # So we have to pass this information to the template.
+  $vars->{'timezone'}     = $user->timezone;
+  $vars->{'eventdata'}    = $eventdata;
+  $vars->{'cancelaction'} = $cancelaction;
 
-    my $message;
-    $template->process("account/cancel-token.txt.tmpl", $vars, \$message)
-      || ThrowTemplateError($template->error());
+  # Notify the user via email about the cancellation.
+  my $template = Bugzilla->template_inner($user->setting('lang'));
 
-    MessageToMTA($message);
+  my $message;
+  $template->process("account/cancel-token.txt.tmpl", $vars, \$message)
+    || ThrowTemplateError($template->error());
 
-    # Delete the token from the database.
-    delete_token($token);
+  MessageToMTA($message);
+
+  # Delete the token from the database.
+  delete_token($token);
 }
 
 sub DeletePasswordTokens {
-    my ($userid, $reason) = @_;
-    my $dbh = Bugzilla->dbh;
+  my ($userid, $reason) = @_;
+  my $dbh = Bugzilla->dbh;
 
-    detaint_natural($userid);
-    my $tokens = $dbh->selectcol_arrayref('SELECT token FROM tokens
+  detaint_natural($userid);
+  my $tokens = $dbh->selectcol_arrayref(
+    'SELECT token FROM tokens
                                            WHERE userid = ? AND tokentype = ?',
-                                           undef, ($userid, 'password'));
+    undef, ($userid, 'password')
+  );
 
-    foreach my $token (@$tokens) {
-        Bugzilla::Token::Cancel($token, $reason);
-    }
+  foreach my $token (@$tokens) {
+    Bugzilla::Token::Cancel($token, $reason);
+  }
 }
 
 # Returns an email change token if the user has one.
 sub HasEmailChangeToken {
-    my $userid = shift;
-    my $dbh = Bugzilla->dbh;
+  my $userid = shift;
+  my $dbh    = Bugzilla->dbh;
 
-    my $token = $dbh->selectrow_array('SELECT token FROM tokens
+  my $token = $dbh->selectrow_array(
+    'SELECT token FROM tokens
                                        WHERE userid = ?
-                                       AND (tokentype = ? OR tokentype = ?) ' .
-                                       $dbh->sql_limit(1),
-                                       undef, ($userid, 'emailnew', 'emailold'));
-    return $token;
+                                       AND (tokentype = ? OR tokentype = ?) '
+      . $dbh->sql_limit(1), undef, ($userid, 'emailnew', 'emailold')
+  );
+  return $token;
 }
 
 # Returns the userid, issuedate and eventdata for the specified token
 sub GetTokenData {
-    my ($token) = @_;
-    my $dbh = Bugzilla->dbh;
+  my ($token) = @_;
+  my $dbh = Bugzilla->dbh;
 
-    return unless defined $token;
-    $token = clean_text($token);
-    trick_taint($token);
+  return unless defined $token;
+  $token = clean_text($token);
+  trick_taint($token);
 
-    my @token_data = $dbh->selectrow_array(
-        "SELECT token, userid, " . $dbh->sql_date_format('issuedate') . ", eventdata, tokentype
+  my @token_data = $dbh->selectrow_array(
+        "SELECT token, userid, "
+      . $dbh->sql_date_format('issuedate')
+      . ", eventdata, tokentype
          FROM   tokens
-         WHERE  token = ?", undef, $token);
+         WHERE  token = ?", undef, $token
+  );
 
-    # Some DBs such as MySQL are case-insensitive by default so we do
-    # a quick comparison to make sure the tokens are indeed the same.
-    my $db_token = shift @token_data;
-    return undef if (!defined $db_token || $db_token ne $token);
+  # Some DBs such as MySQL are case-insensitive by default so we do
+  # a quick comparison to make sure the tokens are indeed the same.
+  my $db_token = shift @token_data;
+  return undef if (!defined $db_token || $db_token ne $token);
 
-    return @token_data;
+  return @token_data;
 }
 
 # Deletes specified token
 sub delete_token {
-    my ($token) = @_;
-    my $dbh = Bugzilla->dbh;
+  my ($token) = @_;
+  my $dbh = Bugzilla->dbh;
 
-    return unless defined $token;
-    trick_taint($token);
+  return unless defined $token;
+  trick_taint($token);
 
-    $dbh->do("DELETE FROM tokens WHERE token = ?", undef, $token);
+  $dbh->do("DELETE FROM tokens WHERE token = ?", undef, $token);
 }
 
 # Given a token, makes sure it comes from the currently logged in user
@@ -453,73 +485,73 @@ sub delete_token {
 # Note: this routine must not be called while tables are locked as it will try
 # to lock some tables itself, see CleanTokenTable().
 sub check_token_data {
-    my ($token, $expected_action, $alternate_script) = @_;
-    my $user = Bugzilla->user;
-    my $template = Bugzilla->template;
-    my $cgi = Bugzilla->cgi;
+  my ($token, $expected_action, $alternate_script) = @_;
+  my $user     = Bugzilla->user;
+  my $template = Bugzilla->template;
+  my $cgi      = Bugzilla->cgi;
 
-    my ($creator_id, $date, $token_action) = GetTokenData($token);
-    unless ($creator_id
-            && $creator_id == $user->id
-            && $token_action eq $expected_action)
-    {
-        # Something is going wrong. Ask confirmation before processing.
-        # It is possible that someone tried to trick an administrator.
-        # In this case, we want to know his name!
-        require Bugzilla::User;
+  my ($creator_id, $date, $token_action) = GetTokenData($token);
+  unless ($creator_id
+    && $creator_id == $user->id
+    && $token_action eq $expected_action)
+  {
+    # Something is going wrong. Ask confirmation before processing.
+    # It is possible that someone tried to trick an administrator.
+    # In this case, we want to know his name!
+    require Bugzilla::User;
 
-        my $vars = {};
-        $vars->{'abuser'} = Bugzilla::User->new($creator_id)->identity;
-        $vars->{'token_action'} = $token_action;
-        $vars->{'expected_action'} = $expected_action;
-        $vars->{'script_name'} = basename($0);
-        $vars->{'alternate_script'} = $alternate_script || basename($0);
+    my $vars = {};
+    $vars->{'abuser'}           = Bugzilla::User->new($creator_id)->identity;
+    $vars->{'token_action'}     = $token_action;
+    $vars->{'expected_action'}  = $expected_action;
+    $vars->{'script_name'}      = basename($0);
+    $vars->{'alternate_script'} = $alternate_script || basename($0);
 
-        # Now is a good time to remove old tokens from the DB.
-        CleanTokenTable();
+    # Now is a good time to remove old tokens from the DB.
+    CleanTokenTable();
 
-        # If no token was found, create a valid token for the given action.
-        unless ($creator_id) {
-            $token = issue_session_token($expected_action);
-            $cgi->param('token', $token);
-        }
-
-        print $cgi->header();
-
-        $template->process('admin/confirm-action.html.tmpl', $vars)
-          || ThrowTemplateError($template->error());
-        exit;
+    # If no token was found, create a valid token for the given action.
+    unless ($creator_id) {
+      $token = issue_session_token($expected_action);
+      $cgi->param('token', $token);
     }
-    return 1;
+
+    print $cgi->header();
+
+    $template->process('admin/confirm-action.html.tmpl', $vars)
+      || ThrowTemplateError($template->error());
+    exit;
+  }
+  return 1;
 }
 
 sub set_token_extra_data {
-    my ($token, $data) = @_;
+  my ($token, $data) = @_;
 
-    $data = encode_json($data) if ref($data);
+  $data = encode_json($data) if ref($data);
 
-    # extra_data is MEDIUMTEXT, max 16M
-    if (length($data) > 16_777_215) {
-        ThrowCodeError('token_data_too_big');
-    }
+  # extra_data is MEDIUMTEXT, max 16M
+  if (length($data) > 16_777_215) {
+    ThrowCodeError('token_data_too_big');
+  }
 
-    Bugzilla->dbh->do(
-        "INSERT INTO token_data (token, extra_data) VALUES (?, ?) ON DUPLICATE KEY UPDATE extra_data = ?",
-        undef, $token, $data, $data);
+  Bugzilla->dbh->do(
+    "INSERT INTO token_data (token, extra_data) VALUES (?, ?) ON DUPLICATE KEY UPDATE extra_data = ?",
+    undef, $token, $data, $data
+  );
 }
 
 sub get_token_extra_data {
-    my ($token) = @_;
-    trick_taint($token);
-    my ($data) = Bugzilla->dbh->selectrow_array(
-        "SELECT extra_data FROM token_data WHERE token = ?",
-        undef, $token);
-    return undef unless defined $data;
-    $data = encode('UTF-8', $data);
-    eval {
-        $data = decode_json($data);
-    };
-    return $data;
+  my ($token) = @_;
+  trick_taint($token);
+  my ($data)
+    = Bugzilla->dbh->selectrow_array(
+    "SELECT extra_data FROM token_data WHERE token = ?",
+    undef, $token);
+  return undef unless defined $data;
+  $data = encode('UTF-8', $data);
+  eval { $data = decode_json($data); };
+  return $data;
 }
 
 ################################################################################
@@ -529,34 +561,38 @@ sub get_token_extra_data {
 # Generates a unique token and inserts it into the database
 # Returns the token and the token timestamp
 sub _create_token {
-    my ($userid, $tokentype, $eventdata) = @_;
-    my $dbh = Bugzilla->dbh;
+  my ($userid, $tokentype, $eventdata) = @_;
+  my $dbh = Bugzilla->dbh;
 
-    detaint_natural($userid) if defined $userid;
-    trick_taint($tokentype);
-    trick_taint($eventdata);
+  detaint_natural($userid) if defined $userid;
+  trick_taint($tokentype);
+  trick_taint($eventdata);
 
-    my $is_shadow = Bugzilla->is_shadow_db;
-    $dbh = Bugzilla->switch_to_main_db() if $is_shadow;
+  my $is_shadow = Bugzilla->is_shadow_db;
+  $dbh = Bugzilla->switch_to_main_db() if $is_shadow;
 
-    $dbh->bz_start_transaction();
+  $dbh->bz_start_transaction();
 
-    my $token = GenerateUniqueToken();
+  my $token = GenerateUniqueToken();
 
-    $dbh->do("INSERT INTO tokens (userid, issuedate, token, tokentype, eventdata)
-        VALUES (?, NOW(), ?, ?, ?)", undef, ($userid, $token, $tokentype, $eventdata));
+  $dbh->do(
+    "INSERT INTO tokens (userid, issuedate, token, tokentype, eventdata)
+        VALUES (?, NOW(), ?, ?, ?)", undef,
+    ($userid, $token, $tokentype, $eventdata)
+  );
 
-    $dbh->bz_commit_transaction();
+  $dbh->bz_commit_transaction();
 
-    if (wantarray) {
-        my (undef, $token_ts, undef) = GetTokenData($token);
-        $token_ts = str2time($token_ts);
-        Bugzilla->switch_to_shadow_db() if $is_shadow;
-        return ($token, $token_ts);
-    } else {
-        Bugzilla->switch_to_shadow_db() if $is_shadow;
-        return $token;
-    }
+  if (wantarray) {
+    my (undef, $token_ts, undef) = GetTokenData($token);
+    $token_ts = str2time($token_ts);
+    Bugzilla->switch_to_shadow_db() if $is_shadow;
+    return ($token, $token_ts);
+  }
+  else {
+    Bugzilla->switch_to_shadow_db() if $is_shadow;
+    return $token;
+  }
 }
 
 1;

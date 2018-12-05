@@ -53,8 +53,7 @@ sub load_one {
     open STDIN, '<', $stdin->path
       or die "STDIN @{[$stdin->path]}: $!"
       if -s $stdin->path;
-    tie *STDOUT, 'Bugzilla::Quantum::Stdout',
-      controller => $c;    ## no critic (tie)
+    tie *STDOUT, 'Bugzilla::Quantum::Stdout', controller => $c;   ## no critic (tie)
 
     # the finally block calls cleanup.
     $c->stash->{cleanup_guard}->dismiss;
@@ -128,19 +127,17 @@ sub _ENV {
     GATEWAY_INTERFACE => 'CGI/1.1',
     HTTPS             => $req->is_secure ? 'on' : 'off',
     %env_headers,
-    QUERY_STRING    => $cgi_query->to_string,
-    PATH_INFO       => $path_info ? "/$path_info" : '',
-    REMOTE_ADDR     => $tx->original_remote_address,
-    REMOTE_HOST     => $tx->original_remote_address,
-    REMOTE_PORT     => $tx->remote_port,
-    REMOTE_USER     => $remote_user || '',
-    REQUEST_METHOD  => $req->method,
-    SCRIPT_NAME     => "$prefix$script_name",
-    SERVER_NAME     => hostname,
-    SERVER_PORT     => $tx->local_port,
-    SERVER_PROTOCOL => $req->is_secure
-    ? 'HTTPS'
-    : 'HTTP',    # TODO: Version is missing
+    QUERY_STRING   => $cgi_query->to_string,
+    PATH_INFO      => $path_info ? "/$path_info" : '',
+    REMOTE_ADDR    => $tx->original_remote_address,
+    REMOTE_HOST    => $tx->original_remote_address,
+    REMOTE_PORT    => $tx->remote_port,
+    REMOTE_USER    => $remote_user || '',
+    REQUEST_METHOD => $req->method,
+    SCRIPT_NAME    => "$prefix$script_name",
+    SERVER_NAME    => hostname,
+    SERVER_PORT    => $tx->local_port,
+    SERVER_PROTOCOL => $req->is_secure ? 'HTTPS' : 'HTTP', # TODO: Version is missing
     SERVER_SOFTWARE => __PACKAGE__,
   );
 }

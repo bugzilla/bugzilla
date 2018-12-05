@@ -18,22 +18,22 @@ use base qw(Bugzilla::BugUrl);
 ###############################
 
 sub should_handle {
-    my ($class, $uri) = @_;
+  my ($class, $uri) = @_;
 
-    # https://webcompat.com/issues/1111
-    my $host = lc($uri->authority);
-    return
-        ($host eq 'webcompat.com' || $host eq 'www.webcompat.com')
-        && $uri->path =~ m#^/issues/\d+$#;
+  # https://webcompat.com/issues/1111
+  my $host = lc($uri->authority);
+  return ($host eq 'webcompat.com' || $host eq 'www.webcompat.com')
+    && $uri->path =~ m#^/issues/\d+$#;
 }
 
 sub _check_value {
-    my ($class, $uri) = @_;
-    $uri = $class->SUPER::_check_value($uri);
-    # force https and drop www from host
-    $uri->scheme('https');
-    $uri->authority('webcompat.com');
-    return $uri;
+  my ($class, $uri) = @_;
+  $uri = $class->SUPER::_check_value($uri);
+
+  # force https and drop www from host
+  $uri->scheme('https');
+  $uri->authority('webcompat.com');
+  return $uri;
 }
 
 1;

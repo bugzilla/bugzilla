@@ -28,24 +28,11 @@ use warnings;
 use constant NAME => 'BMO';
 
 use constant REQUIRED_MODULES => [
-    {
-        package => 'Tie-IxHash',
-        module  => 'Tie::IxHash',
-        version => 0
-    },
-    {
-        package => 'Sys-Syslog',
-        module  => 'Sys::Syslog',
-        version => 0
-    },
-    {
-        package => 'File-MimeInfo',
-        module  => 'File::MimeInfo::Magic',
-        version => '0'
-    },
+  {package => 'Tie-IxHash',    module => 'Tie::IxHash',           version => 0},
+  {package => 'Sys-Syslog',    module => 'Sys::Syslog',           version => 0},
+  {package => 'File-MimeInfo', module => 'File::MimeInfo::Magic', version => '0'},
 ];
 
-use constant OPTIONAL_MODULES => [
-];
+use constant OPTIONAL_MODULES => [];
 
 __PACKAGE__->NAME;

@@ -31,7 +31,7 @@ use Bugzilla;
 use Bugzilla::Constants;
 
 sub usage() {
-    print <<USAGE;
+  print <<USAGE;
 Usage: syncmsandversions.pl <srcproduct> <tgtproduct>
 
 E.g.: syncmsandversions.pl FoodReplicator SeaMonkey
@@ -40,7 +40,7 @@ which do not exist in product "SeaMonkey" into it. This script is normally
 used prior to moving components from srcproduct to tgtproduct.
 USAGE
 
-    exit(1);
+  exit(1);
 }
 
 #############################################################################
@@ -51,8 +51,8 @@ USAGE
 Bugzilla->usage_mode(USAGE_MODE_CMDLINE);
 
 if (scalar @ARGV < 2) {
-    usage();
-    exit();
+  usage();
+  exit();
 }
 
 my ($srcproduct, $tgtproduct) = @ARGV;
@@ -61,17 +61,17 @@ my $dbh = Bugzilla->dbh;
 
 # Find product IDs
 my $srcprodid = $dbh->selectrow_array("SELECT id FROM products WHERE name = ?",
-                                      undef, $srcproduct);
+  undef, $srcproduct);
 if (!$srcprodid) {
-    print "Can't find product ID for '$srcproduct'.\n";
-    exit(1);
+  print "Can't find product ID for '$srcproduct'.\n";
+  exit(1);
 }
 
 my $tgtprodid = $dbh->selectrow_array("SELECT id FROM products WHERE name = ?",
-                                      undef, $tgtproduct);
+  undef, $tgtproduct);
 if (!$tgtprodid) {
-    print "Can't find product ID for '$tgtproduct'.\n";
-    exit(1);
+  print "Can't find product ID for '$tgtproduct'.\n";
+  exit(1);
 }
 
 $dbh->bz_start_transaction();
@@ -84,9 +84,7 @@ $dbh->do("
                                           AND m2.product_id = ?
          WHERE m1.product_id = ?
                AND m2.value IS NULL
-    ",
-    undef,
-    $tgtprodid, $tgtprodid, $srcprodid);
+    ", undef, $tgtprodid, $tgtprodid, $srcprodid);
 
 $dbh->do("
     INSERT INTO versions(value, isactive, product_id)
@@ -96,9 +94,7 @@ $dbh->do("
                                      AND v2.product_id = ?
          WHERE v1.product_id = ?
                AND v2.value IS NULL
-    ",
-    undef,
-    $tgtprodid, $tgtprodid, $srcprodid);
+    ", undef, $tgtprodid, $tgtprodid, $srcprodid);
 
 $dbh->do("
     INSERT INTO group_control_map (group_id, product_id, entry, membercontrol,
@@ -112,9 +108,7 @@ $dbh->do("
                                                  AND g1.group_id = g2.group_id
          WHERE g1.product_id = ?
                AND g2.group_id IS NULL
-    ",
-    undef,
-    $tgtprodid, $srcprodid, $tgtprodid, $srcprodid);
+    ", undef, $tgtprodid, $srcprodid, $tgtprodid, $srcprodid);
 
 $dbh->bz_commit_transaction();
 

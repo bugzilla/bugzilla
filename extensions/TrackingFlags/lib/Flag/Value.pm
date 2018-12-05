@@ -25,32 +25,32 @@ use Scalar::Util qw(blessed weaken);
 use constant DB_TABLE => 'tracking_flags_values';
 
 use constant DB_COLUMNS => qw(
-    id
-    tracking_flag_id
-    setter_group_id
-    value
-    sortkey
-    is_active
-    comment
+  id
+  tracking_flag_id
+  setter_group_id
+  value
+  sortkey
+  is_active
+  comment
 );
 
 use constant LIST_ORDER => 'sortkey';
 
 use constant UPDATE_COLUMNS => qw(
-    setter_group_id
-    value
-    sortkey
-    is_active
-    comment
+  setter_group_id
+  value
+  sortkey
+  is_active
+  comment
 );
 
 use constant VALIDATORS => {
-    tracking_flag_id => \&_check_tracking_flag,
-    setter_group_id  => \&_check_setter_group,
-    value            => \&_check_value,
-    sortkey          => \&_check_sortkey,
-    is_active        => \&Bugzilla::Object::check_boolean,
-    comment          => \&_check_comment,
+  tracking_flag_id => \&_check_tracking_flag,
+  setter_group_id  => \&_check_setter_group,
+  value            => \&_check_value,
+  sortkey          => \&_check_sortkey,
+  is_active        => \&Bugzilla::Object::check_boolean,
+  comment          => \&_check_comment,
 };
 
 ###############################
@@ -58,43 +58,47 @@ use constant VALIDATORS => {
 ###############################
 
 sub _check_value {
-    my ($invocant, $value) = @_;
-    defined $value || ThrowCodeError('param_required', { param => 'value' });
-    return $value;
+  my ($invocant, $value) = @_;
+  defined $value || ThrowCodeError('param_required', {param => 'value'});
+  return $value;
 }
 
 sub _check_tracking_flag {
-    my ($invocant, $flag) = @_;
-    if (blessed $flag) {
-        return $flag->flag_id;
-    }
-    $flag = Bugzilla::Extension::TrackingFlags::Flag->new({ id => $flag, cache => 1 })
-        || ThrowCodeError('tracking_flags_invalid_param', { name => 'flag_id', value => $flag });
+  my ($invocant, $flag) = @_;
+  if (blessed $flag) {
     return $flag->flag_id;
+  }
+  $flag
+    = Bugzilla::Extension::TrackingFlags::Flag->new({id => $flag, cache => 1})
+    || ThrowCodeError('tracking_flags_invalid_param',
+    {name => 'flag_id', value => $flag});
+  return $flag->flag_id;
 }
 
 sub _check_setter_group {
-    my ($invocant, $group) = @_;
-    if (blessed $group) {
-        return $group->id;
-    }
-    $group = Bugzilla::Group->new({ id => $group, cache => 1 })
-        || ThrowCodeError('tracking_flags_invalid_param', { name => 'setter_group_id', value => $group });
+  my ($invocant, $group) = @_;
+  if (blessed $group) {
     return $group->id;
+  }
+  $group
+    = Bugzilla::Group->new({id => $group, cache => 1})
+    || ThrowCodeError('tracking_flags_invalid_param',
+    {name => 'setter_group_id', value => $group});
+  return $group->id;
 }
 
 sub _check_sortkey {
-    my ($invocant, $sortkey) = @_;
-    detaint_natural($sortkey)
-        || ThrowUserError('field_invalid_sortkey', { sortkey => $sortkey });
-    return $sortkey;
+  my ($invocant, $sortkey) = @_;
+  detaint_natural($sortkey)
+    || ThrowUserError('field_invalid_sortkey', {sortkey => $sortkey});
+  return $sortkey;
 }
 
 sub _check_comment {
-    my ($invocant, $value) = @_;
-    return undef unless defined $value;
-    $value = trim($value);
-    return $value eq '' ? undef : $value;
+  my ($invocant, $value) = @_;
+  return undef unless defined $value;
+  $value = trim($value);
+  return $value eq '' ? undef : $value;
 }
 
 ###############################
@@ -102,38 +106,37 @@ sub _check_comment {
 ###############################
 
 sub set_setter_group_id { $_[0]->set('setter_group_id', $_[1]); }
-sub set_value           { $_[0]->set('value', $_[1]);           }
-sub set_sortkey         { $_[0]->set('sortkey', $_[1]);         }
-sub set_is_active       { $_[0]->set('is_active', $_[1]);       }
-sub set_comment         { $_[0]->set('comment', $_[1]);         }
+sub set_value           { $_[0]->set('value',           $_[1]); }
+sub set_sortkey         { $_[0]->set('sortkey',         $_[1]); }
+sub set_is_active       { $_[0]->set('is_active',       $_[1]); }
+sub set_comment         { $_[0]->set('comment',         $_[1]); }
 
 ###############################
 ####      Accessors        ####
 ###############################
 
 sub tracking_flag_id { return $_[0]->{'tracking_flag_id'}; }
-sub setter_group_id  { return $_[0]->{'setter_group_id'};  }
-sub value            { return $_[0]->{'value'};            }
-sub sortkey          { return $_[0]->{'sortkey'};          }
-sub is_active        { return $_[0]->{'is_active'};        }
-sub comment          { return $_[0]->{'comment'};          }
+sub setter_group_id  { return $_[0]->{'setter_group_id'}; }
+sub value            { return $_[0]->{'value'}; }
+sub sortkey          { return $_[0]->{'sortkey'}; }
+sub is_active        { return $_[0]->{'is_active'}; }
+sub comment          { return $_[0]->{'comment'}; }
 
 sub tracking_flag {
-    return $_[0]->{'tracking_flag'} if $_[0]->{'tracking_flag'};
-    my $tf = $_[0]->{'tracking_flag'} = Bugzilla::Extension::TrackingFlags::Flag->new({
-        id => $_[0]->tracking_flag_id, cache => 1
-    });
-    weaken($_[0]->{'tracking_flag'});
-    return $tf;
+  return $_[0]->{'tracking_flag'} if $_[0]->{'tracking_flag'};
+  my $tf = $_[0]->{'tracking_flag'}
+    = Bugzilla::Extension::TrackingFlags::Flag->new(
+    {id => $_[0]->tracking_flag_id, cache => 1});
+  weaken($_[0]->{'tracking_flag'});
+  return $tf;
 }
 
 sub setter_group {
-    if ($_[0]->setter_group_id) {
-        $_[0]->{'setter_group'} ||= Bugzilla::Group->new({
-            id => $_[0]->setter_group_id, cache => 1
-        });
-    }
-    return $_[0]->{'setter_group'};
+  if ($_[0]->setter_group_id) {
+    $_[0]->{'setter_group'}
+      ||= Bugzilla::Group->new({id => $_[0]->setter_group_id, cache => 1});
+  }
+  return $_[0]->{'setter_group'};
 }
 
 ########################################
@@ -141,6 +144,6 @@ sub setter_group {
 ########################################
 
 sub name              { return $_[0]->{'value'}; }
-sub is_visible_on_bug { return 1;                }
+sub is_visible_on_bug { return 1; }
 
 1;

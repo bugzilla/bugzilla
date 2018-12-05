@@ -26,41 +26,42 @@ use constant can_logout            => 0;
 use fields qw(app_id);
 
 sub set_app_id {
-    my ($self, $app_id) = @_;
-    $self->{app_id} = $app_id;
+  my ($self, $app_id) = @_;
+  $self->{app_id} = $app_id;
 }
 
 sub app_id {
-    my ($self) = @_;
-    return $self->{app_id};
+  my ($self) = @_;
+  return $self->{app_id};
 }
 
 # This method is only available to web services. An API key can never
 # be used to authenticate a Web request.
 sub get_login_info {
-    my ($self) = @_;
-    my $params = Bugzilla->input_params;
-    my ($user_id, $login_cookie);
+  my ($self) = @_;
+  my $params = Bugzilla->input_params;
+  my ($user_id, $login_cookie);
 
-    my $api_key_text = trim(delete $params->{'Bugzilla_api_key'});
-    if (!i_am_webservice() || !$api_key_text) {
-        return { failure => AUTH_NODATA };
-    }
+  my $api_key_text = trim(delete $params->{'Bugzilla_api_key'});
+  if (!i_am_webservice() || !$api_key_text) {
+    return {failure => AUTH_NODATA};
+  }
 
-    my $api_key = Bugzilla::User::APIKey->new({ name => $api_key_text });
+  my $api_key = Bugzilla::User::APIKey->new({name => $api_key_text});
 
-    if (!$api_key or $api_key->api_key ne $api_key_text) {
-        # The second part checks the correct capitalisation. Silly MySQL
-        ThrowUserError("api_key_not_valid");
-    }
-    elsif ($api_key->revoked) {
-        ThrowUserError('api_key_revoked');
-    }
+  if (!$api_key or $api_key->api_key ne $api_key_text) {
 
-    $api_key->update_last_used();
-    $self->set_app_id($api_key->app_id);
+    # The second part checks the correct capitalisation. Silly MySQL
+    ThrowUserError("api_key_not_valid");
+  }
+  elsif ($api_key->revoked) {
+    ThrowUserError('api_key_revoked');
+  }
 
-    return { user_id => $api_key->user_id };
+  $api_key->update_last_used();
+  $self->set_app_id($api_key->app_id);
+
+  return {user_id => $api_key->user_id};
 }
 
 1;

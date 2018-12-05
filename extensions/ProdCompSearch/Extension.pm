@@ -16,9 +16,9 @@ use base qw(Bugzilla::Extension);
 our $VERSION = '1';
 
 sub webservice {
-    my ($self,  $args) = @_;
-    my $dispatch = $args->{dispatch};
-    $dispatch->{PCS} = "Bugzilla::Extension::ProdCompSearch::WebService";
+  my ($self, $args) = @_;
+  my $dispatch = $args->{dispatch};
+  $dispatch->{PCS} = "Bugzilla::Extension::ProdCompSearch::WebService";
 }
 
 

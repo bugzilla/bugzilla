@@ -18,12 +18,17 @@ use warnings;
 
 use File::Basename;
 use File::Spec;
+
 BEGIN {
-    require lib;
-    my $dir = File::Spec->rel2abs(dirname(__FILE__));
-    my $base = File::Spec->catdir($dir, "..");
-    lib->import($base, File::Spec->catdir($base, "lib"), File::Spec->catdir($base, qw(local lib perl5)));
-    chdir $base;
+  require lib;
+  my $dir = File::Spec->rel2abs(dirname(__FILE__));
+  my $base = File::Spec->catdir($dir, "..");
+  lib->import(
+    $base,
+    File::Spec->catdir($base, "lib"),
+    File::Spec->catdir($base, qw(local lib perl5))
+  );
+  chdir $base;
 }
 
 use Bugzilla;
@@ -31,9 +36,9 @@ BEGIN { Bugzilla->extensions }
 use Bugzilla::Mailer;
 
 my $msg = do {
-    local $/ = undef;
-    binmode STDIN, ':bytes';
-    <STDIN>;
+  local $/ = undef;
+  binmode STDIN, ':bytes';
+  <STDIN>;
 };
 
 MessageToMTA($msg);

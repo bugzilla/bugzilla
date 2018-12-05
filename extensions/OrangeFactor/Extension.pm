@@ -22,37 +22,40 @@ use DateTime;
 our $VERSION = '1.0';
 
 sub template_before_process {
-    my ($self, $args) = @_;
-    my $file = $args->{'file'};
-    my $vars = $args->{'vars'};
+  my ($self, $args) = @_;
+  my $file = $args->{'file'};
+  my $vars = $args->{'vars'};
 
-    my $user = Bugzilla->user;
+  my $user = Bugzilla->user;
 
-    return unless ($file eq 'bug/show-header.html.tmpl'
-                   || $file eq 'bug/edit.html.tmpl'
-                   || $file eq 'bug_modal/header.html.tmpl'
-                   || $file eq 'bug_modal/edit.html.tmpl');
-    return unless ($user->id
-                   && $user->settings->{'orange_factor'}->{'value'} eq 'on');
+  return
+    unless ($file eq 'bug/show-header.html.tmpl'
+    || $file eq 'bug/edit.html.tmpl'
+    || $file eq 'bug_modal/header.html.tmpl'
+    || $file eq 'bug_modal/edit.html.tmpl');
+  return
+    unless ($user->id && $user->settings->{'orange_factor'}->{'value'} eq 'on');
 
-    # in the header we just need to set the var,
-    # to ensure the css and javascript get included
-    my $bug = exists $vars->{'bugs'} ? $vars->{'bugs'}[0] : $vars->{'bug'};
-    if ($bug && grep($_->name eq 'intermittent-failure', @{ $bug->keyword_objects })) {
-        $vars->{'orange_factor'} = 1;
-        $vars->{'date_start'} = ( DateTime->now() - DateTime::Duration->new( days => 7 ) )->ymd();
-        $vars->{'date_end'} = DateTime->now->ymd();
-    }
+  # in the header we just need to set the var,
+  # to ensure the css and javascript get included
+  my $bug = exists $vars->{'bugs'} ? $vars->{'bugs'}[0] : $vars->{'bug'};
+  if ($bug && grep($_->name eq 'intermittent-failure', @{$bug->keyword_objects}))
+  {
+    $vars->{'orange_factor'} = 1;
+    $vars->{'date_start'}
+      = (DateTime->now() - DateTime::Duration->new(days => 7))->ymd();
+    $vars->{'date_end'} = DateTime->now->ymd();
+  }
 }
 
 sub install_before_final_checks {
-    my ($self, $args) = @_;
-    add_setting({
-        name     => 'orange_factor',
-        options  => ['on', 'off'],
-        default  => 'off',
-        category => 'User Interface'
-    });
+  my ($self, $args) = @_;
+  add_setting({
+    name     => 'orange_factor',
+    options  => ['on', 'off'],
+    default  => 'off',
+    category => 'User Interface'
+  });
 }
 
 __PACKAGE__->NAME;

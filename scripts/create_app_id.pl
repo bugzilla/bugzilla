@@ -24,7 +24,7 @@ Bugzilla->usage_mode(USAGE_MODE_CMDLINE);
 my ($callback, $description) = @ARGV;
 
 if (!$callback || !$description) {
-    die "Usage: scripts/create_app_key.pl <callback_url> <description>\n";
+  die "Usage: scripts/create_app_key.pl <callback_url> <description>\n";
 }
 
 print sha256_hex($callback, $description);

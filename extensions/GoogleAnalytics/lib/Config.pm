@@ -14,28 +14,25 @@ use warnings;
 use Bugzilla::Config::Common;
 
 sub get_param_list {
-    my ($class) = @_;
+  my ($class) = @_;
 
-    my @params = (
-        {
-            name    => 'google_analytics_tracking_id',
-            type    => 't',
-            default => '',
-            checker => sub {
-                my ($tracking_id) = (@_);
+  my @params = (
+    {
+      name    => 'google_analytics_tracking_id',
+      type    => 't',
+      default => '',
+      checker => sub {
+        my ($tracking_id) = (@_);
 
-                return 'must be like UA-XXXXXX-X' unless $tracking_id =~ m{^(UA-[[:xdigit:]]+-[[:xdigit:]]+)?$};
-                return '';
-            }
-        },
-        {
-            name    => 'google_analytics_debug',
-            type    => 'b',
-            default => 0
-        },
-    );
+        return 'must be like UA-XXXXXX-X'
+          unless $tracking_id =~ m{^(UA-[[:xdigit:]]+-[[:xdigit:]]+)?$};
+        return '';
+      }
+    },
+    {name => 'google_analytics_debug', type => 'b', default => 0},
+  );
 
-    return @params;
+  return @params;
 }
 
 1;

@@ -59,8 +59,7 @@ sub create {
     $vars->{scopes}
       = $dbh->selectall_arrayref('SELECT * FROM oauth2_scope', {Slice => {}});
     $self->stash(%{$vars});
-    return $self->render(template => 'admin/oauth/create',
-      handler => 'bugzilla');
+    return $self->render(template => 'admin/oauth/create', handler => 'bugzilla');
   }
 
   $dbh->bz_start_transaction;
@@ -77,13 +76,11 @@ sub create {
   check_token_data($token, 'create_oauth_client');
 
 
-  $dbh->do(
-    'INSERT INTO oauth2_client (id, description, secret) VALUES (?, ?, ?)',
+  $dbh->do('INSERT INTO oauth2_client (id, description, secret) VALUES (?, ?, ?)',
     undef, $id, $description, $secret);
 
   foreach my $scope_id (@scopes) {
-    $scope_id
-      = $dbh->selectrow_array('SELECT id FROM oauth2_scope WHERE id = ?',
+    $scope_id = $dbh->selectrow_array('SELECT id FROM oauth2_scope WHERE id = ?',
       undef, $scope_id);
     if (!$scope_id) {
       ThrowCodeError('param_required', {param => 'scopes'});
@@ -114,9 +111,8 @@ sub delete {
   my $dbh    = Bugzilla->dbh;
   my $vars   = {};
 
-  my $id = $self->param('id');
-  my $client
-    = $dbh->selectrow_hashref('SELECT * FROM oauth2_client WHERE id = ?',
+  my $id     = $self->param('id');
+  my $client = $dbh->selectrow_hashref('SELECT * FROM oauth2_client WHERE id = ?',
     undef, $id);
 
   if (!$self->param('deleteme')) {
@@ -157,8 +153,7 @@ sub edit {
   my $vars   = {};
   my $id     = $self->param('id');
 
-  my $client
-    = $dbh->selectrow_hashref('SELECT * FROM oauth2_client WHERE id = ?',
+  my $client = $dbh->selectrow_hashref('SELECT * FROM oauth2_client WHERE id = ?',
     undef, $id);
   my $client_scopes
     = $dbh->selectall_arrayref(

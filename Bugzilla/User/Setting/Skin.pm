@@ -21,28 +21,31 @@ use File::Basename;
 use constant BUILTIN_SKIN_NAMES => ['standard'];
 
 sub legal_values {
-    my ($self) = @_;
+  my ($self) = @_;
 
-    return $self->{'legal_values'} if defined $self->{'legal_values'};
+  return $self->{'legal_values'} if defined $self->{'legal_values'};
 
-    my $dirbase = bz_locations()->{'skinsdir'} . '/contrib';
-    # Avoid modification of the list BUILTIN_SKIN_NAMES points to by copying the
-    # list over instead of simply writing $legal_values = BUILTIN_SKIN_NAMES.
-    my @legal_values = @{(BUILTIN_SKIN_NAMES)};
+  my $dirbase = bz_locations()->{'skinsdir'} . '/contrib';
 
-    foreach my $direntry (glob(catdir($dirbase, '*'))) {
-        if (-d $direntry) {
-            # Stylesheet set
-            next if basename($direntry) =~ /^cvs$/i;
-            push(@legal_values, basename($direntry));
-        }
-        elsif ($direntry =~ /\.css$/) {
-            # Single-file stylesheet
-            push(@legal_values, basename($direntry));
-        }
+  # Avoid modification of the list BUILTIN_SKIN_NAMES points to by copying the
+  # list over instead of simply writing $legal_values = BUILTIN_SKIN_NAMES.
+  my @legal_values = @{(BUILTIN_SKIN_NAMES)};
+
+  foreach my $direntry (glob(catdir($dirbase, '*'))) {
+    if (-d $direntry) {
+
+      # Stylesheet set
+      next if basename($direntry) =~ /^cvs$/i;
+      push(@legal_values, basename($direntry));
     }
+    elsif ($direntry =~ /\.css$/) {
 
-    return $self->{'legal_values'} = \@legal_values;
+      # Single-file stylesheet
+      push(@legal_values, basename($direntry));
+    }
+  }
+
+  return $self->{'legal_values'} = \@legal_values;
 }
 
 1;

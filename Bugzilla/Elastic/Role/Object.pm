@@ -12,45 +12,44 @@ use Role::Tiny;
 requires qw(ES_TYPE ES_INDEX ES_SETTINGS ES_PROPERTIES es_document);
 requires qw(ID_FIELD DB_TABLE);
 
-sub ES_OBJECTS_AT_ONCE { 100 }
+sub ES_OBJECTS_AT_ONCE {100}
 
 sub ES_SELECT_ALL_SQL {
-    my ($class, $last_id) = @_;
+  my ($class, $last_id) = @_;
 
-    my $id = $class->ID_FIELD;
-    my $table = $class->DB_TABLE;
+  my $id    = $class->ID_FIELD;
+  my $table = $class->DB_TABLE;
 
-    return ("SELECT $id FROM $table WHERE $id > ? ORDER BY $id", [$last_id // 0]);
+  return ("SELECT $id FROM $table WHERE $id > ? ORDER BY $id", [$last_id // 0]);
 }
 
 requires qw(ES_SELECT_UPDATED_SQL);
 
 sub es_id {
-    my ($self) = @_;
-    return join('_', $self->ES_TYPE, $self->id);
+  my ($self) = @_;
+  return join('_', $self->ES_TYPE, $self->id);
 }
 
 around 'ES_PROPERTIES' => sub {
-    my $orig = shift;
-    my $self = shift;
-    my $properties = $orig->($self, @_);
-    $properties->{es_mtime} = { type => 'long' };
-    $properties->{$self->ID_FIELD} = { type => 'long', analyzer => 'keyword' };
+  my $orig       = shift;
+  my $self       = shift;
+  my $properties = $orig->($self, @_);
+  $properties->{es_mtime} = {type => 'long'};
+  $properties->{$self->ID_FIELD} = {type => 'long', analyzer => 'keyword'};
 
-    return $properties;
+  return $properties;
 };
 
 around 'es_document' => sub {
-    my ($orig, $self, $mtime) = @_;
-    my $doc = $orig->($self);
+  my ($orig, $self, $mtime) = @_;
+  my $doc = $orig->($self);
 
-    $doc->{es_mtime} = $mtime;
-    $doc->{$self->ID_FIELD} = $self->id;
-    $doc->{_id} = $self->es_id;
+  $doc->{es_mtime}        = $mtime;
+  $doc->{$self->ID_FIELD} = $self->id;
+  $doc->{_id}             = $self->es_id;
 
-    return $doc;
+  return $doc;
 };
-
 
 
 1;

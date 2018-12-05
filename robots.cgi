@@ -26,6 +26,6 @@ my $template = Bugzilla->template;
 
 my %vars;
 print $cgi->header('text/plain');
-Bugzilla::Hook::process( "before_robots_txt", { vars => \%vars } );
-$template->process( "robots.txt.tmpl", \%vars )
-    or ThrowTemplateError( $template->error() );
+Bugzilla::Hook::process("before_robots_txt", {vars => \%vars});
+$template->process("robots.txt.tmpl", \%vars)
+  or ThrowTemplateError($template->error());

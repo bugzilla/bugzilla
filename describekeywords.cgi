@@ -33,9 +33,9 @@ use Bugzilla::Keyword;
 
 Bugzilla->login();
 
-my $cgi = Bugzilla->cgi;
+my $cgi      = Bugzilla->cgi;
 my $template = Bugzilla->template;
-my $vars = {};
+my $vars     = {};
 
 # Run queries against the shadow DB.
 Bugzilla->switch_to_shadow_db;
@@ -43,14 +43,13 @@ Bugzilla->switch_to_shadow_db;
 # Hide bug counts for security keywords from users who aren't a member of the
 # security group
 my $can_see_security = Bugzilla->user->in_group('core-security-release');
-my $keywords = Bugzilla::Keyword->get_all_with_bug_count();
+my $keywords         = Bugzilla::Keyword->get_all_with_bug_count();
 foreach my $keyword (@$keywords) {
-    $keyword->{'bug_count'} = 0
-        if $keyword->name =~ /^(?:sec|csec|wsec|opsec)-/
-           && !$can_see_security;
+  $keyword->{'bug_count'} = 0
+    if $keyword->name =~ /^(?:sec|csec|wsec|opsec)-/ && !$can_see_security;
 }
 
-$vars->{'keywords'} = $keywords;
+$vars->{'keywords'}        = $keywords;
 $vars->{'caneditkeywords'} = Bugzilla->user->in_group("editkeywords");
 
 print Bugzilla->cgi->header();

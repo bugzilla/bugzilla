@@ -12,12 +12,12 @@ use lib qw( . lib local/lib/perl5 );
 
 BEGIN {
   $ENV{LOG4PERL_CONFIG_FILE} = 'log4perl-t.conf';
-  $ENV{test_db_name} = 'db_errors';
+  $ENV{test_db_name}         = 'db_errors';
 }
 
 END { unlink('data/db/db_errors') }
 
-use Bugzilla::Test::MockLocalconfig (urlbase => 'http://bmo-web.vm' );
+use Bugzilla::Test::MockLocalconfig (urlbase => 'http://bmo-web.vm');
 use Bugzilla::Test::MockDB;
 use Test2::V0;
 use Test2::Tools::Exception qw(dies lives);

@@ -14,170 +14,166 @@ use base qw(Class::Accessor::Fast);
 __PACKAGE__->mk_accessors(qw(bucket creation_date account));
 
 sub new {
-    my $class = shift;
-    my $self  = $class->SUPER::new(@_);
-    croak "no bucket"  unless $self->bucket;
-    croak "no account" unless $self->account;
-    return $self;
+  my $class = shift;
+  my $self  = $class->SUPER::new(@_);
+  croak "no bucket"  unless $self->bucket;
+  croak "no account" unless $self->account;
+  return $self;
 }
 
 sub _uri {
-    my ($self, $key) = @_;
-    return ($key)
-      ? $self->bucket . "/" . $self->account->_urlencode($key)
-      : $self->bucket . "/";
+  my ($self, $key) = @_;
+  return ($key)
+    ? $self->bucket . "/" . $self->account->_urlencode($key)
+    : $self->bucket . "/";
 }
 
 # returns bool
 sub add_key {
-    my ($self, $key, $value, $conf) = @_;
-    croak 'must specify key' unless $key && length $key;
+  my ($self, $key, $value, $conf) = @_;
+  croak 'must specify key' unless $key && length $key;
 
-    if ($conf->{acl_short}) {
-        $self->account->_validate_acl_short($conf->{acl_short});
-        $conf->{'x-amz-acl'} = $conf->{acl_short};
-        delete $conf->{acl_short};
-    }
+  if ($conf->{acl_short}) {
+    $self->account->_validate_acl_short($conf->{acl_short});
+    $conf->{'x-amz-acl'} = $conf->{acl_short};
+    delete $conf->{acl_short};
+  }
 
-    if (ref($value) eq 'SCALAR') {
-        $conf->{'Content-Length'} ||= -s $$value;
-        $value = _content_sub($$value);
-    }
-    else {
-        $conf->{'Content-Length'} ||= length $value;
-    }
+  if (ref($value) eq 'SCALAR') {
+    $conf->{'Content-Length'} ||= -s $$value;
+    $value = _content_sub($$value);
+  }
+  else {
+    $conf->{'Content-Length'} ||= length $value;
+  }
 
-    # If we're pushing to a bucket that's under DNS flux, we might get a 307
-    # Since LWP doesn't support actually waiting for a 100 Continue response,
-    # we'll just send a HEAD first to see what's going on
+  # If we're pushing to a bucket that's under DNS flux, we might get a 307
+  # Since LWP doesn't support actually waiting for a 100 Continue response,
+  # we'll just send a HEAD first to see what's going on
 
-    if (ref($value)) {
-        return $self->account->_send_request_expect_nothing_probed('PUT',
-            $self->_uri($key), $conf, $value);
-    }
-    else {
-        return $self->account->_send_request_expect_nothing('PUT',
-            $self->_uri($key), $conf, $value);
-    }
+  if (ref($value)) {
+    return $self->account->_send_request_expect_nothing_probed('PUT',
+      $self->_uri($key), $conf, $value);
+  }
+  else {
+    return $self->account->_send_request_expect_nothing('PUT', $self->_uri($key),
+      $conf, $value);
+  }
 }
 
 sub add_key_filename {
-    my ($self, $key, $value, $conf) = @_;
-    return $self->add_key($key, \$value, $conf);
+  my ($self, $key, $value, $conf) = @_;
+  return $self->add_key($key, \$value, $conf);
 }
 
 sub head_key {
-    my ($self, $key) = @_;
-    return $self->get_key($key, "HEAD");
+  my ($self, $key) = @_;
+  return $self->get_key($key, "HEAD");
 }
 
 sub get_key {
-    my ($self, $key, $method, $filename) = @_;
-    $method ||= "GET";
-    $filename = $$filename if ref $filename;
-    my $acct = $self->account;
+  my ($self, $key, $method, $filename) = @_;
+  $method ||= "GET";
+  $filename = $$filename if ref $filename;
+  my $acct = $self->account;
 
-    my $request = $acct->_make_request($method, $self->_uri($key), {});
-    my $response = $acct->_do_http($request, $filename);
+  my $request = $acct->_make_request($method, $self->_uri($key), {});
+  my $response = $acct->_do_http($request, $filename);
 
-    if ($response->code == 404) {
-        $acct->err(404);
-        $acct->errstr('The requested key was not found');
-        return undef;
-    }
+  if ($response->code == 404) {
+    $acct->err(404);
+    $acct->errstr('The requested key was not found');
+    return undef;
+  }
 
-    return undef unless $acct->_check_response($response);
+  return undef unless $acct->_check_response($response);
 
-    my $etag = $response->header('ETag');
-    if ($etag) {
-        $etag =~ s/^"//;
-        $etag =~ s/"$//;
-    }
+  my $etag = $response->header('ETag');
+  if ($etag) {
+    $etag =~ s/^"//;
+    $etag =~ s/"$//;
+  }
 
-    my $return = {
-        content_length => $response->content_length || 0,
-        content_type   => $response->content_type,
-        etag           => $etag,
-        value          => $response->content,
-    };
+  my $return = {
+    content_length => $response->content_length || 0,
+    content_type   => $response->content_type,
+    etag           => $etag,
+    value          => $response->content,
+  };
 
-    foreach my $header ($response->headers->header_field_names) {
-        next unless $header =~ /x-amz-meta-/i;
-        $return->{lc $header} = $response->header($header);
-    }
+  foreach my $header ($response->headers->header_field_names) {
+    next unless $header =~ /x-amz-meta-/i;
+    $return->{lc $header} = $response->header($header);
+  }
 
-    return $return;
+  return $return;
 
 }
 
 sub get_key_filename {
-    my ($self, $key, $method, $filename) = @_;
-    $filename = $key unless defined $filename;
-    return $self->get_key($key, $method, \$filename);
+  my ($self, $key, $method, $filename) = @_;
+  $filename = $key unless defined $filename;
+  return $self->get_key($key, $method, \$filename);
 }
 
 # returns bool
 sub delete_key {
-    my ($self, $key) = @_;
-    croak 'must specify key' unless $key && length $key;
-    return $self->account->_send_request_expect_nothing('DELETE',
-        $self->_uri($key), {});
+  my ($self, $key) = @_;
+  croak 'must specify key' unless $key && length $key;
+  return $self->account->_send_request_expect_nothing('DELETE',
+    $self->_uri($key), {});
 }
 
 sub get_acl {
-    my ($self, $key) = @_;
-    my $acct = $self->account;
+  my ($self, $key) = @_;
+  my $acct = $self->account;
 
-    my $request = $acct->_make_request('GET', $self->_uri($key) . '?acl', {});
-    my $response = $acct->_do_http($request);
+  my $request = $acct->_make_request('GET', $self->_uri($key) . '?acl', {});
+  my $response = $acct->_do_http($request);
 
-    if ($response->code == 404) {
-        return undef;
-    }
+  if ($response->code == 404) {
+    return undef;
+  }
 
-    return undef unless $acct->_check_response($response);
+  return undef unless $acct->_check_response($response);
 
-    return $response->content;
+  return $response->content;
 }
 
 sub set_acl {
-    my ($self, $conf) = @_;
-    $conf ||= {};
+  my ($self, $conf) = @_;
+  $conf ||= {};
 
-    unless ($conf->{acl_xml} || $conf->{acl_short}) {
-        croak "need either acl_xml or acl_short";
-    }
+  unless ($conf->{acl_xml} || $conf->{acl_short}) {
+    croak "need either acl_xml or acl_short";
+  }
 
-    if ($conf->{acl_xml} && $conf->{acl_short}) {
-        croak "cannot provide both acl_xml and acl_short";
-    }
+  if ($conf->{acl_xml} && $conf->{acl_short}) {
+    croak "cannot provide both acl_xml and acl_short";
+  }
 
-    my $path = $self->_uri($conf->{key}) . '?acl';
+  my $path = $self->_uri($conf->{key}) . '?acl';
 
-    my $hash_ref =
-        ($conf->{acl_short})
-      ? {'x-amz-acl' => $conf->{acl_short}}
-      : {};
+  my $hash_ref = ($conf->{acl_short}) ? {'x-amz-acl' => $conf->{acl_short}} : {};
 
-    my $xml = $conf->{acl_xml} || '';
+  my $xml = $conf->{acl_xml} || '';
 
-    return $self->account->_send_request_expect_nothing('PUT', $path,
-        $hash_ref, $xml);
+  return $self->account->_send_request_expect_nothing('PUT', $path, $hash_ref,
+    $xml);
 
 }
 
 sub get_location_constraint {
-    my ($self) = @_;
+  my ($self) = @_;
 
-    my $xpc =
-      $self->account->_send_request('GET', $self->bucket . '/?location');
-    return undef unless $xpc && !$self->account->_remember_errors($xpc);
+  my $xpc = $self->account->_send_request('GET', $self->bucket . '/?location');
+  return undef unless $xpc && !$self->account->_remember_errors($xpc);
 
-    my $lc = $xpc->{content};
-    if (defined $lc && $lc eq '') {
-        $lc = undef;
-    }
-    return $lc;
+  my $lc = $xpc->{content};
+  if (defined $lc && $lc eq '') {
+    $lc = undef;
+  }
+  return $lc;
 }
 
 # proxy up the err requests
@@ -187,42 +183,37 @@ sub err { $_[0]->account->err }
 sub errstr { $_[0]->account->errstr }
 
 sub _content_sub {
-    my $filename  = shift;
-    my $stat      = stat($filename);
-    my $remaining = $stat->size;
-    my $blksize   = $stat->blksize || 4096;
+  my $filename  = shift;
+  my $stat      = stat($filename);
+  my $remaining = $stat->size;
+  my $blksize   = $stat->blksize || 4096;
 
-    croak "$filename not a readable file with fixed size"
-      unless -r $filename
-          and $remaining;
+  croak "$filename not a readable file with fixed size"
+    unless -r $filename and $remaining;
 
-    my $fh = IO::File->new($filename, 'r')
-      or croak "Could not open $filename: $!";
-    $fh->binmode;
+  my $fh = IO::File->new($filename, 'r') or croak "Could not open $filename: $!";
+  $fh->binmode;
 
-    return sub {
-        my $buffer;
+  return sub {
+    my $buffer;
 
-        # upon retries the file is closed and we must reopen it
-        unless ($fh->opened) {
-            $fh = IO::File->new($filename, 'r')
-              or croak "Could not open $filename: $!";
-            $fh->binmode;
-            $remaining = $stat->size;
-        }
+    # upon retries the file is closed and we must reopen it
+    unless ($fh->opened) {
+      $fh = IO::File->new($filename, 'r') or croak "Could not open $filename: $!";
+      $fh->binmode;
+      $remaining = $stat->size;
+    }
 
-        unless (my $read = $fh->read($buffer, $blksize)) {
-            croak
-              "Error while reading upload content $filename ($remaining remaining) $!"
-              if $! and $remaining;
-            $fh->close    # otherwise, we found EOF
-              or croak "close of upload content $filename failed: $!";
-            $buffer
-              ||= '';  # LWP expects an empty string on finish, read returns 0
-        }
-        $remaining -= length($buffer);
-        return $buffer;
-    };
+    unless (my $read = $fh->read($buffer, $blksize)) {
+      croak "Error while reading upload content $filename ($remaining remaining) $!"
+        if $! and $remaining;
+      $fh->close    # otherwise, we found EOF
+        or croak "close of upload content $filename failed: $!";
+      $buffer ||= '';    # LWP expects an empty string on finish, read returns 0
+    }
+    $remaining -= length($buffer);
+    return $buffer;
+  };
 }
 
 1;

@@ -17,25 +17,17 @@ use Bugzilla::Util qw(validate_ip);
 our $sortkey = 1700;
 
 use constant get_param_list => (
-    {
-        name    => 'proxy_url',
-        type    => 't',
-        default => ''
-    },
+  {name => 'proxy_url', type => 't', default => ''},
 
-    {
-        name    => 'strict_transport_security',
-        type    => 's',
-        choices => [ 'off', 'this_domain_only', 'include_subdomains' ],
-        default => 'off',
-        checker => \&check_multi
-    },
+  {
+    name    => 'strict_transport_security',
+    type    => 's',
+    choices => ['off', 'this_domain_only', 'include_subdomains'],
+    default => 'off',
+    checker => \&check_multi
+  },
 
-    {
-        name    => 'disable_bug_updates',
-        type    => 'b',
-        default => 0
-    },
+  {name => 'disable_bug_updates', type => 'b', default => 0},
 );
 
 1;

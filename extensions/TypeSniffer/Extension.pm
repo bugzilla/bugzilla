@@ -33,9 +33,7 @@ use IO::Scalar;
 our $VERSION = '1';
 
 # These extensions override/supplement File::MimeInfo::Magic's detection.
-our %EXTENSION_OVERRIDES = (
-    '.lang' => 'text/plain',
-);
+our %EXTENSION_OVERRIDES = ('.lang' => 'text/plain',);
 
 ################################################################################
 # This extension uses magic to guess MIME types for data where the browser has
@@ -43,62 +41,63 @@ our %EXTENSION_OVERRIDES = (
 # extension, or it's a text type with a non-.txt file extension).
 ################################################################################
 sub attachment_process_data {
-    my ($self, $args) = @_;
-    my $attributes = $args->{'attributes'};
-    my $params = Bugzilla->input_params;
+  my ($self, $args) = @_;
+  my $attributes = $args->{'attributes'};
+  my $params     = Bugzilla->input_params;
 
-    # If we have autodetected application/octet-stream from the Content-Type
-    # header, let's have a better go using a sniffer.
-    if ($params->{'contenttypemethod'} &&
-        $params->{'contenttypemethod'} eq 'autodetect' &&
-        $attributes->{'mimetype'} eq 'application/octet-stream')
-    {
-        my $filename = $attributes->{'filename'} . '';
+  # If we have autodetected application/octet-stream from the Content-Type
+  # header, let's have a better go using a sniffer.
+  if ( $params->{'contenttypemethod'}
+    && $params->{'contenttypemethod'} eq 'autodetect'
+    && $attributes->{'mimetype'} eq 'application/octet-stream')
+  {
+    my $filename = $attributes->{'filename'} . '';
 
-        # Check for an override first
-        if ($filename =~ /^.+(\..+$)/) {
-            my $ext = lc($1);
-            if (exists $EXTENSION_OVERRIDES{$ext}) {
-                $attributes->{'mimetype'} = $EXTENSION_OVERRIDES{$ext};
-                return;
-            }
-        }
-
-        # Then try file extension detection
-        my $mimetype = mimetype($filename);
-        if ($mimetype) {
-            $attributes->{'mimetype'} = $mimetype;
-            return;
-        }
-
-        # data attribute can be either scalar data or filehandle
-        # bugzilla.org/docs/3.6/en/html/api/Bugzilla/Attachment.html#create
-        my $fh = $attributes->{'data'};
-        if (!ref($fh)) {
-            my $data = $attributes->{'data'};
-            $fh = new IO::Scalar \$data;
-        }
-        else {
-            # CGI.pm sends us an Fh that isn't actually an IO::Handle, but
-            # has a method for getting an actual handle out of it.
-            if (!$fh->isa('IO::Handle')) {
-                $fh = $fh->handle;
-                # ->handle returns an literal IO::Handle, even though the
-                # underlying object is a file. So we rebless it to be a proper
-                # IO::File object so that we can call ->seek on it and so on.
-                # Just in case CGI.pm fixes this some day, we check ->isa first.
-                if (!$fh->isa('IO::File')) {
-                    bless $fh, 'IO::File';
-                }
-            }
-        }
-
-        $mimetype = mimetype($fh);
-        $fh->seek(0, 0);
-        if ($mimetype) {
-            $attributes->{'mimetype'} = $mimetype;
-        }
+    # Check for an override first
+    if ($filename =~ /^.+(\..+$)/) {
+      my $ext = lc($1);
+      if (exists $EXTENSION_OVERRIDES{$ext}) {
+        $attributes->{'mimetype'} = $EXTENSION_OVERRIDES{$ext};
+        return;
+      }
     }
+
+    # Then try file extension detection
+    my $mimetype = mimetype($filename);
+    if ($mimetype) {
+      $attributes->{'mimetype'} = $mimetype;
+      return;
+    }
+
+    # data attribute can be either scalar data or filehandle
+    # bugzilla.org/docs/3.6/en/html/api/Bugzilla/Attachment.html#create
+    my $fh = $attributes->{'data'};
+    if (!ref($fh)) {
+      my $data = $attributes->{'data'};
+      $fh = new IO::Scalar \$data;
+    }
+    else {
+      # CGI.pm sends us an Fh that isn't actually an IO::Handle, but
+      # has a method for getting an actual handle out of it.
+      if (!$fh->isa('IO::Handle')) {
+        $fh = $fh->handle;
+
+        # ->handle returns an literal IO::Handle, even though the
+        # underlying object is a file. So we rebless it to be a proper
+        # IO::File object so that we can call ->seek on it and so on.
+        # Just in case CGI.pm fixes this some day, we check ->isa first.
+        if (!$fh->isa('IO::File')) {
+          bless $fh, 'IO::File';
+        }
+      }
+    }
+
+    $mimetype = mimetype($fh);
+    $fh->seek(0, 0);
+    if ($mimetype) {
+      $attributes->{'mimetype'} = $mimetype;
+    }
+  }
 }
 
 __PACKAGE__->NAME;

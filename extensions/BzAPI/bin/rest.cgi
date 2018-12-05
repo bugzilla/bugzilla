@@ -14,12 +14,11 @@ use Bugzilla;
 use Bugzilla::Constants;
 use Bugzilla::Error;
 use Bugzilla::WebService::Constants;
+
 BEGIN {
-    if (!Bugzilla->feature('rest')
-        || !Bugzilla->feature('jsonrpc'))
-    {
-        ThrowUserError('feature_disabled', { feature => 'rest' });
-    }
+  if (!Bugzilla->feature('rest') || !Bugzilla->feature('jsonrpc')) {
+    ThrowUserError('feature_disabled', {feature => 'rest'});
+  }
 }
 
 # Set request_cache bzapi value to true in order to enable the
@@ -30,9 +29,10 @@ Bugzilla->request_cache->{bzapi} = 1;
 # otherwise native REST will complain
 my $path_info = Bugzilla->cgi->path_info;
 if ($path_info =~ s'/$'') {
-    # Remove first slash as cgi->path_info expects it to
-    # not be there when setting a new path.
-    Bugzilla->cgi->path_info(substr($path_info, 1));
+
+  # Remove first slash as cgi->path_info expects it to
+  # not be there when setting a new path.
+  Bugzilla->cgi->path_info(substr($path_info, 1));
 }
 
 use Bugzilla::WebService::Server::REST;

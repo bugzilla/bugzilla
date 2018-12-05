@@ -102,8 +102,7 @@ sub setup_routes {
 
   my $r = $self->routes;
   Bugzilla::Quantum::CGI->setup_routes($r);
-  Bugzilla::Quantum::CGI->load_one('bzapi_cgi',
-    'extensions/BzAPI/bin/rest.cgi');
+  Bugzilla::Quantum::CGI->load_one('bzapi_cgi', 'extensions/BzAPI/bin/rest.cgi');
 
   $r->get('/home')->to('Home#index');
   $r->any('/')->to('CGI#index_cgi');
@@ -124,8 +123,8 @@ sub setup_routes {
   $r->any('/bzapi/*PATH_INFO')->to('CGI#bzapi_cgi');
 
   $r->static_file('/__lbheartbeat__');
-  $r->static_file('/__version__' =>
-      {file => 'version.json', content_type => 'application/json'});
+  $r->static_file(
+    '/__version__' => {file => 'version.json', content_type => 'application/json'});
   $r->static_file('/version.json', {content_type => 'application/json'});
 
   $r->page('/review',        'splinter.html');

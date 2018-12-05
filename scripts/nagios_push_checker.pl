@@ -12,8 +12,6 @@ use warnings;
 use lib qw(. lib local/lib/perl5);
 
 
-
-
 use Bugzilla;
 use Bugzilla::Constants;
 use Bugzilla::Product;
@@ -22,11 +20,7 @@ use Getopt::Long;
 
 Bugzilla->usage_mode(USAGE_MODE_CMDLINE);
 
-my $config = {
-    connector => '',
-    warn      => 5,
-    alarm     => 10,
-};
+my $config = {connector => '', warn => 5, alarm => 10,};
 
 my $usage = <<EOF;
 DESCRIPTION
@@ -46,39 +40,39 @@ EXAMPLES
   nagios_push_checker.pl --connector TCL --warn 25 --alarm 50
 EOF
 
-die($usage) unless GetOptions(
-    'connector=s' => \$config->{connector},
-    'warn=i'      => \$config->{warn},
-    'alarm=i'     => \$config->{alarm},
-    'help|?'      => \$config->{help},
-);
+die($usage)
+  unless GetOptions(
+  'connector=s' => \$config->{connector},
+  'warn=i'      => \$config->{warn},
+  'alarm=i'     => \$config->{alarm},
+  'help|?'      => \$config->{help},
+  );
 die $usage if $config->{help} || !$config->{connector};
 
 #
 
-use constant NAGIOS_OK          => 0;
-use constant NAGIOS_WARNING     => 1;
-use constant NAGIOS_CRITICAL    => 2;
-use constant NAGIOS_NAMES       => [qw( OK WARNING CRITICAL )];
+use constant NAGIOS_OK       => 0;
+use constant NAGIOS_WARNING  => 1;
+use constant NAGIOS_CRITICAL => 2;
+use constant NAGIOS_NAMES    => [qw( OK WARNING CRITICAL )];
 
 my $dbh = Bugzilla->switch_to_shadow_db;
 
-my ($count) = $dbh->selectrow_array(
-    "SELECT COUNT(*) FROM push_backlog WHERE connector=?",
-    undef,
-    $config->{connector},
-);
+my ($count)
+  = $dbh->selectrow_array("SELECT COUNT(*) FROM push_backlog WHERE connector=?",
+  undef, $config->{connector},);
 
 my $state;
 if ($count >= $config->{alarm}) {
-    $state = NAGIOS_CRITICAL;
-} elsif ($count >= $config->{warn}) {
-    $state = NAGIOS_WARNING;
-} else {
-    $state = NAGIOS_OK;
+  $state = NAGIOS_CRITICAL;
+}
+elsif ($count >= $config->{warn}) {
+  $state = NAGIOS_WARNING;
+}
+else {
+  $state = NAGIOS_OK;
 }
 
-print "push ", NAGIOS_NAMES->[$state], ": ", $count, " ",
-      "push.", $config->{connector}, " message",
-      ($count == 1 ? '' : 's'), " in backlog\n";
+print "push ", NAGIOS_NAMES->[$state], ": ", $count, " ", "push.",
+  $config->{connector}, " message", ($count == 1 ? '' : 's'), " in backlog\n";
 exit $state;

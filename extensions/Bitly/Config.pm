@@ -16,6 +16,6 @@ use constant NAME => 'Bitly';
 use constant REQUIRED_MODULES => [];
 use constant OPTIONAL_MODULES => [];
 
-use constant API_VERSION_MAP  => { '1_0' => '1_0' };
+use constant API_VERSION_MAP => {'1_0' => '1_0'};
 
 __PACKAGE__->NAME;

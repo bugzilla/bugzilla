@@ -40,16 +40,14 @@ use Bugzilla::Config::Common;
 our $sortkey = 800;
 
 sub get_param_list {
-    my $class      = shift;
-    my @param_list = (
-        {
-            name    => 'webdotbase',
-            type    => 't',
-            default => 'http://www.research.att.com/~north/cgi-bin/webdot.cgi/%urlbase%',
-            checker => \&check_webdotbase
-        }
-    );
-    return @param_list;
+  my $class      = shift;
+  my @param_list = ({
+    name    => 'webdotbase',
+    type    => 't',
+    default => 'http://www.research.att.com/~north/cgi-bin/webdot.cgi/%urlbase%',
+    checker => \&check_webdotbase
+  });
+  return @param_list;
 }
 
 1;

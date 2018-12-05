@@ -16,11 +16,11 @@ use base qw(Bugzilla::Auth::Verify);
 use Bugzilla::Constants qw( AUTH_NO_SUCH_USER );
 
 sub check_credentials {
-    my ($self, $login_data) = @_;
+  my ($self, $login_data) = @_;
 
-    return { failure => AUTH_NO_SUCH_USER } unless $login_data->{github_auth};
+  return {failure => AUTH_NO_SUCH_USER} unless $login_data->{github_auth};
 
-    return $login_data;
+  return $login_data;
 }
 
 1;

@@ -25,47 +25,45 @@ use constant LIST_ORDER     => 'id';
 use constant NAME_FIELD     => 'id';
 
 # turn off auditing and exclude these objects from memcached
-use constant { AUDIT_CREATES => 0,
-               AUDIT_UPDATES => 0,
-               AUDIT_REMOVES => 0,
-               USE_MEMCACHED => 0 };
+use constant {
+  AUDIT_CREATES => 0,
+  AUDIT_UPDATES => 0,
+  AUDIT_REMOVES => 0,
+  USE_MEMCACHED => 0
+};
 
 #####################################################################
 # Provide accessors for our columns
 #####################################################################
 
-sub id                { return $_[0]->{id}                }
-sub bug_id            { return $_[0]->{bug_id}            }
-sub user_id           { return $_[0]->{user_id}           }
+sub id                { return $_[0]->{id} }
+sub bug_id            { return $_[0]->{bug_id} }
+sub user_id           { return $_[0]->{user_id} }
 sub modification_time { return $_[0]->{modification_time} }
 
 sub mark {
-    my ($class, $user_id, $bug_id, $timestamp) = @_;
+  my ($class, $user_id, $bug_id, $timestamp) = @_;
 
-    my ($interest) = @{ $class->match({ user_id => $user_id,
-                                        bug_id => $bug_id }) };
-    if ($interest) {
-        $interest->set(modification_time => $timestamp);
-        $interest->update();
-        return $interest;
-    }
-    else {
-        return $class->create({
-            user_id           => $user_id,
-            bug_id            => $bug_id,
-            modification_time => $timestamp,
-        });
-    }
+  my ($interest) = @{$class->match({user_id => $user_id, bug_id => $bug_id})};
+  if ($interest) {
+    $interest->set(modification_time => $timestamp);
+    $interest->update();
+    return $interest;
+  }
+  else {
+    return $class->create({
+      user_id => $user_id, bug_id => $bug_id, modification_time => $timestamp,
+    });
+  }
 }
 
 sub unmark {
-    my ($class, $user_id, $bug_id) = @_;
+  my ($class, $user_id, $bug_id) = @_;
 
-    my ($interest) = @{ $class->match({ user_id => $user_id,
-                                        bug_id  => $bug_id }) };
-    if ($interest) {
-        $interest->remove_from_db();
-    }
+  my ($interest) = @{$class->match({user_id => $user_id, bug_id => $bug_id})};
+  if ($interest) {
+    $interest->remove_from_db();
+  }
 }
 
 1;

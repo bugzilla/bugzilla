@@ -24,11 +24,13 @@ Bugzilla->usage_mode(USAGE_MODE_CMDLINE);
 my ($users_file, $group, $admin);
 my ($do_adds, $do_removes) = (0, 0);
 
-GetOptions('admin=s'      => \$admin,
-           'users-file=s' => \$users_file,
-           'do-adds'      => \$do_adds,
-           'do-removes'   => \$do_removes,
-           'group=s'      => \$group);
+GetOptions(
+  'admin=s'      => \$admin,
+  'users-file=s' => \$users_file,
+  'do-adds'      => \$do_adds,
+  'do-removes'   => \$do_removes,
+  'group=s'      => \$group
+);
 
 usage() unless $admin && $users_file && $group;
 
@@ -42,33 +44,35 @@ my @missing;
 
 open my $fh, '<', $users_file or die "Unable to open $users_file: $!";
 while (my $user_name = <$fh>) {
-    chomp $user_name;
-    eval {
-        my $user = Bugzilla::User->check({name => $user_name});
-        $new_member{ $user->name } = $user;
-    };
-    if ($@) {
-        push @missing, $user_name;
-    }
+  chomp $user_name;
+  eval {
+    my $user = Bugzilla::User->check({name => $user_name});
+    $new_member{$user->name} = $user;
+  };
+  if ($@) {
+    push @missing, $user_name;
+  }
 }
 
-my @removes = map  { $old_member{$_} } grep { !$new_member{$_} } keys %old_member;
-my @adds    = map  { $new_member{$_} } grep { !$old_member{$_} } keys %new_member;
+my @removes
+  = map { $old_member{$_} } grep { !$new_member{$_} } keys %old_member;
+my @adds = map { $new_member{$_} } grep { !$old_member{$_} } keys %new_member;
 
 if (@removes == 0 && @adds == 0) {
-    if (@missing != 0) {
-        printf STDERR "There are %d user(s) in %s that do not exist.\n",
-          scalar @missing, $users_file;
-    }
-    say STDERR "Nothing to do\n";
-    exit;
+  if (@missing != 0) {
+    printf STDERR "There are %d user(s) in %s that do not exist.\n",
+      scalar @missing, $users_file;
+  }
+  say STDERR "Nothing to do\n";
+  exit;
 }
 
 $| = 1;
 printf STDERR "Group '%s', Admin '%s'\n", $group, $admin;
-printf STDERR "Will add %d user(s)\n", scalar @adds if $do_adds;
+printf STDERR "Will add %d user(s)\n",    scalar @adds    if $do_adds;
 printf STDERR "Will remove %d user(s)\n", scalar @removes if $do_removes;
-printf STDERR "There are %d user(s) in %s that do not exist.\n", scalar @missing, $users_file
+printf STDERR "There are %d user(s) in %s that do not exist.\n",
+  scalar @missing, $users_file
   if @missing;
 say STDERR "Press <Ctrl-C> to stop or <Enter> to continue...";
 getc();
@@ -79,19 +83,19 @@ my $dbh = Bugzilla->dbh;
 $dbh->bz_start_transaction();
 
 if ($do_removes) {
-    foreach my $remove (@removes) {
-        say "remove ", $remove->login, " from ", $group;
-        $remove->set_groups({ remove => [$group] });
-        $remove->update;
-    }
+  foreach my $remove (@removes) {
+    say "remove ", $remove->login, " from ", $group;
+    $remove->set_groups({remove => [$group]});
+    $remove->update;
+  }
 }
 
 if ($do_adds) {
-    foreach my $add (@adds) {
-        say "add ", $add->login, " to ", $group;
-        $add->set_groups({ add => [$group] });
-        $add->update;
-    }
+  foreach my $add (@adds) {
+    say "add ", $add->login, " to ", $group;
+    $add->set_groups({add => [$group]});
+    $add->update;
+  }
 }
 
 $dbh->bz_commit_transaction();
@@ -101,7 +105,7 @@ say STDERR "done.\n";
 Bugzilla->memcached->clear_all();
 
 sub usage {
-    die <<EOF;
+  die <<EOF;
 usage $0 --admin bob\@mozilla.org --users-file users.txt --group pants
 
 --users-file  File containing one bugzilla email per line.

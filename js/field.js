@@ -718,6 +718,7 @@ $(function() {
         serviceUrl: `${BUGZILLA.config.basepath}rest/user/suggest`,
         params: {
             Bugzilla_api_token: BUGZILLA.api_token,
+            fast_mode: 1
         },
         paramName: 'match',
         deferRequestBy: 250,

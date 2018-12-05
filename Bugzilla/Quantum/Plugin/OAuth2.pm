@@ -5,61 +5,30 @@
 # This Source Code Form is "Incompatible With Secondary Licenses", as
 # defined by the Mozilla Public License, v. 2.0.
 
-package Bugzilla::Quantum::OAuth2;
-
+package Bugzilla::Quantum::Plugin::OAuth2;
 use 5.10.1;
-use strict;
-use warnings;
+use Mojo::Base 'Mojolicious::Plugin::OAuth2::Server';
 
-use Bugzilla;
 use Bugzilla::Constants;
 use Bugzilla::Error;
 use Bugzilla::Logging;
 use Bugzilla::Util;
 use Bugzilla::Token;
-
 use DateTime;
-
 use Mojo::Util qw(secure_compare);
 
-use base qw(Exporter);
-our @EXPORT_OK = qw(oauth2);
+sub register {
+  my ($self, $app, $conf) = @_;
 
-sub oauth2 {
-  my ($self) = @_;
+  $conf->{login_resource_owner}     = \&_resource_owner_logged_in;
+  $conf->{confirm_by_resource_owner}= \&_resource_owner_confirm_scopes;
+  $conf->{verify_client}            = \&_verify_client;
+  $conf->{store_auth_code}          = \&_store_auth_code;
+  $conf->{verify_auth_code}         = \&_verify_auth_code;
+  $conf->{store_access_token}       = \&_store_access_token;
+  $conf->{verify_access_token}      = \&_verify_access_token;
 
-  $self->plugin(
-    'OAuth2::Server' => {
-      login_resource_owner      => \&_resource_owner_logged_in,
-      confirm_by_resource_owner => \&_resource_owner_confirm_scopes,
-      verify_client             => \&_verify_client,
-      store_auth_code           => \&_store_auth_code,
-      verify_auth_code          => \&_verify_auth_code,
-      store_access_token        => \&_store_access_token,
-      verify_access_token       => \&_verify_access_token,
-    }
-  );
-
-  # Manage the client list
-  my $r            = $self->routes;
-  my $client_route = $r->under(
-    '/admin/oauth' => sub {
-      my ($c) = @_;
-      my $user = $c->bugzilla->login(LOGIN_REQUIRED) || return undef;
-      $user->in_group('admin')
-        || ThrowUserError('auth_failure',
-        {group => 'admin', action => 'edit', object => 'oauth_clients'});
-      return 1;
-    }
-  );
-  $client_route->any('/list')->to('OAuth2::Clients#list')->name('list_clients');
-  $client_route->any('/create')->to('OAuth2::Clients#create')
-    ->name('create_client');
-  $client_route->any('/delete')->to('OAuth2::Clients#delete')
-    ->name('delete_client');
-  $client_route->any('/edit')->to('OAuth2::Clients#edit')->name('edit_client');
-
-  $self->helper(
+  $app->helper(
     'bugzilla.oauth' => sub {
         my ($c, @scopes) = @_;
 
@@ -75,7 +44,7 @@ sub oauth2 {
     }
   );
 
-  return 1;
+  return $self->SUPER::register($app, $conf);
 }
 
 sub _resource_owner_logged_in {

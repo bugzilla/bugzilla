@@ -9,6 +9,11 @@ package Bugzilla::Quantum::API;
 use 5.10.1;
 use Mojo::Base qw( Mojolicious::Controller );
 
+sub setup_routes {
+  my ($class, $r) = @_;
+  $r->get('/api/user/profile')->to('API#user_profile');
+}
+
 sub user_profile {
   my ($self) = @_;
 

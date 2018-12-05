@@ -23,7 +23,7 @@ use Bugzilla::Constants qw(bz_locations USAGE_MODE_BROWSER);
 our $C;
 my %SEEN;
 
-sub load_all {
+sub setup_routes {
   my ($class, $r) = @_;
 
   foreach my $file (glob '*.cgi') {

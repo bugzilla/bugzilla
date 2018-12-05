@@ -21,7 +21,7 @@ use Bugzilla::Extension             ();
 use Bugzilla::Install::Requirements ();
 use Bugzilla::Logging;
 use Bugzilla::Quantum::CGI;
-use Bugzilla::Quantum::OAuth2 qw(oauth2);
+use Bugzilla::Quantum::OAuth2::Clients;
 use Bugzilla::Quantum::SES;
 use Bugzilla::Quantum::Home;
 use Bugzilla::Quantum::API;
@@ -47,9 +47,7 @@ sub startup {
     unless $ENV{BUGZILLA_DISABLE_SIZELIMIT};
   $self->plugin('ForwardedFor') if Bugzilla->has_feature('better_xff');
   $self->plugin('Bugzilla::Quantum::Plugin::Helpers');
-
-  # OAuth2 Support
-  oauth2($self);
+  $self->plugin('Bugzilla::Quantum::Plugin::OAuth2');
 
   # hypnotoad is weird and doesn't look for MOJO_LISTEN itself.
   $self->config(
@@ -103,7 +101,7 @@ sub setup_routes {
   my ($self) = @_;
 
   my $r = $self->routes;
-  Bugzilla::Quantum::CGI->load_all($r);
+  Bugzilla::Quantum::CGI->setup_routes($r);
   Bugzilla::Quantum::CGI->load_one('bzapi_cgi',
     'extensions/BzAPI/bin/rest.cgi');
 
@@ -140,17 +138,9 @@ sub setup_routes {
   $r->any('/login')->to('CGI#index_cgi' => {'GoAheadAndLogIn' => '1'});
   $r->any('/:new_bug' => [new_bug => qr{new[-_]bug}])->to('CGI#new_bug_cgi');
 
-  $r->get('/api/user/profile')->to('API#user_profile');
-
-  my $ses_auth = $r->under(
-    '/ses' => sub {
-      my ($c) = @_;
-      my $lc = Bugzilla->localconfig;
-
-      return $c->basic_auth('SES', $lc->{ses_username}, $lc->{ses_password});
-    }
-  );
-  $ses_auth->any('/index.cgi')->to('SES#main');
+  Bugzilla::Quantum::API->setup_routes($r);
+  Bugzilla::Quantum::SES->setup_routes($r);
+  Bugzilla::Quantum::OAuth2::Clients->setup_routes($r);
 }
 
 1;

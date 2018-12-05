@@ -74,6 +74,20 @@ declare Notification,
   slurpy Any,
   ];
 
+sub setup_routes {
+  my ($class, $r) = @_;
+
+  my $ses_auth = $r->under(
+    '/ses' => sub {
+      my ($c) = @_;
+      my $lc = Bugzilla->localconfig;
+
+      return $c->basic_auth('SES', $lc->{ses_username}, $lc->{ses_password});
+    }
+  );
+  $ses_auth->any('/index.cgi')->to('SES#main');
+}
+
 sub main {
   my ($self) = @_;
   try {

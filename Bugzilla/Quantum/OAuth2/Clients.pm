@@ -6,16 +6,36 @@
 # defined by the Mozilla Public License, v. 2.0.
 
 package Bugzilla::Quantum::OAuth2::Clients;
+use 5.10.1;
 use Mojo::Base 'Mojolicious::Controller';
 
-use 5.10.1;
 use List::Util qw(first);
-use Moo;
-
-use Bugzilla;
+use Bugzilla::Constants;
 use Bugzilla::Error;
 use Bugzilla::Token;
 use Bugzilla::Util qw(generate_random_password);
+
+sub setup_routes {
+  my ($class, $r) = @_;
+
+  # Manage the client list
+  my $client_route = $r->under(
+    '/admin/oauth' => sub {
+      my ($c) = @_;
+      my $user = $c->bugzilla->login(LOGIN_REQUIRED) || return undef;
+      $user->in_group('admin')
+        || ThrowUserError('auth_failure',
+        {group => 'admin', action => 'edit', object => 'oauth_clients'});
+      return 1;
+    }
+  );
+  $client_route->any('/list')->to('OAuth2::Clients#list')->name('list_clients');
+  $client_route->any('/create')->to('OAuth2::Clients#create')
+    ->name('create_client');
+  $client_route->any('/delete')->to('OAuth2::Clients#delete')
+    ->name('delete_client');
+  $client_route->any('/edit')->to('OAuth2::Clients#edit')->name('edit_client');
+}
 
 # Show list of clients
 sub list {

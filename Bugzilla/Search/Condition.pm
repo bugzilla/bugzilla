@@ -15,55 +15,59 @@ use parent qw(Exporter);
 our @EXPORT_OK = qw(condition);
 
 sub new {
-    my ($class, $params) = @_;
-    my %self = %$params;
-    bless \%self, $class;
-    return \%self;
+  my ($class, $params) = @_;
+  my %self = %$params;
+  bless \%self, $class;
+  return \%self;
 }
 
-sub field    { return $_[0]->{field}    }
-sub value    { return $_[0]->{value}    }
+sub field { return $_[0]->{field} }
+sub value { return $_[0]->{value} }
 
 sub operator {
-    my ($self, $value) = @_;
-    if (@_ == 2) {
-        $self->{operator} = $value;
-    }
-    return $self->{operator};
+  my ($self, $value) = @_;
+  if (@_ == 2) {
+    $self->{operator} = $value;
+  }
+  return $self->{operator};
 }
 
 sub fov {
-    my ($self) = @_;
-    return ($self->field, $self->operator, $self->value);
+  my ($self) = @_;
+  return ($self->field, $self->operator, $self->value);
 }
 
 sub translated {
-    my ($self, $params) = @_;
-    if (@_ == 2) {
-        $self->{translated} = $params;
-    }
-    return $self->{translated};
+  my ($self, $params) = @_;
+  if (@_ == 2) {
+    $self->{translated} = $params;
+  }
+  return $self->{translated};
 }
 
 sub as_string {
-    my ($self) = @_;
-    my $term = $self->translated->{term};
-    $term = "NOT( $term )" if $term && $self->negate;
-    return $term;
+  my ($self) = @_;
+  my $term = $self->translated->{term};
+  $term = "NOT( $term )" if $term && $self->negate;
+  return $term;
 }
 
 sub as_params {
-    my ($self) = @_;
-    return { f => $self->field, o => $self->operator, v => $self->value,
-             n => scalar $self->negate };
+  my ($self) = @_;
+  return {
+    f => $self->field,
+    o => $self->operator,
+    v => $self->value,
+    n => scalar $self->negate
+  };
 }
 
 sub negate {
-    my ($self, $value) = @_;
-    if (@_ == 2) {
-        $self->{negate} = $value ? 1 : 0;
-    }
-    return $self->{negate};
+  my ($self, $value) = @_;
+  if (@_ == 2) {
+    $self->{negate} = $value ? 1 : 0;
+  }
+  return $self->{negate};
 }
 
 ###########################
@@ -71,9 +75,9 @@ sub negate {
 ###########################
 
 sub condition {
-    my ($field, $operator, $value) = @_;
-    return __PACKAGE__->new({ field => $field, operator => $operator,
-                              value => $value });
+  my ($field, $operator, $value) = @_;
+  return __PACKAGE__->new(
+    {field => $field, operator => $operator, value => $value});
 }
 
 1;

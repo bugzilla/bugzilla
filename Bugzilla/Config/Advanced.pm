@@ -16,31 +16,18 @@ use Bugzilla::Config::Common;
 our $sortkey = 1700;
 
 use constant get_param_list => (
-  {
-   name => 'cookiedomain',
-   type => 't',
-   default => ''
-  },
+  {name => 'cookiedomain', type => 't', default => ''},
+
+  {name => 'inbound_proxies', type => 't', default => '', checker => \&check_ip},
+
+  {name => 'proxy_url', type => 't', default => ''},
 
   {
-   name => 'inbound_proxies',
-   type => 't',
-   default => '',
-   checker => \&check_ip
-  },
-
-  {
-   name => 'proxy_url',
-   type => 't',
-   default => ''
-  },
-
-  {
-   name => 'strict_transport_security',
-   type => 's',
-   choices => ['off', 'this_domain_only', 'include_subdomains'],
-   default => 'off',
-   checker => \&check_multi
+    name    => 'strict_transport_security',
+    type    => 's',
+    choices => ['off', 'this_domain_only', 'include_subdomains'],
+    default => 'off',
+    checker => \&check_multi
   },
 );
 

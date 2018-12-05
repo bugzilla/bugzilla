@@ -18,28 +18,30 @@ use parent qw(Bugzilla::BugUrl);
 ###############################
 
 sub should_handle {
-    my ($class, $uri) = @_;
+  my ($class, $uri) = @_;
 
-    # Debian BTS URLs can look like various things:
-    #   http://bugs.debian.org/cgi-bin/bugreport.cgi?bug=1234
-    #   http://bugs.debian.org/1234
-    return (lc($uri->authority) eq 'bugs.debian.org'
-            and (($uri->path =~ /bugreport\.cgi$/
-                  and $uri->query_param('bug') =~ m|^\d+$|)
-                 or $uri->path =~ m|^/\d+$|)) ? 1 : 0;
+  # Debian BTS URLs can look like various things:
+  #   http://bugs.debian.org/cgi-bin/bugreport.cgi?bug=1234
+  #   http://bugs.debian.org/1234
+  return (
+    lc($uri->authority) eq 'bugs.debian.org'
+      and
+      (($uri->path =~ /bugreport\.cgi$/ and $uri->query_param('bug') =~ m|^\d+$|)
+      or $uri->path =~ m|^/\d+$|)
+  ) ? 1 : 0;
 }
 
 sub _check_value {
-    my $class = shift;
+  my $class = shift;
 
-    my $uri = $class->SUPER::_check_value(@_);
+  my $uri = $class->SUPER::_check_value(@_);
 
-    # This is the shortest standard URL form for Debian BTS URLs,
-    # and so we reduce all URLs to this.
-    $uri->path =~ m|^/(\d+)$| || $uri->query_param('bug') =~ m|^(\d+)$|;
-    $uri = new URI("http://bugs.debian.org/$1");
+  # This is the shortest standard URL form for Debian BTS URLs,
+  # and so we reduce all URLs to this.
+  $uri->path =~ m|^/(\d+)$| || $uri->query_param('bug') =~ m|^(\d+)$|;
+  $uri = new URI("http://bugs.debian.org/$1");
 
-    return $uri;
+  return $uri;
 }
 
 1;

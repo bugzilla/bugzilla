@@ -15,53 +15,41 @@ use Bugzilla::WebService::Constants;
 use Bugzilla::WebService::User;
 
 BEGIN {
-    *Bugzilla::WebService::User::rest_resources = \&_rest_resources;
-};
+  *Bugzilla::WebService::User::rest_resources = \&_rest_resources;
+}
 
 sub _rest_resources {
-    my $rest_resources = [
-        qr{^/login$}, {
-            GET => {
-                method => 'login'
-            }
-        },
-        qr{^/logout$}, {
-            GET => {
-                method => 'logout'
-            }
-        },
-        qr{^/valid_login$}, {
-            GET => {
-                method => 'valid_login'
-            }
-        },
-        qr{^/user$}, {
-            GET  => {
-                method => 'get'
-            },
-            POST => {
-                method => 'create',
-                success_code => STATUS_CREATED
-            }
-        },
-        qr{^/user/([^/]+)$}, {
-            GET => {
-                method => 'get',
-                params => sub {
-                    my $param = $_[0] =~ /^\d+$/ ? 'ids' : 'names';
-                    return { $param => [ $_[0] ] };
-                }
-            },
-            PUT => {
-                method => 'update',
-                params => sub {
-                    my $param = $_[0] =~ /^\d+$/ ? 'ids' : 'names';
-                    return { $param => [ $_[0] ] };
-                }
-            }
+  my $rest_resources = [
+    qr{^/login$},
+    {GET => {method => 'login'}},
+    qr{^/logout$},
+    {GET => {method => 'logout'}},
+    qr{^/valid_login$},
+    {GET => {method => 'valid_login'}},
+    qr{^/user$},
+    {
+      GET  => {method => 'get'},
+      POST => {method => 'create', success_code => STATUS_CREATED}
+    },
+    qr{^/user/([^/]+)$},
+    {
+      GET => {
+        method => 'get',
+        params => sub {
+          my $param = $_[0] =~ /^\d+$/ ? 'ids' : 'names';
+          return {$param => [$_[0]]};
         }
-    ];
-    return $rest_resources;
+      },
+      PUT => {
+        method => 'update',
+        params => sub {
+          my $param = $_[0] =~ /^\d+$/ ? 'ids' : 'names';
+          return {$param => [$_[0]]};
+        }
+      }
+    }
+  ];
+  return $rest_resources;
 }
 
 1;

@@ -18,27 +18,27 @@ use parent qw(Bugzilla::BugUrl);
 ###############################
 
 sub should_handle {
-    my ($class, $uri) = @_;
+  my ($class, $uri) = @_;
 
-    # SourceForge tracker URLs have only one form:
-    #  http://sourceforge.net/tracker/?func=detail&aid=111&group_id=111&atid=111
-    return (lc($uri->authority) eq 'sourceforge.net'
-            and $uri->path =~ m|/tracker/|
-            and $uri->query_param('func') eq 'detail'
-            and $uri->query_param('aid')
-            and $uri->query_param('group_id')
-            and $uri->query_param('atid')) ? 1 : 0;
+  # SourceForge tracker URLs have only one form:
+  #  http://sourceforge.net/tracker/?func=detail&aid=111&group_id=111&atid=111
+  return (lc($uri->authority) eq 'sourceforge.net'
+      and $uri->path =~ m|/tracker/|
+      and $uri->query_param('func') eq 'detail'
+      and $uri->query_param('aid')
+      and $uri->query_param('group_id')
+      and $uri->query_param('atid')) ? 1 : 0;
 }
 
 sub _check_value {
-    my $class = shift;
+  my $class = shift;
 
-    my $uri = $class->SUPER::_check_value(@_);
+  my $uri = $class->SUPER::_check_value(@_);
 
-    # Remove any # part if there is one.
-    $uri->fragment(undef);
+  # Remove any # part if there is one.
+  $uri->fragment(undef);
 
-    return $uri;
+  return $uri;
 }
 
 1;

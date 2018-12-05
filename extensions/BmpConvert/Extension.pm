@@ -18,29 +18,30 @@ use Image::Magick;
 our $VERSION = '1.0';
 
 sub attachment_process_data {
-    my ($self, $args) = @_;
-    return unless $args->{attributes}->{mimetype} eq 'image/bmp';
+  my ($self, $args) = @_;
+  return unless $args->{attributes}->{mimetype} eq 'image/bmp';
 
-    my $data = ${$args->{data}};
-    my $img = Image::Magick->new(magick => 'bmp');
+  my $data = ${$args->{data}};
+  my $img = Image::Magick->new(magick => 'bmp');
 
-    # $data is a filehandle.
-    if (ref $data) {
-        $img->Read(file => \*$data);
-        $img->set(magick => 'png');
-        $img->Write(file => \*$data);
-    }
-    # $data is a blob.
-    else {
-        $img->BlobToImage($data);
-        $img->set(magick => 'png');
-        $data = $img->ImageToBlob();
-    }
-    undef $img;
+  # $data is a filehandle.
+  if (ref $data) {
+    $img->Read(file => \*$data);
+    $img->set(magick => 'png');
+    $img->Write(file => \*$data);
+  }
 
-    ${$args->{data}} = $data;
-    $args->{attributes}->{mimetype} = 'image/png';
-    $args->{attributes}->{filename} =~ s/^(.+)\.bmp$/$1.png/i;
+  # $data is a blob.
+  else {
+    $img->BlobToImage($data);
+    $img->set(magick => 'png');
+    $data = $img->ImageToBlob();
+  }
+  undef $img;
+
+  ${$args->{data}} = $data;
+  $args->{attributes}->{mimetype} = 'image/png';
+  $args->{attributes}->{filename} =~ s/^(.+)\.bmp$/$1.png/i;
 }
 
- __PACKAGE__->NAME;
+__PACKAGE__->NAME;

@@ -16,16 +16,11 @@ use Bugzilla::Config::Common;
 our $sortkey = 5000;
 
 sub get_param_list {
-    my ($class) = @_;
+  my ($class) = @_;
 
-    my @param_list = (
-    {
-        name => 'example_string',
-        type => 't',
-        default => 'EXAMPLE',
-    },
-    );
-    return @param_list;
+  my @param_list
+    = ({name => 'example_string', type => 't', default => 'EXAMPLE',},);
+  return @param_list;
 }
 
 1;

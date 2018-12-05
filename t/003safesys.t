@@ -24,39 +24,42 @@ use Test::More tests => scalar(@Support::Files::testitems);
 # This will handle verbosity for us automatically.
 my $fh;
 {
-    no warnings qw(unopened);  # Don't complain about non-existent filehandles
-    if (-e \*Test::More::TESTOUT) {
-        $fh = \*Test::More::TESTOUT;
-    } elsif (-e \*Test::Builder::TESTOUT) {
-        $fh = \*Test::Builder::TESTOUT;
-    } else {
-        $fh = \*STDOUT;
-    }
+  no warnings qw(unopened);    # Don't complain about non-existent filehandles
+  if (-e \*Test::More::TESTOUT) {
+    $fh = \*Test::More::TESTOUT;
+  }
+  elsif (-e \*Test::Builder::TESTOUT) {
+    $fh = \*Test::Builder::TESTOUT;
+  }
+  else {
+    $fh = \*STDOUT;
+  }
 }
 
-my @testitems = @Support::Files::testitems; 
-my $perlapp = "\"$^X\"";
+my @testitems = @Support::Files::testitems;
+my $perlapp   = "\"$^X\"";
 
 foreach my $file (@testitems) {
-    $file =~ s/\s.*$//; # nuke everything after the first space (#comment)
-    next if (!$file); # skip null entries
+  $file =~ s/\s.*$//;    # nuke everything after the first space (#comment)
+  next if (!$file);      # skip null entries
 
-    open(my $fh2, '<', $file);
-    my $bang = <$fh2>;
-    close $fh2;
+  open(my $fh2, '<', $file);
+  my $bang = <$fh2>;
+  close $fh2;
 
-    my $T = "";
-    if ($bang =~ m/#!\S*perl\s+-.*T/) {
-        $T = "T";
-    }
-    my $command = "$perlapp -c$T -It -MSupport::Systemexec $file 2>&1";
-    my $loginfo=`$command`;
-    if ($loginfo =~ /arguments for Support::Systemexec::(system|exec)/im) {
-        ok(0,"$file DOES NOT use proper system or exec calls");
-        print $fh $loginfo;
-    } else {
-        ok(1,"$file uses proper system and exec calls");
-    }
+  my $T = "";
+  if ($bang =~ m/#!\S*perl\s+-.*T/) {
+    $T = "T";
+  }
+  my $command = "$perlapp -c$T -It -MSupport::Systemexec $file 2>&1";
+  my $loginfo = `$command`;
+  if ($loginfo =~ /arguments for Support::Systemexec::(system|exec)/im) {
+    ok(0, "$file DOES NOT use proper system or exec calls");
+    print $fh $loginfo;
+  }
+  else {
+    ok(1, "$file uses proper system and exec calls");
+  }
 }
 
 exit 0;

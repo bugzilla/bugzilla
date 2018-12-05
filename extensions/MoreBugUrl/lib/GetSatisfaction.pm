@@ -18,24 +18,24 @@ use parent qw(Bugzilla::BugUrl);
 ###############################
 
 sub should_handle {
-    my ($class, $uri) = @_;
+  my ($class, $uri) = @_;
 
-    # GetSatisfaction URLs only have one form:
-    #   http(s)://getsatisfaction.com/PROJECT_NAME/topics/TOPIC_NAME
-    return (lc($uri->authority) eq 'getsatisfaction.com'
-            and $uri->path =~ m|^/[^/]+/topics/[^/]+$|) ? 1 : 0;
+  # GetSatisfaction URLs only have one form:
+  #   http(s)://getsatisfaction.com/PROJECT_NAME/topics/TOPIC_NAME
+  return (lc($uri->authority) eq 'getsatisfaction.com'
+      and $uri->path =~ m|^/[^/]+/topics/[^/]+$|) ? 1 : 0;
 }
 
 sub _check_value {
-    my ($class, $uri) = @_;
+  my ($class, $uri) = @_;
 
-    $uri = $class->SUPER::_check_value($uri);
+  $uri = $class->SUPER::_check_value($uri);
 
-    # GetSatisfaction HTTP URLs redirect to HTTPS, so just use the HTTPS
-    # scheme.
-    $uri->scheme('https');
+  # GetSatisfaction HTTP URLs redirect to HTTPS, so just use the HTTPS
+  # scheme.
+  $uri->scheme('https');
 
-    return $uri;
+  return $uri;
 }
 
 1;

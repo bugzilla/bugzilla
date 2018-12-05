@@ -22,22 +22,22 @@ use Bugzilla::Constants;
 use constant DB_TABLE => 'whine_schedules';
 
 use constant DB_COLUMNS => qw(
-    id
-    eventid
-    run_day
-    run_time
-    run_next
-    mailto
-    mailto_type
+  id
+  eventid
+  run_day
+  run_time
+  run_next
+  mailto
+  mailto_type
 );
 
 use constant UPDATE_COLUMNS => qw(
-    eventid 
-    run_day 
-    run_time 
-    run_next 
-    mailto 
-    mailto_type
+  eventid
+  run_day
+  run_time
+  run_next
+  mailto
+  mailto_type
 );
 use constant NAME_FIELD => 'id';
 use constant LIST_ORDER => 'id';
@@ -45,36 +45,38 @@ use constant LIST_ORDER => 'id';
 ####################
 # Simple Accessors #
 ####################
-sub eventid         { return $_[0]->{'eventid'};     }
-sub run_day         { return $_[0]->{'run_day'};     }
-sub run_time        { return $_[0]->{'run_time'};    }
+sub eventid         { return $_[0]->{'eventid'}; }
+sub run_day         { return $_[0]->{'run_day'}; }
+sub run_time        { return $_[0]->{'run_time'}; }
 sub mailto_is_group { return $_[0]->{'mailto_type'}; }
 
 sub mailto {
-    my $self = shift;
+  my $self = shift;
 
-    return $self->{mailto_object} if exists $self->{mailto_object};
-    my $id = $self->{'mailto'};
+  return $self->{mailto_object} if exists $self->{mailto_object};
+  my $id = $self->{'mailto'};
 
-    if ($self->mailto_is_group) {
-        $self->{mailto_object} = Bugzilla::Group->new($id);
-    } else {
-        $self->{mailto_object} = Bugzilla::User->new($id);
-    }
-    return $self->{mailto_object};
+  if ($self->mailto_is_group) {
+    $self->{mailto_object} = Bugzilla::Group->new($id);
+  }
+  else {
+    $self->{mailto_object} = Bugzilla::User->new($id);
+  }
+  return $self->{mailto_object};
 }
 
-sub mailto_users { 
-    my $self = shift;
-    return $self->{mailto_users} if exists $self->{mailto_users};
-    my $object = $self->mailto;
+sub mailto_users {
+  my $self = shift;
+  return $self->{mailto_users} if exists $self->{mailto_users};
+  my $object = $self->mailto;
 
-    if ($self->mailto_is_group) {
-        $self->{mailto_users} = $object->members_non_inherited if $object->is_active;
-    } else {
-        $self->{mailto_users} = $object;
-    }
-    return $self->{mailto_users};
+  if ($self->mailto_is_group) {
+    $self->{mailto_users} = $object->members_non_inherited if $object->is_active;
+  }
+  else {
+    $self->{mailto_users} = $object;
+  }
+  return $self->{mailto_users};
 }
 
 1;

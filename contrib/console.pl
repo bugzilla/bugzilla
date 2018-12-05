@@ -20,115 +20,120 @@ use Bugzilla::Bug;
 use Term::ReadLine;
 use Data::Dumper;
 $Data::Dumper::Sortkeys = 1;
-$Data::Dumper::Terse = 1;
-$Data::Dumper::Indent = 1;
-$Data::Dumper::Useqq = 1;
+$Data::Dumper::Terse    = 1;
+$Data::Dumper::Indent   = 1;
+$Data::Dumper::Useqq    = 1;
 $Data::Dumper::Maxdepth = 1;
-$Data::Dumper::Deparse = 0;
+$Data::Dumper::Deparse  = 0;
 
 my $sysname = get_text('term', {term => 'Bugzilla'});
 my $term = new Term::ReadLine "$sysname Console";
 read_history($term);
 END { write_history($term) }
 
-while ( defined (my $input = $term->readline("$sysname> ")) ) {
-    my @res = eval($input);
-    if ($@) {
-        warn $@;
-    }
-    else {
-        print Dumper(@res);
-    }
+while (defined(my $input = $term->readline("$sysname> "))) {
+  my @res = eval($input);
+  if ($@) {
+    warn $@;
+  }
+  else {
+    print Dumper(@res);
+  }
 }
 print STDERR "\n";
 exit 0;
 
 # d: full dump (normal behavior is limited to depth of 1)
 sub d {
-    local $Data::Dumper::Maxdepth = 0;
-    local $Data::Dumper::Deparse = 1;
-    print Dumper(@_);
-    return ();
+  local $Data::Dumper::Maxdepth = 0;
+  local $Data::Dumper::Deparse  = 1;
+  print Dumper(@_);
+  return ();
 }
 
 # p: print as a single string (normal behavior puts list items on separate lines)
 sub p {
-    no warnings; # suppress possible undefined var message 
-    print(@_, "\n");
-    return ();
+  no warnings;    # suppress possible undefined var message
+  print(@_, "\n");
+  return ();
 }
 
 sub filter {
-    my $name = shift;
-    my $filter = Bugzilla->template->{SERVICE}->{CONTEXT}->{CONFIG}->{FILTERS}->{$name};
-    if (scalar @_) {
-        return $filter->(@_);
-    }
-    else {
-        return $filter;
-    }
+  my $name = shift;
+  my $filter
+    = Bugzilla->template->{SERVICE}->{CONTEXT}->{CONFIG}->{FILTERS}->{$name};
+  if (scalar @_) {
+    return $filter->(@_);
+  }
+  else {
+    return $filter;
+  }
 }
 
-sub b { get_object('Bugzilla::Bug', @_) }
-sub u { get_object('Bugzilla::User', @_) }
+sub b { get_object('Bugzilla::Bug',   @_) }
+sub u { get_object('Bugzilla::User',  @_) }
 sub f { get_object('Bugzilla::Field', @_) }
 
 sub get_object {
-    my $class = shift;
-    $_ = shift;
-    my @results = ();
-    
-    if (ref $_ eq 'HASH' && keys %$_) {
-        @results = @{$class->match($_)};
-    }
-    elsif (m/^\d+$/) {
-        @results = ($class->new($_));
-    }
-    elsif (m/\w/i && grep {$_ eq 'name'} ($class->_get_db_columns)) {
-        @results = @{$class->match({name => $_})};
-    }
-    else {
-        @results = ();
-    }
-    
-    if (wantarray) {
-        return @results;
-    }
-    else {
-        return shift @results;
-    }
+  my $class = shift;
+  $_ = shift;
+  my @results = ();
+
+  if (ref $_ eq 'HASH' && keys %$_) {
+    @results = @{$class->match($_)};
+  }
+  elsif (m/^\d+$/) {
+    @results = ($class->new($_));
+  }
+  elsif (m/\w/i && grep { $_ eq 'name' } ($class->_get_db_columns)) {
+    @results = @{$class->match({name => $_})};
+  }
+  else {
+    @results = ();
+  }
+
+  if (wantarray) {
+    return @results;
+  }
+  else {
+    return shift @results;
+  }
 }
 
 sub read_history {
-    my ($term) = @_;
-    
-    if (open HIST, "<$ENV{HOME}/.bugzilla_console_history") {
-        foreach (<HIST>) {
-            chomp;
-            $term->addhistory($_);
-        }
-        close HIST;
+  my ($term) = @_;
+
+  if (open HIST, "<$ENV{HOME}/.bugzilla_console_history") {
+    foreach (<HIST>) {
+      chomp;
+      $term->addhistory($_);
     }
+    close HIST;
+  }
 }
 
 sub write_history {
-    my ($term) = @_;
+  my ($term) = @_;
 
-    if ($term->can('GetHistory') && open HIST, ">$ENV{HOME}/.bugzilla_console_history") {
-        my %seen_hist = ();
-        my @hist = ();
-        foreach my $line (reverse $term->GetHistory()) {
-            next unless $line =~ m/\S/;
-            next if $seen_hist{$line};
-            $seen_hist{$line} = 1;
-            push @hist, $line;
-            last if (scalar @hist > 500);
-        }
-        foreach (reverse @hist) {
-            print HIST $_, "\n";
-        }
-        close HIST;
+  if (
+    $term->can('GetHistory') && open HIST,
+    ">$ENV{HOME}/.bugzilla_console_history"
+    )
+  {
+    my %seen_hist = ();
+    my @hist      = ();
+    foreach my $line (reverse $term->GetHistory()) {
+      next unless $line =~ m/\S/;
+      next if $seen_hist{$line};
+      $seen_hist{$line} = 1;
+      push @hist, $line;
+      last if (scalar @hist > 500);
     }
+    foreach (reverse @hist) {
+      print HIST $_, "\n";
+    }
+    close HIST;
+  }
 }
 
 __END__

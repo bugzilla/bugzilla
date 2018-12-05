@@ -19,17 +19,17 @@ use QA::Util;
 my ($sel, $config) = get_selenium();
 
 log_in($sel, $config, 'admin');
-set_parameters($sel, { "Bug Fields" => {"usestatuswhiteboard-on" => undef} });
+set_parameters($sel, {"Bug Fields" => {"usestatuswhiteboard-on" => undef}});
 
 # Clear the saved search, in case this test didn't complete previously.
 if ($sel->is_text_present("My bugs from QA_Selenium")) {
-    $sel->click_ok("link=My bugs from QA_Selenium");
-    $sel->wait_for_page_to_load_ok(WAIT_TIME);
-    $sel->title_is("Bug List: My bugs from QA_Selenium");
-    $sel->click_ok("forget_search");
-    $sel->wait_for_page_to_load_ok(WAIT_TIME);
-    $sel->title_is("Search is gone");
-    $sel->is_text_present_ok("OK, the My bugs from QA_Selenium search is gone");
+  $sel->click_ok("link=My bugs from QA_Selenium");
+  $sel->wait_for_page_to_load_ok(WAIT_TIME);
+  $sel->title_is("Bug List: My bugs from QA_Selenium");
+  $sel->click_ok("forget_search");
+  $sel->wait_for_page_to_load_ok(WAIT_TIME);
+  $sel->title_is("Search is gone");
+  $sel->is_text_present_ok("OK, the My bugs from QA_Selenium search is gone");
 }
 
 # Just in case the test failed before completion previously, reset the CANEDIT bit.
@@ -54,18 +54,18 @@ file_bug_in_product($sel, 'TestProduct');
 my $bug_summary = "Test bug editing";
 $sel->select_ok("bug_severity", "label=critical");
 $sel->type_ok("short_desc", $bug_summary);
-$sel->type_ok("comment", "ploc");
+$sel->type_ok("comment",    "ploc");
 my $bug1_id = create_bug($sel, $bug_summary);
 
 # Now edit field values of the bug you just filed.
 
 $sel->select_ok("rep_platform", "label=Other");
-$sel->select_ok("op_sys", "label=Other");
-$sel->select_ok("priority", "label=Highest");
+$sel->select_ok("op_sys",       "label=Other");
+$sel->select_ok("priority",     "label=Highest");
 $sel->select_ok("bug_severity", "label=blocker");
-$sel->type_ok("bug_file_loc", "foo.cgi?action=bar");
+$sel->type_ok("bug_file_loc",      "foo.cgi?action=bar");
 $sel->type_ok("status_whiteboard", "[Selenium was here]");
-$sel->type_ok("comment", "new comment from me :)");
+$sel->type_ok("comment",           "new comment from me :)");
 $sel->select_ok("bug_status", "label=RESOLVED");
 edit_bug($sel, $bug1_id, $bug_summary);
 
@@ -80,22 +80,31 @@ $sel->click_ok("commit");
 $sel->wait_for_page_to_load_ok(WAIT_TIME);
 $sel->title_is("Verify New Product Details...");
 $sel->select_ok("component", "label=QA-Selenium-TEST");
-$sel->is_element_present_ok('//input[@type="checkbox" and @name="groups" and @value="QA-Selenium-TEST"]');
-ok(!$sel->is_editable('//input[@type="checkbox" and @name="groups" and @value="QA-Selenium-TEST"]'), "QA-Selenium-TEST group not editable");
-$sel->is_checked_ok('//input[@type="checkbox" and @name="groups" and @value="QA-Selenium-TEST"]');
+$sel->is_element_present_ok(
+  '//input[@type="checkbox" and @name="groups" and @value="QA-Selenium-TEST"]');
+ok(
+  !$sel->is_editable(
+    '//input[@type="checkbox" and @name="groups" and @value="QA-Selenium-TEST"]'),
+  "QA-Selenium-TEST group not editable"
+);
+$sel->is_checked_ok(
+  '//input[@type="checkbox" and @name="groups" and @value="QA-Selenium-TEST"]');
 edit_bug_and_return($sel, $bug1_id, $bug_summary, {id => "change_product"});
 $sel->select_ok("bug_severity", "label=normal");
-$sel->select_ok("priority", "label=High");
+$sel->select_ok("priority",     "label=High");
 $sel->select_ok("rep_platform", "label=All");
-$sel->select_ok("op_sys", "label=All");
+$sel->select_ok("op_sys",       "label=All");
 $sel->click_ok("cc_edit_area_showhide");
-$sel->type_ok("newcc", $config->{admin_user_login});
+$sel->type_ok("newcc",   $config->{admin_user_login});
 $sel->type_ok("comment", "Unchecking the reporter_accessible checkbox");
+
 # This checkbox is checked by default.
 $sel->click_ok("reporter_accessible");
 $sel->select_ok("bug_status", "label=VERIFIED");
 edit_bug_and_return($sel, $bug1_id, $bug_summary);
-$sel->type_ok("comment", "I am the reporter, but I can see the bug anyway as I belong to the mandatory group");
+$sel->type_ok("comment",
+  "I am the reporter, but I can see the bug anyway as I belong to the mandatory group"
+);
 edit_bug($sel, $bug1_id, $bug_summary);
 logout($sel);
 
@@ -105,12 +114,12 @@ logout($sel);
 log_in($sel, $config, 'admin');
 go_to_bug($sel, $bug1_id);
 $sel->select_ok("bug_severity", "label=blocker");
-$sel->select_ok("priority", "label=Highest");
+$sel->select_ok("priority",     "label=Highest");
 $sel->type_ok("status_whiteboard", "[Selenium was here][admin too]");
 $sel->select_ok("bug_status", "label=CONFIRMED");
 $sel->click_ok("bz_assignee_edit_action");
 $sel->type_ok("assigned_to", $config->{admin_user_login});
-$sel->type_ok("comment", "I have editbugs privs. Taking!");
+$sel->type_ok("comment",     "I have editbugs privs. Taking!");
 edit_bug_and_return($sel, $bug1_id, $bug_summary);
 $sel->click_ok("cc_edit_area_showhide");
 $sel->type_ok("newcc", $config->{unprivileged_user_login});
@@ -130,7 +139,9 @@ logout($sel);
 log_in($sel, $config, 'admin');
 go_to_bug($sel, $bug1_id);
 $sel->click_ok("cclist_accessible");
-$sel->type_ok("comment", "I am allowed to turn off cclist_accessible despite not being in the mandatory group");
+$sel->type_ok("comment",
+  "I am allowed to turn off cclist_accessible despite not being in the mandatory group"
+);
 edit_bug($sel, $bug1_id, $bug_summary);
 logout($sel);
 
@@ -149,6 +160,7 @@ logout($sel);
 log_in($sel, $config, 'admin');
 go_to_bug($sel, $bug1_id);
 $sel->select_ok("product", "label=TestProduct");
+
 # When selecting a new product, Bugzilla tries to reassign the bug by default,
 # so we have to uncheck it.
 $sel->click_ok("set_default_assignee");
@@ -158,13 +170,30 @@ $sel->click_ok("commit");
 $sel->wait_for_page_to_load_ok(WAIT_TIME);
 $sel->title_is("Verify New Product Details...");
 $sel->select_ok("component", "label=TestComponent");
-$sel->is_text_present_ok("These groups are not legal for the 'TestProduct' product or you are not allowed to restrict bugs to these groups");
-$sel->is_element_present_ok('//input[@type="checkbox" and @name="groups" and @value="QA-Selenium-TEST"]');
-ok(!$sel->is_editable('//input[@type="checkbox" and @name="groups" and @value="QA-Selenium-TEST"]'), "QA-Selenium-TEST group not editable");
-ok(!$sel->is_checked('//input[@type="checkbox" and @name="groups" and @value="QA-Selenium-TEST"]'), "QA-Selenium-TEST group not selected");
-$sel->is_element_present_ok('//input[@type="checkbox" and @name="groups" and @value="Master"]');
-$sel->is_editable_ok('//input[@type="checkbox" and @name="groups" and @value="Master"]');
-ok(!$sel->is_checked('//input[@type="checkbox" and @name="groups" and @value="Master"]'), "Master group not selected by default");
+$sel->is_text_present_ok(
+  "These groups are not legal for the 'TestProduct' product or you are not allowed to restrict bugs to these groups"
+);
+$sel->is_element_present_ok(
+  '//input[@type="checkbox" and @name="groups" and @value="QA-Selenium-TEST"]');
+ok(
+  !$sel->is_editable(
+    '//input[@type="checkbox" and @name="groups" and @value="QA-Selenium-TEST"]'),
+  "QA-Selenium-TEST group not editable"
+);
+ok(
+  !$sel->is_checked(
+    '//input[@type="checkbox" and @name="groups" and @value="QA-Selenium-TEST"]'),
+  "QA-Selenium-TEST group not selected"
+);
+$sel->is_element_present_ok(
+  '//input[@type="checkbox" and @name="groups" and @value="Master"]');
+$sel->is_editable_ok(
+  '//input[@type="checkbox" and @name="groups" and @value="Master"]');
+ok(
+  !$sel->is_checked(
+    '//input[@type="checkbox" and @name="groups" and @value="Master"]'),
+  "Master group not selected by default"
+);
 edit_bug($sel, $bug1_id, $bug_summary, {id => "change_product"});
 logout($sel);
 
@@ -173,12 +202,18 @@ logout($sel);
 
 log_in($sel, $config, 'unprivileged');
 go_to_bug($sel, $bug1_id);
-$sel->type_ok("comment", "I have no privs, I can only comment (and remove people from the CC list)");
-ok(!$sel->is_element_present('//select[@name="product"]'), "Product field not editable");
-ok(!$sel->is_element_present('//select[@name="bug_severity"]'), "Severity field not editable");
-ok(!$sel->is_element_present('//select[@name="priority"]'), "Priority field not editable");
-ok(!$sel->is_element_present('//select[@name="op_sys"]'), "OS field not editable");
-ok(!$sel->is_element_present('//select[@name="rep_platform"]'), "Hardware field not editable");
+$sel->type_ok("comment",
+  "I have no privs, I can only comment (and remove people from the CC list)");
+ok(!$sel->is_element_present('//select[@name="product"]'),
+  "Product field not editable");
+ok(!$sel->is_element_present('//select[@name="bug_severity"]'),
+  "Severity field not editable");
+ok(!$sel->is_element_present('//select[@name="priority"]'),
+  "Priority field not editable");
+ok(!$sel->is_element_present('//select[@name="op_sys"]'),
+  "OS field not editable");
+ok(!$sel->is_element_present('//select[@name="rep_platform"]'),
+  "Hardware field not editable");
 $sel->click_ok("cc_edit_area_showhide");
 $sel->add_selection_ok("cc", "label=" . $config->{admin_user_login});
 $sel->click_ok("removecc");
@@ -212,7 +247,8 @@ $sel->type_ok("comment", "Just a comment too...");
 $sel->click_ok("commit");
 $sel->wait_for_page_to_load_ok(WAIT_TIME);
 $sel->title_is("Product Edit Access Denied");
-$sel->is_text_present_ok("You are not permitted to edit bugs in product TestProduct.");
+$sel->is_text_present_ok(
+  "You are not permitted to edit bugs in product TestProduct.");
 logout($sel);
 
 # Test searches and "format for printing".
@@ -240,7 +276,8 @@ $sel->type_ok("save_newqueryname", "My bugs from QA_Selenium");
 $sel->click_ok("remember");
 $sel->wait_for_page_to_load_ok(WAIT_TIME);
 $sel->title_is("Search created");
-$sel->is_text_present_ok("OK, you have a new search named My bugs from QA_Selenium.");
+$sel->is_text_present_ok(
+  "OK, you have a new search named My bugs from QA_Selenium.");
 $sel->click_ok("link=My bugs from QA_Selenium");
 $sel->wait_for_page_to_load_ok(WAIT_TIME);
 $sel->title_is("Bug List: My bugs from QA_Selenium");
@@ -249,7 +286,8 @@ $sel->wait_for_page_to_load_ok(WAIT_TIME);
 $sel->title_is("Full Text Bug Listing");
 $sel->is_text_present_ok("Bug $bug1_id");
 $sel->is_text_present_ok("Status: CONFIRMED");
-$sel->is_text_present_ok("Reporter: QA-Selenium-TEST ($config->{QA_Selenium_TEST_user_login})");
+$sel->is_text_present_ok(
+  "Reporter: QA-Selenium-TEST ($config->{QA_Selenium_TEST_user_login})");
 $sel->is_text_present_ok("Assignee: admin ($config->{admin_user_login})");
 $sel->is_text_present_ok("Severity: blocker");
 $sel->is_text_present_ok("Priority: Highest");
@@ -264,6 +302,7 @@ file_bug_in_product($sel, 'TestProduct');
 my $bug_summary2 = "New bug from me";
 $sel->select_ok("bug_severity", "label=blocker");
 $sel->type_ok("short_desc", $bug_summary2);
+
 # We turned on the CANEDIT bit for TestProduct.
 $sel->type_ok("comment", "I can enter a new bug, but not edit it, right?");
 my $bug2_id = create_bug($sel, $bug_summary2);
@@ -276,7 +315,9 @@ $sel->title_is("Enter Bug: TestProduct");
 $sel->click_ok("commit");
 $sel->wait_for_page_to_load_ok(WAIT_TIME);
 $sel->title_is("Suspicious Action");
-$sel->is_text_present_ok("no valid token for the create_bug action while processing the 'post_bug.cgi' script");
+$sel->is_text_present_ok(
+  "no valid token for the create_bug action while processing the 'post_bug.cgi' script"
+);
 $sel->click_ok("confirm");
 $sel->wait_for_page_to_load_ok(WAIT_TIME);
 $sel->title_like(qr/\d+ \S $bug_summary2/, "Bug created");
@@ -284,7 +325,8 @@ $sel->type_ok("comment", "New comment not allowed");
 $sel->click_ok("commit");
 $sel->wait_for_page_to_load_ok(WAIT_TIME);
 $sel->title_is("Product Edit Access Denied");
-$sel->is_text_present_ok("You are not permitted to edit bugs in product TestProduct.");
+$sel->is_text_present_ok(
+  "You are not permitted to edit bugs in product TestProduct.");
 logout($sel);
 
 # Reassign the newly created bug to the admin.
@@ -293,7 +335,7 @@ log_in($sel, $config, 'admin');
 go_to_bug($sel, $bug2_id);
 $sel->click_ok("bz_assignee_edit_action");
 $sel->type_ok("assigned_to", $config->{admin_user_login});
-$sel->type_ok("comment", "Taking!");
+$sel->type_ok("comment",     "Taking!");
 edit_bug($sel, $bug2_id, $bug_summary2);
 
 # Test mass-change.
@@ -326,75 +368,90 @@ $sel->wait_for_page_to_load_ok(WAIT_TIME);
 $sel->title_is("Changes made to bug $bug1_id");
 $sel->is_text_present_ok("URL foo.cgi?action=bar");
 $sel->is_text_present_ok("Severity critical blocker");
-$sel->is_text_present_ok("Whiteboard [Selenium was here] [Selenium was here][admin too]");
+$sel->is_text_present_ok(
+  "Whiteboard [Selenium was here] [Selenium was here][admin too]");
 $sel->is_text_present_ok("Product QA-Selenium-TEST TestProduct");
 $sel->is_text_present_ok("Status CONFIRMED RESOLVED");
 
 # Last step: move bugs to another DB, if the extension is enabled.
 
 if ($config->{test_extensions}) {
-    set_parameters($sel, { "Bug Moving" => {"move-to-url"     => {type => "text", value => 'http://www.foo.com/'},
-                                            "move-to-address" => {type => "text", value => 'import@foo.com'},
-                                            "movers"          => {type => "text", value => $config->{admin_user_login}}
-                                           }
-                         });
+  set_parameters(
+    $sel,
+    {
+      "Bug Moving" => {
+        "move-to-url"     => {type => "text", value => 'http://www.foo.com/'},
+        "move-to-address" => {type => "text", value => 'import@foo.com'},
+        "movers"          => {type => "text", value => $config->{admin_user_login}}
+      }
+    }
+  );
 
-    $sel->click_ok("link=My bugs from QA_Selenium");
-    $sel->wait_for_page_to_load_ok(WAIT_TIME);
-    $sel->title_is("Bug List: My bugs from QA_Selenium");
-    $sel->is_text_present_ok("2 bugs found");
-    $sel->click_ok("mass_change");
-    $sel->wait_for_page_to_load_ok(WAIT_TIME);
-    $sel->title_is("Bug List");
-    $sel->click_ok("check_all");
-    $sel->type_ok("comment", "-> moved");
-    $sel->click_ok('oldbugmove');
-    $sel->wait_for_page_to_load_ok(WAIT_TIME);
-    $sel->title_is("Bugs processed");
-    $sel->is_text_present_ok("Changes submitted for bug $bug1_id");
-    $sel->is_text_present_ok("Changes submitted for bug $bug2_id");
-    $sel->click_ok("link=$bug2_id");
-    $sel->wait_for_page_to_load_ok(WAIT_TIME);
-    $sel->title_like(qr/^$bug2_id/);
-    $sel->selected_label_is("resolution", "MOVED");
-    $sel->is_text_present_ok("Bug moved to http://www.foo.com/.");
+  $sel->click_ok("link=My bugs from QA_Selenium");
+  $sel->wait_for_page_to_load_ok(WAIT_TIME);
+  $sel->title_is("Bug List: My bugs from QA_Selenium");
+  $sel->is_text_present_ok("2 bugs found");
+  $sel->click_ok("mass_change");
+  $sel->wait_for_page_to_load_ok(WAIT_TIME);
+  $sel->title_is("Bug List");
+  $sel->click_ok("check_all");
+  $sel->type_ok("comment", "-> moved");
+  $sel->click_ok('oldbugmove');
+  $sel->wait_for_page_to_load_ok(WAIT_TIME);
+  $sel->title_is("Bugs processed");
+  $sel->is_text_present_ok("Changes submitted for bug $bug1_id");
+  $sel->is_text_present_ok("Changes submitted for bug $bug2_id");
+  $sel->click_ok("link=$bug2_id");
+  $sel->wait_for_page_to_load_ok(WAIT_TIME);
+  $sel->title_like(qr/^$bug2_id/);
+  $sel->selected_label_is("resolution", "MOVED");
+  $sel->is_text_present_ok("Bug moved to http://www.foo.com/.");
 
-    # Disable bug moving again.
-    set_parameters($sel, { "Bug Moving" => {"movers" => {type => "text", value => ""}} });
+  # Disable bug moving again.
+  set_parameters($sel,
+    {"Bug Moving" => {"movers" => {type => "text", value => ""}}});
 }
 
 # Make sure token checks are working correctly for single bug editing and mass change,
 # first with no token, then with an invalid token.
 
-foreach my $params (["no_token_single_bug", ""], ["invalid_token_single_bug", "&token=1"]) {
-    my ($comment, $token) = @$params;
-    $sel->open_ok("/$config->{bugzilla_installation}/process_bug.cgi?id=$bug1_id&comment=$comment$token",
-                  undef, "Edit a single bug with " . ($token ? "an invalid" : "no") . " token");
-    $sel->title_is("Suspicious Action");
-    $sel->is_text_present_ok($token ? "an invalid token" : "web browser directly");
-    edit_bug_and_return($sel, $bug1_id, $bug_summary, {id => "confirm"});
-    $sel->is_text_present_ok($comment);
+foreach my $params (["no_token_single_bug", ""],
+  ["invalid_token_single_bug", "&token=1"])
+{
+  my ($comment, $token) = @$params;
+  $sel->open_ok(
+    "/$config->{bugzilla_installation}/process_bug.cgi?id=$bug1_id&comment=$comment$token",
+    undef, "Edit a single bug with " . ($token ? "an invalid" : "no") . " token"
+  );
+  $sel->title_is("Suspicious Action");
+  $sel->is_text_present_ok($token ? "an invalid token" : "web browser directly");
+  edit_bug_and_return($sel, $bug1_id, $bug_summary, {id => "confirm"});
+  $sel->is_text_present_ok($comment);
 }
 
-foreach my $params (["no_token_mass_change", ""], ["invalid_token_mass_change", "&token=1"]) {
-    my ($comment, $token) = @$params;
-    $sel->open_ok("/$config->{bugzilla_installation}/process_bug.cgi?id_$bug1_id=1&id_$bug2_id=1&comment=$comment$token",
-                  undef, "Mass change with " . ($token ? "an invalid" : "no") . " token");
-    $sel->title_is("Suspicious Action");
-    $sel->is_text_present_ok("no valid token for the buglist_mass_change action");
-    $sel->click_ok("confirm");
+foreach my $params (["no_token_mass_change", ""],
+  ["invalid_token_mass_change", "&token=1"])
+{
+  my ($comment, $token) = @$params;
+  $sel->open_ok(
+    "/$config->{bugzilla_installation}/process_bug.cgi?id_$bug1_id=1&id_$bug2_id=1&comment=$comment$token",
+    undef, "Mass change with " . ($token ? "an invalid" : "no") . " token"
+  );
+  $sel->title_is("Suspicious Action");
+  $sel->is_text_present_ok("no valid token for the buglist_mass_change action");
+  $sel->click_ok("confirm");
+  $sel->wait_for_page_to_load_ok(WAIT_TIME);
+  $sel->title_is("Bugs processed");
+  foreach my $bug_id ($bug1_id, $bug2_id) {
+    $sel->click_ok("link=$bug_id");
+    $sel->wait_for_page_to_load_ok(WAIT_TIME);
+    $sel->title_like(qr/^$bug_id /);
+    $sel->is_text_present_ok($comment);
+    next if $bug_id == $bug2_id;
+    $sel->go_back_ok();
     $sel->wait_for_page_to_load_ok(WAIT_TIME);
     $sel->title_is("Bugs processed");
-    foreach my $bug_id ($bug1_id, $bug2_id) {
-        $sel->click_ok("link=$bug_id");
-        $sel->wait_for_page_to_load_ok(WAIT_TIME);
-        $sel->title_like(qr/^$bug_id /);
-        $sel->is_text_present_ok($comment);
-        next if $bug_id == $bug2_id;
-        $sel->go_back_ok();
-        $sel->wait_for_page_to_load_ok(WAIT_TIME);
-        $sel->title_is("Bugs processed");
-    }
+  }
 }
 
 # Now move these bugs out of our radar.
@@ -407,7 +464,7 @@ $sel->click_ok("mass_change");
 $sel->wait_for_page_to_load_ok(WAIT_TIME);
 $sel->title_is("Bug List");
 $sel->click_ok("check_all");
-$sel->type_ok("comment", "Reassigning to the reporter");
+$sel->type_ok("comment",     "Reassigning to the reporter");
 $sel->type_ok("assigned_to", $config->{QA_Selenium_TEST_user_login});
 $sel->click_ok("commit");
 $sel->wait_for_page_to_load_ok(WAIT_TIME);
@@ -428,14 +485,14 @@ clear_canedit_on_testproduct($sel, $master_gid);
 logout($sel);
 
 sub clear_canedit_on_testproduct {
-    my ($sel, $master_gid) = @_;
+  my ($sel, $master_gid) = @_;
 
-    edit_product($sel, "TestProduct");
-    $sel->click_ok("link=Edit Group Access Controls:");
-    $sel->wait_for_page_to_load_ok(WAIT_TIME);
-    $sel->title_is("Edit Group Controls for TestProduct");
-    $sel->uncheck_ok("canedit_$master_gid");
-    $sel->click_ok("submit");
-    $sel->wait_for_page_to_load_ok(WAIT_TIME);
-    $sel->title_is("Update group access controls for TestProduct");
+  edit_product($sel, "TestProduct");
+  $sel->click_ok("link=Edit Group Access Controls:");
+  $sel->wait_for_page_to_load_ok(WAIT_TIME);
+  $sel->title_is("Edit Group Controls for TestProduct");
+  $sel->uncheck_ok("canedit_$master_gid");
+  $sel->click_ok("submit");
+  $sel->wait_for_page_to_load_ok(WAIT_TIME);
+  $sel->title_is("Update group access controls for TestProduct");
 }

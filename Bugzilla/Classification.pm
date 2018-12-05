@@ -26,26 +26,26 @@ use parent qw(Bugzilla::Field::ChoiceInterface Bugzilla::Object Exporter);
 
 use constant IS_CONFIG => 1;
 
-use constant DB_TABLE => 'classifications';
+use constant DB_TABLE   => 'classifications';
 use constant LIST_ORDER => 'sortkey, name';
 
 use constant DB_COLUMNS => qw(
-    id
-    name
-    description
-    sortkey
+  id
+  name
+  description
+  sortkey
 );
 
 use constant UPDATE_COLUMNS => qw(
-    name
-    description
-    sortkey
+  name
+  description
+  sortkey
 );
 
 use constant VALIDATORS => {
-    name        => \&_check_name,
-    description => \&_check_description,
-    sortkey     => \&_check_sortkey,
+  name        => \&_check_name,
+  description => \&_check_description,
+  sortkey     => \&_check_sortkey,
 };
 
 ###############################
@@ -53,29 +53,31 @@ use constant VALIDATORS => {
 ###############################
 
 sub remove_from_db {
-    my $self = shift;
-    my $dbh = Bugzilla->dbh;
+  my $self = shift;
+  my $dbh  = Bugzilla->dbh;
 
-    ThrowUserError("classification_not_deletable") if ($self->id == 1);
+  ThrowUserError("classification_not_deletable") if ($self->id == 1);
 
-    $dbh->bz_start_transaction();
+  $dbh->bz_start_transaction();
 
-    # Reclassify products to the default classification, if needed.
-    my $product_ids = $dbh->selectcol_arrayref(
-        'SELECT id FROM products WHERE classification_id = ?', undef, $self->id);
+  # Reclassify products to the default classification, if needed.
+  my $product_ids
+    = $dbh->selectcol_arrayref(
+    'SELECT id FROM products WHERE classification_id = ?',
+    undef, $self->id);
 
-    if (@$product_ids) {
-        $dbh->do('UPDATE products SET classification_id = 1 WHERE '
-                  . $dbh->sql_in('id', $product_ids));
-        foreach my $id (@$product_ids) {
-            Bugzilla->memcached->clear({ table => 'products', id => $id });
-        }
-        Bugzilla->memcached->clear_config();
+  if (@$product_ids) {
+    $dbh->do('UPDATE products SET classification_id = 1 WHERE '
+        . $dbh->sql_in('id', $product_ids));
+    foreach my $id (@$product_ids) {
+      Bugzilla->memcached->clear({table => 'products', id => $id});
     }
+    Bugzilla->memcached->clear_config();
+  }
 
-    $self->SUPER::remove_from_db();
+  $self->SUPER::remove_from_db();
 
-    $dbh->bz_commit_transaction();
+  $dbh->bz_commit_transaction();
 
 }
 
@@ -84,38 +86,41 @@ sub remove_from_db {
 ###############################
 
 sub _check_name {
-    my ($invocant, $name) = @_;
+  my ($invocant, $name) = @_;
 
-    $name = trim($name);
-    $name || ThrowUserError('classification_not_specified');
+  $name = trim($name);
+  $name || ThrowUserError('classification_not_specified');
 
-    if (length($name) > MAX_CLASSIFICATION_SIZE) {
-        ThrowUserError('classification_name_too_long', {'name' => $name});
-    }
+  if (length($name) > MAX_CLASSIFICATION_SIZE) {
+    ThrowUserError('classification_name_too_long', {'name' => $name});
+  }
 
-    my $classification = new Bugzilla::Classification({name => $name});
-    if ($classification && (!ref $invocant || $classification->id != $invocant->id)) {
-        ThrowUserError("classification_already_exists", { name => $classification->name });
-    }
-    return $name;
+  my $classification = new Bugzilla::Classification({name => $name});
+  if ($classification && (!ref $invocant || $classification->id != $invocant->id))
+  {
+    ThrowUserError("classification_already_exists",
+      {name => $classification->name});
+  }
+  return $name;
 }
 
 sub _check_description {
-    my ($invocant, $description) = @_;
+  my ($invocant, $description) = @_;
 
-    $description  = trim($description || '');
-    return $description;
+  $description = trim($description || '');
+  return $description;
 }
 
 sub _check_sortkey {
-    my ($invocant, $sortkey) = @_;
+  my ($invocant, $sortkey) = @_;
 
-    $sortkey ||= 0;
-    my $stored_sortkey = $sortkey;
-    if (!detaint_natural($sortkey) || $sortkey > MAX_SMALLINT) {
-        ThrowUserError('classification_invalid_sortkey', { 'sortkey' => $stored_sortkey });
-    }
-    return $sortkey;
+  $sortkey ||= 0;
+  my $stored_sortkey = $sortkey;
+  if (!detaint_natural($sortkey) || $sortkey > MAX_SMALLINT) {
+    ThrowUserError('classification_invalid_sortkey',
+      {'sortkey' => $stored_sortkey});
+  }
+  return $sortkey;
 }
 
 #####################################
@@ -124,41 +129,45 @@ sub _check_sortkey {
 
 use constant FIELD_NAME => 'classification';
 use constant is_default => 0;
-use constant is_active => 1;
+use constant is_active  => 1;
 
 ###############################
 ####       Methods         ####
 ###############################
 
-sub set_name        { $_[0]->set('name', $_[1]); }
+sub set_name        { $_[0]->set('name',        $_[1]); }
 sub set_description { $_[0]->set('description', $_[1]); }
-sub set_sortkey     { $_[0]->set('sortkey', $_[1]); }
+sub set_sortkey     { $_[0]->set('sortkey',     $_[1]); }
 
 sub product_count {
-    my $self = shift;
-    my $dbh = Bugzilla->dbh;
+  my $self = shift;
+  my $dbh  = Bugzilla->dbh;
 
-    if (!defined $self->{'product_count'}) {
-        $self->{'product_count'} = $dbh->selectrow_array(q{
+  if (!defined $self->{'product_count'}) {
+    $self->{'product_count'} = $dbh->selectrow_array(
+      q{
             SELECT COUNT(*) FROM products
-            WHERE classification_id = ?}, undef, $self->id) || 0;
-    }
-    return $self->{'product_count'};
+            WHERE classification_id = ?}, undef, $self->id
+    ) || 0;
+  }
+  return $self->{'product_count'};
 }
 
 sub products {
-    my $self = shift;
-    my $dbh = Bugzilla->dbh;
+  my $self = shift;
+  my $dbh  = Bugzilla->dbh;
 
-    if (!$self->{'products'}) {
-        my $product_ids = $dbh->selectcol_arrayref(q{
+  if (!$self->{'products'}) {
+    my $product_ids = $dbh->selectcol_arrayref(
+      q{
             SELECT id FROM products
             WHERE classification_id = ?
-            ORDER BY name}, undef, $self->id);
+            ORDER BY name}, undef, $self->id
+    );
 
-        $self->{'products'} = Bugzilla::Product->new_from_list($product_ids);
-    }
-    return $self->{'products'};
+    $self->{'products'} = Bugzilla::Product->new_from_list($product_ids);
+  }
+  return $self->{'products'};
 }
 
 ###############################
@@ -166,7 +175,7 @@ sub products {
 ###############################
 
 sub description { return $_[0]->{'description'}; }
-sub sortkey     { return $_[0]->{'sortkey'};     }
+sub sortkey     { return $_[0]->{'sortkey'}; }
 
 
 ###############################
@@ -177,27 +186,32 @@ sub sortkey     { return $_[0]->{'sortkey'};     }
 # in global/choose-product.html.tmpl.
 
 sub sort_products_by_classification {
-    my $products = shift;
-    my $list;
+  my $products = shift;
+  my $list;
 
-    if (Bugzilla->params->{'useclassification'}) {
-        my $class = {};
-        # Get all classifications with at least one product.
-        foreach my $product (@$products) {
-            $class->{$product->classification_id}->{'object'} ||=
-                new Bugzilla::Classification($product->classification_id);
-            # Nice way to group products per classification, without querying
-            # the DB again.
-            push(@{$class->{$product->classification_id}->{'products'}}, $product);
-        }
-        $list = [sort {$a->{'object'}->sortkey <=> $b->{'object'}->sortkey
-                       || lc($a->{'object'}->name) cmp lc($b->{'object'}->name)}
-                      (values %$class)];
+  if (Bugzilla->params->{'useclassification'}) {
+    my $class = {};
+
+    # Get all classifications with at least one product.
+    foreach my $product (@$products) {
+      $class->{$product->classification_id}->{'object'}
+        ||= new Bugzilla::Classification($product->classification_id);
+
+      # Nice way to group products per classification, without querying
+      # the DB again.
+      push(@{$class->{$product->classification_id}->{'products'}}, $product);
     }
-    else {
-        $list = [{object => undef, products => $products}];
-    }
-    return $list;
+    $list = [
+      sort {
+        $a->{'object'}->sortkey <=> $b->{'object'}->sortkey
+          || lc($a->{'object'}->name) cmp lc($b->{'object'}->name)
+      } (values %$class)
+    ];
+  }
+  else {
+    $list = [{object => undef, products => $products}];
+  }
+  return $list;
 }
 
 1;

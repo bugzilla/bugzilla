@@ -44,8 +44,10 @@ $sel->wait_for_page_to_load(WAIT_TIME);
 $sel->title_is("General Preferences");
 ok(!$sel->is_editable("skin"), "The 'skin' user preference is not editable");
 $sel->select_ok("state_addselfcc", "label=Site Default (Never)");
-$sel->select_ok("post_bug_submit_action", "label=Site Default (Show the updated bug)");
-ok(!$sel->is_editable("zoom_textareas"), "The 'zoom_textareas' user preference is not editable");
+$sel->select_ok("post_bug_submit_action",
+  "label=Site Default (Show the updated bug)");
+ok(!$sel->is_editable("zoom_textareas"),
+  "The 'zoom_textareas' user preference is not editable");
 $sel->click_ok("update");
 $sel->wait_for_page_to_load(WAIT_TIME);
 $sel->title_is("General Preferences");
@@ -56,7 +58,7 @@ file_bug_in_product($sel, 'TestProduct');
 $sel->value_is("cc", "");
 my $bug_summary = "First bug created";
 $sel->type_ok("short_desc", $bug_summary);
-$sel->type_ok("comment", "I'm not in the CC list.");
+$sel->type_ok("comment",    "I'm not in the CC list.");
 my $bug1_id = create_bug($sel, $bug_summary);
 
 $sel->value_is("addselfcc", "off");
@@ -65,7 +67,7 @@ $sel->select_ok("bug_status", "label=IN_PROGRESS");
 edit_bug($sel, $bug1_id, $bug_summary);
 $sel->click_ok("summary_edit_action");
 $sel->value_is("short_desc", $bug_summary);
-$sel->value_is("addselfcc", "off");
+$sel->value_is("addselfcc",  "off");
 
 # Create a saved search for the 'sel-tmp' tag.
 
@@ -92,7 +94,7 @@ file_bug_in_product($sel, 'TestProduct');
 $sel->value_is("cc", "");
 my $bug_summary2 = "My second bug";
 $sel->type_ok("short_desc", $bug_summary2);
-$sel->type_ok("comment", "Still not in the CC list");
+$sel->type_ok("comment",    "Still not in the CC list");
 my $bug2_id = create_bug($sel, $bug_summary2);
 $sel->value_is("addselfcc", "off");
 $sel->type_ok("tag", "sel-tmp");
@@ -128,6 +130,7 @@ $sel->click_ok("find_top");
 $sel->wait_for_page_to_load_ok(WAIT_TIME);
 $sel->title_is("Bug List");
 $sel->is_text_present_ok("2 bugs found");
+
 # We cannot remove tags from several bugs at once (bug 791584).
 go_to_bug($sel, $bug1_id);
 $sel->type_ok("tag", "");
@@ -151,9 +154,10 @@ $sel->click_ok("link=Preferences");
 $sel->wait_for_page_to_load(WAIT_TIME);
 $sel->title_is("General Preferences");
 ok(!$sel->is_editable("skin"), "The 'skin' user preference is not editable");
-$sel->select_ok("state_addselfcc", "label=Always");
+$sel->select_ok("state_addselfcc",        "label=Always");
 $sel->select_ok("post_bug_submit_action", "label=Show next bug in my list");
-ok(!$sel->is_editable("zoom_textareas"), "The 'zoom_textareas' user preference is not editable");
+ok(!$sel->is_editable("zoom_textareas"),
+  "The 'zoom_textareas' user preference is not editable");
 $sel->click_ok("update");
 $sel->wait_for_page_to_load(WAIT_TIME);
 $sel->title_is("General Preferences");
@@ -186,10 +190,13 @@ $sel->click_ok("link=$bug1_id");
 $sel->wait_for_page_to_load(WAIT_TIME);
 $sel->title_like(qr/^$bug1_id /);
 $sel->value_is("addselfcc", "on");
-$sel->type_ok("comment", "I should be CC'ed and then I should see the next bug.");
+$sel->type_ok("comment",
+  "I should be CC'ed and then I should see the next bug.");
 edit_bug($sel, $bug2_id, $bug_summary2);
 $sel->is_text_present_ok("The next bug in your list is bug $bug2_id");
-ok(!$sel->is_text_present("I should see the next bug"), "The updated bug is no longer displayed");
+ok(!$sel->is_text_present("I should see the next bug"),
+  "The updated bug is no longer displayed");
+
 # The user has no privs, so the short_desc field is not present.
 $sel->is_text_present("short_desc", "My second bug");
 $sel->value_is("addselfcc", "on");

@@ -45,7 +45,7 @@ $sel->wait_for_page_to_load(WAIT_TIME);
 $sel->title_is("Edit Group Controls for TestProduct");
 $sel->is_text_present_ok("Selenium-test");
 $sel->select_ok("membercontrol_${group_id}", "label=Shown");
-$sel->select_ok("othercontrol_${group_id}", "label=Mandatory");
+$sel->select_ok("othercontrol_${group_id}",  "label=Mandatory");
 $sel->click_ok("submit");
 $sel->wait_for_page_to_load(WAIT_TIME);
 $sel->title_is("Update group access controls for TestProduct");
@@ -54,15 +54,15 @@ $sel->title_is("Update group access controls for TestProduct");
 
 file_bug_in_product($sel, "TestProduct");
 $sel->is_text_present_ok("Test group for Selenium");
-$sel->value_is("group_${group_id}", "off"); # Must be OFF (else that's a bug)
+$sel->value_is("group_${group_id}", "off");    # Must be OFF (else that's a bug)
 $sel->check_ok("group_${group_id}");
 my $bug_summary = "bug restricted to the Selenium group";
 $sel->type_ok("short_desc", $bug_summary);
-$sel->type_ok("comment", "should be invisible");
+$sel->type_ok("comment",    "should be invisible");
 $sel->selected_label_is("component", "TestComponent");
 my $bug1_id = create_bug($sel, $bug_summary);
 $sel->is_text_present_ok("Test group for Selenium");
-$sel->value_is("group_${group_id}", "on"); # Must be ON
+$sel->value_is("group_${group_id}", "on");     # Must be ON
 
 # Look for this new bug and add it to the new "Selenium bugs" saved search.
 
@@ -88,7 +88,8 @@ $sel->click_ok("link=Selenium bugs");
 $sel->wait_for_page_to_load(WAIT_TIME);
 $sel->title_is("Bug List: Selenium bugs");
 $sel->is_text_present_ok("One bug found");
-$sel->is_element_present_ok("b$bug1_id", undef, "Bug $bug1_id restricted to the bug group");
+$sel->is_element_present_ok("b$bug1_id", undef,
+  "Bug $bug1_id restricted to the bug group");
 
 # No longer use Selenium-test as a bug group.
 
@@ -112,9 +113,12 @@ file_bug_in_product($sel, "TestProduct");
 $sel->selected_label_is("component", "TestComponent");
 my $bug_summary2 = "bug restricted to the Selenium group";
 $sel->type_ok("short_desc", $bug_summary2);
-$sel->type_ok("comment", "should be *visible* when created (the group is disabled)");
-ok(!$sel->is_text_present("Test group for Selenium"), "Selenium-test group unavailable");
-ok(!$sel->is_element_present("group_${group_id}"), "Selenium-test checkbox not present");
+$sel->type_ok("comment",
+  "should be *visible* when created (the group is disabled)");
+ok(!$sel->is_text_present("Test group for Selenium"),
+  "Selenium-test group unavailable");
+ok(!$sel->is_element_present("group_${group_id}"),
+  "Selenium-test checkbox not present");
 my $bug2_id = create_bug($sel, $bug_summary2);
 
 # Make sure the new bug doesn't appear in the "Selenium bugs" saved search.
@@ -123,8 +127,12 @@ $sel->click_ok("link=Selenium bugs");
 $sel->wait_for_page_to_load(WAIT_TIME);
 $sel->title_is("Bug List: Selenium bugs");
 $sel->is_text_present_ok("One bug found");
-$sel->is_element_present_ok("b$bug1_id", undef, "Bug $bug1_id restricted to the bug group");
-ok(!$sel->is_element_present("b$bug2_id"), "Bug $bug2_id NOT restricted to the bug group");
+$sel->is_element_present_ok("b$bug1_id", undef,
+  "Bug $bug1_id restricted to the bug group");
+ok(
+  !$sel->is_element_present("b$bug2_id"),
+  "Bug $bug2_id NOT restricted to the bug group"
+);
 
 # Re-enable the Selenium-test group as bug group. This doesn't affect
 # already filed bugs as this group is not mandatory.
@@ -149,8 +157,12 @@ $sel->click_ok("link=Selenium bugs");
 $sel->wait_for_page_to_load(WAIT_TIME);
 $sel->title_is("Bug List: Selenium bugs");
 $sel->is_text_present_ok("One bug found");
-$sel->is_element_present_ok("b$bug1_id", undef, "Bug $bug1_id restricted to the bug group");
-ok(!$sel->is_element_present("b$bug2_id"), "Bug $bug2_id NOT restricted to the bug group");
+$sel->is_element_present_ok("b$bug1_id", undef,
+  "Bug $bug1_id restricted to the bug group");
+ok(
+  !$sel->is_element_present("b$bug2_id"),
+  "Bug $bug2_id NOT restricted to the bug group"
+);
 
 # Make the Selenium-test group mandatory for TestProduct.
 
@@ -166,15 +178,19 @@ $sel->is_text_present_ok("this group is mandatory and will be added");
 $sel->click_ok("update");
 $sel->wait_for_page_to_load(WAIT_TIME);
 $sel->title_is("Update group access controls for TestProduct");
-$sel->is_text_present_ok('regexp:Adding bugs to group \'Selenium-test\' which is now mandatory for this product');
+$sel->is_text_present_ok(
+  'regexp:Adding bugs to group \'Selenium-test\' which is now mandatory for this product'
+);
 
 # All bugs being in TestProduct must now be restricted to the bug group.
 
 $sel->click_ok("link=Selenium bugs");
 $sel->wait_for_page_to_load(WAIT_TIME);
 $sel->title_is("Bug List: Selenium bugs");
-$sel->is_element_present_ok("b$bug1_id", undef, "Bug $bug1_id restricted to the bug group");
-$sel->is_element_present_ok("b$bug2_id", undef, "Bug $bug2_id restricted to the bug group");
+$sel->is_element_present_ok("b$bug1_id", undef,
+  "Bug $bug1_id restricted to the bug group");
+$sel->is_element_present_ok("b$bug2_id", undef,
+  "Bug $bug2_id restricted to the bug group");
 
 # File a new bug, which must automatically be restricted to the bug group.
 
@@ -182,9 +198,13 @@ file_bug_in_product($sel, "TestProduct");
 $sel->selected_label_is("component", "TestComponent");
 my $bug_summary3 = "Selenium-test group mandatory";
 $sel->type_ok("short_desc", $bug_summary3);
-$sel->type_ok("comment", "group enabled");
-ok(!$sel->is_text_present("Test group for Selenium"), "Selenium-test group not available");
-ok(!$sel->is_element_present("group_${group_id}"), "Selenium-test checkbox not present (mandatory group)");
+$sel->type_ok("comment",    "group enabled");
+ok(!$sel->is_text_present("Test group for Selenium"),
+  "Selenium-test group not available");
+ok(
+  !$sel->is_element_present("group_${group_id}"),
+  "Selenium-test checkbox not present (mandatory group)"
+);
 my $bug3_id = create_bug($sel, $bug_summary3);
 
 # Make sure all three bugs are listed as being restricted to the bug group.
@@ -192,9 +212,12 @@ my $bug3_id = create_bug($sel, $bug_summary3);
 $sel->click_ok("link=Selenium bugs");
 $sel->wait_for_page_to_load(WAIT_TIME);
 $sel->title_is("Bug List: Selenium bugs");
-$sel->is_element_present_ok("b$bug1_id", undef, "Bug $bug1_id restricted to the bug group");
-$sel->is_element_present_ok("b$bug2_id", undef, "Bug $bug2_id restricted to the bug group");
-$sel->is_element_present_ok("b$bug3_id", undef, "Bug $bug3_id restricted to the bug group");
+$sel->is_element_present_ok("b$bug1_id", undef,
+  "Bug $bug1_id restricted to the bug group");
+$sel->is_element_present_ok("b$bug2_id", undef,
+  "Bug $bug2_id restricted to the bug group");
+$sel->is_element_present_ok("b$bug3_id", undef,
+  "Bug $bug3_id restricted to the bug group");
 
 # Turn off the Selenium-test group again.
 
@@ -218,9 +241,11 @@ file_bug_in_product($sel, "TestProduct");
 $sel->selected_label_is("component", "TestComponent");
 my $bug_summary4 = "bug restricted to the Selenium-test group";
 $sel->type_ok("short_desc", $bug_summary4);
-$sel->type_ok("comment", "group disabled");
-ok(!$sel->is_text_present("Test group for Selenium"), "Selenium-test group not available");
-ok(!$sel->is_element_present("group_${group_id}"), "Selenium-test checkbox not present");
+$sel->type_ok("comment",    "group disabled");
+ok(!$sel->is_text_present("Test group for Selenium"),
+  "Selenium-test group not available");
+ok(!$sel->is_element_present("group_${group_id}"),
+  "Selenium-test checkbox not present");
 my $bug4_id = create_bug($sel, $bug_summary4);
 
 # The last bug must not be in the list.
@@ -228,10 +253,16 @@ my $bug4_id = create_bug($sel, $bug_summary4);
 $sel->click_ok("link=Selenium bugs");
 $sel->wait_for_page_to_load(WAIT_TIME);
 $sel->title_is("Bug List: Selenium bugs");
-$sel->is_element_present_ok("b$bug1_id", undef, "Bug $bug1_id restricted to the bug group");
-$sel->is_element_present_ok("b$bug2_id", undef, "Bug $bug2_id restricted to the bug group");
-$sel->is_element_present_ok("b$bug3_id", undef, "Bug $bug3_id restricted to the bug group");
-ok(!$sel->is_element_present("b$bug4_id"), "Bug $bug4_id NOT restricted to the bug group");
+$sel->is_element_present_ok("b$bug1_id", undef,
+  "Bug $bug1_id restricted to the bug group");
+$sel->is_element_present_ok("b$bug2_id", undef,
+  "Bug $bug2_id restricted to the bug group");
+$sel->is_element_present_ok("b$bug3_id", undef,
+  "Bug $bug3_id restricted to the bug group");
+ok(
+  !$sel->is_element_present("b$bug4_id"),
+  "Bug $bug4_id NOT restricted to the bug group"
+);
 
 # Re-enable the mandatory group. All bugs should be restricted to this bug group automatically.
 
@@ -254,10 +285,14 @@ $sel->is_text_present_ok("The group will now be used for bugs");
 $sel->click_ok("link=Selenium bugs");
 $sel->wait_for_page_to_load(WAIT_TIME);
 $sel->title_is("Bug List: Selenium bugs");
-$sel->is_element_present_ok("b$bug1_id", undef, "Bug $bug1_id restricted to the bug group");
-$sel->is_element_present_ok("b$bug2_id", undef, "Bug $bug2_id restricted to the bug group");
-$sel->is_element_present_ok("b$bug3_id", undef, "Bug $bug3_id restricted to the bug group");
-$sel->is_element_present_ok("b$bug4_id", undef, "Bug $bug4_id restricted to the bug group");
+$sel->is_element_present_ok("b$bug1_id", undef,
+  "Bug $bug1_id restricted to the bug group");
+$sel->is_element_present_ok("b$bug2_id", undef,
+  "Bug $bug2_id restricted to the bug group");
+$sel->is_element_present_ok("b$bug3_id", undef,
+  "Bug $bug3_id restricted to the bug group");
+$sel->is_element_present_ok("b$bug4_id", undef,
+  "Bug $bug4_id restricted to the bug group");
 
 # Try to remove the Selenium-test group from TestProduct, but DON'T do it!
 # We just want to make sure a warning is displayed about this removal.
@@ -269,17 +304,24 @@ $sel->wait_for_page_to_load(WAIT_TIME);
 $sel->title_is("Edit Group Controls for TestProduct");
 $sel->is_text_present_ok("Selenium-test");
 $sel->select_ok("membercontrol_${group_id}", "NA");
-$sel->select_ok("othercontrol_${group_id}", "NA");
+$sel->select_ok("othercontrol_${group_id}",  "NA");
 $sel->click_ok("submit");
 $sel->wait_for_page_to_load(WAIT_TIME);
 $sel->title_is("Confirm Group Control Change for product 'TestProduct'");
-$sel->is_text_present_ok("this group is no longer applicable and will be removed");
+$sel->is_text_present_ok(
+  "this group is no longer applicable and will be removed");
 
 # Make sure that renaming a group which is used as a special group
 # (such as insidergroup or querysharegroup) is correctly propagated
 # and that you cannot delete this group.
 
-set_parameters($sel, { "Group Security" => {"querysharegroup" => {type => "select", value => "Selenium-test"}} });
+set_parameters(
+  $sel,
+  {
+    "Group Security" =>
+      {"querysharegroup" => {type => "select", value => "Selenium-test"}}
+  }
+);
 
 go_to_admin($sel);
 $sel->click_ok("link=Groups");
@@ -305,19 +347,27 @@ $sel->value_is("querysharegroup", "X-Selenium-Y");
 
 # There is no UI to delete this group, so we have to type the URL directly.
 
-$sel->open_ok("/$config->{bugzilla_installation}/editgroups.cgi?action=del&group=$group_id");
+$sel->open_ok(
+  "/$config->{bugzilla_installation}/editgroups.cgi?action=del&group=$group_id");
 $sel->title_is("Group not deletable");
-$sel->is_text_present_ok("The group 'X-Selenium-Y' is used by the 'querysharegroup' parameter");
+$sel->is_text_present_ok(
+  "The group 'X-Selenium-Y' is used by the 'querysharegroup' parameter");
 
-$sel->open_ok("/$config->{bugzilla_installation}/editgroups.cgi?action=delete&group=$group_id");
+$sel->open_ok(
+  "/$config->{bugzilla_installation}/editgroups.cgi?action=delete&group=$group_id"
+);
 $sel->title_is("Suspicious Action");
-$sel->is_text_present_ok("you have no valid token for the delete_group action while processing the 'editgroups.cgi' script");
+$sel->is_text_present_ok(
+  "you have no valid token for the delete_group action while processing the 'editgroups.cgi' script"
+);
 $sel->click_ok("confirm");
 $sel->wait_for_page_to_load(WAIT_TIME);
 $sel->title_is("Group not deletable");
-$sel->is_text_present_ok("The group 'X-Selenium-Y' is used by the 'querysharegroup' parameter");
+$sel->is_text_present_ok(
+  "The group 'X-Selenium-Y' is used by the 'querysharegroup' parameter");
 
-set_parameters($sel, { "Group Security" => {"querysharegroup" => {type => "select", value => ""}} });
+set_parameters($sel,
+  {"Group Security" => {"querysharegroup" => {type => "select", value => ""}}});
 
 # Revert the group name change to not mess with the subsequent tests
 # which expect to see 'Selenium-test'.
@@ -355,7 +405,8 @@ $sel->click_ok("delete");
 $sel->wait_for_page_to_load(WAIT_TIME);
 $sel->title_is("Cannot Delete Group");
 my $error_msg = trim($sel->get_text("error_msg"));
-ok($error_msg =~ /^The Selenium-test group cannot be deleted/, "Group is in use - not deletable");
+ok($error_msg =~ /^The Selenium-test group cannot be deleted/,
+  "Group is in use - not deletable");
 $sel->go_back_ok();
 $sel->wait_for_page_to_load(WAIT_TIME);
 $sel->check("removebugs");

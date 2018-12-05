@@ -16,31 +16,15 @@ use Bugzilla::Config::Common;
 our $sortkey = 1100;
 
 sub get_param_list {
-  my $class = shift;
+  my $class      = shift;
   my @param_list = (
-  {
-   name =>    'RADIUS_server',
-   type =>    't',
-   default => ''
-  },
+    {name => 'RADIUS_server', type => 't', default => ''},
 
-  {
-   name =>    'RADIUS_secret',
-   type =>    't',
-   default => ''
-  },
+    {name => 'RADIUS_secret', type => 't', default => ''},
 
-  {
-   name =>    'RADIUS_NAS_IP',
-   type =>    't',
-   default => ''
-  },
+    {name => 'RADIUS_NAS_IP', type => 't', default => ''},
 
-  {
-   name =>    'RADIUS_email_suffix',
-   type =>    't',
-   default => ''
-  },
+    {name => 'RADIUS_email_suffix', type => 't', default => ''},
   );
   return @param_list;
 }

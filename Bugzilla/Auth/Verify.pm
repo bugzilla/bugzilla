@@ -19,119 +19,131 @@ use Bugzilla::User;
 use Bugzilla::Util;
 
 use constant user_can_create_account => 1;
-use constant extern_id_used => 0;
+use constant extern_id_used          => 0;
 
 sub new {
-    my ($class, $login_type) = @_;
-    my $self = fields::new($class);
-    return $self;
+  my ($class, $login_type) = @_;
+  my $self = fields::new($class);
+  return $self;
 }
 
 sub can_change_password {
-    return $_[0]->can('change_password');
+  return $_[0]->can('change_password');
 }
 
 sub create_or_update_user {
-    my ($self, $params) = @_;
-    my $dbh = Bugzilla->dbh;
+  my ($self, $params) = @_;
+  my $dbh = Bugzilla->dbh;
 
-    my $extern_id = $params->{extern_id};
-    my $login     = $params->{bz_username} || $params->{username};
-    my $email     = Bugzilla->params->{use_email_as_login} ? $login : $params->{email};
-    my $password  = $params->{password} || '*';
-    my $real_name = $params->{realname} || '';
-    my $user_id   = $params->{user_id};
+  my $extern_id = $params->{extern_id};
+  my $login = $params->{bz_username} || $params->{username};
+  my $email = Bugzilla->params->{use_email_as_login} ? $login : $params->{email};
+  my $password  = $params->{password} || '*';
+  my $real_name = $params->{realname} || '';
+  my $user_id   = $params->{user_id};
 
-    # A passed-in user_id always overrides anything else, for determining
-    # what account we should return.
-    if (!$user_id) {
-        my $login_user_id = login_to_id($login || '');
-        my $extern_user_id;
-        if ($extern_id) {
-            trick_taint($extern_id);
-            $extern_user_id = $dbh->selectrow_array('SELECT userid
-                 FROM profiles WHERE extern_id = ?', undef, $extern_id);
-        }
-
-        # If we have both a valid extern_id and a valid login, and they are
-        # not the same id, then we have a conflict.
-        if ($login_user_id && $extern_user_id
-            && $login_user_id ne $extern_user_id)
-        {
-            my $extern_name = Bugzilla::User->new($extern_user_id)->login;
-            return { failure => AUTH_ERROR, error => "extern_id_conflict",
-                     details => {extern_id   => $extern_id,
-                                 extern_user => $extern_name,
-                                 username    => $login} };
-        }
-
-        # If we have a valid login, but no valid id,
-        # then we have to create the user. This happens when we're
-        # passed only a login, and that login doesn't exist already.
-        if ($login && !$login_user_id && !$extern_user_id) {
-            validate_email_syntax($email)
-              || return { failure => AUTH_ERROR,
-                          error   => 'auth_invalid_email',
-                          details => {addr => $email} };
-            # Usually we'd call validate_password, but external authentication
-            # systems might follow different standards than ours. So in this
-            # place here, we call trick_taint without checks.
-            trick_taint($password);
-
-            # XXX Theoretically this could fail with an error, but the fix for
-            # that is too involved to be done right now.
-            my $user = Bugzilla::User->create({
-                login_name    => $login,
-                email         => $email,
-                cryptpassword => $password,
-                realname      => $real_name});
-            $login_user_id = $user->id;
-        }
-
-        # If we have a valid login id and an extern_id, but no valid
-        # extern_user_id, then we have to set the user's extern_id.
-        if ($extern_id && $login_user_id && !$extern_user_id) {
-            $dbh->do('UPDATE profiles SET extern_id = ? WHERE userid = ?',
-                     undef, $extern_id, $login_user_id);
-            Bugzilla->memcached->clear({ table => 'profiles', id => $login_user_id });
-        }
-
-        # Finally, at this point, one of these will give us a valid user id.
-        $user_id = $extern_user_id || $login_user_id;
+  # A passed-in user_id always overrides anything else, for determining
+  # what account we should return.
+  if (!$user_id) {
+    my $login_user_id = login_to_id($login || '');
+    my $extern_user_id;
+    if ($extern_id) {
+      trick_taint($extern_id);
+      $extern_user_id = $dbh->selectrow_array(
+        'SELECT userid
+                 FROM profiles WHERE extern_id = ?', undef, $extern_id
+      );
     }
 
-    # If we still don't have a valid user_id, then we weren't passed
-    # enough information in $params, and we should die right here.
-    ThrowCodeError('bad_arg', {argument => 'params', function =>
-        'Bugzilla::Auth::Verify::create_or_update_user'})
-        unless $user_id;
-
-    my $user = new Bugzilla::User($user_id);
-
-    # Now that we have a valid User, we need to see if any data has to be updated.
-    my $changed = 0;
-
-    if ($email && lc($user->email) ne lc($email)) {
-        validate_email_syntax($email)
-          || return { failure => AUTH_ERROR, error => 'auth_invalid_email',
-                      details => {addr => $email} };
-        $user->set_email($email);
-        $changed = 1;
+    # If we have both a valid extern_id and a valid login, and they are
+    # not the same id, then we have a conflict.
+    if ($login_user_id && $extern_user_id && $login_user_id ne $extern_user_id) {
+      my $extern_name = Bugzilla::User->new($extern_user_id)->login;
+      return {
+        failure => AUTH_ERROR,
+        error   => "extern_id_conflict",
+        details =>
+          {extern_id => $extern_id, extern_user => $extern_name, username => $login}
+      };
     }
-    if ($login && lc($user->login) ne lc($login)) {
-        $user->set_login($login);
-        $changed = 1;
-    }
-    if ($real_name && $user->name ne $real_name) {
-        # $real_name is more than likely tainted, but we only use it
-        # in a placeholder and we never use it after this.
-        trick_taint($real_name);
-        $user->set_name($real_name);
-        $changed = 1;
-    }
-    $user->update() if $changed;
 
-    return { user => $user };
+    # If we have a valid login, but no valid id,
+    # then we have to create the user. This happens when we're
+    # passed only a login, and that login doesn't exist already.
+    if ($login && !$login_user_id && !$extern_user_id) {
+      validate_email_syntax($email) || return {
+        failure => AUTH_ERROR,
+        error   => 'auth_invalid_email',
+        details => {addr => $email}
+      };
+
+      # Usually we'd call validate_password, but external authentication
+      # systems might follow different standards than ours. So in this
+      # place here, we call trick_taint without checks.
+      trick_taint($password);
+
+      # XXX Theoretically this could fail with an error, but the fix for
+      # that is too involved to be done right now.
+      my $user = Bugzilla::User->create({
+        login_name    => $login,
+        email         => $email,
+        cryptpassword => $password,
+        realname      => $real_name
+      });
+      $login_user_id = $user->id;
+    }
+
+    # If we have a valid login id and an extern_id, but no valid
+    # extern_user_id, then we have to set the user's extern_id.
+    if ($extern_id && $login_user_id && !$extern_user_id) {
+      $dbh->do('UPDATE profiles SET extern_id = ? WHERE userid = ?',
+        undef, $extern_id, $login_user_id);
+      Bugzilla->memcached->clear({table => 'profiles', id => $login_user_id});
+    }
+
+    # Finally, at this point, one of these will give us a valid user id.
+    $user_id = $extern_user_id || $login_user_id;
+  }
+
+  # If we still don't have a valid user_id, then we weren't passed
+  # enough information in $params, and we should die right here.
+  ThrowCodeError(
+    'bad_arg',
+    {
+      argument => 'params',
+      function => 'Bugzilla::Auth::Verify::create_or_update_user'
+    }
+  ) unless $user_id;
+
+  my $user = new Bugzilla::User($user_id);
+
+  # Now that we have a valid User, we need to see if any data has to be updated.
+  my $changed = 0;
+
+  if ($email && lc($user->email) ne lc($email)) {
+    validate_email_syntax($email) || return {
+      failure => AUTH_ERROR,
+      error   => 'auth_invalid_email',
+      details => {addr => $email}
+    };
+    $user->set_email($email);
+    $changed = 1;
+  }
+  if ($login && lc($user->login) ne lc($login)) {
+    $user->set_login($login);
+    $changed = 1;
+  }
+  if ($real_name && $user->name ne $real_name) {
+
+    # $real_name is more than likely tainted, but we only use it
+    # in a placeholder and we never use it after this.
+    trick_taint($real_name);
+    $user->set_name($real_name);
+    $changed = 1;
+  }
+  $user->update() if $changed;
+
+  return {user => $user};
 }
 
 1;

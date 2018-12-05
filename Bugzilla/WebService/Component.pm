@@ -20,212 +20,209 @@ use Bugzilla::WebService::Constants;
 use Bugzilla::WebService::Util qw(translate params_to_objects validate);
 
 use constant PUBLIC_METHODS => qw(
-    create
-    delete
-    update
+  create
+  delete
+  update
 );
 
 use constant CREATE_MAPPED_FIELDS => {
-    default_assignee   => 'initialowner',
-    default_qa_contact => 'initialqacontact',
-    default_cc         => 'initial_cc',
-    is_open            => 'isactive',
+  default_assignee   => 'initialowner',
+  default_qa_contact => 'initialqacontact',
+  default_cc         => 'initial_cc',
+  is_open            => 'isactive',
 };
 
-use constant MAPPED_FIELDS => {
-    is_open => 'is_active',
-};
+use constant MAPPED_FIELDS => {is_open => 'is_active',};
 
 use constant MAPPED_RETURNS => {
-    initialowner     => 'default_assignee',
-    initialqacontact => 'default_qa_contact',
-    cc_list          => 'default_cc',
-    isactive         => 'isopen',
+  initialowner     => 'default_assignee',
+  initialqacontact => 'default_qa_contact',
+  cc_list          => 'default_cc',
+  isactive         => 'isopen',
 };
 
 sub create {
-    my ($self, $params) = @_;
+  my ($self, $params) = @_;
 
-    my $user = Bugzilla->login(LOGIN_REQUIRED);
+  my $user = Bugzilla->login(LOGIN_REQUIRED);
 
-    $user->in_group('editcomponents')
-        || scalar @{ $user->get_products_by_permission('editcomponents') }
-        || ThrowUserError('auth_failure', { group  => 'editcomponents',
-                                            action => 'edit',
-                                            object => 'components' });
+  $user->in_group('editcomponents')
+    || scalar @{$user->get_products_by_permission('editcomponents')}
+    || ThrowUserError('auth_failure',
+    {group => 'editcomponents', action => 'edit', object => 'components'});
 
-    my $product = $user->check_can_admin_product($params->{product});
+  my $product = $user->check_can_admin_product($params->{product});
 
-    # Translate the fields
-    my $values = translate($params, CREATE_MAPPED_FIELDS);
-    $values->{product} = $product;
+  # Translate the fields
+  my $values = translate($params, CREATE_MAPPED_FIELDS);
+  $values->{product} = $product;
 
-    # Create the component and return the newly created id.
-    my $component = Bugzilla::Component->create($values);
-    return { id => $self->type('int', $component->id) };
+  # Create the component and return the newly created id.
+  my $component = Bugzilla::Component->create($values);
+  return {id => $self->type('int', $component->id)};
 }
 
 sub _component_params_to_objects {
-    # We can't use Util's _param_to_objects since name is a hash
-    my $params = shift;
-    my $user   = Bugzilla->user;
 
-    my @components = ();
+  # We can't use Util's _param_to_objects since name is a hash
+  my $params = shift;
+  my $user   = Bugzilla->user;
 
-    if (defined $params->{ids}) {
-        push @components, @{ Bugzilla::Component->new_from_list($params->{ids}) };
+  my @components = ();
+
+  if (defined $params->{ids}) {
+    push @components, @{Bugzilla::Component->new_from_list($params->{ids})};
+  }
+
+  if (defined $params->{names}) {
+
+    # To get the component objects for product/component combination
+    # first obtain the product object from the passed product name
+    foreach my $name_hash (@{$params->{names}}) {
+      my $product = $user->check_can_admin_product($name_hash->{product});
+      push @components,
+        @{Bugzilla::Component->match({
+          product_id => $product->id, name => $name_hash->{component}
+        })};
     }
+  }
 
-    if (defined $params->{names}) {
-        # To get the component objects for product/component combination
-        # first obtain the product object from the passed product name
-        foreach my $name_hash (@{$params->{names}}) {
-            my $product = $user->check_can_admin_product($name_hash->{product});
-            push @components, @{ Bugzilla::Component->match({
-                product_id => $product->id,
-                name       => $name_hash->{component}
-            })};
-        }
-    }
+  my %seen_component_ids = ();
 
-    my %seen_component_ids = ();
+  my @accessible_components;
+  foreach my $component (@components) {
 
-    my @accessible_components;
-    foreach my $component (@components) {
-        # Skip if we already included this component
-        next if $seen_component_ids{$component->id}++;
+    # Skip if we already included this component
+    next if $seen_component_ids{$component->id}++;
 
-        # Can the user see and admin this product?
-        my $product = $component->product;
-        $user->check_can_admin_product($product->name);
+    # Can the user see and admin this product?
+    my $product = $component->product;
+    $user->check_can_admin_product($product->name);
 
-        push @accessible_components, $component;
-    }
+    push @accessible_components, $component;
+  }
 
-    return \@accessible_components;
+  return \@accessible_components;
 }
 
 sub update {
-    my ($self, $params) = @_;
-    my $dbh  = Bugzilla->dbh;
-    my $user = Bugzilla->login(LOGIN_REQUIRED);
+  my ($self, $params) = @_;
+  my $dbh  = Bugzilla->dbh;
+  my $user = Bugzilla->login(LOGIN_REQUIRED);
 
-    $user->in_group('editcomponents')
-        || scalar @{ $user->get_products_by_permission('editcomponents') }
-        || ThrowUserError("auth_failure", { group  => "editcomponents",
-                                            action => "edit",
-                                            object => "components" });
+  $user->in_group('editcomponents')
+    || scalar @{$user->get_products_by_permission('editcomponents')}
+    || ThrowUserError("auth_failure",
+    {group => "editcomponents", action => "edit", object => "components"});
 
-    defined($params->{names}) || defined($params->{ids})
-        || ThrowCodeError('params_required',
-               { function => 'Component.update', params => ['ids', 'names'] });
+  defined($params->{names})
+    || defined($params->{ids})
+    || ThrowCodeError('params_required',
+    {function => 'Component.update', params => ['ids', 'names']});
 
-    my $component_objects = _component_params_to_objects($params);
+  my $component_objects = _component_params_to_objects($params);
 
-    # If the user tries to change component name for several
-    # components of the same product then throw an error
-    if ($params->{name}) {
-        my %unique_product_comps;
-        foreach my $comp (@$component_objects) {
-            if($unique_product_comps{$comp->product_id}) {
-                ThrowUserError("multiple_components_update_not_allowed");
-            }
-            else {
-                $unique_product_comps{$comp->product_id} = 1;
-            }
-        }
+  # If the user tries to change component name for several
+  # components of the same product then throw an error
+  if ($params->{name}) {
+    my %unique_product_comps;
+    foreach my $comp (@$component_objects) {
+      if ($unique_product_comps{$comp->product_id}) {
+        ThrowUserError("multiple_components_update_not_allowed");
+      }
+      else {
+        $unique_product_comps{$comp->product_id} = 1;
+      }
+    }
+  }
+
+  my $values = translate($params, MAPPED_FIELDS);
+
+  # We delete names and ids to keep only new values to set.
+  delete $values->{names};
+  delete $values->{ids};
+
+  $dbh->bz_start_transaction();
+  foreach my $component (@$component_objects) {
+    $component->set_all($values);
+  }
+
+  my %changes;
+  foreach my $component (@$component_objects) {
+    my $returned_changes = $component->update();
+    $changes{$component->id} = translate($returned_changes, MAPPED_RETURNS);
+  }
+  $dbh->bz_commit_transaction();
+
+  my @result;
+  foreach my $component (@$component_objects) {
+    my %hash = (id => $component->id, changes => {},);
+
+    foreach my $field (keys %{$changes{$component->id}}) {
+      my $change = $changes{$component->id}->{$field};
+
+      if ( $field eq 'default_assignee'
+        || $field eq 'default_qa_contact'
+        || $field eq 'default_cc')
+      {
+        # We need to convert user ids to login names
+        my @old_user_ids = split(/[,\s]+/, $change->[0]);
+        my @new_user_ids = split(/[,\s]+/, $change->[1]);
+
+        my @old_users
+          = map { $_->login } @{Bugzilla::User->new_from_list(\@old_user_ids)};
+        my @new_users
+          = map { $_->login } @{Bugzilla::User->new_from_list(\@new_user_ids)};
+
+        $hash{changes}{$field} = {
+          removed => $self->type('string', join(', ', @old_users)),
+          added   => $self->type('string', join(', ', @new_users)),
+        };
+      }
+      else {
+        $hash{changes}{$field} = {
+          removed => $self->type('string', $change->[0]),
+          added   => $self->type('string', $change->[1])
+        };
+      }
     }
 
-    my $values = translate($params, MAPPED_FIELDS);
+    push(@result, \%hash);
+  }
 
-    # We delete names and ids to keep only new values to set.
-    delete $values->{names};
-    delete $values->{ids};
-
-    $dbh->bz_start_transaction();
-    foreach my $component (@$component_objects) {
-        $component->set_all($values);
-    }
-
-    my %changes;
-    foreach my $component (@$component_objects) {
-        my $returned_changes = $component->update();
-        $changes{$component->id} = translate($returned_changes, MAPPED_RETURNS);
-    }
-    $dbh->bz_commit_transaction();
-
-    my @result;
-    foreach my $component (@$component_objects) {
-        my %hash = (
-            id      => $component->id,
-            changes => {},
-        );
-
-        foreach my $field (keys %{ $changes{$component->id} }) {
-            my $change = $changes{$component->id}->{$field};
-
-            if ($field eq 'default_assignee'
-                || $field eq 'default_qa_contact'
-                || $field eq 'default_cc'
-            ) {
-                # We need to convert user ids to login names
-                my @old_user_ids = split(/[,\s]+/, $change->[0]);
-                my @new_user_ids = split(/[,\s]+/, $change->[1]);
-
-                my @old_users = map { $_->login }
-                    @{Bugzilla::User->new_from_list(\@old_user_ids)};
-                my @new_users = map { $_->login }
-                    @{Bugzilla::User->new_from_list(\@new_user_ids)};
-
-                $hash{changes}{$field} = {
-                    removed => $self->type('string', join(', ', @old_users)),
-                    added   => $self->type('string', join(', ', @new_users)),
-                };
-            }
-            else {
-                $hash{changes}{$field} = {
-                    removed => $self->type('string', $change->[0]),
-                    added   => $self->type('string', $change->[1])
-                };
-            }
-        }
-
-        push(@result, \%hash);
-    }
-
-    return { components => \@result };
+  return {components => \@result};
 }
 
 sub delete {
-    my ($self, $params) = @_;
-    my $dbh  = Bugzilla->dbh;
-    my $user = Bugzilla->login(LOGIN_REQUIRED);
+  my ($self, $params) = @_;
+  my $dbh  = Bugzilla->dbh;
+  my $user = Bugzilla->login(LOGIN_REQUIRED);
 
-    $user->in_group('editcomponents')
-        || scalar @{ $user->get_products_by_permission('editcomponents') }
-        || ThrowUserError("auth_failure", { group  => "editcomponents",
-                                            action => "edit",
-                                            object => "components" });
+  $user->in_group('editcomponents')
+    || scalar @{$user->get_products_by_permission('editcomponents')}
+    || ThrowUserError("auth_failure",
+    {group => "editcomponents", action => "edit", object => "components"});
 
-    defined($params->{names}) || defined($params->{ids})
-        || ThrowCodeError('params_required',
-               { function => 'Component.delete', params => ['ids', 'names'] });
+  defined($params->{names})
+    || defined($params->{ids})
+    || ThrowCodeError('params_required',
+    {function => 'Component.delete', params => ['ids', 'names']});
 
-    my $component_objects = _component_params_to_objects($params);
+  my $component_objects = _component_params_to_objects($params);
 
-    $dbh->bz_start_transaction();
-    my %changes;
-    foreach my $component (@$component_objects) {
-        my $returned_changes = $component->remove_from_db();
-    }
-    $dbh->bz_commit_transaction();
+  $dbh->bz_start_transaction();
+  my %changes;
+  foreach my $component (@$component_objects) {
+    my $returned_changes = $component->remove_from_db();
+  }
+  $dbh->bz_commit_transaction();
 
-    my @result;
-    foreach my $component (@$component_objects) {
-        push @result, { id => $component->id };
-    }
+  my @result;
+  foreach my $component (@$component_objects) {
+    push @result, {id => $component->id};
+  }
 
-    return { components => \@result };
+  return {components => \@result};
 }
 
 1;

@@ -18,16 +18,16 @@ use Bugzilla::Keyword;
 
 my $user = Bugzilla->login();
 
-my $cgi = Bugzilla->cgi;
+my $cgi      = Bugzilla->cgi;
 my $template = Bugzilla->template;
-my $vars = {};
+my $vars     = {};
 
 # Run queries against the shadow DB.
 Bugzilla->switch_to_shadow_db;
 
 $vars->{'keywords'} = Bugzilla::Keyword->get_all_with_bug_count();
 if (!@{$vars->{keywords}}) {
-    ThrowUserError("no_keywords");
+  ThrowUserError("no_keywords");
 }
 
 print $cgi->header();

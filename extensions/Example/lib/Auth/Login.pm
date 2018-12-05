@@ -17,7 +17,7 @@ use Bugzilla::Constants;
 
 # Always returns no data.
 sub get_login_info {
-    return { failure => AUTH_NODATA };
+  return {failure => AUTH_NODATA};
 }
 
 1;

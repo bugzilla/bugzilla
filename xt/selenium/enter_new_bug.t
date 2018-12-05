@@ -26,10 +26,14 @@ my ($sel, $config) = get_selenium();
 
 my $bug_summary = "Bug created by Selenium";
 foreach my $user (qw(admin unprivileged canconfirm)) {
-    log_in($sel, $config, $user);
-    file_bug_in_product($sel, "TestProduct");
-    $sel->type_ok("short_desc", $bug_summary, "Enter bug summary");
-    $sel->type_ok("comment", "--- Bug created by Selenium ---", "Enter bug description");
-    create_bug($sel, $bug_summary);
-    logout($sel);
+  log_in($sel, $config, $user);
+  file_bug_in_product($sel, "TestProduct");
+  $sel->type_ok("short_desc", $bug_summary, "Enter bug summary");
+  $sel->type_ok(
+    "comment",
+    "--- Bug created by Selenium ---",
+    "Enter bug description"
+  );
+  create_bug($sel, $bug_summary);
+  logout($sel);
 }

@@ -16,25 +16,11 @@ use Bugzilla::Config::Common;
 our $sortkey = 100;
 
 use constant get_param_list => (
-  {
-   name => 'urlbase',
-   type => 't',
-   default => '',
-   checker => \&check_urlbase
-  },
+  {name => 'urlbase', type => 't', default => '', checker => \&check_urlbase},
 
-  {
-   name => 'ssl_redirect',
-   type => 'b',
-   default => 0
-  },
+  {name => 'ssl_redirect', type => 'b', default => 0},
 
-  {
-   name => 'sslbase',
-   type => 't',
-   default => '',
-   checker => \&check_sslbase
-  },
+  {name => 'sslbase', type => 't', default => '', checker => \&check_sslbase},
 );
 
 1;

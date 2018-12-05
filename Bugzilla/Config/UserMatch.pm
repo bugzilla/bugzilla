@@ -16,32 +16,21 @@ use Bugzilla::Config::Common;
 our $sortkey = 1600;
 
 sub get_param_list {
-  my $class = shift;
+  my $class      = shift;
   my @param_list = (
-  {
-   name => 'usemenuforusers',
-   type => 'b',
-   default => '0'
-  },
+    {name => 'usemenuforusers', type => 'b', default => '0'},
 
-  {
-   name    => 'ajax_user_autocompletion', 
-   type    => 'b', 
-   default => '1', 
-  },
+    {name => 'ajax_user_autocompletion', type => 'b', default => '1',},
 
-  {
-   name    => 'maxusermatches',
-   type    => 't',
-   default => '1000',
-   checker => \&check_numeric
-  },
+    {
+      name    => 'maxusermatches',
+      type    => 't',
+      default => '1000',
+      checker => \&check_numeric
+    },
 
-  {
-   name    => 'confirmuniqueusermatch',
-   type    => 'b',
-   default => 1,
-  } );
+    {name => 'confirmuniqueusermatch', type => 'b', default => 1,}
+  );
   return @param_list;
 }
 

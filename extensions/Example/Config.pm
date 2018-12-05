@@ -12,29 +12,21 @@ use strict;
 use warnings;
 
 use constant NAME => 'Example';
-use constant REQUIRED_MODULES => [
-    {
-        package => 'Data-Dumper',
-        module  => 'Data::Dumper',
-        version => 0,
-    },
-];
+use constant REQUIRED_MODULES =>
+  [{package => 'Data-Dumper', module => 'Data::Dumper', version => 0,},];
 
 use constant OPTIONAL_MODULES => [
-    {
-        package => 'Acme',
-        module  => 'Acme',
-        version => 1.11,
-        feature => ['example_acme'],
-    },
+  {
+    package => 'Acme',
+    module  => 'Acme',
+    version => 1.11,
+    feature => ['example_acme'],
+  },
 ];
 
 # The map determines which version of
 # the Core API an extension's API modules
 # were written to work with.
-use constant API_VERSION_MAP => {
-    '1_0' => '1_0',
-    '2_0' => '1_0'
-};
+use constant API_VERSION_MAP => {'1_0' => '1_0', '2_0' => '1_0'};
 
 __PACKAGE__->NAME;

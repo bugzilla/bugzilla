@@ -17,16 +17,8 @@ our $sortkey = 1550;
 
 sub get_param_list {
   return (
-    {
-        name    => 'memcached_servers',
-        type    => 't',
-        default => ''
-    },
-    {
-        name    => 'memcached_namespace',
-        type    => 't',
-        default => 'bugzilla:',
-    },
+    {name => 'memcached_servers',   type => 't', default => ''},
+    {name => 'memcached_namespace', type => 't', default => 'bugzilla:',},
   );
 }
 

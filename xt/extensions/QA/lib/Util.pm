@@ -14,15 +14,15 @@ use warnings;
 use parent qw(Exporter);
 
 our @EXPORT = qw(
-    parse_output
+  parse_output
 );
 
 sub parse_output {
-    my ($output, $vars) = @_;
+  my ($output, $vars) = @_;
 
-    $vars->{error} = ($output =~ /software error/i) ? 1 : 0;
-    $vars->{output} = $output;
-    $vars->{bug_id} ||= ($output =~ /Created bug (\d+)/i) ? $1 : undef;
+  $vars->{error} = ($output =~ /software error/i) ? 1 : 0;
+  $vars->{output} = $output;
+  $vars->{bug_id} ||= ($output =~ /Created bug (\d+)/i) ? $1 : undef;
 }
 
 1;

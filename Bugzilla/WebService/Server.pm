@@ -20,72 +20,77 @@ use Digest::MD5 qw(md5_base64);
 use Storable qw(freeze);
 
 sub handle_login {
-    my ($self, $class, $method, $full_method) = @_;
-    # Throw error if the supplied class does not exist or the method is private
-    ThrowCodeError('unknown_method', {method => $full_method}) if (!$class or $method =~ /^_/);
+  my ($self, $class, $method, $full_method) = @_;
 
-    eval "require $class";
-    ThrowCodeError('unknown_method', {method => $full_method}) if $@;
-    return if ($class->login_exempt($method) 
-               and !defined Bugzilla->input_params->{Bugzilla_login});
-    Bugzilla->login();
+  # Throw error if the supplied class does not exist or the method is private
+  ThrowCodeError('unknown_method', {method => $full_method})
+    if (!$class or $method =~ /^_/);
 
-    Bugzilla::Hook::process(
-        'webservice_before_call',
-        { 'method'  => $method, full_method => $full_method });
+  eval "require $class";
+  ThrowCodeError('unknown_method', {method => $full_method}) if $@;
+  return
+    if ($class->login_exempt($method)
+    and !defined Bugzilla->input_params->{Bugzilla_login});
+  Bugzilla->login();
+
+  Bugzilla::Hook::process('webservice_before_call',
+    {'method' => $method, full_method => $full_method});
 }
 
 sub datetime_format_inbound {
-    my ($self, $time) = @_;
+  my ($self, $time) = @_;
 
-    my $converted = datetime_from($time, Bugzilla->local_timezone);
-    if (!defined $converted) {
-        ThrowUserError('illegal_date', { date => $time });
-    }
-    $time = $converted->ymd() . ' ' . $converted->hms();
-    return $time
+  my $converted = datetime_from($time, Bugzilla->local_timezone);
+  if (!defined $converted) {
+    ThrowUserError('illegal_date', {date => $time});
+  }
+  $time = $converted->ymd() . ' ' . $converted->hms();
+  return $time;
 }
 
 sub datetime_format_outbound {
-    my ($self, $date) = @_;
+  my ($self, $date) = @_;
 
-    return undef if (!defined $date or $date eq '');
+  return undef if (!defined $date or $date eq '');
 
-    my $time = $date;
-    if (blessed($date)) {
-        # We expect this to mean we were sent a datetime object
-        $time->set_time_zone('UTC');
-    } else {
-        # We always send our time in UTC, for consistency.
-        # passed in value is likely a string, create a datetime object
-        $time = datetime_from($date, 'UTC');
-    }
-    return $time->iso8601();
+  my $time = $date;
+  if (blessed($date)) {
+
+    # We expect this to mean we were sent a datetime object
+    $time->set_time_zone('UTC');
+  }
+  else {
+    # We always send our time in UTC, for consistency.
+    # passed in value is likely a string, create a datetime object
+    $time = datetime_from($date, 'UTC');
+  }
+  return $time->iso8601();
 }
 
 # ETag support
 sub bz_etag {
-    my ($self, $data) = @_;
-    my $cache = Bugzilla->request_cache;
-    if (defined $data) {
-        # Serialize the data if passed a reference
-        local $Storable::canonical = 1;
-        $data = freeze($data) if ref $data;
+  my ($self, $data) = @_;
+  my $cache = Bugzilla->request_cache;
+  if (defined $data) {
 
-        # Wide characters cause md5_base64() to die.
-        utf8::encode($data) if utf8::is_utf8($data);
+    # Serialize the data if passed a reference
+    local $Storable::canonical = 1;
+    $data = freeze($data) if ref $data;
 
-        # Append content_type to the end of the data
-        # string as we want the etag to be unique to
-        # the content_type. We do not need this for
-        # XMLRPC as text/xml is always returned.
-        if (blessed($self) && $self->can('content_type')) {
-            $data .= $self->content_type if $self->content_type;
-        }
+    # Wide characters cause md5_base64() to die.
+    utf8::encode($data) if utf8::is_utf8($data);
 
-        $cache->{'bz_etag'} = md5_base64($data);
+    # Append content_type to the end of the data
+    # string as we want the etag to be unique to
+    # the content_type. We do not need this for
+    # XMLRPC as text/xml is always returned.
+    if (blessed($self) && $self->can('content_type')) {
+      $data .= $self->content_type if $self->content_type;
     }
-    return $cache->{'bz_etag'};
+
+    $cache->{'bz_etag'} = md5_base64($data);
+  }
+  return $cache->{'bz_etag'};
 }
 
 1;

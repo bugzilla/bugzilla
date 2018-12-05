@@ -5,7 +5,7 @@
 # This Source Code Form is "Incompatible With Secondary Licenses", as
 # defined by the Mozilla Public License, v. 2.0.
 
-# This is the base class for $self in WebService method calls. For the 
+# This is the base class for $self in WebService method calls. For the
 # actual RPC server, see Bugzilla::WebService::Server and its subclasses.
 package Bugzilla::WebService;
 
@@ -17,11 +17,12 @@ use Bugzilla::WebService::Server;
 
 # Used by the JSON-RPC server to convert incoming date fields apprpriately.
 use constant DATE_FIELDS => {};
+
 # Used by the JSON-RPC server to convert incoming base64 fields appropriately.
 use constant BASE64_FIELDS => {};
 
 # For some methods, we shouldn't call Bugzilla->login before we call them
-use constant LOGIN_EXEMPT => { };
+use constant LOGIN_EXEMPT => {};
 
 # Used to allow methods to be called in the JSON-RPC WebService via GET.
 # Methods that can modify data MUST not be listed here.
@@ -32,8 +33,8 @@ use constant READ_ONLY => ();
 use constant PUBLIC_METHODS => ();
 
 sub login_exempt {
-    my ($class, $method) = @_;
-    return $class->LOGIN_EXEMPT->{$method};
+  my ($class, $method) = @_;
+  return $class->LOGIN_EXEMPT->{$method};
 }
 
 1;

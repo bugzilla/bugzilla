@@ -18,27 +18,27 @@ use parent qw(Bugzilla::BugUrl);
 ###############################
 
 sub should_handle {
-    my ($class, $uri) = @_;
+  my ($class, $uri) = @_;
 
-    # PHP Bug URLs have only one form:
-    #   https://bugs.php.net/bug.php?id=1234
-    return (lc($uri->authority) eq 'bugs.php.net'
-            and $uri->path =~ m|/bug\.php$|
-            and $uri->query_param('id') =~ /^\d+$/) ? 1 : 0;
+  # PHP Bug URLs have only one form:
+  #   https://bugs.php.net/bug.php?id=1234
+  return (lc($uri->authority) eq 'bugs.php.net'
+      and $uri->path =~ m|/bug\.php$|
+      and $uri->query_param('id') =~ /^\d+$/) ? 1 : 0;
 }
 
 sub _check_value {
-    my $class = shift;
+  my $class = shift;
 
-    my $uri = $class->SUPER::_check_value(@_);
+  my $uri = $class->SUPER::_check_value(@_);
 
-    # PHP Bug URLs redirect to HTTPS, so just use the HTTPS scheme.
-    $uri->scheme('https');
+  # PHP Bug URLs redirect to HTTPS, so just use the HTTPS scheme.
+  $uri->scheme('https');
 
-    # And remove any # part if there is one.
-    $uri->fragment(undef);
+  # And remove any # part if there is one.
+  $uri->fragment(undef);
 
-    return $uri;
+  return $uri;
 }
 
 1;

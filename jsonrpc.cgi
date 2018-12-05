@@ -16,10 +16,11 @@ use Bugzilla;
 use Bugzilla::Constants;
 use Bugzilla::Error;
 use Bugzilla::WebService::Constants;
+
 BEGIN {
-    if (!Bugzilla->feature('jsonrpc')) {
-        ThrowUserError('feature_disabled', { feature => 'jsonrpc' });
-    }
+  if (!Bugzilla->feature('jsonrpc')) {
+    ThrowUserError('feature_disabled', {feature => 'jsonrpc'});
+  }
 }
 use Bugzilla::WebService::Server::JSONRPC;
 

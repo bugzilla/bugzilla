@@ -18,9 +18,9 @@ use Bugzilla::Constants;
 
 Bugzilla->login();
 
-my $cgi = Bugzilla->cgi;
+my $cgi      = Bugzilla->cgi;
 my $template = Bugzilla->template;
-my $vars = {};
+my $vars     = {};
 
 # Return the appropriate HTTP response headers.
 print $cgi->header('application/xml');
@@ -28,10 +28,10 @@ print $cgi->header('application/xml');
 # Get the contents of favicon.ico
 my $filename = bz_locations()->{'libpath'} . "/images/favicon.ico";
 if (open(IN, '<', $filename)) {
-    local $/;
-    binmode IN;
-    $vars->{'favicon'} = <IN>;
-    close IN;
+  local $/;
+  binmode IN;
+  $vars->{'favicon'} = <IN>;
+  close IN;
 }
 $template->process("search/search-plugin.xml.tmpl", $vars)
   || ThrowTemplateError($template->error());

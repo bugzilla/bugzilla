@@ -21,60 +21,64 @@ my ($sel, $config) = get_selenium();
 # Turn on 'requirelogin'.
 
 log_in($sel, $config, 'admin');
-set_parameters($sel, { "User Authentication" => {"requirelogin-on" => undef} });
+set_parameters($sel, {"User Authentication" => {"requirelogin-on" => undef}});
 logout($sel);
 
 # We try to access each page. None of the ones listed below should
 # let you view it without being logged in.
 
 my @pages = qw(admin attachment buglist chart colchange describecomponents
-               describekeywords duplicates editclassifications editcomponents
-               editfields editflagtypes editgroups editkeywords editmilestones
-               editparams editproducts editsettings editusers editvalues
-               editversions editwhines editworkflow enter_bug page post_bug
-               process_bug query quips report reports request sanitycheck
-               search_plugin show_activity show_bug showdependencygraph
-               showdependencytree summarize_time userprefs votes);
+  describekeywords duplicates editclassifications editcomponents
+  editfields editflagtypes editgroups editkeywords editmilestones
+  editparams editproducts editsettings editusers editvalues
+  editversions editwhines editworkflow enter_bug page post_bug
+  process_bug query quips report reports request sanitycheck
+  search_plugin show_activity show_bug showdependencygraph
+  showdependencytree summarize_time userprefs votes);
 
 foreach my $page (@pages) {
-    $sel->open_ok("/$config->{bugzilla_installation}/${page}.cgi");
-    if ($page ne 'votes' || $config->{test_extensions}) {
-        $sel->title_is("Log in to Bugzilla");
-    }
-    else {
-        $sel->title_is("Extension Disabled");
-    }
+  $sel->open_ok("/$config->{bugzilla_installation}/${page}.cgi");
+  if ($page ne 'votes' || $config->{test_extensions}) {
+    $sel->title_is("Log in to Bugzilla");
+  }
+  else {
+    $sel->title_is("Extension Disabled");
+  }
 }
 
 # Those have parameters passed to the page, so we put them here separately.
 
-@pages = ("query.cgi?format=report-table", "query.cgi?format=report-graph",
-          "votes.cgi?action=show_user", "votes.cgi?action=show_bug");
+@pages = (
+  "query.cgi?format=report-table", "query.cgi?format=report-graph",
+  "votes.cgi?action=show_user",    "votes.cgi?action=show_bug"
+);
 
 foreach my $page (@pages) {
-    $sel->open_ok("/$config->{bugzilla_installation}/$page");
-    if ($page !~ /^votes/ || $config->{test_extensions}) {
-        $sel->title_is("Log in to Bugzilla");
-    }
-    else {
-        $sel->title_is("Extension Disabled");
-    }
+  $sel->open_ok("/$config->{bugzilla_installation}/$page");
+  if ($page !~ /^votes/ || $config->{test_extensions}) {
+    $sel->title_is("Log in to Bugzilla");
+  }
+  else {
+    $sel->title_is("Extension Disabled");
+  }
 }
 
 # These pages should still be accessible.
 
-@pages = ("config.cgi", "createaccount.cgi", "index.cgi", "relogin.cgi",
-          "token.cgi?a=reqpw&loginname=" . $config->{unprivileged_user_login});
+@pages = (
+  "config.cgi", "createaccount.cgi", "index.cgi", "relogin.cgi",
+  "token.cgi?a=reqpw&loginname=" . $config->{unprivileged_user_login}
+);
 
 foreach my $page (@pages) {
-    $sel->open_ok("/$config->{bugzilla_installation}/$page");
-    $sel->title_isnt("Log in to Bugzilla");
+  $sel->open_ok("/$config->{bugzilla_installation}/$page");
+  $sel->title_isnt("Log in to Bugzilla");
 }
 
 # Turn off 'requirelogin'.
 
 log_in($sel, $config, 'admin');
-set_parameters($sel, { "User Authentication" => {"requirelogin-off" => undef} });
+set_parameters($sel, {"User Authentication" => {"requirelogin-off" => undef}});
 logout($sel);
 
 # Make sure we can access random pages again.

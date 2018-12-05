@@ -1,6 +1,7 @@
 use 5.006;
 use strict;
 use warnings;
+
 package CPAN::Meta::Prereqs;
 
 our $VERSION = '2.150005';
@@ -45,34 +46,33 @@ use CPAN::Meta::Requirements 2.121;
 #pod
 #pod =cut
 
-sub __legal_phases { qw(configure build test runtime develop)   }
-sub __legal_types  { qw(requires recommends suggests conflicts) }
+sub __legal_phases {qw(configure build test runtime develop)}
+sub __legal_types  {qw(requires recommends suggests conflicts)}
 
 # expect a prereq spec from META.json -- rjbs, 2010-04-11
 sub new {
   my ($class, $prereq_spec) = @_;
   $prereq_spec ||= {};
 
-  my %is_legal_phase = map {; $_ => 1 } $class->__legal_phases;
-  my %is_legal_type  = map {; $_ => 1 } $class->__legal_types;
+  my %is_legal_phase = map { ; $_ => 1 } $class->__legal_phases;
+  my %is_legal_type  = map { ; $_ => 1 } $class->__legal_types;
 
   my %guts;
-  PHASE: for my $phase (keys %$prereq_spec) {
+PHASE: for my $phase (keys %$prereq_spec) {
     next PHASE unless $phase =~ /\Ax_/i or $is_legal_phase{$phase};
 
-    my $phase_spec = $prereq_spec->{ $phase };
+    my $phase_spec = $prereq_spec->{$phase};
     next PHASE unless keys %$phase_spec;
 
-    TYPE: for my $type (keys %$phase_spec) {
+  TYPE: for my $type (keys %$phase_spec) {
       next TYPE unless $type =~ /\Ax_/i or $is_legal_type{$type};
 
-      my $spec = $phase_spec->{ $type };
+      my $spec = $phase_spec->{$type};
 
       next TYPE unless keys %$spec;
 
-      $guts{prereqs}{$phase}{$type} = CPAN::Meta::Requirements->from_string_hash(
-        $spec
-      );
+      $guts{prereqs}{$phase}{$type}
+        = CPAN::Meta::Requirements->from_string_hash($spec);
     }
   }
 
@@ -152,7 +152,7 @@ sub with_merged_prereqs {
 
       next unless $req->required_modules;
 
-      $new_arg{ $phase }{ $type } = $req->as_string_hash;
+      $new_arg{$phase}{$type} = $req->as_string_hash;
     }
   }
 
@@ -174,8 +174,8 @@ sub with_merged_prereqs {
 
 sub merged_requirements {
   my ($self, $phases, $types) = @_;
-  $phases = [qw/runtime build test/] unless defined $phases;
-  $types = [qw/requires recommends/] unless defined $types;
+  $phases = [qw/runtime build test/]  unless defined $phases;
+  $types  = [qw/requires recommends/] unless defined $types;
 
   confess "merged_requirements phases argument must be an arrayref"
     unless ref $phases eq 'ARRAY';
@@ -184,15 +184,15 @@ sub merged_requirements {
 
   my $req = CPAN::Meta::Requirements->new;
 
-  for my $phase ( @$phases ) {
+  for my $phase (@$phases) {
     unless ($phase =~ /\Ax_/i or grep { $phase eq $_ } $self->__legal_phases) {
-        confess "requested requirements for unknown phase: $phase";
+      confess "requested requirements for unknown phase: $phase";
     }
-    for my $type ( @$types ) {
+    for my $type (@$types) {
       unless ($type =~ /\Ax_/i or grep { $type eq $_ } $self->__legal_types) {
-          confess "requested requirements for unknown type: $type";
+        confess "requested requirements for unknown type: $type";
       }
-      $req->add_requirements( $self->requirements_for($phase, $type) );
+      $req->add_requirements($self->requirements_for($phase, $type));
     }
   }
 
@@ -220,7 +220,7 @@ sub as_string_hash {
       my $req = $self->requirements_for($phase, $type);
       next unless $req->required_modules;
 
-      $hash{ $phase }{ $type } = $req->as_string_hash;
+      $hash{$phase}{$type} = $req->as_string_hash;
     }
   }
 
@@ -249,8 +249,8 @@ sub finalize {
 
   $self->{finalized} = 1;
 
-  for my $phase (keys %{ $self->{prereqs} }) {
-    $_->finalize for values %{ $self->{prereqs}{$phase} };
+  for my $phase (keys %{$self->{prereqs}}) {
+    $_->finalize for values %{$self->{prereqs}{$phase}};
   }
 }
 
@@ -268,7 +268,7 @@ sub finalize {
 sub clone {
   my ($self) = @_;
 
-  my $clone = (ref $self)->new( $self->as_string_hash );
+  my $clone = (ref $self)->new($self->as_string_hash);
 }
 
 1;

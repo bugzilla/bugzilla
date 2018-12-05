@@ -20,77 +20,75 @@ use Bugzilla::Util;
 ####    Initialization     ####
 ###############################
 
-use constant VALIDATOR_DEPENDENCIES => {
-    value => ['bug_id'],
-};
+use constant VALIDATOR_DEPENDENCIES => {value => ['bug_id'],};
 
 ###############################
 ####        Methods        ####
 ###############################
 
 sub ref_bug_url {
-    my $self = shift;
+  my $self = shift;
 
-    if (!exists $self->{ref_bug_url}) {
-        my $ref_bug_id = new URI($self->name)->query_param('id');
-        my $ref_bug = Bugzilla::Bug->check($ref_bug_id);
-        my $ref_value = $self->local_uri($self->bug_id);
-        $self->{ref_bug_url} =
-            new Bugzilla::BugUrl::Bugzilla::Local({ bug_id => $ref_bug->id,
-                                                    value => $ref_value });
-    }
-    return $self->{ref_bug_url};
+  if (!exists $self->{ref_bug_url}) {
+    my $ref_bug_id = new URI($self->name)->query_param('id');
+    my $ref_bug    = Bugzilla::Bug->check($ref_bug_id);
+    my $ref_value  = $self->local_uri($self->bug_id);
+    $self->{ref_bug_url} = new Bugzilla::BugUrl::Bugzilla::Local(
+      {bug_id => $ref_bug->id, value => $ref_value});
+  }
+  return $self->{ref_bug_url};
 }
 
 sub should_handle {
-    my ($class, $uri) = @_;
+  my ($class, $uri) = @_;
 
-    # Check if it is either a bug id number or an alias.
-    return 1 if $uri->as_string =~ m/^\w+$/;
+  # Check if it is either a bug id number or an alias.
+  return 1 if $uri->as_string =~ m/^\w+$/;
 
-    # Check if it is a local Bugzilla uri and call
-    # Bugzilla::BugUrl::Bugzilla to check if it's a valid Bugzilla
-    # see also url.
-    my $canonical_local = URI->new($class->local_uri)->canonical;
-    if ($canonical_local->authority eq $uri->canonical->authority
-        and $canonical_local->path eq $uri->canonical->path)
-    {
-        return $class->SUPER::should_handle($uri);
-    }
+  # Check if it is a local Bugzilla uri and call
+  # Bugzilla::BugUrl::Bugzilla to check if it's a valid Bugzilla
+  # see also url.
+  my $canonical_local = URI->new($class->local_uri)->canonical;
+  if (  $canonical_local->authority eq $uri->canonical->authority
+    and $canonical_local->path eq $uri->canonical->path)
+  {
+    return $class->SUPER::should_handle($uri);
+  }
 
-    return 0;
+  return 0;
 }
 
 sub _check_value {
-    my ($class, $uri, undef, $params) = @_;
+  my ($class, $uri, undef, $params) = @_;
 
-    # At this point we are going to treat any word as a
-    # bug id/alias to the local Bugzilla.
-    my $value = $uri->as_string;
-    if ($value =~ m/^\w+$/) {
-        $uri = new URI($class->local_uri($value));
-    } else {
-        # It's not a word, then we have to check
-        # if it's a valid Bugzilla url.
-        $uri = $class->SUPER::_check_value($uri);
-    }
+  # At this point we are going to treat any word as a
+  # bug id/alias to the local Bugzilla.
+  my $value = $uri->as_string;
+  if ($value =~ m/^\w+$/) {
+    $uri = new URI($class->local_uri($value));
+  }
+  else {
+    # It's not a word, then we have to check
+    # if it's a valid Bugzilla url.
+    $uri = $class->SUPER::_check_value($uri);
+  }
 
-    my $ref_bug_id  = $uri->query_param('id');
-    my $ref_bug     = Bugzilla::Bug->check($ref_bug_id);
-    my $self_bug_id = $params->{bug_id};
-    $params->{ref_bug} = $ref_bug;
+  my $ref_bug_id  = $uri->query_param('id');
+  my $ref_bug     = Bugzilla::Bug->check($ref_bug_id);
+  my $self_bug_id = $params->{bug_id};
+  $params->{ref_bug} = $ref_bug;
 
-    if ($ref_bug->id == $self_bug_id) {
-        ThrowUserError('see_also_self_reference');
-    }
- 
-    return $uri;
+  if ($ref_bug->id == $self_bug_id) {
+    ThrowUserError('see_also_self_reference');
+  }
+
+  return $uri;
 }
 
 sub local_uri {
-    my ($self, $bug_id) = @_;
-    $bug_id ||= '';
-    return correct_urlbase() . "show_bug.cgi?id=$bug_id";
+  my ($self, $bug_id) = @_;
+  $bug_id ||= '';
+  return correct_urlbase() . "show_bug.cgi?id=$bug_id";
 }
 
 1;

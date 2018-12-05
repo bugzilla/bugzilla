@@ -18,32 +18,34 @@ use parent qw(Bugzilla::BugUrl);
 ###############################
 
 sub should_handle {
-    my ($class, $uri) = @_;
-    return ($uri->authority =~ /\.appspot\.com$/i
-            and $uri->path =~ m#^/\d+(?:/|/show)?$#) ? 1 : 0;
+  my ($class, $uri) = @_;
+  return ($uri->authority =~ /\.appspot\.com$/i
+      and $uri->path =~ m#^/\d+(?:/|/show)?$#) ? 1 : 0;
 }
 
 sub _check_value {
-    my ($class, $uri) = @_;
+  my ($class, $uri) = @_;
 
-    $uri = $class->SUPER::_check_value($uri);
+  $uri = $class->SUPER::_check_value($uri);
 
-    # Rietveld URLs have three forms:
-    #   http(s)://example.appspot.com/1234
-    #   http(s)://example.appspot.com/1234/
-    #   http(s)://example.appspot.com/1234/show
-    if ($uri->path =~ m#^/(\d+)(?:/|/show)$#) {
-        # This is the shortest standard URL form for Rietveld issues,
-        # and so we reduce all URLs to this.
-        $uri->path('/' . $1);
-    }
+  # Rietveld URLs have three forms:
+  #   http(s)://example.appspot.com/1234
+  #   http(s)://example.appspot.com/1234/
+  #   http(s)://example.appspot.com/1234/show
+  if ($uri->path =~ m#^/(\d+)(?:/|/show)$#) {
 
-    # Make sure there are no query parameters.
-    $uri->query(undef);
-    # And remove any # part if there is one.
-    $uri->fragment(undef);
+    # This is the shortest standard URL form for Rietveld issues,
+    # and so we reduce all URLs to this.
+    $uri->path('/' . $1);
+  }
 
-    return $uri;
+  # Make sure there are no query parameters.
+  $uri->query(undef);
+
+  # And remove any # part if there is one.
+  $uri->fragment(undef);
+
+  return $uri;
 }
 
 1;

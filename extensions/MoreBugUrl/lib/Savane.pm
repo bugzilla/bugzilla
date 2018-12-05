@@ -18,24 +18,27 @@ use parent qw(Bugzilla::BugUrl);
 ###############################
 
 sub should_handle {
-    my ($class, $uri) = @_;
-    # Savane URLs look like the following (the index.php is optional):
-    #   https://savannah.gnu.org/bugs/index.php?107657
-    #   https://savannah.gnu.org/patch/index.php?107657
-    #   https://savannah.gnu.org/support/index.php?107657
-    #   https://savannah.gnu.org/task/index.php?107657
-    return ($uri->as_string =~ m|/(bugs\|patch\|support\|task)/(index\.php)?\?\d+$|) ? 1 : 0;
+  my ($class, $uri) = @_;
+
+  # Savane URLs look like the following (the index.php is optional):
+  #   https://savannah.gnu.org/bugs/index.php?107657
+  #   https://savannah.gnu.org/patch/index.php?107657
+  #   https://savannah.gnu.org/support/index.php?107657
+  #   https://savannah.gnu.org/task/index.php?107657
+  return ($uri->as_string =~ m|/(bugs\|patch\|support\|task)/(index\.php)?\?\d+$|)
+    ? 1
+    : 0;
 }
 
 sub _check_value {
-    my $class = shift;
+  my $class = shift;
 
-    my $uri = $class->SUPER::_check_value(@_);
+  my $uri = $class->SUPER::_check_value(@_);
 
-    # And remove any # part if there is one.
-    $uri->fragment(undef);
+  # And remove any # part if there is one.
+  $uri->fragment(undef);
 
-    return $uri;
+  return $uri;
 }
 
 1;

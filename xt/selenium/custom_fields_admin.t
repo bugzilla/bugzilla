@@ -27,30 +27,33 @@ $sel->click_ok("link=Custom Fields");
 $sel->wait_for_page_to_load_ok(WAIT_TIME);
 $sel->title_is("Custom Fields");
 
-my @types = ("Bug ID", "Large Text Box", "Free Text", "Multiple-Selection Box",
-             "Drop Down", "Date/Time");
+my @types = (
+  "Bug ID", "Large Text Box",
+  "Free Text", "Multiple-Selection Box",
+  "Drop Down", "Date/Time"
+);
 my $counter = int(rand(10000));
 
 foreach my $type (@types) {
-    my $fname = "cf_field" . ++$counter;
-    my $fdesc = "Field" . $counter;
+  my $fname = "cf_field" . ++$counter;
+  my $fdesc = "Field" . $counter;
 
-    $sel->click_ok("link=Add a new custom field");
-    $sel->wait_for_page_to_load_ok(WAIT_TIME);
-    $sel->title_is("Add a new Custom Field");
-    $sel->type_ok("name", $fname);
-    $sel->type_ok("desc", $fdesc);
-    $sel->select_ok("type", "label=$type");
-    $sel->click_ok("obsolete");
-    $sel->click_ok("create");
-    $sel->wait_for_page_to_load_ok(WAIT_TIME);
-    $sel->title_is("Custom Field Created");
-    $sel->click_ok("//a[\@href='editfields.cgi?action=del&name=$fname']");
-    $sel->wait_for_page_to_load_ok(WAIT_TIME);
-    $sel->title_is("Delete the Custom Field '$fname' ($fdesc)");
-    $sel->click_ok("link=Delete field '$fdesc'");
-    $sel->wait_for_page_to_load_ok(WAIT_TIME);
-    $sel->title_is("Custom Field Deleted");
+  $sel->click_ok("link=Add a new custom field");
+  $sel->wait_for_page_to_load_ok(WAIT_TIME);
+  $sel->title_is("Add a new Custom Field");
+  $sel->type_ok("name", $fname);
+  $sel->type_ok("desc", $fdesc);
+  $sel->select_ok("type", "label=$type");
+  $sel->click_ok("obsolete");
+  $sel->click_ok("create");
+  $sel->wait_for_page_to_load_ok(WAIT_TIME);
+  $sel->title_is("Custom Field Created");
+  $sel->click_ok("//a[\@href='editfields.cgi?action=del&name=$fname']");
+  $sel->wait_for_page_to_load_ok(WAIT_TIME);
+  $sel->title_is("Delete the Custom Field '$fname' ($fdesc)");
+  $sel->click_ok("link=Delete field '$fdesc'");
+  $sel->wait_for_page_to_load_ok(WAIT_TIME);
+  $sel->title_is("Custom Field Deleted");
 }
 
 logout($sel);

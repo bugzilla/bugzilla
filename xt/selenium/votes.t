@@ -19,26 +19,35 @@ use QA::Util;
 my ($sel, $config) = get_selenium();
 
 unless ($config->{test_extensions}) {
-    ok(1, "this installation doesn't test extensions. Skipping test_votes.t completely.");
-    exit;
+  ok(1,
+    "this installation doesn't test extensions. Skipping test_votes.t completely.");
+  exit;
 }
 
 log_in($sel, $config, 'admin');
-set_parameters($sel, { "Bug Fields"              => {"useclassification-off" => undef},
-                       "Administrative Policies" => {"allowbugdeletion-on"   => undef}
-                     });
+set_parameters(
+  $sel,
+  {
+    "Bug Fields"              => {"useclassification-off" => undef},
+    "Administrative Policies" => {"allowbugdeletion-on"   => undef}
+  }
+);
 
 # Create a new product, so that we can safely play with vote settings.
 
 add_product($sel);
-$sel->type_ok("product", "Eureka");
-$sel->type_ok("description", "A great new product");
-$sel->type_ok("votesperuser", 10);
+$sel->type_ok("product",        "Eureka");
+$sel->type_ok("description",    "A great new product");
+$sel->type_ok("votesperuser",   10);
 $sel->type_ok("maxvotesperbug", 5);
 $sel->type_ok("votestoconfirm", 3);
-$sel->type_ok("component", "Pegasus");
-$sel->type_ok("comp_desc", "A constellation in the north hemisphere.");
-$sel->type_ok("initialowner", $config->{permanent_user}, "Setting the default owner");
+$sel->type_ok("component",      "Pegasus");
+$sel->type_ok("comp_desc",      "A constellation in the north hemisphere.");
+$sel->type_ok(
+  "initialowner",
+  $config->{permanent_user},
+  "Setting the default owner"
+);
 $sel->click_ok('add-product');
 $sel->wait_for_page_to_load_ok(WAIT_TIME);
 $sel->title_is("Product Created");
@@ -46,11 +55,12 @@ $sel->title_is("Product Created");
 # Create a new bug with the CONFIRMED status.
 
 file_bug_in_product($sel, 'Eureka');
+
 # CONFIRMED must be the default bug status for users with editbugs privs.
 $sel->selected_label_is("bug_status", "CONFIRMED");
 my $bug_summary = "Aries";
 $sel->type_ok("short_desc", $bug_summary);
-$sel->type_ok("comment", "1st constellation");
+$sel->type_ok("comment",    "1st constellation");
 my $bug1_id = create_bug($sel, $bug_summary);
 
 # Now vote for this bug.
@@ -58,19 +68,25 @@ my $bug1_id = create_bug($sel, $bug_summary);
 $sel->click_ok("link=vote");
 $sel->wait_for_page_to_load_ok(WAIT_TIME);
 $sel->title_is("Change Votes");
+
 # No comment :-/
 my $full_text = trim($sel->get_body_text());
+
 # OK, this is not the most robust regexp, but that's better than nothing.
-ok($full_text =~ /only 5 votes allowed per bug in this product/,
-   "Notice about the number of votes allowed per bug displayed");
+ok(
+  $full_text =~ /only 5 votes allowed per bug in this product/,
+  "Notice about the number of votes allowed per bug displayed"
+);
 $sel->type_ok("bug_$bug1_id", 4);
 $sel->click_ok("change");
 $sel->wait_for_page_to_load_ok(WAIT_TIME);
 $sel->title_is("Change Votes");
 $full_text = trim($sel->get_body_text());
+
 # OK, we may get a false positive if another product has the exact same numbers,
 # but I have no better idea to check this information.
-ok($full_text =~ /4 votes used out of 10 allowed/, "Display the number of votes used");
+ok($full_text =~ /4 votes used out of 10 allowed/,
+  "Display the number of votes used");
 
 # File a new bug, now as UNCONFIRMED. We will confirm it by popular votes.
 
@@ -78,7 +94,7 @@ file_bug_in_product($sel, 'Eureka');
 $sel->select_ok("bug_status", "UNCONFIRMED");
 my $bug_summary2 = "Taurus";
 $sel->type_ok("short_desc", $bug_summary2);
-$sel->type_ok("comment", "2nd constellation");
+$sel->type_ok("comment",    "2nd constellation");
 my $bug2_id = create_bug($sel, $bug_summary2);
 
 # Put enough votes on this bug to confirm it by popular votes.
@@ -99,7 +115,7 @@ file_bug_in_product($sel, 'Eureka');
 $sel->select_ok("bug_status", "UNCONFIRMED");
 my $bug_summary3 = "Gemini";
 $sel->type_ok("short_desc", $bug_summary3);
-$sel->type_ok("comment", "3rd constellation");
+$sel->type_ok("comment",    "3rd constellation");
 my $bug3_id = create_bug($sel, $bug_summary3);
 
 # Vote for this bug, but remain below the threshold required
@@ -114,14 +130,18 @@ $sel->type_ok("bug_$bug3_id", 2);
 $sel->click_ok("change");
 $sel->wait_for_page_to_load_ok(WAIT_TIME);
 $sel->title_is("Change Votes");
+
 # Illegal change: max is 5 votes per bug!
 $sel->type_ok("bug_$bug2_id", 15);
 $sel->click_ok("change");
 $sel->wait_for_page_to_load_ok(WAIT_TIME);
 $sel->title_is("Illegal Vote");
 my $text = trim($sel->get_text("error_msg"));
-ok($text =~ /You may only use at most 5 votes for a single bug in the Eureka product, but you are trying to use 15/,
-   "Too many votes per bug");
+ok(
+  $text
+    =~ /You may only use at most 5 votes for a single bug in the Eureka product, but you are trying to use 15/,
+  "Too many votes per bug"
+);
 
 # FIXME - We cannot use go_back_ok() here, because Firefox complains about
 # POST data not being stored in its cache. As a workaround, we go to
@@ -139,8 +159,11 @@ $sel->click_ok("change");
 $sel->wait_for_page_to_load_ok(WAIT_TIME);
 $sel->title_is("Illegal Vote");
 $text = trim($sel->get_text("error_msg"));
-ok($text =~ /You tried to use 12 votes in the Eureka product, which exceeds the maximum of 10 votes for this product/,
-   "Too many votes for this product");
+ok(
+  $text
+    =~ /You tried to use 12 votes in the Eureka product, which exceeds the maximum of 10 votes for this product/,
+  "Too many votes for this product"
+);
 
 # Decrease the confirmation threshold so that $bug3 becomes confirmed.
 
@@ -151,7 +174,7 @@ $sel->wait_for_page_to_load_ok(WAIT_TIME);
 $sel->title_is("Updating Product 'Eureka'");
 $full_text = trim($sel->get_body_text());
 ok($full_text =~ /Updated number of votes needed to confirm a bug from 3 to 2/,
-   "Confirming the new number of votes to confirm");
+  "Confirming the new number of votes to confirm");
 $sel->is_text_present_ok("Bug $bug3_id confirmed by number of votes");
 
 # Decrease the number of votes per bug so that $bug2 is updated.
@@ -164,9 +187,11 @@ $sel->click_ok("update-product");
 $sel->wait_for_page_to_load_ok(WAIT_TIME);
 $sel->title_is("Updating Product 'Eureka'");
 $full_text = trim($sel->get_body_text());
-ok($full_text =~ /Updated maximum votes per bug from 5 to 4/, "Confirming the new number of votes per bug");
-$sel->is_text_present_ok("removed votes for bug $bug2_id from " . $config->{admin_user_login}, undef,
-                         "Removed votes from the admin");
+ok($full_text =~ /Updated maximum votes per bug from 5 to 4/,
+  "Confirming the new number of votes per bug");
+$sel->is_text_present_ok(
+  "removed votes for bug $bug2_id from " . $config->{admin_user_login},
+  undef, "Removed votes from the admin");
 
 # Go check that $bug2 has been correctly updated.
 
@@ -185,7 +210,10 @@ $sel->click_ok("update-product");
 $sel->wait_for_page_to_load_ok(WAIT_TIME);
 $sel->title_is("Updating Product 'Eureka'");
 $full_text = trim($sel->get_body_text());
-ok($full_text =~ /Updated votes per user from 10 to 5/, "Confirming the new number of votes per user");
+ok(
+  $full_text =~ /Updated votes per user from 10 to 5/,
+  "Confirming the new number of votes per user"
+);
 $sel->is_text_present_ok("removed votes for bug");
 
 # Go check that $bug3 has been correctly updated.
@@ -204,15 +232,17 @@ $sel->click_ok("update-product");
 $sel->wait_for_page_to_load_ok(WAIT_TIME);
 $sel->title_is("Updating Product 'Eureka'");
 $full_text = trim($sel->get_body_text());
-ok($full_text =~ /The product no longer allows the UNCONFIRMED status/, "Disable UNCONFIRMED");
+ok($full_text =~ /The product no longer allows the UNCONFIRMED status/,
+  "Disable UNCONFIRMED");
 
 # File a new bug. UNCONFIRMED must not be listed as a valid bug status.
 
 file_bug_in_product($sel, "Eureka");
-ok(!scalar(grep {$_ eq "UNCONFIRMED"} $sel->get_select_options("bug_status")), "UNCONFIRMED not listed");
+ok(!scalar(grep { $_ eq "UNCONFIRMED" } $sel->get_select_options("bug_status")),
+  "UNCONFIRMED not listed");
 my $bug_summary4 = "Cancer";
 $sel->type_ok("short_desc", $bug_summary4);
-$sel->type_ok("comment", "4th constellation");
+$sel->type_ok("comment",    "4th constellation");
 my $bug4_id = create_bug($sel, $bug_summary4);
 
 # Now delete the 'Eureka' product.
@@ -225,8 +255,10 @@ $sel->click_ok('//a[@href="editproducts.cgi?action=del&product=Eureka"]');
 $sel->wait_for_page_to_load_ok(WAIT_TIME);
 $sel->title_is("Delete Product 'Eureka'");
 $full_text = trim($sel->get_body_text());
-ok($full_text =~ /There are 4 bugs entered for this product/, "Display warning about existing bugs");
-ok($full_text =~ /Pegasus: A constellation in the north hemisphere/, "Display product description");
+ok($full_text =~ /There are 4 bugs entered for this product/,
+  "Display warning about existing bugs");
+ok($full_text =~ /Pegasus: A constellation in the north hemisphere/,
+  "Display product description");
 $sel->click_ok("delete");
 $sel->wait_for_page_to_load_ok(WAIT_TIME);
 $sel->title_is("Product Deleted");

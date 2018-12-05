@@ -11,15 +11,16 @@ use CPAN::Meta::Converter 2.141170;
 
 sub _is_identical {
   my ($left, $right) = @_;
-  return
-    (not defined $left and not defined $right)
+  return (not defined $left and not defined $right)
+
     # if either of these are references, we compare the serialized value
     || (defined $left and defined $right and $left eq $right);
 }
 
 sub _identical {
   my ($left, $right, $path) = @_;
-  croak sprintf "Can't merge attribute %s: '%s' does not equal '%s'", join('.', @{$path}), $left, $right
+  croak sprintf "Can't merge attribute %s: '%s' does not equal '%s'",
+    join('.', @{$path}), $left, $right
     unless _is_identical($left, $right);
   return $left;
 }
@@ -31,10 +32,10 @@ sub _merge {
       $current->{$key} = $next->{$key};
     }
     elsif (my $merger = $mergers->{$key}) {
-      $current->{$key} = $merger->($current->{$key}, $next->{$key}, [ @{$path}, $key ]);
+      $current->{$key} = $merger->($current->{$key}, $next->{$key}, [@{$path}, $key]);
     }
     elsif ($merger = $mergers->{':default'}) {
-      $current->{$key} = $merger->($current->{$key}, $next->{$key}, [ @{$path}, $key ]);
+      $current->{$key} = $merger->($current->{$key}, $next->{$key}, [@{$path}, $key]);
     }
     else {
       croak sprintf "Can't merge unknown attribute '%s'", join '.', @{$path}, $key;
@@ -50,7 +51,7 @@ sub _uniq {
 
 sub _set_addition {
   my ($left, $right) = @_;
-  return [ +_uniq(@{$left}, @{$right}) ];
+  return [+_uniq(@{$left}, @{$right})];
 }
 
 sub _uniq_map {
@@ -59,12 +60,13 @@ sub _uniq_map {
     if (not exists $left->{$key}) {
       $left->{$key} = $right->{$key};
     }
+
     # identical strings or references are merged identically
     elsif (_is_identical($left->{$key}, $right->{$key})) {
-      1; # do nothing - keep left
+      1;    # do nothing - keep left
     }
     elsif (ref $left->{$key} eq 'HASH' and ref $right->{$key} eq 'HASH') {
-      $left->{$key} = _uniq_map($left->{$key}, $right->{$key}, [ @{$path}, $key ]);
+      $left->{$key} = _uniq_map($left->{$key}, $right->{$key}, [@{$path}, $key]);
     }
     else {
       croak 'Duplication of element ' . join '.', @{$path}, $key;
@@ -98,22 +100,26 @@ sub _optional_features {
       $left->{$key} = $right->{$key};
     }
     else {
-      for my $subkey (keys %{ $right->{$key} }) {
+      for my $subkey (keys %{$right->{$key}}) {
         next if $subkey eq 'prereqs';
         if (not exists $left->{$key}{$subkey}) {
           $left->{$key}{$subkey} = $right->{$key}{$subkey};
         }
         else {
-          Carp::croak "Cannot merge two optional_features named '$key' with different '$subkey' values"
-            if do { no warnings 'uninitialized'; $left->{$key}{$subkey} ne $right->{$key}{$subkey} };
+          Carp::croak
+            "Cannot merge two optional_features named '$key' with different '$subkey' values"
+            if do {
+            no warnings 'uninitialized';
+            $left->{$key}{$subkey} ne $right->{$key}{$subkey};
+            };
         }
       }
 
       require CPAN::Meta::Prereqs;
-      $left->{$key}{prereqs} =
-        CPAN::Meta::Prereqs->new($left->{$key}{prereqs})
-          ->with_merged_prereqs(CPAN::Meta::Prereqs->new($right->{$key}{prereqs}))
-          ->as_string_hash;
+      $left->{$key}{prereqs}
+        = CPAN::Meta::Prereqs->new($left->{$key}{prereqs})
+        ->with_merged_prereqs(CPAN::Meta::Prereqs->new($right->{$key}{prereqs}))
+        ->as_string_hash;
     }
   }
   return $left;
@@ -131,21 +137,19 @@ my %default = (
     my ($left, $right) = @_;
     return join ', ', _uniq(split(/, /, $left), split(/, /, $right));
   },
-  license     => \&_set_addition,
-  'meta-spec' => {
-    version => \&_identical,
-    url     => \&_identical
-  },
-  name              => \&_identical,
-  release_status    => \&_identical,
-  version           => \&_identical,
-  description       => \&_identical,
-  keywords          => \&_set_addition,
-  no_index          => { map { ($_ => \&_set_addition) } qw/file directory package namespace/ },
+  license        => \&_set_addition,
+  'meta-spec'    => {version => \&_identical, url => \&_identical},
+  name           => \&_identical,
+  release_status => \&_identical,
+  version        => \&_identical,
+  description    => \&_identical,
+  keywords       => \&_set_addition,
+  no_index =>
+    {map { ($_ => \&_set_addition) } qw/file directory package namespace/},
   optional_features => \&_optional_features,
   prereqs           => sub {
     require CPAN::Meta::Prereqs;
-    my ($left, $right) = map { CPAN::Meta::Prereqs->new($_) } @_[0,1];
+    my ($left, $right) = map { CPAN::Meta::Prereqs->new($_) } @_[0, 1];
     return $left->with_merged_prereqs($right)->as_string_hash;
   },
   provides  => \&_uniq_map,
@@ -163,10 +167,10 @@ sub new {
   my ($class, %arguments) = @_;
   croak 'default version required' if not exists $arguments{default_version};
   my %mapping = %default;
-  my %extra = %{ $arguments{extra_mappings} || {} };
+  my %extra = %{$arguments{extra_mappings} || {}};
   for my $key (keys %extra) {
     if (ref($mapping{$key}) eq 'HASH') {
-      $mapping{$key} = { %{ $mapping{$key} }, %{ $extra{$key} } };
+      $mapping{$key} = {%{$mapping{$key}}, %{$extra{$key}}};
     }
     else {
       $mapping{$key} = $extra{$key};
@@ -174,7 +178,7 @@ sub new {
   }
   return bless {
     default_version => $arguments{default_version},
-    mapping => _coerce_mapping(\%mapping, []),
+    mapping         => _coerce_mapping(\%mapping, []),
   }, $class;
 }
 
@@ -194,10 +198,10 @@ sub _coerce_mapping {
       $ret{$key} = $value;
     }
     elsif (ref($value) eq 'HASH') {
-      my $mapping = _coerce_mapping($value, [ @{$map_path}, $key ]);
+      my $mapping = _coerce_mapping($value, [@{$map_path}, $key]);
       $ret{$key} = sub {
         my ($left, $right, $path) = @_;
-        return _merge($left, $right, $mapping, [ @{$path} ]);
+        return _merge($left, $right, $mapping, [@{$path}]);
       };
     }
     elsif ($coderef_for{$value}) {
@@ -214,13 +218,12 @@ sub merge {
   my ($self, @items) = @_;
   my $current = {};
   for my $next (@items) {
-    if ( blessed($next) && $next->isa('CPAN::Meta') ) {
+    if (blessed($next) && $next->isa('CPAN::Meta')) {
       $next = $next->as_struct;
     }
-    elsif ( ref($next) eq 'HASH' ) {
-      my $cmc = CPAN::Meta::Converter->new(
-        $next, default_version => $self->{default_version}
-      );
+    elsif (ref($next) eq 'HASH') {
+      my $cmc = CPAN::Meta::Converter->new($next,
+        default_version => $self->{default_version});
       $next = $cmc->upgrade_fragment;
     }
     else {

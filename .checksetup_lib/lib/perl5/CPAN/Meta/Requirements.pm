@@ -1,7 +1,9 @@
-use 5.006; # keep at v5.6 for CPAN.pm
+use 5.006;    # keep at v5.6 for CPAN.pm
 use strict;
 use warnings;
+
 package CPAN::Meta::Requirements;
+
 # ABSTRACT: a set of version requirements for a CPAN dist
 
 our $VERSION = '2.140';
@@ -42,14 +44,15 @@ use Carp ();
 # prereqs and be available at runtime.
 
 BEGIN {
-  eval "use version ()"; ## no critic
-  if ( my $err = $@ ) {
-    eval "use ExtUtils::MakeMaker::version" or die $err; ## no critic
+  eval "use version ()";    ## no critic
+  if (my $err = $@) {
+    eval "use ExtUtils::MakeMaker::version" or die $err;    ## no critic
   }
 }
 
 # Perl 5.10.0 didn't have "is_qv" in version.pm
-*_is_qv = version->can('is_qv') ? sub { $_[0]->is_qv } : sub { exists $_[0]->{qv} };
+*_is_qv
+  = version->can('is_qv') ? sub { $_[0]->is_qv } : sub { exists $_[0]->{qv} };
 
 # construct once, reuse many times
 my $V0 = version->new(0);
@@ -78,20 +81,20 @@ sub new {
   $options ||= {};
   Carp::croak "Argument to $class\->new() must be a hash reference"
     unless ref $options eq 'HASH';
-  my %self = map {; $_ => $options->{$_}} @valid_options;
+  my %self = map { ; $_ => $options->{$_} } @valid_options;
 
   return bless \%self => $class;
 }
 
 # from version::vpp
 sub _find_magic_vstring {
-  my $value = shift;
+  my $value  = shift;
   my $tvalue = '';
   require B;
   my $sv = B::svref_2object(\$value);
   my $magic = ref($sv) eq 'B::PVMG' ? $sv->MAGIC : undef;
-  while ( $magic ) {
-    if ( $magic->TYPE eq 'V' ) {
+  while ($magic) {
+    if ($magic->TYPE eq 'V') {
       $tvalue = $magic->PTR;
       $tvalue =~ s/^v?(.+)$/v$1/;
       last;
@@ -105,7 +108,7 @@ sub _find_magic_vstring {
 
 # safe if given an unblessed reference
 sub _isa_version {
-  UNIVERSAL::isa( $_[0], 'UNIVERSAL' ) && $_[0]->isa('version')
+  UNIVERSAL::isa($_[0], 'UNIVERSAL') && $_[0]->isa('version');
 }
 
 sub _version_object {
@@ -116,29 +119,35 @@ sub _version_object {
   if (not defined $version or (!ref($version) && $version eq '0')) {
     return $V0;
   }
-  elsif ( ref($version) eq 'version' || ( ref($version) && _isa_version($version) ) ) {
+  elsif (ref($version) eq 'version' || (ref($version) && _isa_version($version)))
+  {
     $vobj = $version;
   }
   else {
     # hack around version::vpp not handling <3 character vstring literals
-    if ( $INC{'version/vpp.pm'} || $INC{'ExtUtils/MakeMaker/version/vpp.pm'} ) {
-      my $magic = _find_magic_vstring( $version );
+    if ($INC{'version/vpp.pm'} || $INC{'ExtUtils/MakeMaker/version/vpp.pm'}) {
+      my $magic = _find_magic_vstring($version);
       $version = $magic if length $magic;
     }
+
     # pad to 3 characters if before 5.8.1 and appears to be a v-string
-    if ( $] < 5.008001 && $version !~ /\A[0-9]/ && substr($version,0,1) ne 'v' && length($version) < 3 ) {
+    if ( $] < 5.008001
+      && $version !~ /\A[0-9]/
+      && substr($version, 0, 1) ne 'v'
+      && length($version) < 3)
+    {
       $version .= "\0" x (3 - length($version));
     }
     eval {
       local $SIG{__WARN__} = sub { die "Invalid version: $_[0]" };
+
       # avoid specific segfault on some older version.pm versions
       die "Invalid version: $version" if $version eq 'version';
       $vobj = version->new($version);
     };
-    if ( my $err = $@ ) {
+    if (my $err = $@) {
       my $hook = $self->{bad_version_hook};
-      $vobj = eval { $hook->($version, $module) }
-        if ref $hook eq 'CODE';
+      $vobj = eval { $hook->($version, $module) } if ref $hook eq 'CODE';
       unless (eval { $vobj->isa("version") }) {
         $err =~ s{ at .* line \d+.*$}{};
         die "Can't convert '$version': $err";
@@ -147,12 +156,12 @@ sub _version_object {
   }
 
   # ensure no leading '.'
-  if ( $vobj =~ m{\A\.} ) {
+  if ($vobj =~ m{\A\.}) {
     $vobj = version->new("0$vobj");
   }
 
   # ensure normal v-string form
-  if ( _is_qv($vobj) ) {
+  if (_is_qv($vobj)) {
     $vobj = version->new($vobj->normal);
   }
 
@@ -219,7 +228,7 @@ BEGIN {
     my $code = sub {
       my ($self, $name, $version) = @_;
 
-      $version = $self->_version_object( $name, $version );
+      $version = $self->_version_object($name, $version);
 
       $self->__modify_entry_for($name, $method, $version);
 
@@ -243,11 +252,11 @@ sub add_minimum {
     Carp::confess("can't add new requirements to finalized requirements")
       if $self->is_finalized;
 
-    $self->{requirements}{ $name } =
-      CPAN::Meta::Requirements::_Range::Range->with_minimum($V0, $name);
+    $self->{requirements}{$name}
+      = CPAN::Meta::Requirements::_Range::Range->with_minimum($V0, $name);
   }
   else {
-    $version = $self->_version_object( $name, $version );
+    $version = $self->_version_object($name, $version);
 
     $self->__modify_entry_for($name, 'with_minimum', $version);
   }
@@ -274,7 +283,7 @@ sub add_requirements {
     for my $modifier (@$modifiers) {
       my ($method, @args) = @$modifier;
       $self->$method($module => @args);
-    };
+    }
   }
 
   return $self;
@@ -300,7 +309,7 @@ sub add_requirements {
 sub accepts_module {
   my ($self, $module, $version) = @_;
 
-  $version = $self->_version_object( $module, $version );
+  $version = $self->_version_object($module, $version);
 
   return 1 unless my $range = $self->__entry_for($module);
   return $range->_accepts($version);
@@ -324,7 +333,7 @@ sub clear_requirement {
   Carp::confess("can't clear requirements on finalized requirements")
     if $self->is_finalized;
 
-  delete $self->{requirements}{ $module };
+  delete $self->{requirements}{$module};
 
   return $self;
 }
@@ -374,7 +383,7 @@ sub structured_requirements_for_module {
 #pod
 #pod =cut
 
-sub required_modules { keys %{ $_[0]{requirements} } }
+sub required_modules { keys %{$_[0]{requirements}} }
 
 #pod =method clone
 #pod
@@ -392,7 +401,7 @@ sub clone {
   return $new->add_requirements($self);
 }
 
-sub __entry_for     { $_[0]{requirements}{ $_[1] } }
+sub __entry_for { $_[0]{requirements}{$_[1]} }
 
 sub __modify_entry_for {
   my ($self, $name, $method, $version) = @_;
@@ -404,12 +413,12 @@ sub __modify_entry_for {
     if $fin and not $old;
 
   my $new = ($old || 'CPAN::Meta::Requirements::_Range::Range')
-          ->$method($version, $name);
+    ->$method($version, $name);
 
   Carp::confess("can't modify finalized requirements")
     if $fin and $old->as_string ne $new->as_string;
 
-  $self->{requirements}{ $name } = $new;
+  $self->{requirements}{$name} = $new;
 }
 
 #pod =method is_simple
@@ -422,6 +431,7 @@ sub __modify_entry_for {
 sub is_simple {
   my ($self) = @_;
   for my $module ($self->required_modules) {
+
     # XXX: This is a complete hack, but also entirely correct.
     return if $self->__entry_for($module)->as_string =~ /\s/;
   }
@@ -488,8 +498,8 @@ sub finalize { $_[0]{finalized} = 1 }
 sub as_string_hash {
   my ($self) = @_;
 
-  my %hash = map {; $_ => $self->{requirements}{$_}->as_string }
-             $self->required_modules;
+  my %hash = map { ; $_ => $self->{requirements}{$_}->as_string }
+    $self->required_modules;
 
   return \%hash;
 }
@@ -530,23 +540,23 @@ sub as_string_hash {
 #pod =cut
 
 my %methods_for_op = (
-  '==' => [ qw(exact_version) ],
-  '!=' => [ qw(add_exclusion) ],
-  '>=' => [ qw(add_minimum)   ],
-  '<=' => [ qw(add_maximum)   ],
-  '>'  => [ qw(add_minimum add_exclusion) ],
-  '<'  => [ qw(add_maximum add_exclusion) ],
+  '==' => [qw(exact_version)],
+  '!=' => [qw(add_exclusion)],
+  '>=' => [qw(add_minimum)],
+  '<=' => [qw(add_maximum)],
+  '>'  => [qw(add_minimum add_exclusion)],
+  '<'  => [qw(add_maximum add_exclusion)],
 );
 
 sub add_string_requirement {
   my ($self, $module, $req) = @_;
 
-  unless ( defined $req && length $req ) {
+  unless (defined $req && length $req) {
     $req = 0;
     $self->_blank_carp($module);
   }
 
-  my $magic = _find_magic_vstring( $req );
+  my $magic = _find_magic_vstring($req);
   if (length $magic) {
     $self->add_minimum($module => $magic);
     return;
@@ -557,11 +567,12 @@ sub add_string_requirement {
   for my $part (@parts) {
     my ($op, $ver) = $part =~ m{\A\s*(==|>=|>|<=|<|!=)\s*(.*)\z};
 
-    if (! defined $op) {
+    if (!defined $op) {
       $self->add_minimum($module => $part);
-    } else {
+    }
+    else {
       Carp::confess("illegal requirement string: $req")
-        unless my $methods = $methods_for_op{ $op };
+        unless my $methods = $methods_for_op{$op};
 
       $self->$_($module => $ver) for @$methods;
     }
@@ -594,7 +605,7 @@ sub from_string_hash {
 
   for my $module (keys %$hash) {
     my $req = $hash->{$module};
-    unless ( defined $req && length $req ) {
+    unless (defined $req && length $req) {
       $req = 0;
       $class->_blank_carp($module);
     }
@@ -607,25 +618,25 @@ sub from_string_hash {
 ##############################################################
 
 {
-  package
-    CPAN::Meta::Requirements::_Range::Exact;
-  sub _new     { bless { version => $_[1] } => $_[0] }
+
+  package CPAN::Meta::Requirements::_Range::Exact;
+  sub _new { bless {version => $_[1]} => $_[0] }
 
   sub _accepts { return $_[0]{version} == $_[1] }
 
   sub as_string { return "== $_[0]{version}" }
 
-  sub as_struct { return [ [ '==', "$_[0]{version}" ] ] }
+  sub as_struct { return [['==', "$_[0]{version}"]] }
 
-  sub as_modifiers { return [ [ exact_version => $_[0]{version} ] ] }
+  sub as_modifiers { return [[exact_version => $_[0]{version}]] }
 
   sub _reject_requirements {
     my ($self, $module, $error) = @_;
-    Carp::confess("illegal requirements for $module: $error")
+    Carp::confess("illegal requirements for $module: $error");
   }
 
   sub _clone {
-    (ref $_[0])->_new( version->new( $_[0]{version} ) )
+    (ref $_[0])->_new(version->new($_[0]{version}));
   }
 
   sub with_exact_version {
@@ -645,8 +656,7 @@ sub from_string_hash {
     $module = 'module' unless defined $module;
 
     return $self->_clone if $self->{version} >= $minimum;
-    $self->_reject_requirements(
-      $module,
+    $self->_reject_requirements($module,
       "minimum $minimum exceeds exact specification $self->{version}",
     );
   }
@@ -656,8 +666,7 @@ sub from_string_hash {
     $module = 'module' unless defined $module;
 
     return $self->_clone if $self->{version} <= $maximum;
-    $self->_reject_requirements(
-      $module,
+    $self->_reject_requirements($module,
       "maximum $maximum below exact specification $self->{version}",
     );
   }
@@ -667,8 +676,7 @@ sub from_string_hash {
     $module = 'module' unless defined $module;
 
     return $self->_clone unless $exclusion == $self->{version};
-    $self->_reject_requirements(
-      $module,
+    $self->_reject_requirements($module,
       "tried to exclude $exclusion, which is already exactly specified",
     );
   }
@@ -677,22 +685,24 @@ sub from_string_hash {
 ##############################################################
 
 {
-  package
-    CPAN::Meta::Requirements::_Range::Range;
 
-  sub _self { ref($_[0]) ? $_[0] : (bless { } => $_[0]) }
+  package CPAN::Meta::Requirements::_Range::Range;
+
+  sub _self { ref($_[0]) ? $_[0] : (bless {} => $_[0]) }
 
   sub _clone {
-    return (bless { } => $_[0]) unless ref $_[0];
+    return (bless {} => $_[0]) unless ref $_[0];
 
     my ($s) = @_;
     my %guts = (
       (exists $s->{minimum} ? (minimum => version->new($s->{minimum})) : ()),
       (exists $s->{maximum} ? (maximum => version->new($s->{maximum})) : ()),
 
-      (exists $s->{exclusions}
-        ? (exclusions => [ map { version->new($_) } @{ $s->{exclusions} } ])
-        : ()),
+      (
+        exists $s->{exclusions}
+        ? (exclusions => [map { version->new($_) } @{$s->{exclusions}}])
+        : ()
+      ),
     );
 
     bless \%guts => ref($s);
@@ -701,38 +711,36 @@ sub from_string_hash {
   sub as_modifiers {
     my ($self) = @_;
     my @mods;
-    push @mods, [ add_minimum => $self->{minimum} ] if exists $self->{minimum};
-    push @mods, [ add_maximum => $self->{maximum} ] if exists $self->{maximum};
-    push @mods, map {; [ add_exclusion => $_ ] } @{$self->{exclusions} || []};
+    push @mods, [add_minimum => $self->{minimum}] if exists $self->{minimum};
+    push @mods, [add_maximum => $self->{maximum}] if exists $self->{maximum};
+    push @mods, map { ; [add_exclusion => $_] } @{$self->{exclusions} || []};
     return \@mods;
   }
 
   sub as_struct {
     my ($self) = @_;
 
-    return 0 if ! keys %$self;
+    return 0 if !keys %$self;
 
-    my @exclusions = @{ $self->{exclusions} || [] };
+    my @exclusions = @{$self->{exclusions} || []};
 
     my @parts;
 
-    for my $tuple (
-      [ qw( >= > minimum ) ],
-      [ qw( <= < maximum ) ],
-    ) {
+    for my $tuple ([qw( >= > minimum )], [qw( <= < maximum )],) {
       my ($op, $e_op, $k) = @$tuple;
       if (exists $self->{$k}) {
-        my @new_exclusions = grep { $_ != $self->{ $k } } @exclusions;
+        my @new_exclusions = grep { $_ != $self->{$k} } @exclusions;
         if (@new_exclusions == @exclusions) {
-          push @parts, [ $op, "$self->{ $k }" ];
-        } else {
-          push @parts, [ $e_op, "$self->{ $k }" ];
+          push @parts, [$op, "$self->{ $k }"];
+        }
+        else {
+          push @parts, [$e_op, "$self->{ $k }"];
           @exclusions = @new_exclusions;
         }
       }
     }
 
-    push @parts, map {; [ "!=", "$_" ] } @exclusions;
+    push @parts, map { ; ["!=", "$_"] } @exclusions;
 
     return \@parts;
   }
@@ -740,16 +748,16 @@ sub from_string_hash {
   sub as_string {
     my ($self) = @_;
 
-    my @parts = @{ $self->as_struct };
+    my @parts = @{$self->as_struct};
 
     return $parts[0][1] if @parts == 1 and $parts[0][0] eq '>=';
 
-    return join q{, }, map {; join q{ }, @$_ } @parts;
+    return join q{, }, map { ; join q{ }, @$_ } @parts;
   }
 
   sub _reject_requirements {
     my ($self, $module, $error) = @_;
-    Carp::confess("illegal requirements for $module: $error")
+    Carp::confess("illegal requirements for $module: $error");
   }
 
   sub with_exact_version {
@@ -758,10 +766,8 @@ sub from_string_hash {
     $self = $self->_clone;
 
     unless ($self->_accepts($version)) {
-      $self->_reject_requirements(
-        $module,
-        "exact specification $version outside of range " . $self->as_string
-      );
+      $self->_reject_requirements($module,
+        "exact specification $version outside of range " . $self->as_string);
     }
 
     return CPAN::Meta::Requirements::_Range::Exact->_new($version);
@@ -772,19 +778,17 @@ sub from_string_hash {
 
     if (defined $self->{minimum} and defined $self->{maximum}) {
       if ($self->{minimum} == $self->{maximum}) {
-        if (grep { $_ == $self->{minimum} } @{ $self->{exclusions} || [] }) {
-          $self->_reject_requirements(
-            $module,
+        if (grep { $_ == $self->{minimum} } @{$self->{exclusions} || []}) {
+          $self->_reject_requirements($module,
             "minimum and maximum are both $self->{minimum}, which is excluded",
           );
         }
 
-        return CPAN::Meta::Requirements::_Range::Exact->_new($self->{minimum})
+        return CPAN::Meta::Requirements::_Range::Exact->_new($self->{minimum});
       }
 
       if ($self->{minimum} > $self->{maximum}) {
-        $self->_reject_requirements(
-          $module,
+        $self->_reject_requirements($module,
           "minimum $self->{minimum} exceeds maximum $self->{maximum}",
         );
       }
@@ -793,13 +797,11 @@ sub from_string_hash {
     # eliminate irrelevant exclusions
     if ($self->{exclusions}) {
       my %seen;
-      @{ $self->{exclusions} } = grep {
-        (! defined $self->{minimum} or $_ >= $self->{minimum})
-        and
-        (! defined $self->{maximum} or $_ <= $self->{maximum})
-        and
-        ! $seen{$_}++
-      } @{ $self->{exclusions} };
+      @{$self->{exclusions}} = grep {
+              (!defined $self->{minimum} or $_ >= $self->{minimum})
+          and (!defined $self->{maximum} or $_ <= $self->{maximum})
+          and !$seen{$_}++
+      } @{$self->{exclusions}};
     }
 
     return $self;
@@ -810,9 +812,10 @@ sub from_string_hash {
     $module = 'module' unless defined $module;
     $self = $self->_clone;
 
-    if (defined (my $old_min = $self->{minimum})) {
+    if (defined(my $old_min = $self->{minimum})) {
       $self->{minimum} = (sort { $b cmp $a } ($minimum, $old_min))[0];
-    } else {
+    }
+    else {
       $self->{minimum} = $minimum;
     }
 
@@ -824,9 +827,10 @@ sub from_string_hash {
     $module = 'module' unless defined $module;
     $self = $self->_clone;
 
-    if (defined (my $old_max = $self->{maximum})) {
+    if (defined(my $old_max = $self->{maximum})) {
       $self->{maximum} = (sort { $a cmp $b } ($maximum, $old_max))[0];
-    } else {
+    }
+    else {
       $self->{maximum} = $maximum;
     }
 
@@ -838,7 +842,7 @@ sub from_string_hash {
     $module = 'module' unless defined $module;
     $self = $self->_clone;
 
-    push @{ $self->{exclusions} ||= [] }, $exclusion;
+    push @{$self->{exclusions} ||= []}, $exclusion;
 
     return $self->_simplify($module);
   }
@@ -848,14 +852,16 @@ sub from_string_hash {
 
     return if defined $self->{minimum} and $version < $self->{minimum};
     return if defined $self->{maximum} and $version > $self->{maximum};
-    return if defined $self->{exclusions}
-          and grep { $version == $_ } @{ $self->{exclusions} };
+    return
+      if defined $self->{exclusions}
+      and grep { $version == $_ } @{$self->{exclusions}};
 
     return 1;
   }
 }
 
 1;
+
 # vim: ts=2 sts=2 sw=2 et:
 
 __END__

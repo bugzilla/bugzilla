@@ -15,8 +15,8 @@ use Bugzilla::BugMail;
 BEGIN { eval "use parent qw(Bugzilla::Job::Mailer)"; }
 
 sub process_job {
-    my ($class, $arg) = @_;
-    Bugzilla::BugMail::dequeue($arg->{vars});
+  my ($class, $arg) = @_;
+  Bugzilla::BugMail::dequeue($arg->{vars});
 }
 
 1;

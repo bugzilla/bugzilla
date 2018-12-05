@@ -17,20 +17,15 @@ use Test::More;
 use File::Spec::Functions ':ALL';
 
 BEGIN {
-    # Don't run tests for installs or automated tests
-    unless ( $ENV{RELEASE_TESTING} ) {
-        plan( skip_all => "Author tests not required for installation" );
-    }
-    my $config = catfile('t', 'critic-core.ini');
-    unless ( eval "use Test::Perl::Critic -profile => '$config'; 1" ) {
-        plan skip_all => 'Test::Perl::Critic required to criticise code';
-    }
+  # Don't run tests for installs or automated tests
+  unless ($ENV{RELEASE_TESTING}) {
+    plan(skip_all => "Author tests not required for installation");
+  }
+  my $config = catfile('t', 'critic-core.ini');
+  unless (eval "use Test::Perl::Critic -profile => '$config'; 1") {
+    plan skip_all => 'Test::Perl::Critic required to criticise code';
+  }
 }
 
 # need to skip t/
-all_critic_ok(
-    'Bugzilla.pm',
-    'Bugzilla/',
-    glob("*.cgi"),
-    glob("*.pl"),
-);
+all_critic_ok('Bugzilla.pm', 'Bugzilla/', glob("*.cgi"), glob("*.pl"),);

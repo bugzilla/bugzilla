@@ -27,60 +27,47 @@ sub get_param_list {
   # and bug_status.is_open is not yet defined (hence the eval), so we use
   # the bug statuses above as they are still hardcoded.
   eval {
-      my @current_closed_states = map {$_->name} closed_bug_statuses();
-      # If no closed state was found, use the default list above.
-      @closed_bug_statuses = @current_closed_states if scalar(@current_closed_states);
+    my @current_closed_states = map { $_->name } closed_bug_statuses();
+
+    # If no closed state was found, use the default list above.
+    @closed_bug_statuses = @current_closed_states if scalar(@current_closed_states);
   };
 
   my @param_list = (
-  {
-   name => 'duplicate_or_move_bug_status',
-   type => 's',
-   choices => \@closed_bug_statuses,
-   default => $closed_bug_statuses[0],
-   checker => \&check_bug_status,
-   onchange => \&change_duplicate_or_move_bug_status
-  },
+    {
+      name     => 'duplicate_or_move_bug_status',
+      type     => 's',
+      choices  => \@closed_bug_statuses,
+      default  => $closed_bug_statuses[0],
+      checker  => \&check_bug_status,
+      onchange => \&change_duplicate_or_move_bug_status
+    },
 
-  {
-   name => 'letsubmitterchoosepriority',
-   type => 'b',
-   default => 1
-  },
+    {name => 'letsubmitterchoosepriority', type => 'b', default => 1},
 
-  {
-   name => 'letsubmitterchoosemilestone',
-   type => 'b',
-   default => 1
-  },
+    {name => 'letsubmitterchoosemilestone', type => 'b', default => 1},
 
-  {
-   name => 'commentonchange_resolution',
-   type => 'b',
-   default => 0
-  },
+    {name => 'commentonchange_resolution', type => 'b', default => 0},
 
-  {
-   name => 'commentonduplicate',
-   type => 'b',
-   default => 0
-  },
+    {name => 'commentonduplicate', type => 'b', default => 0},
 
-  {
-   name => 'resolution_forbidden_with_open_blockers',
-   type => 's',
-   choices => \&_get_resolutions,
-   default => '',
-   checker => \&check_resolution,
-  } );
+    {
+      name    => 'resolution_forbidden_with_open_blockers',
+      type    => 's',
+      choices => \&_get_resolutions,
+      default => '',
+      checker => \&check_resolution,
+    }
+  );
 
   return @param_list;
 }
 
 sub _get_resolutions {
-    my $resolution_field = Bugzilla::Field->new({ name => 'resolution', cache => 1 });
-    # The empty resolution is included - it represents "no value".
-    return [ map { $_->name } @{ $resolution_field->legal_values } ];
+  my $resolution_field = Bugzilla::Field->new({name => 'resolution', cache => 1});
+
+  # The empty resolution is included - it represents "no value".
+  return [map { $_->name } @{$resolution_field->legal_values}];
 }
 
 1;

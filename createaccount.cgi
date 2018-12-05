@@ -20,39 +20,42 @@ use Bugzilla::Token;
 # Just in case someone already has an account, let them get the correct footer
 # on an error message. The user is logged out just after the account is
 # actually created.
-my $user = Bugzilla->login(LOGIN_OPTIONAL);
-my $cgi = Bugzilla->cgi;
+my $user     = Bugzilla->login(LOGIN_OPTIONAL);
+my $cgi      = Bugzilla->cgi;
 my $template = Bugzilla->template;
-my $vars = { doc_section => 'using/creating-an-account.html' };
+my $vars     = {doc_section => 'using/creating-an-account.html'};
 
 print $cgi->header();
 
 my $email = $cgi->param('email');
-my $login = Bugzilla->params->{'use_email_as_login'} ? $email : $cgi->param('login');
+my $login
+  = Bugzilla->params->{'use_email_as_login'} ? $email : $cgi->param('login');
 
 my $request_new_password = $cgi->param('request_new_password');
 
 if ($request_new_password) {
-    $template->process('account/request-new-password.html.tmpl', $vars)
-      || ThrowTemplateError($template->error());
+  $template->process('account/request-new-password.html.tmpl', $vars)
+    || ThrowTemplateError($template->error());
 }
 elsif ($email && $login) {
-    $user->check_account_creation_enabled;
-    # Check the hash token to make sure this user actually submitted
-    # the create account form.
-    my $token = $cgi->param('token');
-    check_hash_token($token, ['create_account']);
+  $user->check_account_creation_enabled;
 
-    $user->check_and_send_account_creation_confirmation($login, $email);
-    $vars->{'login'} = $login;
-    $vars->{'email'} = $email;
+  # Check the hash token to make sure this user actually submitted
+  # the create account form.
+  my $token = $cgi->param('token');
+  check_hash_token($token, ['create_account']);
 
-    $template->process("account/created.html.tmpl", $vars)
-      || ThrowTemplateError($template->error());
+  $user->check_and_send_account_creation_confirmation($login, $email);
+  $vars->{'login'} = $login;
+  $vars->{'email'} = $email;
+
+  $template->process("account/created.html.tmpl", $vars)
+    || ThrowTemplateError($template->error());
 }
 else {
-    $user->check_account_creation_enabled;
-    # Show the standard "would you like to create an account?" form.
-    $template->process('account/create.html.tmpl', $vars)
-      || ThrowTemplateError($template->error());
+  $user->check_account_creation_enabled;
+
+  # Show the standard "would you like to create an account?" form.
+  $template->process('account/create.html.tmpl', $vars)
+    || ThrowTemplateError($template->error());
 }

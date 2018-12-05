@@ -19,7 +19,7 @@ use Digest::MD5 qw(md5_hex);
 use parent qw(Text::MultiMarkdown);
 
 # use private code points
-use constant FENCED_BLOCK => "\N{U+F111}";
+use constant FENCED_BLOCK          => "\N{U+F111}";
 use constant INDENTED_FENCED_BLOCK => "\N{U+F222}";
 
 # Regex to match balanced [brackets]. See Friedl's
@@ -34,6 +34,7 @@ $g_nested_brackets = qr{
        \]
     )*
 }x;
+
 # Doesn't allow for whitespace, because we're using it to match URLs:
 $g_nested_parens = qr{
     (?>                                 # Atomic matching
@@ -48,70 +49,74 @@ $g_nested_parens = qr{
 our %g_escape_table;
 
 foreach my $char (split //, '\\`*_{}[]()>#+-.!~') {
-    $g_escape_table{$char} = md5_hex($char);
+  $g_escape_table{$char} = md5_hex($char);
 }
 $g_escape_table{'&lt;'} = md5_hex('&lt;');
 
 sub new {
-    my $invocant = shift;
-    my $class = ref $invocant || $invocant;
-    my $obj = $class->SUPER::new(tab_width => MARKDOWN_TAB_WIDTH,
-                              # Bugzilla uses HTML not XHTML
-                              empty_element_suffix => '>');
-    $obj->{tab_width} = MARKDOWN_TAB_WIDTH;
-    $obj->{empty_element_suffix} = '>';
-    return $obj;
+  my $invocant = shift;
+  my $class    = ref $invocant || $invocant;
+  my $obj      = $class->SUPER::new(
+    tab_width => MARKDOWN_TAB_WIDTH,
+
+    # Bugzilla uses HTML not XHTML
+    empty_element_suffix => '>'
+  );
+  $obj->{tab_width}            = MARKDOWN_TAB_WIDTH;
+  $obj->{empty_element_suffix} = '>';
+  return $obj;
 }
 
 sub markdown {
-    my ($self, $text, $bug, $comment) = @_;
-    my $user = Bugzilla->user;
+  my ($self, $text, $bug, $comment) = @_;
+  my $user = Bugzilla->user;
 
-    if ($user->settings->{use_markdown}->{is_enabled}
-        && $user->setting('use_markdown') eq 'on')
-    {
-        $text = $self->_removeFencedCodeBlocks($text);
-        $text = Bugzilla::Template::quoteUrls($text, $bug, $comment, $user, 1);
-        return $self->SUPER::markdown($text);
-    }
+  if ( $user->settings->{use_markdown}->{is_enabled}
+    && $user->setting('use_markdown') eq 'on')
+  {
+    $text = $self->_removeFencedCodeBlocks($text);
+    $text = Bugzilla::Template::quoteUrls($text, $bug, $comment, $user, 1);
+    return $self->SUPER::markdown($text);
+  }
 
-    return Bugzilla::Template::quoteUrls($text, $bug, $comment, $user);
+  return Bugzilla::Template::quoteUrls($text, $bug, $comment, $user);
 }
 
 sub _code_blocks {
-    my ($self) = @_;
-    $self->{code_blocks} = $self->{params}->{code_blocks} ||= [];
-    return $self->{code_blocks};
+  my ($self) = @_;
+  $self->{code_blocks} = $self->{params}->{code_blocks} ||= [];
+  return $self->{code_blocks};
 }
 
 sub _indented_code_blocks {
-    my ($self) = @_;
-    $self->{indented_code_blocks} = $self->{params}->{indented_code_blocks} ||= [];
-    return $self->{indented_code_blocks};
+  my ($self) = @_;
+  $self->{indented_code_blocks} = $self->{params}->{indented_code_blocks} ||= [];
+  return $self->{indented_code_blocks};
 }
 
 sub _RunSpanGamut {
-    # These are all the transformations that occur *within* block-level
-    # tags like paragraphs, headers, and list items.
 
-    my ($self, $text) = @_;
+  # These are all the transformations that occur *within* block-level
+  # tags like paragraphs, headers, and list items.
 
-    $text = $self->_DoCodeSpans($text);
-    $text = $self->_EscapeSpecialCharsWithinTagAttributes($text);
-    $text = $self->_EscapeSpecialChars($text);
+  my ($self, $text) = @_;
 
-    $text = $self->_DoAnchors($text);
+  $text = $self->_DoCodeSpans($text);
+  $text = $self->_EscapeSpecialCharsWithinTagAttributes($text);
+  $text = $self->_EscapeSpecialChars($text);
 
-    # Strikethroughs is Bugzilla's extension
-    $text = $self->_DoStrikethroughs($text);
+  $text = $self->_DoAnchors($text);
 
-    $text = $self->_DoAutoLinks($text);
-    $text = $self->_EncodeAmpsAndAngles($text);
-    $text = $self->_DoItalicsAndBold($text);
+  # Strikethroughs is Bugzilla's extension
+  $text = $self->_DoStrikethroughs($text);
 
-    $text =~ s/\n/<br$self->{empty_element_suffix}\n/g;
+  $text = $self->_DoAutoLinks($text);
+  $text = $self->_EncodeAmpsAndAngles($text);
+  $text = $self->_DoItalicsAndBold($text);
 
-    return $text;
+  $text =~ s/\n/<br$self->{empty_element_suffix}\n/g;
+
+  return $text;
 }
 
 # We first replace all fenced code blocks with just their
@@ -122,8 +127,8 @@ sub _RunSpanGamut {
 # structures. The contents of the body will be processed after
 # processing markdown structures.
 sub _removeFencedCodeBlocks {
-    my ($self, $text) = @_;
-    $text =~ s{
+  my ($self, $text) = @_;
+  $text =~ s{
         ^ `{3,} [\s\t]* \n
         (                # $1 = the entire code block
           (?: .* \n+)+?
@@ -134,7 +139,7 @@ sub _removeFencedCodeBlocks {
             "${\FENCED_BLOCK}\n";
         }egmx;
 
-    $text =~ s{
+  $text =~ s{
         (?:\n\n|\A)
         (                # $1 = the code block -- one or more lines, starting with a space/tab
           (?:
@@ -147,21 +152,22 @@ sub _removeFencedCodeBlocks {
             push @{$self->_indented_code_blocks}, $1;
             "\n${\INDENTED_FENCED_BLOCK}\n";
         }egmx;
-    return $text;
+  return $text;
 }
 
 # Override to check for HTML-escaped <>" chars.
 sub _StripLinkDefinitions {
-    my ($self, $text) = @_;
+  my ($self, $text) = @_;
 
-    #
-    # Strips link definitions from text, stores the URLs and titles in
-    # hash references.
-    #
-    my $less_than_tab = $self->{tab_width} - 1;
+  #
+  # Strips link definitions from text, stores the URLs and titles in
+  # hash references.
+  #
+  my $less_than_tab = $self->{tab_width} - 1;
 
-    # Link defs are in the form: ^[id]: url "optional title"
-    while ($text =~ s{
+  # Link defs are in the form: ^[id]: url "optional title"
+  while (
+    $text =~ s{
             ^[ ]{0,$less_than_tab}\[(.+)\]: # id = \$1
               [ \t]*
               \n?               # maybe *one* newline
@@ -178,26 +184,29 @@ sub _StripLinkDefinitions {
                 [ \t]*
             )?  # title is optional
             (?:\n+|\Z)
-        }{}omx) {
-        $self->{_urls}{lc $1} = $self->_EncodeAmpsAndAngles( $2 );    # Link IDs are case-insensitive
-        if ($3) {
-            $self->{_titles}{lc $1} = $3;
-            $self->{_titles}{lc $1} =~ s/"/&quot;/g;
-        }
-
+        }{}omx
+    )
+  {
+    $self->{_urls}{lc $1} = $self->_EncodeAmpsAndAngles($2); # Link IDs are case-insensitive
+    if ($3) {
+      $self->{_titles}{lc $1} = $3;
+      $self->{_titles}{lc $1} =~ s/"/&quot;/g;
     }
 
-    return $text;
+  }
+
+  return $text;
 }
 
 # We need to look for HTML-escaped '<' and '>' (i.e. &lt; and &gt;).
 # We also remove Email linkification from the original implementation
 # as it is already done in Bugzilla's quoteUrls().
 sub _DoAutoLinks {
-    my ($self, $text) = @_;
+  my ($self, $text) = @_;
 
-    $text =~ s{(?:<|&lt;)((?:https?|ftp):[^'">\s]+?)(?:>|&gt;)}{<a href="$1">$1</a>}gi;
-    return $text;
+  $text
+    =~ s{(?:<|&lt;)((?:https?|ftp):[^'">\s]+?)(?:>|&gt;)}{<a href="$1">$1</a>}gi;
+  return $text;
 }
 
 # The main reasons for overriding this method are
@@ -207,17 +216,17 @@ sub _DoAnchors {
 #
 # Turn Markdown link shortcuts into <a> tags.
 #
-    my ($self, $text) = @_;
+  my ($self, $text) = @_;
 
-    # We revert linkifications of non-email links and only
-    # those links whose URL and title are the same because
-    # this way we can be sure that link is generated by quoteUrls()
-    $text =~ s@<a \s+ href="(?! mailto ) (.+?)">\1</a>@$1@xmg;
+  # We revert linkifications of non-email links and only
+  # those links whose URL and title are the same because
+  # this way we can be sure that link is generated by quoteUrls()
+  $text =~ s@<a \s+ href="(?! mailto ) (.+?)">\1</a>@$1@xmg;
 
-    #
-    # First, handle reference-style links: [link text] [id]
-    #
-    $text =~ s{
+  #
+  # First, handle reference-style links: [link text] [id]
+  #
+  $text =~ s{
         (                   # wrap whole match in $1
           \[
             ($g_nested_brackets)    # link text = $2
@@ -244,10 +253,10 @@ sub _DoAnchors {
         $self->_GenerateAnchor($whole_match, $link_text, $link_id);
     }xsge;
 
-    #
-    # Next, inline-style links: [link text](url "optional title")
-    #
-    $text =~ s{
+  #
+  # Next, inline-style links: [link text](url "optional title")
+  #
+  $text =~ s{
         (               # wrap whole match in $1
           \[
             ($g_nested_brackets)    # link text = $2
@@ -283,12 +292,12 @@ sub _DoAnchors {
         $self->_GenerateAnchor($whole_match, $link_text, undef, $url, $title);
     }xsge;
 
-    #
-    # Handle reference-style shortcuts: [link text]
-    # These must come last in case you've also got [link test][1]
-    # or [link test](/foo)
-    #
-    $text =~ s{
+  #
+  # Handle reference-style shortcuts: [link text]
+  # These must come last in case you've also got [link test][1]
+  # or [link test](/foo)
+  #
+  $text =~ s{
         (                    # wrap whole match in $1
           \[
             ([^\[\]]+)        # link text = $2; can't contain '[' or ']'
@@ -303,10 +312,10 @@ sub _DoAnchors {
         $self->_GenerateAnchor($whole_match, $link_text, $link_id);
     }xsge;
 
-    # Last, handle "naked" references
-    # Caveat, does not handle ;http://amazon.com
-    my $safe_url_regexp = Bugzilla::Template::SAFE_URL_REGEXP();
-    $text =~ s{
+  # Last, handle "naked" references
+  # Caveat, does not handle ;http://amazon.com
+  my $safe_url_regexp = Bugzilla::Template::SAFE_URL_REGEXP();
+  $text =~ s{
         (
           (^|(?<![;^"'<>]))  # negative lookbehind, including ';' in '&lt;'
           (                  # wrap url in $3
@@ -319,7 +328,7 @@ sub _DoAnchors {
         $self->_GenerateAnchor($whole_match, $url, undef, $url, undef);
     }xsge;
 
-    return $text;
+  return $text;
 }
 
 # The purpose of overriding this function is to add support
@@ -330,69 +339,72 @@ sub _DoAnchors {
 # and we do not want a part of those variables to look emphasized/bold.
 # Instead, we render them as the way they originally are.
 sub _DoItalicsAndBold {
-    my ($self, $text) = @_;
+  my ($self, $text) = @_;
 
-    # Handle at beginning of lines:
-    $text =~ s{ (^__ (?=\S) (.+?[*_]*) (?<=\S) __ (?!\S)) }
+  # Handle at beginning of lines:
+  $text =~ s{ (^__ (?=\S) (.+?[*_]*) (?<=\S) __ (?!\S)) }
               {
                   my $result = _has_multiple_underscores($2) ? $1 : "<strong>$2</strong>";
                   $result;
               }gsxe;
 
-    $text =~ s{ ^\*\* (?=\S) (.+?[*_]*) (?<=\S) \*\* }{<strong>$1</strong>}gsx;
+  $text =~ s{ ^\*\* (?=\S) (.+?[*_]*) (?<=\S) \*\* }{<strong>$1</strong>}gsx;
 
-    $text =~ s{ (^_ (?=\S) (.+?) (?<=\S) _ (?!\S)) }
+  $text =~ s{ (^_ (?=\S) (.+?) (?<=\S) _ (?!\S)) }
               {
                   my $result = _has_multiple_underscores($2) ? $1 : "<em>$2</em>";
                   $result;
               }gsxe;
 
-    $text =~ s{ ^\* (?=\S) (.+?) (?<=\S) \* }{<em>$1</em>}gsx;
+  $text =~ s{ ^\* (?=\S) (.+?) (?<=\S) \* }{<em>$1</em>}gsx;
 
-    # <strong> must go first:
-    $text =~ s{ ( (?<=\s) __ (?=\S) (.+?[*_]*) (?<=\S) __ (?!\S) ) }
+  # <strong> must go first:
+  $text =~ s{ ( (?<=\s) __ (?=\S) (.+?[*_]*) (?<=\S) __ (?!\S) ) }
               {
                   my $result = _has_multiple_underscores($2) ? $1 : "<strong>$2</strong>";
                   $result;
               }gsxe;
 
 
-    $text =~ s{ (?<=\s) \*\* (?=\S) (.+?[*_]*) (?<=\S) \*\* }{<strong>$1</strong>}gsx;
+  $text
+    =~ s{ (?<=\s) \*\* (?=\S) (.+?[*_]*) (?<=\S) \*\* }{<strong>$1</strong>}gsx;
 
-    $text =~ s{ ( (?<=\s) _ (?=\S) (.+?) (?<=\S) _ (?!\S) ) }
+  $text =~ s{ ( (?<=\s) _ (?=\S) (.+?) (?<=\S) _ (?!\S) ) }
               {
                   my $result = _has_multiple_underscores($2) ? $1 : "<em>$2</em>";
                   $result;
               }gsxe;
 
-    $text =~ s{ (?<=\s) \* (?=\S) (.+?) (?<=\S) \* }{<em>$1</em>}gsx;
+  $text =~ s{ (?<=\s) \* (?=\S) (.+?) (?<=\S) \* }{<em>$1</em>}gsx;
 
-    # And now, a second pass to catch nested strong and emphasis special cases
-    $text =~ s{ ( (?<=\s) __ (?=\S) (.+?[*_]*) (?<=\S) __ (\S*) ) }
+  # And now, a second pass to catch nested strong and emphasis special cases
+  $text =~ s{ ( (?<=\s) __ (?=\S) (.+?[*_]*) (?<=\S) __ (\S*) ) }
               {
                   my $result = _has_multiple_underscores($3) ? $1 : "<strong>$2</strong>$3";
                   $result;
               }gsxe;
 
-    $text =~ s{ (?<=\s) \*\* (?=\S) (.+?[*_]*) (?<=\S) \*\* }{<strong>$1</strong>}gsx;
-    $text =~ s{ ( (?<=\s) _ (?=\S) (.+?) (?<=\S) _ (\S*) ) }
+  $text
+    =~ s{ (?<=\s) \*\* (?=\S) (.+?[*_]*) (?<=\S) \*\* }{<strong>$1</strong>}gsx;
+  $text =~ s{ ( (?<=\s) _ (?=\S) (.+?) (?<=\S) _ (\S*) ) }
               {
                   my $result = _has_multiple_underscores($3) ? $1 : "<em>$2</em>$3";
                   $result;
               }gsxe;
 
-    $text =~ s{ (?<=\s) \* (?=\S) (.+?) (?<=\S) \* }{<em>$1</em>}gsx;
+  $text =~ s{ (?<=\s) \* (?=\S) (.+?) (?<=\S) \* }{<em>$1</em>}gsx;
 
-    return $text;
+  return $text;
 }
 
 sub _DoStrikethroughs {
-    my ($self, $text) = @_;
+  my ($self, $text) = @_;
 
-    $text =~ s{ ^ ~~ (?=\S) ([^~]+?) (?<=\S) ~~ (?!~) }{<del>$1</del>}gsx;
-    $text =~ s{ (?<=_|[^~\w]) ~~ (?=\S) ([^~]+?) (?<=\S) ~~ (?!~) }{<del>$1</del>}gsx;
+  $text =~ s{ ^ ~~ (?=\S) ([^~]+?) (?<=\S) ~~ (?!~) }{<del>$1</del>}gsx;
+  $text
+    =~ s{ (?<=_|[^~\w]) ~~ (?=\S) ([^~]+?) (?<=\S) ~~ (?!~) }{<del>$1</del>}gsx;
 
-    return $text;
+  return $text;
 }
 
 # The original _DoCodeSpans() uses the 's' modifier in its regex
@@ -400,9 +412,9 @@ sub _DoStrikethroughs {
 # We copy the code from the original implementation and remove the
 # 's' modifier from it.
 sub _DoCodeSpans {
-    my ($self, $text) = @_;
+  my ($self, $text) = @_;
 
-    $text =~ s@
+  $text =~ s@
             (?<!\\)     # Character before opening ` can't be a backslash
             (`+)        # $1 = Opening run of `
             (.+?)       # $2 = The code block
@@ -417,21 +429,21 @@ sub _DoCodeSpans {
             "<code>$c</code>";
         @egx;
 
-    return $text;
+  return $text;
 }
 
 # Override to delay after DoBlockQuotes
 sub _DoCodeBlocks {
-    my ($self, $text) = @_;
+  my ($self, $text) = @_;
 
-    return $text;
+  return $text;
 }
 
 # add GFM Fenced Code Blocks
 sub _DoDelayCodeBlocks {
-    my ($self, $text) = @_;
+  my ($self, $text) = @_;
 
-    $text =~ s{
+  $text =~ s{
         ^ (${\FENCED_BLOCK}|${\INDENTED_FENCED_BLOCK})
         }{
             my $aref = ($1 eq FENCED_BLOCK) ? $self->_code_blocks : $self->_indented_code_blocks;
@@ -446,13 +458,13 @@ sub _DoDelayCodeBlocks {
             $result;
         }egmx;
 
-    return $text;
+  return $text;
 }
 
 sub _DoBlockQuotes {
-    my ($self, $text) = @_;
+  my ($self, $text) = @_;
 
-    $text =~ s{
+  $text =~ s{
           (                             # Wrap whole match in $1
             (?:
               ^[ \t]*&gt;[ \t]?         # '>' at the start of a line
@@ -476,61 +488,63 @@ sub _DoBlockQuotes {
             "<blockquote class=\"markdown\">\n$bq\n</blockquote>\n\n";
         }egmx;
 
-    $text = $self->_DoDelayCodeBlocks($text);
-    return $text;
+  $text = $self->_DoDelayCodeBlocks($text);
+  return $text;
 }
 
 sub _DoLists {
-    my ($self, $text) = @_;
+  my ($self, $text) = @_;
 
-    $text = $self->SUPER::_DoLists($text);
+  $text = $self->SUPER::_DoLists($text);
 
-    # strip trailing newlines created by DoLists
-    $text =~ s/\n</</g;
+  # strip trailing newlines created by DoLists
+  $text =~ s/\n</</g;
 
-    return $text;
+  return $text;
 }
 
 sub _EncodeCode {
-    my ($self, $text) = @_;
+  my ($self, $text) = @_;
 
-    # We need to unescape the escaped HTML characters in code blocks.
-    # These are the reverse of the escapings done in Bugzilla::Util::html_quote()
-    $text =~ s/&lt;/</g;
-    $text =~ s/&gt;/>/g;
-    $text =~ s/&quot;/"/g;
-    $text =~ s/&#64;/@/g;
-    # '&amp;' substitution must be the last one, otherwise a literal like '&gt;'
-    # will turn to '>' because '&' is already changed to '&amp;' in Bugzilla::Util::html_quote().
-    # In other words, html_quote() will change '&gt;' to '&amp;gt;' and then we will
-    # change '&amp;gt' -> '&gt;' -> '>' if we write this substitution as the first one.
-    $text =~ s/&amp;/&/g;
-    $text =~ s{<a \s+ href="(?:mailto:)? (.+?)"> \1 </a>}{$1}xmgi;
-    $text = $self->SUPER::_EncodeCode($text);
-    $text =~ s/~/$g_escape_table{'~'}/go;
-    # Encode '&lt;' to prevent URLs from getting linkified in code spans
-    $text =~ s/&lt;/$g_escape_table{'&lt;'}/go;
+  # We need to unescape the escaped HTML characters in code blocks.
+  # These are the reverse of the escapings done in Bugzilla::Util::html_quote()
+  $text =~ s/&lt;/</g;
+  $text =~ s/&gt;/>/g;
+  $text =~ s/&quot;/"/g;
+  $text =~ s/&#64;/@/g;
 
-    return $text;
+# '&amp;' substitution must be the last one, otherwise a literal like '&gt;'
+# will turn to '>' because '&' is already changed to '&amp;' in Bugzilla::Util::html_quote().
+# In other words, html_quote() will change '&gt;' to '&amp;gt;' and then we will
+# change '&amp;gt' -> '&gt;' -> '>' if we write this substitution as the first one.
+  $text =~ s/&amp;/&/g;
+  $text =~ s{<a \s+ href="(?:mailto:)? (.+?)"> \1 </a>}{$1}xmgi;
+  $text = $self->SUPER::_EncodeCode($text);
+  $text =~ s/~/$g_escape_table{'~'}/go;
+
+  # Encode '&lt;' to prevent URLs from getting linkified in code spans
+  $text =~ s/&lt;/$g_escape_table{'&lt;'}/go;
+
+  return $text;
 }
 
 sub _EncodeBackslashEscapes {
-    my ($self, $text) = @_;
+  my ($self, $text) = @_;
 
-    $text = $self->SUPER::_EncodeBackslashEscapes($text);
-    $text =~ s/\\~/$g_escape_table{'~'}/go;
+  $text = $self->SUPER::_EncodeBackslashEscapes($text);
+  $text =~ s/\\~/$g_escape_table{'~'}/go;
 
-    return $text;
+  return $text;
 }
 
 sub _UnescapeSpecialChars {
-    my ($self, $text) = @_;
+  my ($self, $text) = @_;
 
-    $text = $self->SUPER::_UnescapeSpecialChars($text);
-    $text =~ s/$g_escape_table{'~'}/~/go;
-    $text =~ s/$g_escape_table{'&lt;'}/&lt;/go;
+  $text = $self->SUPER::_UnescapeSpecialChars($text);
+  $text =~ s/$g_escape_table{'~'}/~/go;
+  $text =~ s/$g_escape_table{'&lt;'}/&lt;/go;
 
-    return $text;
+  return $text;
 }
 
 # Check if the passed string is of the form multiple_underscores_in_a_word.
@@ -538,11 +552,11 @@ sub _UnescapeSpecialChars {
 # any white-space. Then, if the string is composed of non-space chunks which
 # are bound together with underscores, the string has the desired form.
 sub _has_multiple_underscores {
-    my $string = shift;
-    return 0 unless $string;
-    return 0 if $string =~ /\s/;
-    return 1 if $string =~ /_/;
-    return 0;
+  my $string = shift;
+  return 0 unless $string;
+  return 0 if $string =~ /\s/;
+  return 1 if $string =~ /_/;
+  return 0;
 }
 
 1;

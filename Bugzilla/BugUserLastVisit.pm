@@ -25,25 +25,27 @@ use constant LIST_ORDER     => 'id';
 use constant NAME_FIELD     => 'id';
 
 # turn off auditing and exclude these objects from memcached
-use constant { AUDIT_CREATES => 0,
-               AUDIT_UPDATES => 0,
-               AUDIT_REMOVES => 0,
-               USE_MEMCACHED => 0 };
+use constant {
+  AUDIT_CREATES => 0,
+  AUDIT_UPDATES => 0,
+  AUDIT_REMOVES => 0,
+  USE_MEMCACHED => 0
+};
 
 #####################################################################
 # Provide accessors for our columns
 #####################################################################
 
-sub id            { return $_[0]->{id}            }
-sub bug_id        { return $_[0]->{bug_id}        }
-sub user_id       { return $_[0]->{user_id}       }
+sub id            { return $_[0]->{id} }
+sub bug_id        { return $_[0]->{bug_id} }
+sub user_id       { return $_[0]->{user_id} }
 sub last_visit_ts { return $_[0]->{last_visit_ts} }
 
 sub user {
-    my $self = shift;
+  my $self = shift;
 
-    $self->{user} //= Bugzilla::User->new({ id => $self->user_id, cache => 1 });
-    return $self->{user};
+  $self->{user} //= Bugzilla::User->new({id => $self->user_id, cache => 1});
+  return $self->{user};
 }
 
 1;

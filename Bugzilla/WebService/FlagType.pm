@@ -22,292 +22,308 @@ use Bugzilla::Util qw(trim);
 use List::MoreUtils qw(uniq);
 
 use constant PUBLIC_METHODS => qw(
-    create
-    get
-    update
+  create
+  get
+  update
 );
 
 sub get {
-    my ($self, $params) = @_;
-    my $dbh  = Bugzilla->switch_to_shadow_db();
-    my $user = Bugzilla->user;
+  my ($self, $params) = @_;
+  my $dbh  = Bugzilla->switch_to_shadow_db();
+  my $user = Bugzilla->user;
 
-    defined $params->{product}
-        || ThrowCodeError('param_required',
-                          { function => 'Bug.flag_types',
-                            param   => 'product' });
+  defined $params->{product}
+    || ThrowCodeError('param_required',
+    {function => 'Bug.flag_types', param => 'product'});
 
-    my $product   = delete $params->{product};
-    my $component = delete $params->{component};
+  my $product   = delete $params->{product};
+  my $component = delete $params->{component};
 
-    $product = Bugzilla::Product->check({ name => $product, cache => 1 });
-    $component = Bugzilla::Component->check(
-        { name => $component, product => $product, cache => 1 }) if $component;
+  $product = Bugzilla::Product->check({name => $product, cache => 1});
+  $component
+    = Bugzilla::Component->check(
+    {name => $component, product => $product, cache => 1})
+    if $component;
 
-    my $flag_params = { product_id => $product->id };
-    $flag_params->{component_id} = $component->id if $component;
-    my $matched_flag_types = Bugzilla::FlagType::match($flag_params);
+  my $flag_params = {product_id => $product->id};
+  $flag_params->{component_id} = $component->id if $component;
+  my $matched_flag_types = Bugzilla::FlagType::match($flag_params);
 
-    my $flag_types = { bug => [], attachment => [] };
-    foreach my $flag_type (@$matched_flag_types) {
-        push(@{ $flag_types->{bug} }, $self->_flagtype_to_hash($flag_type, $product))
-            if $flag_type->target_type eq 'bug';
-        push(@{ $flag_types->{attachment} }, $self->_flagtype_to_hash($flag_type, $product))
-            if $flag_type->target_type eq 'attachment';
-    }
+  my $flag_types = {bug => [], attachment => []};
+  foreach my $flag_type (@$matched_flag_types) {
+    push(@{$flag_types->{bug}}, $self->_flagtype_to_hash($flag_type, $product))
+      if $flag_type->target_type eq 'bug';
+    push(
+      @{$flag_types->{attachment}},
+      $self->_flagtype_to_hash($flag_type, $product)
+    ) if $flag_type->target_type eq 'attachment';
+  }
 
-    return $flag_types;
+  return $flag_types;
 }
 
 sub create {
-    my ($self, $params) = @_;
-    my $user = Bugzilla->login(LOGIN_REQUIRED);
+  my ($self, $params) = @_;
+  my $user = Bugzilla->login(LOGIN_REQUIRED);
 
-    $user->in_group('editcomponents')
-        || scalar(@{$user->get_products_by_permission('editcomponents')})
-        || ThrowUserError("auth_failure", { group => "editcomponents",
-                                         action => "add",
-                                         object => "flagtypes" });
+  $user->in_group('editcomponents')
+    || scalar(@{$user->get_products_by_permission('editcomponents')})
+    || ThrowUserError("auth_failure",
+    {group => "editcomponents", action => "add", object => "flagtypes"});
 
-    $params->{name} || ThrowCodeError('param_required', { param => 'name' });
-    $params->{description} || ThrowCodeError('param_required', { param => 'description' });
+  $params->{name} || ThrowCodeError('param_required', {param => 'name'});
+  $params->{description}
+    || ThrowCodeError('param_required', {param => 'description'});
 
-    my %args = (
-        sortkey => 1,
-        name => undef,
-        inclusions => ['0:0'],  # Default to __ALL__:__ALL__
-        cc_list => '',
-        description => undef,
-        is_requestable => 'on',
-        exclusions => [],
-        is_multiplicable => 'on',
-        request_group => '',
-        is_active => 'on',
-        is_specifically_requestable => 'on',
-        target_type => 'bug',
-        grant_group => '',
-    );
+  my %args = (
+    sortkey                     => 1,
+    name                        => undef,
+    inclusions                  => ['0:0'],    # Default to __ALL__:__ALL__
+    cc_list                     => '',
+    description                 => undef,
+    is_requestable              => 'on',
+    exclusions                  => [],
+    is_multiplicable            => 'on',
+    request_group               => '',
+    is_active                   => 'on',
+    is_specifically_requestable => 'on',
+    target_type                 => 'bug',
+    grant_group                 => '',
+  );
 
-    foreach my $key (keys %args) {
-        $args{$key} = $params->{$key} if defined($params->{$key});
+  foreach my $key (keys %args) {
+    $args{$key} = $params->{$key} if defined($params->{$key});
+  }
+
+  $args{name}        = trim($params->{name});
+  $args{description} = trim($params->{description});
+
+  # Is specifically requestable is actually is_requesteeable
+  if (exists $args{is_specifically_requestable}) {
+    $args{is_requesteeble} = delete $args{is_specifically_requestable};
+  }
+
+# Default is on for the tickbox flags.
+# If the user has set them to 'off' then undefine them so the flags are not ticked
+  foreach
+    my $arg_name (qw(is_requestable is_multiplicable is_active is_requesteeble))
+  {
+    if (defined($args{$arg_name}) && ($args{$arg_name} eq '0')) {
+      $args{$arg_name} = undef;
     }
+  }
 
-    $args{name} = trim($params->{name});
-    $args{description} = trim($params->{description});
+  # Process group inclusions and exclusions
+  $args{inclusions} = _process_lists($params->{inclusions})
+    if defined $params->{inclusions};
+  $args{exclusions} = _process_lists($params->{exclusions})
+    if defined $params->{exclusions};
 
-    # Is specifically requestable is actually is_requesteeable
-    if (exists $args{is_specifically_requestable}) {
-        $args{is_requesteeble} = delete $args{is_specifically_requestable};
-    }
+  my $flagtype = Bugzilla::FlagType->create(\%args);
 
-    # Default is on for the tickbox flags.
-    # If the user has set them to 'off' then undefine them so the flags are not ticked
-    foreach my $arg_name (qw(is_requestable is_multiplicable is_active is_requesteeble)) {
-        if (defined($args{$arg_name}) && ($args{$arg_name} eq '0')) {
-            $args{$arg_name} = undef;
-        }
-    }
-
-    # Process group inclusions and exclusions
-    $args{inclusions} = _process_lists($params->{inclusions}) if defined $params->{inclusions};
-    $args{exclusions} = _process_lists($params->{exclusions}) if defined $params->{exclusions};
-
-    my $flagtype = Bugzilla::FlagType->create(\%args);
-
-    return { id => $self->type('int', $flagtype->id)  };
+  return {id => $self->type('int', $flagtype->id)};
 }
 
 sub update {
-    my ($self, $params) = @_;
-    my $dbh = Bugzilla->dbh;
-    my $user = Bugzilla->login(LOGIN_REQUIRED);
+  my ($self, $params) = @_;
+  my $dbh  = Bugzilla->dbh;
+  my $user = Bugzilla->login(LOGIN_REQUIRED);
 
-    $user->in_group('editcomponents')
-        || scalar(@{$user->get_products_by_permission('editcomponents')})
-        || ThrowUserError("auth_failure", { group  => "editcomponents",
-                                            action => "edit",
-                                            object => "flagtypes" });
+  $user->in_group('editcomponents')
+    || scalar(@{$user->get_products_by_permission('editcomponents')})
+    || ThrowUserError("auth_failure",
+    {group => "editcomponents", action => "edit", object => "flagtypes"});
 
-    defined($params->{names}) || defined($params->{ids})
-        || ThrowCodeError('params_required',
-               { function => 'FlagType.update', params => ['ids', 'names'] });
+  defined($params->{names})
+    || defined($params->{ids})
+    || ThrowCodeError('params_required',
+    {function => 'FlagType.update', params => ['ids', 'names']});
 
-    # Get the list of unique flag type ids we are updating
-    my @flag_type_ids = defined($params->{ids}) ? @{$params->{ids}} : ();
-    if (defined $params->{names}) {
-        push @flag_type_ids, map { $_->id }
-            @{ Bugzilla::FlagType::match({ name => $params->{names} }) };
+  # Get the list of unique flag type ids we are updating
+  my @flag_type_ids = defined($params->{ids}) ? @{$params->{ids}} : ();
+  if (defined $params->{names}) {
+    push @flag_type_ids,
+      map { $_->id } @{Bugzilla::FlagType::match({name => $params->{names}})};
+  }
+  @flag_type_ids = uniq @flag_type_ids;
+
+  # We delete names and ids to keep only new values to set.
+  delete $params->{names};
+  delete $params->{ids};
+
+  # Process group inclusions and exclusions
+  # We removed them from $params because these are handled differently
+  my $inclusions = _process_lists(delete $params->{inclusions})
+    if defined $params->{inclusions};
+  my $exclusions = _process_lists(delete $params->{exclusions})
+    if defined $params->{exclusions};
+
+  $dbh->bz_start_transaction();
+  my %changes = ();
+
+  foreach my $flag_type_id (@flag_type_ids) {
+    my ($flagtype, $can_fully_edit)
+      = $user->check_can_admin_flagtype($flag_type_id);
+
+    if ($can_fully_edit) {
+      $flagtype->set_all($params);
     }
-    @flag_type_ids = uniq @flag_type_ids;
-
-    # We delete names and ids to keep only new values to set.
-    delete $params->{names};
-    delete $params->{ids};
-
-    # Process group inclusions and exclusions
-    # We removed them from $params because these are handled differently
-    my $inclusions = _process_lists(delete $params->{inclusions}) if defined $params->{inclusions};
-    my $exclusions = _process_lists(delete $params->{exclusions}) if defined $params->{exclusions};
-
-    $dbh->bz_start_transaction();
-    my %changes = ();
-
-    foreach my $flag_type_id (@flag_type_ids) {
-        my ($flagtype, $can_fully_edit) = $user->check_can_admin_flagtype($flag_type_id);
-
-        if ($can_fully_edit) {
-            $flagtype->set_all($params);
-        }
-        elsif (scalar keys %$params) {
-            ThrowUserError('flag_type_not_editable', { flagtype => $flagtype });
-        }
-
-        # Process the clusions
-        foreach my $type ('inclusions', 'exclusions') {
-            my $clusions = $type eq 'inclusions' ? $inclusions : $exclusions;
-            next if not defined $clusions;
-
-            my @extra_clusions = ();
-            if (!$user->in_group('editcomponents')) {
-                my $products = $user->get_products_by_permission('editcomponents');
-                # Bring back the products the user cannot edit.
-                foreach my $item (values %{$flagtype->$type}) {
-                    my ($prod_id, $comp_id) = split(':', $item);
-                    push(@extra_clusions, $item) unless grep { $_->id == $prod_id } @$products;
-                }
-            }
-
-            $flagtype->set_clusions({
-                $type => [@$clusions, @extra_clusions],
-            });
-        }
-
-        my $returned_changes = $flagtype->update();
-        $changes{$flagtype->id} = {
-            name    => $flagtype->name,
-            changes => $returned_changes,
-        };
-    }
-    $dbh->bz_commit_transaction();
-
-    my @result;
-    foreach my $flag_type_id (keys %changes) {
-        my %hash = (
-            id      => $self->type('int',    $flag_type_id),
-            name    => $self->type('string', $changes{$flag_type_id}{name}),
-            changes => {},
-        );
-
-        foreach my $field (keys %{ $changes{$flag_type_id}{changes} }) {
-            my $change = $changes{$flag_type_id}{changes}{$field};
-            $hash{changes}{$field} = {
-                removed => $self->type('string', $change->[0]),
-                added   => $self->type('string', $change->[1])
-            };
-        }
-
-        push(@result, \%hash);
+    elsif (scalar keys %$params) {
+      ThrowUserError('flag_type_not_editable', {flagtype => $flagtype});
     }
 
-    return { flagtypes => \@result };
+    # Process the clusions
+    foreach my $type ('inclusions', 'exclusions') {
+      my $clusions = $type eq 'inclusions' ? $inclusions : $exclusions;
+      next if not defined $clusions;
+
+      my @extra_clusions = ();
+      if (!$user->in_group('editcomponents')) {
+        my $products = $user->get_products_by_permission('editcomponents');
+
+        # Bring back the products the user cannot edit.
+        foreach my $item (values %{$flagtype->$type}) {
+          my ($prod_id, $comp_id) = split(':', $item);
+          push(@extra_clusions, $item) unless grep { $_->id == $prod_id } @$products;
+        }
+      }
+
+      $flagtype->set_clusions({$type => [@$clusions, @extra_clusions],});
+    }
+
+    my $returned_changes = $flagtype->update();
+    $changes{$flagtype->id}
+      = {name => $flagtype->name, changes => $returned_changes,};
+  }
+  $dbh->bz_commit_transaction();
+
+  my @result;
+  foreach my $flag_type_id (keys %changes) {
+    my %hash = (
+      id      => $self->type('int',    $flag_type_id),
+      name    => $self->type('string', $changes{$flag_type_id}{name}),
+      changes => {},
+    );
+
+    foreach my $field (keys %{$changes{$flag_type_id}{changes}}) {
+      my $change = $changes{$flag_type_id}{changes}{$field};
+      $hash{changes}{$field} = {
+        removed => $self->type('string', $change->[0]),
+        added   => $self->type('string', $change->[1])
+      };
+    }
+
+    push(@result, \%hash);
+  }
+
+  return {flagtypes => \@result};
 }
 
 sub _flagtype_to_hash {
-    my ($self, $flagtype, $product) = @_;
-    my $user = Bugzilla->user;
+  my ($self, $flagtype, $product) = @_;
+  my $user = Bugzilla->user;
 
-    my @values = ('X');
-    push(@values, '?') if ($flagtype->is_requestable && $user->can_request_flag($flagtype));
-    push(@values, '+', '-') if $user->can_set_flag($flagtype);
+  my @values = ('X');
+  push(@values, '?')
+    if ($flagtype->is_requestable && $user->can_request_flag($flagtype));
+  push(@values, '+', '-') if $user->can_set_flag($flagtype);
 
-    my $item = {
-        id          => $self->type('int'    , $flagtype->id),
-        name        => $self->type('string' , $flagtype->name),
-        description => $self->type('string' , $flagtype->description),
-        type        => $self->type('string' , $flagtype->target_type),
-        values      => \@values,
-        is_active   => $self->type('boolean', $flagtype->is_active),
-        is_requesteeble  => $self->type('boolean', $flagtype->is_requesteeble),
-        is_multiplicable => $self->type('boolean', $flagtype->is_multiplicable)
-    };
+  my $item = {
+    id               => $self->type('int',     $flagtype->id),
+    name             => $self->type('string',  $flagtype->name),
+    description      => $self->type('string',  $flagtype->description),
+    type             => $self->type('string',  $flagtype->target_type),
+    values           => \@values,
+    is_active        => $self->type('boolean', $flagtype->is_active),
+    is_requesteeble  => $self->type('boolean', $flagtype->is_requesteeble),
+    is_multiplicable => $self->type('boolean', $flagtype->is_multiplicable)
+  };
 
-    if ($product) {
-        my $inclusions = $self->_flagtype_clusions_to_hash($flagtype->inclusions, $product->id);
-        my $exclusions = $self->_flagtype_clusions_to_hash($flagtype->exclusions, $product->id);
-        # if we have both inclusions and exclusions, the exclusions are redundant
-        $exclusions = [] if @$inclusions && @$exclusions;
-        # no need to return anything if there's just "any component"
-        $item->{inclusions} = $inclusions if @$inclusions && $inclusions->[0] ne '';
-        $item->{exclusions} = $exclusions if @$exclusions && $exclusions->[0] ne '';
-    }
+  if ($product) {
+    my $inclusions
+      = $self->_flagtype_clusions_to_hash($flagtype->inclusions, $product->id);
+    my $exclusions
+      = $self->_flagtype_clusions_to_hash($flagtype->exclusions, $product->id);
 
-    return $item;
+    # if we have both inclusions and exclusions, the exclusions are redundant
+    $exclusions = [] if @$inclusions && @$exclusions;
+
+    # no need to return anything if there's just "any component"
+    $item->{inclusions} = $inclusions if @$inclusions && $inclusions->[0] ne '';
+    $item->{exclusions} = $exclusions if @$exclusions && $exclusions->[0] ne '';
+  }
+
+  return $item;
 }
 
 sub _flagtype_clusions_to_hash {
-    my ($self, $clusions, $product_id) = @_;
-    my $result = [];
-    foreach my $key (keys %$clusions) {
-        my ($prod_id, $comp_id) = split(/:/, $clusions->{$key}, 2);
-        if ($prod_id == 0 || $prod_id == $product_id) {
-            if ($comp_id) {
-                my $component = Bugzilla::Component->new({ id => $comp_id, cache => 1 });
-                push @$result, $component->name;
-            }
-            else {
-                return [ '' ];
-            }
-        }
+  my ($self, $clusions, $product_id) = @_;
+  my $result = [];
+  foreach my $key (keys %$clusions) {
+    my ($prod_id, $comp_id) = split(/:/, $clusions->{$key}, 2);
+    if ($prod_id == 0 || $prod_id == $product_id) {
+      if ($comp_id) {
+        my $component = Bugzilla::Component->new({id => $comp_id, cache => 1});
+        push @$result, $component->name;
+      }
+      else {
+        return [''];
+      }
     }
-    return $result;
+  }
+  return $result;
 }
 
 sub _process_lists {
-    my $list = shift;
-    my $user = Bugzilla->user;
+  my $list = shift;
+  my $user = Bugzilla->user;
 
-    my @products;
-    if ($user->in_group('editcomponents')) {
-        @products = Bugzilla::Product->get_all;
+  my @products;
+  if ($user->in_group('editcomponents')) {
+    @products = Bugzilla::Product->get_all;
+  }
+  else {
+    @products = @{$user->get_products_by_permission('editcomponents')};
+  }
+
+  my @component_list;
+
+  foreach my $item (@$list) {
+
+    # A hash with products as the key and component names as the values
+    if (ref($item) eq 'HASH') {
+      while (my ($product_name, $component_names) = each %$item) {
+        my $product = Bugzilla::Product->check({name => $product_name});
+        unless (grep { $product->name eq $_->name } @products) {
+          ThrowUserError('product_access_denied', {name => $product_name});
+        }
+        my @component_ids;
+
+        foreach my $comp_name (@$component_names) {
+          my $component
+            = Bugzilla::Component->check({product => $product, name => $comp_name});
+          ThrowCodeError('param_invalid', {param => $comp_name})
+            unless defined $component;
+          push @component_list, $product->id . ':' . $component->id;
+        }
+      }
+    }
+    elsif (!ref($item)) {
+
+      # These are whole products
+      my $product = Bugzilla::Product->check({name => $item});
+      unless (grep { $product->name eq $_->name } @products) {
+        ThrowUserError('product_access_denied', {name => $item});
+      }
+      push @component_list, $product->id . ':0';
     }
     else {
-        @products = @{$user->get_products_by_permission('editcomponents')};
+      # The user has passed something invalid
+      ThrowCodeError('param_invalid', {param => $item});
     }
+  }
 
-    my @component_list;
-
-    foreach my $item (@$list) {
-        # A hash with products as the key and component names as the values
-        if(ref($item) eq 'HASH') {
-            while (my ($product_name, $component_names) = each %$item) {
-                my $product = Bugzilla::Product->check({name => $product_name});
-                unless (grep { $product->name eq $_->name } @products) {
-                    ThrowUserError('product_access_denied', { name => $product_name });
-                }
-                my @component_ids;
-
-                foreach my $comp_name (@$component_names) {
-                    my $component = Bugzilla::Component->check({product => $product, name => $comp_name});
-                    ThrowCodeError('param_invalid', { param => $comp_name}) unless defined $component;
-                    push @component_list, $product->id . ':' . $component->id;
-                }
-            }
-        }
-        elsif(!ref($item)) {
-            # These are whole products
-            my $product = Bugzilla::Product->check({name => $item});
-            unless (grep { $product->name eq $_->name } @products) {
-                ThrowUserError('product_access_denied', { name => $item });
-            }
-            push @component_list, $product->id . ':0';
-        }
-        else {
-            # The user has passed something invalid
-            ThrowCodeError('param_invalid', { param => $item });
-        }
-    }
-
-    return \@component_list;
+  return \@component_list;
 }
 
 1;

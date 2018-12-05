@@ -17,32 +17,26 @@ our $sortkey = 150;
 
 use constant get_param_list => (
   {
-   name => 'maintainer',
-   type => 't',
-   no_reset => '1',
-   default => '',
-   checker => \&check_email
+    name     => 'maintainer',
+    type     => 't',
+    no_reset => '1',
+    default  => '',
+    checker  => \&check_email
   },
 
-  {
-   name => 'shutdownhtml',
-   type => 'l',
-   default => ''
-  },
+  {name => 'shutdownhtml', type => 'l', default => ''},
+
+  {name => 'announcehtml', type => 'l', default => ''},
 
   {
-   name => 'announcehtml',
-   type => 'l',
-   default => ''
-  },
-
-  {
-   name => 'upgrade_notification',
-   type => 's',
-   choices => ['development_snapshot', 'latest_stable_release',
-               'stable_branch_release', 'disabled'],
-   default => 'latest_stable_release',
-   checker => \&check_notification
+    name    => 'upgrade_notification',
+    type    => 's',
+    choices => [
+      'development_snapshot',  'latest_stable_release',
+      'stable_branch_release', 'disabled'
+    ],
+    default => 'latest_stable_release',
+    checker => \&check_notification
   },
 );
 

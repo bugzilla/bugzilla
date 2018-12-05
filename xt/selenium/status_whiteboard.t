@@ -27,7 +27,7 @@ file_bug_in_product($sel, "TestProduct");
 $sel->select_ok("component", "TestComponent");
 my $bug_summary = "white and black";
 $sel->type_ok("short_desc", $bug_summary);
-$sel->type_ok("comment", "This bug is to test the status whiteboard");
+$sel->type_ok("comment",    "This bug is to test the status whiteboard");
 my $bug1_id = create_bug($sel, $bug_summary);
 $sel->is_text_present_ok("Whiteboard:");
 $sel->type_ok("status_whiteboard", "[msg from test_status_whiteboard.t: x77v]");
@@ -37,7 +37,7 @@ file_bug_in_product($sel, "TestProduct");
 $sel->select_ok("component", "TestComponent");
 my $bug_summary2 = "WTC";
 $sel->type_ok("short_desc", $bug_summary2);
-$sel->type_ok("comment", "bugzillation!");
+$sel->type_ok("comment",    "bugzillation!");
 my $bug2_id = create_bug($sel, $bug_summary2);
 $sel->type_ok("status_whiteboard", "[msg from test_status_whiteboard.t: x77v]");
 edit_bug($sel, $bug2_id, $bug_summary2);
@@ -58,7 +58,8 @@ $sel->click_ok("remember");
 $sel->wait_for_page_to_load_ok(WAIT_TIME);
 $sel->title_is("Search created");
 my $text = trim($sel->get_text("message"));
-ok($text =~ /you have a new search named sw-x77v/, 'Saved search correctly saved');
+ok($text =~ /you have a new search named sw-x77v/,
+  'Saved search correctly saved');
 
 # Make sure the saved query works.
 
@@ -75,9 +76,11 @@ set_parameters($sel, {'Bug Fields' => {'usestatuswhiteboard-off' => undef}});
 $sel->click_ok("link=Search");
 $sel->wait_for_page_to_load_ok(WAIT_TIME);
 $sel->title_is("Search for bugs");
-ok(!$sel->is_text_present("Whiteboard:"), "Whiteboard label no longer displayed in the search page");
+ok(!$sel->is_text_present("Whiteboard:"),
+  "Whiteboard label no longer displayed in the search page");
 go_to_bug($sel, $bug1_id);
-ok(!$sel->is_text_present("Whiteboard:"), "Whiteboard label no longer displayed in the bug page");
+ok(!$sel->is_text_present("Whiteboard:"),
+  "Whiteboard label no longer displayed in the bug page");
 
 # Queries based on the status whiteboard should still work when
 # the parameter is off.

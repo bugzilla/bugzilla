@@ -1,6 +1,7 @@
 use 5.006;
 use strict;
 use warnings;
+
 package CPAN::Meta;
 
 our $VERSION = '2.150005';
@@ -92,7 +93,7 @@ BEGIN {
 
   no strict 'refs';
   for my $attr (@STRING_READERS) {
-    *$attr = sub { $_[0]{ $attr } };
+    *$attr = sub { $_[0]{$attr} };
   }
 }
 
@@ -121,10 +122,9 @@ BEGIN {
   no strict 'refs';
   for my $attr (@LIST_READERS) {
     *$attr = sub {
-      my $value = $_[0]{ $attr };
-      croak "$attr must be called in list context"
-        unless wantarray;
-      return @{ _dclone($value) } if ref $value;
+      my $value = $_[0]{$attr};
+      croak "$attr must be called in list context" unless wantarray;
+      return @{_dclone($value)} if ref $value;
       return $value;
     };
   }
@@ -163,7 +163,7 @@ BEGIN {
   for my $attr (@MAP_READERS) {
     (my $subname = $attr) =~ s/-/_/;
     *$subname = sub {
-      my $value = $_[0]{ $attr };
+      my $value = $_[0]{$attr};
       return _dclone($value) if $value;
       return {};
     };
@@ -182,7 +182,7 @@ BEGIN {
 #pod =cut
 
 sub custom_keys {
-  return grep { /^x_/i } keys %{$_[0]};
+  return grep {/^x_/i} keys %{$_[0]};
 }
 
 sub custom {
@@ -220,29 +220,29 @@ sub _new {
   my ($class, $struct, $options) = @_;
   my $self;
 
-  if ( $options->{lazy_validation} ) {
+  if ($options->{lazy_validation}) {
+
     # try to convert to a valid structure; if succeeds, then return it
-    my $cmc = CPAN::Meta::Converter->new( $struct );
-    $self = $cmc->convert( version => 2 ); # valid or dies
+    my $cmc = CPAN::Meta::Converter->new($struct);
+    $self = $cmc->convert(version => 2);    # valid or dies
     return bless $self, $class;
   }
   else {
     # validate original struct
-    my $cmv = CPAN::Meta::Validator->new( $struct );
-    unless ( $cmv->is_valid) {
-      die "Invalid metadata structure. Errors: "
-        . join(", ", $cmv->errors) . "\n";
+    my $cmv = CPAN::Meta::Validator->new($struct);
+    unless ($cmv->is_valid) {
+      die "Invalid metadata structure. Errors: " . join(", ", $cmv->errors) . "\n";
     }
   }
 
   # up-convert older spec versions
   my $version = $struct->{'meta-spec'}{version} || '1.0';
-  if ( $version == 2 ) {
+  if ($version == 2) {
     $self = $struct;
   }
   else {
-    my $cmc = CPAN::Meta::Converter->new( $struct );
-    $self = $cmc->convert( version => 2 );
+    my $cmc = CPAN::Meta::Converter->new($struct);
+    $self = $cmc->convert(version => 2);
   }
 
   return bless $self, $class;
@@ -268,10 +268,10 @@ sub new {
 sub create {
   my ($class, $struct, $options) = @_;
   my $version = __PACKAGE__->VERSION || 2;
-  $struct->{generated_by} ||= __PACKAGE__ . " version $version" ;
+  $struct->{generated_by} ||= __PACKAGE__ . " version $version";
   $struct->{'meta-spec'}{version} ||= int($version);
   my $self = eval { $class->_new($struct, $options) };
-  croak ($@) if $@;
+  croak($@) if $@;
   return $self;
 }
 
@@ -293,12 +293,11 @@ sub load_file {
   my ($class, $file, $options) = @_;
   $options->{lazy_validation} = 1 unless exists $options->{lazy_validation};
 
-  croak "load_file() requires a valid, readable filename"
-    unless -r $file;
+  croak "load_file() requires a valid, readable filename" unless -r $file;
 
   my $self;
   eval {
-    my $struct = Parse::CPAN::Meta->load_file( $file );
+    my $struct = Parse::CPAN::Meta->load_file($file);
     $self = $class->_new($struct, $options);
   };
   croak($@) if $@;
@@ -320,7 +319,7 @@ sub load_yaml_string {
 
   my $self;
   eval {
-    my ($struct) = Parse::CPAN::Meta->load_yaml_string( $yaml );
+    my ($struct) = Parse::CPAN::Meta->load_yaml_string($yaml);
     $self = $class->_new($struct, $options);
   };
   croak($@) if $@;
@@ -342,7 +341,7 @@ sub load_json_string {
 
   my $self;
   eval {
-    my $struct = Parse::CPAN::Meta->load_json_string( $json );
+    my $struct = Parse::CPAN::Meta->load_json_string($json);
     $self = $class->_new($struct, $options);
   };
   croak($@) if $@;
@@ -365,7 +364,7 @@ sub load_string {
 
   my $self;
   eval {
-    my $struct = Parse::CPAN::Meta->load_string( $string );
+    my $struct = Parse::CPAN::Meta->load_string($string);
     $self = $class->_new($struct, $options);
   };
   croak($@) if $@;
@@ -400,22 +399,18 @@ sub save {
   my $version = $options->{version} || '2';
   my $layer = $] ge '5.008001' ? ':utf8' : '';
 
-  if ( $version ge '2' ) {
-    carp "'$file' should end in '.json'"
-      unless $file =~ m{\.json$};
+  if ($version ge '2') {
+    carp "'$file' should end in '.json'" unless $file =~ m{\.json$};
   }
   else {
-    carp "'$file' should end in '.yml'"
-      unless $file =~ m{\.yml$};
+    carp "'$file' should end in '.yml'" unless $file =~ m{\.yml$};
   }
 
-  my $data = $self->as_string( $options );
-  open my $fh, ">$layer", $file
-    or die "Error opening '$file' for writing: $!\n";
+  my $data = $self->as_string($options);
+  open my $fh, ">$layer", $file or die "Error opening '$file' for writing: $!\n";
 
   print {$fh} $data;
-  close $fh
-    or die "Error closing '$file': $!\n";
+  close $fh or die "Error closing '$file': $!\n";
 
   return 1;
 }
@@ -455,7 +450,7 @@ sub effective_prereqs {
 
   return $prereq unless @$features;
 
-  my @other = map {; $self->feature($_)->prereqs } @$features;
+  my @other = map { ; $self->feature($_)->prereqs } @$features;
 
   return $prereq->with_merged_prereqs(\@other);
 }
@@ -476,11 +471,11 @@ sub effective_prereqs {
 sub should_index_file {
   my ($self, $filename) = @_;
 
-  for my $no_index_file (@{ $self->no_index->{file} || [] }) {
+  for my $no_index_file (@{$self->no_index->{file} || []}) {
     return if $filename eq $no_index_file;
   }
 
-  for my $no_index_dir (@{ $self->no_index->{directory} }) {
+  for my $no_index_dir (@{$self->no_index->{directory}}) {
     $no_index_dir =~ s{$}{/} unless $no_index_dir =~ m{/\z};
     return if index($filename, $no_index_dir) == 0;
   }
@@ -502,11 +497,11 @@ sub should_index_file {
 sub should_index_package {
   my ($self, $package) = @_;
 
-  for my $no_index_pkg (@{ $self->no_index->{package} || [] }) {
+  for my $no_index_pkg (@{$self->no_index->{package} || []}) {
     return if $package eq $no_index_pkg;
   }
 
-  for my $no_index_ns (@{ $self->no_index->{namespace} }) {
+  for my $no_index_ns (@{$self->no_index->{namespace}}) {
     return if index($package, "${no_index_ns}::") == 0;
   }
 
@@ -526,8 +521,8 @@ sub features {
   my ($self) = @_;
 
   my $opt_f = $self->optional_features;
-  my @features = map {; CPAN::Meta::Feature->new($_ => $opt_f->{ $_ }) }
-                 keys %$opt_f;
+  my @features
+    = map { ; CPAN::Meta::Feature->new($_ => $opt_f->{$_}) } keys %$opt_f;
 
   return @features;
 }
@@ -546,7 +541,7 @@ sub feature {
   my ($self, $ident) = @_;
 
   croak "no feature named $ident"
-    unless my $f = $self->optional_features->{ $ident };
+    unless my $f = $self->optional_features->{$ident};
 
   return CPAN::Meta::Feature->new($ident, $f);
 }
@@ -567,9 +562,9 @@ sub feature {
 sub as_struct {
   my ($self, $options) = @_;
   my $struct = _dclone($self);
-  if ( $options->{version} ) {
-    my $cmc = CPAN::Meta::Converter->new( $struct );
-    $struct = $cmc->convert( version => $options->{version} );
+  if ($options->{version}) {
+    my $cmc = CPAN::Meta::Converter->new($struct);
+    $struct = $cmc->convert(version => $options->{version});
   }
   return $struct;
 }
@@ -603,28 +598,28 @@ sub as_string {
   my $version = $options->{version} || '2';
 
   my $struct;
-  if ( $self->meta_spec_version ne $version ) {
-    my $cmc = CPAN::Meta::Converter->new( $self->as_struct );
-    $struct = $cmc->convert( version => $version );
+  if ($self->meta_spec_version ne $version) {
+    my $cmc = CPAN::Meta::Converter->new($self->as_struct);
+    $struct = $cmc->convert(version => $version);
   }
   else {
     $struct = $self->as_struct;
   }
 
   my ($data, $backend);
-  if ( $version ge '2' ) {
+  if ($version ge '2') {
     $backend = Parse::CPAN::Meta->json_backend();
-    local $struct->{x_serialization_backend} = sprintf '%s version %s',
-      $backend, $backend->VERSION;
+    local $struct->{x_serialization_backend} = sprintf '%s version %s', $backend,
+      $backend->VERSION;
     $data = $backend->new->pretty->canonical->encode($struct);
   }
   else {
     $backend = Parse::CPAN::Meta->yaml_backend();
-    local $struct->{x_serialization_backend} = sprintf '%s version %s',
-      $backend, $backend->VERSION;
+    local $struct->{x_serialization_backend} = sprintf '%s version %s', $backend,
+      $backend->VERSION;
     $data = eval { no strict 'refs'; &{"$backend\::Dump"}($struct) };
-    if ( $@ ) {
-      croak $backend->can('errstr') ? $backend->errstr : $@
+    if ($@) {
+      croak $backend->can('errstr') ? $backend->errstr : $@;
     }
   }
 
@@ -633,7 +628,7 @@ sub as_string {
 
 # Used by JSON::PP, etc. for "convert_blessed"
 sub TO_JSON {
-  return { %{ $_[0] } };
+  return {%{$_[0]}};
 }
 
 1;

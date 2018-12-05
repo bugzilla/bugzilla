@@ -15,30 +15,32 @@ use lib qw(. lib local/lib/perl5 t);
 use Test2::Tools::Mock;
 use Test::More;
 use Bugzilla::Util;
+
 BEGIN {
-    my $terms = {
-        "bug"               => "bug",
-        "Bug"               => "Bug",
-        "abug"              => "a bug",
-        "Abug"              => "A bug",
-        "aBug"              => "a Bug",
-        "ABug"              => "A Bug",
-        "bugs"              => "bugs",
-        "Bugs"              => "Bugs",
-        "comment"           => "comment",
-        "comments"          => "comments",
-        "zeroSearchResults" => "Zarro Boogs found",
-        "Bugzilla"          => "Bugzilla"
-    };
-    no warnings 'redefine', 'once';
-    *Bugzilla::Util::template_var = sub {
-        my $name = shift;
-        if ($name eq 'terms') {
-            return $terms;
-        } else {
-            die "sorry!";
-        }
-    };
+  my $terms = {
+    "bug"               => "bug",
+    "Bug"               => "Bug",
+    "abug"              => "a bug",
+    "Abug"              => "A bug",
+    "aBug"              => "a Bug",
+    "ABug"              => "A Bug",
+    "bugs"              => "bugs",
+    "Bugs"              => "Bugs",
+    "comment"           => "comment",
+    "comments"          => "comments",
+    "zeroSearchResults" => "Zarro Boogs found",
+    "Bugzilla"          => "Bugzilla"
+  };
+  no warnings 'redefine', 'once';
+  *Bugzilla::Util::template_var = sub {
+    my $name = shift;
+    if ($name eq 'terms') {
+      return $terms;
+    }
+    else {
+      die "sorry!";
+    }
+  };
 }
 use Bugzilla;
 use Bugzilla::Constants;
@@ -52,22 +54,19 @@ use File::Basename;
 Bugzilla->usage_mode(USAGE_MODE_TEST);
 Bugzilla->error_mode(ERROR_MODE_DIE);
 
-my $user_mock = mock 'Bugzilla::User' => (
-    override_constructor => ['new', 'hash'],
-);
+my $user_mock
+  = mock 'Bugzilla::User' => (override_constructor => ['new', 'hash'],);
 
-my $comment_mock = mock 'Bugzilla::Comment' => (
-    add_constructor => ['new', 'hash'],
-);
+my $comment_mock
+  = mock 'Bugzilla::Comment' => (add_constructor => ['new', 'hash'],);
 
-my $bug_mock = mock 'Bugzilla::Bug' => (
-    override_constructor => ['new', 'hash'],
-);
+my $bug_mock
+  = mock 'Bugzilla::Bug' => (override_constructor => ['new', 'hash'],);
 
 # mocked objects just take all constructor args and put them into the hash.
 my $user = Bugzilla::User->new(
-    userid => 33,
-    settings => { use_markdown => { is_enabled => 1, value => 'on' } },
+  userid   => 33,
+  settings => {use_markdown => {is_enabled => 1, value => 'on'}},
 );
 my $bug = Bugzilla::Bug->new(bug_id => 666);
 my $comment = Bugzilla::Comment->new(already_wrapped => 0);

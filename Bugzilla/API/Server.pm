@@ -40,178 +40,177 @@ has api_ext_version => (is => 'rw', default => '');
 has api_options     => (is => 'rw', default => sub { [] });
 has api_params      => (is => 'rw', default => sub { {} });
 has api_path        => (is => 'rw', default => '');
-has cgi             => (is => 'lazy');
-has content_type    => (is => 'rw', default => 'application/json');
-has controller      => (is => 'rw', default => undef);
-has json            => (is => 'lazy');
-has load_error      => (is => 'rw', default => undef);
-has method_name     => (is => 'rw', default => '');
-has request         => (is => 'lazy');
-has success_code    => (is => 'rw', default => 200);
+has cgi          => (is => 'lazy');
+has content_type => (is => 'rw', default => 'application/json');
+has controller   => (is => 'rw', default => undef);
+has json         => (is => 'lazy');
+has load_error   => (is => 'rw', default => undef);
+has method_name  => (is => 'rw', default => '');
+has request      => (is => 'lazy');
+has success_code => (is => 'rw', default => 200);
 
 ##################
 # Public methods #
 ##################
 
 sub server {
-    my ($class) = @_;
+  my ($class) = @_;
 
-    my $api_namespace = DEFAULT_API_NAMESPACE;
-    my $api_version   = DEFAULT_API_VERSION;
+  my $api_namespace = DEFAULT_API_NAMESPACE;
+  my $api_version   = DEFAULT_API_VERSION;
 
-    # First load the default server in case something fails
-    # we still have something to return.
+  # First load the default server in case something fails
+  # we still have something to return.
+  my $server_class = "Bugzilla::API::${api_version}::Server";
+  require_module($server_class);
+  my $self = $server_class->new;
+
+  my $path_info = Bugzilla->cgi->path_info;
+
+  # If we do not match /<namespace>/<version>/ then we assume legacy calls
+  # and use the default namespace and version.
+  if ($path_info =~ m|^/([^/]+)/(\d+\.\d+(?:\.\d+)?)/|) {
+
+    # First figure out the namespace we are accessing (core is native)
+    $api_namespace = $1 if $path_info =~ s|^/([^/]+)||;
+    $api_namespace = $self->_check_namespace($api_namespace);
+
+    # Figure out which version we are looking for based on path
+    $api_version = $1 if $path_info =~ s|^/(\d+\.\d+(?:\.\d+)?)(/.*)$|$2|;
+    $api_version = $self->_check_version($api_version, $api_namespace);
+  }
+
+  # If the version pulled from the path is different than
+  # what the server is currently, then reload as the new version.
+  if ($api_version ne $self->api_version) {
     my $server_class = "Bugzilla::API::${api_version}::Server";
     require_module($server_class);
-    my $self = $server_class->new;
+    $self = $server_class->new;
+  }
 
-    my $path_info = Bugzilla->cgi->path_info;
+  # Stuff away for later
+  $self->api_path($path_info);
 
-    # If we do not match /<namespace>/<version>/ then we assume legacy calls
-    # and use the default namespace and version.
-    if ($path_info =~ m|^/([^/]+)/(\d+\.\d+(?:\.\d+)?)/|) {
-        # First figure out the namespace we are accessing (core is native)
-        $api_namespace = $1 if $path_info =~ s|^/([^/]+)||;
-        $api_namespace = $self->_check_namespace($api_namespace);
-
-        # Figure out which version we are looking for based on path
-        $api_version = $1 if $path_info =~ s|^/(\d+\.\d+(?:\.\d+)?)(/.*)$|$2|;
-        $api_version = $self->_check_version($api_version, $api_namespace);
-    }
-
-    # If the version pulled from the path is different than
-    # what the server is currently, then reload as the new version.
-    if ($api_version ne $self->api_version) {
-        my $server_class = "Bugzilla::API::${api_version}::Server";
-        require_module($server_class);
-        $self = $server_class->new;
-    }
-
-    # Stuff away for later
-    $self->api_path($path_info);
-
-    return $self;
+  return $self;
 }
 
 sub constants {
-    my ($self) = @_;
-    return $self->{_constants} if defined $self->{_constants};
+  my ($self) = @_;
+  return $self->{_constants} if defined $self->{_constants};
 
-    no strict 'refs';
+  no strict 'refs';
 
-    my $api_version = $self->api_version;
-    my $class = "Bugzilla::API::${api_version}::Constants";
-    require_module($class);
+  my $api_version = $self->api_version;
+  my $class       = "Bugzilla::API::${api_version}::Constants";
+  require_module($class);
 
-    $self->{_constants} = {};
-    foreach my $constant (@{$class . "::EXPORT_OK"}) {
-        if (ref $class->$constant) {
-            $self->{_constants}->{$constant} = $class->$constant;
-        }
-        else {
-            my @list = ($class->$constant);
-            $self->{_constants}->{$constant} = (scalar(@list) == 1) ? $list[0] : \@list;
-        }
+  $self->{_constants} = {};
+  foreach my $constant (@{$class . "::EXPORT_OK"}) {
+    if (ref $class->$constant) {
+      $self->{_constants}->{$constant} = $class->$constant;
     }
+    else {
+      my @list = ($class->$constant);
+      $self->{_constants}->{$constant} = (scalar(@list) == 1) ? $list[0] : \@list;
+    }
+  }
 
-    return $self->{_constants};
+  return $self->{_constants};
 }
 
 sub response_header {
-    my ($self, $code, $result) = @_;
-    # The HTTP body needs to be bytes (not a utf8 string) for recent
-    # versions of HTTP::Message, but JSON::RPC::Server doesn't handle this
-    # properly. $_[1] is the HTTP body content we're going to be sending.
-    if (utf8::is_utf8($result)) {
-        utf8::encode($result);
-        # Since we're going to just be sending raw bytes, we need to
-        # set STDOUT to not expect utf8.
-        disable_utf8();
-    }
-    my $h = HTTP::Headers->new;
-    $h->header('Content-Type' => $self->content_type . '; charset=UTF-8');
-    return HTTP::Response->new($code => undef, $h, $result);
+  my ($self, $code, $result) = @_;
+
+  # The HTTP body needs to be bytes (not a utf8 string) for recent
+  # versions of HTTP::Message, but JSON::RPC::Server doesn't handle this
+  # properly. $_[1] is the HTTP body content we're going to be sending.
+  if (utf8::is_utf8($result)) {
+    utf8::encode($result);
+
+    # Since we're going to just be sending raw bytes, we need to
+    # set STDOUT to not expect utf8.
+    disable_utf8();
+  }
+  my $h = HTTP::Headers->new;
+  $h->header('Content-Type' => $self->content_type . '; charset=UTF-8');
+  return HTTP::Response->new($code => undef, $h, $result);
 }
 
 ###################################
 # Public methods to be overridden #
 ###################################
 
-sub handle { }
-sub response { }
+sub handle         { }
+sub response       { }
 sub print_response { }
-sub handle_login { }
+sub handle_login   { }
 
 ###################
 # Utility methods #
 ###################
 
 sub return_error {
-    my ($self, $status_code, $message, $error_code) = @_;
-    if ($status_code && $message) {
-        $self->{_return_error} = {
-            status_code => $status_code,
-            error       => JSON::true,
-            message     => $message
-        };
-        $self->{_return_error}->{code} = $error_code if $error_code;
-    }
-    return $self->{_return_error};
+  my ($self, $status_code, $message, $error_code) = @_;
+  if ($status_code && $message) {
+    $self->{_return_error}
+      = {status_code => $status_code, error => JSON::true, message => $message};
+    $self->{_return_error}->{code} = $error_code if $error_code;
+  }
+  return $self->{_return_error};
 }
 
 sub callback {
-    my ($self, $value) = @_;
-    if (defined $value) {
-        $value = trim($value);
-        # We don't use \w because we don't want to allow Unicode here.
-        if ($value !~ /^[A-Za-z0-9_\.\[\]]+$/) {
-            ThrowUserError('json_rpc_invalid_callback', { callback => $value });
-        }
-        $self->{_callback} = $value;
-        # JSONP needs to be parsed by a JS parser, not by a JSON parser.
-        $self->content_type('text/javascript');
+  my ($self, $value) = @_;
+  if (defined $value) {
+    $value = trim($value);
+
+    # We don't use \w because we don't want to allow Unicode here.
+    if ($value !~ /^[A-Za-z0-9_\.\[\]]+$/) {
+      ThrowUserError('json_rpc_invalid_callback', {callback => $value});
     }
-    return $self->{_callback};
+    $self->{_callback} = $value;
+
+    # JSONP needs to be parsed by a JS parser, not by a JSON parser.
+    $self->content_type('text/javascript');
+  }
+  return $self->{_callback};
 }
 
 # ETag support
 sub etag {
-    my ($self, $data) = @_;
-    my $cache = Bugzilla->request_cache;
-    if (defined $data) {
-        # Serialize the data if passed a reference
-        local $Storable::canonical = 1;
-        $data = freeze($data) if ref $data;
+  my ($self, $data) = @_;
+  my $cache = Bugzilla->request_cache;
+  if (defined $data) {
 
-        # Wide characters cause md5_base64() to die.
-        utf8::encode($data) if utf8::is_utf8($data);
+    # Serialize the data if passed a reference
+    local $Storable::canonical = 1;
+    $data = freeze($data) if ref $data;
 
-        # Append content_type to the end of the data
-        # string as we want the etag to be unique to
-        # the content_type. We do not need this for
-        # XMLRPC as text/xml is always returned.
-        if (blessed($self) && $self->can('content_type')) {
-            $data .= $self->content_type if $self->content_type;
-        }
+    # Wide characters cause md5_base64() to die.
+    utf8::encode($data) if utf8::is_utf8($data);
 
-        $cache->{'_etag'} = md5_base64($data);
+    # Append content_type to the end of the data
+    # string as we want the etag to be unique to
+    # the content_type. We do not need this for
+    # XMLRPC as text/xml is always returned.
+    if (blessed($self) && $self->can('content_type')) {
+      $data .= $self->content_type if $self->content_type;
     }
-    return $cache->{'_etag'};
+
+    $cache->{'_etag'} = md5_base64($data);
+  }
+  return $cache->{'_etag'};
 }
 
 # HACK: Allow error tag checking to work with t/012throwables.t
 sub ThrowUserError {
-    my ($error, $self, $vars) = @_;
-    $self->load_error({ type  => 'user',
-                        error => $error,
-                        vars  => $vars });
+  my ($error, $self, $vars) = @_;
+  $self->load_error({type => 'user', error => $error, vars => $vars});
 }
 
 sub ThrowCodeError {
-    my ($error, $self, $vars) = @_;
-    $self->load_error({ type  => 'code',
-                        error => $error,
-                        vars  => $vars });
+  my ($error, $self, $vars) = @_;
+  $self->load_error({type => 'code', error => $error, vars => $vars});
 }
 
 ###################
@@ -219,143 +218,141 @@ sub ThrowCodeError {
 ###################
 
 sub _build_cgi {
-    return Bugzilla->cgi;
+  return Bugzilla->cgi;
 }
 
 sub _build_json {
-    # This may seem a little backwards to set utf8(0), but what this really
-    # means is "don't convert our utf8 into byte strings, just leave it as a
-    # utf8 string."
-    return JSON->new->utf8(0)
-           ->allow_blessed(1)
-           ->convert_blessed(1);
+
+  # This may seem a little backwards to set utf8(0), but what this really
+  # means is "don't convert our utf8 into byte strings, just leave it as a
+  # utf8 string."
+  return JSON->new->utf8(0)->allow_blessed(1)->convert_blessed(1);
 }
 
 sub _build_request {
-    return HTTP::Request->new($_[0]->cgi->request_method, $_[0]->cgi->url);
+  return HTTP::Request->new($_[0]->cgi->request_method, $_[0]->cgi->url);
 }
 
 sub _check_namespace {
-    my ($self, $namespace) = @_;
+  my ($self, $namespace) = @_;
 
-    # No need to do anything else if native api
-    return $namespace if lc($namespace) eq lc(DEFAULT_API_NAMESPACE);
+  # No need to do anything else if native api
+  return $namespace if lc($namespace) eq lc(DEFAULT_API_NAMESPACE);
 
-    # Check if namespace matches an extension name
-    my $found = 0;
-    foreach my $extension (@{ Bugzilla->extensions }) {
-        $found = 1 if lc($extension->NAME) eq lc($namespace);
-    }
-    # Make sure we have this namespace available
-    if (!$found) {
-        ThrowUserError('unknown_api_namespace', $self,
-                       { api_namespace => $namespace });
-        return DEFAULT_API_NAMESPACE;
-    }
+  # Check if namespace matches an extension name
+  my $found = 0;
+  foreach my $extension (@{Bugzilla->extensions}) {
+    $found = 1 if lc($extension->NAME) eq lc($namespace);
+  }
 
-    return $namespace;
+  # Make sure we have this namespace available
+  if (!$found) {
+    ThrowUserError('unknown_api_namespace', $self, {api_namespace => $namespace});
+    return DEFAULT_API_NAMESPACE;
+  }
+
+  return $namespace;
 }
 
 sub _check_version {
-    my ($self, $version, $namespace) = @_;
+  my ($self, $version, $namespace) = @_;
 
-    return DEFAULT_API_VERSION if !defined $version;
+  return DEFAULT_API_VERSION if !defined $version;
 
-    my $old_version = $version;
-    $version =~ s/\./_/g;
+  my $old_version = $version;
+  $version =~ s/\./_/g;
 
-    my $version_dir;
-    if (lc($namespace) eq 'core') {
-        $version_dir = File::Spec->catdir('Bugzilla', 'API', $version);
+  my $version_dir;
+  if (lc($namespace) eq 'core') {
+    $version_dir = File::Spec->catdir('Bugzilla', 'API', $version);
+  }
+  else {
+    $version_dir = File::Spec->catdir(bz_locations()->{extensionsdir},
+      $namespace, 'API', $version);
+  }
+
+  # Make sure we actual have this version installed
+  if (!-d $version_dir) {
+    ThrowUserError('unknown_api_version', $self,
+      {api_version => $old_version, api_namespace => $namespace});
+    return DEFAULT_API_VERSION;
+  }
+
+  # If we using an extension API, we need to determining which version of
+  # the Core API it was written for.
+  if (lc($namespace) ne 'core') {
+    my $core_api_version;
+    foreach my $extension (@{Bugzilla->extensions}) {
+      next if lc($extension->NAME) ne lc($namespace);
+      if ($extension->API_VERSION_MAP && $extension->API_VERSION_MAP->{$version}) {
+        $self->api_ext_version($version);
+        $version = $extension->API_VERSION_MAP->{$version};
+      }
     }
-    else {
-        $version_dir = File::Spec->catdir(bz_locations()->{extensionsdir},
-                                          $namespace, 'API', $version);
-    }
+  }
 
-    # Make sure we actual have this version installed
-    if (!-d $version_dir) {
-        ThrowUserError('unknown_api_version', $self,
-                       { api_version   => $old_version,
-                         api_namespace => $namespace });
-        return DEFAULT_API_VERSION;
-    }
-
-    # If we using an extension API, we need to determining which version of
-    # the Core API it was written for.
-    if (lc($namespace) ne 'core') {
-        my $core_api_version;
-        foreach my $extension (@{ Bugzilla->extensions }) {
-            next if lc($extension->NAME) ne lc($namespace);
-            if ($extension->API_VERSION_MAP
-                && $extension->API_VERSION_MAP->{$version})
-            {
-                $self->api_ext_version($version);
-                $version = $extension->API_VERSION_MAP->{$version};
-            }
-        }
-    }
-
-    return $version;
+  return $version;
 }
 
 sub _best_content_type {
-    my ($self, @types) = @_;
-    my @accept_types = $self->_get_content_prefs();
-    # Return the types as-is if no accept header sent, since sorting will be a no-op.
-    if (!@accept_types) {
-        return $types[0];
-    }
-    my $score = sub { $self->_score_type(shift, @accept_types) };
-    my @scored_types = sort {$score->($b) <=> $score->($a)} @types;
-    return $scored_types[0] || '*/*';
+  my ($self, @types) = @_;
+  my @accept_types = $self->_get_content_prefs();
+
+ # Return the types as-is if no accept header sent, since sorting will be a no-op.
+  if (!@accept_types) {
+    return $types[0];
+  }
+  my $score = sub { $self->_score_type(shift, @accept_types) };
+  my @scored_types = sort { $score->($b) <=> $score->($a) } @types;
+  return $scored_types[0] || '*/*';
 }
 
 sub _score_type {
-    my ($self, $type, @accept_types) = @_;
-    my $score = scalar(@accept_types);
-    for my $accept_type (@accept_types) {
-        return $score if $type eq $accept_type;
-        $score--;
-    }
-    return 0;
+  my ($self, $type, @accept_types) = @_;
+  my $score = scalar(@accept_types);
+  for my $accept_type (@accept_types) {
+    return $score if $type eq $accept_type;
+    $score--;
+  }
+  return 0;
 }
 
 sub _get_content_prefs {
-    my $self = shift;
-    my $default_weight = 1;
-    my @prefs;
+  my $self           = shift;
+  my $default_weight = 1;
+  my @prefs;
 
-    # Parse the Accept header, and save type name, score, and position.
-    my @accept_types = split /,/, $self->cgi->http('accept') || '';
-    my $order = 0;
-    for my $accept_type (@accept_types) {
-        my ($weight) = ($accept_type =~ /q=(\d\.\d+|\d+)/);
-        my ($name) = ($accept_type =~ m#(\S+/[^;]+)#);
-        next unless $name;
-        push @prefs, { name => $name, order => $order++};
-        if (defined $weight) {
-            $prefs[-1]->{score} = $weight;
-        } else {
-            $prefs[-1]->{score} = $default_weight;
-            $default_weight -= 0.001;
-        }
+  # Parse the Accept header, and save type name, score, and position.
+  my @accept_types = split /,/, $self->cgi->http('accept') || '';
+  my $order = 0;
+  for my $accept_type (@accept_types) {
+    my ($weight) = ($accept_type =~ /q=(\d\.\d+|\d+)/);
+    my ($name)   = ($accept_type =~ m#(\S+/[^;]+)#);
+    next unless $name;
+    push @prefs, {name => $name, order => $order++};
+    if (defined $weight) {
+      $prefs[-1]->{score} = $weight;
     }
+    else {
+      $prefs[-1]->{score} = $default_weight;
+      $default_weight -= 0.001;
+    }
+  }
 
-    # Sort the types by score, subscore by order, and pull out just the name
-    @prefs = map {$_->{name}} sort {$b->{score} <=> $a->{score} ||
-                                    $a->{order} <=> $b->{order}} @prefs;
-    return @prefs;
+  # Sort the types by score, subscore by order, and pull out just the name
+  @prefs = map { $_->{name} }
+    sort { $b->{score} <=> $a->{score} || $a->{order} <=> $b->{order} } @prefs;
+  return @prefs;
 }
 
 ####################################
 # Private methods to be overridden #
 ####################################
 
-sub _handle { }
-sub _params_check { }
+sub _handle               { }
+sub _params_check         { }
 sub _retrieve_json_params { }
-sub _find_resource { }
+sub _find_resource        { }
 
 1;
 

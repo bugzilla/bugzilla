@@ -16,47 +16,45 @@ use Bugzilla::Config::Common;
 our $sortkey = 1400;
 
 sub get_param_list {
-  my $class = shift;
+  my $class      = shift;
   my @param_list = (
-  {
-   name => 'quip_list_entry_control',
-   type => 's',
-   choices => ['open', 'moderated', 'closed'],
-   default => 'open',
-   checker => \&check_multi
-  },
+    {
+      name    => 'quip_list_entry_control',
+      type    => 's',
+      choices => ['open', 'moderated', 'closed'],
+      default => 'open',
+      checker => \&check_multi
+    },
 
-  {
-   name => 'mybugstemplate',
-   type => 't',
-   default => 'buglist.cgi?resolution=---&amp;emailassigned_to1=1&amp;emailreporter1=1&amp;emailtype1=exact&amp;email1=%userid%'
-  },
+    {
+      name => 'mybugstemplate',
+      type => 't',
+      default =>
+        'buglist.cgi?resolution=---&amp;emailassigned_to1=1&amp;emailreporter1=1&amp;emailtype1=exact&amp;email1=%userid%'
+    },
 
-  {
-   name => 'defaultquery',
-   type => 't',
-   default => 'resolution=---&emailassigned_to1=1&emailassigned_to2=1&emailreporter2=1&emailcc2=1&emailqa_contact2=1&emaillongdesc3=1&order=Importance&long_desc_type=substring'
-  },
+    {
+      name => 'defaultquery',
+      type => 't',
+      default =>
+        'resolution=---&emailassigned_to1=1&emailassigned_to2=1&emailreporter2=1&emailcc2=1&emailqa_contact2=1&emaillongdesc3=1&order=Importance&long_desc_type=substring'
+    },
 
-  {
-   name => 'search_allow_no_criteria',
-   type => 'b',
-   default => 1
-  },
+    {name => 'search_allow_no_criteria', type => 'b', default => 1},
 
-  {
-    name => 'default_search_limit',
-    type => 't',
-    default => '500',
-    checker => \&check_numeric
-  },
+    {
+      name    => 'default_search_limit',
+      type    => 't',
+      default => '500',
+      checker => \&check_numeric
+    },
 
-  {
-    name => 'max_search_results',
-    type => 't',
-    default => '10000',
-    checker => \&check_numeric
-  },
+    {
+      name    => 'max_search_results',
+      type    => 't',
+      default => '10000',
+      checker => \&check_numeric
+    },
   );
   return @param_list;
 }

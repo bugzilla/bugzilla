@@ -16,121 +16,123 @@ use Bugzilla::Search::Condition qw(condition);
 use Bugzilla::Util qw(trick_taint);
 
 sub new {
-    my ($class, $joiner) = @_;
-    if ($joiner and $joiner ne 'OR' and $joiner ne 'AND') {
-        ThrowCodeError('search_invalid_joiner', { joiner => $joiner });
-    }
-    # This will go into SQL directly so needs to be untainted.
-    trick_taint($joiner) if $joiner;
-    bless { joiner => $joiner || 'AND' }, $class;
+  my ($class, $joiner) = @_;
+  if ($joiner and $joiner ne 'OR' and $joiner ne 'AND') {
+    ThrowCodeError('search_invalid_joiner', {joiner => $joiner});
+  }
+
+  # This will go into SQL directly so needs to be untainted.
+  trick_taint($joiner) if $joiner;
+  bless {joiner => $joiner || 'AND'}, $class;
 }
 
 sub children {
-    my ($self) = @_;
-    $self->{children} ||= [];
-    return $self->{children};
+  my ($self) = @_;
+  $self->{children} ||= [];
+  return $self->{children};
 }
 
 sub update_search_args {
-    my ($self, $search_args) = @_;
-    # abstract
+  my ($self, $search_args) = @_;
+
+  # abstract
 }
 
 sub joiner { return $_[0]->{joiner} }
 
 sub has_translated_conditions {
-    my ($self) = @_;
-    my $children = $self->children;
-    return 1 if grep { $_->isa('Bugzilla::Search::Condition')
-                       && $_->translated } @$children;
-    foreach my $child (@$children) {
-        next if $child->isa('Bugzilla::Search::Condition');
-        return 1 if $child->has_translated_conditions;
-    }
-    return 0;
+  my ($self) = @_;
+  my $children = $self->children;
+  return 1
+    if grep { $_->isa('Bugzilla::Search::Condition') && $_->translated }
+    @$children;
+  foreach my $child (@$children) {
+    next if $child->isa('Bugzilla::Search::Condition');
+    return 1 if $child->has_translated_conditions;
+  }
+  return 0;
 }
 
 sub add {
-    my $self = shift;
-    my $children = $self->children;
-    if (@_ == 3) {
-        push(@$children, condition(@_));
-        return;
-    }
-    
-    my ($child) = @_;
-    return if !defined $child;
-    $child->isa(__PACKAGE__) || $child->isa('Bugzilla::Search::Condition')
-        || die 'child not the right type: ' . $child;
-    push(@{ $self->children }, $child);
+  my $self     = shift;
+  my $children = $self->children;
+  if (@_ == 3) {
+    push(@$children, condition(@_));
+    return;
+  }
+
+  my ($child) = @_;
+  return if !defined $child;
+  $child->isa(__PACKAGE__)
+    || $child->isa('Bugzilla::Search::Condition')
+    || die 'child not the right type: ' . $child;
+  push(@{$self->children}, $child);
 }
 
 sub negate {
-    my ($self, $value) = @_;
-    if (@_ == 2) {
-        $self->{negate} = $value ? 1 : 0;
-    }
-    return $self->{negate};
+  my ($self, $value) = @_;
+  if (@_ == 2) {
+    $self->{negate} = $value ? 1 : 0;
+  }
+  return $self->{negate};
 }
 
 sub walk_conditions {
-    my ($self, $callback) = @_;
-    foreach my $child (@{ $self->children }) {
-        if ($child->isa('Bugzilla::Search::Condition')) {
-            $callback->($self, $child);
-        }
-        else {
-            $child->walk_conditions($callback);
-        }
+  my ($self, $callback) = @_;
+  foreach my $child (@{$self->children}) {
+    if ($child->isa('Bugzilla::Search::Condition')) {
+      $callback->($self, $child);
     }
+    else {
+      $child->walk_conditions($callback);
+    }
+  }
 }
 
 sub as_string {
-    my ($self) = @_;
-    if (!$self->{sql}) {
-        my @strings;
-        foreach my $child (@{ $self->children }) {
-            next if $child->isa(__PACKAGE__) && !$child->has_translated_conditions;
-            next if $child->isa('Bugzilla::Search::Condition')
-                    && !$child->translated;
+  my ($self) = @_;
+  if (!$self->{sql}) {
+    my @strings;
+    foreach my $child (@{$self->children}) {
+      next if $child->isa(__PACKAGE__) && !$child->has_translated_conditions;
+      next if $child->isa('Bugzilla::Search::Condition') && !$child->translated;
 
-            my $string = $child->as_string;
-            next unless $string;
-            if ($self->joiner eq 'AND') {
-                $string = "( $string )" if $string =~ /OR/;
-            }
-            else {
-                $string = "( $string )" if $string =~ /AND/;
-            }
-            push(@strings, $string);
-        }
-
-        my $sql = join(' ' . $self->joiner . ' ', @strings);
-        $sql = "NOT( $sql )" if $sql && $self->negate;
-        $self->{sql} = $sql;
+      my $string = $child->as_string;
+      next unless $string;
+      if ($self->joiner eq 'AND') {
+        $string = "( $string )" if $string =~ /OR/;
+      }
+      else {
+        $string = "( $string )" if $string =~ /AND/;
+      }
+      push(@strings, $string);
     }
-    return $self->{sql};
+
+    my $sql = join(' ' . $self->joiner . ' ', @strings);
+    $sql = "NOT( $sql )" if $sql && $self->negate;
+    $self->{sql} = $sql;
+  }
+  return $self->{sql};
 }
 
 # Search.pm converts URL parameters to Clause objects. This helps do the
 # reverse.
 sub as_params {
-    my ($self) = @_;
-    my @params;
-    foreach my $child (@{ $self->children }) {
-        if ($child->isa(__PACKAGE__)) {
-            my %open_paren = (f => 'OP', n => scalar $child->negate,
-                              j => $child->joiner);
-            push(@params, \%open_paren);
-            push(@params, $child->as_params);
-            my %close_paren =  (f => 'CP');
-            push(@params, \%close_paren);
-        }
-        else {
-            push(@params, $child->as_params);
-        }
+  my ($self) = @_;
+  my @params;
+  foreach my $child (@{$self->children}) {
+    if ($child->isa(__PACKAGE__)) {
+      my %open_paren = (f => 'OP', n => scalar $child->negate, j => $child->joiner);
+      push(@params, \%open_paren);
+      push(@params, $child->as_params);
+      my %close_paren = (f => 'CP');
+      push(@params, \%close_paren);
     }
-    return @params;
+    else {
+      push(@params, $child->as_params);
+    }
+  }
+  return @params;
 }
 
 1;

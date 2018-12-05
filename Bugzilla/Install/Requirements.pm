@@ -19,7 +19,7 @@ use warnings;
 
 use Bugzilla::Constants;
 use Bugzilla::Install::Util qw(install_string bin_loc success
-                               extension_requirement_packages);
+  extension_requirement_packages);
 use List::Util qw(max);
 use Term::ANSIColor;
 use CPAN::Meta;
@@ -31,15 +31,15 @@ use parent qw(Exporter);
 use autodie;
 
 our @EXPORT = qw(
-    FEATURE_FILES
+  FEATURE_FILES
 
-    load_cpan_meta
-    check_cpan_requirements
-    check_cpan_feature
-    check_all_cpan_features
-    check_webdotbase
-    check_font_file
-    map_files_to_features
+  load_cpan_meta
+  check_cpan_requirements
+  check_cpan_feature
+  check_all_cpan_features
+  check_webdotbase
+  check_font_file
+  map_files_to_features
 );
 
 our $checking_for_indent = 0;
@@ -54,11 +54,11 @@ use constant TABLE_WIDTH => 71;
 # The keys are the names of the modules, the values are what the module
 # is called in the output of "apachectl -t -D DUMP_MODULES".
 use constant APACHE_MODULES => {
-    mod_headers => 'headers_module',
-    mod_env     => 'env_module',
-    mod_expires => 'expires_module',
-    mod_rewrite => 'rewrite_module',
-    mod_version => 'version_module'
+  mod_headers => 'headers_module',
+  mod_env     => 'env_module',
+  mod_expires => 'expires_module',
+  mod_rewrite => 'rewrite_module',
+  mod_version => 'version_module'
 };
 
 # These are all of the binaries that we could possibly use that can
@@ -71,261 +71,282 @@ use constant APACHE => qw(apachectl httpd apache2 apache);
 
 # If we don't find any of the above binaries in the normal PATH,
 # these are extra places we look.
-use constant APACHE_PATH => [qw(
+use constant APACHE_PATH => [
+  qw(
     /usr/sbin
     /usr/local/sbin
     /usr/libexec
     /usr/local/libexec
-)];
+    )
+];
 
 # This maps features to the files that require that feature in order
 # to compile. It is used by t/001compile.t and mod_perl.pl.
 use constant FEATURE_FILES => (
-    jsonrpc       => ['Bugzilla/WebService/Server/JSONRPC.pm', 'jsonrpc.cgi'],
-    xmlrpc        => ['Bugzilla/WebService/Server/XMLRPC.pm', 'xmlrpc.cgi',
-                      'Bugzilla/WebService.pm', 'Bugzilla/WebService/*.pm'],
-    csp           => ['Bugzilla/CGI/ContentSecurityPolicy.pm'],
-    psgi          => ['app.psgi'],
-    moving        => ['importxml.pl'],
-    auth_ldap     => ['Bugzilla/Auth/Verify/LDAP.pm'],
-    auth_radius   => ['Bugzilla/Auth/Verify/RADIUS.pm'],
-    documentation => ['docs/makedocs.pl'],
-    inbound_email => ['email_in.pl'],
-    jobqueue      => ['Bugzilla/Job/*', 'Bugzilla/JobQueue.pm',
-                      'Bugzilla/JobQueue/*', 'jobqueue.pl'],
-    patch_viewer  => ['Bugzilla/Attachment/PatchReader.pm'],
-    updates       => ['Bugzilla/Update.pm'],
-    markdown      => ['Bugzilla/Markdown.pm', 't/100markdown.t'],
-    memcached     => ['Bugzilla/Memcache.pm'],
-    auth_delegation => ['auth.cgi'],
+  jsonrpc => ['Bugzilla/WebService/Server/JSONRPC.pm', 'jsonrpc.cgi'],
+  xmlrpc  => [
+    'Bugzilla/WebService/Server/XMLRPC.pm', 'xmlrpc.cgi',
+    'Bugzilla/WebService.pm',               'Bugzilla/WebService/*.pm'
+  ],
+  csp           => ['Bugzilla/CGI/ContentSecurityPolicy.pm'],
+  psgi          => ['app.psgi'],
+  moving        => ['importxml.pl'],
+  auth_ldap     => ['Bugzilla/Auth/Verify/LDAP.pm'],
+  auth_radius   => ['Bugzilla/Auth/Verify/RADIUS.pm'],
+  documentation => ['docs/makedocs.pl'],
+  inbound_email => ['email_in.pl'],
+  jobqueue      => [
+    'Bugzilla/Job/*',      'Bugzilla/JobQueue.pm',
+    'Bugzilla/JobQueue/*', 'jobqueue.pl'
+  ],
+  patch_viewer    => ['Bugzilla/Attachment/PatchReader.pm'],
+  updates         => ['Bugzilla/Update.pm'],
+  markdown        => ['Bugzilla/Markdown.pm', 't/100markdown.t'],
+  memcached       => ['Bugzilla/Memcache.pm'],
+  auth_delegation => ['auth.cgi'],
 );
 
 sub load_cpan_meta {
-    my $dir = bz_locations()->{libpath};
-    my @meta_json = map { File::Spec->catfile($dir, $_) } qw( MYMETA.json META.json );
-    my ($file) = grep { -f $_ } @meta_json;
+  my $dir = bz_locations()->{libpath};
+  my @meta_json
+    = map { File::Spec->catfile($dir, $_) } qw( MYMETA.json META.json );
+  my ($file) = grep { -f $_ } @meta_json;
 
-    if ($file) {
-        open my $meta_fh, '<', $file or die "unable to open $file: $!";
-        my $str = do { local $/ = undef; scalar <$meta_fh> };
-        # detaint
-        $str =~ /^(.+)$/s; $str = $1;
-        close $meta_fh;
+  if ($file) {
+    open my $meta_fh, '<', $file or die "unable to open $file: $!";
+    my $str = do { local $/ = undef; scalar <$meta_fh> };
 
-        return CPAN::Meta->load_json_string($str);
-    }
-    else {
-        ThrowCodeError('cpan_meta_missing');
-    }
+    # detaint
+    $str =~ /^(.+)$/s;
+    $str = $1;
+    close $meta_fh;
+
+    return CPAN::Meta->load_json_string($str);
+  }
+  else {
+    ThrowCodeError('cpan_meta_missing');
+  }
 }
 
 sub check_all_cpan_features {
-    my ($meta, $dirs, $output) = @_;
-    my %report;
+  my ($meta, $dirs, $output) = @_;
+  my %report;
 
-    local $checking_for_indent = 2;
+  local $checking_for_indent = 2;
 
-    print "\nOptional features:\n" if $output;
-    my @features = sort { $a->identifier cmp $b->identifier } $meta->features;
-    foreach my $feature (@features) {
-        next if $feature->identifier eq 'features';
-        printf "Feature '%s': %s\n", $feature->identifier, $feature->description if $output;
-        my $result = check_cpan_feature($feature, $dirs, $output);
-        print "\n" if $output;
-
-        $report{$feature->identifier} = {
-            description => $feature->description,
-            result => $result,
-        };
-    }
-
-    print install_string('all_optional_features_require'), "\n" if $output;
-    my $features = check_cpan_feature($meta->feature('features'), $dirs, $output);
+  print "\nOptional features:\n" if $output;
+  my @features = sort { $a->identifier cmp $b->identifier } $meta->features;
+  foreach my $feature (@features) {
+    next if $feature->identifier eq 'features';
+    printf "Feature '%s': %s\n", $feature->identifier, $feature->description
+      if $output;
+    my $result = check_cpan_feature($feature, $dirs, $output);
     print "\n" if $output;
 
-    $report{features} = {
-        description => $meta->feature('features')->description,
-        result => $features,
-    };
+    $report{$feature->identifier}
+      = {description => $feature->description, result => $result,};
+  }
 
-    return \%report;
+  print install_string('all_optional_features_require'), "\n" if $output;
+  my $features = check_cpan_feature($meta->feature('features'), $dirs, $output);
+  print "\n" if $output;
+
+  $report{features} = {
+    description => $meta->feature('features')->description,
+    result      => $features,
+  };
+
+  return \%report;
 }
 
 sub check_cpan_feature {
-    my ($feature, $dirs, $output) = @_;
+  my ($feature, $dirs, $output) = @_;
 
-    return _check_prereqs($feature->prereqs, $dirs, $output);
+  return _check_prereqs($feature->prereqs, $dirs, $output);
 }
 
 sub check_cpan_requirements {
-    my ($meta, $dirs, $output) = @_;
+  my ($meta, $dirs, $output) = @_;
 
-    my $result = _check_prereqs($meta->effective_prereqs, $dirs, $output);
-    print colored(install_string('installation_failed'), COLOR_ERROR), "\n" if !$result->{ok} && $output;
-    return $result;
+  my $result = _check_prereqs($meta->effective_prereqs, $dirs, $output);
+  print colored(install_string('installation_failed'), COLOR_ERROR), "\n"
+    if !$result->{ok} && $output;
+  return $result;
 }
 
 sub _check_prereqs {
-    my ($prereqs, $dirs, $output) = @_;
-    $dirs //= \@INC;
-    my $reqs = $prereqs->merged_requirements(['configure', 'runtime'], ['requires']);
-    my @found;
-    my @missing;
+  my ($prereqs, $dirs, $output) = @_;
+  $dirs //= \@INC;
+  my $reqs
+    = $prereqs->merged_requirements(['configure', 'runtime'], ['requires']);
+  my @found;
+  my @missing;
 
-    foreach my $module (sort $reqs->required_modules) {
-        my $ok = _check_module($reqs, $module, $dirs, $output);
-        if ($ok) {
-            push @found, $module;
-        }
-        else {
-            push @missing, $module;
-        }
+  foreach my $module (sort $reqs->required_modules) {
+    my $ok = _check_module($reqs, $module, $dirs, $output);
+    if ($ok) {
+      push @found, $module;
     }
+    else {
+      push @missing, $module;
+    }
+  }
 
-    return { ok => (@missing == 0), found => \@found, missing => \@missing };
+  return {ok => (@missing == 0), found => \@found, missing => \@missing};
 }
 
 sub _check_module {
-    my ($reqs, $module, $dirs, $output) = @_;
-    my $required_version = $reqs->requirements_for_module($module);
+  my ($reqs, $module, $dirs, $output) = @_;
+  my $required_version = $reqs->requirements_for_module($module);
 
-    if ($module eq 'perl') {
-        my $ok = $reqs->accepts_module($module, $]);
-        _checking_for({package => "perl", found => $], wanted => $required_version, ok => $ok}) if $output;
-        return $ok;
-    } else {
-        my $metadata = Module::Metadata->new_from_module($module, inc => $dirs);
-        my $version = eval { $metadata->version };
-        my $ok = $metadata && $version && $reqs->accepts_module($module, $version || 0);
-        _checking_for({package => $module, $version ? ( found => $version ) : (), wanted => $required_version, ok => $ok}) if $output;
+  if ($module eq 'perl') {
+    my $ok = $reqs->accepts_module($module, $]);
+    _checking_for(
+      {package => "perl", found => $], wanted => $required_version, ok => $ok})
+      if $output;
+    return $ok;
+  }
+  else {
+    my $metadata = Module::Metadata->new_from_module($module, inc => $dirs);
+    my $version = eval { $metadata->version };
+    my $ok = $metadata && $version && $reqs->accepts_module($module, $version || 0);
+    _checking_for({
+      package => $module,
+      $version ? (found => $version) : (),
+      wanted => $required_version,
+      ok     => $ok
+    })
+      if $output;
 
-        return $ok;
-    }
+    return $ok;
+  }
 }
 
 
 sub _get_apachectl {
-    foreach my $bin_name (APACHE) {
-        my $bin = bin_loc($bin_name);
-        return $bin if $bin;
-    }
-    # Try again with a possibly different path.
-    foreach my $bin_name (APACHE) {
-        my $bin = bin_loc($bin_name, APACHE_PATH);
-        return $bin if $bin;
-    }
-    return undef;
+  foreach my $bin_name (APACHE) {
+    my $bin = bin_loc($bin_name);
+    return $bin if $bin;
+  }
+
+  # Try again with a possibly different path.
+  foreach my $bin_name (APACHE) {
+    my $bin = bin_loc($bin_name, APACHE_PATH);
+    return $bin if $bin;
+  }
+  return undef;
 }
 
 sub check_webdotbase {
-    my ($output) = @_;
+  my ($output) = @_;
 
-    my $webdotbase = Bugzilla->localconfig->{'webdotbase'};
-    return 1 if $webdotbase =~ /^https?:/;
+  my $webdotbase = Bugzilla->localconfig->{'webdotbase'};
+  return 1 if $webdotbase =~ /^https?:/;
 
-    my $return;
-    $return = 1 if -x $webdotbase;
+  my $return;
+  $return = 1 if -x $webdotbase;
 
-    if ($output) {
-        _checking_for({ package => 'GraphViz', ok => $return });
+  if ($output) {
+    _checking_for({package => 'GraphViz', ok => $return});
+  }
+
+  if (!$return) {
+    print install_string('bad_executable', {bin => $webdotbase}), "\n";
+  }
+
+  my $webdotdir = bz_locations()->{'webdotdir'};
+
+  # Check .htaccess allows access to generated images
+  if (-e "$webdotdir/.htaccess") {
+    my $htaccess = new IO::File("$webdotdir/.htaccess", 'r')
+      || die "$webdotdir/.htaccess: " . $!;
+    if (!grep(/ \\\.png\$/, $htaccess->getlines)) {
+      print STDERR install_string('webdot_bad_htaccess', {dir => $webdotdir}), "\n";
     }
+    $htaccess->close;
+  }
 
-    if (!$return) {
-        print install_string('bad_executable', { bin => $webdotbase }), "\n";
-    }
-
-    my $webdotdir = bz_locations()->{'webdotdir'};
-    # Check .htaccess allows access to generated images
-    if (-e "$webdotdir/.htaccess") {
-        my $htaccess = new IO::File("$webdotdir/.htaccess", 'r')
-            || die "$webdotdir/.htaccess: " . $!;
-        if (!grep(/ \\\.png\$/, $htaccess->getlines)) {
-            print STDERR install_string('webdot_bad_htaccess',
-                                        { dir => $webdotdir }), "\n";
-        }
-        $htaccess->close;
-    }
-
-    return $return;
+  return $return;
 }
 
 sub check_font_file {
-    my ($output) = @_;
+  my ($output) = @_;
 
-    my $font_file = Bugzilla->localconfig->{'font_file'};
+  my $font_file = Bugzilla->localconfig->{'font_file'};
 
-    my $readable;
-    $readable = 1 if -r $font_file;
+  my $readable;
+  $readable = 1 if -r $font_file;
 
-    my $ttf;
-    $ttf = 1 if $font_file =~ /\.(ttf|otf)$/;
+  my $ttf;
+  $ttf = 1 if $font_file =~ /\.(ttf|otf)$/;
 
-    if ($output) {
-        _checking_for({ package => 'Font file', ok => $readable && $ttf});
-    }
+  if ($output) {
+    _checking_for({package => 'Font file', ok => $readable && $ttf});
+  }
 
-    if (!$readable) {
-        print install_string('bad_font_file', { file => $font_file }), "\n";
-    }
-    elsif (!$ttf) {
-        print install_string('bad_font_file_name', { file => $font_file }), "\n";
-    }
+  if (!$readable) {
+    print install_string('bad_font_file', {file => $font_file}), "\n";
+  }
+  elsif (!$ttf) {
+    print install_string('bad_font_file_name', {file => $font_file}), "\n";
+  }
 
-    return $readable && $ttf;
+  return $readable && $ttf;
 }
 
 sub _checking_for {
-    my ($params) = @_;
-    my ($package, $ok, $wanted, $blacklisted, $found) =
-        @$params{qw(package ok wanted blacklisted found)};
+  my ($params) = @_;
+  my ($package, $ok, $wanted, $blacklisted, $found)
+    = @$params{qw(package ok wanted blacklisted found)};
 
-    my $ok_string = $ok ? install_string('module_ok') : '';
+  my $ok_string = $ok ? install_string('module_ok') : '';
 
-    # If we're actually checking versions (like for Perl modules), then
-    # we have some rather complex logic to determine what we want to
-    # show. If we're not checking versions (like for GraphViz) we just
-    # show "ok" or "not found".
-    if (exists $params->{found}) {
-        my $found_string;
-        # We do a string compare in case it's non-numeric. We make sure
-        # it's not a version object as negative versions are forbidden.
-        if ($found && !ref($found) && $found eq '-1') {
-            $found_string = install_string('module_not_found');
-        }
-        elsif ($found) {
-            $found_string = install_string('module_found', { ver => $found });
-        }
-        else {
-            $found_string = install_string('module_unknown_version');
-        }
-        $ok_string = $ok ? "$ok_string: $found_string" : $found_string;
+  # If we're actually checking versions (like for Perl modules), then
+  # we have some rather complex logic to determine what we want to
+  # show. If we're not checking versions (like for GraphViz) we just
+  # show "ok" or "not found".
+  if (exists $params->{found}) {
+    my $found_string;
+
+    # We do a string compare in case it's non-numeric. We make sure
+    # it's not a version object as negative versions are forbidden.
+    if ($found && !ref($found) && $found eq '-1') {
+      $found_string = install_string('module_not_found');
     }
-    elsif (!$ok) {
-        $ok_string = install_string('module_not_found');
+    elsif ($found) {
+      $found_string = install_string('module_found', {ver => $found});
     }
+    else {
+      $found_string = install_string('module_unknown_version');
+    }
+    $ok_string = $ok ? "$ok_string: $found_string" : $found_string;
+  }
+  elsif (!$ok) {
+    $ok_string = install_string('module_not_found');
+  }
 
-    my $black_string = $blacklisted ? install_string('blacklisted') : '';
-    my $want_string  = $wanted ? "$wanted" : install_string('any');
+  my $black_string = $blacklisted ? install_string('blacklisted') : '';
+  my $want_string = $wanted ? "$wanted" : install_string('any');
 
-    my $str = sprintf "%s %20s %-11s $ok_string $black_string\n",
-      ( ' ' x $checking_for_indent ) . install_string('checking_for'),
-      $package, "($want_string)";
-    print $ok ? $str : colored($str, COLOR_ERROR);
+  my $str = sprintf "%s %20s %-11s $ok_string $black_string\n",
+    (' ' x $checking_for_indent) . install_string('checking_for'), $package,
+    "($want_string)";
+  print $ok ? $str : colored($str, COLOR_ERROR);
 }
 
 # This does a reverse mapping for FEATURE_FILES.
 sub map_files_to_features {
-    my %features = FEATURE_FILES;
-    my %files;
-    foreach my $feature (keys %features) {
-        my @my_files = @{ $features{$feature} };
-        foreach my $pattern (@my_files) {
-            foreach my $file (glob $pattern) {
-                $files{$file} = $feature;
-            }
-        }
+  my %features = FEATURE_FILES;
+  my %files;
+  foreach my $feature (keys %features) {
+    my @my_files = @{$features{$feature}};
+    foreach my $pattern (@my_files) {
+      foreach my $file (glob $pattern) {
+        $files{$file} = $feature;
+      }
     }
-    return \%files;
+  }
+  return \%files;
 }
 
 1;

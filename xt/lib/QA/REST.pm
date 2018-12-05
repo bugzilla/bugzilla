@@ -23,45 +23,48 @@ use QA::Util;
 use parent qw(LWP::UserAgent Exporter);
 
 @QA::REST::EXPORT = qw(
-    MUST_FAIL
-    get_rest_client
+  MUST_FAIL
+  get_rest_client
 );
 
 use constant MUST_FAIL => 1;
 
 sub get_rest_client {
-    my $rest_client = LWP::UserAgent->new( ssl_opts => { verify_hostname => 0 } );
-    bless($rest_client, 'QA::REST');
-    my $config = $rest_client->{bz_config} = get_config();
-    $rest_client->{bz_url} = $config->{browser_url} . '/' . $config->{bugzilla_installation} . '/rest/';
-    $rest_client->{bz_default_headers} = {'Accept' => 'application/json', 'Content-Type' => 'application/json'};
-    return $rest_client;
+  my $rest_client = LWP::UserAgent->new(ssl_opts => {verify_hostname => 0});
+  bless($rest_client, 'QA::REST');
+  my $config = $rest_client->{bz_config} = get_config();
+  $rest_client->{bz_url}
+    = $config->{browser_url} . '/' . $config->{bugzilla_installation} . '/rest/';
+  $rest_client->{bz_default_headers}
+    = {'Accept' => 'application/json', 'Content-Type' => 'application/json'};
+  return $rest_client;
 }
 
 sub bz_config { return $_[0]->{bz_config}; }
 
 sub call {
-    my ($self, $method, $data, $http_verb, $expect_to_fail) = @_;
-    $http_verb = lc($http_verb || 'GET');
-    $data //= {};
+  my ($self, $method, $data, $http_verb, $expect_to_fail) = @_;
+  $http_verb = lc($http_verb || 'GET');
+  $data //= {};
 
-    my %args = %{ $self->{bz_default_headers} };
-    # We do not pass the API key in the URL, so that it's not logged by the web server.
-    if ($http_verb eq 'get' && $data->{api_key}) {
-        $args{'X-BUGZILLA-API-KEY'} = $data->{api_key};
-    }
-    elsif ($http_verb ne 'get') {
-        $args{Content} = encode_json($data);
-    }
+  my %args = %{$self->{bz_default_headers}};
 
-    my $response = $self->$http_verb($self->{bz_url} . $method, %args);
-    my $res = decode_json($response->decoded_content);
-    if ($response->is_success xor $expect_to_fail) {
-        return $res;
-    }
-    else {
-        die 'error ' . $res->{code} . ': ' . $res->{message} . "\n";
-    }
+# We do not pass the API key in the URL, so that it's not logged by the web server.
+  if ($http_verb eq 'get' && $data->{api_key}) {
+    $args{'X-BUGZILLA-API-KEY'} = $data->{api_key};
+  }
+  elsif ($http_verb ne 'get') {
+    $args{Content} = encode_json($data);
+  }
+
+  my $response = $self->$http_verb($self->{bz_url} . $method, %args);
+  my $res = decode_json($response->decoded_content);
+  if ($response->is_success xor $expect_to_fail) {
+    return $res;
+  }
+  else {
+    die 'error ' . $res->{code} . ': ' . $res->{message} . "\n";
+  }
 }
 
 1;

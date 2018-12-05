@@ -50,21 +50,22 @@ my $work_time;
 my $fetch_extension_info = 0;
 my $debug;
 
-GetOptions('help|h|?'       => \$help,
-           'uri=s'          => \$Bugzilla_uri,
-           'login:s'        => \$Bugzilla_login,
-           'password=s'     => \$Bugzilla_password,
-           'restrictlogin!' => \$Bugzilla_restrict,
-           'bug_id:s'       => \$bug_id,
-           'product_name:s' => \$product_name,
-           'create:s'       => \$create_file_name,
-           'field:s'        => \$legal_field_values,
-           'comment:s'      => \$add_comment,
-           'private:i'      => \$private,
-           'worktime:f'     => \$work_time,
-           'extension_info' => \$fetch_extension_info,
-           'debug'          => \$debug
-          ) or pod2usage({'-verbose' => 0, '-exitval' => 1});
+GetOptions(
+  'help|h|?'       => \$help,
+  'uri=s'          => \$Bugzilla_uri,
+  'login:s'        => \$Bugzilla_login,
+  'password=s'     => \$Bugzilla_password,
+  'restrictlogin!' => \$Bugzilla_restrict,
+  'bug_id:s'       => \$bug_id,
+  'product_name:s' => \$product_name,
+  'create:s'       => \$create_file_name,
+  'field:s'        => \$legal_field_values,
+  'comment:s'      => \$add_comment,
+  'private:i'      => \$private,
+  'worktime:f'     => \$work_time,
+  'extension_info' => \$fetch_extension_info,
+  'debug'          => \$debug
+) or pod2usage({'-verbose' => 0, '-exitval' => 1});
 
 =head1 OPTIONS
 
@@ -171,7 +172,7 @@ Enable tracing at the debug level of XMLRPC requests and responses if requested.
 =cut
 
 if ($debug) {
-   $proxy->import(+trace => 'debug');
+  $proxy->import(+trace => 'debug');
 }
 
 =head2 Checking Bugzilla's version
@@ -184,7 +185,8 @@ minimum required version your application needs.
 
 $soapresult = $proxy->call('Bugzilla.version');
 _die_on_fault($soapresult);
-print 'Connecting to a Bugzilla of version ' . $soapresult->result()->{version} . ".\n";
+print 'Connecting to a Bugzilla of version '
+  . $soapresult->result()->{version} . ".\n";
 
 =head2 Checking Bugzilla's timezone
 
@@ -217,22 +219,27 @@ parameter).
 =cut
 
 if (defined($Bugzilla_login)) {
-    if ($Bugzilla_login ne '') {
-        # Log in.
-        $soapresult = $proxy->call('User.login',
-                                   { login => $Bugzilla_login,
-                                     password => $Bugzilla_password,
-                                     restrict_login => $Bugzilla_restrict } );
-        $Bugzilla_token = $soapresult->result->{token};
-        _die_on_fault($soapresult);
-        print "Login successful.\n";
-    }
-    else {
-        # Log out.
-        $soapresult = $proxy->call('User.logout');
-        _die_on_fault($soapresult);
-        print "Logout successful.\n";
-    }
+  if ($Bugzilla_login ne '') {
+
+    # Log in.
+    $soapresult = $proxy->call(
+      'User.login',
+      {
+        login          => $Bugzilla_login,
+        password       => $Bugzilla_password,
+        restrict_login => $Bugzilla_restrict
+      }
+    );
+    $Bugzilla_token = $soapresult->result->{token};
+    _die_on_fault($soapresult);
+    print "Login successful.\n";
+  }
+  else {
+    # Log out.
+    $soapresult = $proxy->call('User.logout');
+    _die_on_fault($soapresult);
+    print "Logout successful.\n";
+  }
 }
 
 =head2 Getting Extension Information
@@ -242,16 +249,16 @@ Returns all the information any extensions have decided to provide to the webser
 =cut
 
 if ($fetch_extension_info) {
-    $soapresult = $proxy->call('Bugzilla.extensions', {token => $Bugzilla_token});
-    _die_on_fault($soapresult);
-    my $extensions = $soapresult->result()->{extensions};
-    foreach my $extensionname (keys(%$extensions)) {
-        print "Extension '$extensionname' information\n";
-        my $extension = $extensions->{$extensionname};
-        foreach my $data (keys(%$extension)) {
-            print '  ' . $data . ' => ' . $extension->{$data} . "\n";
-        }
+  $soapresult = $proxy->call('Bugzilla.extensions', {token => $Bugzilla_token});
+  _die_on_fault($soapresult);
+  my $extensions = $soapresult->result()->{extensions};
+  foreach my $extensionname (keys(%$extensions)) {
+    print "Extension '$extensionname' information\n";
+    my $extension = $extensions->{$extensionname};
+    foreach my $data (keys(%$extension)) {
+      print '  ' . $data . ' => ' . $extension->{$data} . "\n";
     }
+  }
 }
 
 =head2 Retrieving Bug Information
@@ -262,21 +269,22 @@ The call will return a C<Bugzilla::Bug> object.
 =cut
 
 if ($bug_id) {
-    $soapresult = $proxy->call('Bug.get', { ids => [$bug_id], token => $Bugzilla_token});
-    _die_on_fault($soapresult);
-    $result = $soapresult->result;
-    my $bug = $result->{bugs}->[0];
-    foreach my $field (keys(%$bug)) {
-        my $value = $bug->{$field};
-        if (ref($value) eq 'HASH') {
-            foreach (keys %$value) {
-                print "$_: " . $value->{$_} . "\n";
-            }
-        }
-        else {
-            print "$field: $value\n";
-        }
+  $soapresult
+    = $proxy->call('Bug.get', {ids => [$bug_id], token => $Bugzilla_token});
+  _die_on_fault($soapresult);
+  $result = $soapresult->result;
+  my $bug = $result->{bugs}->[0];
+  foreach my $field (keys(%$bug)) {
+    my $value = $bug->{$field};
+    if (ref($value) eq 'HASH') {
+      foreach (keys %$value) {
+        print "$_: " . $value->{$_} . "\n";
+      }
     }
+    else {
+      print "$field: $value\n";
+    }
+  }
 }
 
 =head2 Retrieving Product Information
@@ -287,27 +295,28 @@ The call will return a C<Bugzilla::Product> object.
 =cut
 
 if ($product_name) {
-    $soapresult = $proxy->call('Product.get', {'names' => [$product_name], token => $Bugzilla_token});
-    _die_on_fault($soapresult);
-    $result = $soapresult->result()->{'products'}->[0];
+  $soapresult = $proxy->call('Product.get',
+    {'names' => [$product_name], token => $Bugzilla_token});
+  _die_on_fault($soapresult);
+  $result = $soapresult->result()->{'products'}->[0];
 
-    # Iterate all entries, the values may be scalars or array refs with hash refs.
-    foreach my $key (sort(keys %$result)) {
-      my $value = $result->{$key};
+  # Iterate all entries, the values may be scalars or array refs with hash refs.
+  foreach my $key (sort(keys %$result)) {
+    my $value = $result->{$key};
 
-      if (ref($value)) {
-        my $counter = 0;
-        foreach my $hash (@$value) {
-          while (my ($innerKey, $innerValue) = each %$hash) {
-            print "$key.$counter.$innerKey: $innerValue\n";
-          }
-          ++$counter;
+    if (ref($value)) {
+      my $counter = 0;
+      foreach my $hash (@$value) {
+        while (my ($innerKey, $innerValue) = each %$hash) {
+          print "$key.$counter.$innerKey: $innerValue\n";
         }
-      }
-      else {
-        print "$key: $value\n"
+        ++$counter;
       }
     }
+    else {
+      print "$key: $value\n";
+    }
+  }
 }
 
 =head2 Creating A Bug
@@ -320,20 +329,20 @@ The call will return a hash with a bug id for the newly created bug.
 =cut
 
 if ($create_file_name) {
-    my $bug_fields = do "$create_file_name";
-    $bug_fields->{Bugzilla_token} = $Bugzilla_token;
-    $soapresult = $proxy->call('Bug.create', \%$bug_fields);
-    _die_on_fault($soapresult);
-    $result = $soapresult->result;
+  my $bug_fields = do "$create_file_name";
+  $bug_fields->{Bugzilla_token} = $Bugzilla_token;
+  $soapresult = $proxy->call('Bug.create', \%$bug_fields);
+  _die_on_fault($soapresult);
+  $result = $soapresult->result;
 
-    if (ref($result) eq 'HASH') {
-        foreach (keys(%$result)) {
-            print "$_: $$result{$_}\n";
-        }
+  if (ref($result) eq 'HASH') {
+    foreach (keys(%$result)) {
+      print "$_: $$result{$_}\n";
     }
-    else {
-        print "$result\n";
-    }
+  }
+  else {
+    print "$result\n";
+  }
 
 }
 
@@ -346,11 +355,12 @@ list of legal values for this field.
 =cut
 
 if ($legal_field_values) {
-    $soapresult = $proxy->call('Bug.legal_values', {field => $legal_field_values, token => $Bugzilla_token} );
-    _die_on_fault($soapresult);
-    $result = $soapresult->result;
+  $soapresult = $proxy->call('Bug.legal_values',
+    {field => $legal_field_values, token => $Bugzilla_token});
+  _die_on_fault($soapresult);
+  $result = $soapresult->result;
 
-    print join("\n", @{$result->{values}}) . "\n";
+  print join("\n", @{$result->{values}}) . "\n";
 }
 
 =head2 Adding a comment to a bug
@@ -362,15 +372,23 @@ or not.
 =cut
 
 if ($add_comment) {
-    if ($bug_id) {
-        $soapresult = $proxy->call('Bug.add_comment', {id => $bug_id,
-            comment => $add_comment, private => $private, work_time => $work_time, token => $Bugzilla_token});
-        _die_on_fault($soapresult);
-        print "Comment added.\n";
-    }
-    else {
-        print "A --bug_id must be supplied to add a comment.";
-    }
+  if ($bug_id) {
+    $soapresult = $proxy->call(
+      'Bug.add_comment',
+      {
+        id        => $bug_id,
+        comment   => $add_comment,
+        private   => $private,
+        work_time => $work_time,
+        token     => $Bugzilla_token
+      }
+    );
+    _die_on_fault($soapresult);
+    print "Comment added.\n";
+  }
+  else {
+    print "A --bug_id must be supplied to add a comment.";
+  }
 }
 
 =head1 NOTES
@@ -407,18 +425,19 @@ help to you.
 =cut
 
 sub _die_on_fault {
-    my $soapresult = shift;
+  my $soapresult = shift;
 
-    if ($soapresult->fault) {
-        my ($package, $filename, $line) = caller;
-        die $soapresult->faultcode . ' ' . $soapresult->faultstring .
-            " in SOAP call near $filename line $line.\n";
-    }
+  if ($soapresult->fault) {
+    my ($package, $filename, $line) = caller;
+    die $soapresult->faultcode . ' '
+      . $soapresult->faultstring
+      . " in SOAP call near $filename line $line.\n";
+  }
 }
 
 sub _syntaxhelp {
-    my $msg = shift;
+  my $msg = shift;
 
-    print "Error: $msg\n";
-    pod2usage({'-verbose' => 0, '-exitval' => 1});
+  print "Error: $msg\n";
+  pod2usage({'-verbose' => 0, '-exitval' => 1});
 }

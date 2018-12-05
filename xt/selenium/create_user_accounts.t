@@ -21,7 +21,13 @@ my ($sel, $config) = get_selenium();
 # Set the email regexp for new bugzilla accounts to end with @bugzilla.test.
 
 log_in($sel, $config, 'admin');
-set_parameters($sel, { "User Authentication" => {"createemailregexp" => {type => "text", value => '[^@]+@bugzilla\.test$'}} });
+set_parameters(
+  $sel,
+  {
+    "User Authentication" =>
+      {"createemailregexp" => {type => "text", value => '[^@]+@bugzilla\.test$'}}
+  }
+);
 logout($sel);
 
 # Create a valid account. We need to randomize the login address, because a request
@@ -57,40 +63,50 @@ my $error_msg = trim($sel->get_text("error_msg"));
 ok($error_msg =~ /Please wait 10 minutes/, "Too soon for this account");
 
 # These accounts do not pass the regexp.
-my @accounts = ('test@yahoo.com', 'test@bugzilla.net', 'test@bugzilla.test.com');
+my @accounts
+  = ('test@yahoo.com', 'test@bugzilla.net', 'test@bugzilla.test.com');
 foreach my $account (@accounts) {
-    $sel->click_ok("link=New Account");
-    $sel->wait_for_page_to_load_ok(WAIT_TIME);
-    $sel->title_is("Create a new Bugzilla account");
-    $sel->type_ok("email", $account);
-    $sel->click_ok("send");
-    $sel->wait_for_page_to_load_ok(WAIT_TIME);
-    $sel->title_is("Account Creation Restricted");
-    $sel->is_text_present_ok("User account creation has been restricted.");
+  $sel->click_ok("link=New Account");
+  $sel->wait_for_page_to_load_ok(WAIT_TIME);
+  $sel->title_is("Create a new Bugzilla account");
+  $sel->type_ok("email", $account);
+  $sel->click_ok("send");
+  $sel->wait_for_page_to_load_ok(WAIT_TIME);
+  $sel->title_is("Account Creation Restricted");
+  $sel->is_text_present_ok("User account creation has been restricted.");
 }
 
 # These accounts are illegal.
-@accounts = ('test\bugzilla@bugzilla.test', 'test@bugzilla.org@bugzilla.test', 'test@bugzilla..test');
+@accounts = (
+  'test\bugzilla@bugzilla.test', 'test@bugzilla.org@bugzilla.test',
+  'test@bugzilla..test'
+);
+
 # Logins larger than 127 characters must be rejected, for security reasons.
-push  @accounts, 'selenium-' . random_string(110) . '@bugzilla.test';
+push @accounts, 'selenium-' . random_string(110) . '@bugzilla.test';
 
 foreach my $account (@accounts) {
-    $sel->click_ok("link=New Account");
-    $sel->wait_for_page_to_load_ok(WAIT_TIME);
-    $sel->title_is("Create a new Bugzilla account");
-    # Starting with 5.0, the login field is a type=email and is marked "required"
-    # This means that we need to add the novalidate attribute to the enclosing form
-    # so that the illegal login can still be checked by the backend code.
-    my $script = q{
+  $sel->click_ok("link=New Account");
+  $sel->wait_for_page_to_load_ok(WAIT_TIME);
+  $sel->title_is("Create a new Bugzilla account");
+
+  # Starting with 5.0, the login field is a type=email and is marked "required"
+  # This means that we need to add the novalidate attribute to the enclosing form
+  # so that the illegal login can still be checked by the backend code.
+  my $script = q{
         document.getElementById('account_creation_form').setAttribute('novalidate', 1);
     };
-    $sel->run_script($script);
-    $sel->type_ok("email", $account);
-    $sel->click_ok("send");
-    $sel->wait_for_page_to_load_ok(WAIT_TIME);
-    $sel->title_is("Invalid Email Address");
-    my $error_msg = trim($sel->get_text("error_msg"));
-    ok($error_msg =~ /^The e-mail address you entered (\S+) didn't pass our syntax checking/, "Invalid email address detected");
+  $sel->run_script($script);
+  $sel->type_ok("email", $account);
+  $sel->click_ok("send");
+  $sel->wait_for_page_to_load_ok(WAIT_TIME);
+  $sel->title_is("Invalid Email Address");
+  my $error_msg = trim($sel->get_text("error_msg"));
+  ok(
+    $error_msg
+      =~ /^The e-mail address you entered (\S+) didn't pass our syntax checking/,
+    "Invalid email address detected"
+  );
 }
 
 # This account already exists.
@@ -102,11 +118,20 @@ $sel->click_ok("send");
 $sel->wait_for_page_to_load_ok(WAIT_TIME);
 $sel->title_is("Account Already Exists");
 $error_msg = trim($sel->get_text("error_msg"));
-ok($error_msg eq "There is already an account with the email address $config->{admin_user_login}.", "Account already exists");
+ok(
+  $error_msg eq
+    "There is already an account with the email address $config->{admin_user_login}.",
+  "Account already exists"
+);
 
 # Turn off user account creation.
 log_in($sel, $config, 'admin');
-set_parameters($sel, { "User Authentication" => {"createemailregexp" => {type => "text", value => ''}} });
+set_parameters(
+  $sel,
+  {
+    "User Authentication" => {"createemailregexp" => {type => "text", value => ''}}
+  }
+);
 logout($sel);
 
 # Make sure that links pointing to createaccount.cgi are all deactivated.
@@ -114,17 +139,29 @@ ok(!$sel->is_text_present("New Account"), "No link named 'New Account'");
 $sel->click_ok("link=Home");
 $sel->wait_for_page_to_load_ok(WAIT_TIME);
 $sel->title_is("Bugzilla Main Page");
-ok(!$sel->is_text_present("Open a New Account"), "No link named 'Open a New Account'");
+ok(
+  !$sel->is_text_present("Open a New Account"),
+  "No link named 'Open a New Account'"
+);
 $sel->open_ok("/$config->{bugzilla_installation}/createaccount.cgi");
 $sel->title_is("Account Creation Disabled");
 $error_msg = trim($sel->get_text("error_msg"));
-ok($error_msg =~ /^User account creation has been disabled. New accounts must be created by an administrator/,
-   "User account creation disabled");
+ok(
+  $error_msg
+    =~ /^User account creation has been disabled. New accounts must be created by an administrator/,
+  "User account creation disabled"
+);
 
 # Re-enable user account creation.
 
 log_in($sel, $config, 'admin');
-set_parameters($sel, { "User Authentication" => {"createemailregexp" => {type => "text", value => '.*'}} });
+set_parameters(
+  $sel,
+  {
+    "User Authentication" =>
+      {"createemailregexp" => {type => "text", value => '.*'}}
+  }
+);
 
 # Make sure selenium-<random_string>@bugzilla.test has not be added to the DB yet.
 go_to_admin($sel);

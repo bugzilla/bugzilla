@@ -1,6 +1,7 @@
 use 5.006;
 use strict;
 use warnings;
+
 package CPAN::Meta::Feature;
 
 our $VERSION = '2.150005';
@@ -44,7 +45,7 @@ sub new {
 #pod
 #pod =cut
 
-sub identifier  { $_[0]{identifier}  }
+sub identifier { $_[0]{identifier} }
 
 #pod =method description
 #pod
@@ -61,7 +62,7 @@ sub description { $_[0]{description} }
 #pod
 #pod =cut
 
-sub prereqs     { $_[0]{prereqs} }
+sub prereqs { $_[0]{prereqs} }
 
 1;
 

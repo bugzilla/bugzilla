@@ -17,22 +17,23 @@ use Test::More "no_plan";
 use QA::Util;
 
 my ($sel, $config) = get_selenium();
-my $qa_user = $config->{QA_Selenium_TEST_user_login};
+my $qa_user       = $config->{QA_Selenium_TEST_user_login};
 my $no_privs_user = $config->{unprivileged_user_login};
 
 log_in($sel, $config, 'admin');
-set_parameters($sel, { "Group Security" => {"strict_isolation-on" => undef} });
+set_parameters($sel, {"Group Security" => {"strict_isolation-on" => undef}});
 
 # Restrict the bug to the "Master" group, so that we can check that only
 # allowed people can be CC'ed to the bug.
 
 file_bug_in_product($sel, 'Another Product');
 $sel->select_ok("component", "label=c2");
-$sel->select_ok("version", "label=Another2");
+$sel->select_ok("version",   "label=Another2");
 my $bug_summary = "Test isolation";
 $sel->type_ok("short_desc", $bug_summary);
-$sel->type_ok("comment", "Unallowed users refused");
-my $master_gid = $sel->get_attribute('//input[@type="checkbox" and @name="groups" and @value="Master"]@id');
+$sel->type_ok("comment",    "Unallowed users refused");
+my $master_gid = $sel->get_attribute(
+  '//input[@type="checkbox" and @name="groups" and @value="Master"]@id');
 $sel->check_ok($master_gid);
 $master_gid =~ s/group_//;
 my $bug1_id = create_bug($sel, $bug_summary);
@@ -69,7 +70,8 @@ $sel->type_ok("newcc", $no_privs_user);
 $sel->click_ok("commit");
 $sel->wait_for_page_to_load_ok(WAIT_TIME);
 $sel->title_is("Invalid User Group");
-$sel->is_text_present_ok("User '$no_privs_user' is not able to edit the 'Another Product' Product");
+$sel->is_text_present_ok(
+  "User '$no_privs_user' is not able to edit the 'Another Product' Product");
 $sel->go_back_ok();
 $sel->wait_for_page_to_load_ok(WAIT_TIME);
 $sel->title_like(qr/^$bug1_id /);
@@ -78,7 +80,8 @@ $sel->type_ok("newcc", $qa_user);
 $sel->click_ok("commit");
 $sel->wait_for_page_to_load_ok(WAIT_TIME);
 $sel->title_is("Invalid User Group");
-$sel->is_text_present_ok("User '$qa_user' is not able to edit the 'Another Product' Product");
+$sel->is_text_present_ok(
+  "User '$qa_user' is not able to edit the 'Another Product' Product");
 
 # Now set QA_Selenium_TEST user as a member of the Master group.
 
@@ -114,11 +117,12 @@ $sel->type_ok("newcc", "$qa_user, $no_privs_user");
 $sel->click_ok("commit");
 $sel->wait_for_page_to_load_ok(WAIT_TIME);
 $sel->title_is("Invalid User Group");
-$sel->is_text_present_ok("User '$no_privs_user' is not able to edit the 'Another Product' Product");
+$sel->is_text_present_ok(
+  "User '$no_privs_user' is not able to edit the 'Another Product' Product");
 
 # Reset parameters back to defaults.
 
-set_parameters($sel, { "Group Security" => {"strict_isolation-off" => undef} });
+set_parameters($sel, {"Group Security" => {"strict_isolation-off" => undef}});
 
 go_to_admin($sel);
 $sel->click_ok("link=Users");

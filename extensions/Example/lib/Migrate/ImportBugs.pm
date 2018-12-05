@@ -19,8 +19,7 @@ implementation see L<Bugzilla::Migrate::Gnats>.
 
 package Bugzilla::Extension::Example::Migrate::ImportBugs;
 
-use 5.14.0
-use strict;
+use 5.14.0 use strict;
 use warnings;
 
 use parent qw(Bugzilla::Migrate);
@@ -30,41 +29,32 @@ use Bugzilla::Install::Util qw(indicate_progress);
 use Bugzilla::Util qw(format_time trim generate_random_password);
 
 use constant REQUIRED_MODULES => [
-    {
-        package => 'Email-Simple-FromHandle',
-        module  => 'Email::Simple::FromHandle',
-        version => 0.050,
-    },
+  {
+    package => 'Email-Simple-FromHandle',
+    module  => 'Email::Simple::FromHandle',
+    version => 0.050,
+  },
 ];
 
-use constant FIELD_MAP => {
-    'Number'         => 'bug_id',
-    'Category'       => 'product',
-};
+use constant FIELD_MAP => {'Number' => 'bug_id', 'Category' => 'product',};
 
 use constant VALUE_MAP => {
-    bug_severity => {
-        'serious'      => 'major',
-        'non-critical' => 'normal',
-    },
-    bug_status => {
-        'feedback'  => 'RESOLVED',
-        'released'  => 'VERIFIED',
-    },
+  bug_severity => {'serious'  => 'major',    'non-critical' => 'normal',},
+  bug_status   => {'feedback' => 'RESOLVED', 'released'     => 'VERIFIED',},
 };
 
 use constant IMPORTBUGS_CONFIG_VARS => (
-    {
-        name    => 'default_email_domain',
-        default => 'example.com',
-        desc    => <<'END',
+  {
+    name    => 'default_email_domain',
+    default => 'example.com',
+    desc    => <<'END',
 # Some users do not have full email addresses, but Bugzilla requires
 # every user to have an email address. What domain should be appended to
 # usernames that don't have emails, to make them into email addresses?
 # (For example, if you leave this at the default, "unknown" would become
 # "unknown@example.com".)
 END
-    },
+  },
 );
 
 #########
@@ -72,7 +62,7 @@ END
 #########
 
 sub before_insert {
-    my $self = shift;
+  my $self = shift;
 }
 
 #########
@@ -80,7 +70,7 @@ sub before_insert {
 #########
 
 sub _read_users {
-    my $self = shift;
+  my $self = shift;
 }
 
 ############
@@ -88,7 +78,7 @@ sub _read_users {
 ############
 
 sub _read_products {
-    my $self = shift;
+  my $self = shift;
 }
 
 ################
@@ -96,11 +86,11 @@ sub _read_products {
 ################
 
 sub _read_bugs {
-    my $self = shift;
+  my $self = shift;
 }
 
 sub _parse_project {
-    my ($self, $directory) = @_;
+  my ($self, $directory) = @_;
 }
 
 1;

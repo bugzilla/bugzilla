@@ -14,41 +14,44 @@ use warnings;
 use parent qw(Bugzilla::Extension);
 
 use constant MORE_SUB_CLASSES => qw(
-    Bugzilla::Extension::MoreBugUrl::BitBucket
-    Bugzilla::Extension::MoreBugUrl::ReviewBoard
-    Bugzilla::Extension::MoreBugUrl::Rietveld
-    Bugzilla::Extension::MoreBugUrl::RT
-    Bugzilla::Extension::MoreBugUrl::GetSatisfaction
-    Bugzilla::Extension::MoreBugUrl::PHP
-    Bugzilla::Extension::MoreBugUrl::Redmine
-    Bugzilla::Extension::MoreBugUrl::Savane
-    Bugzilla::Extension::MoreBugUrl::Phabricator
+  Bugzilla::Extension::MoreBugUrl::BitBucket
+  Bugzilla::Extension::MoreBugUrl::ReviewBoard
+  Bugzilla::Extension::MoreBugUrl::Rietveld
+  Bugzilla::Extension::MoreBugUrl::RT
+  Bugzilla::Extension::MoreBugUrl::GetSatisfaction
+  Bugzilla::Extension::MoreBugUrl::PHP
+  Bugzilla::Extension::MoreBugUrl::Redmine
+  Bugzilla::Extension::MoreBugUrl::Savane
+  Bugzilla::Extension::MoreBugUrl::Phabricator
 );
 
 # We need to update bug_see_also table because both
 # Rietveld and ReviewBoard were originally under Bugzilla/BugUrl/.
 sub install_update_db {
-    my $dbh = Bugzilla->dbh;
+  my $dbh = Bugzilla->dbh;
 
-    my $should_rename = $dbh->selectrow_array(
-        q{SELECT 1 FROM bug_see_also
+  my $should_rename = $dbh->selectrow_array(
+    q{SELECT 1 FROM bug_see_also
           WHERE class IN ('Bugzilla::BugUrl::Rietveld', 
-                          'Bugzilla::BugUrl::ReviewBoard')});
+                          'Bugzilla::BugUrl::ReviewBoard')}
+  );
 
-    if ($should_rename) {
-        my $sth = $dbh->prepare('UPDATE bug_see_also SET class = ?
-                                 WHERE class = ?');
-        $sth->execute('Bugzilla::Extension::MoreBugUrl::ReviewBoard',
-                      'Bugzilla::BugUrl::ReviewBoard');
+  if ($should_rename) {
+    my $sth = $dbh->prepare(
+      'UPDATE bug_see_also SET class = ?
+                                 WHERE class = ?'
+    );
+    $sth->execute('Bugzilla::Extension::MoreBugUrl::ReviewBoard',
+      'Bugzilla::BugUrl::ReviewBoard');
 
-        $sth->execute('Bugzilla::Extension::MoreBugUrl::Rietveld',
-                      'Bugzilla::BugUrl::Rietveld');
-    }
+    $sth->execute('Bugzilla::Extension::MoreBugUrl::Rietveld',
+      'Bugzilla::BugUrl::Rietveld');
+  }
 }
 
 sub bug_url_sub_classes {
-    my ($self, $args) = @_;
-    push @{ $args->{sub_classes} }, MORE_SUB_CLASSES;
+  my ($self, $args) = @_;
+  push @{$args->{sub_classes}}, MORE_SUB_CLASSES;
 }
 
 __PACKAGE__->NAME;

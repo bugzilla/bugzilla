@@ -1,3 +1,4 @@
+
 =head1 NAME
 
 JSON::PP::Boolean - dummy module providing JSON::PP::Boolean

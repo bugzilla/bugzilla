@@ -18,24 +18,25 @@ use parent qw(Bugzilla::BugUrl);
 ###############################
 
 sub should_handle {
-    my ($class, $uri) = @_;
-    return ($uri->path =~ m|^/T\d+$|) ? 1 : 0;
+  my ($class, $uri) = @_;
+  return ($uri->path =~ m|^/T\d+$|) ? 1 : 0;
 }
 
 sub _check_value {
-    my $class = shift;
+  my $class = shift;
 
-    my $uri = $class->SUPER::_check_value(@_);
+  my $uri = $class->SUPER::_check_value(@_);
 
-    # Phabricator URLs have only one form:
-    #   http://example.com/T111
+  # Phabricator URLs have only one form:
+  #   http://example.com/T111
 
-    # Make sure there are no query parameters.
-    $uri->query(undef);
-    # And remove any # part if there is one.
-    $uri->fragment(undef);
+  # Make sure there are no query parameters.
+  $uri->query(undef);
 
-    return $uri;
+  # And remove any # part if there is one.
+  $uri->fragment(undef);
+
+  return $uri;
 }
 
 1;

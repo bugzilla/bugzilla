@@ -19,7 +19,7 @@ use QA::Util;
 my ($sel, $config) = get_selenium();
 
 log_in($sel, $config, 'admin');
-set_parameters($sel, { "Bug Fields" => {"useclassification-on" => undef} });
+set_parameters($sel, {"Bug Fields" => {"useclassification-on" => undef}});
 
 # Do not use file_bug_in_product() because our goal here is not to file
 # a bug but to check what is present in the UI, and also to make sure
@@ -36,7 +36,10 @@ ok($full_text =~ /All: Show all products/, "The 'All' link is displayed");
 $sel->click_ok("link=All");
 $sel->wait_for_page_to_load_ok(WAIT_TIME);
 $sel->is_text_present_ok("Select Product");
-ok(!$sel->is_text_present("QA-Selenium-TEST"), "The QA-Selenium-TEST product is not displayed");
+ok(
+  !$sel->is_text_present("QA-Selenium-TEST"),
+  "The QA-Selenium-TEST product is not displayed"
+);
 logout($sel);
 
 # Same steps, but for a member of the "QA‑Selenium‑TEST" group.

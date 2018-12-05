@@ -28,8 +28,9 @@ go_to_home($sel, $config);
 $sel->click_ok("link=New");
 $sel->wait_for_page_to_load_ok(WAIT_TIME);
 $sel->title_is("Log in to Bugzilla");
+
 # The login and password are hardcoded here, because this account doesn't exist.
-$sel->type_ok("Bugzilla_login", 'guest@foo.com');
+$sel->type_ok("Bugzilla_login",    'guest@foo.com');
 $sel->type_ok("Bugzilla_password", 'foo-bar-baz');
 $sel->click_ok("log_in");
 $sel->wait_for_page_to_load_ok(WAIT_TIME);

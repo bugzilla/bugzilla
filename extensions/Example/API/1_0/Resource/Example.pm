@@ -18,29 +18,21 @@ use Bugzilla::Error;
 #############
 
 use constant READ_ONLY => qw(
-    hello
-    throw_an_error
+  hello
+  throw_an_error
 );
 
 use constant PUBLIC_METHODS => qw(
-    hello
-    throw_an_error
+  hello
+  throw_an_error
 );
 
 sub REST_RESOURCES {
-    my $rest_resources = [
-        qr{^/hello$}, {
-            GET  => {
-                method => 'hello'
-            }
-        },
-        qr{^/throw_an_error$}, {
-            GET => {
-                method => 'throw_an_error'
-            }
-        }
-    ];
-    return $rest_resources;
+  my $rest_resources = [
+    qr{^/hello$},          {GET => {method => 'hello'}},
+    qr{^/throw_an_error$}, {GET => {method => 'throw_an_error'}}
+  ];
+  return $rest_resources;
 }
 
 ###########
@@ -49,9 +41,7 @@ sub REST_RESOURCES {
 
 # This can be called as Example.hello() from the WebService.
 sub hello {
-    return {
-        message => 'Hello!'
-    };
+  return {message => 'Hello!'};
 }
 
 sub throw_an_error { ThrowUserError('example_my_error') }

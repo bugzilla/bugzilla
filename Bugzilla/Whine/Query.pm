@@ -23,12 +23,12 @@ use Bugzilla::Search::Saved;
 use constant DB_TABLE => 'whine_queries';
 
 use constant DB_COLUMNS => qw(
-    id
-    eventid
-    query_name
-    sortkey
-    onemailperbug
-    title
+  id
+  eventid
+  query_name
+  sortkey
+  onemailperbug
+  title
 );
 
 use constant NAME_FIELD => 'id';
@@ -37,11 +37,11 @@ use constant LIST_ORDER => 'sortkey';
 ####################
 # Simple Accessors #
 ####################
-sub eventid           { return $_[0]->{'eventid'};       }
-sub sortkey           { return $_[0]->{'sortkey'};       }
+sub eventid           { return $_[0]->{'eventid'}; }
+sub sortkey           { return $_[0]->{'sortkey'}; }
 sub one_email_per_bug { return $_[0]->{'onemailperbug'}; }
-sub title             { return $_[0]->{'title'};         }
-sub name              { return $_[0]->{'query_name'};    }
+sub title             { return $_[0]->{'title'}; }
+sub name              { return $_[0]->{'query_name'}; }
 
 
 1;

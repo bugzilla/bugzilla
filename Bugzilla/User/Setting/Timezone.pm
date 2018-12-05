@@ -18,19 +18,21 @@ use parent qw(Bugzilla::User::Setting);
 use Bugzilla::Constants;
 
 sub legal_values {
-    my ($self) = @_;
+  my ($self) = @_;
 
-    return $self->{'legal_values'} if defined $self->{'legal_values'};
+  return $self->{'legal_values'} if defined $self->{'legal_values'};
 
-    my @timezones = DateTime::TimeZone->all_names;
-    # Remove old formats, such as CST6CDT, EST, EST5EDT.
-    @timezones = grep { $_ =~ m#.+/.+#} @timezones;
-    # Append 'local' to the list, which will use the timezone
-    # given by the server.
-    push(@timezones, 'local');
-    push(@timezones, 'UTC');
+  my @timezones = DateTime::TimeZone->all_names;
 
-    return $self->{'legal_values'} = \@timezones;
+  # Remove old formats, such as CST6CDT, EST, EST5EDT.
+  @timezones = grep { $_ =~ m#.+/.+# } @timezones;
+
+  # Append 'local' to the list, which will use the timezone
+  # given by the server.
+  push(@timezones, 'local');
+  push(@timezones, 'UTC');
+
+  return $self->{'legal_values'} = \@timezones;
 }
 
 1;

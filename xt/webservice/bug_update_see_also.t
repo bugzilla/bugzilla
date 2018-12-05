@@ -24,63 +24,80 @@ my ($config, $xmlrpc, $jsonrpc, $jsonrpc_get) = get_rpc_clients();
 my $bug_url = 'http://landfill.bugzilla.org/bugzilla-tip/show_bug.cgi?id=100';
 
 # update_see_also doesn't support logged-out users.
-my @tests = grep { $_->{user} } @{ STANDARD_BUG_TESTS() };
+my @tests = grep { $_->{user} } @{STANDARD_BUG_TESTS()};
 foreach my $t (@tests) {
-    $t->{args}->{add} = $t->{args}->{remove} = [];
+  $t->{args}->{add} = $t->{args}->{remove} = [];
 }
 
-push(@tests, (
-    { user  => 'unprivileged',
-      args  => { ids => ['public_bug'], add => [$bug_url] },
+push(
+  @tests,
+  (
+    {
+      user  => 'unprivileged',
+      args  => {ids => ['public_bug'], add => [$bug_url]},
       error => 'only the assignee or reporter of the bug, or a user',
       test  => 'Unprivileged user cannot add a URL to a bug',
     },
 
-    { user  => 'admin',
-      args  => { ids => ['public_bug'], add => ['asdfasdfasdf'] },
+    {
+      user  => 'admin',
+      args  => {ids => ['public_bug'], add => ['asdfasdfasdf']},
       error => 'asdf',
       test  => 'Admin cannot add an invalid URL',
     },
-    { user => 'admin',
-      args => { ids => ['public_bug'], remove => ['asdfasdfasdf'] },
+    {
+      user => 'admin',
+      args => {ids => ['public_bug'], remove => ['asdfasdfasdf']},
       test => 'Invalid URL silently ignored',
     },
 
-    { user => 'admin',
-      args => { ids => ['public_bug'], add => [$bug_url] },
+    {
+      user => 'admin',
+      args => {ids => ['public_bug'], add => [$bug_url]},
       test => 'Admin can add a URL to a public bug',
     },
-    { user  => 'unprivileged',
-      args  => { ids => ['public_bug'], remove => [$bug_url] },
+    {
+      user  => 'unprivileged',
+      args  => {ids => ['public_bug'], remove => [$bug_url]},
       error => 'only the assignee or reporter of the bug, or a user',
       test  => 'Unprivileged user cannot remove a URL from a bug',
     },
-    { user => 'admin',
-      args => { ids => ['public_bug'], remove => [$bug_url] },
+    {
+      user => 'admin',
+      args => {ids => ['public_bug'], remove => [$bug_url]},
       test => 'Admin can remove a URL from a public bug',
     },
 
-    { user => PRIVATE_BUG_USER,
-      args => { ids => ['private_bug'], add => [$bug_url] },
+    {
+      user => PRIVATE_BUG_USER,
+      args => {ids => ['private_bug'], add => [$bug_url]},
       test => PRIVATE_BUG_USER . ' can add a URL to a private bug',
     },
-    { user => PRIVATE_BUG_USER,
-      args => { ids => ['private_bug'], remove => [$bug_url] },
+    {
+      user => PRIVATE_BUG_USER,
+      args => {ids => ['private_bug'], remove => [$bug_url]},
       test => PRIVATE_BUG_USER . ' can remove a URL from a private bug',
     },
 
-));
+  )
+);
 
 sub post_success {
-    my ($call, $t) = @_;
-    isa_ok($call->result->{changes}, 'HASH', "Changes");
+  my ($call, $t) = @_;
+  isa_ok($call->result->{changes}, 'HASH', "Changes");
 }
 
-$jsonrpc_get->bz_call_fail('Bug.update_see_also',
-    { ids => ['public_bug'], add => [$bug_url] },
-    'must use HTTP POST', 'update_see_also fails over GET');
+$jsonrpc_get->bz_call_fail(
+  'Bug.update_see_also',
+  {ids => ['public_bug'], add => [$bug_url]},
+  'must use HTTP POST',
+  'update_see_also fails over GET'
+);
 
 foreach my $rpc ($jsonrpc, $xmlrpc) {
-    $rpc->bz_run_tests(tests => \@tests, method => 'Bug.update_see_also',
-                       post_success => \&post_success);
+  $rpc->bz_run_tests(
+    tests        => \@tests,
+    method       => 'Bug.update_see_also',
+    post_success => \&post_success
+  );
 }

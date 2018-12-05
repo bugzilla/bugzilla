@@ -12,33 +12,33 @@ use strict;
 use warnings;
 
 sub process {
-    my ($name, $args) = @_;
+  my ($name, $args) = @_;
 
-    _entering($name);
+  _entering($name);
 
-    foreach my $extension (@{ Bugzilla->extensions }) {
-        if ($extension->can($name)) {
-            $extension->$name($args);
-        }
+  foreach my $extension (@{Bugzilla->extensions}) {
+    if ($extension->can($name)) {
+      $extension->$name($args);
     }
+  }
 
-    _leaving($name);
+  _leaving($name);
 }
 
 sub in {
-    my $hook_name = shift;
-    my $currently_in = Bugzilla->request_cache->{hook_stack}->[-1] || '';
-    return $hook_name eq $currently_in ? 1 : 0;
+  my $hook_name = shift;
+  my $currently_in = Bugzilla->request_cache->{hook_stack}->[-1] || '';
+  return $hook_name eq $currently_in ? 1 : 0;
 }
 
 sub _entering {
-    my ($hook_name) = @_;
-    my $hook_stack = Bugzilla->request_cache->{hook_stack} ||= [];
-    push(@$hook_stack, $hook_name);
+  my ($hook_name) = @_;
+  my $hook_stack = Bugzilla->request_cache->{hook_stack} ||= [];
+  push(@$hook_stack, $hook_name);
 }
 
 sub _leaving {
-    pop @{ Bugzilla->request_cache->{hook_stack} };
+  pop @{Bugzilla->request_cache->{hook_stack}};
 }
 
 1;

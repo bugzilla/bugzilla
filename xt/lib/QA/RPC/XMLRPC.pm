@@ -18,7 +18,7 @@ use lib "$RealBin/../../../lib", "$RealBin/../../../../local/lib/perl5";
 
 use parent qw(QA::RPC XMLRPC::Lite);
 
-use constant TYPE => 'XML-RPC';
+use constant TYPE           => 'XML-RPC';
 use constant DATETIME_REGEX => qr/^\d{8}T\d\d:\d\d:\d\d$/;
 
 1;

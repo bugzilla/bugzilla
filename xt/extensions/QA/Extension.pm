@@ -23,52 +23,52 @@ use Bugzilla::User;
 our $VERSION = '1.0';
 
 sub page_before_template {
-    my ($self, $args) = @_;
-    return if $args->{page_id} ne 'qa/email_in.html';
+  my ($self, $args) = @_;
+  return if $args->{page_id} ne 'qa/email_in.html';
 
-    my $template = Bugzilla->template;
-    my $cgi = Bugzilla->cgi;
-    print $cgi->header;
+  my $template = Bugzilla->template;
+  my $cgi      = Bugzilla->cgi;
+  print $cgi->header;
 
-    # Needed to make sure he can access and edit bugs.
-    my $user = Bugzilla::User->check(scalar $cgi->param('sender'));
-    Bugzilla->set_user($user);
+  # Needed to make sure he can access and edit bugs.
+  my $user = Bugzilla::User->check(scalar $cgi->param('sender'));
+  Bugzilla->set_user($user);
 
-    my ($output, $tmpl_file);
-    my $action = $cgi->param('action') || '';
-    my $vars = { sender => $user, action => $action, pid => $$ };
+  my ($output, $tmpl_file);
+  my $action = $cgi->param('action') || '';
+  my $vars = {sender => $user, action => $action, pid => $$};
 
-    if ($action eq 'create') {
-        $tmpl_file = 'qa/create_bug.txt.tmpl';
-    }
-    elsif ($action eq 'create_with_headers') {
-        $tmpl_file = 'qa/create_bug_with_headers.txt.tmpl';
-    }
-    elsif ($action =~ /^update(_with_headers)?$/) {
-        my $f = $1 || '';
-        $tmpl_file = "qa/update_bug$f.txt.tmpl";
-        my $bug = Bugzilla::Bug->check(scalar $cgi->param('bug_id'));
-        $vars->{bug_id} = $bug->id;
-    }
-    else {
-        ThrowUserError('unknown_action', { action => $action });
-    }
+  if ($action eq 'create') {
+    $tmpl_file = 'qa/create_bug.txt.tmpl';
+  }
+  elsif ($action eq 'create_with_headers') {
+    $tmpl_file = 'qa/create_bug_with_headers.txt.tmpl';
+  }
+  elsif ($action =~ /^update(_with_headers)?$/) {
+    my $f = $1 || '';
+    $tmpl_file = "qa/update_bug$f.txt.tmpl";
+    my $bug = Bugzilla::Bug->check(scalar $cgi->param('bug_id'));
+    $vars->{bug_id} = $bug->id;
+  }
+  else {
+    ThrowUserError('unknown_action', {action => $action});
+  }
 
-    $template->process($tmpl_file, $vars, \$output)
-      or ThrowTemplateError($template->error());
+  $template->process($tmpl_file, $vars, \$output)
+    or ThrowTemplateError($template->error());
 
-    my $file = "/tmp/email_in_$$.txt";
-    open(FH, '>', $file);
-    print FH $output;
-    close FH;
+  my $file = "/tmp/email_in_$$.txt";
+  open(FH, '>', $file);
+  print FH $output;
+  close FH;
 
-    $output = `email_in.pl -v < $file 2>&1`;
-    unlink $file;
+  $output = `email_in.pl -v < $file 2>&1`;
+  unlink $file;
 
-    parse_output($output, $vars);
+  parse_output($output, $vars);
 
-    $template->process('qa/results.html.tmpl', $vars)
-      or ThrowTemplateError($template->error());
+  $template->process('qa/results.html.tmpl', $vars)
+    or ThrowTemplateError($template->error());
 }
 
 __PACKAGE__->NAME;

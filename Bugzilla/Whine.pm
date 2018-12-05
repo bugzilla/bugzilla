@@ -27,11 +27,11 @@ use Bugzilla::Whine::Query;
 use constant DB_TABLE => 'whine_events';
 
 use constant DB_COLUMNS => qw(
-    id
-    owner_userid
-    subject
-    body
-    mailifnobugs
+  id
+  owner_userid
+  subject
+  body
+  mailifnobugs
 );
 
 use constant LIST_ORDER => 'id';
@@ -39,15 +39,15 @@ use constant LIST_ORDER => 'id';
 ####################
 # Simple Accessors #
 ####################
-sub subject         { return $_[0]->{'subject'};      }
-sub body            { return $_[0]->{'body'};         }
+sub subject         { return $_[0]->{'subject'}; }
+sub body            { return $_[0]->{'body'}; }
 sub mail_if_no_bugs { return $_[0]->{'mailifnobugs'}; }
 
 sub user {
-    my ($self) = @_;
-    return $self->{user} if defined $self->{user};
-    $self->{user} = new Bugzilla::User($self->{'owner_userid'});
-    return $self->{user};
+  my ($self) = @_;
+  return $self->{user} if defined $self->{user};
+  $self->{user} = new Bugzilla::User($self->{'owner_userid'});
+  return $self->{user};
 }
 
 1;

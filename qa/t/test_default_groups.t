@@ -19,12 +19,12 @@ my ($sel, $config) = get_selenium();
 # it has automatically a group created for it with the same name.
 
 log_in($sel, $config, 'admin');
-set_parameters($sel, { "Group Security" => {"makeproductgroups-on" => undef} });
+set_parameters($sel, {"Group Security" => {"makeproductgroups-on" => undef}});
 add_product($sel);
-$sel->type_ok("product", "ready_to_die");
+$sel->type_ok("product",     "ready_to_die");
 $sel->type_ok("description", "will die");
-$sel->select_ok("security_group_id", "label=core-security");
-$sel->select_ok("default_op_sys_id", "Unspecified");
+$sel->select_ok("security_group_id",   "label=core-security");
+$sel->select_ok("default_op_sys_id",   "Unspecified");
 $sel->select_ok("default_platform_id", "Unspecified");
 $sel->click_ok('//input[@value="Add"]');
 $sel->wait_for_page_to_load_ok(WAIT_TIME);
@@ -43,7 +43,8 @@ $sel->value_is("desc", "Access to bugs in the ready_to_die product");
 my @groups = $sel->get_select_options("members_remove");
 ok((grep { $_ eq 'admin' } @groups), "'admin' inherits group membership");
 @groups = $sel->get_select_options("bless_from_remove");
-ok((grep { $_ eq 'admin' } @groups), "'admin' inherits can bless group membership");
+ok((grep { $_ eq 'admin' } @groups),
+  "'admin' inherits can bless group membership");
 $sel->is_checked_ok("isactive");
 
 # Check that the automatically created product group has the membercontrol
@@ -53,15 +54,16 @@ edit_product($sel, "ready_to_die");
 $sel->click_ok("link=Edit Group Access Controls:");
 $sel->wait_for_page_to_load_ok(WAIT_TIME);
 $sel->title_is("Edit Group Controls for ready_to_die");
-$sel->value_is("entry_$group1_id", "off");
+$sel->value_is("entry_$group1_id",   "off");
 $sel->value_is("canedit_$group1_id", "off");
 $sel->selected_label_is("membercontrol_$group1_id", "Default");
-$sel->selected_label_is("othercontrol_$group1_id", "NA");
+$sel->selected_label_is("othercontrol_$group1_id",  "NA");
 
 edit_product($sel, "ready_to_die");
 $sel->go_back_ok();
 $sel->wait_for_page_to_load_ok(WAIT_TIME);
-$sel->click_ok('//a[contains(@href,"/editproducts.cgi?action=del&product=ready_to_die")]');
+$sel->click_ok(
+  '//a[contains(@href,"/editproducts.cgi?action=del&product=ready_to_die")]');
 $sel->wait_for_page_to_load_ok(WAIT_TIME);
 $sel->title_is("Delete Product 'ready_to_die'");
 $sel->click_ok("delete");
@@ -80,10 +82,10 @@ $sel->is_text_present_ok("Access to bugs in the ready_to_die product");
 # a new "ready_to_die_" one must be created.
 
 add_product($sel);
-$sel->type_ok("product", "ready_to_die");
+$sel->type_ok("product",     "ready_to_die");
 $sel->type_ok("description", "will die");
-$sel->select_ok("security_group_id", "label=core-security");
-$sel->select_ok("default_op_sys_id", "Unspecified");
+$sel->select_ok("security_group_id",   "label=core-security");
+$sel->select_ok("default_op_sys_id",   "Unspecified");
 $sel->select_ok("default_platform_id", "Unspecified");
 $sel->click_ok('//input[@value="Add"]');
 $sel->wait_for_page_to_load_ok(WAIT_TIME);
@@ -103,7 +105,8 @@ $sel->value_is("desc", "Access to bugs in the ready_to_die product");
 @groups = $sel->get_select_options("members_remove");
 ok((grep { $_ eq 'admin' } @groups), "'admin' inherits group membership");
 @groups = $sel->get_select_options("bless_from_remove");
-ok((grep { $_ eq 'admin' } @groups), "'admin' inherits can bless group membership");
+ok((grep { $_ eq 'admin' } @groups),
+  "'admin' inherits can bless group membership");
 $sel->value_is("isactive", "on");
 
 # Check group settings. The old 'ready_to_die' group has no relationship
@@ -113,14 +116,14 @@ edit_product($sel, "ready_to_die");
 $sel->click_ok("link=Edit Group Access Controls:");
 $sel->wait_for_page_to_load_ok(WAIT_TIME);
 $sel->title_is("Edit Group Controls for ready_to_die");
-$sel->value_is("entry_$group1_id", "off");
-$sel->value_is("entry_$group2_id", "off");
+$sel->value_is("entry_$group1_id",   "off");
+$sel->value_is("entry_$group2_id",   "off");
 $sel->value_is("canedit_$group1_id", "off");
 $sel->value_is("canedit_$group2_id", "off");
 $sel->selected_label_is("membercontrol_$group1_id", "NA");
-$sel->selected_label_is("othercontrol_$group1_id", "NA");
+$sel->selected_label_is("othercontrol_$group1_id",  "NA");
 $sel->selected_label_is("membercontrol_$group2_id", "Default");
-$sel->selected_label_is("othercontrol_$group2_id", "NA");
+$sel->selected_label_is("othercontrol_$group2_id",  "NA");
 
 # Delete the ready_to_die_ group. It's bound to the ready_to_die product,
 # so the deletion requires explicit agreement from the admin.
@@ -129,7 +132,8 @@ go_to_admin($sel);
 $sel->click_ok("link=Groups");
 $sel->wait_for_page_to_load_ok(WAIT_TIME);
 $sel->title_is("Edit Groups");
-$sel->click_ok("//a[contains(\@href, '/editgroups.cgi?action=del&group=$group2_id')]");
+$sel->click_ok(
+  "//a[contains(\@href, '/editgroups.cgi?action=del&group=$group2_id')]");
 $sel->wait_for_page_to_load_ok(WAIT_TIME);
 $sel->title_is("Delete group");
 $sel->is_text_present_ok("This group is tied to the following products");
@@ -137,8 +141,10 @@ $sel->click_ok("delete");
 $sel->wait_for_page_to_load_ok(WAIT_TIME);
 $sel->title_is("Cannot Delete Group");
 my $text = trim($sel->get_text("error_msg"));
-ok($text =~ qr/All references to this group must be removed/,
-   "Group ready_to_die_ cannot be deleted as it is bound to a product");
+ok(
+  $text =~ qr/All references to this group must be removed/,
+  "Group ready_to_die_ cannot be deleted as it is bound to a product"
+);
 $sel->go_back_ok();
 $sel->wait_for_page_to_load_ok(WAIT_TIME);
 $sel->title_is("Delete group");
@@ -147,12 +153,14 @@ $sel->click_ok("delete");
 $sel->wait_for_page_to_load_ok(WAIT_TIME);
 $sel->title_is("Group Deleted");
 $text = trim($sel->get_text("message"));
-ok($text =~ qr/The group ready_to_die_ has been deleted/, "Group ready_to_die_ has been deleted");
+ok($text =~ qr/The group ready_to_die_ has been deleted/,
+  "Group ready_to_die_ has been deleted");
 
 edit_product($sel, "ready_to_die");
 $sel->go_back_ok();
 $sel->wait_for_page_to_load_ok(WAIT_TIME);
-$sel->click_ok('//a[contains(@href,"/editproducts.cgi?action=del&product=ready_to_die")]');
+$sel->click_ok(
+  '//a[contains(@href,"/editproducts.cgi?action=del&product=ready_to_die")]');
 $sel->wait_for_page_to_load_ok(WAIT_TIME);
 $sel->title_is("Delete Product 'ready_to_die'");
 $sel->click_ok("delete");
@@ -162,12 +170,12 @@ $sel->title_is("Product Deleted");
 # Reset the makeproductgroups parameter. Now creating a new product must
 # not create a new group, nor bind any group with it.
 
-set_parameters($sel, { "Group Security" => {"makeproductgroups-off" => undef} });
+set_parameters($sel, {"Group Security" => {"makeproductgroups-off" => undef}});
 add_product($sel);
-$sel->type_ok("product", "ready_to_die");
+$sel->type_ok("product",     "ready_to_die");
 $sel->type_ok("description", "will die");
-$sel->select_ok("security_group_id", "label=core-security");
-$sel->select_ok("default_op_sys_id", "Unspecified");
+$sel->select_ok("security_group_id",   "label=core-security");
+$sel->select_ok("default_op_sys_id",   "Unspecified");
 $sel->select_ok("default_platform_id", "Unspecified");
 $sel->click_ok('//input[@value="Add"]');
 $sel->wait_for_page_to_load_ok(WAIT_TIME);
@@ -180,10 +188,10 @@ $sel->title_is("Edit Product 'ready_to_die'");
 $sel->click_ok("link=Edit Group Access Controls:");
 $sel->wait_for_page_to_load_ok(WAIT_TIME);
 $sel->title_is("Edit Group Controls for ready_to_die");
-$sel->value_is("entry_$group1_id", "off");
+$sel->value_is("entry_$group1_id",   "off");
 $sel->value_is("canedit_$group1_id", "off");
 $sel->selected_label_is("membercontrol_$group1_id", "NA");
-$sel->selected_label_is("othercontrol_$group1_id", "NA");
+$sel->selected_label_is("othercontrol_$group1_id",  "NA");
 
 # Delete remaining groups and products.
 
@@ -192,19 +200,22 @@ $sel->click_ok("link=Groups");
 $sel->wait_for_page_to_load_ok(WAIT_TIME);
 $sel->title_is("Edit Groups");
 ok(!$sel->is_text_present('ready_to_die__'), 'No ready_to_die__ group created');
-$sel->click_ok("//a[contains(\@href, '/editgroups.cgi?action=del&group=$group1_id')]");
+$sel->click_ok(
+  "//a[contains(\@href, '/editgroups.cgi?action=del&group=$group1_id')]");
 $sel->wait_for_page_to_load_ok(WAIT_TIME);
 $sel->title_is("Delete group");
 $sel->click_ok("delete");
 $sel->wait_for_page_to_load_ok(WAIT_TIME);
 $sel->title_is("Group Deleted");
 $text = trim($sel->get_text("message"));
-ok($text =~ /The group ready_to_die has been deleted/, "Group ready_to_die has been deleted");
+ok($text =~ /The group ready_to_die has been deleted/,
+  "Group ready_to_die has been deleted");
 
 edit_product($sel, "ready_to_die");
 $sel->go_back_ok();
 $sel->wait_for_page_to_load_ok(WAIT_TIME);
-$sel->click_ok('//a[contains(@href,"/editproducts.cgi?action=del&product=ready_to_die")]');
+$sel->click_ok(
+  '//a[contains(@href,"/editproducts.cgi?action=del&product=ready_to_die")]');
 $sel->wait_for_page_to_load_ok(WAIT_TIME);
 $sel->title_is("Delete Product 'ready_to_die'");
 $sel->click_ok("delete");

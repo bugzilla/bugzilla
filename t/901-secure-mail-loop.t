@@ -15,20 +15,20 @@ use Crypt::OpenPGP;
 my $pubring = new Crypt::OpenPGP::KeyRing(Data => PUBLIC_KEY());
 my $pgp = new Crypt::OpenPGP(PubRing => $pubring);
 {
-    local $SIG{ALRM} = sub { fail("stuck in a loop"); exit; };
-    alarm(120);
-    my $encrypted = $pgp->encrypt(
-        Data       => "hello, world",
-        Recipients => "@",
-        Cipher     => 'CAST5',
-        Armour     => 0
-    );
-    alarm(0);
+  local $SIG{ALRM} = sub { fail("stuck in a loop"); exit; };
+  alarm(120);
+  my $encrypted = $pgp->encrypt(
+    Data       => "hello, world",
+    Recipients => "@",
+    Cipher     => 'CAST5',
+    Armour     => 0
+  );
+  alarm(0);
 }
 pass("didn't get stuck in a loop");
 
 sub PUBLIC_KEY {
-    return <<'KEY';
+  return <<'KEY';
 -----BEGIN PGP PUBLIC KEY BLOCK-----
 Version: GnuPG v1.4.9 (GNU/Linux)
 

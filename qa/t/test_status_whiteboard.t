@@ -55,7 +55,8 @@ $sel->click_ok("remember");
 $sel->wait_for_page_to_load_ok(WAIT_TIME);
 $sel->title_is("Search created");
 my $text = trim($sel->get_text("message"));
-ok($text =~ /you have a new search named sw-x77v/, 'Saved search correctly saved');
+ok($text =~ /you have a new search named sw-x77v/,
+  'Saved search correctly saved');
 
 # Make sure the saved query works.
 
@@ -69,12 +70,15 @@ $sel->is_text_present_ok("2 bugs found");
 # is off.
 
 set_parameters($sel, {'Bug Fields' => {'usestatuswhiteboard-off' => undef}});
+
 # Show detailed bug information panel on advanced search
-ok($sel->create_cookie('TUI=information_query=1'), 'Show detailed bug information');
+ok($sel->create_cookie('TUI=information_query=1'),
+  'Show detailed bug information');
 $sel->click_ok('//*[@class="link-search"]//a');
 $sel->wait_for_page_to_load_ok(WAIT_TIME);
 $sel->title_is("Search for bugs");
-ok(!$sel->is_text_present("Whiteboard:"), "Whiteboard label no longer displayed");
+ok(!$sel->is_text_present("Whiteboard:"),
+  "Whiteboard label no longer displayed");
 $sel->open_ok("/$config->{bugzilla_installation}/show_bug.cgi?id=$test_bug_1");
 $sel->title_like(qr/^$test_bug_1\b/);
 ok(!$sel->is_element_present('//label[@for="status_whiteboard"]'));

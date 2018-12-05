@@ -17,21 +17,22 @@ use Test::More;
 my $root = cwd();
 
 find(
-    {
-        wanted => sub {
-            if (/\.css$/) {
-                my $css_file = $File::Find::name;
-                my $content = path($_)->slurp;
-                while ($content =~ m{url\(["']?([^\?\)"']+)(?:\?.+)?['"]?\)}g) {
-                    my $file = $1;
-                    my $file_rel_root = File::Spec->abs2rel(realpath(File::Spec->rel2abs($file)), $root);
+  {
+    wanted => sub {
+      if (/\.css$/) {
+        my $css_file = $File::Find::name;
+        my $content  = path($_)->slurp;
+        while ($content =~ m{url\(["']?([^\?\)"']+)(?:\?.+)?['"]?\)}g) {
+          my $file = $1;
+          my $file_rel_root
+            = File::Spec->abs2rel(realpath(File::Spec->rel2abs($file)), $root);
 
-                    ok(-f $file, "$css_file references $file ($file_rel_root)");
-                }
-            }
-        },
+          ok(-f $file, "$css_file references $file ($file_rel_root)");
+        }
+      }
     },
-    'skins'
+  },
+  'skins'
 );
 
 done_testing;

@@ -19,49 +19,57 @@ use Support::Files;
 use Support::Templates;
 
 use File::Spec;
-use Test::More tests => (scalar(@Support::Files::testitems)
-                         + scalar(@Support::Files::test_files)
-                         + $Support::Templates::num_actual_files) * 3;
+use Test::More tests => (
+      scalar(@Support::Files::testitems)
+    + scalar(@Support::Files::test_files)
+    + $Support::Templates::num_actual_files)
+  * 3;
 
 my @testitems = (@Support::Files::testitems, @Support::Files::test_files);
 for my $path (@Support::Templates::include_paths) {
-   push(@testitems, map(File::Spec->catfile($path, $_),
-                        Support::Templates::find_actual_files($path)));
+  push(
+    @testitems,
+    map(File::Spec->catfile($path, $_),
+      Support::Templates::find_actual_files($path))
+  );
 }
 
 my %results;
 
 foreach my $file (@testitems) {
-    open (FILE, "$file");
-    my @contents = <FILE>;
-    if (grep /\t/, @contents) {
-        ok(0, "$file contains tabs --WARNING");
-    } else {
-        ok(1, "$file has no tabs");
-    }
-    close (FILE);
+  open(FILE, "$file");
+  my @contents = <FILE>;
+  if (grep /\t/, @contents) {
+    ok(0, "$file contains tabs --WARNING");
+  }
+  else {
+    ok(1, "$file has no tabs");
+  }
+  close(FILE);
 }
 
 foreach my $file (@testitems) {
-    open (FILE, "$file");
-    my @contents = <FILE>;
-    if (grep /\r/, @contents) {
-        ok(0, "$file contains non-OS-conformant line endings --WARNING");
-    } else {
-        ok(1, "All line endings of $file are OS conformant");
-    }
-    close (FILE);
+  open(FILE, "$file");
+  my @contents = <FILE>;
+  if (grep /\r/, @contents) {
+    ok(0, "$file contains non-OS-conformant line endings --WARNING");
+  }
+  else {
+    ok(1, "All line endings of $file are OS conformant");
+  }
+  close(FILE);
 }
 
 foreach my $file (@testitems) {
-    open (FILE, "$file");
-    my $first_line = <FILE>;
-    if ($first_line =~ /\xef\xbb\xbf/) {
-        ok(0, "$file contains Byte Order Mark --WARNING");
-    } else {
-        ok(1, "$file is free of a Byte Order Mark");
-    }
-    close (FILE);
+  open(FILE, "$file");
+  my $first_line = <FILE>;
+  if ($first_line =~ /\xef\xbb\xbf/) {
+    ok(0, "$file contains Byte Order Mark --WARNING");
+  }
+  else {
+    ok(1, "$file is free of a Byte Order Mark");
+  }
+  close(FILE);
 }
 
 exit 0;

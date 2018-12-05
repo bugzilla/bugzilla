@@ -33,7 +33,8 @@ create_user($oauth_login, $oauth_password);
 # Create a new OAuth2 client used for testing
 my $oauth_client = create_oauth_client('Shiny New OAuth Client', ['user:read']);
 ok $oauth_client->{id}, 'New client id (' . $oauth_client->{id} . ')';
-ok $oauth_client->{secret}, 'New client secret (' . $oauth_client->{secret} . ')';
+ok $oauth_client->{secret},
+  'New client secret (' . $oauth_client->{secret} . ')';
 
 my $t = Test::Mojo->new('Bugzilla::Quantum');
 
@@ -126,8 +127,8 @@ $t->get_ok('/api/user/profile')->status_is(401);
 # 2. Passing a Bearer header containing the access token, the server should
 # allow us to get data about our user
 $t->get_ok('/api/user/profile' =>
-    {Authorization => 'Bearer ' . $access_data->{access_token}})
-  ->status_is(200)->json_is('/login' => $oauth_login);
+    {Authorization => 'Bearer ' . $access_data->{access_token}})->status_is(200)
+  ->json_is('/login' => $oauth_login);
 
 done_testing;
 

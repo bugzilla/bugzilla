@@ -32,48 +32,52 @@ use Test::More tests => ($Support::Templates::num_actual_files);
 # Find all the templates
 my @testitems;
 for my $path (@Support::Templates::include_paths) {
-    push(@testitems, map(File::Spec->catfile($path, $_),
-                         Support::Templates::find_actual_files($path)));
+  push(
+    @testitems,
+    map(File::Spec->catfile($path, $_),
+      Support::Templates::find_actual_files($path))
+  );
 }
 
 foreach my $file (@testitems) {
-    my @errors;
+  my @errors;
 
-    # Read the entire file into a string
-    local $/;
-    open (FILE, "<$file") || die "Can't open $file: $!\n";
-    my $slurp = <FILE>;
-    close (FILE);
+  # Read the entire file into a string
+  local $/;
+  open(FILE, "<$file") || die "Can't open $file: $!\n";
+  my $slurp = <FILE>;
+  close(FILE);
 
-    # /g means we execute this loop for every match
-    # /s means we ignore linefeeds in the regexp matches
-    # This extracts everything which is _not_ a directive.
-    while ($slurp =~ /%\](.*?)(\[%|$)/gs) {
-        my $text = $1;
+  # /g means we execute this loop for every match
+  # /s means we ignore linefeeds in the regexp matches
+  # This extracts everything which is _not_ a directive.
+  while ($slurp =~ /%\](.*?)(\[%|$)/gs) {
+    my $text = $1;
 
-        my @lineno = ($` =~ m/\n/gs);
-        my $lineno = scalar(@lineno) + 1;
+    my @lineno = ($` =~ m/\n/gs);
+    my $lineno = scalar(@lineno) + 1;
 
-        # "a bug", "bug", "bugs"
-        if (grep /(a?[\s>]bugs?[\s.:;,<])/i, $text) {
-            # Exclude variable assignment.
-            unless (grep /bugs =/, $text) {
-                push(@errors, [$lineno, $text]);
-                next;
-            }
-        }
-    }
+    # "a bug", "bug", "bugs"
+    if (grep /(a?[\s>]bugs?[\s.:;,<])/i, $text) {
 
-    if (scalar(@errors)) {
-      ok(0, "$file contains invalid bare words (e.g. 'bug') --WARNING");
-
-      foreach my $error (@errors) {
-        print "$error->[0]: $error->[1]\n";
+      # Exclude variable assignment.
+      unless (grep /bugs =/, $text) {
+        push(@errors, [$lineno, $text]);
+        next;
       }
     }
-    else {
-      ok(1, "$file has no invalid barewords");
+  }
+
+  if (scalar(@errors)) {
+    ok(0, "$file contains invalid bare words (e.g. 'bug') --WARNING");
+
+    foreach my $error (@errors) {
+      print "$error->[0]: $error->[1]\n";
     }
+  }
+  else {
+    ok(1, "$file has no invalid barewords");
+  }
 }
 
 exit 0;

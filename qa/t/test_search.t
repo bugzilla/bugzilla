@@ -20,7 +20,8 @@ my ($sel, $config) = get_selenium();
 
 go_to_home($sel, $config);
 open_advanced_search_page($sel);
-$sel->type_ok("short_desc", "ois£jdfm#sd%fasd!fm", "Type a non-existent string in the bug summary field");
+$sel->type_ok("short_desc", "ois£jdfm#sd%fasd!fm",
+  "Type a non-existent string in the bug summary field");
 $sel->click_ok("Search");
 $sel->wait_for_page_to_load(WAIT_TIME);
 $sel->title_is("Bug List");
@@ -28,7 +29,9 @@ $sel->is_text_present_ok("Zarro Boogs found");
 
 # Display all available columns. Look for all bugs assigned to a user who doesn't exist.
 
-$sel->open_ok("/$config->{bugzilla_installation}/buglist.cgi?quicksearch=%40xx45ft&columnlist=all");
+$sel->open_ok(
+  "/$config->{bugzilla_installation}/buglist.cgi?quicksearch=%40xx45ft&columnlist=all"
+);
 $sel->title_like(qr/^Bug List:/);
 $sel->is_text_present_ok("Zarro Boogs found");
 
@@ -38,12 +41,12 @@ log_in($sel, $config, 'canconfirm');
 file_bug_in_product($sel, "TestProduct");
 my $bug_summary = "Update this summary with this bug ID";
 $sel->type_ok("short_desc", $bug_summary);
-$sel->type_ok("comment", "I'm supposed to appear in the coming buglist.");
+$sel->type_ok("comment",    "I'm supposed to appear in the coming buglist.");
 my $bug1_id = create_bug($sel, $bug_summary);
 $sel->click_ok("editme_action");
 $bug_summary .= ": my ID is $bug1_id";
 $sel->type_ok("short_desc", $bug_summary);
-$sel->type_ok("comment", "Updating bug summary....");
+$sel->type_ok("comment",    "Updating bug summary....");
 $sel->click_ok("commit");
 $sel->wait_for_page_to_load_ok(WAIT_TIME);
 $sel->is_text_present_ok("Changes submitted for bug $bug1_id");
@@ -67,5 +70,6 @@ $sel->click_ok("Search");
 $sel->wait_for_page_to_load_ok(WAIT_TIME);
 $sel->title_is("Bug List");
 $sel->is_text_present_ok("One bug found");
-$sel->is_text_present_ok("Update this summary with this bug ID: my ID is $bug1_id");
+$sel->is_text_present_ok(
+  "Update this summary with this bug ID: my ID is $bug1_id");
 logout($sel);

@@ -18,7 +18,7 @@ my ($sel, $config) = get_selenium();
 # Enable classifications
 
 log_in($sel, $config, 'admin');
-set_parameters($sel, { "Bug Fields" => {"useclassification-on" => undef} });
+set_parameters($sel, {"Bug Fields" => {"useclassification-on" => undef}});
 
 # Create a new classification.
 
@@ -31,25 +31,29 @@ $sel->title_is("Select classification");
 # Accessing action=delete directly must 1) trigger the security check page,
 # and 2) automatically reclassify products in this classification.
 if ($sel->is_text_present("cone")) {
-    $sel->open_ok("/$config->{bugzilla_installation}/editclassifications.cgi?action=delete&amp;classification=cone");
-    $sel->title_is("Suspicious Action");
-    $sel->click_ok("confirm");
-    $sel->wait_for_page_to_load_ok(WAIT_TIME);
-    $sel->title_is("Classification Deleted");
+  $sel->open_ok(
+    "/$config->{bugzilla_installation}/editclassifications.cgi?action=delete&amp;classification=cone"
+  );
+  $sel->title_is("Suspicious Action");
+  $sel->click_ok("confirm");
+  $sel->wait_for_page_to_load_ok(WAIT_TIME);
+  $sel->title_is("Classification Deleted");
 }
 if ($sel->is_text_present("ctwo")) {
-    $sel->open_ok("/$config->{bugzilla_installation}/editclassifications.cgi?action=delete&amp;classification=ctwo");
-    $sel->title_is("Suspicious Action");
-    $sel->click_ok("confirm");
-    $sel->wait_for_page_to_load_ok(WAIT_TIME);
-    $sel->title_is("Classification Deleted");
+  $sel->open_ok(
+    "/$config->{bugzilla_installation}/editclassifications.cgi?action=delete&amp;classification=ctwo"
+  );
+  $sel->title_is("Suspicious Action");
+  $sel->click_ok("confirm");
+  $sel->wait_for_page_to_load_ok(WAIT_TIME);
+  $sel->title_is("Classification Deleted");
 }
 
 $sel->click_ok("link=Add");
 $sel->wait_for_page_to_load_ok(WAIT_TIME);
 $sel->title_is("Add new classification");
 $sel->type_ok("classification", "cone");
-$sel->type_ok("description", "Classification number 1");
+$sel->type_ok("description",    "Classification number 1");
 $sel->click_ok('//input[@type="submit" and @value="Add"]');
 $sel->wait_for_page_to_load_ok(WAIT_TIME);
 $sel->title_is("New Classification Created");
@@ -62,7 +66,8 @@ $sel->click_ok("add_products");
 $sel->wait_for_page_to_load_ok(WAIT_TIME);
 $sel->title_is("Reclassify products");
 my @products = $sel->get_select_options("myprodlist");
-ok(scalar @products == 1 && $products[0] eq 'TestProduct', "TestProduct successfully added to 'cone'");
+ok(scalar @products == 1 && $products[0] eq 'TestProduct',
+  "TestProduct successfully added to 'cone'");
 
 # Create a new bug in this product/classification.
 
@@ -72,7 +77,8 @@ $sel->type_ok("comment", "Created by Selenium with classifications turned on");
 $sel->click_ok("commit");
 $sel->wait_for_page_to_load_ok(WAIT_TIME);
 my $bug1_id = $sel->get_value('//input[@name="id" and @type="hidden"]');
-$sel->is_text_present_ok('has been added to the database', "Bug $bug1_id created");
+$sel->is_text_present_ok('has been added to the database',
+  "Bug $bug1_id created");
 
 # Rename 'cone' to 'Unclassified', which must be rejected as it already exists,
 # then to 'ctwo', which is not yet in use. Should work fine, even with products
@@ -109,18 +115,23 @@ go_to_admin($sel);
 $sel->click_ok("link=Classifications");
 $sel->wait_for_page_to_load_ok(WAIT_TIME);
 $sel->title_is("Select classification");
-$sel->click_ok('//a[contains(@href,"/editclassifications.cgi?action=del&classification=ctwo")]');
+$sel->click_ok(
+  '//a[contains(@href,"/editclassifications.cgi?action=del&classification=ctwo")]'
+);
 $sel->wait_for_page_to_load_ok(WAIT_TIME);
 $sel->title_is("Error");
 my $error = trim($sel->get_text("error_msg"));
-ok($error =~ /there are products for this classification/, "Reject classification deletion");
+ok($error =~ /there are products for this classification/,
+  "Reject classification deletion");
 
 # Reclassify the product before deleting the classification.
 
 $sel->go_back_ok();
 $sel->wait_for_page_to_load_ok(WAIT_TIME);
 $sel->title_is("Select classification");
-$sel->click_ok('//a[contains(@href,"/editclassifications.cgi?action=reclassify&classification=ctwo")]');
+$sel->click_ok(
+  '//a[contains(@href,"/editclassifications.cgi?action=reclassify&classification=ctwo")]'
+);
 $sel->wait_for_page_to_load_ok(WAIT_TIME);
 $sel->title_is("Reclassify products");
 $sel->add_selection_ok("myprodlist", "label=TestProduct");
@@ -130,7 +141,9 @@ $sel->title_is("Reclassify products");
 $sel->click_ok("link=edit");
 $sel->wait_for_page_to_load_ok(WAIT_TIME);
 $sel->title_is("Select classification");
-$sel->click_ok('//a[contains(@href,"/editclassifications.cgi?action=del&classification=ctwo")]');
+$sel->click_ok(
+  '//a[contains(@href,"/editclassifications.cgi?action=del&classification=ctwo")]'
+);
 $sel->wait_for_page_to_load_ok(WAIT_TIME);
 $sel->title_is("Delete classification");
 $sel->is_text_present_ok("Do you really want to delete this classification?");
@@ -140,7 +153,7 @@ $sel->title_is("Classification Deleted");
 
 # Disable classifications and make sure you cannot edit them anymore.
 
-set_parameters($sel, { "Bug Fields" => {"useclassification-off" => undef} });
+set_parameters($sel, {"Bug Fields" => {"useclassification-off" => undef}});
 $sel->open_ok("/$config->{bugzilla_installation}/editclassifications.cgi");
 $sel->title_is("Classification Not Enabled");
 logout($sel);

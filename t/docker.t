@@ -14,16 +14,16 @@ use IO::Handle;
 use Test::More;
 
 my $dockerfile = 'Dockerfile';
-my $ci_config = '.circleci/config.yml';
+my $ci_config  = '.circleci/config.yml';
 
 my $base;
 open my $dockerfile_fh, '<', $dockerfile;
 while (my $line = readline $dockerfile_fh) {
-    chomp $line;
-    if ($line =~ /^FROM\s+(\S+)/ms) {
-        $base = $1;
-        last;
-    }
+  chomp $line;
+  if ($line =~ /^FROM\s+(\S+)/ms) {
+    $base = $1;
+    last;
+  }
 }
 close $dockerfile_fh;
 
@@ -40,12 +40,12 @@ my $regex = qr{
 
 open my $ci_config_fh, '<', $ci_config;
 while (my $line = readline $ci_config_fh) {
-    chomp $line;
-    if ($line =~ /($regex)/ms) {
-        my $ln = $ci_config_fh->input_line_number;
-        fail("found docker image $1, expected $base in $ci_config line $ln");
-    }
-    pass("Forbidden version not found");
+  chomp $line;
+  if ($line =~ /($regex)/ms) {
+    my $ln = $ci_config_fh->input_line_number;
+    fail("found docker image $1, expected $base in $ci_config line $ln");
+  }
+  pass("Forbidden version not found");
 }
 close $ci_config_fh;
 

@@ -11,7 +11,7 @@ use 5.10.1;
 use lib qw( . lib local/lib/perl5 );
 use Bugzilla;
 
-BEGIN { Bugzilla->extensions };
+BEGIN { Bugzilla->extensions }
 
 use Test::More;
 use Test2::Tools::Mock;
@@ -30,68 +30,65 @@ our @project_members;
 
 
 my $User = mock 'Bugzilla::Extension::PhabBugz::User' => (
-    add_constructor => [
-        'fake_new' => 'hash',
-    ],
-    override => [
-        'match' => sub { [ mock() ] },
-    ],
+  add_constructor => ['fake_new' => 'hash',],
+  override        => ['match'    => sub { [mock()] },],
 );
 
 my $Feed = mock 'Bugzilla::Extension::PhabBugz::Feed' => (
-    override => [
-        get_group_members => sub {
-            return [ map { Bugzilla::Extension::PhabBugz::User->fake_new(%$_) } @group_members ];
-        }
-    ]
+  override => [
+    get_group_members => sub {
+      return [map { Bugzilla::Extension::PhabBugz::User->fake_new(%$_) }
+          @group_members];
+    }
+  ]
 );
 
 my $Project = mock 'Bugzilla::Extension::PhabBugz::Project' => (
-    override_constructor => [
-        new_from_query => 'ref_copy',
-    ],
-    override => [
-        'members' => sub {
-            return [ map { Bugzilla::Extension::PhabBugz::User->fake_new(%$_) } @project_members ];
-        }
-    ]
+  override_constructor => [new_from_query => 'ref_copy',],
+  override             => [
+    'members' => sub {
+      return [map { Bugzilla::Extension::PhabBugz::User->fake_new(%$_) }
+          @project_members];
+    }
+  ]
 );
 
-local Bugzilla->params->{phabricator_enabled} = 1;
-local Bugzilla->params->{phabricator_api_key} = 'FAKE-API-KEY';
+local Bugzilla->params->{phabricator_enabled}  = 1;
+local Bugzilla->params->{phabricator_api_key}  = 'FAKE-API-KEY';
 local Bugzilla->params->{phabricator_base_uri} = 'http://fake.fabricator.tld';
 
 my $Bugzilla = mock 'Bugzilla' => (
-    override => [
-        'dbh'  => sub { mock() },
-        'user' => sub { Bugzilla::User->new({ name => 'phab-bot@bmo.tld' }) },
-    ],
+  override => [
+    'dbh'  => sub { mock() },
+    'user' => sub { Bugzilla::User->new({name => 'phab-bot@bmo.tld'}) },
+  ],
 );
 
 my $BugzillaGroup = mock 'Bugzilla::Group' => (
-    add_constructor => [
-        'fake_new' => 'hash',
-    ],
-    override => [
-        'match' => sub { [ Bugzilla::Group->fake_new(id => 1, name => 'firefox-security' ) ] },
-    ],
+  add_constructor => ['fake_new' => 'hash',],
+  override        => [
+    'match' =>
+      sub { [Bugzilla::Group->fake_new(id => 1, name => 'firefox-security')] },
+  ],
 );
 
 my $BugzillaUser = mock 'Bugzilla::User' => (
-    add_constructor => [
-        'fake_new' => 'hash',
-    ],
-    override => [
-        'new' => sub {
-            my ($class, $hash) = @_;
-            if ($hash->{name} eq 'phab-bot@bmo.tld') {
-                return $class->fake_new( id => 8_675_309, login_name => 'phab-bot@bmo.tld', realname => 'Fake PhabBot' );
-            }
-            else {
-            }
-        },
-        'match' => sub { [ mock() ] },
-    ],
+  add_constructor => ['fake_new' => 'hash',],
+  override        => [
+    'new' => sub {
+      my ($class, $hash) = @_;
+      if ($hash->{name} eq 'phab-bot@bmo.tld') {
+        return $class->fake_new(
+          id         => 8_675_309,
+          login_name => 'phab-bot@bmo.tld',
+          realname   => 'Fake PhabBot'
+        );
+      }
+      else {
+      }
+    },
+    'match' => sub { [mock()] },
+  ],
 );
 
 
@@ -99,78 +96,66 @@ my $feed = Bugzilla::Extension::PhabBugz::Feed->new;
 
 # Same members in both
 do {
-    my $UserAgent = mock 'Mojo::UserAgent' => (
-        override => [
-            'post' => sub {
-                my ($self, $url, undef, $params) = @_;
-                my $data = decode_json($params->{params});
-                is_deeply($data->{transactions}, [], 'no-op');
-                return mock_useragent_tx('{}');
-            },
-        ],
-    );
-    local @group_members = (
-        { phid => 'foo' },
-    );
-    local @project_members = (
-        { phid => 'foo' },
-    );
-    $feed->group_query;
+  my $UserAgent = mock 'Mojo::UserAgent' => (
+    override => [
+      'post' => sub {
+        my ($self, $url, undef, $params) = @_;
+        my $data = decode_json($params->{params});
+        is_deeply($data->{transactions}, [], 'no-op');
+        return mock_useragent_tx('{}');
+      },
+    ],
+  );
+  local @group_members   = ({phid => 'foo'},);
+  local @project_members = ({phid => 'foo'},);
+  $feed->group_query;
 };
 
 # Project has members not in group
 do {
-    my $UserAgent = mock 'Mojo::UserAgent' => (
-        override => [
-            'post' => sub {
-                my ($self, $url, undef, $params) = @_;
-                my $data = decode_json($params->{params});
-                my $expected = [ { type => 'members.remove', value => ['foo'] } ];
-                is_deeply($data->{transactions}, $expected, 'remove foo');
-                return mock_useragent_tx('{}');
-            },
-        ]
-    );
-    local @group_members = ();
-    local @project_members = (
-        { phid => 'foo' },
-    );
-    $feed->group_query;
+  my $UserAgent = mock 'Mojo::UserAgent' => (
+    override => [
+      'post' => sub {
+        my ($self, $url, undef, $params) = @_;
+        my $data = decode_json($params->{params});
+        my $expected = [{type => 'members.remove', value => ['foo']}];
+        is_deeply($data->{transactions}, $expected, 'remove foo');
+        return mock_useragent_tx('{}');
+      },
+    ]
+  );
+  local @group_members = ();
+  local @project_members = ({phid => 'foo'},);
+  $feed->group_query;
 };
 
 # Group has members not in project
 do {
-    my $UserAgent = mock 'Mojo::UserAgent' => (
-        override => [
-            'post' => sub {
-                my ($self, $url, undef, $params) = @_;
-                my $data = decode_json($params->{params});
-                my $expected = [ { type => 'members.add', value => ['foo'] } ];
-                is_deeply($data->{transactions}, $expected, 'add foo');
-                return mock_useragent_tx('{}');
-            },
-        ]
-    );
-    local @group_members = (
-        { phid => 'foo' },
-    );
-    local @project_members = (
-    );
-    $feed->group_query;
+  my $UserAgent = mock 'Mojo::UserAgent' => (
+    override => [
+      'post' => sub {
+        my ($self, $url, undef, $params) = @_;
+        my $data = decode_json($params->{params});
+        my $expected = [{type => 'members.add', value => ['foo']}];
+        is_deeply($data->{transactions}, $expected, 'add foo');
+        return mock_useragent_tx('{}');
+      },
+    ]
+  );
+  local @group_members = ({phid => 'foo'},);
+  local @project_members = ();
+  $feed->group_query;
 };
 
 do {
-    my $Revision  = mock 'Bugzilla::Extension::PhabBugz::Revision' => (
-        override => [
-            'update' => sub { 1 },
-        ],
-    );
-    my $UserAgent = mock 'Mojo::UserAgent' => (
-        override => [
-            'post' => sub {
-                my ($self, $url, undef, $params) = @_;
-                if ($url =~ /differential\.revision\.search/) {
-                    my $content = <<JSON;
+  my $Revision = mock 'Bugzilla::Extension::PhabBugz::Revision' =>
+    (override => ['update' => sub {1},],);
+  my $UserAgent = mock 'Mojo::UserAgent' => (
+    override => [
+      'post' => sub {
+        my ($self, $url, undef, $params) = @_;
+        if ($url =~ /differential\.revision\.search/) {
+          my $content = <<JSON;
 {
     "error_info": null,
     "error_code": null,
@@ -217,35 +202,32 @@ do {
     }
 }
 JSON
-                    return mock_useragent_tx($content);
-                }
-                else {
-                    return mock_useragent_tx("bad request");
-                }
-            },
-        ],
-    );
-    my $Attachment = mock 'Bugzilla::Attachment' => (
-        add_constructor => [ fake_new => 'hash' ],
-    );
-    my $Bug = mock 'Bugzilla::Bug' => (
-        add_constructor => [ fake_new => 'hash' ],
-    );
-    my $bug = Bugzilla::Bug->fake_new(
-        bug_id      => 23,
-        attachments => [
-            Bugzilla::Attachment->fake_new(
-                mimetype => 'text/x-phabricator-request',
-                filename => 'phabricator-D9999-url.txt',
-            ),
-        ]
-    );
+          return mock_useragent_tx($content);
+        }
+        else {
+          return mock_useragent_tx("bad request");
+        }
+      },
+    ],
+  );
+  my $Attachment
+    = mock 'Bugzilla::Attachment' => (add_constructor => [fake_new => 'hash'],);
+  my $Bug = mock 'Bugzilla::Bug' => (add_constructor => [fake_new => 'hash'],);
+  my $bug = Bugzilla::Bug->fake_new(
+    bug_id      => 23,
+    attachments => [
+      Bugzilla::Attachment->fake_new(
+        mimetype => 'text/x-phabricator-request',
+        filename => 'phabricator-D9999-url.txt',
+      ),
+    ]
+  );
 
-    my $revisions = get_attachment_revisions($bug);
-    is(ref($revisions), 'ARRAY', 'it is an array ref');
-    isa_ok($revisions->[0], 'Bugzilla::Extension::PhabBugz::Revision');
-    is($revisions->[0]->bug_id, 23, 'Bugzila ID is 23');
-    ok( try { $revisions->[0]->update }, 'update revision');
+  my $revisions = get_attachment_revisions($bug);
+  is(ref($revisions), 'ARRAY', 'it is an array ref');
+  isa_ok($revisions->[0], 'Bugzilla::Extension::PhabBugz::Revision');
+  is($revisions->[0]->bug_id, 23, 'Bugzila ID is 23');
+  ok(try { $revisions->[0]->update }, 'update revision');
 
 };
 

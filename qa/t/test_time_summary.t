@@ -20,17 +20,24 @@ my $test_bug_1 = $config->{test_bug_1};
 # Set the timetracking group to "editbugs", which is the default value for this parameter.
 
 log_in($sel, $config, 'admin');
-set_parameters($sel, { "Group Security" => {"timetrackinggroup" => {type => "select", value => "editbugs"}} });
+set_parameters(
+  $sel,
+  {
+    "Group Security" =>
+      {"timetrackinggroup" => {type => "select", value => "editbugs"}}
+  }
+);
 
 # Add some Hours Worked to a bug so that we are sure at least one bug
 # will be present in our buglist below.
 
 go_to_bug($sel, $test_bug_1);
 $sel->type_ok("work_time", 2.6);
-$sel->type_ok("comment", "I did some work");
+$sel->type_ok("comment",   "I did some work");
 $sel->click_ok("commit");
 $sel->wait_for_page_to_load_ok(WAIT_TIME);
 $sel->is_text_present_ok("Changes submitted for bug $test_bug_1");
+
 # Make sure the correct bug is redisplayed.
 $sel->click_ok("link=bug $test_bug_1");
 $sel->wait_for_page_to_load_ok(WAIT_TIME);
@@ -43,7 +50,8 @@ $sel->is_text_present_ok("Hours Worked: 2.6");
 $sel->open_ok("/$config->{bugzilla_installation}/summarize_time.cgi");
 $sel->title_is("No Bugs Selected");
 my $error_msg = trim($sel->get_text("error_msg"));
-ok($error_msg =~ /You apparently didn't choose any bugs to view/, "No data displayed");
+ok($error_msg =~ /You apparently didn't choose any bugs to view/,
+  "No data displayed");
 
 # Search for bugs which have some value in the Hours Worked field.
 
@@ -65,7 +73,7 @@ $sel->title_like(qr/^Time Summary \(\d+ bugs selected\)/);
 $sel->check_ok("monthly");
 $sel->check_ok("detailed");
 $sel->type_ok("start_date", "2009-01-01");
-$sel->type_ok("end_date", "2009-04-30");
+$sel->type_ok("end_date",   "2009-04-30");
 $sel->click_ok("summarize");
 $sel->wait_for_page_to_load_ok(WAIT_TIME);
 $sel->title_like(qr/^Time Summary \(\d+ bugs selected\)/);

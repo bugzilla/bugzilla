@@ -16,30 +16,30 @@ use ok 'Bugzilla::Test::MockDB';
 use ok 'Bugzilla::Test::Util', qw(create_user);
 
 try {
-    Bugzilla::Test::MockDB->import();
-    pass('made fake in-memory db');
+  Bugzilla::Test::MockDB->import();
+  pass('made fake in-memory db');
 }
 catch {
-    diag $_;
-    fail('made fake in-memory db');
+  diag $_;
+  fail('made fake in-memory db');
 };
 
 try {
-    create_user('bob@pants.gov', '*');
-    ok( Bugzilla::User->new({name => 'bob@pants.gov'})->id, 'create a user' );
+  create_user('bob@pants.gov', '*');
+  ok(Bugzilla::User->new({name => 'bob@pants.gov'})->id, 'create a user');
 }
 catch {
-    fail('create a user');
+  fail('create a user');
 };
 
 try {
-    my $rob = create_user('rob@pants.gov', '*');
-    Bugzilla::User->check({id => $rob->id});
-    pass('rob@pants.gov checks out');
+  my $rob = create_user('rob@pants.gov', '*');
+  Bugzilla::User->check({id => $rob->id});
+  pass('rob@pants.gov checks out');
 }
 catch {
-    diag $_;
-    fail('rob@pants.gov fails');
+  diag $_;
+  fail('rob@pants.gov fails');
 };
 
 done_testing;

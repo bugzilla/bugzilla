@@ -24,29 +24,33 @@ use Test::More tests => scalar(@Support::Files::testitems);
 # This will handle verbosity for us automatically.
 my $fh;
 {
-    no warnings 'unopened';
-    if (-e \*Test::More::TESTOUT) {
-        $fh = \*Test::More::TESTOUT;
-    } elsif (-e \*Test::Builder::TESTOUT) {
-        $fh = \*Test::Builder::TESTOUT;
-    } else {
-        $fh = \*STDOUT;
-    }
+  no warnings 'unopened';
+  if (-e \*Test::More::TESTOUT) {
+    $fh = \*Test::More::TESTOUT;
+  }
+  elsif (-e \*Test::Builder::TESTOUT) {
+    $fh = \*Test::Builder::TESTOUT;
+  }
+  else {
+    $fh = \*STDOUT;
+  }
 }
 
 my @testitems = @Support::Files::testitems;
 
 foreach my $file (@testitems) {
-    $file =~ s/\s.*$//; # nuke everything after the first space (#comment)
-    next if (!$file); # skip null entries
-    my $error_count = podchecker($file, $fh);
-    if ($error_count < 0) {
-        ok(1,"$file does not contain any POD");
-    } elsif ($error_count == 0) {
-        ok(1,"$file has correct POD syntax");
-    } else {
-        ok(0,"$file has incorrect POD syntax --ERROR");
-    }
+  $file =~ s/\s.*$//;    # nuke everything after the first space (#comment)
+  next if (!$file);      # skip null entries
+  my $error_count = podchecker($file, $fh);
+  if ($error_count < 0) {
+    ok(1, "$file does not contain any POD");
+  }
+  elsif ($error_count == 0) {
+    ok(1, "$file has correct POD syntax");
+  }
+  else {
+    ok(0, "$file has incorrect POD syntax --ERROR");
+  }
 }
 
 exit 0;

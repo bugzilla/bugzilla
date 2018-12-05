@@ -13,13 +13,13 @@ use Test::More tests => 2;
 use Crypt::OpenPGP::Util;
 
 {
-    local $SIG{ALRM} = sub {
-        fail("getting random bytes froze program");
-        exit;
-    };
-    alarm(60);
-    my $bytes = Crypt::OpenPGP::Util::get_random_bytes(32);
-    alarm(0);
-    pass("getting random bytes didn't freeze program");
-    is(length $bytes, 32, "got 32 bytes");
+  local $SIG{ALRM} = sub {
+    fail("getting random bytes froze program");
+    exit;
+  };
+  alarm(60);
+  my $bytes = Crypt::OpenPGP::Util::get_random_bytes(32);
+  alarm(0);
+  pass("getting random bytes didn't freeze program");
+  is(length $bytes, 32, "got 32 bytes");
 }

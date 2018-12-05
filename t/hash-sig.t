@@ -12,10 +12,11 @@ use Bugzilla::Util qw(generate_random_password);
 use Bugzilla::Token qw(issue_hash_sig check_hash_sig);
 use Test::More;
 
-my $localconfig = { site_wide_secret => generate_random_password(256) };
+my $localconfig = {site_wide_secret => generate_random_password(256)};
 {
-    package Bugzilla;
-    sub localconfig { $localconfig }
+
+  package Bugzilla;
+  sub localconfig {$localconfig}
 }
 
 my $sig = issue_hash_sig("hero", "batman");

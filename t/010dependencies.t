@@ -30,7 +30,8 @@ use constant MODULE_REGEX => qr/
     ['"]?
     ([\w:\.\\]+)
 /x;
-use constant BASE_REGEX => qr/^use (?:base|parent) (?:-norequire, )?qw\(([^\)]+)/;
+use constant BASE_REGEX =>
+  qr/^use (?:base|parent) (?:-norequire, )?qw\(([^\)]+)/;
 
 # Extract all Perl modules.
 foreach my $file (@Support::Files::testitems) {
@@ -42,46 +43,47 @@ foreach my $file (@Support::Files::testitems) {
 }
 
 foreach my $module (keys %mods) {
-    my $reading = 1;
-    my @use;
+  my $reading = 1;
+  my @use;
 
-    open(SOURCE, $mods{$module});
-    while (my $line = <SOURCE>) {
-      last if ($line =~ /^__END__/);
-      if ($line =~ /^=cut/) {
-        $reading = 1;
-        next;
-      }
-      next unless $reading;
-      if ($line =~ /^=(head|over|item|back|pod|begin|end|for)/) {
-        $reading = 0;
-        next;
-      }
-      if ($line =~ /^package\s+([^;]);/) {
-        $module = $1;
-      }
-      elsif ($line =~ BASE_REGEX or $line =~ MODULE_REGEX) {
-        my $used_string = $1;
-        # "use base"/"use parent" can have multiple modules
-        my @used_array = split(/\s+/, $used_string);
-        foreach my $used (@used_array) {
-            next if $used !~ /^Bugzilla/;
-            $used =~ s#/#::#g;
-            $used =~ s#\.pm$##;
-            $used =~ s#\$module#[^:]+#;
-            $used =~ s#\${[^}]+}#[^:]+#;
-            $used =~ s#[" ]##g;
-            push(@use, grep(/^\Q$used\E$/, keys %mods));
-        }
+  open(SOURCE, $mods{$module});
+  while (my $line = <SOURCE>) {
+    last if ($line =~ /^__END__/);
+    if ($line =~ /^=cut/) {
+      $reading = 1;
+      next;
+    }
+    next unless $reading;
+    if ($line =~ /^=(head|over|item|back|pod|begin|end|for)/) {
+      $reading = 0;
+      next;
+    }
+    if ($line =~ /^package\s+([^;]);/) {
+      $module = $1;
+    }
+    elsif ($line =~ BASE_REGEX or $line =~ MODULE_REGEX) {
+      my $used_string = $1;
+
+      # "use base"/"use parent" can have multiple modules
+      my @used_array = split(/\s+/, $used_string);
+      foreach my $used (@used_array) {
+        next if $used !~ /^Bugzilla/;
+        $used =~ s#/#::#g;
+        $used =~ s#\.pm$##;
+        $used =~ s#\$module#[^:]+#;
+        $used =~ s#\${[^}]+}#[^:]+#;
+        $used =~ s#[" ]##g;
+        push(@use, grep(/^\Q$used\E$/, keys %mods));
       }
     }
-    close (SOURCE);
+  }
+  close(SOURCE);
 
-    foreach my $u (@use) {
-      if (!grep {$_ eq $u} @{$deps{$module}}) {
-        push(@{$deps{$module}}, $u);
-      }
+  foreach my $u (@use) {
+    if (!grep { $_ eq $u } @{$deps{$module}}) {
+      push(@{$deps{$module}}, $u);
     }
+  }
 }
 
 sub creates_loop {

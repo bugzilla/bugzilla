@@ -29,6 +29,6 @@ ok(unlink("testing.vnc.pid"), "Removing testing.vnc.pid");
 # Stop the Xvfb server third
 ok(open(XPID, "<testing.x.pid"), "Opening testing.x.pid");
 ok(($pid = <XPID>), "Reading testing.x.pid");
-ok(close(XPID),  "Closing testing.x.pid");
+ok(close(XPID), "Closing testing.x.pid");
 ok(kill(9, $pid), "Killing process $pid");
 ok(unlink("testing.x.pid"), "Removing testing.x.pid");

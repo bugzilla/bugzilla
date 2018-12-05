@@ -19,11 +19,17 @@ my $test_bug_1 = $config->{test_bug_1};
 
 
 log_in($sel, $config, 'tweakparams');
-set_parameters($sel, { "User Matching"  => {"usemenuforusers-off" => undef,
-                                            "maxusermatches"      => {type => 'text', value => '0'},
-                                            "confirmuniqueusermatch-on" => undef},
-                       "Group Security" => {"usevisibilitygroups-off" => undef}
-                     });
+set_parameters(
+  $sel,
+  {
+    "User Matching" => {
+      "usemenuforusers-off"       => undef,
+      "maxusermatches"            => {type => 'text', value => '0'},
+      "confirmuniqueusermatch-on" => undef
+    },
+    "Group Security" => {"usevisibilitygroups-off" => undef}
+  }
+);
 
 go_to_bug($sel, $test_bug_1);
 $sel->click_ok("cc_edit_area_showhide");
@@ -35,7 +41,8 @@ $sel->type_ok("newcc", $config->{unprivileged_user_login_truncated});
 $sel->click_ok("commit");
 $sel->wait_for_page_to_load_ok(WAIT_TIME);
 $sel->title_is("Confirm Match");
-$sel->is_text_present_ok("$config->{unprivileged_user_login_truncated} matched");
+$sel->is_text_present_ok(
+  "$config->{unprivileged_user_login_truncated} matched");
 $sel->go_back_ok();
 $sel->wait_for_page_to_load_ok(WAIT_TIME);
 $sel->title_like(qr/^$test_bug_1/);
@@ -75,7 +82,8 @@ $sel->is_text_present_ok("*$config->{common_email} matched:");
 
 # Now restrict 'maxusermatches'.
 
-set_parameters($sel, { "User Matching" => {"maxusermatches" => {type => 'text', value => '1'}} });
+set_parameters($sel,
+  {"User Matching" => {"maxusermatches" => {type => 'text', value => '1'}}});
 
 go_to_bug($sel, $test_bug_1);
 $sel->click_ok("cc_edit_area_showhide");
@@ -103,9 +111,13 @@ $sel->is_text_present_ok("Changes submitted for bug $test_bug_1");
 
 # Now turn on group visibility. It involves important security checks.
 
-set_parameters($sel, { "User Matching"  => {"maxusermatches" => {type => 'text', value => '2'}},
-                       "Group Security" => {"usevisibilitygroups-on" => undef}
-                     });
+set_parameters(
+  $sel,
+  {
+    "User Matching" => {"maxusermatches" => {type => 'text', value => '2'}},
+    "Group Security" => {"usevisibilitygroups-on" => undef}
+  }
+);
 
 # By default, groups are not visible to themselves, so we have to enable this.
 # The tweakparams user has not enough privs to do it himself.
@@ -121,11 +133,11 @@ $sel->wait_for_page_to_load(WAIT_TIME);
 $sel->title_is("Change Group: tweakparams");
 
 my @groups = $sel->get_select_options("visible_from_add");
-if (grep {$_ eq 'tweakparams'} @groups) {
-    $sel->add_selection_ok("visible_from_add", "label=tweakparams");
-    $sel->click_ok('//input[@value="Update Group"]');
-    $sel->wait_for_page_to_load_ok(WAIT_TIME);
-    $sel->title_is("Change Group: tweakparams");
+if (grep { $_ eq 'tweakparams' } @groups) {
+  $sel->add_selection_ok("visible_from_add", "label=tweakparams");
+  $sel->click_ok('//input[@value="Update Group"]');
+  $sel->wait_for_page_to_load_ok(WAIT_TIME);
+  $sel->title_is("Change Group: tweakparams");
 }
 logout($sel);
 log_in($sel, $config, 'tweakparams');
@@ -139,7 +151,8 @@ $sel->type_ok("newcc", $config->{unprivileged_user_login_truncated});
 $sel->click_ok("commit");
 $sel->wait_for_page_to_load_ok(WAIT_TIME);
 $sel->title_is("Match Failed");
-$sel->is_text_present_ok("$config->{unprivileged_user_login_truncated} did not match anything");
+$sel->is_text_present_ok(
+  "$config->{unprivileged_user_login_truncated} did not match anything");
 $sel->go_back_ok();
 $sel->wait_for_page_to_load_ok(WAIT_TIME);
 $sel->title_like(qr/^$test_bug_1/);
@@ -152,7 +165,8 @@ $sel->type_ok("newcc", $config->{common_email});
 $sel->click_ok("commit");
 $sel->wait_for_page_to_load_ok(WAIT_TIME);
 $sel->title_is("Confirm Match");
-$sel->is_text_present_ok("$config->{common_email} matched more than the maximum of 2 users");
+$sel->is_text_present_ok(
+  "$config->{common_email} matched more than the maximum of 2 users");
 $sel->go_back_ok();
 $sel->wait_for_page_to_load_ok(WAIT_TIME);
 $sel->title_like(qr/^$test_bug_1/);
@@ -168,21 +182,39 @@ $sel->is_text_present_ok("<$config->{tweakparams_user_login}>");
 
 # Now test user menus. It must NOT display users we are not allowed to see.
 
-set_parameters($sel, { "User Matching" => {"usemenuforusers-on" => undef} });
+set_parameters($sel, {"User Matching" => {"usemenuforusers-on" => undef}});
 
 go_to_bug($sel, $test_bug_1);
 $sel->click_ok("cc_edit_area_showhide");
 my @cc = $sel->get_select_options("newcc");
-ok(!grep($_ =~ /$config->{unprivileged_user_login}/, @cc), "$config->{unprivileged_user_login} is not visible");
-ok(!grep($_ =~ /$config->{canconfirm_user_login}/, @cc), "$config->{canconfirm_user_login} is not visible");
-ok(grep($_ =~ /$config->{admin_user_login}/, @cc), "$config->{admin_user_login} is visible");
-ok(grep($_ =~ /$config->{tweakparams_user_login}/, @cc), "$config->{tweakparams_user_login} is visible");
+ok(
+  !grep($_ =~ /$config->{unprivileged_user_login}/, @cc),
+  "$config->{unprivileged_user_login} is not visible"
+);
+ok(
+  !grep($_ =~ /$config->{canconfirm_user_login}/, @cc),
+  "$config->{canconfirm_user_login} is not visible"
+);
+ok(
+  grep($_ =~ /$config->{admin_user_login}/, @cc),
+  "$config->{admin_user_login} is visible"
+);
+ok(
+  grep($_ =~ /$config->{tweakparams_user_login}/, @cc),
+  "$config->{tweakparams_user_login} is visible"
+);
 
 # Reset paramters.
 
-set_parameters($sel, { "User Matching"  => {"usemenuforusers-off" => undef,
-                                            "maxusermatches"      => {type => 'text', value => '0'},
-                                            "confirmuniqueusermatch-off" => undef},
-                       "Group Security" => {"usevisibilitygroups-off" => undef}
-                     });
+set_parameters(
+  $sel,
+  {
+    "User Matching" => {
+      "usemenuforusers-off"        => undef,
+      "maxusermatches"             => {type => 'text', value => '0'},
+      "confirmuniqueusermatch-off" => undef
+    },
+    "Group Security" => {"usevisibilitygroups-off" => undef}
+  }
+);
 logout($sel);

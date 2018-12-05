@@ -16,7 +16,7 @@ use QA::Util;
 my ($sel, $config) = get_selenium();
 
 log_in($sel, $config, 'admin');
-set_parameters($sel, { "Bug Fields" => {"useclassification-on" => undef} });
+set_parameters($sel, {"Bug Fields" => {"useclassification-on" => undef}});
 
 # Do not use file_bug_in_product() because our goal here is not to file
 # a bug but to check what is present in the UI, and also to make sure
@@ -31,7 +31,10 @@ $sel->title_is("Enter Bug");
 $sel->click_ok("link=Other Products", undef, "Choose full product list");
 $sel->wait_for_page_to_load(WAIT_TIME);
 $sel->title_is("Enter Bug");
-ok(!$sel->is_text_present("QA-Selenium-TEST"), "The QA-Selenium-TEST product is not displayed");
+ok(
+  !$sel->is_text_present("QA-Selenium-TEST"),
+  "The QA-Selenium-TEST product is not displayed"
+);
 logout($sel);
 
 # Same steps, but for a member of the "QA‑Selenium‑TEST" group.
@@ -42,16 +45,18 @@ $sel->click_ok('//*[@class="link-file"]//a');
 $sel->wait_for_page_to_load_ok(WAIT_TIME);
 $sel->title_is("Enter A Bug");
 if ($sel->is_text_present('None of the above; my bug is in')) {
-    $sel->click_ok('advanced_link');
-    $sel->wait_for_page_to_load_ok(WAIT_TIME);
-    $sel->title_is("Enter Bug");
+  $sel->click_ok('advanced_link');
+  $sel->wait_for_page_to_load_ok(WAIT_TIME);
+  $sel->title_is("Enter Bug");
 }
 $sel->click_ok('link=Other Products');
 $sel->wait_for_page_to_load_ok(WAIT_TIME);
+
 # For some unknown reason, Selenium doesn't like hyphens in links.
 # $sel->is_text_present_ok("QA-Selenium-TEST");
 # $sel->click_ok("link=QA-Selenium-TEST");
-$sel->click_ok('//div[@id="choose_product"]//a[contains(@href, "QA-Selenium-TEST")]');
+$sel->click_ok(
+  '//div[@id="choose_product"]//a[contains(@href, "QA-Selenium-TEST")]');
 $sel->wait_for_page_to_load_ok(WAIT_TIME);
 $sel->is_text_present_ok("Product: QA-Selenium-TEST");
 logout($sel);

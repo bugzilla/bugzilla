@@ -13,34 +13,30 @@ use Test2::V0;
 
 my $parser = Bugzilla->markdown_parser;
 
+is($parser->render_html('# header'), "<h1>header</h1>\n", 'Simple header');
+
 is(
-    $parser->render_html('# header'),
-    "<h1>header</h1>\n",
-    'Simple header'
+  $parser->render_html('`code snippet`'),
+  "<p><code>code snippet</code></p>\n",
+  'Simple code snippet'
 );
 
 is(
-    $parser->render_html('`code snippet`'),
-    "<p><code>code snippet</code></p>\n",
-    'Simple code snippet'
+  $parser->render_html('http://bmo-web.vm'),
+  "<p><a href=\"http://bmo-web.vm\">http://bmo-web.vm</a></p>\n",
+  'Autolink extension'
 );
 
 is(
-    $parser->render_html('http://bmo-web.vm'),
-    "<p><a href=\"http://bmo-web.vm\">http://bmo-web.vm</a></p>\n",
-    'Autolink extension'
+  $parser->render_html('<script>hijack()</script>'),
+  "&lt;script>hijack()&lt;/script>\n",
+  'Tagfilter extension'
 );
 
 is(
-    $parser->render_html('<script>hijack()</script>'),
-    "&lt;script>hijack()&lt;/script>\n",
-    'Tagfilter extension'
-);
-
-is(
-    $parser->render_html('~~strikethrough~~'),
-    "<p><del>strikethrough</del></p>\n",
-    'Strikethrough extension'
+  $parser->render_html('~~strikethrough~~'),
+  "<p><del>strikethrough</del></p>\n",
+  'Strikethrough extension'
 );
 
 my $table_markdown = <<'MARKDOWN';
@@ -66,10 +62,6 @@ my $table_html = <<'HTML';
 </table>
 HTML
 
-is(
-    $parser->render_html($table_markdown),
-    $table_html,
-    'Table extension'
-);
+is($parser->render_html($table_markdown), $table_html, 'Table extension');
 
 done_testing;

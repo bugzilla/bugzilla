@@ -14,32 +14,17 @@ use Test::More;
 binmode STDOUT, ':encoding(utf-8)';
 
 my @expect = (
-    ['dhanesh95'],
-    ['kentuckyfriedtakahe', 'k17e'],
-    ['emceeaich'],
-    ['seban'],
-    ['emceeaich'],
-    ['glob'],
-    ['briansmith', 'bsmith'],
-    ['bz'],
-    ['dkl-test'],
-    ['dylan'],
-    ['7'],
-    ['bwinton'],
-    ['canuckistani'],
-    ['GaryChen', 'PYChen', 'gchen', '陳柏宇'],
-    ['gfx'],
-    ['ted.mielczarek'],
-    [],
-    ['tb-l10n'],
-    ['Gavin'],
-    ['прозвище'],
+  ['dhanesh95'], ['kentuckyfriedtakahe', 'k17e'], ['emceeaich'], ['seban'],
+  ['emceeaich'], ['glob'], ['briansmith', 'bsmith'], ['bz'], ['dkl-test'],
+  ['dylan'], ['7'], ['bwinton'], ['canuckistani'],
+  ['GaryChen', 'PYChen', 'gchen', '陳柏宇'], ['gfx'], ['ted.mielczarek'], [],
+  ['tb-l10n'], ['Gavin'], ['прозвище'],
 
 );
 
 while (<DATA>) {
-    my @nicks = extract_nicks($_);
-    is_deeply(\@nicks, shift @expect);
+  my @nicks = extract_nicks($_);
+  is_deeply(\@nicks, shift @expect);
 }
 
 done_testing;

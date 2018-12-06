@@ -22,12 +22,12 @@ sub user_profile {
   if ($user && $user->id) {
     $self->render(
       json => {
-        id     => $user->id,
-        name   => $user->name,
-        login  => $user->login,
-        nick   => $user->nick,
-        groups => [map { $_->name } @{$user->groups}],
-        mfa    => $user->mfa,
+        id                    => $user->id,
+        name                  => $user->name,
+        login                 => $user->login,
+        nick                  => $user->nick,
+        groups                => [map { $_->name } @{$user->groups}],
+        mfa                   => lc($user->mfa),
         mfa_required_by_group => $user->in_mfa_group ? true : false,
       }
     );

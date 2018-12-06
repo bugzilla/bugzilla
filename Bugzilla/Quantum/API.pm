@@ -8,6 +8,7 @@
 package Bugzilla::Quantum::API;
 use 5.10.1;
 use Mojo::Base qw( Mojolicious::Controller );
+use Mojo::JSON qw( true false );
 
 sub setup_routes {
   my ($class, $r) = @_;
@@ -26,6 +27,8 @@ sub user_profile {
         login  => $user->login,
         nick   => $user->nick,
         groups => [map { $_->name } @{$user->groups}],
+        mfa    => $user->mfa,
+        mfa_required_by_group => $user->in_mfa_group ? true : false,
       }
     );
   }

@@ -35,6 +35,13 @@
       "problemMatcher": []
     },
     {
+      "label": "Vagrant: Connect to Database",
+      "type": "shell",
+      "command": "vagrant ssh db -c 'mysql -u root -p bugs_bmo'",
+      "group": "none",
+      "problemMatcher": []
+    },
+    {
       "label": "Vagrant: Update Perl Dependencies",
       "type": "shell",
       "command": "vagrant ssh web -c bmo-refresh-bundle",

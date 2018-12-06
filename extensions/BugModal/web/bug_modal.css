@@ -638,6 +638,10 @@ h3.change-name {
     color: #555;
 }
 
+.comment-actions button.iconic .icon {
+  pointer-events: none;
+}
+
 .comment-actions button.iconic .icon::before {
     font-family: 'Material Icons';
     font-size: 16px;

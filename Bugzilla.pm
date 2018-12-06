@@ -446,6 +446,12 @@ sub job_queue {
   return request_cache->{job_queue} ||= Bugzilla::JobQueue->new();
 }
 
+sub jwt {
+  my ($class, @args) = @_;
+  require Mojo::JWT;
+  return Mojo::JWT->new(@args, secret => $class->localconfig->{jwt_secret});
+}
+
 sub dbh {
   my ($class) = @_;
 
@@ -1197,5 +1203,12 @@ See the documentation for the C<Bugzilla::Memcached> module for more
 information.
 
 =back
+
+=item C<jwt>
+
+Returns a L<Mojo::JWT> object, configured with the Bugzilla localconfig jwt_secret set.
+
+  my $payload_hash = Bugzilla->jwt->decode($jwt);
+  my $new_jwt      = Bugzilla->jwt(claims => $payload_hash)->encode;
 
 =back

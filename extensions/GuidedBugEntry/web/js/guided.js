@@ -258,7 +258,7 @@ var product = {
         id: ++this._counter,
         params: {
           names: [productName],
-          exclude_fields: ['internals', 'milestones'],
+          exclude_fields: ['internals', 'milestones', 'components.flag_types'],
           Bugzilla_api_token : (BUGZILLA.api_token ? BUGZILLA.api_token : '')
         }
       }

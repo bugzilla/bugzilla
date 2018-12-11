@@ -102,6 +102,8 @@ creation_time  datetime  This is exactly same as the ``time`` key. Use this
 is_private     boolean   ``true`` if this comment is private (only visible to a
                          certain group called the "insidergroup"), ``false``
                          otherwise.
+is_markdown    boolean   ``true`` if this comment is markdown. ``false`` if this
+                         comment is plaintext.
 =============  ========  ========================================================
 
 **Errors**
@@ -123,7 +125,8 @@ it can also throw the following errors:
 Create Comments
 ---------------
 
-This allows you to add a comment to a bug in Bugzilla.
+This allows you to add a comment to a bug in Bugzilla. All comments created via the
+API will be considered Markdown (specifically GitHub Flavored Markdown).
 
 **Request**
 

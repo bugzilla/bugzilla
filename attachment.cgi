@@ -621,7 +621,8 @@ sub insert {
     {
       isprivate  => $attachment->isprivate,
       type       => CMT_ATTACHMENT_CREATED,
-      extra_data => $attachment->id
+      extra_data => $attachment->id,
+      is_markdown => Bugzilla->params->{use_markdown} ? 1 : 0
     }
   );
 
@@ -780,7 +781,8 @@ sub update {
       {
         isprivate  => $attachment->isprivate,
         type       => CMT_ATTACHMENT_UPDATED,
-        extra_data => $attachment->id
+        extra_data => $attachment->id,
+        is_markdown => Bugzilla->params->{use_markdown} ? 1 : 0
       }
     );
   }

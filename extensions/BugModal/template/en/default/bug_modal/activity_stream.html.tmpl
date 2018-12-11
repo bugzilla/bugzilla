@@ -261,16 +261,25 @@
 [% END %]
 
 [% BLOCK comment_body %]
-  <pre class="comment-text [%= "bz_private" IF comment.is_private %]" id="ct-[% comment.count FILTER none %]"
-    [% IF comment.collapsed +%] style="display:none"[% END ~%]
+  [% IF comment.is_markdown AND Param('use_markdown') %]
+    [% comment_tag = 'div' %]
+  [% ELSE %]
+    [% comment_tag = 'pre' %]
+  [% END %]
+
+  <[% comment_tag FILTER none %] class="comment-text [%= "bz_private" IF comment.is_private %]"
+                     id="ct-[% comment.count FILTER none %]"
+                     data-comment-id="[% comment.id FILTER none %]"
+                     [% IF comment.is_markdown +%] data-ismarkdown="true" [% END ~%]
+                     [% IF comment.collapsed +%] style="display:none"[% END ~%]
   >[% FILTER collapse %]
     [% IF comment.is_about_attachment && comment.attachment.is_image ~%]
-      <a href="[% basepath FILTER none %]attachment.cgi?id=[% comment.attachment.id FILTER none %]"
+      <a href="attachment.cgi?id=[% comment.attachment.id FILTER none %]"
         title="[% comment.attachment.description FILTER html %]"
-        class="lightbox"><img src="[% basepath FILTER none %]extensions/BugModal/web/image.png" width="16" height="16"></a>
+        class="lightbox"><img src="extensions/BugModal/web/image.png" width="16" height="16"></a>
     [% END %]
   [% END %]
-  [%~ comment.body_full FILTER quoteUrls(bug, comment) ~%]</pre>
+  [%~ comment.body_full FILTER renderMarkdown(bug, comment) ~%]</[% comment_tag FILTER none %]>
 [% END %]
 
 [%

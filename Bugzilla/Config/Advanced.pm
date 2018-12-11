@@ -28,6 +28,8 @@ use constant get_param_list => (
   },
 
   {name => 'disable_bug_updates', type => 'b', default => 0},
+
+  {name => 'use_markdown', type => 'b', default => 0},
 );
 
 1;

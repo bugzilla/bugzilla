@@ -739,6 +739,22 @@ sub create {
         1
       ],
 
+      renderMarkdown => [
+        sub {
+          my ($context, $bug, $comment, $user) = @_;
+          return sub {
+            my $text = shift;
+            if ($comment && $comment->is_markdown && Bugzilla->params->{use_markdown}) {
+              return Bugzilla->markdown->render_html($text, $bug, $comment, $user);
+            }
+            else {
+              return quoteUrls($text, $bug, $comment, $user);
+            }
+          };
+        },
+        1
+      ],
+
       bug_link => [
         sub {
           my ($context, $bug, $options) = @_;

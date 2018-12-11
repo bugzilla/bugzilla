@@ -858,31 +858,54 @@ $(function() {
 
             var prefix = "(In reply to " + comment_author + " from comment #" + comment_id + ")\n";
             var reply_text = "";
-            if (BUGZILLA.user.settings.quote_replies == 'quoted_reply') {
-                var text = $('#ct-' + comment_id).text();
-                reply_text = prefix + wrapReplyText(text);
-            } else if (BUGZILLA.user.settings.quote_replies == 'simply_reply') {
-                reply_text = prefix;
+
+            var quoteMarkdown = function($comment) {
+                const uid = $comment.data('comment-id');
+                bugzilla_ajax(
+                    {
+                        url: `rest/bug/comment/${uid}`,
+                    },
+                    (data) => {
+                        const quoted = data['comments'][uid]['text'].replace(/\n/g, "\n> ");
+                        reply_text = `${prefix}\n> ${quoted}`;
+                        populateNewComment();
+                    }
+                );
             }
 
-            // quoting a private comment, check the 'private' cb
-            $('#add-comment-private-cb').prop('checked',
-                $('#add-comment-private-cb:checked').length || $('#is-private-' + comment_id + ':checked').length);
+            var populateNewComment = function() {
+                // quoting a private comment, check the 'private' cb
+                $('#add-comment-private-cb').prop('checked',
+                    $('#add-comment-private-cb:checked').length || $('#is-private-' + comment_id + ':checked').length);
 
-            // remove embedded links to attachment details
-            reply_text = reply_text.replace(/(attachment\s+\d+)(\s+\[[^\[\n]+\])+/gi, '$1');
+                // remove embedded links to attachment details
+                reply_text = reply_text.replace(/(attachment\s+\d+)(\s+\[[^\[\n]+\])+/gi, '$1');
 
-            $.scrollTo($('#comment'), function() {
-                if ($('#comment').val() != reply_text) {
-                    $('#comment').val($('#comment').val() + reply_text);
+                $.scrollTo($('#comment'), function() {
+                    if ($('#comment').val() != reply_text) {
+                        $('#comment').val($('#comment').val() + reply_text);
+                    }
+
+                    if (BUGZILLA.user.settings.autosize_comments) {
+                        autosize.update($('#comment'));
+                    }
+
+                    $('#comment').trigger('input').focus();
+                });
+            }
+
+            if (BUGZILLA.user.settings.quote_replies == 'quoted_reply') {
+                var $comment = $('#ct-' + comment_id);
+                if ($comment.attr('data-ismarkdown')) {
+                    quoteMarkdown($comment);
+                } else {
+                    reply_text = prefix + wrapReplyText($comment.text());
+                    populateNewComment();
                 }
-
-                if (BUGZILLA.user.settings.autosize_comments) {
-                    autosize.update($('#comment'));
-                }
-
-                $('#comment').focus();
-            });
+            } else if (BUGZILLA.user.settings.quote_replies == 'simply_reply') {
+                reply_text = prefix;
+                populateNewComment();
+            }
         });
 
     if (BUGZILLA.user.settings.autosize_comments) {

@@ -795,12 +795,10 @@ sub check_rate_limit {
   }
 }
 
-sub markdown_parser {
-  require Bugzilla::Markdown::GFM;
-  require Bugzilla::Markdown::GFM::Parser;
-  return request_cache->{markdown_parser}
-    ||= Bugzilla::Markdown::GFM::Parser->new(
-    {extensions => [qw( autolink tagfilter table strikethrough)]});
+sub markdown {
+  require Bugzilla::Markdown;
+  state $markdown = Bugzilla::Markdown->new;
+  return $markdown;
 }
 
 # Private methods
@@ -1121,10 +1119,9 @@ of features, see C<OPTIONAL_MODULES> in C<Bugzilla::Install::Requirements>.
 
 Feeds the provided message into our centralised auditing system.
 
-=item C<markdown_parser>
+=item C<markdown>
 
-Returns a L<Bugzilla::Markdown::GFM::Parser> with the default extensions
-loaded (autolink, tagfilter, table, and strikethrough).
+Returns a L<Bugzilla::Markdown> object.
 
 =back
 

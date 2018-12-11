@@ -221,7 +221,7 @@ sub directive_ok {
                                         quoteUrls|time|uri|xml|lower|html_light|
                                         obsolete|inactive|closed|unitconvert|
                                         txt|html_linebreak|none|json|null|id|
-                                        markdown)\b/x;
+                                        markdown|renderMarkdown)\b/x;
   return 0;
 }
 

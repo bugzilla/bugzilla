@@ -141,11 +141,15 @@ sub update_comment {
   $comment->{thetext} = $new_comment;
   $bug->_sync_fulltext(update_comments => 1);
 
+  my $html
+    = $comment->is_markdown && Bugzilla->params->{use_markdown}
+    ? Bugzilla->markdown->render_html($new_comment, $bug)
+    : Bugzilla::Template::quoteUrls($new_comment, $bug);
+
   # Respond with the updated comment and number of revisions
   return {
-    text => $self->type('string', $new_comment),
-    html =>
-      $self->type('string', Bugzilla::Template::quoteUrls($new_comment, $bug)),
+    text  => $self->type('string', $new_comment),
+    html  => $self->type('string', $html),
     count => $self->type(
       'int',
       $dbh->selectrow_array(

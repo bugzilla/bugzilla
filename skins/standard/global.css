@@ -963,7 +963,7 @@ input.required, select.required, span.required_explanation {
 }
 
 #comment {
-    margin: 0px 0px 1em 0px;
+    margin: 0px 0px 0.5em 0px;
 }
 
 /*******************/
@@ -1518,7 +1518,8 @@ table.edit_form hr {
     left: 16px;
 }
 
-.bz_comment_text span.quote, .bz_comment_text span.quote_wrapped {
+.bz_comment_text span.quote, .bz_comment_text span.quote_wrapped,
+div.bz_comment_text pre {
     background: #eee !important;
     color: #444 !important;
     display: block !important;
@@ -1526,6 +1527,40 @@ table.edit_form hr {
     margin-bottom: -10px !important;
     overflow: auto;
     padding: 5px !important;
+}
+
+/* Markdown comments */
+div.bz_comment_text {
+    white-space: normal;
+    padding: 0 8px 0 8px;
+    font-family: inherit !important;
+}
+
+div.bz_comment_text code {
+    color: #444;
+    background-color: #eee;
+    font-size: 13px;
+    font-family: "Fira Mono","Droid Sans Mono",Menlo,Monaco,"Courier New",monospace;
+}
+
+div.bz_comment_text table {
+    border-collapse: collapse;
+}
+
+div.bz_comment_text th, div.bz_comment_text td {
+    padding: 5px 10px;
+    border: 1px solid #ccc;
+}
+
+div.bz_comment_text hr {
+    display: block !important;
+}
+
+div.bz_comment_text blockquote {
+    background: #fcfcfc;
+    border-left: 5px solid #ccc;
+    margin: 1.5em 10px;
+    padding: 0.5em 10px;
 }
 
 .bz_comment_tags {

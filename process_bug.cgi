@@ -275,6 +275,7 @@ if (should_set('comment')) {
   $set_all_fields{comment} = {
     body       => scalar $cgi->param('comment'),
     is_private => scalar $cgi->param('comment_is_private'),
+    is_markdown => Bugzilla->params->{use_markdown} ? 1 : 0,
   };
 }
 if (should_set('see_also')) {

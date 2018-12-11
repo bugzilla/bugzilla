@@ -18,6 +18,6 @@
   # Contributor(s): Frédéric Buclin <LpSolit@gmail.com>
   #%]
 
-[% tabs = tabs.import([{ name => "my_tab", label => "Example Custom Preferences",
+[% CALL tabs.import([{ name => "my_tab", label => "Example Custom Preferences",
                          link => "userprefs.cgi?tab=my_tab", saveable => 1 }
                       ]) %]

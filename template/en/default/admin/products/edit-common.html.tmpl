@@ -42,6 +42,12 @@
         [% product.description FILTER html %]</textarea>
   </td>
 </tr>
+<tr>
+  <th align="right">New [% terms.bug %] comment template:</th>
+  <td><textarea rows="8" cols="64" wrap="virtual" name="bug_description_template">
+        [% product.bug_description_template FILTER html %]</textarea>
+  </td>
+</tr>
 
 [% IF Param('usetargetmilestone') -%]
   <tr>

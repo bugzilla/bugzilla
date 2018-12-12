@@ -55,6 +55,7 @@ use constant UPDATE_COLUMNS => qw(
   defaultmilestone
   isactive
   allows_unconfirmed
+  bug_description_template
 );
 
 use constant VALIDATORS => {
@@ -521,6 +522,7 @@ sub set_description        { $_[0]->set('description',        $_[1]); }
 sub set_default_milestone  { $_[0]->set('defaultmilestone',   $_[1]); }
 sub set_is_active          { $_[0]->set('isactive',           $_[1]); }
 sub set_allows_unconfirmed { $_[0]->set('allows_unconfirmed', $_[1]); }
+sub set_bug_description_template { $_[0]->set('bug_description_template', $_[1]); }
 
 sub set_group_controls {
   my ($self, $group, $settings) = @_;
@@ -901,6 +903,17 @@ sub is_active          { return $_[0]->{'isactive'}; }
 sub default_milestone  { return $_[0]->{'defaultmilestone'}; }
 sub classification_id  { return $_[0]->{'classification_id'}; }
 
+# Lazy-load the bug_description_template column
+sub bug_description_template {
+  my $self = shift;
+  if (!exists $self->{'bug_description_template'}) {
+    $self->{'bug_description_template'} = Bugzilla->dbh->selectrow_array(
+      'SELECT bug_description_template FROM products WHERE id = ?',
+      undef, $self->id);
+  }
+  return $self->{'bug_description_template'};
+}
+
 ###############################
 ####      Subroutines    ######
 ###############################
@@ -953,6 +966,7 @@ Bugzilla::Product - Bugzilla product class.
     my $defaultmilestone = $product->default_milestone;
     my $classificationid = $product->classification_id;
     my $allows_unconfirmed = $product->allows_unconfirmed;
+    my $bug_description_template = $product->bug_description_template;
 
 =head1 DESCRIPTION
 

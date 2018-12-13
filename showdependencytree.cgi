@@ -13,12 +13,13 @@ use warnings;
 use lib qw(. lib local/lib/perl5);
 
 use Bugzilla;
+use Bugzilla::Constants;
 use Bugzilla::Error;
 use Bugzilla::Bug;
 
 use List::Util qw(max);
 
-my $user = Bugzilla->login();
+my $user = Bugzilla->login(LOGIN_REQUIRED);
 
 my $cgi      = Bugzilla->cgi;
 my $template = Bugzilla->template;

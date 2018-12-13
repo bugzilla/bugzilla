@@ -22,7 +22,7 @@ use Bugzilla::Error;
 use Bugzilla::Bug;
 use Bugzilla::Status;
 
-Bugzilla->login();
+Bugzilla->login(LOGIN_REQUIRED);
 
 my $cgi      = Bugzilla->cgi;
 my $template = Bugzilla->template;

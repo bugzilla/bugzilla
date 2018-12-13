@@ -46,12 +46,15 @@ over 60 seconds. Valid keys are <code>get_b[%''%]ug</code> which covers JSONRPC,
                        "So, you have to turn on this option before any such deletions " _
                        "will ever happen."
 
+  block_user_agent => "This option is a regexp. When a client's user agent matches it, $terms.Bugzilla will not serve requests to it."
+
   last_visit_keep_days => "This option controls how many days $terms.Bugzilla will " _
-                          "remember when users visit specific ${terms.bugs}.",
+                           "remember when users visit specific ${terms.bugs}.",
 
-   rate_limit_active => "Allow some types of requests to be rate limited."
+  rate_limit_active => "Allow some types of requests to be rate limited."
 
-   rate_limit_rules => rate_limit_rules_desc
+  rate_limit_rules => rate_limit_rules_desc
 
-   log_user_requests => "This option controls logging of authenticated requests in the user_request_log table"}
+  log_user_requests => "This option controls logging of authenticated requests in the user_request_log table"}
+
 %]

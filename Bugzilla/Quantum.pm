@@ -32,6 +32,7 @@ use Bugzilla::Util ();
 use Cwd qw(realpath);
 use MojoX::Log::Log4perl::Tiny;
 use Bugzilla::WebService::Server::REST;
+use Try::Tiny;
 
 has 'static' => sub { Bugzilla::Quantum::Static->new };
 
@@ -48,6 +49,29 @@ sub startup {
   $self->plugin('ForwardedFor') if Bugzilla->has_feature('better_xff');
   $self->plugin('Bugzilla::Quantum::Plugin::Helpers');
   $self->plugin('Bugzilla::Quantum::Plugin::OAuth2');
+
+  $self->hook(
+    before_routes => sub {
+      my ($c) = @_;
+      return if $c->stash->{'mojo.static'};
+
+      # It is possible the regexp is bad.
+      # If that is the case, we just log the error and continue on.
+      try {
+        my $regexp = Bugzilla->params->{block_user_agent};
+        if ($regexp && $c->req->headers->user_agent =~ /$regexp/) {
+          my $msg = "Contact " . Bugzilla->params->{maintainer};
+          $c->respond_to(
+            json => {json => {error => $msg}, status => 400},
+            any  => {text => "$msg\n",        status => 400},
+          );
+        }
+      }
+      catch {
+        ERROR($_);
+      };
+    }
+  );
 
   # hypnotoad is weird and doesn't look for MOJO_LISTEN itself.
   $self->config(

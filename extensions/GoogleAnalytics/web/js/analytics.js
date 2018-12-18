@@ -8,7 +8,7 @@
 $(function() {
   var meta = $('meta[name="google-analytics"]');
 
-  if (typeof Mozilla.dntEnabled === 'function' && !Mozilla.dntEnabled() && meta.length) {
+  if (meta.length) {
     // Activate Google Analytics
     window.ga=window.ga||function(){(ga.q=ga.q||[]).push(arguments)};ga.l=+new Date;
     ga('create', meta.attr('content'), 'auto');

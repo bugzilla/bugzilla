@@ -6,9 +6,14 @@
   # defined by the Mozilla Public License, v. 2.0.
   #%]
 
+[% USE Bugzilla %]
+
+[%# Disable tracking of DNT-enabled users, security group members as well as private bugs #%]
+[% RETURN IF !Bugzilla.params.google_analytics_tracking_id || Bugzilla.cgi.http('dnt') == '1' ||
+    user.in_group(Param('insidergroup')) || (bug.defined && bug.groups_in.size) %]
+
 [% IF !javascript_urls %]
   [% javascript_urls = [] %]
 [% END %]
 
 [% javascript_urls.push('extensions/GoogleAnalytics/web/js/analytics.js') %]
-[% javascript_urls.push('extensions/GoogleAnalytics/web/js/dnt-helper.js') %]

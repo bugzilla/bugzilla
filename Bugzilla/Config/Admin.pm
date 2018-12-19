@@ -39,7 +39,7 @@ sub get_param_list {
     {
       name    => 'rate_limit_rules',
       type    => 'l',
-      default => '{"get_bug": [75, 60], "show_bug": [75, 60], "github": [10, 60]}',
+      default => default_rate_limit_rules(),
       checker => \&check_rate_limit_rules,
       updater => \&update_rate_limit_rules,
     },
@@ -49,6 +49,16 @@ sub get_param_list {
     {name => 'block_user_agent', type => 't', default => ''},
   );
   return @param_list;
+}
+
+sub default_rate_limit_rules {
+  return encode_json({
+    get_bug         => [75, 60],
+    show_bug        => [75, 60],
+    github          => [10, 60],
+    get_attachments => [75, 60],
+    get_comments    => [75, 60],
+  });
 }
 
 sub check_rate_limit_rules {
@@ -62,7 +72,11 @@ sub check_rate_limit_rules {
   }
   values %$val;
 
-  foreach my $required (qw( show_bug get_bug github )) {
+  my @required = qw(
+    show_bug github get_bug
+    get_attachments get_comments
+  );
+  foreach my $required (@required) {
     return "missing $required" unless exists $val->{$required};
   }
 
@@ -72,7 +86,9 @@ sub check_rate_limit_rules {
 sub update_rate_limit_rules {
   my ($rules) = @_;
   my $val = decode_json($rules);
-  $val->{github} = [10, 60];
+  $val->{github}          = [10, 60];
+  $val->{get_attachments} = [75, 60];
+  $val->{get_comments}    = [75, 60];
   return encode_json($val);
 }
 

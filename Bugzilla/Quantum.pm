@@ -39,7 +39,7 @@ has 'static' => sub { Bugzilla::Quantum::Static->new };
 sub startup {
   my ($self) = @_;
 
-  DEBUG('Starting up');
+  TRACE('Starting up');
   $self->plugin('Bugzilla::Quantum::Plugin::BlockIP');
   $self->plugin('Bugzilla::Quantum::Plugin::Glue');
   $self->plugin('Bugzilla::Quantum::Plugin::Hostage')
@@ -49,6 +49,8 @@ sub startup {
   $self->plugin('ForwardedFor') if Bugzilla->has_feature('better_xff');
   $self->plugin('Bugzilla::Quantum::Plugin::Helpers');
   $self->plugin('Bugzilla::Quantum::Plugin::OAuth2');
+
+  push @{ $self->commands->namespaces }, 'Bugzilla::Quantum::Command';
 
   $self->hook(
     before_routes => sub {

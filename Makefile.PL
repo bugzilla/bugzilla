@@ -82,6 +82,7 @@ my %requires = (
   'Net::DNS'                            => '0',
   'Package::Stash'                      => '0.37',
   'Parse::CPAN::Meta'                   => '1.44',
+  'PerlX::Maybe'                        => 0,
   'Role::Tiny'                          => '2.000003',
   'Scope::Guard'                        => '0.21',
   'Sereal'                              => '4.004',

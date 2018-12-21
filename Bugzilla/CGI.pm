@@ -47,6 +47,9 @@ sub DEFAULT_CSP {
     connect_src => [
       'self',
 
+      # This is for extensions/BMO/web/js/firefox-crash-table.js
+      'https://product-details.mozilla.org',
+
       # This is for extensions/GoogleAnalytics using beacon or XHR
       'https://www.google-analytics.com',
 
@@ -85,6 +88,9 @@ sub SHOW_BUG_MODAL_CSP {
     img_src     => ['self', 'https://secure.gravatar.com'],
     connect_src => [
       'self',
+
+      # This is for extensions/BMO/web/js/firefox-crash-table.js
+      'https://product-details.mozilla.org',
 
       # This is for extensions/GoogleAnalytics using beacon or XHR
       'https://www.google-analytics.com',

@@ -8,6 +8,7 @@
 
 [% style_urls.push('extensions/BMO/web/styles/edit_bug.css') %]
 [% javascript_urls.push('extensions/BMO/web/js/edit_bug.js') %]
+[% javascript_urls.push("extensions/BMO/web/js/firefox-crash-table.js") %]
 [% IF user.in_group('bounty-team') %]
   [% javascript_urls.push('extensions/BMO/web/js/attachment_bounty_form.js') %]
   [% yui.push('selector') %]

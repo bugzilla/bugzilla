@@ -395,7 +395,7 @@ sub login {
   }
 
   # If Mojo native app is requesting login, we need to possibly redirect
-  my $C = $Bugzilla::Quantum::CGI::C;
+  my $C = $Bugzilla::App::CGI::C;
   if ($C->session->{override_login_target}) {
     my $mojo_url = Mojo::URL->new($C->session->{override_login_target});
     $mojo_url->query($C->session->{cgi_params});
@@ -788,7 +788,7 @@ sub check_rate_limit {
       Bugzilla->audit(
         "[rate_limit] action=$action, ip=$ip, limit=$limit, name=$name");
       if ($action eq 'block') {
-        $Bugzilla::Quantum::CGI::C->block_ip($ip);
+        $Bugzilla::App::CGI::C->block_ip($ip);
         ThrowUserError("rate_limit");
       }
     }

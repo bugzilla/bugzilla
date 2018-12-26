@@ -1,4 +1,4 @@
-package Bugzilla::Quantum::Plugin::BlockIP;
+package Bugzilla::App::Plugin::BlockIP;
 use 5.10.1;
 use Mojo::Base 'Mojolicious::Plugin';
 

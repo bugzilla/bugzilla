@@ -5,7 +5,7 @@
 # This Source Code Form is "Incompatible With Secondary Licenses", as
 # defined by the Mozilla Public License, v. 2.0.
 
-package Bugzilla::Quantum::Home;
+package Bugzilla::App::Home;
 use Mojo::Base 'Mojolicious::Controller';
 
 use Bugzilla::Error;

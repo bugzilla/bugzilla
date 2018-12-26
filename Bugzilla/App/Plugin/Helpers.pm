@@ -4,7 +4,7 @@
 #
 # This Source Code Form is "Incompatible With Secondary Licenses", as
 # defined by the Mozilla Public License, v. 2.0.
-package Bugzilla::Quantum::Plugin::Helpers;
+package Bugzilla::App::Plugin::Helpers;
 use 5.10.1;
 use Mojo::Base qw(Mojolicious::Plugin);
 

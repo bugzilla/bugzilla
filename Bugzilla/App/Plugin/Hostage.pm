@@ -1,4 +1,4 @@
-package Bugzilla::Quantum::Plugin::Hostage;
+package Bugzilla::App::Plugin::Hostage;
 use 5.10.1;
 use Mojo::Base 'Mojolicious::Plugin';
 use Bugzilla::Logging;

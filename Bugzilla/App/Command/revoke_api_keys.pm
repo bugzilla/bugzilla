@@ -5,7 +5,7 @@
 # This Source Code Form is "Incompatible With Secondary Licenses", as
 # defined by the Mozilla Public License, v. 2.0.
 
-package Bugzilla::Quantum::Command::revoke_api_keys; ## no critic (Capitalization)
+package Bugzilla::App::Command::revoke_api_keys; ## no critic (Capitalization)
 use 5.10.1;
 use Mojo::Base 'Mojolicious::Command';
 
@@ -46,7 +46,7 @@ __END__
 
 =head1 NAME
 
-Bugzilla::Quantum::Command::revoke_api_keys - revoke API keys command
+Bugzilla::App::Command::revoke_api_keys - revoke API keys command
 
 =head1 SYNOPSIS
 
@@ -61,11 +61,11 @@ Bugzilla::Quantum::Command::revoke_api_keys - revoke API keys command
 
 =head1 DESCRIPTION
 
-L<Bugzilla::Quantum::Command::revoke_api_keys> revokes API keys.
+L<Bugzilla::App::Command::revoke_api_keys> revokes API keys.
 
 =head1 ATTRIBUTES
 
-L<Bugzilla::Quantum::Command::revoke_api_keys> inherits all attributes from
+L<Bugzilla::App::Command::revoke_api_keys> inherits all attributes from
 L<Mojolicious::Command> and implements the following new ones.
 
 =head2 description
@@ -84,7 +84,7 @@ Usage information for this command, used for the help screen.
 
 =head1 METHODS
 
-L<Bugzilla::Quantum::Command::revoke_api_keys> inherits all methods from
+L<Bugzilla::App::Command::revoke_api_keys> inherits all methods from
 L<Mojolicious::Command> and implements the following new ones.
 
 =head2 run

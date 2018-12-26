@@ -5,7 +5,7 @@
 # This Source Code Form is "Incompatible With Secondary Licenses", as
 # defined by the Mozilla Public License, v. 2.0.
 
-package Bugzilla::Quantum::Plugin::Glue;
+package Bugzilla::App::Plugin::Glue;
 use 5.10.1;
 use Mojo::Base 'Mojolicious::Plugin';
 

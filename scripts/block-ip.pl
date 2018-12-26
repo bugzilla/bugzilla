@@ -12,7 +12,7 @@ use warnings;
 use lib qw(. lib local/lib/perl5);
 
 use Bugzilla;
-use Bugzilla::Quantum;
+use Bugzilla::App;
 use Bugzilla::Constants;
 use Getopt::Long;
 
@@ -23,7 +23,7 @@ GetOptions('unblock' => \$unblock);
 
 pod2usage("No IPs given") unless @ARGV;
 
-my $app = Bugzilla::Quantum->new;
+my $app = Bugzilla::App->new;
 
 if ($unblock) {
   $app->unblock_ip($_) for @ARGV;
@@ -55,4 +55,4 @@ If passed, the IPs will be unblocked instead of blocked. Use this to remove IPs 
 
 =head1 DESCRIPTION
 
-This is just a simple CLI inteface to L<Bugzilla::Quantum::Plugin::BlockIP>.
+This is just a simple CLI inteface to L<Bugzilla::App::Plugin::BlockIP>.

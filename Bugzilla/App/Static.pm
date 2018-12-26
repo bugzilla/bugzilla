@@ -5,7 +5,7 @@
 # This Source Code Form is "Incompatible With Secondary Licenses", as
 # defined by the Mozilla Public License, v. 2.0.
 
-package Bugzilla::Quantum::Static;
+package Bugzilla::App::Static;
 use Mojo::Base 'Mojolicious::Static';
 use Bugzilla::Constants qw(bz_locations);
 

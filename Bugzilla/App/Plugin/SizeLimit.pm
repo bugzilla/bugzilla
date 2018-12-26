@@ -5,7 +5,7 @@
 # This Source Code Form is "Incompatible With Secondary Licenses", as
 # defined by the Mozilla Public License, v. 2.0.
 
-package Bugzilla::Quantum::Plugin::SizeLimit;
+package Bugzilla::App::Plugin::SizeLimit;
 use 5.10.1;
 use Mojo::Base 'Mojolicious::Plugin';
 use Mojo::JSON qw(decode_json);

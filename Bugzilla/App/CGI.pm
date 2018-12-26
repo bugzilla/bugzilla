@@ -5,7 +5,7 @@
 # This Source Code Form is "Incompatible With Secondary Licenses", as
 # defined by the Mozilla Public License, v. 2.0.
 
-package Bugzilla::Quantum::CGI;
+package Bugzilla::App::CGI;
 use Mojo::Base 'Mojolicious::Controller';
 
 use CGI::Compile;
@@ -17,7 +17,7 @@ use Sub::Name;
 use Socket qw(AF_INET inet_aton);
 use Mojo::File qw(path);
 use English qw(-no_match_vars);
-use Bugzilla::Quantum::Stdout;
+use Bugzilla::App::Stdout;
 use Bugzilla::Constants qw(bz_locations USAGE_MODE_BROWSER);
 
 our $C;
@@ -53,7 +53,7 @@ sub load_one {
     open STDIN, '<', $stdin->path
       or die "STDIN @{[$stdin->path]}: $!"
       if -s $stdin->path;
-    tie *STDOUT, 'Bugzilla::Quantum::Stdout', controller => $c;   ## no critic (tie)
+    tie *STDOUT, 'Bugzilla::App::Stdout', controller => $c;   ## no critic (tie)
 
     # the finally block calls cleanup.
     $c->stash->{cleanup_guard}->dismiss;

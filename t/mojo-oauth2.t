@@ -36,7 +36,7 @@ ok $oauth_client->{id}, 'New client id (' . $oauth_client->{id} . ')';
 ok $oauth_client->{secret},
   'New client secret (' . $oauth_client->{secret} . ')';
 
-my $t = Test::Mojo->new('Bugzilla::Quantum');
+my $t = Test::Mojo->new('Bugzilla::App');
 
 # Allow 1 redirect max
 $t->ua->max_redirects(1);

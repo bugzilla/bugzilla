@@ -108,6 +108,7 @@ my %test_requires = (
   'Test::Perl::Critic::Progressive' => 0,
   'Test::Selenium::Firefox'         => 0,
   'Test::WWW::Selenium'             => 0,
+  'Test2::V0'                       => 0,
 );
 my %recommends = (Safe => '2.30',);
 

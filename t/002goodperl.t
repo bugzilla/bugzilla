@@ -69,22 +69,7 @@ foreach my $file (@testitems) {
       next;
     }
 
-    if ($file_line1 =~ m#^\#\!/usr/bin/perl(?:\s-(\w+))?$#) {
-      my $file_flags = $1 || '';
-      if ($flags eq $file_flags) {
-        ok(1,
-          "$file uses standard perl location" . ($flags ? " and -$flags flag" : ""));
-      }
-      elsif ($flags) {
-        ok(0, "$file is MISSING -$flags flag --WARNING");
-      }
-      else {
-        ok(0, "$file has unexpected -$file_flags flag --WARNING");
-      }
-    }
-    else {
-      ok(0, "$file uses non-standard perl location");
-    }
+    ok($file_line1 =~ m{^#!/usr/bin/env perl$}, "$file uses proper shebang line");
   }
 }
 

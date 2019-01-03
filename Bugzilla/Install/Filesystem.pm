@@ -46,18 +46,6 @@ our @EXPORT = qw(
   fix_file_permissions
 );
 
-use constant INDEX_HTML => <<'EOT';
-<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
-<html>
-<head>
-  <meta http-equiv="Refresh" content="0; URL=index.cgi">
-</head>
-<body>
-  <h1>I think you are looking for <a href="index.cgi">index.cgi</a></h1>
-</body>
-</html>
-EOT
-
 use constant HTTPD_ENV => qw(
   LOCALCONFIG_ENV
   BUGZILLA_UNSAFE_AUTH_DELEGATION
@@ -356,10 +344,6 @@ sub FILESYSTEM {
       {perms => CGI_READ, overwrite => 1, contents => $yui3_all_css},
   );
 
-  # Because checksetup controls the creation of index.html separately
-  # from all other files, it gets its very own hash.
-  my %index_html = ('index.html' => {perms => WS_SERVE, contents => INDEX_HTML});
-
   Bugzilla::Hook::process(
     'install_filesystem',
     {
@@ -371,7 +355,7 @@ sub FILESYSTEM {
     }
   );
 
-  my %all_files = (%create_files, %index_html, %files);
+  my %all_files = (%create_files, %files);
   my %all_dirs = (%create_dirs, %non_recurse_dirs);
 
   return {
@@ -380,7 +364,6 @@ sub FILESYSTEM {
     all_dirs     => \%all_dirs,
 
     create_files => \%create_files,
-    index_html   => \%index_html,
     all_files    => \%all_files,
   };
 }
@@ -430,16 +413,6 @@ sub update_filesystem {
   }
 
   _create_files(%files);
-  if ($params->{index_html}) {
-    _create_files(%{$fs->{index_html}});
-  }
-  elsif (-e 'index.html') {
-    my $templatedir = bz_locations()->{'templatedir'};
-    print "*** It appears that you still have an old index.html hanging around.\n",
-      "Either the contents of this file should be moved into a template and\n",
-      "placed in the '$templatedir/en/custom' directory, or you should delete\n",
-      "the file.\n";
-  }
 
   # Delete old files that no longer need to exist
 
@@ -851,15 +824,14 @@ filesystem during installation, including creating the data/ directory.
 
 =over
 
-=item C<update_filesystem({ index_html => 0 })>
+=item C<update_filesystem()>
 
 Description: Creates all the directories and files that Bugzilla
              needs to function but doesn't ship with. Also does
              any updates to these files as necessary during an
              upgrade.
 
-Params:      C<index_html> - Whether or not we should create
-               the F<index.html> file.
+Params:      none
 
 Returns:     nothing
 

@@ -1790,20 +1790,18 @@ sub _inject_headers_into_body {
 
         # these aren't real fields, but exist in the headers
         push @fields, ('Comment Created', 'Attachment Created');
-        @fields = sort { length($b) <=> length($a) } @fields;
-        while ($value ne '') {
-          foreach my $field (@fields) {
-            if ($value eq $field) {
-              push @headers, "$name: $field";
-              $value = '';
-              last;
-            }
-            if (substr($value, 0, length($field) + 1) eq $field . ' ') {
-              push @headers, "$name: $field";
-              $value = substr($value, length($field) + 1);
-              last;
-            }
-          }
+
+        # The fields should be in longest to shortest order
+        my @sorted_fields = sort { length($b) <=> length($a) } @fields;
+
+        # A field matches if it ends with a space or the end-of-string.
+        my @regexp_fields = map { '(' . quotemeta($_) . ')(?:\s|$)' } @sorted_fields;
+        my $fields_regexp = join('|', @regexp_fields);
+
+        # //g matches all patterns and the grep ensures we only get matches.
+        my @extracted_fields = grep { defined($_) } $value =~ /$fields_regexp/g;
+        foreach my $field (@extracted_fields) {
+          push @headers, "$name: $field";
         }
       }
       else {
@@ -1845,6 +1843,7 @@ sub _inject_headers_into_body {
   }
   elsif (!$email->content_type || $email->content_type =~ /^text\/(?:html|plain)/)
   {
+
     # text-only email
     _replace_placeholder_in_part($email, $replacement);
   }

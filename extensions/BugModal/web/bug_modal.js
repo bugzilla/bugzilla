@@ -378,7 +378,7 @@ $(function() {
     }
 
     // lightboxes
-    $('.lightbox, .comment-text .lightbox + span:first-of-type a:first-of-type')
+    $('.lightbox, .comment-text .lightbox + span:first-of-type a:first-of-type, .comment-text .lightbox + p span:first-of-type a:first-of-type')
         .click(function(event) {
             if (event.metaKey || event.ctrlKey || event.altKey || event.shiftKey)
                 return;

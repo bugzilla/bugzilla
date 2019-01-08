@@ -37,7 +37,7 @@
   <div id="comment_preview" class="bz_default_hidden bz_comment">
     <div id="comment_preview_loading" class="bz_default_hidden">Generating Preview...</div>
     <div id="comment_preview_error" class="bz_default_hidden"></div>
-    [% IF comment.is_markdown AND Param('use_markdown') %]
+    [% IF ( comment.is_markdown OR NOT comment.id ) AND Param('use_markdown') %]
       [% comment_tag = 'div' %]
     [% ELSE %]
       [% comment_tag = 'pre' %]

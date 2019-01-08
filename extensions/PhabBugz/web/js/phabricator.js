@@ -52,8 +52,8 @@ Phabricator.getBugRevisions = function() {
             var tdReviewStatus       = td.clone();
             var tdReviewer           = td.clone();
             var spanReviewStatusIcon = span.clone();
+            trReview.prop('title', revision.reviews[i].long_status);
             spanReviewStatusIcon.addClass('review-status-icon-' + revision.reviews[i].status);
-            spanReviewStatusIcon.prop('title', revision.reviews[i].long_status);
             tdReviewStatus.append(spanReviewStatusIcon);
             tdReviewer.text(revision.reviews[i].user);
             tdReviewer.addClass('review-reviewer');

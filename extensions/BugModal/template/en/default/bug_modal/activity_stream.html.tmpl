@@ -276,7 +276,7 @@
     [% IF comment.is_about_attachment && comment.attachment.is_image ~%]
       <a href="attachment.cgi?id=[% comment.attachment.id FILTER none %]"
         title="[% comment.attachment.description FILTER html %]"
-        class="lightbox"><img src="extensions/BugModal/web/image.png" width="16" height="16"></a>
+        class="lightbox lightbox-icon [%= "markdown" IF comment_tag == 'div' %]"><img src="extensions/BugModal/web/image.png" width="16" height="16"></a>
     [% END %]
   [% END %]
   [%~ comment.body_full FILTER renderMarkdown(bug, comment) ~%]</[% comment_tag FILTER none %]>

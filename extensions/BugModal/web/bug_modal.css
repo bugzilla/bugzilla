@@ -991,6 +991,10 @@ div.ui-tooltip {
     vertical-align: sub;
 }
 
+a.lightbox-icon.markdown {
+    display: none;
+}
+
 #lb_img {
     background-color: #fff;
     border: 1px solid #666;

@@ -39,7 +39,10 @@ sub DEFAULT_CSP {
     default_src => ['self'],
     script_src =>
       ['self', 'nonce', 'unsafe-inline', 'https://www.google-analytics.com'],
-    frame_src   => ['none',],
+    frame_src   => [
+      # This is for extensions/BMO/web/js/firefox-crash-table.js
+      'https://crash-stop-addon.herokuapp.com',
+    ],
     worker_src  => ['none',],
     img_src     => ['self', 'blob:', 'https://secure.gravatar.com'],
     style_src   => ['self', 'unsafe-inline'],
@@ -98,7 +101,12 @@ sub SHOW_BUG_MODAL_CSP {
       # This is from extensions/OrangeFactor/web/js/orange_factor.js
       'https://treeherder.mozilla.org/api/failurecount/',
     ],
-    frame_src  => ['self',],
+    frame_src  => [
+      'self',
+
+      # This is for extensions/BMO/web/js/firefox-crash-table.js
+      'https://crash-stop-addon.herokuapp.com',
+    ],
     worker_src => ['none',],
   );
   if (use_attachbase() && $bug_id) {

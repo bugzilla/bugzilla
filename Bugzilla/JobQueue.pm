@@ -130,7 +130,11 @@ sub work {
     first_interval => 0,
     interval       => $delay,
     reschedule     => 'drift',
-    on_tick        => sub { $self->work_once }
+    on_tick        => sub {
+      alarm(60 * 5);
+      $self->work_once;
+      alarm(0);
+    }
   );
   DEBUG("working every $delay seconds");
   $loop->add($timer);

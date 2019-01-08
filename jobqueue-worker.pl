@@ -18,7 +18,6 @@ BEGIN {
   my $dir = rel2abs(dirname(__FILE__));
   lib->import($dir, catdir($dir, 'lib'), catdir($dir, qw(local lib perl5)));
   chdir $dir or die "chdir $dir failed: $!";
-
 }
 
 use Bugzilla::JobQueue::Worker;

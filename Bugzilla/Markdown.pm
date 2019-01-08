@@ -44,11 +44,17 @@ sub render_html {
   my $parser = $self->markdown_parser;
   return escape_html($markdown) unless $parser;
 
+  no warnings 'utf8'; # this is needed because our perl is so old.
+  # This is a bit faster since it doesn't engage the regex engine.
+  # Replace < with \x{FDD4}, and remove \x{FDD4}.
+  $markdown =~ tr/<\x{FDD4}/\x{FDD4}/d;
   my @valid_text_parent_tags = ('p', 'li', 'td');
   my @bad_tags               = qw( img );
   my $bugzilla_shorthand     = $self->bugzilla_shorthand;
   my $html                   = decode('UTF-8', $parser->render_html($markdown));
-  my $dom                    = Mojo::DOM->new($html);
+
+  $html =~ s/\x{FDD4}/&lt;/g;
+  my $dom = Mojo::DOM->new($html);
 
   $dom->find(join(', ', @bad_tags))->map('remove');
   $dom->find(join ', ', @valid_text_parent_tags)->map(sub {

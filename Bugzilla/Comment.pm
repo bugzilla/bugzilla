@@ -52,6 +52,7 @@ use constant UPDATE_COLUMNS => qw(
   isprivate
   type
   extra_data
+  is_markdown
 );
 
 use constant DB_TABLE => 'longdescs';
@@ -344,6 +345,7 @@ sub body_full {
 sub set_is_private { $_[0]->set('isprivate',  $_[1]); }
 sub set_type       { $_[0]->set('type',       $_[1]); }
 sub set_extra_data { $_[0]->set('extra_data', $_[1]); }
+sub set_is_markdown { $_[0]->set('is_markdown', $_[1]); }
 
 sub add_tag {
   my ($self, $tag) = @_;

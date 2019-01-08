@@ -108,6 +108,18 @@ sub page_before_template {
   }
 }
 
+sub object_end_of_create {
+  my ($self, $args) = @_;
+  my $class = $args->{class};
+
+  if ($class eq 'Bugzilla::Comment') {
+    my $comment = $args->{object};
+    if ($comment->body =~ /^Review of attachment (\d+)\s*:\n-{65}\n\n/s) {
+      $comment->set_is_markdown(0);
+      $comment->update;
+    }
+  }
+}
 
 sub bug_format_comment {
   my ($self, $args) = @_;

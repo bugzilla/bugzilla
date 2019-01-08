@@ -700,6 +700,8 @@ div.comment-text {
     white-space: normal;
     padding: 0 8px 0 8px;
     font-family: inherit !important;
+    font-size: 14px !important;
+    line-height: 21px !important;
 }
 
 div.comment-text code {

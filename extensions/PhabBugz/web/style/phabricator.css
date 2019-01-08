@@ -71,6 +71,7 @@ span[class^="review-status-icon-"]::before
     display: inline-block;
     font-variant: normal;
     text-rendering: auto;
+    margin: -2px 4px -2px 0;
     font-family: FontAwesome-DifferentialStatus;
 }
 

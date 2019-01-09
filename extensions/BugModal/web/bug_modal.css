@@ -701,7 +701,12 @@ div.comment-text {
     padding: 0 8px 0 8px;
     font-family: inherit !important;
     font-size: 14px !important;
-    line-height: 21px !important;
+}
+
+div.comment-text p,
+div.comment-text li {
+    line-height: 21px;
+    max-width: 70em;
 }
 
 div.comment-text code {

@@ -9,7 +9,7 @@
 window.addEventListener('DOMContentLoaded', () => {
   "use strict";
 
-  const VERSION = "0.3.1";
+  const VERSION = "0.4.0";
 
   async function fetchProductDetails() {
     const url = "https://product-details.mozilla.org/1.0/firefox_versions.json";

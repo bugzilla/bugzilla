@@ -112,18 +112,18 @@
         background-color: #C00;
     }
 
-    #message-container .announcement {
+    #message-container .new_announcement {
         border-bottom: 1px solid rgba(0, 0, 0, 0.2);
         color: #555;
         background-color: lightyellow;
     }
 
-    #message-container .announcement p.warning {
+    #message-container .new_announcement p.warning {
         color: red;
     }
 
     /* Reset legacy style */
-    #message-container .announcement #message {
+    #message-container .new_announcement #message {
         margin: 0;
         border: 0;
         padding: 0;

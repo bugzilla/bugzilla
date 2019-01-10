@@ -23,6 +23,20 @@ use Bugzilla::Constants qw(bz_locations USAGE_MODE_BROWSER);
 our $C;
 my %SEEN;
 
+sub testagent {
+  my ($self) = @_;
+  $self->render(text => "OK Mojolicious");
+}
+
+sub announcement_hide {
+  my ($self) = @_;
+  my $checksum = $self->param('checksum');
+  if ($checksum && $checksum =~ /^[[:xdigit:]]{32}$/) {
+    $self->session->{announcement_checksum} = $checksum;
+  }
+  $self->render(json => {});
+}
+
 sub setup_routes {
   my ($class, $r) = @_;
 
@@ -78,7 +92,6 @@ sub load_one {
   *{$name} = subname($name, $wrapper);
   return 1;
 }
-
 
 sub _ENV {
   my ($c, $script_name) = @_;

@@ -273,10 +273,12 @@
       </div>
     </div>
   [% END %]
-  [% IF Param('announcehtml') %]
-    <div class="announcement">
+  [% announcehtml = Param('announcehtml') %]
+  [% checksum     = md5(announcehtml) %]
+  [% IF announcehtml AND c.session.announcement_checksum != checksum %]
+    <div id="new_announcement" class="new_announcement" data-checksum="[% checksum FILTER html %]">
       <div class="inner">
-        [% Param('announcehtml') FILTER none %]
+        [% announcehtml FILTER none %]
       </div>
     </div>
   [% END %]

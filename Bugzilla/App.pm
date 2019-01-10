@@ -12,6 +12,7 @@ use Mojo::Base 'Mojolicious';
 use CGI::Compile;
 use utf8;
 use Encode;
+use FileHandle;    # this is for compat back to 5.10
 
 use Bugzilla          ();
 use Bugzilla::BugMail ();
@@ -51,6 +52,8 @@ sub startup {
   $self->plugin('Bugzilla::App::Plugin::OAuth2');
 
   push @{ $self->commands->namespaces }, 'Bugzilla::App::Command';
+
+  $self->sessions->cookie_name('bugzilla');
 
   $self->hook(
     before_routes => sub {
@@ -134,12 +137,9 @@ sub setup_routes {
   $r->any('/')->to('CGI#index_cgi');
   $r->any('/bug/<id:num>')->to('CGI#show_bug_cgi');
   $r->any('/<id:num>')->to('CGI#show_bug_cgi');
-  $r->get(
-    '/testagent.cgi' => sub {
-      my $c = shift;
-      $c->render(text => "OK Mojolicious");
-    }
-  );
+  $r->get('/testagent.cgi')->to('CGI#testagent');
+  $r->add_type('hex32' => qr/[[:xdigit:]]{32}/);
+  $r->post('/announcement/hide/<checksum:hex32>')->to('CGI#announcement_hide');
 
   $r->any('/rest')->to('CGI#rest_cgi');
   $r->any('/rest.cgi/*PATH_INFO')->to('CGI#rest_cgi' => {PATH_INFO => ''});

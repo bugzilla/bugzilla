@@ -539,7 +539,11 @@ $Template::Stash::SCALAR_OPS->{lower} = sub {
 our $is_processing = 0;
 
 sub process {
-  my $self = shift;
+  my ($self, $input, $vars, $output) = @_;
+  $vars //= {};
+  if (($ENV{SERVER_SOFTWARE} // '') eq 'Bugzilla::App::CGI') {
+    $vars->{self} = $vars->{c} = $Bugzilla::App::CGI::C;
+  }
 
   # All of this current_langs stuff allows template_inner to correctly
   # determine what-language Template object it should instantiate.
@@ -549,7 +553,7 @@ sub process {
   local $SIG{__DIE__};
   delete $SIG{__DIE__};
   warn "WARNING: CGI::Carp makes templates slow" if $INC{"CGI/Carp.pm"};
-  my $retval = $self->SUPER::process(@_);
+  my $retval = $self->SUPER::process($input, $vars, $output);
   shift @$current_langs;
   return $retval;
 }
@@ -935,6 +939,10 @@ sub create {
 
       json_encode => sub {
         return decode('UTF-8', encode_json($_[0]), Encode::FB_DEFAULT);
+      },
+
+      md5 => sub {
+        return md5_hex($_[0]);
       },
 
       # Function to create date strings

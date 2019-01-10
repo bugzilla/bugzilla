@@ -26,10 +26,8 @@ use Bugzilla::Test::MockLocalconfig (urlbase => 'http://bmo-web.vm');
 use Bugzilla::Test::MockDB;
 
 # This redirects reads and writes from the config file (data/params)
-use Bugzilla::Test::MockParams (
-  phabricator_enabled => 1,
-  announcehtml        => '<div id="announcement">Mojo::Test is awesome</div>',
-);
+use Bugzilla::Test::MockParams (phabricator_enabled => 1,
+  announcehtml => 'Mojo::Test is awesome',);
 
 # Util provides a few functions more making mock data in the DB.
 use Bugzilla::Test::Util qw(create_user issue_api_key);
@@ -61,7 +59,7 @@ $t->get_ok('/bzapi/configuration')->status_is(200)
 
 # for web requests, you use text_like (or text_is) with CSS selectors.
 $t->get_ok('/')->status_is(200)
-  ->text_like('#announcement' => qr/Mojo::Test is awesome/);
+  ->text_like('#new_announcement div' => qr/Mojo::Test is awesome/);
 
 # Chaining is not magical, you can break up longer lines
 # by calling methods on $t, as below.

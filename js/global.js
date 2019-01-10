@@ -305,3 +305,26 @@ window.addEventListener('DOMContentLoaded', focus_main_content, { once: true });
 window.addEventListener('load', detect_blocked_gravatars, { once: true });
 window.addEventListener('load', adjust_scroll_onload, { once: true });
 window.addEventListener('hashchange', adjust_scroll_onload);
+
+window.addEventListener('DOMContentLoaded', () => {
+  const announcement = document.getElementById('new_announcement');
+  if (announcement) {
+    const hide_announcement = () => {
+      const checksum = announcement.dataset.checksum;
+      const url = `${BUGZILLA.config.basepath}announcement/hide/${checksum}`;
+      fetch(url, { method: "POST" }).then(
+        response => announcement.style.display = "none"
+      );
+      localStorage.setItem("announcement_checksum", checksum);
+    }
+    announcement.addEventListener('click', hide_announcement);
+    window.addEventListener('visibilitychange', () => {
+      if (!window.hidden) {
+        const hidden_checksum = localStorage.getItem("announcement_checksum");
+        if (hidden_checksum && hidden_checksum == announcement.dataset.checksum) {
+          announcement.style.display = "none";
+        }
+      }
+    });
+  }
+}, { once: true });

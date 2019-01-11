@@ -91,8 +91,6 @@ use constant FEATURE_FILES => (
     'Bugzilla/API/*/*.pm',    'Bugzilla/API/*/Server.pm',
     'Bugzilla/API/*/Resource/*.pm'
   ],
-  csp           => ['Bugzilla/CGI/ContentSecurityPolicy.pm'],
-  psgi          => ['app.psgi'],
   moving        => ['importxml.pl'],
   auth_ldap     => ['Bugzilla/Auth/Verify/LDAP.pm'],
   auth_radius   => ['Bugzilla/Auth/Verify/RADIUS.pm'],

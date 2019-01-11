@@ -4,9 +4,10 @@
 #
 # This Source Code Form is "Incompatible With Secondary Licenses", as
 # defined by the Mozilla Public License, v. 2.0.
-use 5.10.1;
 use strict;
 use warnings;
+use 5.10.1;
+use lib qw( . lib local/lib/perl5 );
 use autodie;
 
 use Test::More 1.302;

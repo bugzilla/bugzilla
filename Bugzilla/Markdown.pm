@@ -49,7 +49,7 @@ sub render_html {
   # Replace < with \x{FDD4}, and remove \x{FDD4}.
   $markdown =~ tr/\x{FDD4}//d;
   $markdown =~ s{<(?!https?://)}{\x{FDD4}}gs;
-  my @valid_text_parent_tags = ('p', 'li', 'td');
+  my @valid_text_parent_tags = ('h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'p', 'li', 'td');
   my @bad_tags               = qw( img );
   my $bugzilla_shorthand     = $self->bugzilla_shorthand;
   my $html                   = decode('UTF-8', $parser->render_html($markdown));

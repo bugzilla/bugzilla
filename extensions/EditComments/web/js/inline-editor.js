@@ -47,6 +47,9 @@ Bugzilla.InlineCommentEditor = class InlineCommentEditor {
     this.$body = $change_set.querySelector('.comment-text');
 
     this.$edit_button.addEventListener('click', event => this.edit_button_onclick(event));
+
+    // Check if the comment is written in Markdown
+    this.is_markdown = this.$body.matches('[data-ismarkdown="true"]');
   }
 
   /**
@@ -71,7 +74,7 @@ Bugzilla.InlineCommentEditor = class InlineCommentEditor {
   }
 
   /**
-   * Called whenever the Edit button is clicked.
+   * Called whenever the Edit button is clicked. Hide the current comment and insert the inline comment editor instead.
    * @param {MouseEvent} event Click event.
    */
   edit_button_onclick(event) {
@@ -80,37 +83,60 @@ Bugzilla.InlineCommentEditor = class InlineCommentEditor {
     this.toggle_toolbar_buttons(true);
     this.$body.hidden = true;
 
-    // Replace the comment body with a disabled `<textarea>` filled with the text as a placeholder while retrieving the
-    // raw comment text
-    this.$body.insertAdjacentHTML('afterend',
-      `<textarea class="comment-editor-textarea" disabled>${this.$body.textContent}</textarea>`);
-    this.$textarea = this.$body.nextElementSibling;
-    this.$textarea.style.height = `${this.$textarea.scrollHeight}px`;
+    // Determine the preview area's HTML tag name: `<div>` for Markdown comments or `<pre>` for plaintext
+    const preview_tag = this.is_markdown ? 'div' : 'pre';
 
-    // Insert a toolbar that provides the Save and Cancel buttons as well as the Hide This Revision checkbox for admin
-    this.$textarea.insertAdjacentHTML('afterend',
+    // Replace the comment body with a disabled `<textarea>` filled with the text as a placeholder while retrieving the
+    // raw comment text. Also, provide a toolbar with the Save and Cancel buttons as well as the Hide This Revision
+    // checkbox for admin. Allow to preview the edited comment
+    this.$body.insertAdjacentHTML('afterend',
       `
-      <div role="toolbar" class="comment-editor-toolbar" aria-label="${this.str.toolbar}">
-        ${BUGZILLA.user.is_insider && BUGZILLA.user.id !== this.commenter_id ? `
-          <label><input type="checkbox" value="on" checked> ${this.str.hide_revision}</label>` : ''}
-        <button type="button" class="minor" data-action="cancel" title="${this.str.cancel_tooltip} (Esc)"
-                aria-keyshortcuts="Escape">${this.str.cancel}</button>
-        <button type="button" class="major" disabled data-action="save"
-                title="${this.str.save_tooltip} (${this.on_mac ? '&#x2318;Return' : 'Ctrl+Enter'})"
-                aria-keyshortcuts="${this.on_mac ? 'Meta+Enter' : 'Ctrl+Enter'}">${this.str.save}</button>
+      <div role="group" class="comment-editor">
+        <div role="tablist">
+          <button type="button" role="tab" data-action="edit" aria-selected="true"
+                  aria-controls="comment-${this.comment_id}-tabpanel-edit">${this.str.edit}</button>
+          <button type="button" disabled role="tab" data-action="preview" aria-selected="false"
+                  aria-controls="comment-${this.comment_id}-tabpanel-preview">${this.str.preview}</button>
+        </div>
+        <div role="tabpanel" id="comment-${this.comment_id}-tabpanel-edit">
+          <textarea disabled>${this.$body.textContent}</textarea>
+        </div>
+        <div role="tabpanel" id="comment-${this.comment_id}-tabpanel-preview" hidden>
+          <${preview_tag} tabindex="-1" class="comment-text"></${preview_tag}>
+        </div>
+        <div role="toolbar" class="bottom-toolbar" aria-label="${this.str.toolbar}">
+          ${BUGZILLA.user.is_insider && BUGZILLA.user.id !== this.commenter_id ? `<label>
+            <input type="checkbox" value="on" checked data-action="hide"> ${this.str.hide_revision}</label>` : ''}
+          <button type="button" class="minor" data-action="cancel" title="${this.str.cancel_tooltip} (Esc)"
+                  aria-keyshortcuts="Escape">${this.str.cancel}</button>
+          <button type="button" class="major" disabled data-action="save"
+                  title="${this.str.save_tooltip} (${this.on_mac ? '&#x2318;Return' : 'Ctrl+Enter'})"
+                  aria-keyshortcuts="${this.on_mac ? 'Meta+Enter' : 'Ctrl+Enter'}">${this.str.save}</button>
+        </div>
       </div>
       `
     );
-    this.$toolbar = this.$textarea.nextElementSibling;
 
-    this.$save_button = this.$toolbar.querySelector('button[data-action="save"]');
-    this.$cancel_button = this.$toolbar.querySelector('button[data-action="cancel"]');
-    this.$is_hidden_checkbox = this.$toolbar.querySelector('input[type="checkbox"]');
+    this.$container = this.$body.nextElementSibling;
+    this.$edit_tab = this.$container.querySelector('[data-action="edit"]');
+    this.$edit_tabpanel = this.$container.querySelector('[id$="-tabpanel-edit"]');
+    this.$preview_tab = this.$container.querySelector('[data-action="preview"]');
+    this.$preview_tabpanel = this.$container.querySelector('[id$="-tabpanel-preview"]');
+    this.$textarea = this.$container.querySelector('textarea');
+    this.$preview = this.$container.querySelector('.comment-text');
+    this.$save_button = this.$container.querySelector('[data-action="save"]');
+    this.$cancel_button = this.$container.querySelector('[data-action="cancel"]');
+    this.$is_hidden_checkbox = this.$container.querySelector('[data-action="hide"]');
 
+    this.$edit_tab.addEventListener('click', () => this.edit());
+    this.$preview_tab.addEventListener('click', () => this.preview());
     this.$textarea.addEventListener('input', event => this.textarea_oninput(event));
     this.$textarea.addEventListener('keydown', event => this.textarea_onkeydown(event));
     this.$save_button.addEventListener('click', () => this.save());
     this.$cancel_button.addEventListener('click', () => this.finish());
+
+    // Adjust the height of `<textarea>`
+    this.$textarea.style.height = `${this.$textarea.scrollHeight}px`;
 
     // Retrieve the raw comment text
     bugzilla_ajax({
@@ -124,7 +150,8 @@ Bugzilla.InlineCommentEditor = class InlineCommentEditor {
   }
 
   /**
-   * Called whenever the comment `<textarea>` is edited. Enable or disable the Save button depending on the content.
+   * Called whenever the comment `<textarea>` is edited. Enable or disable the Preview tab and Save button depending on
+   * the content.
    * @param {KeyboardEvent} event `input` event.
    */
   textarea_oninput(event) {
@@ -132,7 +159,7 @@ Bugzilla.InlineCommentEditor = class InlineCommentEditor {
       return;
     }
 
-    this.$save_button.disabled = !this.edited || !!this.$textarea.value.match(/^\s*$/);
+    this.$preview_tab.disabled = this.$save_button.disabled = !this.edited || !!this.$textarea.value.match(/^\s*$/);
   }
 
   /**
@@ -155,6 +182,58 @@ Bugzilla.InlineCommentEditor = class InlineCommentEditor {
     // Escape = Cancel
     if (key === 'Escape' && !accelKey && !altKey && !shiftKey) {
       this.finish();
+    }
+  }
+
+  /**
+   * Called whenever the Edit tab is clicked. Show and focus the comment `<textarea>` for further editing.
+   */
+  edit() {
+    this.$edit_tab.setAttribute('aria-selected', 'true');
+    this.$edit_tabpanel.hidden = false;
+    this.$preview_tab.setAttribute('aria-selected', 'false');
+    this.$preview_tabpanel.hidden = true;
+    this.$textarea.focus();
+  }
+
+  /**
+   * Called whenever the Preview tab is clicked. Fetch and display the rendered comment.
+   */
+  preview() {
+    this.$preview.style.height = `${this.$textarea.scrollHeight}px`;
+    this.$edit_tab.setAttribute('aria-selected', 'false');
+    this.$edit_tabpanel.hidden = true;
+    this.$preview_tab.setAttribute('aria-selected', 'true');
+    this.$preview_tabpanel.hidden = false;
+    this.$preview.focus();
+    this.$preview.setAttribute('aria-busy', 'true');
+
+    this.render_message(this.str.loading);
+
+    bugzilla_ajax({
+      url: `${BUGZILLA.config.basepath}rest/bug/comment/render`,
+      type: 'POST',
+      hideError: true,
+      data: { id: BUGZILLA.bug_id, text: this.$textarea.value },
+    }, data => {
+      this.$preview.innerHTML = data.html;
+      this.$preview.style.removeProperty('height');
+      this.$preview.setAttribute('aria-busy', 'false');
+    }, () => {
+      this.render_message(this.str.preview_error);
+      this.$preview.setAttribute('aria-busy', 'false');
+    });
+  }
+
+  /**
+   * Show a single line message on the preview area depending on the Markdown support status.
+   * @param {String} str Message to display.
+   */
+  render_message(str) {
+    if (this.is_markdown) {
+      this.$preview.innerHTML = `<p>${str}</p>`;
+    } else {
+      this.$preview.textContent = str;
     }
   }
 
@@ -192,8 +271,7 @@ Bugzilla.InlineCommentEditor = class InlineCommentEditor {
     this.toggle_toolbar_buttons(false);
     this.$edit_button.focus();
     this.$body.hidden = false;
-    this.$textarea.remove();
-    this.$toolbar.remove();
+    this.$container.remove();
   }
 
   /**

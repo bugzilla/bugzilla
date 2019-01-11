@@ -14,26 +14,82 @@
   content: '\E254';
 }
 
-.comment-editor-toolbar {
-  padding: 8px;
+.comment-editor {
   background-color: #EEE;
-  text-align: right;
 }
 
-.comment-editor-toolbar label {
-  margin: 0 8px;
+.comment-editor [role="tablist"] {
+  display: flex;
+  padding: 4px 8px 0;
 }
 
-.comment-editor-textarea {
-  border: 0;
+.comment-editor [role="tab"] {
+  outline: none;
+  margin: 0;
+  border-width: 1px 1px 0 1px;
+  border-style: solid;
+  border-color: #C0C0C0;
   border-radius: 0;
+  padding: 4px 8px;
+  color: #333;
+  background-color: transparent;
+  background-image: none;
+  box-shadow: none;
+  text-shadow: none;
+  font-weight: normal;
+}
+
+.comment-editor [role="tab"]:first-child {
+  border-top-left-radius: 4px;
+}
+
+.comment-editor [role="tab"]:not(:first-child) {
+  border-left-width: 0;
+}
+
+.comment-editor [role="tab"]:last-child {
+  border-top-right-radius: 4px;
+}
+
+.comment-editor [role="tab"][aria-selected="true"] {
+  background-color: #FFF;
+}
+
+.comment-editor [role="tab"][disabled] {
+  color: #999;
+}
+
+.comment-editor [role="tabpanel"] {
+  padding: 0 8px;
+}
+
+.comment-editor textarea {
+  margin: 0;
+  border: 1px solid #CCC;
+  border-radius: 0 4px 4px 4px;
   padding: 8px;
   width: 100%;
   min-height: 5em;
+  box-shadow: none;
   font: 13px/1.2 "Droid Sans Mono", Menlo, Monaco, "Courier New", Courier, monospace;
   resize: vertical;
 }
 
-.comment-editor-textarea:disabled {
+.comment-editor textarea:disabled {
   background-color: #F3F3F3;
+}
+
+.comment-editor .comment-text {
+  margin: 0;
+  outline: none;
+  border: 1px solid #CCC;
+}
+
+.comment-editor .bottom-toolbar {
+  padding: 8px;
+  text-align: right;
+}
+
+.comment-editor .bottom-toolbar label {
+  margin: 0 8px;
 }

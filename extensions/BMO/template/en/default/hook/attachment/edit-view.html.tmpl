@@ -21,6 +21,7 @@
 [% attachment_data = attachment.fetch_github_pr_diff %]
 
 <div>
+  <input type="hidden" name="markdown_off" value="1">
   [% INCLUDE global/textarea.html.tmpl
     id       = 'editFrame'
     name     = 'comment'

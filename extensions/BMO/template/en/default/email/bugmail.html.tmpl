@@ -48,11 +48,13 @@
             </b>
           [% END %]
           [% IF comment.is_markdown AND Param('use_markdown') %]
+            [% should_wrap = 0 %]
             [% comment_tag = 'div' %]
           [% ELSE %]
+            [% should_wrap = 1 %]
             [% comment_tag = 'pre' %]
           [% END %]
-          <[% comment_tag FILTER none %] class="comment" [% IF comment_tag == 'pre' %] style="font-size: initial" [% END %]>[% comment.body_full({ wrap => 1 }) FILTER renderMarkdown(bug, comment) %]</[% comment_tag FILTER none %]>
+          <[% comment_tag FILTER none %] class="comment" [% IF comment_tag == 'pre' %] style="font-size: initial" [% END %]>[% comment.body_full({ wrap => should_wrap }) FILTER renderMarkdown(bug, comment) %]</[% comment_tag FILTER none %]>
         </div>
       [% END %]
     </div>

@@ -51,6 +51,15 @@ sub render_html {
 
   if ($markdown =~ /^\s*$MARKDOWN_OFF\n/s) {
     my $text = $self->bugzilla_shorthand->( trim($markdown) );
+    my $dom = Mojo::DOM->new($text);
+    $dom->find('*')->each(sub {
+      my ($e) = @_;
+      my $attr = $e->attr;
+      foreach my $key (keys %$attr) {
+        $attr->{$key} =~ s/\s+/ /gs;
+      }
+    });
+    $text = $dom->to_string;
     my @p = split(/\n{2,}/, $text);
     my $html = join("\n", map { s/\n/<br>\n/gs; "<p>$_</p>\n" } @p );
     return $html;

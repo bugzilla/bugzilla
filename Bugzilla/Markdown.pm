@@ -11,6 +11,7 @@ use Moo;
 
 use Encode;
 use Mojo::DOM;
+use Mojo::Util qw(trim);
 use HTML::Escape qw(escape_html);
 use List::MoreUtils qw(any);
 
@@ -39,10 +40,21 @@ sub _build_markdown_parser {
   }
 }
 
+my $MARKDOWN_OFF = quotemeta '#[markdown(off)]';
 sub render_html {
   my ($self, $markdown, $bug, $comment, $user) = @_;
   my $parser = $self->markdown_parser;
   return escape_html($markdown) unless $parser;
+
+  # This makes sure we never handle > foo text in the shortcuts code.
+  local $Bugzilla::Template::COLOR_QUOTES = 0;
+
+  if ($markdown =~ /^\s*$MARKDOWN_OFF\n/s) {
+    my $text = $self->bugzilla_shorthand->( trim($markdown) );
+    my @p = split(/\n{2,}/, $text);
+    my $html = join("\n", map { s/\n/<br>\n/gs; "<p>$_</p>\n" } @p );
+    return $html;
+  }
 
   no warnings 'utf8'; # this is needed because our perl is so old.
   # This is a bit faster since it doesn't engage the regex engine.

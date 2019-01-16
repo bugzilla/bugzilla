@@ -50,6 +50,7 @@ use constant FORMAT_DOUBLE => '%19s %-55s';
 use constant FORMAT_2_SIZE => [19, 55];
 
 our %SHARED_PROVIDERS;
+our $COLOR_QUOTES = 1;
 
 # Pseudo-constant.
 sub SAFE_URL_REGEXP {
@@ -216,9 +217,11 @@ sub quoteUrls {
 
   $text = html_quote($text);
 
-  # Color quoted text
-  $text =~ s~^(&gt;.+)$~<span class="quote">$1</span >~mg;
-  $text =~ s~</span >\n<span class="quote">~\n~g;
+  if ($COLOR_QUOTES) {
+    # Color quoted text
+    $text =~ s~^(&gt;.+)$~<span class="quote">$1</span >~mg;
+    $text =~ s~</span >\n<span class="quote">~\n~g;
+  }
 
   # mailto:
   # Use |<nothing> so that $1 is defined regardless

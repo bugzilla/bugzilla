@@ -144,9 +144,9 @@ window.addEventListener('DOMContentLoaded', () => {
       const hgrevs = [];
       let isFirst = false;
       let currentCommentId = "";
-      const aSelector = oldWay ? ".bz_comment_text > a" : ".comment-text > a";
+      const aSelector = oldWay ? ".bz_comment_text > a" : ".comment-text > a, .comment-text > p:first-child > a";
       document.querySelectorAll(aSelector).forEach(a => {
-        const parentId = a.parentNode.attributes.id;
+        const parentId = a.closest(oldWay ? '.bz_comment_text' : '.comment-text').id;
         let hasBugherderKw = false;
         let hasUpliftKw = false;
         if (parentId !== currentCommentId) {

@@ -157,7 +157,7 @@ window.addEventListener('DOMContentLoaded', () => {
           let commentTagSelector = "";
           let x = "";
           if (oldWay) {
-            const parts = parentId.value.split("_");
+            const parts = parentId.split("_");
             if (parts.length == 3) {
               const num = parts[2];
               const ctag = "comment_tag_" + num;
@@ -165,7 +165,7 @@ window.addEventListener('DOMContentLoaded', () => {
               x = "x" + String.fromCharCode(160); // &nbsp;
             }
           } else {
-            const parts = parentId.value.split("-");
+            const parts = parentId.split("-");
             if (parts.length == 2) {
               const num = parts[1];
               const ctag = "ctag-" + num;

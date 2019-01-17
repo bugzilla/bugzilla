@@ -184,9 +184,8 @@ sub feed_query {
     }
     else {
       my $phab_user = Bugzilla::User->new({name => PHAB_AUTOMATION_USER});
-      $author
-        = Bugzilla::Extension::PhabBugz::User->new_from_query({ids => [$phab_user->id]
-        });
+      $author = Bugzilla::Extension::PhabBugz::User->new_from_query(
+        {ids => [$phab_user->id]});
     }
 
     # Load the revision from Phabricator
@@ -370,7 +369,6 @@ sub process_revision_change {
     }
   }
 
-
   my $log_message = sprintf(
     "REVISION CHANGE FOUND: D%d: %s | bug: %d | %s | %s",
     $revision->id,  $revision->title, $revision->bug_id,
@@ -489,7 +487,24 @@ sub process_revision_change {
         . $attachment->id
         . " for bug "
         . $attachment->bug_id);
+    my $moved_comment
+      = "Revision D"
+      . $revision->id
+      . " was moved to bug "
+      . $bug->id
+      . ". Setting attachment "
+      . $attachment->id
+      . " to obsolete.";
     $attachment->set_is_obsolete(1);
+    $attachment->bug->add_comment(
+      $moved_comment,
+      {
+        type        => CMT_ATTACHMENT_UPDATED,
+        extra_data  => $attachment->id,
+        is_markdown => (Bugzilla->params->{use_markdown} ? 1 : 0)
+      }
+    );
+    $attachment->bug->update($timestamp);
     $attachment->update($timestamp);
   }
 

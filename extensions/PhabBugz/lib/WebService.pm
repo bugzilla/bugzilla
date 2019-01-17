@@ -165,6 +165,10 @@ sub bug_revisions {
 
   my @revisions;
   foreach my $revision (@{$response->{result}{data}}) {
+
+    # Skip if revision bug id was moved to a different bug
+    next if $revision->{fields}->{'bugzilla.bug-id'} ne $bug->id;
+
     my $revision_obj  = Bugzilla::Extension::PhabBugz::Revision->new($revision);
     my $revision_data = {
       id          => 'D' . $revision_obj->id,

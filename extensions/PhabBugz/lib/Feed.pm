@@ -192,44 +192,8 @@ sub feed_query {
     # Load the revision from Phabricator
     my $revision = Bugzilla::Extension::PhabBugz::Revision->new_from_query(
       {phids => [$object_phid]});
-    $self->process_revision_change($revision, $author, $story_text, 0);
+    $self->process_revision_change($revision, $author, $story_text);
     $self->save_last_id($story_id, 'feed');
-  }
-
-  # Process any build targets as well.
-  my $dbh = Bugzilla->dbh;
-
-  INFO("Checking for revisions with pending build plan");
-  my $build_targets
-    = $dbh->selectall_arrayref(
-    "SELECT name, value FROM phabbugz WHERE name LIKE 'build_target_%'",
-    {Slice => {}});
-
-  my $delete_build_target
-    = $dbh->prepare("DELETE FROM phabbugz WHERE name = ? AND VALUE = ?");
-
-  foreach my $target (@$build_targets) {
-    my ($revision_id) = ($target->{name} =~ /^build_target_(\d+)$/);
-    my $build_target = $target->{value};
-
-    next unless $revision_id && $build_target;
-
-    INFO("Processing revision $revision_id with build target $build_target");
-
-    my $revision
-      = Bugzilla::Extension::PhabBugz::Revision->new_from_query({
-      ids => [int($revision_id)]
-      });
-
-    $self->process_revision_change($revision, $revision->author,
-      " created D" . $revision->id, 1);
-
-    # Set the build target to a passing status to
-    # allow the revision to exit draft state
-    request('harbormaster.sendmessage',
-      {buildTargetPHID => $build_target, type => 'pass'});
-
-    $delete_build_target->execute($target->{name}, $target->{value});
   }
 
   if (Bugzilla->datadog) {
@@ -381,8 +345,8 @@ sub group_query {
 }
 
 sub process_revision_change {
-  state $check = compile($Invocant, Revision, LinkedPhabUser, Str, Bool);
-  my ($self, $revision, $changer, $story_text, $from_build_plan) = $check->(@_);
+  state $check = compile($Invocant, Revision, LinkedPhabUser, Str);
+  my ($self, $revision, $changer, $story_text) = $check->(@_);
   my $is_new = $story_text =~ /\s+created\s+D\d+/;
 
   # NO BUG ID
@@ -392,7 +356,7 @@ sub process_revision_change {
       # If new revision and bug id was omitted, make revision public
       INFO("No bug associated with new revision. Marking public.");
       $revision->make_public();
-      if ($revision->status eq 'draft' && !$from_build_plan) {
+      if ($revision->status eq 'draft') {
         INFO("Moving from draft to needs-review");
         $revision->set_status('request-review');
       }
@@ -530,7 +494,7 @@ sub process_revision_change {
   }
 
   # Set status to request-review if revision is new and in draft state
-  if ($is_new && $revision->status eq 'draft' && !$from_build_plan) {
+  if ($is_new && $revision->status eq 'draft') {
     INFO("Moving from draft to needs-review");
     $revision->set_status('request-review');
   }

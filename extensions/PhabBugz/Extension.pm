@@ -30,12 +30,14 @@ sub template_before_process {
 
   if (my $bug = exists $vars->{'bugs'} ? $vars->{'bugs'}[0] : $vars->{'bug'}) {
     my $has_revisions = 0;
+    my $active_revision_count = 0;
     foreach my $attachment (@{$bug->attachments}) {
       next if $attachment->contenttype ne PHAB_CONTENT_TYPE;
+      $active_revision_count++ if !$attachment->isobsolete;
       $has_revisions = 1;
-      last;
     }
     $vars->{phabricator_revisions} = $has_revisions;
+    $vars->{phabricator_active_revision_count} = $active_revision_count;
   }
 }
 

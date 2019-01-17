@@ -8,8 +8,16 @@
 
 [% RETURN UNLESS phabricator_revisions %]
 
+[%
+  phab_subtitle = [];
+  IF phabricator_active_revision_count;
+    phab_subtitle.push(phabricator_active_revision_count _ " active revision" _ (phabricator_active_revision_count == 1 ? "" : "s"));
+  END;
+%]
+
 [% WRAPPER bug_modal/module.html.tmpl
     title = "Phabricator Revisions"
+    subtitle = phab_subtitle
     collapsed = 0
 %]
   [% INCLUDE phabricator/table.html.tmpl %]

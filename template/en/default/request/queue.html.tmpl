@@ -230,7 +230,7 @@ to some group are shown by default.
   [% buglist = {} %]
 
   <h3>[% column_headers.$group_field %]:
-    [%+ (request.$group_field || "None") FILTER email FILTER html %]</h3>
+    [%+ (request.$group_field.email || request.$group_field || "None") FILTER email FILTER html %]</h3>
   <table class="requests" cellspacing="0" cellpadding="4" border="1">
     <tr>
       [% FOREACH column = display_columns %]

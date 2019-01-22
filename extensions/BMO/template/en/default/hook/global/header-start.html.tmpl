@@ -14,6 +14,10 @@
   [% javascript_urls.push('extensions/BMO/web/js/sorttable.js') %]
 [% END %]
 
+[% IF template.name == 'search/search-advanced.html.tmpl' %]
+  [% javascript_urls.push('extensions/BMO/web/js/advanced-search.js') %]
+[% END %]
+
 [% IF !bodyclasses %]
   [% bodyclasses = [] %]
 [% END %]

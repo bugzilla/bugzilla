@@ -43,7 +43,19 @@ sub _tracking_flags {
 }
 
 sub _tracking_flag_names {
-  return Bugzilla::Extension::TrackingFlags::Flag->get_all_names();
+  my ($class)   = @_;
+  my $memcached = $class->memcached;
+  my $cache     = $class->request_cache;
+  my $tf_names  = $cache->{tracking_flags_names};
+
+  return @$tf_names if $tf_names;
+  $tf_names //= $memcached->get_config({key => 'tracking_flag_names'});
+  $tf_names //= Bugzilla->dbh->selectcol_arrayref(
+    "SELECT name FROM tracking_flags ORDER BY name");
+
+  $cache->{tracking_flags_names} = $tf_names;
+
+  return @$tf_names;
 }
 
 sub page_before_template {

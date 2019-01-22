@@ -769,7 +769,8 @@ sub elastic {
 }
 
 sub check_rate_limit {
-  my ($class, $name, $ip) = @_;
+  my ($class, $name, $ip, $throw_error) = @_;
+  $throw_error //= sub { ThrowUserError("rate_limit") };
   my $params = Bugzilla->params;
   if ($params->{rate_limit_active}) {
     my $rules = decode_json($params->{rate_limit_rules});
@@ -789,7 +790,7 @@ sub check_rate_limit {
         "[rate_limit] action=$action, ip=$ip, limit=$limit, name=$name");
       if ($action eq 'block') {
         $Bugzilla::App::CGI::C->block_ip($ip);
-        ThrowUserError("rate_limit");
+        $throw_error->();
       }
     }
   }

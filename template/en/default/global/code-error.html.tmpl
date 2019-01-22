@@ -545,6 +545,7 @@
 
 <p class="throw_error">
   [% error_message FILTER none %]
+  [% IF rate_limit_error %] (rate limit exceeded) [% END %]
 </p>
 
 [% IF variables %]

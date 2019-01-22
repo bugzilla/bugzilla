@@ -58,6 +58,7 @@ sub default_rate_limit_rules {
     github          => [10, 60],
     get_attachments => [75, 60],
     get_comments    => [75, 60],
+    webpage_errors  => [75, 60],
   });
 }
 
@@ -75,6 +76,7 @@ sub check_rate_limit_rules {
   my @required = qw(
     show_bug github get_bug
     get_attachments get_comments
+    webpage_errors
   );
   foreach my $required (@required) {
     return "missing $required" unless exists $val->{$required};
@@ -89,6 +91,7 @@ sub update_rate_limit_rules {
   $val->{github}          = [10, 60];
   $val->{get_attachments} = [75, 60];
   $val->{get_comments}    = [75, 60];
+  $val->{webpage_errors}  = [75, 60];
   return encode_json($val);
 }
 

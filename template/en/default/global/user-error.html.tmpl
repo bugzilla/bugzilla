@@ -2012,6 +2012,7 @@
   <tr>
     <td id="error_msg" class="throw_error">
       [% error_message FILTER none %]
+      [% IF rate_limit_error %] (rate limit exceeded) [% END %]
     </td>
   </tr>
 </table>

@@ -86,6 +86,7 @@ sub _throw_error {
   }
 
   if (Bugzilla->error_mode == ERROR_MODE_WEBPAGE) {
+    Bugzilla->check_rate_limit("webpage_errors", remote_ip(), sub { $vars->{rate_limit_error} = 1 });
     my $cgi = Bugzilla->cgi;
     $cgi->close_standby_message('text/html', 'inline', 'error', 'html');
     $template->process($name, $vars) || ThrowTemplateError($template->error());

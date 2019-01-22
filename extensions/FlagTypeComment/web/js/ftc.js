@@ -169,9 +169,14 @@ Bugzilla.FlagTypeComment = class FlagTypeComment {
    * @returns {Boolean} Always `true` to allow submitting the form.
    */
   form_onsubmit() {
+    if (this.inserted_fieldsets.length) {
+      // Enable Markdown
+      this.$comment.form.querySelector('[name="markdown_off"]').remove();
+    }
+
     for (const $fieldset of this.inserted_fieldsets) {
       const text = [
-        `[${$fieldset.querySelector('h3').innerText}]`,
+        `## ${$fieldset.querySelector('h3').innerText}`,
         ...[...$fieldset.querySelectorAll('tr')].map($tr => {
           const checkboxes = [...$tr.querySelectorAll('input[type="checkbox"]:checked')];
           const $radio = $tr.querySelector('input[type="radio"]:checked');
@@ -203,7 +208,7 @@ Bugzilla.FlagTypeComment = class FlagTypeComment {
             }
           }
 
-          return `${label}: ${value}`;
+          return `### ${label}\n\n${value}`;
         }),
       ].join('\n\n');
 

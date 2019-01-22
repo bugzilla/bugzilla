@@ -23,6 +23,8 @@ use Bugzilla::Extension::TrackingFlags::Flag::Bug;
 use Bugzilla::Extension::TrackingFlags::Flag::Value;
 use Bugzilla::Extension::TrackingFlags::Flag::Visibility;
 
+our $SKIP_PRELOAD = 0;
+
 ###############################
 ####    Initialization     ####
 ###############################
@@ -210,7 +212,7 @@ sub match {
   my $is_active_filter = delete $params->{is_active};
 
   my $flags = $class->SUPER::match($params);
-  preload_all_the_things($flags, {bug_id => $bug_id});
+  preload_all_the_things($flags, {bug_id => $bug_id}) unless $SKIP_PRELOAD;
 
   if ($is_active_filter) {
     $flags = [grep { $_->is_active || exists $_->{bug_flag} } @$flags];
@@ -223,7 +225,7 @@ sub get_all {
   my $cache = Bugzilla->request_cache;
   if (!exists $cache->{'tracking_flags'}) {
     my @tracking_flags = $self->SUPER::get_all(@_);
-    preload_all_the_things(\@tracking_flags);
+    preload_all_the_things(\@tracking_flags) unless $SKIP_PRELOAD;
     my %tracking_flags_hash = map { $_->flag_id => $_ } @tracking_flags;
     $cache->{'tracking_flags'} = \%tracking_flags_hash;
   }

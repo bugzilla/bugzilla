@@ -55,7 +55,7 @@ sub DATE_FIELDS {
   };
 
   # Add date related custom fields
-  foreach my $field (Bugzilla->active_custom_fields) {
+  foreach my $field (Bugzilla->active_custom_fields({skip_extensions => 1})) {
     next
       unless ($field->type == FIELD_TYPE_DATETIME
       || $field->type == FIELD_TYPE_DATE);
@@ -536,6 +536,7 @@ sub search {
   my $user = Bugzilla->user;
   my $dbh  = Bugzilla->dbh;
 
+  local $Bugzilla::Extension::TrackingFlags::Flag::SKIP_PRELOAD = 1;
   Bugzilla->switch_to_shadow_db();
 
   my $match_params = dclone($params);

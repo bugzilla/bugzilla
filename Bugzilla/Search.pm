@@ -352,7 +352,7 @@ sub SPECIAL_PARSING {
     # BMO - add ability to use pronoun for triage owners
     triage_owner => \&_triage_owner_pronoun,
   };
-  foreach my $field (Bugzilla->active_custom_fields) {
+  foreach my $field (Bugzilla->active_custom_fields({skip_extensions => 1})) {
     if ($field->type == FIELD_TYPE_DATETIME) {
       $map->{$field->name} = \&_datetime_translate;
     }

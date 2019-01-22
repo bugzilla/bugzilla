@@ -267,7 +267,7 @@
     [% comment_tag = 'pre' %]
   [% END %]
 
-  <[% comment_tag FILTER none %] class="comment-text [%= "bz_private" IF comment.is_private %]"
+  <[% comment_tag FILTER none %] class="comment-text [%= "markdown-body" IF comment.is_markdown %] [%= "bz_private" IF comment.is_private %]"
                      id="ct-[% comment.count FILTER none %]"
                      data-comment-id="[% comment.id FILTER none %]"
                      [% IF comment.is_markdown +%] data-ismarkdown="true" [% END ~%]

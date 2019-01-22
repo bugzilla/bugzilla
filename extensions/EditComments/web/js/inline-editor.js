@@ -102,7 +102,7 @@ Bugzilla.InlineCommentEditor = class InlineCommentEditor {
           <textarea disabled>${this.$body.textContent}</textarea>
         </div>
         <div role="tabpanel" id="comment-${this.comment_id}-tabpanel-preview" hidden>
-          <${preview_tag} tabindex="-1" class="comment-text"></${preview_tag}>
+          <${preview_tag} tabindex="-1" class="comment-text ${this.is_markdown ? 'markdown-body' : ''}"></${preview_tag}>
         </div>
         <div role="toolbar" class="bottom-toolbar" aria-label="${this.str.toolbar}">
           ${BUGZILLA.user.is_insider && BUGZILLA.user.id !== this.commenter_id ? `<label>

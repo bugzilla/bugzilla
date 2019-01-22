@@ -609,10 +609,6 @@ h3.change-name {
     border-top: 1px solid #ddd;
 }
 
-body.platform-Win32 .comment-text, body.platform-Win64 .comment-text {
-    font-family: "Fira Mono", monospace;
-}
-
 .comment-text span.quote, .comment-text span.quote_wrapped {
     background: #eee !important;
     color: #444 !important;

@@ -7,9 +7,7 @@
   #%]
 
 [%
-  RETURN UNLESS template.name == 'bug/show-modal.html.tmpl'
-    || template.name == 'bug/create/created.html.tmpl'
-    || template.name == 'bug/process/results.html.tmpl';
+  RETURN UNLESS bug.defined;
   RETURN UNLESS user.is_insider
     || Param('edit_comments_group') && user.in_group(Param('edit_comments_group'));
 

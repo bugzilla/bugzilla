@@ -570,14 +570,14 @@ div#docslinks {
 }
 
 .bz_obsolete {
-    text-decoration: line-through;
+    text-decoration: line-through !important;
 }
 .bz_inactive {
-    text-decoration: line-through;
+    text-decoration: line-through !important;
 }
 .bz_closed,
 .bz_CLOSED td {
-    text-decoration: line-through;
+    text-decoration: line-through !important;
 }
 .bz_private {
     color: darkred;

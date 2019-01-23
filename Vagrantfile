@@ -40,7 +40,7 @@ Dir.glob(".vagrant/machines/*/*/synced_folders").each do |filename|
       synced_folder[key] = RSYNC_ARGS
     end
     if dirty
-      say "Updating #{filename} because it has old rsync args"
+      puts "Updating #{filename} because it has old rsync args"
       IO.write(filename + ".new", JSON.unparse(synced_folders))
     end
   end

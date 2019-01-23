@@ -17,7 +17,6 @@ VENDOR_BUNDLE_URL = ENV.fetch "BMO_BUNDLE_URL",
 RSYNC_ARGS = [
   '--verbose',
   '--archive',
-  '--delete',
   '-z',
   '--copy-links',
   '--exclude=local/',
@@ -27,6 +26,26 @@ RSYNC_ARGS = [
   '--exclude=localconfig',
   '--include=.git/'
 ]
+
+# This is a little weird, but we need to update
+require 'json'
+
+Dir.glob(".vagrant/machines/*/*/synced_folders").each do |filename|
+  synced_folders = JSON.parse(IO.read(filename))
+  synced_folder = synced_folders["rsync"]["/vagrant"]
+  dirty = false
+  %w( rsync__args args ).each do |key|
+    if RSYNC_ARGS != synced_folder[key]
+      dirty = true
+      synced_folder[key] = RSYNC_ARGS
+    end
+    if dirty
+      say "Updating #{filename} because it has old rsync args"
+      IO.write(filename + ".new", JSON.unparse(synced_folders))
+    end
+  end
+end
+
 
 # All Vagrant configuration is done below. The '2' in Vagrant.configure
 # configures the configuration version (we support older styles for

@@ -18,6 +18,9 @@
 - name: copy re.pl
   copy: src=re.pl dest=/usr/local/bin/re.pl mode=0755
 
+- name: copy start_morbo
+  copy: src=start_morbo dest=/usr/local/bin/start_morbo mode=0755
+
 - name: copy use-nytprof
   copy: src=use-nytprof dest=/usr/local/bin/use-nytprof mode=0755
 

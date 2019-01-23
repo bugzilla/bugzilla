@@ -1,0 +1,10 @@
+#!/usr/bin/env perl
+
+$ENV{PERL5LIB}    = '/vagrant/local/lib/perl5';
+$ENV{PATH}        = "/vagrant/local/bin:$ENV{PATH}";
+$ENV{MOJO_LISTEN} = 'http://*:80';
+
+my @files = ('Bugzilla.pm', 'Bugzilla', glob("*.cgi"), 'extensions', 'template');
+my @watch=  map { ('-w' => $_) } (@files);
+
+system morbo => @watch, '-v', 'bugzilla.pl';

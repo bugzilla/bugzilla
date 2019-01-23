@@ -18,10 +18,10 @@
     group: root
     mode: 0755
 
-- name: enable hypnotoad
-  service: name=hypnotoad enabled=yes
+- name: disable hypnotoad
+  service: name=hypnotoad enabled=no
   when: LAZY == 0
 
-- name: restart hypnotoad
-  service: name=hypnotoad state=restarted
+- name: stop hypnotoad
+  service: name=hypnotoad state=stopped
 

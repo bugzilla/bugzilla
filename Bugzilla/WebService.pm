@@ -14,6 +14,8 @@ use strict;
 use warnings;
 
 use Bugzilla::WebService::Server;
+use Bugzilla::WebService::Wants;
+use PerlX::Maybe qw(maybe);
 
 # Used by the JSON-RPC server to convert incoming date fields apprpriately.
 use constant DATE_FIELDS => {};
@@ -35,6 +37,18 @@ use constant PUBLIC_METHODS => ();
 sub login_exempt {
   my ($class, $method) = @_;
   return $class->LOGIN_EXEMPT->{$method};
+}
+
+sub wants_object {
+  my ($self) = @_;
+  return $self->{__wants_object} if $self->{__wants_object};
+  my $params = Bugzilla->input_params;
+  my $wants  = Bugzilla::WebService::Wants->new(
+    cache                => Bugzilla->request_cache->{filter_wants} ||= {},
+    maybe include_fields => $params->{include_fields},
+    maybe exclude_fields => $params->{exclude_fields},
+  );
+  return $self->{__wants_object} = $wants;
 }
 
 1;

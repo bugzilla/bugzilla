@@ -169,9 +169,11 @@ Bugzilla.FlagTypeComment = class FlagTypeComment {
    * @returns {Boolean} Always `true` to allow submitting the form.
    */
   form_onsubmit() {
-    if (this.inserted_fieldsets.length) {
-      // Enable Markdown
-      this.$comment.form.querySelector('[name="markdown_off"]').remove();
+    const $markdown_off = this.$comment.form.querySelector('input[name="markdown_off"]');
+
+    // Enable Markdown for any regular patches. Phabricator requests don't come with this hidden `<input>`
+    if (this.inserted_fieldsets.length && $markdown_off) {
+      $markdown_off.remove();
     }
 
     for (const $fieldset of this.inserted_fieldsets) {

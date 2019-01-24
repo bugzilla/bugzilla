@@ -119,7 +119,7 @@ my @oses = (
   'Windows Vista', 'Windows 7',
   'Windows 8',     'Windows 8.1',
   'Windows 10',    'Windows Phone',
-  'Mac OS X',      'Linux',
+  'macOS',         'Linux',
   'Android',       'iOS',
   'iOS 7',         'iOS 8',
   'BSDI',          'FreeBSD',

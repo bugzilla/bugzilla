@@ -164,7 +164,7 @@ use constant OS_MAP => (
 
   # OS X 10.3 is the most likely default version of PowerPC Macs
   # OS X 10.0 is more for configurations which didn't setup 10.x versions
-  qr/\(.*Mac OS X.*\)/     => [("Mac OS X 10.3",  "Mac OS X 10.0", "Mac OS X")],
+  qr/\(.*Mac OS X.*\)/     => [("Mac OS X 10.3",  "Mac OS X 10.0", "macOS")],
   qr/\(.*Mac OS 9.*\)/     => [("Mac System 9.x", "Mac System 9.0")],
   qr/\(.*Mac OS 8\.6.*\)/  => [("Mac System 8.6", "Mac System 8.5")],
   qr/\(.*Mac OS 8\.5.*\)/  => ["Mac System 8.5"],
@@ -172,7 +172,7 @@ use constant OS_MAP => (
   qr/\(.*Mac OS 8\.0.*\)/  => ["Mac System 8.0"],
   qr/\(.*Mac OS 8[^.].*\)/ => ["Mac System 8.0"],
   qr/\(.*Mac OS 8.*\)/     => ["Mac System 8.6"],
-  qr/\(.*Darwin.*\)/       => [("Mac OS X 10.0",  "Mac OS X")],
+  qr/\(.*Darwin.*\)/       => [("Mac OS X 10.0",  "macOS")],
 
   # Silly
   qr/\(.*Mac.*PowerPC.*\)/ => ["Mac System 9.x"],

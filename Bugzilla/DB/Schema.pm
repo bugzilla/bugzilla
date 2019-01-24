@@ -1785,62 +1785,65 @@ use constant ABSTRACT_SCHEMA => {
 
   oauth2_client => {
     FIELDS => [
-      id            => {TYPE => 'varchar(255)', NOTNULL => 1, PRIMARYKEY => 1},
+      id            => {TYPE => 'INTSERIAL',    NOTNULL => 1, PRIMARYKEY => 1},
+      client_id     => {TYPE => 'varchar(255)', NOTNULL => 1},
       description   => {TYPE => 'varchar(255)', NOTNULL => 1},
       secret        => {TYPE => 'varchar(255)', NOTNULL => 1},
       active        => {TYPE => 'BOOLEAN',      NOTNULL => 1, DEFAULT => 'TRUE'},
-      last_modified => {TYPE => 'DATETIME'}
-    ]
+      last_modified => {TYPE => 'DATETIME'},
+    ],
   },
 
   oauth2_scope => {
     FIELDS => [
-      id          => {TYPE => 'INT3',         NOTNULL => 1, PRIMARYKEY => 1},
-      description => {TYPE => 'varchar(255)', NOTNULL => 1}
-    ]
+      id          => {TYPE => 'INTSERIAL',    NOTNULL => 1, PRIMARYKEY => 1},
+      description => {TYPE => 'varchar(255)', NOTNULL => 1},
+    ],
   },
 
   oauth2_client_scope => {
     FIELDS => [
+      id        => {TYPE => 'INTSERIAL', NOTNULL => 1, PRIMARYKEY => 1},
       client_id => {
-        TYPE       => 'varchar(255)',
+        TYPE       => 'INT4',
         NOTNULL    => 1,
         REFERENCES => {
           TABLE  => 'oauth2_client',
           COLUMN => 'id',
           UPDATE => 'CASCADE',
-          DELETE => 'CASCADE'
+          DELETE => 'CASCADE',
         }
       },
       scope_id => {
-        TYPE       => 'INT3',
+        TYPE       => 'INT4',
         NOTNULL    => 1,
         REFERENCES => {
           TABLE  => 'oauth2_scope',
           COLUMN => 'id',
           UPDATE => 'CASCADE',
-          DELETE => 'CASCADE'
-        }
+          DELETE => 'CASCADE',
+        },
       },
-      allowed => {TYPE => 'BOOLEAN', NOTNULL => 1, DEFAULT => 'FALSE'}
     ],
     INDEXES => [
       oauth2_client_scope_idx =>
         {FIELDS => ['client_id', 'scope_id'], TYPE => 'UNIQUE'},
-    ]
+    ],
   },
 
-  oauth2_auth_code => {
+  oauth2_jwt => {
     FIELDS => [
-      auth_code => {TYPE => 'varchar(255)', NOTNULL => 1, PRIMARYKEY => 1},
+      id      => {TYPE => 'INTSERIAL', NOTNULL => 1, PRIMARYKEY => 1},
+      jti     => {TYPE => 'varchar(255)', NOTNULL => 1},
+      type    => {TYPE => 'INT2', NOTNULL => 1},
       client_id => {
-        TYPE       => 'varchar(255)',
+        TYPE       => 'INT4',
         NOTNULL    => 1,
         REFERENCES => {
           TABLE  => 'oauth2_client',
           COLUMN => 'id',
           UPDATE => 'CASCADE',
-          DELETE => 'CASCADE'
+          DELETE => 'CASCADE',
         }
       },
       user_id => {
@@ -1850,167 +1853,14 @@ use constant ABSTRACT_SCHEMA => {
           TABLE  => 'profiles',
           COLUMN => 'userid',
           UPDATE => 'CASCADE',
-          DELETE => 'CASCADE'
-        }
+          DELETE => 'CASCADE',
+        },
       },
-      expires      => {TYPE => 'DATETIME', NOTNULL => 1},
-      redirect_uri => {TYPE => 'TINYTEXT', NOTNULL => 1},
-      verified     => {TYPE => 'BOOLEAN',  NOTNULL => 1, DEFAULT => 'FALSE'},
-    ]
-  },
-
-  oauth2_auth_code_scope => {
-    FIELDS => [
-      auth_code => {
-        TYPE       => 'varchar(255)',
-        NOTNULL    => 1,
-        REFERENCES => {
-          TABLE  => 'oauth2_auth_code',
-          COLUMN => 'auth_code',
-          UPDATE => 'CASCADE',
-          DELETE => 'CASCADE'
-        }
-      },
-      scope_id => {
-        TYPE       => 'INT3',
-        NOTNULL    => 1,
-        REFERENCES => {
-          TABLE  => 'oauth2_scope',
-          COLUMN => 'id',
-          UPDATE => 'CASCADE',
-          DELETE => 'CASCADE'
-        }
-      },
-      allowed => {TYPE => 'BOOLEAN', NOTNULL => 1, DEFAULT => 'FALSE'},
+      expires => {TYPE => 'DATETIME'},
     ],
     INDEXES => [
-      oauth2_auth_code_scope_idx =>
-        {FIELDS => ['auth_code', 'scope_id'], TYPE => 'UNIQUE'},
-    ]
-  },
-
-  oauth2_access_token => {
-    FIELDS => [
-      access_token  => {TYPE => 'varchar(255)', NOTNULL => 1, PRIMARYKEY => 1},
-      refresh_token => {TYPE => 'varchar(255)'},
-      client_id     => {
-        TYPE       => 'varchar(255)',
-        NOTNULL    => 1,
-        REFERENCES => {
-          TABLE  => 'oauth2_client',
-          COLUMN => 'id',
-          UPDATE => 'CASCADE',
-          DELETE => 'CASCADE'
-        }
-      },
-      user_id => {
-        TYPE       => 'INT3',
-        NOTNULL    => 1,
-        REFERENCES => {
-          TABLE  => 'profiles',
-          COLUMN => 'userid',
-          UPDATE => 'CASCADE',
-          DELETE => 'CASCADE'
-        }
-      },
-      expires => {TYPE => 'DATETIME', NOTNULL => 1},
-    ]
-  },
-
-  oauth2_access_token_scope => {
-    FIELDS => [
-      access_token => {
-        TYPE       => 'varchar(255)',
-        NOTNULL    => 1,
-        REFERENCES => {
-          TABLE  => 'oauth2_access_token',
-          COLUMN => 'access_token',
-          UPDATE => 'CASCADE',
-          DELETE => 'CASCADE'
-        }
-      },
-      scope_id => {
-        TYPE       => 'INT3',
-        NOTNULL    => 1,
-        REFERENCES => {
-          TABLE  => 'oauth2_scope',
-          COLUMN => 'id',
-          UPDATE => 'CASCADE',
-          DELETE => 'CASCADE'
-        }
-      },
-      allowed => {TYPE => 'BOOLEAN', NOTNULL => 1, DEFAULT => 'FALSE'},
+      oauth2_jwt_jti_type_idx => {FIELDS => [qw(jti type)], TYPE => 'UNIQUE'},
     ],
-    INDEXES => [
-      oauth2_access_token_scope_idx =>
-        {FIELDS => ['access_token', 'scope_id'], TYPE => 'UNIQUE'}
-    ]
-  },
-
-  oauth2_refresh_token => {
-    FIELDS => [
-      refresh_token => {TYPE => 'varchar(255)', NOTNULL => 1, PRIMARYKEY => 1},
-      access_token  => {
-        TYPE       => 'varchar(255)',
-        NOTNULL    => 1,
-        REFERENCES => {
-          TABLE  => 'oauth2_access_token',
-          COLUMN => 'access_token',
-          UPDATE => 'CASCADE',
-          DELETE => 'CASCADE'
-        }
-      },
-      client_id => {
-        TYPE       => 'varchar(255)',
-        NOTNULL    => 1,
-        REFERENCES => {
-          TABLE  => 'oauth2_client',
-          COLUMN => 'id',
-          UPDATE => 'CASCADE',
-          DELETE => 'CASCADE'
-        }
-      },
-      user_id => {
-        TYPE       => 'INT3',
-        NOTNULL    => 1,
-        REFERENCES => {
-          TABLE  => 'profiles',
-          COLUMN => 'userid',
-          UPDATE => 'CASCADE',
-          DELETE => 'CASCADE'
-        }
-      }
-    ]
-  },
-
-  oauth2_refresh_token_scope => {
-    FIELDS => [
-      refresh_token => {
-        TYPE       => 'varchar(255)',
-        NOTNULL    => 1,
-        REFERENCES => {
-          TABLE  => 'oauth2_refresh_token',
-          COLUMN => 'refresh_token',
-          UPDATE => 'CASCADE',
-          DELETE => 'CASCADE'
-        }
-      },
-      scope_id => {
-        TYPE       => 'INT3',
-        NOTNULL    => 1,
-        REFERENCES => {
-          TABLE  => 'oauth2_scope',
-          COLUMN => 'id',
-          UPDATE => 'CASCADE',
-          DELETE => 'CASCADE'
-        }
-      },
-      allowed => {TYPE => 'BOOLEAN', NOTNULL => 1, DEFAULT => 'FALSE'},
-    ],
-    INDEXES => [
-      oauth2_refresh_token_scope_idx =>
-        {FIELDS => ['refresh_token', 'scope_id'], TYPE => 'UNIQUE'}
-    ]
   }
 };
 

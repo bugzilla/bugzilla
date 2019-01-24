@@ -13,6 +13,7 @@ use lib qw( . lib local/lib/perl5 );
 BEGIN {
   $ENV{LOG4PERL_CONFIG_FILE}     = 'log4perl-t.conf';
   $ENV{BUGZILLA_DISABLE_HOSTAGE} = 1;
+  $ENV{MOJO_TEST}                = 1;
 }
 
 use Bugzilla::Test::MockDB;
@@ -28,11 +29,12 @@ my $referer        = Bugzilla->localconfig->{urlbase};
 my $stash          = {};
 
 # Create user to use as OAuth2 resource owner
-create_user($oauth_login, $oauth_password);
+my $oauth_user = create_user($oauth_login, $oauth_password);
 
 # Create a new OAuth2 client used for testing
 my $oauth_client = create_oauth_client('Shiny New OAuth Client', ['user:read']);
-ok $oauth_client->{id}, 'New client id (' . $oauth_client->{id} . ')';
+ok $oauth_client->{client_id},
+  'New client id (' . $oauth_client->{client_id} . ')';
 ok $oauth_client->{secret},
   'New client secret (' . $oauth_client->{secret} . ')';
 
@@ -48,7 +50,7 @@ $t->app->hook(after_dispatch => sub { $stash = shift->stash });
 # User should be logged out so /oauth/authorize should redirect to a login screen
 $t->get_ok(
   '/oauth/authorize' => {Referer => $referer} => form => {
-    client_id     => $oauth_client->{id},
+    client_id     => $oauth_client->{client_id},
     response_type => 'code',
     state         => 'state',
     scope         => 'user:read',
@@ -67,7 +69,7 @@ $t->post_ok(
     Bugzilla_password      => $oauth_password,
     Bugzilla_restrictlogin => 1,
     GoAheadAndLogIn        => 1,
-    client_id              => $oauth_client->{id},
+    client_id              => $oauth_client->{client_id},
     response_type          => 'code',
     state                  => 'state',
     scope                  => 'user:read',
@@ -84,13 +86,13 @@ ok $csrf_token, "Get csrf token ($csrf_token)";
 # URI specified in the redirect_uri value. In this case a simple text page.
 $t->get_ok(
   '/oauth/authorize' => {Referer => $referer} => form => {
-    "oauth_confirm_" . $oauth_client->{id} => 1,
-    token                                  => $csrf_token,
-    client_id                              => $oauth_client->{id},
-    response_type                          => 'code',
-    state                                  => 'state',
-    scope                                  => 'user:read',
-    redirect_uri                           => '/oauth/redirect'
+    "oauth_confirm_" . $oauth_client->{client_id} => 1,
+    token                                         => $csrf_token,
+    client_id                                     => $oauth_client->{client_id},
+    response_type                                 => 'code',
+    state                                         => 'state',
+    scope                                         => 'user:read',
+    redirect_uri                                  => '/oauth/redirect'
   }
 )->status_is(200)->content_is('Redirect Success!');
 
@@ -107,7 +109,7 @@ ok $auth_code, "Get auth code ($auth_code)";
 # end user.
 $t->post_ok(
   '/oauth/access_token' => {Referer => $referer} => form => {
-    client_id     => $oauth_client->{id},
+    client_id     => $oauth_client->{client_id},
     client_secret => $oauth_client->{secret},
     code          => $auth_code,
     grant_type    => 'authorization_code',
@@ -129,6 +131,43 @@ $t->get_ok('/api/user/profile')->status_is(401);
 $t->get_ok('/api/user/profile' =>
     {Authorization => 'Bearer ' . $access_data->{access_token}})->status_is(200)
   ->json_is('/login' => $oauth_login);
+
+# Should be able to use the refresh token to get a new access token
+$t->post_ok(
+  '/oauth/access_token' => {Referer => $referer} => form => {
+    client_id     => $oauth_client->{client_id},
+    client_secret => $oauth_client->{secret},
+    refresh_token => $access_data->{refresh_token},
+    grant_type    => 'refresh_token',
+    redirect_uri  => '/oauth/redirect',
+  }
+)->status_is(200)->json_has('access_token', 'Has access token')
+  ->json_has('refresh_token', 'Has refresh token')
+  ->json_has('token_type',    'Has token type');
+
+$access_data = $t->tx->res->json;
+
+$t->get_ok('/api/user/profile' =>
+    {Authorization => 'Bearer ' . $access_data->{access_token}})->status_is(200)
+  ->json_is('/login' => $oauth_login);
+
+# API should fail if user is disabled
+$oauth_user->set_disabledtext('DISABLED');
+$oauth_user->update();
+$t->get_ok('/api/user/profile' =>
+    {Authorization => 'Bearer ' . $access_data->{access_token}})
+  ->status_is(401);
+
+# Should get an error if we try to re-use the same auth code again
+$t->post_ok(
+  '/oauth/access_token' => {Referer => $referer} => form => {
+    client_id     => $oauth_client->{client_id},
+    client_secret => $oauth_client->{secret},
+    code          => $auth_code,
+    grant_type    => 'authorization_code',
+    redirect_uri  => '/oauth/redirect',
+  }
+)->status_is(400)->json_is('/error' => 'invalid_grant');
 
 done_testing;
 

@@ -780,6 +780,8 @@ sub update_table_definitions {
   $dbh->bz_add_column('products', 'bug_description_template',
     {TYPE => 'MEDIUMTEXT'});
 
+  _add_oauth2_jwt_support();
+
   ################################################################
   # New --TABLE-- changes should go *** A B O V E *** this point #
   ################################################################
@@ -4225,6 +4227,64 @@ sub _populate_oauth2_scopes {
   my ($scope_count) = $dbh->selectrow_array('SELECT COUNT(*) FROM oauth2_scope');
   return if $scope_count;
   $dbh->do("INSERT INTO oauth2_scope (id, description) VALUES (1, 'user:read')");
+}
+
+sub _add_oauth2_jwt_support {
+  my $dbh = Bugzilla->dbh;
+
+  # Return if we have already made these changes
+  return if $dbh->bz_column_info('oauth2_client', 'client_id');
+
+  print "Updating OAuth2 tables for JWT support...\n";
+
+  # Some tables need to be dropped completely
+  foreach my $table (
+    qw/ oauth2_refresh_token_scope oauth2_refresh_token
+    oauth2_access_token_scope oauth2_access_token
+    oauth2_auth_code_scope oauth2_auth_code /
+    )
+  {
+    $dbh->bz_drop_table($table);
+  }
+
+  # Drop foreign keys. THey will be recreated later.
+  $dbh->bz_drop_fk('oauth2_client_scope', 'client_id');
+  $dbh->bz_drop_fk('oauth2_client_scope', 'scope_id');
+
+  # client id should no longer be the primary key for the clients table
+  $dbh->bz_rename_column('oauth2_client', 'id', 'client_id');
+  $dbh->bz_alter_column('oauth2_client', 'client_id',
+    {TYPE => 'varchar(255)', NOTNULL => 1});
+
+  # scope table needs INTSERIAL (INT4)
+  $dbh->bz_alter_column('oauth2_scope', 'id',
+    {TYPE => 'INTSERIAL', NOTNULL => 1, PRIMARYKEY => 1});
+
+  # oauth2_client_scope.allowed is unncessary so we drop it
+  $dbh->bz_drop_column('oauth2_client_scope', 'allowed');
+
+  # Update old non-id string columns to new id column
+  $dbh->bz_alter_column('oauth2_client_scope', 'scope_id',
+    {TYPE => 'INT4', NOTNULL => 1});
+
+  # Add primary key columns to the tables that require it
+  foreach my $table (qw/oauth2_client oauth2_client_scope/) {
+    $dbh->bz_add_column($table, 'id',
+      {TYPE => 'INTSERIAL', NOTNULL => 1, PRIMARYKEY => 1});
+  }
+
+  # Last changes needed for the oauth2_client_scope table by
+  # populating the client_id table with integers instead of keys.
+  $dbh->bz_add_column('oauth2_client_scope', 'client_id_new', {TYPE => 'INT4'});
+  $dbh->do(
+    'UPDATE oauth2_client_scope AS oacs,
+    (SELECT * FROM oauth2_client) AS oac
+    SET oacs.client_id_new = oac.id'
+  );
+  $dbh->bz_drop_column('oauth2_client_scope', 'client_id');
+  $dbh->bz_rename_column('oauth2_client_scope', 'client_id_new', 'client_id');
+  $dbh->bz_alter_column('oauth2_client_scope', 'client_id',
+    {TYPE => 'INT4', NOTNULL => 1});
 }
 
 1;

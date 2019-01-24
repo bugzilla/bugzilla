@@ -50,8 +50,12 @@ sub create_oauth_client {
   my $id     = generate_random_password(20);
   my $secret = generate_random_password(40);
 
-  $dbh->do('INSERT INTO oauth2_client (id, description, secret) VALUES (?, ?, ?)',
+  $dbh->do('INSERT INTO oauth2_client (client_id, description, secret) VALUES (?, ?, ?)',
     undef, $id, $description, $secret);
+
+  my $client_data
+    = $dbh->selectrow_hashref('SELECT * FROM oauth2_client WHERE client_id = ?',
+    undef, $id);
 
   foreach my $scope (@{$scopes}) {
     my $scope_id
@@ -61,13 +65,12 @@ sub create_oauth_client {
       die "Scope $scope not found";
     }
     $dbh->do(
-      'INSERT INTO oauth2_client_scope (client_id, scope_id, allowed) VALUES (?, ?, 1)',
-      undef, $id, $scope_id
+      'INSERT INTO oauth2_client_scope (client_id, scope_id) VALUES (?, ?)',
+      undef, $client_data->{id}, $scope_id
     );
   }
 
-  return $dbh->selectrow_hashref('SELECT * FROM oauth2_client WHERE id = ?',
-    undef, $id);
+  return $client_data;
 }
 
 sub issue_api_key {

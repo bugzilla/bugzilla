@@ -119,7 +119,7 @@ sub _verify_client {
     return (0, 'invalid_scope');
   }
 
-  if (!$ENV{MOJO_TEST} && Mojo::URL->new($redirect_uri)->scheme ne 'https') {
+  if (!$ENV{BUGZILLA_ALLOW_INSECURE_HTTP} && Mojo::URL->new($redirect_uri)->scheme ne 'https') {
     INFO("invalid_redirect_uri: $redirect_uri");
     return (0, 'invalid_redirect_uri');
   }

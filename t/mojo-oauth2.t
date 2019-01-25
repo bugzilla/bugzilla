@@ -11,9 +11,9 @@ use 5.10.1;
 use lib qw( . lib local/lib/perl5 );
 
 BEGIN {
-  $ENV{LOG4PERL_CONFIG_FILE}     = 'log4perl-t.conf';
-  $ENV{BUGZILLA_DISABLE_HOSTAGE} = 1;
-  $ENV{MOJO_TEST}                = 1;
+  $ENV{LOG4PERL_CONFIG_FILE}         = 'log4perl-t.conf';
+  $ENV{BUGZILLA_DISABLE_HOSTAGE}     = 1;
+  $ENV{BUGZILLA_ALLOW_INSECURE_HTTP} = 1;
 }
 
 use Bugzilla::Test::MockDB;

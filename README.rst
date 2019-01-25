@@ -292,8 +292,8 @@ MOJO_CLIENTS
   this value and increase "MOJO_WORKERS" instead for better performance.
   Default: 200
 
-BUGZILLA_UNSAFE_AUTH_DELEGATION
-  This should never be set in production. It allows auth delegation over http.
+BUGZILLA_ALLOW_INSECURE_HTTP
+  This should never be set in production. It allows auth delegation and oauth over http.
 
 BMO_urlbase
   The public url for this instance. Note that if this begins with https://

@@ -4,23 +4,30 @@
   "version": "2.0.0",
   "tasks": [
     {
-      "label": "Vagrant: Start Local Server",
+      "label": "Vagrant: Start VM",
       "type": "shell",
       "command": "vagrant up",
       "group": "none",
       "problemMatcher": []
     },
     {
-      "label": "Vagrant: Suspend Local Server",
+      "label": "Vagrant: Suspend VM",
       "type": "shell",
       "command": "vagrant suspend",
       "group": "none",
       "problemMatcher": []
     },
     {
-      "label": "Vagrant: Update Local Server",
+        "label": "Vagrant: Start Web Server",
+        "type": "shell",
+        "command": "vagrant ssh web -c 'start_morbo'",
+        "group": "none",
+        "problemMatcher": []
+    },
+    {
+      "label": "Vagrant: Update Web Server",
       "type": "shell",
-      "command": "bash -c 'vagrant rsync && vagrant provision --provision-with update'",
+      "command": "vagrant rsync web",
       "group": {
         "kind": "build",
         "isDefault": true
@@ -28,9 +35,9 @@
       "problemMatcher": []
     },
     {
-      "label": "Vagrant: Force Update Local Server",
+      "label": "Vagrant: Force Update VM",
       "type": "shell",
-      "command": "bash -c 'vagrant rsync && vagrant provision'",
+      "command": "vagrant rsync && vagrant provision",
       "group": "build",
       "problemMatcher": []
     },

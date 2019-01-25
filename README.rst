@@ -50,7 +50,8 @@ From your BMO checkout run the following command:
 
     vagrant up
 
-Depending on the speed of your computer and your Internet connection, this
+Vagrant might ask to install some missing plugins it detected, you should install these.
+Depending on the speed of your computer and your Internet connection, this entire process
 will take from a few minutes to much longer.
 
 If this fails, please file a bug `using this link <https://bugzilla.mozilla.org/enter_bug.cgi?assigned_to=nobody%40mozilla.org&bug_file_loc=http%3A%2F%2F&bug_ignored=0&bug_severity=normal&bug_status=NEW&cf_fx_iteration=---&cf_fx_points=---&component=Developer%20Box&contenttypemethod=autodetect&contenttypeselection=text%2Fplain&defined_groups=1&flag_type-254=X&flag_type-4=X&flag_type-607=X&flag_type-791=X&flag_type-800=X&flag_type-803=X&form_name=enter_bug&maketemplate=Remember%20values%20as%20bookmarkable%20template&op_sys=Unspecified&priority=--&product=bugzilla.mozilla.org&rep_platform=Unspecified&target_milestone=---&version=Production>`__.
@@ -59,6 +60,8 @@ Otherwise, you should have a working BMO developer machine!
 
 To test it, you'll want to add an entry to /etc/hosts for bmo-web.vm pointing
 to 192.168.3.43.
+
+Then you must start the development webserver with ``vagrant ssh web -c 'start_morbo'``.
 
 After that, you should be able to visit http://bmo-web.vm/ from your browser.
 You can login as vagrant@bmo-web.vm with the password "vagrant01!" (without
@@ -71,7 +74,7 @@ After editing files in the bmo directory, you will need to run
 
 .. code-block:: bash
 
-    vagrant rsync && vagrant provision --provision-with update
+    vagrant rsync web
 
 to see the changes applied to your vagrant VM. If the above command fails
 or db is changed, do a full provision:

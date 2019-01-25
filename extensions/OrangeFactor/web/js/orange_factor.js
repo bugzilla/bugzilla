@@ -55,7 +55,7 @@ $(function() {
             bug: $orangeCount.data('bug-id'),
             startday: $orangeCount.data('date-start'),
             endday: $orangeCount.data('date-end'),
-            tree: 'trunk'
+            tree: 'all'
         });
         let request = {
             dataType: "json",

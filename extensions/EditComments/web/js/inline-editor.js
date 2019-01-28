@@ -105,6 +105,7 @@ Bugzilla.InlineCommentEditor = class InlineCommentEditor {
           <${preview_tag} tabindex="-1" class="comment-text ${this.is_markdown ? 'markdown-body' : ''}"></${preview_tag}>
         </div>
         <div role="toolbar" class="bottom-toolbar" aria-label="${this.str.toolbar}">
+          <span role="status"></span>
           ${BUGZILLA.user.is_insider && BUGZILLA.user.id !== this.commenter_id ? `<label>
             <input type="checkbox" value="on" checked data-action="hide"> ${this.str.hide_revision}</label>` : ''}
           <button type="button" class="minor" data-action="cancel" title="${this.str.cancel_tooltip} (Esc)"
@@ -127,6 +128,7 @@ Bugzilla.InlineCommentEditor = class InlineCommentEditor {
     this.$save_button = this.$container.querySelector('[data-action="save"]');
     this.$cancel_button = this.$container.querySelector('[data-action="cancel"]');
     this.$is_hidden_checkbox = this.$container.querySelector('[data-action="hide"]');
+    this.$status = this.$container.querySelector('[role="status"]');
 
     this.$edit_tab.addEventListener('click', () => this.edit());
     this.$preview_tab.addEventListener('click', () => this.preview());
@@ -246,8 +248,8 @@ Bugzilla.InlineCommentEditor = class InlineCommentEditor {
     }
 
     // Disable the `<textarea>` and Save button while waiting for the response
-    this.$textarea.disabled = this.$save_button.disabled = true;
-    this.$save_button.textContent = this.str.saving;
+    this.$textarea.disabled = this.$save_button.disabled = this.$cancel_button.disabled = true;
+    this.$status.textContent = this.str.saving;
 
     bugzilla_ajax({
       url: `${BUGZILLA.config.basepath}rest/editcomments/comment/${this.comment_id}`,
@@ -344,8 +346,8 @@ Bugzilla.InlineCommentEditor = class InlineCommentEditor {
    * @param {String} message Error message.
    */
   save_onerror(message) {
-    this.$textarea.disabled = this.$save_button.disabled = false;
-    this.$save_button.textContent = this.str.save;
+    this.$textarea.disabled = this.$save_button.disabled = this.$cancel_button.disabled = false;
+    this.$status.textContent = '';
 
     window.alert(`${this.str.save_error}\n\n${message}`);
   }

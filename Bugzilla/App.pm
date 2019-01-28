@@ -17,7 +17,7 @@ use FileHandle;    # this is for compat back to 5.10
 use Bugzilla          ();
 use Bugzilla::BugMail ();
 use Bugzilla::CGI     ();
-use Bugzilla::Constants qw(bz_locations);
+use Bugzilla::Constants qw(bz_locations MAX_STS_AGE);
 use Bugzilla::Extension             ();
 use Bugzilla::Install::Requirements ();
 use Bugzilla::Logging;
@@ -125,6 +125,19 @@ sub startup {
       }
     );
   }
+  $self->hook(after_dispatch => sub {
+    my ($c) = @_;
+    if ($c->req->is_secure
+      && ! $c->res->headers->strict_transport_security
+      && Bugzilla->params->{'strict_transport_security'} ne 'off')
+    {
+      my $sts_opts = 'max-age=' . MAX_STS_AGE;
+      if (Bugzilla->params->{'strict_transport_security'} eq 'include_subdomains') {
+        $sts_opts .= '; includeSubDomains';
+      }
+      $c->res->headers->strict_transport_security($sts_opts);
+    }
+  });
   Bugzilla::WebService::Server::REST->preload;
 
   $self->setup_routes;

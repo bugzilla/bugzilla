@@ -676,27 +676,36 @@ sub fields {
 }
 
 sub active_custom_fields {
-  my (undef, $params) = @_;
-  my $cache_id  = 'active_custom_fields';
-  my $can_cache = !exists $params->{bug_id};
-  if ($params) {
+  my (undef, $params, $wants) = @_;
+  my $cache_id = 'active_custom_fields';
+  my $can_cache = !exists $params->{bug_id} && !$wants;
+  if ($can_cache && $params) {
     $cache_id .= ($params->{product} ? '_p' . $params->{product}->id : '')
       . ($params->{component} ? '_c' . $params->{component}->id : '');
     $cache_id .= ':noext' if $params->{skip_extensions};
   }
-  if (!$can_cache || !exists request_cache->{$cache_id}) {
-    my $fields
-      = Bugzilla::Field->match({custom => 1, obsolete => 0, skip_extensions => 1});
-    Bugzilla::Hook::process('active_custom_fields',
-      {fields => \$fields, params => $params});
-    if ($can_cache) {
-      request_cache->{$cache_id} = $fields;
-    }
-    else {
-      return @$fields;
-    }
+
+  if ($can_cache && exists request_cache->{$cache_id}) {
+    return @{request_cache->{$cache_id}};
   }
-  return @{request_cache->{$cache_id}};
+  else {
+    my $match_params = {custom => 1, obsolete => 0, skip_extensions => 1};
+    if ($wants) {
+      if ($wants->exclude->{custom}) {
+        return ();
+      }
+      elsif ($wants->is_specific) {
+        my @names = (grep {/^cf_/} $wants->includes);
+        return () unless @names;
+        $match_params->{name} = \@names;
+      }
+    }
+    my $fields = Bugzilla::Field->match($match_params);
+    Bugzilla::Hook::process('active_custom_fields',
+      {fields => \$fields, params => $params, wants => $wants});
+    request_cache->{$cache_id} = $fields if $can_cache;
+    return @$fields;
+  }
 }
 
 sub has_flags {

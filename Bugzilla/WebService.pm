@@ -40,15 +40,17 @@ sub login_exempt {
 }
 
 sub wants_object {
-  my ($self) = @_;
-  return $self->{__wants_object} if $self->{__wants_object};
-  my $params = Bugzilla->input_params;
-  my $wants  = Bugzilla::WebService::Wants->new(
-    cache                => Bugzilla->request_cache->{filter_wants} ||= {},
-    maybe include_fields => $params->{include_fields},
-    maybe exclude_fields => $params->{exclude_fields},
-  );
-  return $self->{__wants_object} = $wants;
+  my ($class) = @_;
+  my $cache = Bugzilla->request_cache;
+
+  return $cache->{filter_wants_object} //= do {
+    my $params = Bugzilla->input_params;
+     Bugzilla::WebService::Wants->new(
+      cache                => $cache->{filter_wants} ||= {},
+      maybe include_fields => $params->{include_fields},
+      maybe exclude_fields => $params->{exclude_fields},
+    );
+  };
 }
 
 1;

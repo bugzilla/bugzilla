@@ -14,8 +14,8 @@ use parent qw(Bugzilla::WebService);
 use Bugzilla::Error;
 
 use constant PUBLIC_METHODS => qw(
-    hello
-    throw_an_error
+  hello
+  throw_an_error
 );
 
 # This can be called as Example.hello() from the WebService.

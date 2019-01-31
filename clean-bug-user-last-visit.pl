@@ -31,8 +31,6 @@ Bugzilla->usage_mode(USAGE_MODE_CMDLINE);
 
 my $dbh = Bugzilla->dbh;
 my $sql = 'DELETE FROM bug_user_last_visit WHERE last_visit_ts < '
-  . $dbh->sql_date_math('NOW()',
-                        '-',
-                        Bugzilla->params->{last_visit_keep_days},
-                        'DAY');
+  . $dbh->sql_date_math('NOW()', '-', Bugzilla->params->{last_visit_keep_days},
+  'DAY');
 $dbh->do($sql);

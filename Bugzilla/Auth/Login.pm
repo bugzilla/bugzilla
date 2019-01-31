@@ -16,18 +16,18 @@ use fields qw();
 # Determines whether or not a user can logout. It's really a subroutine,
 # but we implement it here as a constant. Override it in subclasses if
 # that particular type of login method cannot log out.
-use constant can_logout => 1;
-use constant can_login  => 1;
-use constant requires_persistence  => 1;
-use constant requires_verification => 1;
+use constant can_logout              => 1;
+use constant can_login               => 1;
+use constant requires_persistence    => 1;
+use constant requires_verification   => 1;
 use constant user_can_create_account => 0;
-use constant is_automatic => 0;
-use constant extern_id_used => 0; 
+use constant is_automatic            => 0;
+use constant extern_id_used          => 0;
 
 sub new {
-    my ($class) = @_;
-    my $self = fields::new($class);
-    return $self;
+  my ($class) = @_;
+  my $self = fields::new($class);
+  return $self;
 }
 
 1;

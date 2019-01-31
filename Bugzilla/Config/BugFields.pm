@@ -25,73 +25,50 @@ sub get_param_list {
   my @legal_OS         = @{get_legal_field_values('op_sys')};
 
   my @param_list = (
-  {
-   name => 'useclassification',
-   type => 'b',
-   default => 0
-  },
+    {name => 'useclassification', type => 'b', default => 0},
 
-  {
-   name => 'usetargetmilestone',
-   type => 'b',
-   default => 0
-  },
+    {name => 'usetargetmilestone', type => 'b', default => 0},
 
-  {
-   name => 'useqacontact',
-   type => 'b',
-   default => 0
-  },
+    {name => 'useqacontact', type => 'b', default => 0},
 
-  {
-   name => 'usestatuswhiteboard',
-   type => 'b',
-   default => 0
-  },
+    {name => 'usestatuswhiteboard', type => 'b', default => 0},
 
-  {
-   name => 'use_see_also',
-   type => 'b',
-   default => 1
-  },
+    {name => 'use_see_also', type => 'b', default => 1},
 
-  {
-   name => 'defaultpriority',
-   type => 's',
-   choices => \@legal_priorities,
-   default => $legal_priorities[-1],
-   checker => \&check_priority
-  },
+    {
+      name    => 'defaultpriority',
+      type    => 's',
+      choices => \@legal_priorities,
+      default => $legal_priorities[-1],
+      checker => \&check_priority
+    },
 
-  {
-   name => 'defaultseverity',
-   type => 's',
-   choices => \@legal_severities,
-   default => $legal_severities[-1],
-   checker => \&check_severity
-  },
+    {
+      name    => 'defaultseverity',
+      type    => 's',
+      choices => \@legal_severities,
+      default => $legal_severities[-1],
+      checker => \&check_severity
+    },
 
-  {
-   name => 'defaultplatform',
-   type => 's',
-   choices => ['', @legal_platforms],
-   default => '',
-   checker => \&check_platform
-  },
+    {
+      name    => 'defaultplatform',
+      type    => 's',
+      choices => ['', @legal_platforms],
+      default => '',
+      checker => \&check_platform
+    },
 
-  {
-   name => 'defaultopsys',
-   type => 's',
-   choices => ['', @legal_OS],
-   default => '',
-   checker => \&check_opsys
-  },
+    {
+      name    => 'defaultopsys',
+      type    => 's',
+      choices => ['', @legal_OS],
+      default => '',
+      checker => \&check_opsys
+    },
 
-  {
-   name => 'collapsed_comment_tags',
-   type => 't',
-   default => 'obsolete, spam',
-  });
+    {name => 'collapsed_comment_tags', type => 't', default => 'obsolete, spam',}
+  );
   return @param_list;
 }
 

@@ -16,14 +16,15 @@ use Bugzilla;
 use Bugzilla::Constants;
 use Bugzilla::Error;
 
-my $cgi = Bugzilla->cgi;
+my $cgi      = Bugzilla->cgi;
 my $template = Bugzilla->template;
-my $user = Bugzilla->login(LOGIN_REQUIRED);
+my $user     = Bugzilla->login(LOGIN_REQUIRED);
 
 print $cgi->header();
 
 $user->can_administer
-  || ThrowUserError('auth_failure', {action => 'access', object => 'administrative_pages'});
+  || ThrowUserError('auth_failure',
+  {action => 'access', object => 'administrative_pages'});
 
 $template->process('admin/admin.html.tmpl')
   || ThrowTemplateError($template->error());

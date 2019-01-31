@@ -17,39 +17,36 @@ use Bugzilla::User;
 use Bugzilla::Error;
 use Bugzilla::Constants;
 use Bugzilla::WebService::Constants;
-use Bugzilla::WebService::Util qw(validate filter filter_wants translate params_to_objects);
+use Bugzilla::WebService::Util
+  qw(validate filter filter_wants translate params_to_objects);
 
 use constant READ_ONLY => qw(
-    get
-    get_accessible_products
-    get_enterable_products
-    get_selectable_products
+  get
+  get_accessible_products
+  get_enterable_products
+  get_selectable_products
 );
 
 use constant PUBLIC_METHODS => qw(
-    create
-    get
-    get_accessible_products
-    get_enterable_products
-    get_selectable_products
-    update
+  create
+  get
+  get_accessible_products
+  get_enterable_products
+  get_selectable_products
+  update
 );
 
-use constant MAPPED_FIELDS => {
-    has_unconfirmed => 'allows_unconfirmed',
-    is_open => 'is_active',
-};
+use constant MAPPED_FIELDS =>
+  {has_unconfirmed => 'allows_unconfirmed', is_open => 'is_active',};
 
 use constant MAPPED_RETURNS => {
-    allows_unconfirmed => 'has_unconfirmed',
-    defaultmilestone => 'default_milestone',
-    isactive => 'is_open',
+  allows_unconfirmed => 'has_unconfirmed',
+  defaultmilestone   => 'default_milestone',
+  isactive           => 'is_open',
 };
 
-use constant FIELD_MAP => {
-    has_unconfirmed => 'allows_unconfirmed',
-    is_open         => 'isactive',
-};
+use constant FIELD_MAP =>
+  {has_unconfirmed => 'allows_unconfirmed', is_open => 'isactive',};
 
 ##################################################
 # Add aliases here for method name compatibility #
@@ -57,300 +54,277 @@ use constant FIELD_MAP => {
 
 # Get the ids of the products the user can search
 sub get_selectable_products {
-    Bugzilla->switch_to_shadow_db();
-    return {ids => [map {$_->id} @{Bugzilla->user->get_selectable_products}]};
+  Bugzilla->switch_to_shadow_db();
+  return {ids => [map { $_->id } @{Bugzilla->user->get_selectable_products}]};
 }
 
 # Get the ids of the products the user can enter bugs against
 sub get_enterable_products {
-    Bugzilla->switch_to_shadow_db();
-    return {ids => [map {$_->id} @{Bugzilla->user->get_enterable_products}]};
+  Bugzilla->switch_to_shadow_db();
+  return {ids => [map { $_->id } @{Bugzilla->user->get_enterable_products}]};
 }
 
 # Get the union of the products the user can search and enter bugs against.
 sub get_accessible_products {
-    Bugzilla->switch_to_shadow_db();
-    return {ids => [map {$_->id} @{Bugzilla->user->get_accessible_products}]};
+  Bugzilla->switch_to_shadow_db();
+  return {ids => [map { $_->id } @{Bugzilla->user->get_accessible_products}]};
 }
 
 # Get a list of actual products, based on list of ids or names
 sub get {
-    my ($self, $params) = validate(@_, 'ids', 'names', 'type');
-    my $user = Bugzilla->user;
+  my ($self, $params) = validate(@_, 'ids', 'names', 'type');
+  my $user = Bugzilla->user;
 
-    defined $params->{ids} || defined $params->{names} || defined $params->{type}
-        || ThrowCodeError("params_required", { function => "Product.get",
-                                               params => ['ids', 'names', 'type'] });
-    Bugzilla->switch_to_shadow_db();
+       defined $params->{ids}
+    || defined $params->{names}
+    || defined $params->{type}
+    || ThrowCodeError("params_required",
+    {function => "Product.get", params => ['ids', 'names', 'type']});
+  Bugzilla->switch_to_shadow_db();
 
-    my $products = [];
-    if (defined $params->{type}) {
-        my %product_hash;
-        foreach my $type (@{ $params->{type} }) {
-            my $result = [];
-            if ($type eq 'accessible') {
-                $result = $user->get_accessible_products();
-            }
-            elsif ($type eq 'enterable') {
-                $result = $user->get_enterable_products();
-            }
-            elsif ($type eq 'selectable') {
-                $result = $user->get_selectable_products();
-            }
-            else {
-                ThrowUserError('get_products_invalid_type',
-                               { type => $type });
-            }
-            map { $product_hash{$_->id} = $_ } @$result;
-        }
-        $products = [ values %product_hash ];
+  my $products = [];
+  if (defined $params->{type}) {
+    my %product_hash;
+    foreach my $type (@{$params->{type}}) {
+      my $result = [];
+      if ($type eq 'accessible') {
+        $result = $user->get_accessible_products();
+      }
+      elsif ($type eq 'enterable') {
+        $result = $user->get_enterable_products();
+      }
+      elsif ($type eq 'selectable') {
+        $result = $user->get_selectable_products();
+      }
+      else {
+        ThrowUserError('get_products_invalid_type', {type => $type});
+      }
+      map { $product_hash{$_->id} = $_ } @$result;
     }
-    else {
-        $products = $user->get_accessible_products;
+    $products = [values %product_hash];
+  }
+  else {
+    $products = $user->get_accessible_products;
+  }
+
+  my @requested_products;
+
+  if (defined $params->{ids}) {
+
+    # Create a hash with the ids the user wants
+    my %ids = map { $_ => 1 } @{$params->{ids}};
+
+    # Return the intersection of this, by grepping the ids from $products.
+    push(@requested_products, grep { $ids{$_->id} } @$products);
+  }
+
+  if (defined $params->{names}) {
+
+    # Create a hash with the names the user wants
+    my %names = map { lc($_) => 1 } @{$params->{names}};
+
+    # Return the intersection of this, by grepping the names
+    # from $products, union'ed with products found by ID to
+    # avoid duplicates
+    foreach my $product (grep { $names{lc $_->name} } @$products) {
+      next if grep { $_->id == $product->id } @requested_products;
+      push @requested_products, $product;
     }
+  }
 
-    my @requested_products;
+  # If we just requested a specific type of products without
+  # specifying ids or names, then return the entire list.
+  if (!defined $params->{ids} && !defined $params->{names}) {
+    @requested_products = @$products;
+  }
 
-    if (defined $params->{ids}) {
-        # Create a hash with the ids the user wants
-        my %ids = map { $_ => 1 } @{$params->{ids}};
-
-        # Return the intersection of this, by grepping the ids from $products.
-        push(@requested_products,
-            grep { $ids{$_->id} } @$products);
-    }
-
-    if (defined $params->{names}) {
-        # Create a hash with the names the user wants
-        my %names = map { lc($_) => 1 } @{$params->{names}};
-
-        # Return the intersection of this, by grepping the names
-        # from $products, union'ed with products found by ID to
-        # avoid duplicates
-        foreach my $product (grep { $names{lc $_->name} }
-                                  @$products) {
-            next if grep { $_->id == $product->id }
-                         @requested_products;
-            push @requested_products, $product;
-        }
-    }
-
-    # If we just requested a specific type of products without
-    # specifying ids or names, then return the entire list.
-    if (!defined $params->{ids} && !defined $params->{names}) {
-        @requested_products = @$products;
-    }
-
-    # Now create a result entry for each.
-    my @products = map { $self->_product_to_hash($params, $_) }
-                       @requested_products;
-    return { products => \@products };
+  # Now create a result entry for each.
+  my @products = map { $self->_product_to_hash($params, $_) } @requested_products;
+  return {products => \@products};
 }
 
 sub create {
-    my ($self, $params) = @_;
+  my ($self, $params) = @_;
 
-    Bugzilla->login(LOGIN_REQUIRED);
-    Bugzilla->user->in_group('editcomponents')
-        || ThrowUserError("auth_failure", { group  => "editcomponents",
-                                            action => "add",
-                                            object => "products"});
-    # Create product
-    my $args = {
-        name             => $params->{name},
-        description      => $params->{description},
-        version          => $params->{version},
-        defaultmilestone => $params->{default_milestone},
-        # create_series has no default value.
-        create_series    => defined $params->{create_series} ?
-                              $params->{create_series} : 1
-    };
-    foreach my $field (qw(has_unconfirmed is_open classification)) {
-        if (defined $params->{$field}) {
-            my $name = FIELD_MAP->{$field} || $field;
-            $args->{$name} = $params->{$field};
-        }
+  Bugzilla->login(LOGIN_REQUIRED);
+  Bugzilla->user->in_group('editcomponents')
+    || ThrowUserError("auth_failure",
+    {group => "editcomponents", action => "add", object => "products"});
+
+  # Create product
+  my $args = {
+    name             => $params->{name},
+    description      => $params->{description},
+    version          => $params->{version},
+    defaultmilestone => $params->{default_milestone},
+
+    # create_series has no default value.
+    create_series => defined $params->{create_series}
+    ? $params->{create_series}
+    : 1
+  };
+  foreach my $field (qw(has_unconfirmed is_open classification)) {
+    if (defined $params->{$field}) {
+      my $name = FIELD_MAP->{$field} || $field;
+      $args->{$name} = $params->{$field};
     }
-    my $product = Bugzilla::Product->create($args);
-    return { id => $self->type('int', $product->id) };
+  }
+  my $product = Bugzilla::Product->create($args);
+  return {id => $self->type('int', $product->id)};
 }
 
 sub update {
-    my ($self, $params) = @_;
+  my ($self, $params) = @_;
 
-    my $dbh = Bugzilla->dbh;
+  my $dbh = Bugzilla->dbh;
 
-    Bugzilla->login(LOGIN_REQUIRED);
-    Bugzilla->user->in_group('editcomponents')
-        || ThrowUserError("auth_failure", { group  => "editcomponents",
-                                            action => "edit",
-                                            object => "products" });
+  Bugzilla->login(LOGIN_REQUIRED);
+  Bugzilla->user->in_group('editcomponents')
+    || ThrowUserError("auth_failure",
+    {group => "editcomponents", action => "edit", object => "products"});
 
-    defined($params->{names}) || defined($params->{ids})
-        || ThrowCodeError('params_required',
-               { function => 'Product.update', params => ['ids', 'names'] });
+  defined($params->{names})
+    || defined($params->{ids})
+    || ThrowCodeError('params_required',
+    {function => 'Product.update', params => ['ids', 'names']});
 
-    my $product_objects = params_to_objects($params, 'Bugzilla::Product');
+  my $product_objects = params_to_objects($params, 'Bugzilla::Product');
 
-    my $values = translate($params, MAPPED_FIELDS);
+  my $values = translate($params, MAPPED_FIELDS);
 
-    # We delete names and ids to keep only new values to set.
-    delete $values->{names};
-    delete $values->{ids};
+  # We delete names and ids to keep only new values to set.
+  delete $values->{names};
+  delete $values->{ids};
 
-    $dbh->bz_start_transaction();
-    foreach my $product (@$product_objects) {
-        $product->set_all($values);
+  $dbh->bz_start_transaction();
+  foreach my $product (@$product_objects) {
+    $product->set_all($values);
+  }
+
+  my %changes;
+  foreach my $product (@$product_objects) {
+    my $returned_changes = $product->update();
+    $changes{$product->id} = translate($returned_changes, MAPPED_RETURNS);
+  }
+  $dbh->bz_commit_transaction();
+
+  my @result;
+  foreach my $product (@$product_objects) {
+    my %hash = (id => $product->id, changes => {},);
+
+    foreach my $field (keys %{$changes{$product->id}}) {
+      my $change = $changes{$product->id}->{$field};
+      $hash{changes}{$field} = {
+        removed => $self->type('string', $change->[0]),
+        added   => $self->type('string', $change->[1])
+      };
     }
 
-    my %changes;
-    foreach my $product (@$product_objects) {
-        my $returned_changes = $product->update();
-        $changes{$product->id} = translate($returned_changes, MAPPED_RETURNS);
-    }
-    $dbh->bz_commit_transaction();
+    push(@result, \%hash);
+  }
 
-    my @result;
-    foreach my $product (@$product_objects) {
-        my %hash = (
-            id      => $product->id,
-            changes => {},
-        );
-
-        foreach my $field (keys %{ $changes{$product->id} }) {
-            my $change = $changes{$product->id}->{$field};
-            $hash{changes}{$field} = {
-                removed => $self->type('string', $change->[0]),
-                added   => $self->type('string', $change->[1])
-            };
-        }
-
-        push(@result, \%hash);
-    }
-
-    return { products => \@result };
+  return {products => \@result};
 }
 
 sub _product_to_hash {
-    my ($self, $params, $product) = @_;
+  my ($self, $params, $product) = @_;
 
-    my $field_data = {
-        id          => $self->type('int', $product->id),
-        name        => $self->type('string', $product->name),
-        description => $self->type('string', $product->description),
-        is_active   => $self->type('boolean', $product->is_active),
-        default_milestone => $self->type('string', $product->default_milestone),
-        has_unconfirmed   => $self->type('boolean', $product->allows_unconfirmed),
-        classification => $self->type('string', $product->classification->name),
-    };
-    if (filter_wants($params, 'components')) {
-        $field_data->{components} = [map {
-            $self->_component_to_hash($_, $params)
-        } @{$product->components}];
-    }
-    if (filter_wants($params, 'versions')) {
-        $field_data->{versions} = [map {
-            $self->_version_to_hash($_, $params)
-        } @{$product->versions}];
-    }
-    if (filter_wants($params, 'milestones')) {
-        $field_data->{milestones} = [map {
-            $self->_milestone_to_hash($_, $params)
-        } @{$product->milestones}];
-    }
-    return filter($params, $field_data);
+  my $field_data = {
+    id                => $self->type('int',     $product->id),
+    name              => $self->type('string',  $product->name),
+    description       => $self->type('string',  $product->description),
+    is_active         => $self->type('boolean', $product->is_active),
+    default_milestone => $self->type('string',  $product->default_milestone),
+    has_unconfirmed   => $self->type('boolean', $product->allows_unconfirmed),
+    classification    => $self->type('string',  $product->classification->name),
+  };
+  if (filter_wants($params, 'components')) {
+    $field_data->{components}
+      = [map { $self->_component_to_hash($_, $params) } @{$product->components}];
+  }
+  if (filter_wants($params, 'versions')) {
+    $field_data->{versions}
+      = [map { $self->_version_to_hash($_, $params) } @{$product->versions}];
+  }
+  if (filter_wants($params, 'milestones')) {
+    $field_data->{milestones}
+      = [map { $self->_milestone_to_hash($_, $params) } @{$product->milestones}];
+  }
+  return filter($params, $field_data);
 }
 
 sub _component_to_hash {
-    my ($self, $component, $params) = @_;
-    my $field_data = filter $params, {
-        id =>
-            $self->type('int', $component->id),
-        name =>
-            $self->type('string', $component->name),
-        description =>
-            $self->type('string' , $component->description),
-        default_assigned_to =>
-            $self->type('email', $component->default_assignee->login),
-        default_qa_contact =>
-            $self->type('email', $component->default_qa_contact ?
-                                 $component->default_qa_contact->login : ""),
-        sort_key =>  # sort_key is returned to match Bug.fields
-            0,
-        is_active =>
-            $self->type('boolean', $component->is_active),
-    }, undef, 'components';
+  my ($self, $component, $params) = @_;
+  my $field_data = filter $params, {
+    id          => $self->type('int',    $component->id),
+    name        => $self->type('string', $component->name),
+    description => $self->type('string', $component->description),
+    default_assigned_to =>
+      $self->type('email', $component->default_assignee->login),
+    default_qa_contact => $self->type(
+      'email',
+      $component->default_qa_contact ? $component->default_qa_contact->login : ""
+    ),
+    sort_key =>    # sort_key is returned to match Bug.fields
+      0,
+    is_active => $self->type('boolean', $component->is_active),
+    },
+    undef, 'components';
 
-    if (filter_wants($params, 'flag_types', undef, 'components')) {
-        $field_data->{flag_types} = {
-            bug =>
-                [map {
-                    $self->_flag_type_to_hash($_)
-                } @{$component->flag_types->{'bug'}}],
-            attachment =>
-                [map {
-                    $self->_flag_type_to_hash($_)
-                } @{$component->flag_types->{'attachment'}}],
-        };
-    }
+  if (filter_wants($params, 'flag_types', undef, 'components')) {
+    $field_data->{flag_types} = {
+      bug =>
+        [map { $self->_flag_type_to_hash($_) } @{$component->flag_types->{'bug'}}],
+      attachment => [
+        map { $self->_flag_type_to_hash($_) } @{$component->flag_types->{'attachment'}}
+      ],
+    };
+  }
 
-    return $field_data;
+  return $field_data;
 }
 
 sub _flag_type_to_hash {
-    my ($self, $flag_type, $params) = @_;
-    return filter $params, {
-        id =>
-            $self->type('int', $flag_type->id),
-        name =>
-            $self->type('string', $flag_type->name),
-        description =>
-            $self->type('string', $flag_type->description),
-        cc_list =>
-            $self->type('string', $flag_type->cc_list),
-        sort_key =>
-            $self->type('int', $flag_type->sortkey),
-        is_active =>
-            $self->type('boolean', $flag_type->is_active),
-        is_requestable =>
-            $self->type('boolean', $flag_type->is_requestable),
-        is_requesteeble =>
-            $self->type('boolean', $flag_type->is_requesteeble),
-        is_multiplicable =>
-            $self->type('boolean', $flag_type->is_multiplicable),
-        grant_group =>
-            $self->type('int', $flag_type->grant_group_id),
-        request_group =>
-            $self->type('int', $flag_type->request_group_id),
-    }, undef, 'flag_types';
+  my ($self, $flag_type, $params) = @_;
+  return filter $params,
+    {
+    id               => $self->type('int',     $flag_type->id),
+    name             => $self->type('string',  $flag_type->name),
+    description      => $self->type('string',  $flag_type->description),
+    cc_list          => $self->type('string',  $flag_type->cc_list),
+    sort_key         => $self->type('int',     $flag_type->sortkey),
+    is_active        => $self->type('boolean', $flag_type->is_active),
+    is_requestable   => $self->type('boolean', $flag_type->is_requestable),
+    is_requesteeble  => $self->type('boolean', $flag_type->is_requesteeble),
+    is_multiplicable => $self->type('boolean', $flag_type->is_multiplicable),
+    grant_group      => $self->type('int',     $flag_type->grant_group_id),
+    request_group    => $self->type('int',     $flag_type->request_group_id),
+    },
+    undef, 'flag_types';
 }
 
 sub _version_to_hash {
-    my ($self, $version, $params) = @_;
-    return filter $params, {
-        id =>
-            $self->type('int', $version->id),
-        name =>
-            $self->type('string', $version->name),
-        sort_key =>  # sort_key is returened to match Bug.fields
-            0,
-        is_active =>
-            $self->type('boolean', $version->is_active),
-    }, undef, 'versions';
+  my ($self, $version, $params) = @_;
+  return filter $params, {
+    id   => $self->type('int',    $version->id),
+    name => $self->type('string', $version->name),
+    sort_key =>    # sort_key is returened to match Bug.fields
+      0,
+    is_active => $self->type('boolean', $version->is_active),
+    },
+    undef, 'versions';
 }
 
 sub _milestone_to_hash {
-    my ($self, $milestone, $params) = @_;
-    return filter $params, {
-        id =>
-            $self->type('int', $milestone->id),
-        name =>
-            $self->type('string', $milestone->name),
-        sort_key =>
-            $self->type('int', $milestone->sortkey),
-        is_active =>
-            $self->type('boolean', $milestone->is_active),
-    }, undef, 'milestones';
+  my ($self, $milestone, $params) = @_;
+  return filter $params,
+    {
+    id        => $self->type('int',     $milestone->id),
+    name      => $self->type('string',  $milestone->name),
+    sort_key  => $self->type('int',     $milestone->sortkey),
+    is_active => $self->type('boolean', $milestone->is_active),
+    },
+    undef, 'milestones';
 }
 
 1;

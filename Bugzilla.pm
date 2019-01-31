@@ -13,11 +13,11 @@ use warnings;
 
 # We want any compile errors to get to the browser, if possible.
 BEGIN {
-    # This makes sure we're in a CGI.
-    if ($ENV{SERVER_SOFTWARE} && !$ENV{MOD_PERL}) {
-        require CGI::Carp;
-        CGI::Carp->import('fatalsToBrowser');
-    }
+  # This makes sure we're in a CGI.
+  if ($ENV{SERVER_SOFTWARE} && !$ENV{MOD_PERL}) {
+    require CGI::Carp;
+    CGI::Carp->import('fatalsToBrowser');
+  }
 }
 
 use Bugzilla::Auth;
@@ -51,15 +51,15 @@ use Safe;
 
 # Scripts that are not stopped by shutdownhtml being in effect.
 use constant SHUTDOWNHTML_EXEMPT => qw(
-    editparams.cgi
-    checksetup.pl
-    migrate.pl
-    recode.pl
+  editparams.cgi
+  checksetup.pl
+  migrate.pl
+  recode.pl
 );
 
 # Non-cgi scripts that should silently exit.
 use constant SHUTDOWNHTML_EXIT_SILENTLY => qw(
-    whine.pl
+  whine.pl
 );
 
 # shutdownhtml pages are sent as an HTTP 503. After how many seconds
@@ -74,119 +74,127 @@ use constant SHUTDOWNHTML_RETRY_AFTER => 3600;
 
 # Note that this is a raw subroutine, not a method, so $class isn't available.
 sub init_page {
-    if (Bugzilla->usage_mode == USAGE_MODE_CMDLINE) {
-        init_console();
-    }
-    elsif (Bugzilla->params->{'utf8'}) {
-        binmode STDOUT, ':utf8';
-    }
+  if (Bugzilla->usage_mode == USAGE_MODE_CMDLINE) {
+    init_console();
+  }
+  elsif (Bugzilla->params->{'utf8'}) {
+    binmode STDOUT, ':utf8';
+  }
 
-    if (${^TAINT}) {
-        my $path = '';
-        if (ON_WINDOWS) {
-            # On Windows, these paths are tainted, preventing
-            # File::Spec::Win32->tmpdir from using them. But we need
-            # a place to temporary store attachments which are uploaded.
-            foreach my $temp (qw(TMPDIR TMP TEMP WINDIR)) {
-                trick_taint($ENV{$temp}) if $ENV{$temp};
-            }
-            # Some DLLs used by Strawberry Perl are also in c\bin,
-            # see https://rt.cpan.org/Public/Bug/Display.html?id=99104
-            if (!ON_ACTIVESTATE) {
-                my $c_path = $path = dirname($^X);
-                $c_path =~ s/\bperl\b(?=\\bin)/c/;
-                $path .= ";$c_path";
-                trick_taint($path);
-            }
-        }
-        # Some environment variables are not taint safe
-        delete @::ENV{'PATH', 'IFS', 'CDPATH', 'ENV', 'BASH_ENV'};
-        # Some modules throw undefined errors (notably File::Spec::Win32) if
-        # PATH is undefined.
-        $ENV{'PATH'} = $path;
+  if (${^TAINT}) {
+    my $path = '';
+    if (ON_WINDOWS) {
+
+      # On Windows, these paths are tainted, preventing
+      # File::Spec::Win32->tmpdir from using them. But we need
+      # a place to temporary store attachments which are uploaded.
+      foreach my $temp (qw(TMPDIR TMP TEMP WINDIR)) {
+        trick_taint($ENV{$temp}) if $ENV{$temp};
+      }
+
+      # Some DLLs used by Strawberry Perl are also in c\bin,
+      # see https://rt.cpan.org/Public/Bug/Display.html?id=99104
+      if (!ON_ACTIVESTATE) {
+        my $c_path = $path = dirname($^X);
+        $c_path =~ s/\bperl\b(?=\\bin)/c/;
+        $path .= ";$c_path";
+        trick_taint($path);
+      }
     }
 
-    # Because this function is run live from perl "use" commands of
-    # other scripts, we're skipping the rest of this function if we get here
-    # during a perl syntax check (perl -c, like we do during the
-    # 001compile.t test).
-    return if $^C;
+    # Some environment variables are not taint safe
+    delete @::ENV{'PATH', 'IFS', 'CDPATH', 'ENV', 'BASH_ENV'};
 
-    # IIS prints out warnings to the webpage, so ignore them, or log them
-    # to a file if the file exists.
-    if ($ENV{SERVER_SOFTWARE} && $ENV{SERVER_SOFTWARE} =~ /microsoft-iis/i) {
-        $SIG{__WARN__} = sub {
-            my ($msg) = @_;
-            my $datadir = bz_locations()->{'datadir'};
-            if (-w "$datadir/errorlog") {
-                my $warning_log = new IO::File(">>$datadir/errorlog");
-                print $warning_log $msg;
-                $warning_log->close();
-            }
-        };
+    # Some modules throw undefined errors (notably File::Spec::Win32) if
+    # PATH is undefined.
+    $ENV{'PATH'} = $path;
+  }
+
+  # Because this function is run live from perl "use" commands of
+  # other scripts, we're skipping the rest of this function if we get here
+  # during a perl syntax check (perl -c, like we do during the
+  # 001compile.t test).
+  return if $^C;
+
+  # IIS prints out warnings to the webpage, so ignore them, or log them
+  # to a file if the file exists.
+  if ($ENV{SERVER_SOFTWARE} && $ENV{SERVER_SOFTWARE} =~ /microsoft-iis/i) {
+    $SIG{__WARN__} = sub {
+      my ($msg) = @_;
+      my $datadir = bz_locations()->{'datadir'};
+      if (-w "$datadir/errorlog") {
+        my $warning_log = new IO::File(">>$datadir/errorlog");
+        print $warning_log $msg;
+        $warning_log->close();
+      }
+    };
+  }
+
+  my $script = basename($0);
+
+  # Because of attachment_base, attachment.cgi handles this itself.
+  if ($script ne 'attachment.cgi') {
+    do_ssl_redirect_if_required();
+  }
+
+  # If Bugzilla is shut down, do not allow anything to run, just display a
+  # message to the user about the downtime and log out.  Scripts listed in
+  # SHUTDOWNHTML_EXEMPT are exempt from this message.
+  #
+  # This code must go here. It cannot go anywhere in Bugzilla::CGI, because
+  # it uses Template, and that causes various dependency loops.
+  if (!grep { $_ eq $script } SHUTDOWNHTML_EXEMPT
+    and Bugzilla->params->{'shutdownhtml'})
+  {
+    # Allow non-cgi scripts to exit silently (without displaying any
+    # message), if desired. At this point, no DBI call has been made
+    # yet, and no error will be returned if the DB is inaccessible.
+    if (!i_am_cgi() && grep { $_ eq $script } SHUTDOWNHTML_EXIT_SILENTLY) {
+      exit;
     }
 
-    my $script = basename($0);
+    # For security reasons, log out users when Bugzilla is down.
+    # Bugzilla->login() is required to catch the logincookie, if any.
+    my $user;
+    eval { $user = Bugzilla->login(LOGIN_OPTIONAL); };
+    if ($@) {
 
-    # Because of attachment_base, attachment.cgi handles this itself.
-    if ($script ne 'attachment.cgi') {
-        do_ssl_redirect_if_required();
+      # The DB is not accessible. Use the default user object.
+      $user = Bugzilla->user;
+      $user->{settings} = {};
     }
+    my $userid = $user->id;
+    Bugzilla->logout();
 
-    # If Bugzilla is shut down, do not allow anything to run, just display a
-    # message to the user about the downtime and log out.  Scripts listed in 
-    # SHUTDOWNHTML_EXEMPT are exempt from this message.
-    #
-    # This code must go here. It cannot go anywhere in Bugzilla::CGI, because
-    # it uses Template, and that causes various dependency loops.
-    if (!grep { $_ eq $script } SHUTDOWNHTML_EXEMPT
-        and Bugzilla->params->{'shutdownhtml'})
+    my $template = Bugzilla->template;
+    my $vars     = {};
+    $vars->{'message'} = 'shutdown';
+    $vars->{'userid'}  = $userid;
+
+    # Generate and return a message about the downtime, appropriately
+    # for if we're a command-line script or a CGI script.
+    my $extension;
+    if (i_am_cgi()
+      && (!Bugzilla->cgi->param('ctype') || Bugzilla->cgi->param('ctype') eq 'html'))
     {
-        # Allow non-cgi scripts to exit silently (without displaying any
-        # message), if desired. At this point, no DBI call has been made
-        # yet, and no error will be returned if the DB is inaccessible.
-        if (!i_am_cgi()
-            && grep { $_ eq $script } SHUTDOWNHTML_EXIT_SILENTLY)
-        {
-            exit;
-        }
-
-        # For security reasons, log out users when Bugzilla is down.
-        # Bugzilla->login() is required to catch the logincookie, if any.
-        my $user;
-        eval { $user = Bugzilla->login(LOGIN_OPTIONAL); };
-        if ($@) {
-            # The DB is not accessible. Use the default user object.
-            $user = Bugzilla->user;
-            $user->{settings} = {};
-        }
-        my $userid = $user->id;
-        Bugzilla->logout();
-
-        my $template = Bugzilla->template;
-        my $vars = {};
-        $vars->{'message'} = 'shutdown';
-        $vars->{'userid'} = $userid;
-        # Generate and return a message about the downtime, appropriately
-        # for if we're a command-line script or a CGI script.
-        my $extension;
-        if (i_am_cgi() && (!Bugzilla->cgi->param('ctype')
-                           || Bugzilla->cgi->param('ctype') eq 'html')) {
-            $extension = 'html';
-        }
-        else {
-            $extension = 'txt';
-        }
-        if (i_am_cgi()) {
-            # Set the HTTP status to 503 when Bugzilla is down to avoid pages
-            # being indexed by search engines.
-            print Bugzilla->cgi->header(-status => 503, 
-                -retry_after => SHUTDOWNHTML_RETRY_AFTER);
-        }
-        $template->process("global/message.$extension.tmpl", $vars)
-            || ThrowTemplateError($template->error);
-        exit;
+      $extension = 'html';
     }
+    else {
+      $extension = 'txt';
+    }
+    if (i_am_cgi()) {
+
+      # Set the HTTP status to 503 when Bugzilla is down to avoid pages
+      # being indexed by search engines.
+      print Bugzilla->cgi->header(
+        -status      => 503,
+        -retry_after => SHUTDOWNHTML_RETRY_AFTER
+      );
+    }
+    $template->process("global/message.$extension.tmpl", $vars)
+      || ThrowTemplateError($template->error);
+    exit;
+  }
 }
 
 #####################################################################
@@ -194,434 +202,446 @@ sub init_page {
 #####################################################################
 
 sub template {
-    return $_[0]->request_cache->{template} ||= Bugzilla::Template->create();
+  return $_[0]->request_cache->{template} ||= Bugzilla::Template->create();
 }
 
 sub template_inner {
-    my ($class, $lang) = @_;
-    my $cache = $class->request_cache;
-    my $current_lang = $cache->{template_current_lang}->[0];
-    $lang ||= $current_lang || '';
-    return $cache->{"template_inner_$lang"} ||= Bugzilla::Template->create(language => $lang);
+  my ($class, $lang) = @_;
+  my $cache        = $class->request_cache;
+  my $current_lang = $cache->{template_current_lang}->[0];
+  $lang ||= $current_lang || '';
+  return $cache->{"template_inner_$lang"}
+    ||= Bugzilla::Template->create(language => $lang);
 }
 
 our $extension_packages;
+
 sub extensions {
-    my ($class) = @_;
-    my $cache = $class->request_cache;
-    if (!$cache->{extensions}) {
-        # Under mod_perl, mod_perl.pl populates $extension_packages for us.
-        if (!$extension_packages) {
-            $extension_packages = Bugzilla::Extension->load_all();
-        }
-        my @extensions;
-        foreach my $package (@$extension_packages) {
-            my $extension = $package->new();
-            if ($extension->enabled) {
-                push(@extensions, $extension);
-            }        
-        }
-        $cache->{extensions} = \@extensions;
+  my ($class) = @_;
+  my $cache = $class->request_cache;
+  if (!$cache->{extensions}) {
+
+    # Under mod_perl, mod_perl.pl populates $extension_packages for us.
+    if (!$extension_packages) {
+      $extension_packages = Bugzilla::Extension->load_all();
     }
-    return $cache->{extensions};
+    my @extensions;
+    foreach my $package (@$extension_packages) {
+      my $extension = $package->new();
+      if ($extension->enabled) {
+        push(@extensions, $extension);
+      }
+    }
+    $cache->{extensions} = \@extensions;
+  }
+  return $cache->{extensions};
 }
 
 sub feature {
-    my ($class, $feature) = @_;
-    my $cache = $class->request_cache;
-    return $cache->{feature}->{$feature}
-        if exists $cache->{feature}->{$feature};
+  my ($class, $feature) = @_;
+  my $cache = $class->request_cache;
+  return $cache->{feature}->{$feature} if exists $cache->{feature}->{$feature};
 
-    my $feature_map = $cache->{feature_map};
-    if (!$feature_map) {
-        foreach my $package (@{ OPTIONAL_MODULES() }) {
-            foreach my $f (@{ $package->{feature} }) {
-                $feature_map->{$f} ||= [];
-                push(@{ $feature_map->{$f} }, $package);
-            }
-        }
-        $cache->{feature_map} = $feature_map;
+  my $feature_map = $cache->{feature_map};
+  if (!$feature_map) {
+    foreach my $package (@{OPTIONAL_MODULES()}) {
+      foreach my $f (@{$package->{feature}}) {
+        $feature_map->{$f} ||= [];
+        push(@{$feature_map->{$f}}, $package);
+      }
     }
+    $cache->{feature_map} = $feature_map;
+  }
 
-    if (!$feature_map->{$feature}) {
-        ThrowCodeError('invalid_feature', { feature => $feature });
-    }
+  if (!$feature_map->{$feature}) {
+    ThrowCodeError('invalid_feature', {feature => $feature});
+  }
 
-    my $success = 1;
-    foreach my $package (@{ $feature_map->{$feature} }) {
-        have_vers($package) or $success = 0;
-    }
-    $cache->{feature}->{$feature} = $success;
-    return $success;
+  my $success = 1;
+  foreach my $package (@{$feature_map->{$feature}}) {
+    have_vers($package) or $success = 0;
+  }
+  $cache->{feature}->{$feature} = $success;
+  return $success;
 }
 
 sub cgi {
-    return $_[0]->request_cache->{cgi} ||= new Bugzilla::CGI();
+  return $_[0]->request_cache->{cgi} ||= new Bugzilla::CGI();
 }
 
 sub input_params {
-    my ($class, $params) = @_;
-    my $cache = $class->request_cache;
-    # This is how the WebService and other places set input_params.
-    if (defined $params) {
-        $cache->{input_params} = $params;
-    }
-    return $cache->{input_params} if defined $cache->{input_params};
+  my ($class, $params) = @_;
+  my $cache = $class->request_cache;
 
-    # Making this scalar makes it a tied hash to the internals of $cgi,
-    # so if a variable is changed, then it actually changes the $cgi object
-    # as well.
-    $cache->{input_params} = $class->cgi->Vars;
-    return $cache->{input_params};
+  # This is how the WebService and other places set input_params.
+  if (defined $params) {
+    $cache->{input_params} = $params;
+  }
+  return $cache->{input_params} if defined $cache->{input_params};
+
+  # Making this scalar makes it a tied hash to the internals of $cgi,
+  # so if a variable is changed, then it actually changes the $cgi object
+  # as well.
+  $cache->{input_params} = $class->cgi->Vars;
+  return $cache->{input_params};
 }
 
 sub localconfig {
-    return $_[0]->process_cache->{localconfig} ||= read_localconfig();
+  return $_[0]->process_cache->{localconfig} ||= read_localconfig();
 }
 
 sub params {
-    return $_[0]->request_cache->{params} ||= Bugzilla::Config::read_param_file();
+  return $_[0]->request_cache->{params} ||= Bugzilla::Config::read_param_file();
 }
 
 sub user {
-    return $_[0]->request_cache->{user} ||= new Bugzilla::User;
+  return $_[0]->request_cache->{user} ||= new Bugzilla::User;
 }
 
 sub set_user {
-    my ($class, $user) = @_;
-    $class->request_cache->{user} = $user;
+  my ($class, $user) = @_;
+  $class->request_cache->{user} = $user;
 }
 
 sub sudoer {
-    return $_[0]->request_cache->{sudoer};
+  return $_[0]->request_cache->{sudoer};
 }
 
 sub sudo_request {
-    my ($class, $new_user, $new_sudoer) = @_;
-    $class->request_cache->{user}   = $new_user;
-    $class->request_cache->{sudoer} = $new_sudoer;
-    # NOTE: If you want to log the start of an sudo session, do it here.
+  my ($class, $new_user, $new_sudoer) = @_;
+  $class->request_cache->{user}   = $new_user;
+  $class->request_cache->{sudoer} = $new_sudoer;
+
+  # NOTE: If you want to log the start of an sudo session, do it here.
 }
 
 sub page_requires_login {
-    return $_[0]->request_cache->{page_requires_login};
+  return $_[0]->request_cache->{page_requires_login};
 }
 
 sub login {
-    my ($class, $type) = @_;
+  my ($class, $type) = @_;
 
-    return $class->user if $class->user->id;
+  return $class->user if $class->user->id;
 
-    my $authorizer = new Bugzilla::Auth();
-    $type = LOGIN_REQUIRED if $class->cgi->param('GoAheadAndLogIn');
+  my $authorizer = new Bugzilla::Auth();
+  $type = LOGIN_REQUIRED if $class->cgi->param('GoAheadAndLogIn');
 
-    if (!defined $type || $type == LOGIN_NORMAL) {
-        $type = $class->params->{'requirelogin'} ? LOGIN_REQUIRED : LOGIN_NORMAL;
+  if (!defined $type || $type == LOGIN_NORMAL) {
+    $type = $class->params->{'requirelogin'} ? LOGIN_REQUIRED : LOGIN_NORMAL;
+  }
+
+  # Allow templates to know that we're in a page that always requires
+  # login.
+  if ($type == LOGIN_REQUIRED) {
+    $class->request_cache->{page_requires_login} = 1;
+  }
+
+  my $authenticated_user = $authorizer->login($type);
+
+  # At this point, we now know if a real person is logged in.
+  # We must now check to see if an sudo session is in progress.
+  # For a session to be in progress, the following must be true:
+  # 1: There must be a logged in user
+  # 2: That user must be in the 'bz_sudoer' group
+  # 3: There must be a valid value in the 'sudo' cookie
+  # 4: A Bugzilla::User object must exist for the given cookie value
+  # 5: That user must NOT be in the 'bz_sudo_protect' group
+  my $token = $class->cgi->cookie('sudo');
+  if (defined $authenticated_user && $token) {
+    my ($user_id, $date, $sudo_target_id) = Bugzilla::Token::GetTokenData($token);
+    if (!$user_id
+      || $user_id != $authenticated_user->id
+      || !detaint_natural($sudo_target_id)
+      || (time() - str2time($date) > MAX_SUDO_TOKEN_AGE))
+    {
+      $class->cgi->remove_cookie('sudo');
+      ThrowUserError('sudo_invalid_cookie');
     }
 
-    # Allow templates to know that we're in a page that always requires
-    # login.
-    if ($type == LOGIN_REQUIRED) {
-        $class->request_cache->{page_requires_login} = 1;
-    }
+    my $sudo_target = new Bugzilla::User($sudo_target_id);
+    if ( $authenticated_user->in_group('bz_sudoers')
+      && defined $sudo_target
+      && !$sudo_target->in_group('bz_sudo_protect'))
+    {
+      $class->set_user($sudo_target);
+      $class->request_cache->{sudoer} = $authenticated_user;
 
-    my $authenticated_user = $authorizer->login($type);
-    
-    # At this point, we now know if a real person is logged in.
-    # We must now check to see if an sudo session is in progress.
-    # For a session to be in progress, the following must be true:
-    # 1: There must be a logged in user
-    # 2: That user must be in the 'bz_sudoer' group
-    # 3: There must be a valid value in the 'sudo' cookie
-    # 4: A Bugzilla::User object must exist for the given cookie value
-    # 5: That user must NOT be in the 'bz_sudo_protect' group
-    my $token = $class->cgi->cookie('sudo');
-    if (defined $authenticated_user && $token) {
-        my ($user_id, $date, $sudo_target_id) = Bugzilla::Token::GetTokenData($token);
-        if (!$user_id
-            || $user_id != $authenticated_user->id
-            || !detaint_natural($sudo_target_id)
-            || (time() - str2time($date) > MAX_SUDO_TOKEN_AGE))
-        {
-            $class->cgi->remove_cookie('sudo');
-            ThrowUserError('sudo_invalid_cookie');
-        }
+      # And make sure that both users have the same Auth object,
+      # since we never call Auth::login for the sudo target.
+      $sudo_target->set_authorizer($authenticated_user->authorizer);
 
-        my $sudo_target = new Bugzilla::User($sudo_target_id);
-        if ($authenticated_user->in_group('bz_sudoers')
-            && defined $sudo_target
-            && !$sudo_target->in_group('bz_sudo_protect'))
-        {
-            $class->set_user($sudo_target);
-            $class->request_cache->{sudoer} = $authenticated_user;
-            # And make sure that both users have the same Auth object,
-            # since we never call Auth::login for the sudo target.
-            $sudo_target->set_authorizer($authenticated_user->authorizer);
-
-            # NOTE: If you want to do any special logging, do it here.
-        }
-        else {
-            delete_token($token);
-            $class->cgi->remove_cookie('sudo');
-            ThrowUserError('sudo_illegal_action', { sudoer => $authenticated_user,
-                                                    target_user => $sudo_target });
-        }
+      # NOTE: If you want to do any special logging, do it here.
     }
     else {
-        $class->set_user($authenticated_user);
+      delete_token($token);
+      $class->cgi->remove_cookie('sudo');
+      ThrowUserError('sudo_illegal_action',
+        {sudoer => $authenticated_user, target_user => $sudo_target});
     }
+  }
+  else {
+    $class->set_user($authenticated_user);
+  }
 
-    if ($class->sudoer) {
-        $class->sudoer->update_last_seen_date();
-    } else {
-        $class->user->update_last_seen_date();
-    }
+  if ($class->sudoer) {
+    $class->sudoer->update_last_seen_date();
+  }
+  else {
+    $class->user->update_last_seen_date();
+  }
 
-    return $class->user;
+  return $class->user;
 }
 
 sub logout {
-    my ($class, $option) = @_;
+  my ($class, $option) = @_;
 
-    # If we're not logged in, go away
-    return unless $class->user->id;
+  # If we're not logged in, go away
+  return unless $class->user->id;
 
-    $option = LOGOUT_CURRENT unless defined $option;
-    Bugzilla::Auth::Persist::Cookie->logout({type => $option});
-    $class->logout_request() unless $option eq LOGOUT_KEEP_CURRENT;
+  $option = LOGOUT_CURRENT unless defined $option;
+  Bugzilla::Auth::Persist::Cookie->logout({type => $option});
+  $class->logout_request() unless $option eq LOGOUT_KEEP_CURRENT;
 }
 
 sub logout_user {
-    my ($class, $user) = @_;
-    # When we're logging out another user we leave cookies alone, and
-    # therefore avoid calling Bugzilla->logout() directly.
-    Bugzilla::Auth::Persist::Cookie->logout({user => $user});
+  my ($class, $user) = @_;
+
+  # When we're logging out another user we leave cookies alone, and
+  # therefore avoid calling Bugzilla->logout() directly.
+  Bugzilla::Auth::Persist::Cookie->logout({user => $user});
 }
 
 # just a compatibility front-end to logout_user that gets a user by id
 sub logout_user_by_id {
-    my ($class, $id) = @_;
-    my $user = new Bugzilla::User($id);
-    $class->logout_user($user);
+  my ($class, $id) = @_;
+  my $user = new Bugzilla::User($id);
+  $class->logout_user($user);
 }
 
 # hack that invalidates credentials for a single request
 sub logout_request {
-    my $class = shift;
-    delete $class->request_cache->{user};
-    delete $class->request_cache->{sudoer};
-    # We can't delete from $cgi->cookie, so logincookie data will remain
-    # there. Don't rely on it: use Bugzilla->user->login instead!
+  my $class = shift;
+  delete $class->request_cache->{user};
+  delete $class->request_cache->{sudoer};
+
+  # We can't delete from $cgi->cookie, so logincookie data will remain
+  # there. Don't rely on it: use Bugzilla->user->login instead!
 }
 
 sub job_queue {
-    require Bugzilla::JobQueue;
-    return $_[0]->request_cache->{job_queue} ||= Bugzilla::JobQueue->new();
+  require Bugzilla::JobQueue;
+  return $_[0]->request_cache->{job_queue} ||= Bugzilla::JobQueue->new();
 }
 
 sub dbh {
-    # If we're not connected, then we must want the main db
-    return $_[0]->request_cache->{dbh} ||= $_[0]->dbh_main;
+
+  # If we're not connected, then we must want the main db
+  return $_[0]->request_cache->{dbh} ||= $_[0]->dbh_main;
 }
 
 sub dbh_main {
-    return $_[0]->request_cache->{dbh_main} ||= Bugzilla::DB::connect_main();
+  return $_[0]->request_cache->{dbh_main} ||= Bugzilla::DB::connect_main();
 }
 
 sub languages {
-    return Bugzilla::Install::Util::supported_languages();
+  return Bugzilla::Install::Util::supported_languages();
 }
 
 sub current_language {
-    return $_[0]->request_cache->{current_language} ||= (include_languages())[0];
+  return $_[0]->request_cache->{current_language} ||= (include_languages())[0];
 }
 
 sub error_mode {
-    my ($class, $newval) = @_;
-    if (defined $newval) {
-        $class->request_cache->{error_mode} = $newval;
-    }
+  my ($class, $newval) = @_;
+  if (defined $newval) {
+    $class->request_cache->{error_mode} = $newval;
+  }
 
-    # XXX - Once we require Perl 5.10.1, this test can be replaced by //.
-    if (exists $class->request_cache->{error_mode}) {
-        return $class->request_cache->{error_mode};
-    }
-    else {
-        return (i_am_cgi() ? ERROR_MODE_WEBPAGE : ERROR_MODE_DIE);
-    }
+  # XXX - Once we require Perl 5.10.1, this test can be replaced by //.
+  if (exists $class->request_cache->{error_mode}) {
+    return $class->request_cache->{error_mode};
+  }
+  else {
+    return (i_am_cgi() ? ERROR_MODE_WEBPAGE : ERROR_MODE_DIE);
+  }
 }
 
 # This is used only by Bugzilla::Error to throw errors.
 sub _json_server {
-    my ($class, $newval) = @_;
-    if (defined $newval) {
-        $class->request_cache->{_json_server} = $newval;
-    }
-    return $class->request_cache->{_json_server};
+  my ($class, $newval) = @_;
+  if (defined $newval) {
+    $class->request_cache->{_json_server} = $newval;
+  }
+  return $class->request_cache->{_json_server};
 }
 
 sub usage_mode {
-    my ($class, $newval) = @_;
-    if (defined $newval) {
-        if ($newval == USAGE_MODE_BROWSER) {
-            $class->error_mode(ERROR_MODE_WEBPAGE);
-        }
-        elsif ($newval == USAGE_MODE_CMDLINE) {
-            $class->error_mode(ERROR_MODE_DIE);
-        }
-        elsif ($newval == USAGE_MODE_XMLRPC) {
-            $class->error_mode(ERROR_MODE_DIE_SOAP_FAULT);
-        }
-        elsif ($newval == USAGE_MODE_JSON) {
-            $class->error_mode(ERROR_MODE_JSON_RPC);
-        }
-        elsif ($newval == USAGE_MODE_EMAIL) {
-            $class->error_mode(ERROR_MODE_DIE);
-        }
-        elsif ($newval == USAGE_MODE_TEST) {
-            $class->error_mode(ERROR_MODE_TEST);
-        }
-        elsif ($newval == USAGE_MODE_REST) {
-            $class->error_mode(ERROR_MODE_REST);
-        }
-        else {
-            ThrowCodeError('usage_mode_invalid',
-                           {'invalid_usage_mode', $newval});
-        }
-        $class->request_cache->{usage_mode} = $newval;
+  my ($class, $newval) = @_;
+  if (defined $newval) {
+    if ($newval == USAGE_MODE_BROWSER) {
+      $class->error_mode(ERROR_MODE_WEBPAGE);
     }
-
-    # XXX - Once we require Perl 5.10.1, this test can be replaced by //.
-    if (exists $class->request_cache->{usage_mode}) {
-        return $class->request_cache->{usage_mode};
+    elsif ($newval == USAGE_MODE_CMDLINE) {
+      $class->error_mode(ERROR_MODE_DIE);
+    }
+    elsif ($newval == USAGE_MODE_XMLRPC) {
+      $class->error_mode(ERROR_MODE_DIE_SOAP_FAULT);
+    }
+    elsif ($newval == USAGE_MODE_JSON) {
+      $class->error_mode(ERROR_MODE_JSON_RPC);
+    }
+    elsif ($newval == USAGE_MODE_EMAIL) {
+      $class->error_mode(ERROR_MODE_DIE);
+    }
+    elsif ($newval == USAGE_MODE_TEST) {
+      $class->error_mode(ERROR_MODE_TEST);
+    }
+    elsif ($newval == USAGE_MODE_REST) {
+      $class->error_mode(ERROR_MODE_REST);
     }
     else {
-        return (i_am_cgi()? USAGE_MODE_BROWSER : USAGE_MODE_CMDLINE);
+      ThrowCodeError('usage_mode_invalid', {'invalid_usage_mode', $newval});
     }
+    $class->request_cache->{usage_mode} = $newval;
+  }
+
+  # XXX - Once we require Perl 5.10.1, this test can be replaced by //.
+  if (exists $class->request_cache->{usage_mode}) {
+    return $class->request_cache->{usage_mode};
+  }
+  else {
+    return (i_am_cgi() ? USAGE_MODE_BROWSER : USAGE_MODE_CMDLINE);
+  }
 }
 
 sub installation_mode {
-    my ($class, $newval) = @_;
-    ($class->request_cache->{installation_mode} = $newval) if defined $newval;
-    return $class->request_cache->{installation_mode}
-        || INSTALLATION_MODE_INTERACTIVE;
+  my ($class, $newval) = @_;
+  ($class->request_cache->{installation_mode} = $newval) if defined $newval;
+  return $class->request_cache->{installation_mode}
+    || INSTALLATION_MODE_INTERACTIVE;
 }
 
 sub installation_answers {
-    my ($class, $filename) = @_;
-    if ($filename) {
-        my $s = new Safe;
-        $s->rdo($filename);
+  my ($class, $filename) = @_;
+  if ($filename) {
+    my $s = new Safe;
+    $s->rdo($filename);
 
-        die "Error reading $filename: $!" if $!;
-        die "Error evaluating $filename: $@" if $@;
+    die "Error reading $filename: $!"    if $!;
+    die "Error evaluating $filename: $@" if $@;
 
-        # Now read the param back out from the sandbox
-        $class->request_cache->{installation_answers} = $s->varglob('answer');
-    }
-    return $class->request_cache->{installation_answers} || {};
+    # Now read the param back out from the sandbox
+    $class->request_cache->{installation_answers} = $s->varglob('answer');
+  }
+  return $class->request_cache->{installation_answers} || {};
 }
 
 sub switch_to_shadow_db {
-    my $class = shift;
+  my $class = shift;
 
-    if (!$class->request_cache->{dbh_shadow}) {
-        if ($class->params->{'shadowdb'}) {
-            $class->request_cache->{dbh_shadow} = Bugzilla::DB::connect_shadow();
-        } else {
-            $class->request_cache->{dbh_shadow} = $class->dbh_main;
-        }
+  if (!$class->request_cache->{dbh_shadow}) {
+    if ($class->params->{'shadowdb'}) {
+      $class->request_cache->{dbh_shadow} = Bugzilla::DB::connect_shadow();
     }
+    else {
+      $class->request_cache->{dbh_shadow} = $class->dbh_main;
+    }
+  }
 
-    $class->request_cache->{dbh} = $class->request_cache->{dbh_shadow};
-    # we have to return $class->dbh instead of {dbh} as
-    # {dbh_shadow} may be undefined if no shadow DB is used
-    # and no connection to the main DB has been established yet.
-    return $class->dbh;
+  $class->request_cache->{dbh} = $class->request_cache->{dbh_shadow};
+
+  # we have to return $class->dbh instead of {dbh} as
+  # {dbh_shadow} may be undefined if no shadow DB is used
+  # and no connection to the main DB has been established yet.
+  return $class->dbh;
 }
 
 sub switch_to_main_db {
-    my $class = shift;
+  my $class = shift;
 
-    $class->request_cache->{dbh} = $class->dbh_main;
-    return $class->dbh_main;
+  $class->request_cache->{dbh} = $class->dbh_main;
+  return $class->dbh_main;
 }
 
 sub is_shadow_db {
-    my $class = shift;
-    return $class->request_cache->{dbh} != $class->dbh_main;
+  my $class = shift;
+  return $class->request_cache->{dbh} != $class->dbh_main;
 }
 
 sub fields {
-    my ($class, $criteria) = @_;
-    $criteria ||= {};
-    my $cache = $class->request_cache;
+  my ($class, $criteria) = @_;
+  $criteria ||= {};
+  my $cache = $class->request_cache;
 
-    # We create an advanced cache for fields by type, so that we
-    # can avoid going back to the database for every fields() call.
-    # (And most of our fields() calls are for getting fields by type.)
-    #
-    # We also cache fields by name, because calling $field->name a few
-    # million times can be slow in calling code, but if we just do it
-    # once here, that makes things a lot faster for callers.
-    if (!defined $cache->{fields}) {
-        my @all_fields = Bugzilla::Field->get_all;
-        my (%by_name, %by_type);
-        foreach my $field (@all_fields) {
-            my $name = $field->name;
-            $by_type{$field->type}->{$name} = $field;
-            $by_name{$name} = $field;
-        }
-        $cache->{fields} = { by_type => \%by_type, by_name => \%by_name };
+  # We create an advanced cache for fields by type, so that we
+  # can avoid going back to the database for every fields() call.
+  # (And most of our fields() calls are for getting fields by type.)
+  #
+  # We also cache fields by name, because calling $field->name a few
+  # million times can be slow in calling code, but if we just do it
+  # once here, that makes things a lot faster for callers.
+  if (!defined $cache->{fields}) {
+    my @all_fields = Bugzilla::Field->get_all;
+    my (%by_name, %by_type);
+    foreach my $field (@all_fields) {
+      my $name = $field->name;
+      $by_type{$field->type}->{$name} = $field;
+      $by_name{$name} = $field;
     }
+    $cache->{fields} = {by_type => \%by_type, by_name => \%by_name};
+  }
 
-    my $fields = $cache->{fields};
-    my %requested;
-    if (my $types = delete $criteria->{type}) {
-        $types = ref($types) ? $types : [$types];
-        %requested = map { %{ $fields->{by_type}->{$_} || {} } } @$types;
+  my $fields = $cache->{fields};
+  my %requested;
+  if (my $types = delete $criteria->{type}) {
+    $types = ref($types) ? $types : [$types];
+    %requested = map { %{$fields->{by_type}->{$_} || {}} } @$types;
+  }
+  else {
+    %requested = %{$fields->{by_name}};
+  }
+
+  my $do_by_name = delete $criteria->{by_name};
+
+  # Filtering before returning the fields based on
+  # the criterias.
+  foreach my $filter (keys %$criteria) {
+    foreach my $field (keys %requested) {
+      if ($requested{$field}->$filter != $criteria->{$filter}) {
+        delete $requested{$field};
+      }
     }
-    else {
-        %requested = %{ $fields->{by_name} };
-    }
+  }
 
-    my $do_by_name = delete $criteria->{by_name};
-
-    # Filtering before returning the fields based on
-    # the criterias.
-    foreach my $filter (keys %$criteria) {
-        foreach my $field (keys %requested) {
-            if ($requested{$field}->$filter != $criteria->{$filter}) {
-                delete $requested{$field};
-            }
-        }
-    }
-
-    return $do_by_name ? \%requested
-        : [sort { $a->sortkey <=> $b->sortkey || $a->name cmp $b->name } values %requested];
+  return $do_by_name
+    ? \%requested
+    : [sort { $a->sortkey <=> $b->sortkey || $a->name cmp $b->name }
+      values %requested];
 }
 
 sub active_custom_fields {
-    my $class = shift;
-    if (!exists $class->request_cache->{active_custom_fields}) {
-        $class->request_cache->{active_custom_fields} =
-          Bugzilla::Field->match({ custom => 1, obsolete => 0 });
-    }
-    return @{$class->request_cache->{active_custom_fields}};
+  my $class = shift;
+  if (!exists $class->request_cache->{active_custom_fields}) {
+    $class->request_cache->{active_custom_fields}
+      = Bugzilla::Field->match({custom => 1, obsolete => 0});
+  }
+  return @{$class->request_cache->{active_custom_fields}};
 }
 
 sub has_flags {
-    my $class = shift;
+  my $class = shift;
 
-    if (!defined $class->request_cache->{has_flags}) {
-        $class->request_cache->{has_flags} = Bugzilla::Flag->any_exist;
-    }
-    return $class->request_cache->{has_flags};
+  if (!defined $class->request_cache->{has_flags}) {
+    $class->request_cache->{has_flags} = Bugzilla::Flag->any_exist;
+  }
+  return $class->request_cache->{has_flags};
 }
 
 sub local_timezone {
-    return $_[0]->process_cache->{local_timezone}
-             ||= DateTime::TimeZone->new(name => 'local');
+  return $_[0]->process_cache->{local_timezone}
+    ||= DateTime::TimeZone->new(name => 'local');
 }
 
 # This creates the request cache for non-mod_perl installations.
@@ -631,27 +651,28 @@ sub local_timezone {
 our $_request_cache = $Bugzilla::Install::Util::_cache;
 
 sub request_cache {
-    if ($ENV{MOD_PERL}) {
-        require Apache2::RequestUtil;
-        # Sometimes (for example, during mod_perl.pl), the request
-        # object isn't available, and we should use $_request_cache instead.
-        my $request = eval { Apache2::RequestUtil->request };
-        return $_request_cache if !$request;
-        return $request->pnotes();
-    }
-    return $_request_cache;
+  if ($ENV{MOD_PERL}) {
+    require Apache2::RequestUtil;
+
+    # Sometimes (for example, during mod_perl.pl), the request
+    # object isn't available, and we should use $_request_cache instead.
+    my $request = eval { Apache2::RequestUtil->request };
+    return $_request_cache if !$request;
+    return $request->pnotes();
+  }
+  return $_request_cache;
 }
 
 sub clear_request_cache {
-    $_request_cache = {};
-    if ($ENV{MOD_PERL}) {
-        require Apache2::RequestUtil;
-        my $request = eval { Apache2::RequestUtil->request };
-        if ($request) {
-            my $pnotes = $request->pnotes;
-            delete @$pnotes{(keys %$pnotes)};
-        }
+  $_request_cache = {};
+  if ($ENV{MOD_PERL}) {
+    require Apache2::RequestUtil;
+    my $request = eval { Apache2::RequestUtil->request };
+    if ($request) {
+      my $pnotes = $request->pnotes;
+      delete @$pnotes{(keys %$pnotes)};
     }
+  }
 }
 
 # This is a per-process cache.  Under mod_cgi it's identical to the
@@ -660,13 +681,13 @@ sub clear_request_cache {
 our $_process_cache = {};
 
 sub process_cache {
-    return $_process_cache;
+  return $_process_cache;
 }
 
 # This is a memcached wrapper, which provides cross-process and cross-system
 # caching.
 sub memcached {
-    return $_[0]->process_cache->{memcached} ||= Bugzilla::Memcached->_new();
+  return $_[0]->process_cache->{memcached} ||= Bugzilla::Memcached->_new();
 }
 
 # Private methods
@@ -674,28 +695,29 @@ sub memcached {
 # Per-process cleanup. Note that this is a plain subroutine, not a method,
 # so we don't have $class available.
 sub _cleanup {
-    my $cache = Bugzilla->request_cache;
-    my $main = $cache->{dbh_main};
-    my $shadow = $cache->{dbh_shadow};
-    foreach my $dbh ($main, $shadow) {
-        next if !$dbh;
-        $dbh->bz_rollback_transaction() if $dbh->bz_in_transaction;
-        $dbh->disconnect;
-    }
-    my $smtp = $cache->{smtp};
-    $smtp->disconnect if $smtp;
-    clear_request_cache();
+  my $cache  = Bugzilla->request_cache;
+  my $main   = $cache->{dbh_main};
+  my $shadow = $cache->{dbh_shadow};
+  foreach my $dbh ($main, $shadow) {
+    next if !$dbh;
+    $dbh->bz_rollback_transaction() if $dbh->bz_in_transaction;
+    $dbh->disconnect;
+  }
+  my $smtp = $cache->{smtp};
+  $smtp->disconnect if $smtp;
+  clear_request_cache();
 
-    # These are both set by CGI.pm but need to be undone so that
-    # Apache can actually shut down its children if it needs to.
-    foreach my $signal (qw(TERM PIPE)) {
-        $SIG{$signal} = 'DEFAULT' if $SIG{$signal} && $SIG{$signal} eq 'IGNORE';
-    }
+  # These are both set by CGI.pm but need to be undone so that
+  # Apache can actually shut down its children if it needs to.
+  foreach my $signal (qw(TERM PIPE)) {
+    $SIG{$signal} = 'DEFAULT' if $SIG{$signal} && $SIG{$signal} eq 'IGNORE';
+  }
 }
 
 sub END {
-    # Bugzilla.pm cannot compile in mod_perl.pl if this runs.
-    _cleanup() unless $ENV{MOD_PERL};
+
+  # Bugzilla.pm cannot compile in mod_perl.pl if this runs.
+  _cleanup() unless $ENV{MOD_PERL};
 }
 
 init_page() if !$ENV{MOD_PERL};

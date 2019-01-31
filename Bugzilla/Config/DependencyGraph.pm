@@ -16,21 +16,17 @@ use Bugzilla::Config::Common;
 our $sortkey = 800;
 
 sub get_param_list {
-  my $class = shift;
+  my $class      = shift;
   my @param_list = (
-  {
-   name => 'webdotbase',
-   type => 't',
-   default => '',
-   checker => \&check_webdotbase
-  },
+    {
+      name    => 'webdotbase',
+      type    => 't',
+      default => '',
+      checker => \&check_webdotbase
+    },
 
-  {
-   name => 'font_file',
-   type => 't',
-   default => '',
-   checker => \&check_font_file
-  });
+    {name => 'font_file', type => 't', default => '', checker => \&check_font_file}
+  );
   return @param_list;
 }
 

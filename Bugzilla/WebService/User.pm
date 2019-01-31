@@ -18,40 +18,35 @@ use Bugzilla::Error;
 use Bugzilla::Group;
 use Bugzilla::User;
 use Bugzilla::Util qw(trim detaint_natural);
-use Bugzilla::WebService::Util qw(filter filter_wants validate translate params_to_objects);
+use Bugzilla::WebService::Util
+  qw(filter filter_wants validate translate params_to_objects);
 
 use List::Util qw(first min);
 
 # Don't need auth to login
-use constant LOGIN_EXEMPT => {
-    login => 1,
-    offer_account_by_email => 1,
-};
+use constant LOGIN_EXEMPT => {login => 1, offer_account_by_email => 1,};
 
 use constant READ_ONLY => qw(
-    get
+  get
 );
 
 use constant PUBLIC_METHODS => qw(
-    create
-    get
-    login
-    logout
-    offer_account_by_email
-    update
-    valid_login
+  create
+  get
+  login
+  logout
+  offer_account_by_email
+  update
+  valid_login
 );
 
-use constant MAPPED_FIELDS => {
-    email => 'login',
-    full_name => 'name',
-    login_denied_text => 'disabledtext',
-};
+use constant MAPPED_FIELDS =>
+  {email => 'login', full_name => 'name', login_denied_text => 'disabledtext',};
 
 use constant MAPPED_RETURNS => {
-    login_name => 'email',
-    realname => 'full_name',
-    disabledtext => 'login_denied_text',
+  login_name   => 'email',
+  realname     => 'full_name',
+  disabledtext => 'login_denied_text',
 };
 
 ##############
@@ -59,38 +54,38 @@ use constant MAPPED_RETURNS => {
 ##############
 
 sub login {
-    my ($self, $params) = @_;
+  my ($self, $params) = @_;
 
-    # Check to see if we are already logged in
-    my $user = Bugzilla->user;
-    if ($user->id) {
-        return $self->_login_to_hash($user);
-    }
-
-    # Username and password params are required 
-    foreach my $param ("login", "password") {
-        (defined $params->{$param} || defined $params->{'Bugzilla_' . $param})
-            || ThrowCodeError('param_required', { param => $param });
-    }
-
-    $user = Bugzilla->login();
+  # Check to see if we are already logged in
+  my $user = Bugzilla->user;
+  if ($user->id) {
     return $self->_login_to_hash($user);
+  }
+
+  # Username and password params are required
+  foreach my $param ("login", "password") {
+    (defined $params->{$param} || defined $params->{'Bugzilla_' . $param})
+      || ThrowCodeError('param_required', {param => $param});
+  }
+
+  $user = Bugzilla->login();
+  return $self->_login_to_hash($user);
 }
 
 sub logout {
-    my $self = shift;
-    Bugzilla->logout;
+  my $self = shift;
+  Bugzilla->logout;
 }
 
 sub valid_login {
-    my ($self, $params) = @_;
-    defined $params->{login}
-        || ThrowCodeError('param_required', { param => 'login' });
-    Bugzilla->login();
-    if (Bugzilla->user->id && Bugzilla->user->login eq $params->{login}) {
-        return $self->type('boolean', 1);
-    }
-    return $self->type('boolean', 0);
+  my ($self, $params) = @_;
+  defined $params->{login}
+    || ThrowCodeError('param_required', {param => 'login'});
+  Bugzilla->login();
+  if (Bugzilla->user->id && Bugzilla->user->login eq $params->{login}) {
+    return $self->type('boolean', 1);
+  }
+  return $self->type('boolean', 0);
 }
 
 #################
@@ -98,168 +93,171 @@ sub valid_login {
 #################
 
 sub offer_account_by_email {
-    my $self = shift;
-    my ($params) = @_;
-    my $email = trim($params->{email})
-        || ThrowCodeError('param_required', { param => 'email' });
+  my $self     = shift;
+  my ($params) = @_;
+  my $email    = trim($params->{email})
+    || ThrowCodeError('param_required', {param => 'email'});
 
-    Bugzilla->user->check_account_creation_enabled;
-    Bugzilla->user->check_and_send_account_creation_confirmation($email);
-    return undef;
+  Bugzilla->user->check_account_creation_enabled;
+  Bugzilla->user->check_and_send_account_creation_confirmation($email);
+  return undef;
 }
 
 sub create {
-    my $self = shift;
-    my ($params) = @_;
+  my $self = shift;
+  my ($params) = @_;
 
-    Bugzilla->user->in_group('editusers') 
-        || ThrowUserError("auth_failure", { group  => "editusers",
-                                            action => "add",
-                                            object => "users"});
+  Bugzilla->user->in_group('editusers')
+    || ThrowUserError("auth_failure",
+    {group => "editusers", action => "add", object => "users"});
 
-    my $email = trim($params->{email})
-        || ThrowCodeError('param_required', { param => 'email' });
-    my $realname = trim($params->{full_name});
-    my $password = trim($params->{password}) || '*';
+  my $email = trim($params->{email})
+    || ThrowCodeError('param_required', {param => 'email'});
+  my $realname = trim($params->{full_name});
+  my $password = trim($params->{password}) || '*';
 
-    my $user = Bugzilla::User->create({
-        login_name    => $email,
-        realname      => $realname,
-        cryptpassword => $password
+  my $user
+    = Bugzilla::User->create({
+    login_name => $email, realname => $realname, cryptpassword => $password
     });
 
-    return { id => $self->type('int', $user->id) };
+  return {id => $self->type('int', $user->id)};
 }
 
 
-# function to return user information by passing either user ids or 
+# function to return user information by passing either user ids or
 # login names or both together:
-# $call = $rpc->call( 'User.get', { ids => [1,2,3], 
+# $call = $rpc->call( 'User.get', { ids => [1,2,3],
 #         names => ['testusera@redhat.com', 'testuserb@redhat.com'] });
 sub get {
-    my ($self, $params) = validate(@_, 'names', 'ids', 'match', 'group_ids', 'groups');
+  my ($self, $params)
+    = validate(@_, 'names', 'ids', 'match', 'group_ids', 'groups');
 
-    Bugzilla->switch_to_shadow_db();
+  Bugzilla->switch_to_shadow_db();
 
-    defined($params->{names}) || defined($params->{ids})
-        || defined($params->{match})
-        || ThrowCodeError('params_required', 
-               { function => 'User.get', params => ['ids', 'names', 'match'] });
+       defined($params->{names})
+    || defined($params->{ids})
+    || defined($params->{match})
+    || ThrowCodeError('params_required',
+    {function => 'User.get', params => ['ids', 'names', 'match']});
 
-    my @user_objects;
-    @user_objects = map { Bugzilla::User->check($_) } @{ $params->{names} }
-                    if $params->{names};
+  my @user_objects;
+  @user_objects = map { Bugzilla::User->check($_) } @{$params->{names}}
+    if $params->{names};
 
-    # start filtering to remove duplicate user ids
-    my %unique_users = map { $_->id => $_ } @user_objects;
-    @user_objects = values %unique_users;
-      
-    my @users;
+  # start filtering to remove duplicate user ids
+  my %unique_users = map { $_->id => $_ } @user_objects;
+  @user_objects = values %unique_users;
 
-    # If the user is not logged in: Return an error if they passed any user ids.
-    # Otherwise, return a limited amount of information based on login names.
-    if (!Bugzilla->user->id){
-        if ($params->{ids}){
-            ThrowUserError("user_access_by_id_denied");
-        }
-        if ($params->{match}) {
-            ThrowUserError('user_access_by_match_denied');
-        }
-        my $in_group = $self->_filter_users_by_group(
-            \@user_objects, $params);
-        @users = map { filter $params, {
-                     id        => $self->type('int', $_->id),
-                     real_name => $self->type('string', $_->name),
-                     name      => $self->type('email', $_->login),
-                 } } @$in_group;
+  my @users;
 
-        return { users => \@users };
+  # If the user is not logged in: Return an error if they passed any user ids.
+  # Otherwise, return a limited amount of information based on login names.
+  if (!Bugzilla->user->id) {
+    if ($params->{ids}) {
+      ThrowUserError("user_access_by_id_denied");
     }
-
-    my $obj_by_ids;
-    $obj_by_ids = Bugzilla::User->new_from_list($params->{ids}) if $params->{ids};
-
-    # obj_by_ids are only visible to the user if they can see
-    # the otheruser, for non visible otheruser throw an error
-    foreach my $obj (@$obj_by_ids) {
-        if (Bugzilla->user->can_see_user($obj)){
-            if (!$unique_users{$obj->id}) {
-                push (@user_objects, $obj);
-                $unique_users{$obj->id} = $obj;
-            }
-        }
-        else {
-            ThrowUserError('auth_failure', {reason => "not_visible",
-                                            action => "access",
-                                            object => "user",
-                                            userid => $obj->id});
-        }
+    if ($params->{match}) {
+      ThrowUserError('user_access_by_match_denied');
     }
-
-    # User Matching
-    my $limit = Bugzilla->params->{maxusermatches};
-    if ($params->{limit}) {
-        detaint_natural($params->{limit})
-            || ThrowCodeError('param_must_be_numeric',
-                              { function => 'Bugzilla::WebService::User::match',
-                                param    => 'limit' });
-        $limit = $limit ? min($params->{limit}, $limit) : $params->{limit};
-    }
-
-    my $exclude_disabled = $params->{'include_disabled'} ? 0 : 1;
-    foreach my $match_string (@{ $params->{'match'} || [] }) {
-        my $matched = Bugzilla::User::match($match_string, $limit, $exclude_disabled);
-        foreach my $user (@$matched) {
-            if (!$unique_users{$user->id}) {
-                push(@user_objects, $user);
-                $unique_users{$user->id} = $user;
-            }
-        }
-    }
-
     my $in_group = $self->_filter_users_by_group(\@user_objects, $params);
-    foreach my $user (@$in_group) {
-        my $user_info = filter $params, {
-            id        => $self->type('int', $user->id),
-            real_name => $self->type('string', $user->name),
-            name      => $self->type('email', $user->login),
-            email     => $self->type('email', $user->email),
-            can_login => $self->type('boolean', $user->is_enabled ? 1 : 0),
-        };
-
-        if (Bugzilla->user->in_group('editusers')) {
-            $user_info->{email_enabled}     = $self->type('boolean', $user->email_enabled);
-            $user_info->{login_denied_text} = $self->type('string', $user->disabledtext);
+    @users = map {
+      filter $params,
+        {
+        id        => $self->type('int',    $_->id),
+        real_name => $self->type('string', $_->name),
+        name      => $self->type('email',  $_->login),
         }
+    } @$in_group;
 
-        if (Bugzilla->user->id == $user->id) {
-            if (filter_wants($params, 'saved_searches')) {
-                $user_info->{saved_searches} = [
-                    map { $self->_query_to_hash($_) } @{ $user->queries }
-                ];
-            }
-            if (filter_wants($params, 'saved_reports')) {
-                $user_info->{saved_reports}  = [
-                    map { $self->_report_to_hash($_) } @{ $user->reports }
-                ];
-            }
+    return {users => \@users};
+  }
+
+  my $obj_by_ids;
+  $obj_by_ids = Bugzilla::User->new_from_list($params->{ids}) if $params->{ids};
+
+  # obj_by_ids are only visible to the user if they can see
+  # the otheruser, for non visible otheruser throw an error
+  foreach my $obj (@$obj_by_ids) {
+    if (Bugzilla->user->can_see_user($obj)) {
+      if (!$unique_users{$obj->id}) {
+        push(@user_objects, $obj);
+        $unique_users{$obj->id} = $obj;
+      }
+    }
+    else {
+      ThrowUserError(
+        'auth_failure',
+        {
+          reason => "not_visible",
+          action => "access",
+          object => "user",
+          userid => $obj->id
         }
+      );
+    }
+  }
 
-        if (filter_wants($params, 'groups')) {
-            if (Bugzilla->user->id == $user->id || Bugzilla->user->in_group('editusers')) {
-                $user_info->{groups} = [
-                    map { $self->_group_to_hash($_) } @{ $user->groups }
-                ];
-            }
-            else {
-                $user_info->{groups} = $self->_filter_bless_groups($user->groups);
-            }
-        }
+  # User Matching
+  my $limit = Bugzilla->params->{maxusermatches};
+  if ($params->{limit}) {
+    detaint_natural($params->{limit})
+      || ThrowCodeError('param_must_be_numeric',
+      {function => 'Bugzilla::WebService::User::match', param => 'limit'});
+    $limit = $limit ? min($params->{limit}, $limit) : $params->{limit};
+  }
 
-        push(@users, $user_info);
+  my $exclude_disabled = $params->{'include_disabled'} ? 0 : 1;
+  foreach my $match_string (@{$params->{'match'} || []}) {
+    my $matched = Bugzilla::User::match($match_string, $limit, $exclude_disabled);
+    foreach my $user (@$matched) {
+      if (!$unique_users{$user->id}) {
+        push(@user_objects, $user);
+        $unique_users{$user->id} = $user;
+      }
+    }
+  }
+
+  my $in_group = $self->_filter_users_by_group(\@user_objects, $params);
+  foreach my $user (@$in_group) {
+    my $user_info = filter $params,
+      {
+      id        => $self->type('int',     $user->id),
+      real_name => $self->type('string',  $user->name),
+      name      => $self->type('email',   $user->login),
+      email     => $self->type('email',   $user->email),
+      can_login => $self->type('boolean', $user->is_enabled ? 1 : 0),
+      };
+
+    if (Bugzilla->user->in_group('editusers')) {
+      $user_info->{email_enabled}     = $self->type('boolean', $user->email_enabled);
+      $user_info->{login_denied_text} = $self->type('string',  $user->disabledtext);
     }
 
-    return { users => \@users };
+    if (Bugzilla->user->id == $user->id) {
+      if (filter_wants($params, 'saved_searches')) {
+        $user_info->{saved_searches}
+          = [map { $self->_query_to_hash($_) } @{$user->queries}];
+      }
+      if (filter_wants($params, 'saved_reports')) {
+        $user_info->{saved_reports}
+          = [map { $self->_report_to_hash($_) } @{$user->reports}];
+      }
+    }
+
+    if (filter_wants($params, 'groups')) {
+      if (Bugzilla->user->id == $user->id || Bugzilla->user->in_group('editusers')) {
+        $user_info->{groups} = [map { $self->_group_to_hash($_) } @{$user->groups}];
+      }
+      else {
+        $user_info->{groups} = $self->_filter_bless_groups($user->groups);
+      }
+    }
+
+    push(@users, $user_info);
+  }
+
+  return {users => \@users};
 }
 
 ###############
@@ -267,156 +265,157 @@ sub get {
 ###############
 
 sub update {
-    my ($self, $params) = @_;
+  my ($self, $params) = @_;
 
-    my $dbh = Bugzilla->dbh;
+  my $dbh = Bugzilla->dbh;
 
-    my $user = Bugzilla->login(LOGIN_REQUIRED);
+  my $user = Bugzilla->login(LOGIN_REQUIRED);
 
-    # Reject access if there is no sense in continuing.
-    $user->in_group('editusers')
-        || ThrowUserError("auth_failure", {group  => "editusers",
-                                           action => "edit",
-                                           object => "users"});
+  # Reject access if there is no sense in continuing.
+  $user->in_group('editusers')
+    || ThrowUserError("auth_failure",
+    {group => "editusers", action => "edit", object => "users"});
 
-    defined($params->{names}) || defined($params->{ids})
-        || ThrowCodeError('params_required', 
-               { function => 'User.update', params => ['ids', 'names'] });
+  defined($params->{names})
+    || defined($params->{ids})
+    || ThrowCodeError('params_required',
+    {function => 'User.update', params => ['ids', 'names']});
 
-    my $user_objects = params_to_objects($params, 'Bugzilla::User');
+  my $user_objects = params_to_objects($params, 'Bugzilla::User');
 
-    my $values = translate($params, MAPPED_FIELDS);
+  my $values = translate($params, MAPPED_FIELDS);
 
-    # We delete names and ids to keep only new values to set.
-    delete $values->{names};
-    delete $values->{ids};
+  # We delete names and ids to keep only new values to set.
+  delete $values->{names};
+  delete $values->{ids};
 
-    $dbh->bz_start_transaction();
-    foreach my $user (@$user_objects){
-        $user->set_all($values);
+  $dbh->bz_start_transaction();
+  foreach my $user (@$user_objects) {
+    $user->set_all($values);
+  }
+
+  my %changes;
+  foreach my $user (@$user_objects) {
+    my $returned_changes = $user->update();
+    $changes{$user->id} = translate($returned_changes, MAPPED_RETURNS);
+  }
+  $dbh->bz_commit_transaction();
+
+  my @result;
+  foreach my $user (@$user_objects) {
+    my %hash = (id => $user->id, changes => {},);
+
+    foreach my $field (keys %{$changes{$user->id}}) {
+      my $change = $changes{$user->id}->{$field};
+
+      # We normalize undef to an empty string, so that the API
+      # stays consistent for things that can become empty.
+      $change->[0] = '' if !defined $change->[0];
+      $change->[1] = '' if !defined $change->[1];
+
+      # We also flatten arrays (used by groups and blessed_groups)
+      $change->[0] = join(',', @{$change->[0]}) if ref $change->[0];
+      $change->[1] = join(',', @{$change->[1]}) if ref $change->[1];
+
+      $hash{changes}{$field} = {
+        removed => $self->type('string', $change->[0]),
+        added   => $self->type('string', $change->[1])
+      };
     }
 
-    my %changes;
-    foreach my $user (@$user_objects){
-        my $returned_changes = $user->update();
-        $changes{$user->id} = translate($returned_changes, MAPPED_RETURNS);    
-    }
-    $dbh->bz_commit_transaction();
+    push(@result, \%hash);
+  }
 
-    my @result;
-    foreach my $user (@$user_objects) {
-        my %hash = (
-            id      => $user->id,
-            changes => {},
-        );
-
-        foreach my $field (keys %{ $changes{$user->id} }) {
-            my $change = $changes{$user->id}->{$field};
-            # We normalize undef to an empty string, so that the API
-            # stays consistent for things that can become empty.
-            $change->[0] = '' if !defined $change->[0];
-            $change->[1] = '' if !defined $change->[1];
-            # We also flatten arrays (used by groups and blessed_groups)
-            $change->[0] = join(',', @{$change->[0]}) if ref $change->[0];
-            $change->[1] = join(',', @{$change->[1]}) if ref $change->[1];
-
-            $hash{changes}{$field} = {
-                removed => $self->type('string', $change->[0]),
-                added   => $self->type('string', $change->[1]) 
-            };
-        }
-
-        push(@result, \%hash);
-    }
-
-    return { users => \@result };
+  return {users => \@result};
 }
 
 sub _filter_users_by_group {
-    my ($self, $users, $params) = @_;
-    my ($group_ids, $group_names) = @$params{qw(group_ids groups)};
+  my ($self, $users, $params) = @_;
+  my ($group_ids, $group_names) = @$params{qw(group_ids groups)};
 
-    # If no groups are specified, we return all users.
-    return $users if (!$group_ids and !$group_names);
+  # If no groups are specified, we return all users.
+  return $users if (!$group_ids and !$group_names);
 
-    my $user = Bugzilla->user;
-    my (@groups, %groups);
+  my $user = Bugzilla->user;
+  my (@groups, %groups);
 
-    if ($group_ids) {
-        @groups = map { Bugzilla::Group->check({ id => $_ }) } @$group_ids;
-        $groups{$_->id} = $_ foreach @groups;
+  if ($group_ids) {
+    @groups = map { Bugzilla::Group->check({id => $_}) } @$group_ids;
+    $groups{$_->id} = $_ foreach @groups;
+  }
+  if ($group_names) {
+    foreach my $name (@$group_names) {
+      my $group
+        = Bugzilla::Group->check({name => $name, _error => 'invalid_group_name'});
+      $user->in_group($group)
+        || ThrowUserError('invalid_group_name', {name => $name});
+      $groups{$group->id} = $group;
     }
-    if ($group_names) {
-        foreach my $name (@$group_names) {
-            my $group = Bugzilla::Group->check({ name => $name, _error => 'invalid_group_name' });
-            $user->in_group($group) || ThrowUserError('invalid_group_name', { name => $name });
-            $groups{$group->id} = $group;
-        }
-    }
-    @groups = values %groups;
+  }
+  @groups = values %groups;
 
-    my @in_group = grep { $self->_user_in_any_group($_, \@groups) } @$users;
-    return \@in_group;
+  my @in_group = grep { $self->_user_in_any_group($_, \@groups) } @$users;
+  return \@in_group;
 }
 
 sub _user_in_any_group {
-    my ($self, $user, $groups) = @_;
-    foreach my $group (@$groups) {
-        return 1 if $user->in_group($group);
-    }
-    return 0;
+  my ($self, $user, $groups) = @_;
+  foreach my $group (@$groups) {
+    return 1 if $user->in_group($group);
+  }
+  return 0;
 }
 
 sub _filter_bless_groups {
-    my ($self, $groups) = @_;
-    my $user = Bugzilla->user;
+  my ($self, $groups) = @_;
+  my $user = Bugzilla->user;
 
-    my @filtered_groups;
-    foreach my $group (@$groups) {
-        next unless $user->can_bless($group->id);
-        push(@filtered_groups, $self->_group_to_hash($group));
-    }
+  my @filtered_groups;
+  foreach my $group (@$groups) {
+    next unless $user->can_bless($group->id);
+    push(@filtered_groups, $self->_group_to_hash($group));
+  }
 
-    return \@filtered_groups;
+  return \@filtered_groups;
 }
 
 sub _group_to_hash {
-    my ($self, $group) = @_;
-    my $item = {
-        id          => $self->type('int', $group->id), 
-        name        => $self->type('string', $group->name), 
-        description => $self->type('string', $group->description), 
-    };
-    return $item;
+  my ($self, $group) = @_;
+  my $item = {
+    id          => $self->type('int',    $group->id),
+    name        => $self->type('string', $group->name),
+    description => $self->type('string', $group->description),
+  };
+  return $item;
 }
 
 sub _query_to_hash {
-    my ($self, $query) = @_;
-    my $item = {
-        id    => $self->type('int', $query->id),
-        name  => $self->type('string', $query->name),
-        query => $self->type('string', $query->url),
-    };
-    return $item;
+  my ($self, $query) = @_;
+  my $item = {
+    id    => $self->type('int',    $query->id),
+    name  => $self->type('string', $query->name),
+    query => $self->type('string', $query->url),
+  };
+  return $item;
 }
 
 sub _report_to_hash {
-    my ($self, $report) = @_;
-    my $item = {
-        id    => $self->type('int', $report->id),
-        name  => $self->type('string', $report->name),
-        query => $self->type('string', $report->query),
-    };
-    return $item;
+  my ($self, $report) = @_;
+  my $item = {
+    id    => $self->type('int',    $report->id),
+    name  => $self->type('string', $report->name),
+    query => $self->type('string', $report->query),
+  };
+  return $item;
 }
 
 sub _login_to_hash {
-    my ($self, $user) = @_;
-    my $item = { id => $self->type('int', $user->id) };
-    if ($user->{_login_token}) {
-        $item->{'token'} = $user->id . "-" . $user->{_login_token};
-    }
-    return $item;
+  my ($self, $user) = @_;
+  my $item = {id => $self->type('int', $user->id)};
+  if ($user->{_login_token}) {
+    $item->{'token'} = $user->id . "-" . $user->{_login_token};
+  }
+  return $item;
 }
 
 1;

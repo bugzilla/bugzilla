@@ -16,12 +16,11 @@ use Bugzilla;
 use Bugzilla::Constants;
 use Bugzilla::Error;
 use Bugzilla::WebService::Constants;
+
 BEGIN {
-    if (!Bugzilla->feature('rest')
-        || !Bugzilla->feature('jsonrpc'))
-    {
-        ThrowUserError('feature_disabled', { feature => 'rest' });
-    }
+  if (!Bugzilla->feature('rest') || !Bugzilla->feature('jsonrpc')) {
+    ThrowUserError('feature_disabled', {feature => 'rest'});
+  }
 }
 use Bugzilla::WebService::Server::REST;
 Bugzilla->usage_mode(USAGE_MODE_REST);

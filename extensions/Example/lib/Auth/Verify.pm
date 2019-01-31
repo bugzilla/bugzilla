@@ -16,7 +16,7 @@ use Bugzilla::Constants;
 
 # A verifier that always fails.
 sub check_credentials {
-    return { failure => AUTH_NO_SUCH_USER };
+  return {failure => AUTH_NO_SUCH_USER};
 }
 
 1;

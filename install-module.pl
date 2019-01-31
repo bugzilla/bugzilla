@@ -32,69 +32,69 @@ use Pod::Usage;
 init_console();
 
 my @original_args = @ARGV;
-my $original_dir = cwd();
+my $original_dir  = cwd();
 our %switch;
 GetOptions(\%switch, 'all|a', 'upgrade-all|u', 'show-config|s', 'global|g',
-                     'shell', 'help|h');
+  'shell', 'help|h');
 
-pod2usage({ -verbose => 1 }) if $switch{'help'};
+pod2usage({-verbose => 1}) if $switch{'help'};
 
 if (ON_ACTIVESTATE) {
-    print <<END;
+  print <<END;
 You cannot run this script when using ActiveState Perl. Please follow
 the instructions given by checksetup.pl to install missing Perl modules.
 
 END
-    exit;
+  exit;
 }
 
-pod2usage({ -verbose => 0 }) if (!%switch && !@ARGV);
+pod2usage({-verbose => 0}) if (!%switch && !@ARGV);
 
 set_cpan_config($switch{'global'});
 
 if ($switch{'show-config'}) {
-    print Dumper($CPAN::Config);
-    exit;
+  print Dumper($CPAN::Config);
+  exit;
 }
 
 check_cpan_requirements($original_dir, \@original_args);
 
 if ($switch{'shell'}) {
-    CPAN::shell();
-    exit;
+  CPAN::shell();
+  exit;
 }
 
 if ($switch{'all'} || $switch{'upgrade-all'}) {
-    my @modules;
-    if ($switch{'upgrade-all'}) {
-        @modules = (@{REQUIRED_MODULES()}, @{OPTIONAL_MODULES()});
-        push(@modules, DB_MODULE->{$_}->{dbd}) foreach (keys %{DB_MODULE()});
+  my @modules;
+  if ($switch{'upgrade-all'}) {
+    @modules = (@{REQUIRED_MODULES()}, @{OPTIONAL_MODULES()});
+    push(@modules, DB_MODULE->{$_}->{dbd}) foreach (keys %{DB_MODULE()});
+  }
+  else {
+    # This is the only time we need a Bugzilla-related module, so
+    # we require them down here. Otherwise this script can be run from
+    # any directory, even outside of Bugzilla itself.
+    my $reqs = check_requirements(0);
+    @modules = (@{$reqs->{missing}}, @{$reqs->{optional}});
+    my $dbs = DB_MODULE;
+    foreach my $db (keys %$dbs) {
+      push(@modules, $dbs->{$db}->{dbd}) if !have_vers($dbs->{$db}->{dbd}, 0);
     }
-    else {
-        # This is the only time we need a Bugzilla-related module, so
-        # we require them down here. Otherwise this script can be run from
-        # any directory, even outside of Bugzilla itself.
-        my $reqs = check_requirements(0);
-        @modules = (@{$reqs->{missing}}, @{$reqs->{optional}});
-        my $dbs = DB_MODULE;
-        foreach my $db (keys %$dbs) {
-            push(@modules, $dbs->{$db}->{dbd})
-                if !have_vers($dbs->{$db}->{dbd}, 0);
-        }
-    }
-    foreach my $module (@modules) {
-        my $cpan_name = $module->{module};
-        # --all shouldn't include mod_perl2, because it can have some complex
-        # configuration, and really should be installed on its own.
-        next if $cpan_name eq 'mod_perl2';
-        next if $cpan_name eq 'DBD::Oracle' and !$ENV{ORACLE_HOME};
-        next if $cpan_name eq 'DBD::Pg' and !bin_loc('pg_config');
-        install_module($cpan_name);
-    }
+  }
+  foreach my $module (@modules) {
+    my $cpan_name = $module->{module};
+
+    # --all shouldn't include mod_perl2, because it can have some complex
+    # configuration, and really should be installed on its own.
+    next if $cpan_name eq 'mod_perl2';
+    next if $cpan_name eq 'DBD::Oracle' and !$ENV{ORACLE_HOME};
+    next if $cpan_name eq 'DBD::Pg' and !bin_loc('pg_config');
+    install_module($cpan_name);
+  }
 }
 
 foreach my $module (@ARGV) {
-    install_module($module);
+  install_module($module);
 }
 
 __END__

@@ -19,12 +19,12 @@ $verbose = 0;
 my $onlytest = "";
 
 foreach (@ARGV) {
-    if (/^(?:-v|--verbose)$/) {
-        $verbose = 1;
-    }
-    else {
-        $onlytest = sprintf("%0.3d",$_);
-    }
+  if (/^(?:-v|--verbose)$/) {
+    $verbose = 1;
+  }
+  else {
+    $onlytest = sprintf("%0.3d", $_);
+  }
 }
 
 runtests(glob("t/$onlytest*.t"));

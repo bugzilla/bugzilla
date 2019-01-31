@@ -17,43 +17,40 @@ use Bugzilla::WebService::FlagType;
 use Bugzilla::Error;
 
 BEGIN {
-    *Bugzilla::WebService::FlagType::rest_resources = \&_rest_resources;
-};
+  *Bugzilla::WebService::FlagType::rest_resources = \&_rest_resources;
+}
 
 sub _rest_resources {
-    my $rest_resources = [
-        qr{^/flag_type$}, {
-            POST => {
-                method => 'create',
-                success_code => STATUS_CREATED
-            }
-        },
-        qr{^/flag_type/([^/]+)/([^/]+)$}, {
-            GET => {
-                method => 'get',
-                params => sub {
-                    return { product   => $_[0],
-                             component => $_[1] };
-                }
-            }
-        },
-        qr{^/flag_type/([^/]+)$}, {
-            GET => {
-                method => 'get',
-                params => sub {
-                    return { product => $_[0] };
-                }
-            },
-            PUT => {
-                method => 'update',
-                params => sub {
-                    my $param = $_[0] =~ /^\d+$/ ? 'ids' : 'names';
-                    return { $param => [ $_[0] ] };
-                }
-            }
-        },
-    ];
-    return $rest_resources;
+  my $rest_resources = [
+    qr{^/flag_type$},
+    {POST => {method => 'create', success_code => STATUS_CREATED}},
+    qr{^/flag_type/([^/]+)/([^/]+)$},
+    {
+      GET => {
+        method => 'get',
+        params => sub {
+          return {product => $_[0], component => $_[1]};
+        }
+      }
+    },
+    qr{^/flag_type/([^/]+)$},
+    {
+      GET => {
+        method => 'get',
+        params => sub {
+          return {product => $_[0]};
+        }
+      },
+      PUT => {
+        method => 'update',
+        params => sub {
+          my $param = $_[0] =~ /^\d+$/ ? 'ids' : 'names';
+          return {$param => [$_[0]]};
+        }
+      }
+    },
+  ];
+  return $rest_resources;
 }
 
 1;

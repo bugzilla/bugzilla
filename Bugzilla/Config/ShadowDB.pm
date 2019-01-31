@@ -16,35 +16,23 @@ use Bugzilla::Config::Common;
 our $sortkey = 1500;
 
 sub get_param_list {
-  my $class = shift;
+  my $class      = shift;
   my @param_list = (
-  {
-   name => 'shadowdbhost',
-   type => 't',
-   default => '',
-  },
+    {name => 'shadowdbhost', type => 't', default => '',},
 
-  {
-   name => 'shadowdbport',
-   type => 't',
-   default => '3306',
-   checker => \&check_numeric,
-  },
+    {
+      name    => 'shadowdbport',
+      type    => 't',
+      default => '3306',
+      checker => \&check_numeric,
+    },
 
-  {
-   name => 'shadowdbsock',
-   type => 't',
-   default => '',
-  },
+    {name => 'shadowdbsock', type => 't', default => '',},
 
-  # This entry must be _after_ the shadowdb{host,port,sock} settings so that
-  # they can be used in the validation here
-  {
-   name => 'shadowdb',
-   type => 't',
-   default => '',
-   checker => \&check_shadowdb
-  } );
+    # This entry must be _after_ the shadowdb{host,port,sock} settings so that
+    # they can be used in the validation here
+    {name => 'shadowdb', type => 't', default => '', checker => \&check_shadowdb}
+  );
   return @param_list;
 }
 

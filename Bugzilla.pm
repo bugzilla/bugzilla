@@ -691,7 +691,7 @@ sub active_custom_fields {
   else {
     my $match_params = {custom => 1, obsolete => 0, skip_extensions => 1};
     if ($wants) {
-      if ($wants->exclude->{custom}) {
+      if ($wants->exclude_type->{custom}) {
         return ();
       }
       elsif ($wants->is_specific) {

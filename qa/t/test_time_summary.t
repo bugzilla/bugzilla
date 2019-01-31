@@ -47,7 +47,7 @@ $sel->is_text_present_ok("Hours Worked: 2.6");
 
 # Let's call summarize_time.cgi directly, with no parameters.
 
-$sel->open_ok("/$config->{bugzilla_installation}/summarize_time.cgi");
+$sel->open_ok("/summarize_time.cgi");
 $sel->title_is("No Bugs Selected");
 my $error_msg = trim($sel->get_text("error_msg"));
 ok($error_msg =~ /You apparently didn't choose any bugs to view/,

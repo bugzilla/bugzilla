@@ -29,7 +29,7 @@ my @args
   remove_invalid_attach_references remove_old_whine_targets rescanallBugMail);
 
 foreach my $arg (@args) {
-  $sel->open_ok("/$config->{bugzilla_installation}/sanitycheck.cgi?$arg=1");
+  $sel->open_ok("/sanitycheck.cgi?$arg=1");
   $sel->title_is("Suspicious Action",
     "Calling sanitycheck.cgi with no token triggers a confirmation page");
   $sel->click_ok("confirm", "Confirm the action");

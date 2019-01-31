@@ -131,7 +131,6 @@ sub _ENV {
   }
   my $cgi_query = Mojo::Parameters->new(%captures);
   $cgi_query->append($req->url->query);
-  my $prefix = $c->stash->{bmo_prefix} ? '/bmo/' : '/';
 
   return (
     %ENV,
@@ -147,7 +146,7 @@ sub _ENV {
     REMOTE_PORT    => $tx->remote_port,
     REMOTE_USER    => $remote_user || '',
     REQUEST_METHOD => $req->method,
-    SCRIPT_NAME    => "$prefix$script_name",
+    SCRIPT_NAME    => "/$script_name",
     SERVER_NAME    => hostname,
     SERVER_PORT    => $tx->local_port,
     SERVER_PROTOCOL => $req->is_secure ? 'HTTPS' : 'HTTP', # TODO: Version is missing

@@ -155,7 +155,7 @@ $sel->title_is("Default Preferences");
 # Set normal user Email Prefs (by directly going to Email Prefs pane)
 logout($sel);
 log_in($sel, $config, 'editbugs');
-$sel->open_ok("$config->{bugzilla_installation}/userprefs.cgi?tab=email");
+$sel->open_ok("/userprefs.cgi?tab=email");
 $sel->is_text_present_ok("Email Preferences");
 $sel->click_ok("//input[\@value='Enable All Bugmail']");
 $sel->click_ok("email-3-1", undef,

@@ -137,8 +137,7 @@ sub get_selenium {
 sub get_xmlrpc_client {
   my $config = get_config();
   my $xmlrpc_url
-    = $config->{browser_url} . "/"
-    . $config->{bugzilla_installation}
+    = $config->{browser_url}
     . "/xmlrpc.cgi";
 
   require QA::RPC::XMLRPC;
@@ -172,7 +171,7 @@ sub get_rpc_clients {
 
 sub go_to_home {
   my ($sel, $config) = @_;
-  $sel->open_ok("/$config->{bugzilla_installation}/",
+  $sel->open_ok("/",
     undef, "Go to the home page");
   $sel->set_speed(500);
   $sel->title_is("Bugzilla Main Page");
@@ -190,7 +189,7 @@ sub screenshot_page {
 sub log_in {
   my ($sel, $config, $user) = @_;
 
-  $sel->open_ok("/$config->{bugzilla_installation}/login",
+  $sel->open_ok("/login",
     undef, "Go to the home page");
   $sel->title_is("Log in to Bugzilla");
   $sel->type_ok(
@@ -242,9 +241,7 @@ sub file_bug_in_product {
   if ($sel->is_text_present($product)) {
     ok(1, "Display the list of enterable products");
     $sel->open_ok(
-      "/"
-        . $config->{bugzilla_installation}
-        . "/enter_bug.cgi?product=$product&format=__default__",
+        "/enter_bug.cgi?product=$product&format=__default__",
       undef,
       "Choose product $product"
     );

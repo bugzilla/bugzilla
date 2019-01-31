@@ -155,7 +155,7 @@ $sel->refresh;
 $sel->wait_for_page_to_load_ok(WAIT_TIME);
 $sel->title_is("Bugzilla Main Page");
 ok(!$sel->is_text_present("New Account"), "No link named 'New Account'");
-$sel->open_ok("/$config->{bugzilla_installation}/createaccount.cgi");
+$sel->open_ok("/createaccount.cgi");
 $sel->title_is("Account Creation Disabled");
 $error_msg = trim($sel->get_text("error_msg"));
 ok(

@@ -129,7 +129,7 @@ $sel->is_text_present_ok("Changes submitted for bug $bug2_id");
 
 # 7th step: test validation methods for milestones.
 
-$sel->open_ok("/$config->{bugzilla_installation}/editmilestones.cgi");
+$sel->open_ok("/editmilestones.cgi");
 $sel->title_is("Edit milestones for which product?");
 $sel->click_ok("link=TestProduct");
 $sel->wait_for_page_to_load(WAIT_TIME);
@@ -181,7 +181,7 @@ $sel->title_is("Milestone Deleted");
 
 # 8th step: make sure the (now deleted) milestone of the bug has fallen back to the default milestone.
 
-$sel->open_ok("/$config->{bugzilla_installation}/show_bug.cgi?id=$bug1_id");
+$sel->open_ok("/show_bug.cgi?id=$bug1_id");
 $sel->title_like(qr/^$bug1_id/);
 $sel->is_text_present_ok('regexp:Target Milestone:\W+---',
   undef, "Milestone has fallen back to the default milestone");

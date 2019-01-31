@@ -26,7 +26,7 @@ my $private_id = $private_bug->{id};
 my $public_id  = $public_bug->{id};
 
 my $base_url
-  = $config->{browser_url} . "/" . $config->{bugzilla_installation} . '/';
+  = $config->{browser_url} . '/';
 
 # Set a few fields on the private bug, including setting up
 # a dependency relationship.

@@ -20,7 +20,7 @@ my ($sel, $config) = get_selenium();
 log_in($sel, $config, 'admin');
 if ($sel->is_text_present("My QA query")) {
   $sel->open_ok(
-    "/$config->{bugzilla_installation}/buglist.cgi?cmdtype=dorem&remaction=forget&namedcmd=My%20QA%20query",
+    "/buglist.cgi?cmdtype=dorem&remaction=forget&namedcmd=My%20QA%20query",
     undef, "Make sure the 'My QA query' saved search isn't present"
   );
 

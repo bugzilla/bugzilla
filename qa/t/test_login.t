@@ -21,7 +21,7 @@ my ($sel, $config) = get_selenium();
 # Try to log in to Bugzilla using an invalid account. To be sure that the login form
 # is triggered, we try to access an admin page.
 
-$sel->open_ok("/$config->{bugzilla_installation}/editparams.cgi");
+$sel->open_ok("/editparams.cgi");
 $sel->title_is("Log in to Bugzilla");
 
 # The login and password are hardcoded here, because this account doesn't exist.

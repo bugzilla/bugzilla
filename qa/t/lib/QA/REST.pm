@@ -30,7 +30,7 @@ sub get_rest_client {
   bless($rest_client, 'QA::REST');
   my $config = $rest_client->{bz_config} = get_config();
   $rest_client->{bz_url}
-    = $config->{browser_url} . '/' . $config->{bugzilla_installation} . '/rest/';
+    = $config->{browser_url} . '/rest/';
   $rest_client->{bz_default_headers}
     = {'Accept' => 'application/json', 'Content-Type' => 'application/json'};
   return $rest_client;

@@ -158,7 +158,7 @@ $sel->is_text_present_ok("Zarro Boogs found");
 
 # Make sure describekeywords.cgi works as expected.
 
-$sel->open_ok("/$config->{bugzilla_installation}/describekeywords.cgi");
+$sel->open_ok("/describekeywords.cgi");
 $sel->wait_for_page_to_load(WAIT_TIME);
 $sel->title_is("Bugzilla Keyword Descriptions");
 $sel->is_text_present_ok("key-selenium-kone");

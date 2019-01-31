@@ -32,7 +32,7 @@ $sel->title_is("Select classification");
 # and 2) automatically reclassify products in this classification.
 if ($sel->is_text_present("cone")) {
   $sel->open_ok(
-    "/$config->{bugzilla_installation}/editclassifications.cgi?action=delete&amp;classification=cone"
+    "/editclassifications.cgi?action=delete&amp;classification=cone"
   );
   $sel->title_is("Suspicious Action");
   $sel->click_ok("confirm");
@@ -41,7 +41,7 @@ if ($sel->is_text_present("cone")) {
 }
 if ($sel->is_text_present("ctwo")) {
   $sel->open_ok(
-    "/$config->{bugzilla_installation}/editclassifications.cgi?action=delete&amp;classification=ctwo"
+    "/editclassifications.cgi?action=delete&amp;classification=ctwo"
   );
   $sel->title_is("Suspicious Action");
   $sel->click_ok("confirm");
@@ -154,6 +154,6 @@ $sel->title_is("Classification Deleted");
 # Disable classifications and make sure you cannot edit them anymore.
 
 set_parameters($sel, {"Bug Fields" => {"useclassification-off" => undef}});
-$sel->open_ok("/$config->{bugzilla_installation}/editclassifications.cgi");
+$sel->open_ok("/editclassifications.cgi");
 $sel->title_is("Classification Not Enabled");
 logout($sel);

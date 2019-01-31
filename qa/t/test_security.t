@@ -14,7 +14,6 @@ use Test::More "no_plan";
 use QA::Util;
 
 my ($sel, $config) = get_selenium(CHROME_MODE);
-my $urlbase    = $config->{bugzilla_installation};
 my $admin_user = $config->{admin_user_login};
 
 # Let's create a bug and attachment to play with.
@@ -55,7 +54,7 @@ $sel->title_like(qr/^$bug1_id /);
 # # Alternate host for attachments; no cookie should be accessible.
 
 # set_parameters($sel, { "Attachments" => {"attachment_base" => {type  => "text",
-#                                                                value => "$config->{browser_ip_url}/$urlbase/"}} });
+#                                                                value => "$config->{browser_ip_url}/"}} });
 # go_to_bug($sel, $bug1_id);
 # $sel->click_ok("link=simple patch, v1");
 # $sel->wait_for_page_to_load_ok(WAIT_TIME);
@@ -88,7 +87,7 @@ my $editbugs_cookie = $sel->get_value("token");
 # Using our own unused token is fine.
 
 $sel->open_ok(
-  "/$urlbase/userprefs.cgi?tab=settings&dosave=1&display_quips=off&token=$editbugs_cookie"
+  "/userprefs.cgi?tab=settings&dosave=1&display_quips=off&token=$editbugs_cookie"
 );
 $sel->title_is("User Preferences");
 $sel->is_text_present_ok(
@@ -101,7 +100,7 @@ my @args = ("", "token=", "token=i123x", "token=$admin_cookie",
 
 foreach my $arg (@args) {
   $sel->open_ok(
-    "/$urlbase/userprefs.cgi?tab=settings&dosave=1&display_quips=off&$arg");
+    "/userprefs.cgi?tab=settings&dosave=1&display_quips=off&$arg");
   $sel->title_is("Suspicious Action");
 
   if ($arg eq "token=$admin_cookie") {

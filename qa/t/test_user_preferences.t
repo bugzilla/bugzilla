@@ -137,7 +137,7 @@ $sel->is_text_present_ok("The next bug I should see is this one.");
 
 # Remove the tag from all bugs.
 
-$sel->open_ok("/$config->{bugzilla_installation}/buglist.cgi?tag=sel-tmp",
+$sel->open_ok("/buglist.cgi?tag=sel-tmp",
   undef, "List 'sel-tmp' bugs");
 $sel->wait_for_page_to_load(WAIT_TIME);
 $sel->title_is("Bug List");

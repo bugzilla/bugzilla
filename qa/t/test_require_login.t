@@ -35,7 +35,7 @@ my @pages = qw(admin attachment buglist chart colchange describecomponents
   userprefs votes xml);
 
 foreach my $page (@pages) {
-  $sel->open_ok("/$config->{bugzilla_installation}/${page}.cgi");
+  $sel->open_ok("/${page}.cgi");
   if ($page ne 'votes' || $config->{test_extensions}) {
     $sel->title_is("Log in to Bugzilla");
   }
@@ -52,7 +52,7 @@ foreach my $page (@pages) {
 );
 
 foreach my $page (@pages) {
-  $sel->open_ok("/$config->{bugzilla_installation}/$page");
+  $sel->open_ok("/$page");
   if ($page !~ /^votes/ || $config->{test_extensions}) {
     $sel->title_is("Log in to Bugzilla");
   }
@@ -69,7 +69,7 @@ foreach my $page (@pages) {
 );
 
 foreach my $page (@pages) {
-  $sel->open_ok("/$config->{bugzilla_installation}/$page");
+  $sel->open_ok("/$page");
   $sel->title_isnt("Log in to Bugzilla");
 }
 

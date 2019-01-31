@@ -38,13 +38,6 @@ sub register {
   $app->hook(
     before_dispatch => sub {
       my ($c) = @_;
-      if ($D{HTTPD_IN_SUBDIR}) {
-        my $path = $c->req->url->path;
-        if ($path =~ s{^/bmo}{}s) {
-          $c->stash->{bmo_prefix} = 1;
-          $c->req->url->path($path);
-        }
-      }
       Log::Log4perl::MDC->put(request_id => $c->req->request_id);
       $c->stash->{cleanup_guard} = Scope::Guard->new(\&Bugzilla::cleanup);
       Bugzilla->usage_mode(USAGE_MODE_MOJO);

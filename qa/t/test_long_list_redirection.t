@@ -13,7 +13,7 @@ use QA::Util;
 
 my ($sel, $config) = get_selenium();
 
-$sel->open_ok("/$config->{bugzilla_installation}/long_list.cgi?id=1");
+$sel->open_ok("/long_list.cgi?id=1");
 $sel->title_is("Full Text Bug Listing", "Display bug as format for printing");
 my $text = $sel->get_text('//*[@id="bugzilla-body"]//h1');
 $text =~ s/[\r\n\t\s]+/ /g;

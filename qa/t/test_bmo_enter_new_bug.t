@@ -37,7 +37,7 @@ set_parameters($sel, {"Bug Fields" => {"useclassification-off" => undef}});
 #
 ## FIXME figure out how to use format= with file_bug_in_product
 #
-#$sel->open_ok("/$config->{bugzilla_installation}/enter_bug.cgi?product=Marketing&format=mktgevent");
+#$sel->open_ok("/enter_bug.cgi?product=Marketing&format=mktgevent");
 #$sel->wait_for_page_to_load_ok(WAIT_TIME);
 #$sel->title_is("Event Request Form", "Open custom bug entry form - mktgevent");
 #$sel->type_ok("firstname", "Bugzilla", "Enter first name");
@@ -59,7 +59,7 @@ set_parameters($sel, {"Bug Fields" => {"useclassification-off" => undef}});
 #
 ## swag
 #
-#$sel->open_ok("/$config->{bugzilla_installation}/enter_bug.cgi?product=Marketing&format=swag");
+#$sel->open_ok("/enter_bug.cgi?product=Marketing&format=swag");
 #$sel->wait_for_page_to_load_ok(WAIT_TIME);
 #$sel->title_is("Swag Request Form", "Open custom bug entry form - swag");
 #$sel->type_ok("firstname", "Bugzilla", "Enter first name");
@@ -91,7 +91,7 @@ _check_component('Marketing', 'Trademark Permissions');
 _check_group('marketing-private');
 
 $sel->open_ok(
-  "/$config->{bugzilla_installation}/enter_bug.cgi?product=Marketing&format=trademark"
+  "/enter_bug.cgi?product=Marketing&format=trademark"
 );
 $sel->wait_for_page_to_load_ok(WAIT_TIME);
 $sel->title_is("Trademark Usage Requests",
@@ -116,7 +116,7 @@ _check_component('Infrastructure & Operations', 'WebOps: Other');
 _check_version('Infrastructure & Operations', 'other');
 _check_group('infra');
 
-#$sel->open_ok("/$config->{bugzilla_installation}/enter_bug.cgi?product=mozilla.org&format=itrequest");
+#$sel->open_ok("/enter_bug.cgi?product=mozilla.org&format=itrequest");
 #$sel->wait_for_page_to_load_ok(WAIT_TIME);
 #$sel->title_is("Mozilla Corporation/Foundation IT Requests", "Open custom bug entry form - itrequest");
 #$sel->click_ok("component_webops_other", "Select request type");
@@ -130,7 +130,7 @@ _check_group('infra');
 
 # brownbag
 
-#$sel->open_ok("/$config->{bugzilla_installation}/enter_bug.cgi?product=mozilla.org&format=brownbag");
+#$sel->open_ok("/enter_bug.cgi?product=mozilla.org&format=brownbag");
 #$sel->wait_for_page_to_load_ok(WAIT_TIME);
 #$sel->title_is("Mozilla Corporation Brownbag Requests", "Open custom bug entry form - brownbag");
 #$sel->type_ok("presenter", "Bugzilla Administrator", "Enter presenter");
@@ -153,7 +153,7 @@ _check_group('infra');
 
 # presentation
 
-#$sel->open_ok("/$config->{bugzilla_installation}/enter_bug.cgi?product=mozilla.org&format=presentation");
+#$sel->open_ok("/enter_bug.cgi?product=mozilla.org&format=presentation");
 #$sel->wait_for_page_to_load_ok(WAIT_TIME);
 #$sel->title_is("Mozilla Corporation Mountain View Presentation Request", "Open custom bug entry form - presentation");
 #$sel->type_ok("presenter", "Bugzilla Administrator", "Enter presenter");
@@ -182,7 +182,7 @@ _check_version('mozilla.org', 'other');
 _check_component('mozilla.org', 'Discussion Forums');
 
 $sel->open_ok(
-  "/$config->{bugzilla_installation}/enter_bug.cgi?product=mozilla.org&format=mozlist"
+  "/enter_bug.cgi?product=mozilla.org&format=mozlist"
 );
 $sel->wait_for_page_to_load_ok(WAIT_TIME);
 $sel->title_is("Mozilla Discussion Forum",
@@ -213,7 +213,7 @@ _check_group('mozilla-confidential');
 
 _check_group('pr-private');
 
-#$sel->open_ok("/$config->{bugzilla_installation}/enter_bug.cgi?product=Mozilla PR&format=mozpr");
+#$sel->open_ok("/enter_bug.cgi?product=Mozilla PR&format=mozpr");
 #$sel->wait_for_page_to_load_ok(WAIT_TIME);
 #$sel->title_is("Create a PR Request", "Open custom bug entry form - mozpr");
 #$sel->select_ok("location", "value=China", "Select location");
@@ -234,7 +234,7 @@ _check_component('Legal', 'Contract Request');
 _check_group('mozilla-employee-confidential');
 
 $sel->open_ok(
-  "/$config->{bugzilla_installation}/enter_bug.cgi?product=Legal&format=legal");
+  "/enter_bug.cgi?product=Legal&format=legal");
 $sel->wait_for_page_to_load_ok(WAIT_TIME);
 $sel->title_is("Mozilla Corporation Legal Requests",
   "Open custom bug entry form - legal");

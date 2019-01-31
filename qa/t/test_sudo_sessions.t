@@ -101,7 +101,7 @@ $sel->title_is("User Preferences");
 $sel->is_text_present_ok("There are no permission bits set on your account");
 
 # We access the page directly as there is no link pointing to it.
-$sel->open_ok("/$config->{bugzilla_installation}/editusers.cgi");
+$sel->open_ok("/editusers.cgi");
 $sel->title_is("Authorization Required");
 $error_msg = trim($sel->get_text("error_msg"));
 ok($error_msg =~ /^Sorry, you aren't a member of the 'editusers' group/,
@@ -115,7 +115,7 @@ $sel->is_text_present_ok("The sudo session has been ended");
 # Try to access the sudo page directly, with no credentials.
 
 $sel->open_ok(
-  "/$config->{bugzilla_installation}/relogin.cgi?action=begin-sudo&target_login=$config->{admin_user_login}"
+  "/relogin.cgi?action=begin-sudo&target_login=$config->{admin_user_login}"
 );
 $sel->title_is("Password Required");
 
@@ -155,7 +155,7 @@ $sel->title_is("Password Required");
 # Same as above, but with your password.
 
 $sel->open_ok(
-  "/$config->{bugzilla_installation}/relogin.cgi?action=prepare-sudo&target_login=foo\@bar.com"
+  "/relogin.cgi?action=prepare-sudo&target_login=foo\@bar.com"
 );
 $sel->title_is("Begin sudo session");
 $sel->value_is("target_login", 'foo@bar.com');

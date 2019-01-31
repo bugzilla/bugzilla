@@ -23,7 +23,7 @@ logout($sel);
 
 # Accessing config.cgi should display no sensitive data.
 
-$sel->open_ok("/$config->{bugzilla_installation}/config.cgi",
+$sel->open_ok("/config.cgi",
   undef, "Go to config.cgi (JS format)");
 $sel->is_text_present_ok("var status = [ ];");
 $sel->is_text_present_ok("var status_open = [ ];");

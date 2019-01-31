@@ -66,8 +66,7 @@ sub call {
 
   my $config = $self->bz_config;
   my $url
-    = $config->{browser_url} . "/"
-    . $config->{bugzilla_installation}
+    = $config->{browser_url}
     . "/jsonrpc.cgi";
   my $result;
   if ($self->bz_get_mode) {

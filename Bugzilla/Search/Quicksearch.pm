@@ -127,7 +127,7 @@ use constant COMPONENT_EXCEPTIONS => (
 );
 
 # Quicksearch-wide globals for boolean charts.
-our ($chart, $and, $or, $fulltext, $bug_status_set, $ELASTIC);
+our ($chart, $and, $or, $fulltext, $bug_status_set, $bug_product_set, $ELASTIC);
 
 sub quicksearch {
   my ($searchstring) = (@_);
@@ -252,6 +252,16 @@ sub quicksearch {
     unless ($bug_status_set) {
       $cgi->param('bug_status', BUG_STATE_OPEN);
     }
+
+    # Provide a hook to allow modifying the params
+    Bugzilla::Hook::process(
+      'quicksearch_run',
+      {
+        'cgi'             => $cgi,
+        'bug_status_set'  => $bug_status_set,
+        'bug_product_set' => $bug_product_set,
+      }
+    );
 
     # Inform user about any unknown fields
     if (scalar(@unknownFields) || scalar(keys %ambiguous_fields)) {
@@ -476,6 +486,9 @@ sub _handle_field_names {
       else {
         if ($translated eq 'bug_status' || $translated eq 'resolution') {
           $bug_status_set = 1;
+        }
+        if ($translated =~ /^(?:classification|product|component)$/) {
+          $bug_product_set = 1;
         }
         foreach my $value (@values) {
           next unless defined $value;

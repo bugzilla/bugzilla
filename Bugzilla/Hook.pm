@@ -1417,6 +1417,41 @@ want it to map to. You can modify existing mappings or add new ones.
 
 =back
 
+=head2 quicksearch_run
+
+This hook allows you to alter the QuickSearch params, so you can, for example,
+include specific bug status or exclude specific products in search results
+by default.
+
+Params:
+
+=over
+
+=item C<cgi> - The current C<cgi> object. The search params can be altered
+using C<< $cgi->param(field, value) >>.
+
+=item C<bug_status_set> - A boolean indicating whether the status and/or
+resolution is specified in the search query entered by user.
+
+=item C<bug_product_set> - A boolean indicating whether the classification,
+product and/or component is specified in the search query entered by user.
+
+=back
+
+=head2 quicksearch_test
+
+This hook allows you to alter the QuickSearch params in the test. This has to
+correspond with the C<quicksearch_run> hook described above.
+
+Params:
+
+=over
+
+=item C<opt> - A hash of the test options containing C<params>, which has to be
+altered in the same way as C<quicksearch_run>.
+
+=back
+
 =head2 sanitycheck_check
 
 This hook allows for extra sanity checks to be added, for use by

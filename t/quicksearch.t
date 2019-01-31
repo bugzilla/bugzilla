@@ -13,6 +13,7 @@ use Bugzilla::Test::MockDB;
 use Bugzilla::Test::MockParams (password_complexity => 'no_constraints');
 use Bugzilla;
 use Bugzilla::Constants;
+use Bugzilla::Hook;
 BEGIN { Bugzilla->extensions }
 use Test2::V0;
 use Test2::Tools::Mock qw(mock mock_accessor);
@@ -121,6 +122,10 @@ sub test_quicksearch {
       $vars->{$key} = [sort @{$vars->{$key} // []}];
     }
   }
+
+  # Provide a hook to allow modifying the params. This has to correspond with
+  # the `quicksearch_run` hook
+  Bugzilla::Hook::process('quicksearch_test', { 'opt' => \%opt });
 
   is($vars, $opt{params}, "test params: $opt{input}");
   if (my $sql = $opt{sql_like}) {

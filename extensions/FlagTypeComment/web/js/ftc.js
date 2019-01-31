@@ -178,7 +178,7 @@ Bugzilla.FlagTypeComment = class FlagTypeComment {
 
     for (const $fieldset of this.inserted_fieldsets) {
       const text = [
-        `## ${$fieldset.querySelector('h3').innerText}`,
+        `### ${$fieldset.querySelector('h3').innerText}`,
         ...[...$fieldset.querySelectorAll('tr')].map($tr => {
           const checkboxes = [...$tr.querySelectorAll('input[type="checkbox"]:checked')];
           const $radio = $tr.querySelector('input[type="radio"]:checked');
@@ -210,7 +210,7 @@ Bugzilla.FlagTypeComment = class FlagTypeComment {
             }
           }
 
-          return `### ${label}\n\n${value}`;
+          return `#### ${label}\n\n${value}`;
         }),
       ].join('\n\n');
 

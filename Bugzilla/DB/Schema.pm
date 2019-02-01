@@ -250,7 +250,7 @@ use constant ABSTRACT_SCHEMA => {
       op_sys       => {TYPE => 'varchar(64)',  NOTNULL => 1},
       priority     => {TYPE => 'varchar(64)',  NOTNULL => 1},
       product_id   => {
-        TYPE       => 'INT2',
+        TYPE       => 'INT3',
         NOTNULL    => 1,
         REFERENCES => {TABLE => 'products', COLUMN => 'id'}
       },
@@ -694,7 +694,7 @@ use constant ABSTRACT_SCHEMA => {
         REFERENCES => {TABLE => 'flagtypes', COLUMN => 'id', DELETE => 'CASCADE'}
       },
       product_id => {
-        TYPE       => 'INT2',
+        TYPE       => 'INT3',
         REFERENCES => {TABLE => 'products', COLUMN => 'id', DELETE => 'CASCADE'}
       },
       component_id => {
@@ -716,7 +716,7 @@ use constant ABSTRACT_SCHEMA => {
         REFERENCES => {TABLE => 'flagtypes', COLUMN => 'id', DELETE => 'CASCADE'}
       },
       product_id => {
-        TYPE       => 'INT2',
+        TYPE       => 'INT3',
         REFERENCES => {TABLE => 'products', COLUMN => 'id', DELETE => 'CASCADE'}
       },
       component_id => {
@@ -787,7 +787,7 @@ use constant ABSTRACT_SCHEMA => {
       id         => {TYPE => 'MEDIUMSERIAL', NOTNULL => 1, PRIMARYKEY => 1},
       value      => {TYPE => 'varchar(64)',  NOTNULL => 1},
       product_id => {
-        TYPE       => 'INT2',
+        TYPE       => 'INT3',
         NOTNULL    => 1,
         REFERENCES => {TABLE => 'products', COLUMN => 'id', DELETE => 'CASCADE'}
       },
@@ -802,7 +802,7 @@ use constant ABSTRACT_SCHEMA => {
     FIELDS => [
       id         => {TYPE => 'MEDIUMSERIAL', NOTNULL => 1, PRIMARYKEY => 1},
       product_id => {
-        TYPE       => 'INT2',
+        TYPE       => 'INT3',
         NOTNULL    => 1,
         REFERENCES => {TABLE => 'products', COLUMN => 'id', DELETE => 'CASCADE'}
       },
@@ -1200,7 +1200,7 @@ use constant ABSTRACT_SCHEMA => {
         REFERENCES => {TABLE => 'groups', COLUMN => 'id', DELETE => 'CASCADE'}
       },
       product_id => {
-        TYPE       => 'INT2',
+        TYPE       => 'INT3',
         NOTNULL    => 1,
         REFERENCES => {TABLE => 'products', COLUMN => 'id', DELETE => 'CASCADE'}
       },
@@ -1354,10 +1354,10 @@ use constant ABSTRACT_SCHEMA => {
 
   products => {
     FIELDS => [
-      id                => {TYPE => 'SMALLSERIAL', NOTNULL => 1, PRIMARYKEY => 1},
+      id                => {TYPE => 'MEDIUMSERIAL', NOTNULL => 1, PRIMARYKEY => 1},
       name              => {TYPE => 'varchar(64)', NOTNULL => 1},
       classification_id => {
-        TYPE       => 'INT2',
+        TYPE       => 'INT3',
         NOTNULL    => 1,
         DEFAULT    => '1',
         REFERENCES => {TABLE => 'classifications', COLUMN => 'id', DELETE => 'CASCADE'}
@@ -1375,7 +1375,7 @@ use constant ABSTRACT_SCHEMA => {
       id         => {TYPE => 'MEDIUMSERIAL', NOTNULL => 1, PRIMARYKEY => 1},
       name       => {TYPE => 'varchar(64)',  NOTNULL => 1},
       product_id => {
-        TYPE       => 'INT2',
+        TYPE       => 'INT3',
         NOTNULL    => 1,
         REFERENCES => {TABLE => 'products', COLUMN => 'id', DELETE => 'CASCADE'}
       },

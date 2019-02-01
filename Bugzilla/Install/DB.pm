@@ -654,6 +654,8 @@ sub update_table_definitions {
   # 2011-11-28 dkl@mozilla.com - Bug 685611
   _fix_notnull_defaults();
 
+  _fix_product_id();
+
   # 2012-02-15 LpSolit@gmail.com - Bug 722113
   if ($dbh->bz_index_info('profile_search', 'profile_search_user_id')) {
     $dbh->bz_drop_index('profile_search', 'profile_search_user_id');
@@ -3990,6 +3992,21 @@ sub _on_delete_set_null_for_audit_log_userid {
   if ($fk and !defined $fk->{DELETE}) {
     $fk->{DELETE} = 'SET NULL';
     $dbh->bz_alter_fk('audit_log', 'user_id', $fk);
+  }
+}
+use Data::Printer;
+sub _fix_product_id {
+  my $dbh = Bugzilla->dbh;
+  my @fixes = (
+    { table => 'bugs', column => 'product_id' },
+  );
+  foreach my $fix (@fixes) {
+    my $fk = $dbh->bz_fk_info($fix->{table}, $fix->{column});
+    my $def = $dbh->bz_column_info($fix->{table}, $fix->{column});
+    p $def;
+    $dbh->bz_drop_related_fks($fix->{table}, $fix->{column});
+    $def->{TYPE} = 'INT3';
+    $dbh->bz_alter_column($fix->{table}, $fix->{column}, $def);
   }
 }
 

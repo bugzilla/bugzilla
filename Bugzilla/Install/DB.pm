@@ -475,9 +475,6 @@ sub update_table_definitions {
   $dbh->bz_drop_column('profiles', 'refreshed_when');
   $dbh->bz_drop_column('groups',   'last_changed');
 
-  # 2006-08-06 LpSolit@gmail.com - Bug 347521
-  $dbh->bz_alter_column('flagtypes', 'id',
-    {TYPE => 'MEDIUMSERIAL', NOTNULL => 1, PRIMARYKEY => 1});
   # 2019-01-31 dylan@hardison.net - Bug TODO
   _update_flagtypes_id();
 
@@ -823,25 +820,27 @@ sub _update_product_name_definition {
 }
 
 sub _update_flagtypes_id {
-  my $dbh = Bugzilla->dbh;
+  my $dbh   = Bugzilla->dbh;
   my @fixes = (
-    { table => 'flaginclusions', column => 'type_id' },
-    { table => 'flagexclusions', column => 'type_id' },
-    { table => 'flags', column => 'type_id' },
+    {table => 'flaginclusions', column => 'type_id'},
+    {table => 'flagexclusions', column => 'type_id'},
+    {table => 'flags',          column => 'type_id'},
   );
   my $flagtypes_def = $dbh->bz_column_info('flagtypes', 'id');
-  return if $flagtypes_def->{TYPE} ne 'SMALLSERIAL';
   foreach my $fix (@fixes) {
     my $def = $dbh->bz_column_info($fix->{table}, $fix->{column});
     if ($def->{TYPE} eq 'INT2') {
       warn "Dropping $fix->{table}\n";
       $dbh->bz_drop_related_fks($fix->{table}, $fix->{column});
       $def->{TYPE} = 'INT3';
-      $dbh->bz_alter_column($fix->{table}, $fix->{column}, $def)
+      $dbh->bz_alter_column($fix->{table}, $fix->{column}, $def);
     }
   }
-  $flagtypes_def->{TYPE} = 'MEDIUMSERIAL';
-  $dbh->bz_alter_column('flagtypes', 'id', $flagtypes_def);
+
+  if ($flagtypes_def->{TYPE} eq 'SMALLSERIAL') {
+    $flagtypes_def->{TYPE} = 'MEDIUMSERIAL';
+    $dbh->bz_alter_column('flagtypes', 'id', $flagtypes_def);
+  }
 }
 
 # A helper for the function below.

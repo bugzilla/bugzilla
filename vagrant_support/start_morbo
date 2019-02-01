@@ -1,8 +1,16 @@
 #!/usr/bin/env perl
 
-$ENV{PERL5LIB}                     = '/vagrant/local/lib/perl5';
-$ENV{PATH}                         = "/vagrant/local/bin:$ENV{PATH}";
-$ENV{MOJO_LISTEN}                  = 'http://*:80';
+my $cert_file = '/vagrant/bmo-web.vm.pem';
+my $key_file  = '/vagrant/bmo-web.vm-key.pem';
+my $listen    = 'http://*:80';
+
+if (-f $cert_file && -f $key_file) {
+  $listen .= ",https://*:443?cert=$cert_file&key=$key_file";
+}
+
+$ENV{PERL5LIB}    = '/vagrant/local/lib/perl5';
+$ENV{PATH}        = "/vagrant/local/bin:$ENV{PATH}";
+$ENV{MOJO_LISTEN} = $listen;
 $ENV{BUGZILLA_ALLOW_INSECURE_HTTP} = 1;
 
 my @files

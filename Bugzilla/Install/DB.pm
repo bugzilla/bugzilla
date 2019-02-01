@@ -477,7 +477,7 @@ sub update_table_definitions {
 
   # 2006-08-06 LpSolit@gmail.com - Bug 347521
   $dbh->bz_alter_column('flagtypes', 'id',
-    {TYPE => 'SMALLSERIAL', NOTNULL => 1, PRIMARYKEY => 1});
+    {TYPE => 'MEDIUMSERIAL', NOTNULL => 1, PRIMARYKEY => 1});
 
   $dbh->bz_alter_column('keyworddefs', 'id',
     {TYPE => 'SMALLSERIAL', NOTNULL => 1, PRIMARYKEY => 1});

@@ -59,6 +59,15 @@
         group: root
         mode: 0644
 
+    - name: 'add MOJO_LISTEN'
+      lineinfile:
+        dest: /etc/environment
+        regexp: 'MOJO_LISTEN='
+        line: 'MOJO_LISTEN=http://*::80'
+        owner: root
+        group: root
+        mode: 0644
+
     - name: copy ntp.conf
       copy:
         src: ntp.conf

@@ -1,0 +1,37 @@
+#!/usr/bin/env perl
+
+use File::Basename qw(basename dirname);
+use File::Spec::Functions qw(catfile catdir);
+use Cwd qw(realpath);
+our $BUGZILLA_DIR;
+
+BEGIN {
+  require lib;
+  $BUGZILLA_DIR = dirname(dirname(realpath(__FILE__)));
+  lib->import(
+    $BUGZILLA_DIR,
+    catdir($BUGZILLA_DIR, 'lib'),
+    catdir($BUGZILLA_DIR, qw(local lib perl5))
+  );
+}
+use Env qw(@PATH @PERL5LIB $MOJO_LISTEN $BUGZILLA_ALLOW_INSECURE_HTTP MOJO_REVERSE_PROXY);
+
+chdir $BUGZILLA_DIR;
+
+my $cert_file = catfile($BUGZILLA_DIR, 'bmo-web.vm.pem');
+my $key_file  = catfile($BUGZILLA_DIR, 'bmo-web.vm-key.pem');
+
+if ($MOJO_LISTEN && -f $cert_file && -f $key_file) {
+  $MOJO_LISTEN .= ",https://*:443?cert=$cert_file&key=$key_file";
+}
+
+push @PERL5LIB, catdir($BUGZILLA_DIR, qw(local lib perl5));
+unshift @PATH,  catdir($BUGZILLA_DIR, qw(local bin));
+$BUGZILLA_ALLOW_INSECURE_HTTP //= 1;
+$MOJO_REVERSE_PROXY //= $BUGZILLA_DIR ne '/vagrant';
+
+my @files
+  = ('Bugzilla.pm', 'Bugzilla', glob("*.cgi"), 'extensions', 'template');
+my @watch = map { ('-w' => $_) } (@files);
+
+exec morbo => @watch, '-v', 'bugzilla.pl';

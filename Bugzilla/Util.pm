@@ -147,7 +147,7 @@ sub html_light_quote {
 
   if (!Bugzilla->feature('html_desc')) {
     my $safe = join('|', @allow);
-    my $chr = chr(1);
+    my $chr  = chr(1);
 
     # First, escape safe elements.
     $text =~ s#<($safe)>#$chr$1$chr#go;
@@ -168,7 +168,7 @@ sub html_light_quote {
     push(@allow, qw(a blockquote q span));
 
     # Allowed protocols.
-    my $safe_protocols = join('|', SAFE_PROTOCOLS);
+    my $safe_protocols  = join('|', SAFE_PROTOCOLS);
     my $protocol_regexp = qr{(^(?:$safe_protocols):|^[^:]+$)}i;
 
     # Deny all elements and attributes unless explicitly authorized.
@@ -225,7 +225,7 @@ sub email_filter {
   if (!Bugzilla->user->id) {
     my @emails = Email::Address->parse($toencode);
     if (scalar @emails) {
-      my @hosts = map { quotemeta($_->host) } @emails;
+      my @hosts    = map { quotemeta($_->host) } @emails;
       my $hosts_re = join('|', @hosts);
       $toencode =~ s/\@(?:$hosts_re)//g;
       return $toencode;
@@ -320,7 +320,7 @@ sub correct_urlbase {
 }
 
 sub remote_ip {
-  my $ip = $ENV{'REMOTE_ADDR'} || '127.0.0.1';
+  my $ip      = $ENV{'REMOTE_ADDR'} || '127.0.0.1';
   my @proxies = split(/[\s,]+/, Bugzilla->params->{'inbound_proxies'});
 
   # If the IP address is one of our trusted proxies, then we look at
@@ -778,7 +778,7 @@ sub validate_date {
   if ($ts) {
     $date2 = time2str("%Y-%m-%d", $ts);
 
-    $date =~ s/(\d+)-0*(\d+?)-0*(\d+?)/$1-$2-$3/;
+    $date  =~ s/(\d+)-0*(\d+?)-0*(\d+?)/$1-$2-$3/;
     $date2 =~ s/(\d+)-0*(\d+?)-0*(\d+?)/$1-$2-$3/;
   }
   my $ret = ($ts && $date eq $date2);

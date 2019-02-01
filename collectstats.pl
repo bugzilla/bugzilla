@@ -165,7 +165,7 @@ sub collect_stats {
   my $when    = localtime(time);
   my $dbh     = Bugzilla->dbh;
 
-  my $file = join '/', $dir, $product->id;
+  my $file   = join '/', $dir, $product->id;
   my $exists = -f $file;
 
   # if the file exists, get the old status and resolution list for that product.
@@ -214,7 +214,7 @@ sub collect_stats {
   }
 
   if (!$exists || scalar(@data)) {
-    my $fields = join('|', ('DATE', @statuses, @resolutions));
+    my $fields       = join('|', ('DATE', @statuses, @resolutions));
     my $product_name = $product->name;
     print DATA <<FIN;
 # Bugzilla Daily Bug Stats
@@ -325,7 +325,7 @@ sub regenerate_stats {
   }
 
   if (open DATA, ">", $file) {
-    my $fields = join('|', ('DATE', @statuses, @resolutions));
+    my $fields       = join('|', ('DATE', @statuses, @resolutions));
     my $product_name = $product->name;
     print DATA <<FIN;
 # Bugzilla Daily Bug Stats
@@ -456,7 +456,7 @@ sub CollectSeriesData {
   # (days_since_epoch + series_id) % frequency = 0. So they'll run every
   # <frequency> days, but the start date depends on the series_id.
   my $days_since_epoch = int(time() / (60 * 60 * 24));
-  my $today = today_dash();
+  my $today            = today_dash();
 
   # We save a copy of the main $dbh and then switch to the shadow and get
   # that one too. Remember, these may be the same.

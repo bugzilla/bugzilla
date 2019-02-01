@@ -92,7 +92,7 @@ sub extensions {
   my %retval;
   foreach my $extension (@{Bugzilla->extensions}) {
     my $version = $extension->VERSION || 0;
-    my $name = $extension->NAME;
+    my $name    = $extension->NAME;
     $retval{$name}->{version} = $self->type('string', $version);
   }
   return {extensions => \%retval};

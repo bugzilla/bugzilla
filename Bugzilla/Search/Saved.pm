@@ -66,7 +66,7 @@ sub new {
       ThrowCodeError('bad_arg', {argument => 'name', function => "${class}::new"});
     }
     my $condition = 'userid = ? AND name = ?';
-    my $user_id = blessed $user ? $user->id : $user;
+    my $user_id   = blessed $user ? $user->id : $user;
     detaint_natural($user_id)
       || ThrowCodeError('param_must_be_numeric',
       {function => $class . '::_init', param => 'user'});
@@ -206,7 +206,7 @@ sub preload {
 
   return unless scalar @$searches;
 
-  my @query_ids = map { $_->id } @$searches;
+  my @query_ids         = map { $_->id } @$searches;
   my $queries_in_footer = $dbh->selectcol_arrayref(
     'SELECT namedquery_id
            FROM namedqueries_link_in_footer
@@ -252,7 +252,7 @@ sub link_in_footer {
 
   # We only cache link_in_footer for the current Bugzilla->user.
   return $self->{link_in_footer} if exists $self->{link_in_footer} && !$user;
-  my $user_id = $user ? $user->id : Bugzilla->user->id;
+  my $user_id        = $user ? $user->id : Bugzilla->user->id;
   my $link_in_footer = Bugzilla->dbh->selectrow_array(
     'SELECT 1 FROM namedqueries_link_in_footer
           WHERE namedquery_id = ? AND user_id = ?', undef, $self->id, $user_id

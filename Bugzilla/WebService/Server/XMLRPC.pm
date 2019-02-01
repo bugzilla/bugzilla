@@ -379,7 +379,7 @@ sub BEGIN {
         my $super_method = "SUPER::$method";
         return $self->$super_method($value);
       }
-      }
+    }
   }
 }
 

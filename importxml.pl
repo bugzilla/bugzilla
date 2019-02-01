@@ -623,7 +623,7 @@ sub process_bug {
     $err .= "   Using default product and component set ";
     $err .= "at the command line.\n";
 
-    $product = new Bugzilla::Product({name => $default_product_name});
+    $product   = new Bugzilla::Product({name => $default_product_name});
     $component = new Bugzilla::Component(
       {name => $default_component_name, product => $product});
     if (!$component) {
@@ -1084,7 +1084,7 @@ sub process_bug {
   $query .= ")";
 
   $dbh->do($query, undef, @values);
-  my $id = $dbh->bz_last_key('bugs', 'bug_id');
+  my $id      = $dbh->bz_last_key('bugs', 'bug_id');
   my $bug_obj = Bugzilla::Bug->new($id);
 
   # We are almost certain to get some uninitialized warnings

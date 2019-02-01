@@ -2048,7 +2048,7 @@ sub _column_fks_to_ddl {
   my ($self, $table, $column_fks) = @_;
   my @ddl;
   foreach my $column (keys %$column_fks) {
-    my $def = $column_fks->{$column};
+    my $def       = $column_fks->{$column};
     my $fk_string = $self->get_fk_ddl($table, $column, $def);
     push(@ddl, $fk_string);
   }
@@ -2147,7 +2147,7 @@ sub get_table_columns {
 sub get_table_indexes_abstract {
   my ($self, $table) = @_;
   my $table_def = $self->get_table_abstract($table);
-  my %indexes = @{$table_def->{INDEXES} || []};
+  my %indexes   = @{$table_def->{INDEXES} || []};
   return \%indexes;
 }
 
@@ -2217,7 +2217,7 @@ sub _get_create_table_ddl {
     my $finfo = shift(@fields);
     push(@col_lines, "\t$field\t" . $self->get_type_ddl($finfo));
     if ($self->FK_ON_CREATE and $finfo->{REFERENCES}) {
-      my $fk = $finfo->{REFERENCES};
+      my $fk     = $finfo->{REFERENCES};
       my $fk_ddl = $self->get_fk_ddl($table, $field, $fk);
       push(@fk_lines, $fk_ddl);
     }
@@ -2352,7 +2352,7 @@ sub get_alter_column_ddl {
   my ($table, $column, $new_def, $set_nulls_to) = @_;
 
   my @statements;
-  my $old_def = $self->get_column_abstract($table, $column);
+  my $old_def  = $self->get_column_abstract($table, $column);
   my $specific = $self->{db_specific};
 
   # If the types have changed, we have to deal with that.
@@ -2711,7 +2711,7 @@ sub delete_column {
   my ($self, $table, $column) = @_;
 
   my $abstract_fields = $self->{abstract_schema}{$table}{FIELDS};
-  my $name_position = firstidx { $_ eq $column } @$abstract_fields;
+  my $name_position   = firstidx { $_ eq $column } @$abstract_fields;
   die "Attempted to delete nonexistent column ${table}.${column}"
     if $name_position == -1;
 
@@ -2859,7 +2859,7 @@ sub _set_object {
 sub delete_index {
   my ($self, $table, $name) = @_;
 
-  my $indexes = $self->{abstract_schema}{$table}{INDEXES};
+  my $indexes       = $self->{abstract_schema}{$table}{INDEXES};
   my $name_position = firstidx { $_ eq $name } @$indexes;
   die "Attempted to delete nonexistent index $name on the $table table"
     if $name_position == -1;

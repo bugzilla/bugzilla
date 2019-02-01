@@ -481,7 +481,7 @@ sub error_catch {
   return unless $args->{error} eq 'bad_page_cgi_id';
 
   my $page_id = $args->{vars}->{page_id};
-  my $login = Bugzilla->user->identity || "Someone";
+  my $login   = Bugzilla->user->identity || "Someone";
   warn "$login attempted to access page.cgi with id = $page_id";
 
   my $page          = $args->{message};

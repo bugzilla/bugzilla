@@ -195,7 +195,7 @@ if ($action eq 'edit') {
 if ($action eq 'update') {
   check_token_data($token, 'edit_milestone');
   my $milestone_old_name = trim($cgi->param('milestoneold') || '');
-  my $milestone = Bugzilla::Milestone->check(
+  my $milestone          = Bugzilla::Milestone->check(
     {product => $product, name => $milestone_old_name});
 
   $milestone->set_name($milestone_name);

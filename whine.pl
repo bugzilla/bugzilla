@@ -253,7 +253,7 @@ sub get_next_event {
           my $sth = $dbh->prepare("SELECT name FROM groups " . "WHERE id=?");
           $sth->execute($mailto);
           my $groupname = $sth->fetch->[0];
-          my $group_id = Bugzilla::Group::ValidateGroupName($groupname, $owner);
+          my $group_id  = Bugzilla::Group::ValidateGroupName($groupname, $owner);
           if ($group_id) {
             my $glist = join(',', @{Bugzilla::Group->flatten_group_membership($group_id)});
             $sth = $dbh->prepare(
@@ -417,7 +417,7 @@ sub run_queries {
     push @{$thisquery->{'columnlist'}}, @searchfields;
 
     my @orderstrings = split(/,\s*/, $searchparams->param('order') || '');
-    my $search = new Bugzilla::Search(
+    my $search       = new Bugzilla::Search(
       'fields' => \@searchfields,
       'params' => scalar $searchparams->Vars,
       'user'   => $args->{'recipient'},         # the search runs as the recipient
@@ -628,7 +628,7 @@ sub get_next_date {
     # if it's today
     if ($daysinmonth[$now_month] == $now_day) {
       my $month = $now_month + 1;
-      $month = 1 if $month > 12;
+      $month    = 1 if $month > 12;
       $add_days = $daysinmonth[$month] + 1;
     }
     else {

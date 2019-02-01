@@ -83,7 +83,7 @@ sub new {
 
   if (ref $param) {
     my $bug_id = $param->{bug_id};
-    my $name = $param->{name} || $param->{value};
+    my $name   = $param->{name} || $param->{value};
     if (!defined $bug_id) {
       ThrowCodeError('bad_arg', {argument => 'bug_id', function => "${class}::new"});
     }
@@ -92,7 +92,7 @@ sub new {
     }
 
     my $condition = 'bug_id = ? AND value = ?';
-    my @values = ($bug_id, $name);
+    my @values    = ($bug_id, $name);
     $param = {condition => $condition, values => \@values};
   }
 

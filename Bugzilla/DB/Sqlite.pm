@@ -250,7 +250,7 @@ sub bz_setup_database {
 
   # If we created TheSchwartz tables with COLLATE bugzilla (during the
   # 4.1.x development series) re-create them without it.
-  my @tables = $self->bz_table_list();
+  my @tables    = $self->bz_table_list();
   my @ts_tables = grep {/^ts_/} @tables;
   my $drop_ok;
   foreach my $table (@ts_tables) {

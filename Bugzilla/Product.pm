@@ -112,7 +112,7 @@ sub create {
 # of products.
 sub preload {
   my ($products, $preload_flagtypes) = @_;
-  my %prods = map { $_->id => $_ } @$products;
+  my %prods    = map { $_->id => $_ } @$products;
   my @prod_ids = keys %prods;
   return unless @prod_ids;
 
@@ -120,7 +120,7 @@ sub preload {
   require Bugzilla::Component;
   foreach my $field (qw(component version milestone)) {
     my $classname = "Bugzilla::" . ucfirst($field);
-    my $objects = $classname->match({product_id => \@prod_ids});
+    my $objects   = $classname->match({product_id => \@prod_ids});
 
     # Now populate the products with this set of objects.
     foreach my $obj (@$objects) {
@@ -843,7 +843,7 @@ sub flag_types {
   # We cache flag types to avoid useless calls to get_clusions().
   my $cache = Bugzilla->request_cache->{flag_types_per_product} ||= {};
   $self->{flag_types} = {};
-  my $prod_id = $self->id;
+  my $prod_id   = $self->id;
   my $flagtypes = Bugzilla::FlagType::match({product_id => $prod_id});
 
   foreach my $type ('bug', 'attachment') {

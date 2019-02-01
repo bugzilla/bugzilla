@@ -29,7 +29,7 @@ $user->in_group('admin')
   {group => 'admin', action => 'modify', object => 'workflow'});
 
 my $action = $cgi->param('action') || 'edit';
-my $token = $cgi->param('token');
+my $token  = $cgi->param('token');
 
 sub get_workflow {
   my $dbh      = Bugzilla->dbh;

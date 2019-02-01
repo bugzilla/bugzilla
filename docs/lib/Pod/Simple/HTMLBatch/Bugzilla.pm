@@ -61,7 +61,7 @@ sub _write_contents_middle {
     foreach my $e (@downlines) {
       $row_count++;
       my $even_or_odd = $row_count % 2 ? 'even' : 'odd';
-      my $name = esc($e->[0]);
+      my $name        = esc($e->[0]);
       my $path = join("/", '.', esc(@{$e->[3]})) . $Pod::Simple::HTML::HTML_EXTENSION;
       my $description = $self->{bugzilla_desc}->{$name} || '';
       $description = esc($description);

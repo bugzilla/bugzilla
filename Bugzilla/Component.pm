@@ -83,7 +83,7 @@ sub new {
     }
 
     my $condition = 'product_id = ? AND name = ?';
-    my @values = ($product->id, $name);
+    my @values    = ($product->id, $name);
     $param = {condition => $condition, values => \@values};
   }
 

@@ -145,7 +145,7 @@ if ($@ eq '') {
       my $verstring = "GD version $gd, libgd version $gdlib";
 
       $gdlib =~ s/^([^\.]+)\..*/$1/;
-      $gd =~ s/^([^\.]+)\..*/$1/;
+      $gd    =~ s/^([^\.]+)\..*/$1/;
 
       if ($gdlib == $gd) {
         say "TEST-OK $verstring; Major versions match.";
@@ -159,10 +159,10 @@ if ($@ eq '') {
   # Test GD
   eval {
     my $image = new GD::Image(100, 100);
-    my $black = $image->colorAllocate(0,   0,   0);
+    my $black = $image->colorAllocate(0, 0, 0);
     my $white = $image->colorAllocate(255, 255, 255);
-    my $red   = $image->colorAllocate(255, 0,   0);
-    my $blue  = $image->colorAllocate(0,   0,   255);
+    my $red   = $image->colorAllocate(255, 0, 0);
+    my $blue  = $image->colorAllocate(0, 0, 255);
     $image->transparent($white);
     $image->rectangle(0, 0, 99, 99, $black);
     $image->arc(50, 50, 95, 75, 0, 360, $blue);

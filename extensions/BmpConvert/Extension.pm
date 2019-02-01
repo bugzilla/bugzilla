@@ -22,7 +22,7 @@ sub attachment_process_data {
   return unless $args->{attributes}->{mimetype} eq 'image/bmp';
 
   my $data = ${$args->{data}};
-  my $img = Image::Magick->new(magick => 'bmp');
+  my $img  = Image::Magick->new(magick => 'bmp');
 
   # $data is a filehandle.
   if (ref $data) {

@@ -146,7 +146,7 @@ END
     else {
       print "Please edit $dest_file to configure the daemon.\n";
     }
-    }
+  }
 }
 
 sub gd_can_uninstall {
@@ -160,7 +160,7 @@ sub gd_can_uninstall {
       }
       system($chkconfig, '--del', $initscript);
       print "$initscript disabled.", " To stop it, run: $initd/$initscript stop\n";
-      }
+    }
   }
 
   return $self->SUPER::gd_can_install(@_);

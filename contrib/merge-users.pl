@@ -44,7 +44,7 @@ use Pod::Usage;
 my $dbh = Bugzilla->dbh;
 
 # Display the help if called with --help or -?.
-my $help = 0;
+my $help   = 0;
 my $result = GetOptions("help|?" => \$help);
 pod2usage(0) if $help;
 
@@ -179,7 +179,7 @@ foreach my $table (keys %changes) {
 
     # Get all columns to consider. There is always at least
     # one column given: the one to update.
-    my @columns = split(/[\s]+/, $column_list);
+    my @columns       = split(/[\s]+/, $column_list);
     my $cols_to_check = join(' AND ', map {"$_ = ?"} @columns);
 
     # The first column of the list is the one to update.

@@ -364,7 +364,7 @@ sub _argument_type_check {
   # Now, convert dateTime fields on input.
   $self->_bz_method_name =~ /^(\S+)\.(\S+)$/;
   my ($class, $method) = ($1, $2);
-  my $pkg = $self->{dispatch_path}->{$class};
+  my $pkg         = $self->{dispatch_path}->{$class};
   my @date_fields = @{$pkg->DATE_FIELDS->{$method} || []};
   foreach my $field (@date_fields) {
     if (defined $params->{$field}) {

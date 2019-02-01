@@ -53,7 +53,7 @@ local our $realdepth = 0;
 # Generate the tree of bugs that this bug depends on and a list of IDs
 # appearing in the tree.
 my $dependson_tree = {$id => $bug};
-my $dependson_ids = {};
+my $dependson_ids  = {};
 GenerateTree($id, "dependson", 1, $dependson_tree, $dependson_ids);
 $vars->{'dependson_tree'} = $dependson_tree;
 $vars->{'dependson_ids'}  = [keys(%$dependson_ids)];
@@ -61,7 +61,7 @@ $vars->{'dependson_ids'}  = [keys(%$dependson_ids)];
 # Generate the tree of bugs that this bug blocks and a list of IDs
 # appearing in the tree.
 my $blocked_tree = {$id => $bug};
-my $blocked_ids = {};
+my $blocked_ids  = {};
 GenerateTree($id, "blocked", 1, $blocked_tree, $blocked_ids);
 $vars->{'blocked_tree'} = $blocked_tree;
 $vars->{'blocked_ids'}  = [keys(%$blocked_ids)];

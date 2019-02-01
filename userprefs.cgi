@@ -300,7 +300,7 @@ sub SaveEmail {
 
     # The new information given to us by the user.
     my $new_watched_users = join(',', $cgi->param('new_watchedusers')) || '';
-    my @new_watch_names = split(/[,\s]+/, $new_watched_users);
+    my @new_watch_names   = split(/[,\s]+/, $new_watched_users);
     my %new_watch_ids;
 
     foreach my $username (@new_watch_names) {
@@ -541,7 +541,7 @@ sub DoApiKey {
   my $user = Bugzilla->user;
 
   my $api_keys = Bugzilla::User::APIKey->match({user_id => $user->id});
-  $vars->{api_keys} = $api_keys;
+  $vars->{api_keys}    = $api_keys;
   $vars->{any_revoked} = grep { $_->revoked } @$api_keys;
 }
 

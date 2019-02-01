@@ -34,7 +34,7 @@ sub retry_delay {
 
 sub work {
   my ($class, $job) = @_;
-  my $msg = $job->arg->{msg};
+  my $msg     = $job->arg->{msg};
   my $success = eval { MessageToMTA($msg, 1); 1; };
   if (!$success) {
     $job->failed($@);

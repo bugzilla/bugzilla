@@ -225,7 +225,7 @@ sub code_files_to_subroutines {
     next if $file =~ /install-requirements/;
     print "Moving $file code into Extension.pm...\n";
     my ($modules, $code) = process_code_file($file);
-    my @code_lines = map {"    $_"} @$code;
+    my @code_lines  = map {"    $_"} @$code;
     my $code_string = join('', @code_lines);
     $code_string =~ s/Bugzilla->hook_args/\$args/g;
     $code_string =~ s/my\s+\$args\s+=\s+\$args;//gs;
@@ -244,7 +244,7 @@ END
     push(@subroutines, $subroutine);
   }
 
-  my %seen_modules = map { trim($_) => 1 } @all_modules;
+  my %seen_modules      = map { trim($_) => 1 } @all_modules;
   my $module_string     = join("\n", sort keys %seen_modules);
   my $subroutine_string = join("\n", @subroutines);
   return ($module_string, $subroutine_string);

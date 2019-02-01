@@ -70,7 +70,7 @@ sub invalid_field_operator_combination { return undef }
 sub search_params {
   my ($self) = @_;
 
-  my %params = %{$self->test->{top_params} || {}};
+  my %params  = %{$self->test->{top_params} || {}};
   my $counter = 0;
   foreach my $row (@{$self->test->{params}}) {
     $row->{v} = $self->translate_value($row) if exists $row->{v};

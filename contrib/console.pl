@@ -27,7 +27,7 @@ $Data::Dumper::Maxdepth = 1;
 $Data::Dumper::Deparse  = 0;
 
 my $sysname = get_text('term', {term => 'Bugzilla'});
-my $term = new Term::ReadLine "$sysname Console";
+my $term    = new Term::ReadLine "$sysname Console";
 read_history($term);
 END { write_history($term) }
 

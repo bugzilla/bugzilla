@@ -101,7 +101,7 @@ foreach my $table (@table_list) {
 
   my ($total) = $source_db->selectrow_array("SELECT COUNT(*) FROM $table");
   my $select_query = "SELECT " . join(',', @table_columns) . " FROM $table";
-  my $select_sth = $source_db->prepare($select_query);
+  my $select_sth   = $source_db->prepare($select_query);
   $select_sth->execute();
 
   my $insert_query

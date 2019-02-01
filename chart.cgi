@@ -76,7 +76,7 @@ $vars->{'doc_section'} = 'using/reports-and-charts.html#charts';
 # series_id they apply to (e.g. subscribe, unsubscribe).
 my @actions = grep(/^action-/, $cgi->param());
 if ($actions[0] && $actions[0] =~ /^action-([^\d]+)(\d*)$/) {
-  $action = $1;
+  $action    = $1;
   $series_id = $2 if $2;
 }
 

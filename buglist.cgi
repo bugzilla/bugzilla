@@ -370,7 +370,7 @@ if ($cmdtype eq "dorem") {
       $vars->{'search_id'}  = $query_id;
     }
     $params = new Bugzilla::CGI($buffer);
-    $order = $params->param('order') || $order;
+    $order  = $params->param('order') || $order;
 
   }
   elsif ($remaction eq "runseries") {
@@ -912,7 +912,7 @@ $vars->{'buglist'}        = \@bugidlist;
 $vars->{'columns'}        = $columns;
 $vars->{'displaycolumns'} = \@displaycolumns;
 
-$vars->{'openstates'} = [BUG_STATE_OPEN];
+$vars->{'openstates'}   = [BUG_STATE_OPEN];
 $vars->{'closedstates'} = [map { $_->name } closed_bug_statuses()];
 
 # The iCal file needs priorities ordered from 1 to 9 (highest to lowest)
@@ -1018,7 +1018,7 @@ if ($dotweak && scalar @bugs) {
     = _get_common_flag_types([keys %$bugcomponentids]);
 
   # Convert bug statuses to their ID.
-  my @bug_statuses = map { $dbh->quote($_) } keys %$bugstatuses;
+  my @bug_statuses   = map { $dbh->quote($_) } keys %$bugstatuses;
   my $bug_status_ids = $dbh->selectcol_arrayref(
     'SELECT id FROM bug_status
                                WHERE ' . $dbh->sql_in('value', \@bug_statuses)
@@ -1122,7 +1122,7 @@ my $disposition = "inline";
 
 if ($format->{'extension'} eq "html") {
   my $list_id = $cgi->param('list_id') || $cgi->param('regetlastlist');
-  my $search = $user->save_last_search(
+  my $search  = $user->save_last_search(
     {bugs => \@bugidlist, order => $order, vars => $vars, list_id => $list_id});
   $cgi->param('list_id', $search->id) if $search;
   $contenttype = "text/html";

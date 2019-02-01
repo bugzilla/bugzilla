@@ -63,14 +63,12 @@ use constant APACHE => qw(apachectl httpd apache2 apache);
 
 # If we don't find any of the above binaries in the normal PATH,
 # these are extra places we look.
-use constant APACHE_PATH => [
-  qw(
+use constant APACHE_PATH => [qw(
     /usr/sbin
     /usr/local/sbin
     /usr/libexec
     /usr/local/libexec
-    )
-];
+    )];
 
 # The below two constants are subroutines so that they can implement
 # a hook. Other than that they are actually constants.
@@ -475,7 +473,7 @@ sub check_requirements {
   my ($output) = @_;
 
   print "\n", install_string('checking_modules'), "\n" if $output;
-  my $root = ROOT_USER;
+  my $root    = ROOT_USER;
   my $missing = _check_missing(REQUIRED_MODULES, $output);
 
   print "\n", install_string('checking_dbd'), "\n" if $output;
@@ -608,7 +606,7 @@ sub print_module_instructions {
   if (my @missing = @{$check_results->{apache}}) {
     print install_string('modules_message_apache');
     my $missing_string = join(', ', @missing);
-    my $size = TABLE_WIDTH - 7;
+    my $size           = TABLE_WIDTH - 7;
     printf "*    \%-${size}s *\n", $missing_string;
     my $spaces = TABLE_WIDTH - 2;
     print "*", (' ' x $spaces), "*\n";

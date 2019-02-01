@@ -168,7 +168,7 @@ if ($cgi->param('update')) {
       # to be altered or deleted
 
       # Check schedules for changes
-      my $schedules = Bugzilla::Whine::Schedule->match({eventid => $eventid});
+      my $schedules   = Bugzilla::Whine::Schedule->match({eventid => $eventid});
       my @scheduleids = ();
       foreach my $schedule (@$schedules) {
         push @scheduleids, $schedule->id;
@@ -347,7 +347,7 @@ for my $event_id (keys %{$events}) {
   my $schedules = Bugzilla::Whine::Schedule->match({eventid => $event_id});
   foreach my $schedule (@$schedules) {
     my $mailto_type = $schedule->mailto_is_group ? MAILTO_GROUP : MAILTO_USER;
-    my $mailto = '';
+    my $mailto      = '';
     if ($mailto_type == MAILTO_USER) {
       $mailto = $schedule->mailto->login;
     }

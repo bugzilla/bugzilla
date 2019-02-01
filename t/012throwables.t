@@ -45,7 +45,7 @@ foreach my $module (@Support::Files::testitems) {
 foreach my $include_path (@include_paths) {
   foreach my $path (@{$actual_files{$include_path}}) {
     my $file = File::Spec->catfile($include_path, $path);
-    $file =~ s/\s.*$//;    # nuke everything after the first space
+    $file =~ s/\s.*$//;                 # nuke everything after the first space
     $file =~ s|\\|/|g if ON_WINDOWS;    # convert \ to / in path if on windows
     $test_templates{$file} = () if $file =~ m#global/(code|user)-error\.html\.tmpl#;
 

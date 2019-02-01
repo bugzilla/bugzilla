@@ -50,7 +50,7 @@ pod2usage({-verbose => 1, -exitval => 1}) if $switch{'help'};
 # Read in the "answers" file if it exists, for running in
 # non-interactive mode.
 my $answers_file = $ARGV[0];
-my $silent = $answers_file && !$switch{'verbose'};
+my $silent       = $answers_file && !$switch{'verbose'};
 
 print(install_string('header', get_version_and_os()) . "\n") unless $silent;
 exit 0 if $switch{'version'};

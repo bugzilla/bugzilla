@@ -30,7 +30,7 @@ $user->in_group('admin')
   {group => 'admin', action => 'edit', object => 'custom_fields'});
 
 my $action = trim($cgi->param('action') || '');
-my $token = $cgi->param('token');
+my $token  = $cgi->param('token');
 
 print $cgi->header();
 

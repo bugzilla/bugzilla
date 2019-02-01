@@ -205,7 +205,7 @@ sub get_attachment {
       }
       $attachments{$field_name} = $attachment;
     }
-    my @args = map { $_ . '=' . $attachments{$_}->id } @field_names;
+    my @args       = map { $_ . '=' . $attachments{$_}->id } @field_names;
     my $cgi_params = $cgi->canonicalise_query(@field_names, 't', 'Bugzilla_login',
       'Bugzilla_password');
     push(@args, $cgi_params) if $cgi_params;
@@ -810,7 +810,7 @@ sub delete_attachment {
     # The token is valid. Delete the content of the attachment.
     my $msg;
     $vars->{'attachment'} = $attachment;
-    $vars->{'reason'} = clean_text($cgi->param('reason') || '');
+    $vars->{'reason'}     = clean_text($cgi->param('reason') || '');
 
     $template->process("attachment/delete_reason.txt.tmpl", $vars, \$msg)
       || ThrowTemplateError($template->error());

@@ -178,7 +178,7 @@ sub get_create_database_sql {
 # MySQL has a simpler ALTER TABLE syntax than ANSI.
 sub get_alter_column_ddl {
   my ($self, $table, $column, $new_def, $set_nulls_to) = @_;
-  my $old_def = $self->get_column($table, $column);
+  my $old_def      = $self->get_column($table, $column);
   my %new_def_copy = %$new_def;
   if ($old_def->{PRIMARYKEY} && $new_def->{PRIMARYKEY}) {
 

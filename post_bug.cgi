@@ -216,7 +216,7 @@ $vars->{'bug'} = $bug;
 Bugzilla::Hook::process('post_bug_after_creation', {vars => $vars});
 
 my $recipients = {changer => $user};
-my $bug_sent = Bugzilla::BugMail::Send($id, $recipients);
+my $bug_sent   = Bugzilla::BugMail::Send($id, $recipients);
 $bug_sent->{type} = 'created';
 $bug_sent->{id}   = $id;
 my @all_mail_results = ($bug_sent);

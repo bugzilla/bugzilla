@@ -31,7 +31,7 @@ $user->in_group('tweakparams')
   {group => "tweakparams", action => "modify", object => "settings"});
 
 my $action = trim($cgi->param('action') || '');
-my $token = $cgi->param('token');
+my $token  = $cgi->param('token');
 
 if ($action eq 'update') {
   check_token_data($token, 'edit_settings');

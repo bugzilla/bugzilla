@@ -100,7 +100,7 @@ elsif ($action eq 'begin-sudo') {
   my $user = Bugzilla->login(LOGIN_REQUIRED);
 
   my $target_login = $cgi->param('target_login');
-  my $reason = $cgi->param('reason') || '';
+  my $reason       = $cgi->param('reason') || '';
 
   # At this point, the user is logged in.  However, if they used a method
   # where they could have provided a username/password (i.e. CGI), but they

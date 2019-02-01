@@ -26,7 +26,7 @@ sub process {
 }
 
 sub in {
-  my $hook_name = shift;
+  my $hook_name    = shift;
   my $currently_in = Bugzilla->request_cache->{hook_stack}->[-1] || '';
   return $hook_name eq $currently_in ? 1 : 0;
 }

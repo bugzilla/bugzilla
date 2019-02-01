@@ -276,7 +276,7 @@ sub sanitycheck_check {
   my $needs_rebuild;
   foreach my $id (keys %cached_counts) {
     my $cached_count = $cached_counts{$id};
-    my $real_count = $real_counts{$id} || 0;
+    my $real_count   = $real_counts{$id} || 0;
     if ($cached_count < 0) {
       $status->('voting_count_alert', {id => $id}, 'alert');
     }
@@ -447,7 +447,7 @@ sub _page_user {
       ($who->id, $product->id)
     );
 
-    my %votes = map { $_->[0] => $_->[1] } @$vote_list;
+    my %votes   = map { $_->[0] => $_->[1] } @$vote_list;
     my @bug_ids = sort keys %votes;
 
     # Exclude bugs that the user can no longer see.
@@ -878,7 +878,7 @@ sub _remove_votes {
 # If a user votes for a bug, or the number of votes required to
 # confirm a bug has been reduced, check if the bug is now confirmed.
 sub _confirm_if_vote_confirmed {
-  my $id = shift;
+  my $id  = shift;
   my $bug = ref $id ? $id : new Bugzilla::Bug({id => $id, cache => 1});
 
   my $ret = 0;

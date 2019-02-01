@@ -41,7 +41,7 @@ if (grep(/^cmd-/, $cgi->param())) {
 
 Bugzilla->login();
 my $action = $cgi->param('action') || 'menu';
-my $token = $cgi->param('token');
+my $token  = $cgi->param('token');
 
 if ($action eq "menu") {
 

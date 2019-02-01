@@ -77,7 +77,7 @@ use constant DEFAULT_MAP => {
 
 sub type {
   my ($class, $field) = @_;
-  my $field_obj = blessed $field ? $field : Bugzilla::Field->check($field);
+  my $field_obj  = blessed $field ? $field : Bugzilla::Field->check($field);
   my $field_name = $field_obj->name;
 
   if (my $package = $class->CLASS_MAP->{$field_name}) {

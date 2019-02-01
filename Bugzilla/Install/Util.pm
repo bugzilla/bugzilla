@@ -620,7 +620,7 @@ sub set_output_encoding {
 sub init_console {
   eval { ON_WINDOWS && require Win32::Console::ANSI; };
   $ENV{'ANSI_COLORS_DISABLED'} = 1 if ($@ || !-t *STDOUT);
-  $SIG{__DIE__} = \&_console_die;
+  $SIG{__DIE__}                = \&_console_die;
   prevent_windows_dialog_boxes();
   set_output_encoding();
 }

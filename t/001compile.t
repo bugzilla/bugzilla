@@ -62,7 +62,7 @@ sub compile_file {
   ok(!$return_val, $file) or diag('--ERROR');
 }
 
-my @testitems = (@Support::Files::testitems, @Support::Files::test_files);
+my @testitems     = (@Support::Files::testitems, @Support::Files::test_files);
 my $file_features = map_files_to_features();
 
 # Test the scripts by compiling them

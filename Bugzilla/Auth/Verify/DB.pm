@@ -23,7 +23,7 @@ sub check_credentials {
   my $dbh = Bugzilla->dbh;
 
   my $username = $login_data->{username};
-  my $user = new Bugzilla::User({name => $username});
+  my $user     = new Bugzilla::User({name => $username});
 
   return {failure => AUTH_NO_SUCH_USER} unless $user;
 

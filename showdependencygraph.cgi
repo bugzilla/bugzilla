@@ -108,7 +108,7 @@ if (!grep { $_ eq $rankdir } @valid_rankdirs) {
   $rankdir = 'TB';
 }
 
-my $display = $cgi->param('display') || 'tree';
+my $display   = $cgi->param('display') || 'tree';
 my $webdotdir = bz_locations()->{'webdotdir'};
 
 my ($fh, $filename) = File::Temp::tempfile(
@@ -139,8 +139,7 @@ foreach my $i (split('[\s,]+', $cgi->param('id'))) {
 my @stack = keys(%baselist);
 
 if ($display eq 'web') {
-  my $sth = $dbh->prepare(
-    q{SELECT blocked, dependson
+  my $sth = $dbh->prepare(q{SELECT blocked, dependson
                                 FROM dependencies
                                WHERE blocked = ? OR dependson = ?}
   );
@@ -184,8 +183,7 @@ foreach my $k (keys(%baselist)) {
   $seen{$k} = 1;
 }
 
-my $sth = $dbh->prepare(
-  q{SELECT bug_status, resolution, short_desc
+my $sth = $dbh->prepare(q{SELECT bug_status, resolution, short_desc
                   FROM bugs
                  WHERE bugs.bug_id = ?}
 );

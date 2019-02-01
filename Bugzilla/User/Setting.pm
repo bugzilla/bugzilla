@@ -35,7 +35,7 @@ sub new {
   my $setting_name = shift;
   my $user_id      = shift;
 
-  my $class = ref($invocant) || $invocant;
+  my $class    = ref($invocant) || $invocant;
   my $subclass = '';
 
   # Create a ref to an empty hash and bless it
@@ -149,8 +149,7 @@ sub add_setting {
                     VALUES (?, ?, 1, ?)}, undef, ($name, $default_value, $subclass)
   );
 
-  my $sth = $dbh->prepare(
-    q{INSERT INTO setting_value (name, value, sortindex)
+  my $sth = $dbh->prepare(q{INSERT INTO setting_value (name, value, sortindex)
                                     VALUES (?, ?, ?)}
   );
 
@@ -167,7 +166,7 @@ sub get_all_settings {
   my $dbh       = Bugzilla->dbh;
 
   my $cache_key = "user_settings.$user_id";
-  my $rows = Bugzilla->memcached->get_config({key => $cache_key});
+  my $rows      = Bugzilla->memcached->get_config({key => $cache_key});
   if (!$rows) {
     $rows = $dbh->selectall_arrayref(
       q{SELECT name, default_value, is_enabled, setting_value, subclass
@@ -232,8 +231,7 @@ sub set_default {
   my ($setting_name, $default_value, $is_enabled) = @_;
   my $dbh = Bugzilla->dbh;
 
-  my $sth = $dbh->prepare(
-    q{UPDATE setting
+  my $sth = $dbh->prepare(q{UPDATE setting
                                  SET default_value = ?, is_enabled = ?
                                WHERE name = ?}
   );

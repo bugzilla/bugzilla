@@ -172,7 +172,7 @@ sub sqlize_dates {
 sub get_blocker_ids {
   my ($bug_id, $unique) = @_;
   $unique ||= {$bug_id => 1};
-  my $deps = Bugzilla::Bug::EmitDependList("blocked", "dependson", $bug_id);
+  my $deps   = Bugzilla::Bug::EmitDependList("blocked", "dependson", $bug_id);
   my @unseen = grep { !$unique->{$_}++ } @$deps;
   foreach $bug_id (@unseen) {
     get_blocker_ids($bug_id, $unique);

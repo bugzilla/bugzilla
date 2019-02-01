@@ -690,7 +690,7 @@ sub insert_bugs {
   my $dbh = Bugzilla->dbh;
   say get_text('migrate_creating_bugs');
 
-  my $init_statuses = Bugzilla::Status->can_change_to();
+  my $init_statuses    = Bugzilla::Status->can_change_to();
   my %allowed_statuses = map { lc($_->name) => 1 } @$init_statuses;
 
   # Bypass the question of whether or not we can file UNCONFIRMED

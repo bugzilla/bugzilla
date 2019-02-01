@@ -186,8 +186,8 @@ foreach my $table ($dbh->bz_table_list_real) {
                                             AND $column != ''"
       );
 
-      my @pk_array = map {"$_ = ?"} split(',', $pk);
-      my $pk_where = join(' AND ', @pk_array);
+      my @pk_array   = map {"$_ = ?"} split(',', $pk);
+      my $pk_where   = join(' AND ', @pk_array);
       my $update_sth = $dbh->prepare("UPDATE $table SET $column = ? WHERE $pk_where");
 
       $sth->execute();
@@ -197,7 +197,7 @@ foreach my $table ($dbh->bz_table_list_real) {
 
         # Wide characters cause md5_base64() to die.
         my $digest_data = utf8::is_utf8($data) ? Encode::encode_utf8($data) : $data;
-        my $digest = md5_base64($digest_data);
+        my $digest      = md5_base64($digest_data);
 
         my @primary_keys = reverse split(',', $pk);
 

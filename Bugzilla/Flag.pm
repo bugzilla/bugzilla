@@ -450,7 +450,7 @@ sub create {
   my ($class, $flag, $timestamp) = @_;
   $timestamp ||= Bugzilla->dbh->selectrow_array('SELECT LOCALTIMESTAMP(0)');
 
-  my $params = {};
+  my $params  = {};
   my @columns = grep { $_ ne 'id' } $class->_get_db_columns;
 
   # Some columns use date formatting so use alias instead
@@ -513,7 +513,7 @@ sub update_flags {
   my ($class, $self, $old_self, $timestamp) = @_;
 
   my @old_summaries = $class->snapshot($old_self->flags);
-  my %old_flags = map { $_->id => $_ } @{$old_self->flags};
+  my %old_flags     = map { $_->id => $_ } @{$old_self->flags};
 
   foreach my $new_flag (@{$self->flags}) {
     if (!$new_flag->id) {
@@ -549,7 +549,7 @@ sub update_flags {
   }
 
   my @new_summaries = $class->snapshot($self->flags);
-  my @changes = $class->update_activity(\@old_summaries, \@new_summaries);
+  my @changes       = $class->update_activity(\@old_summaries, \@new_summaries);
 
   Bugzilla::Hook::process(
     'flag_end_of_update',
@@ -628,7 +628,7 @@ sub force_retarget {
   foreach my $flag (@$flags) {
 
     # $bug is undefined when e.g. editing inclusion and exclusion lists.
-    my $obj = $flag->attachment || $bug || $flag->bug;
+    my $obj            = $flag->attachment || $bug || $flag->bug;
     my $is_retargetted = $flag->retarget($obj);
     if ($is_retargetted) {
       $dbh->do('UPDATE flags SET type_id = ? WHERE id = ?',

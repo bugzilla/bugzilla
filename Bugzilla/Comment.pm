@@ -305,7 +305,7 @@ sub remove_tag {
   my ($self, $tag) = @_;
   $tag = $self->_check_tag($tag);
 
-  my $tags = $self->tags;
+  my $tags  = $self->tags;
   my $index = first { lc($tags->[$_]) eq lc($tag) } 0 .. scalar(@$tags) - 1;
   return unless defined $index;
   splice(@$tags, $index, 1);

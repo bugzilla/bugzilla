@@ -412,7 +412,7 @@ use constant COLUMN_DEPENDS => {
 # fields it needs a little help.
 sub COLUMN_JOINS {
   my $invocant = shift;
-  my $user = blessed($invocant) ? $invocant->_user : Bugzilla->user;
+  my $user     = blessed($invocant) ? $invocant->_user : Bugzilla->user;
 
   my $joins = {
     actual_time => {
@@ -614,7 +614,7 @@ sub COLUMNS {
 
 sub REPORT_COLUMNS {
   my $invocant = shift;
-  my $user = blessed($invocant) ? $invocant->_user : Bugzilla->user;
+  my $user     = blessed($invocant) ? $invocant->_user : Bugzilla->user;
 
   my $columns = dclone(blessed($invocant) ? $invocant->COLUMNS : COLUMNS);
 
@@ -658,7 +658,7 @@ use constant GROUP_BY_SKIP => qw(
 # Note that the params argument may be modified by Bugzilla::Search
 sub new {
   my $invocant = shift;
-  my $class = ref($invocant) || $invocant;
+  my $class    = ref($invocant) || $invocant;
 
   my $self = {@_};
   bless($self, $class);
@@ -674,7 +674,7 @@ sub new {
   # do it, because there's no way to know if we were passed a tied hash
   # or not.
   my $params_in = $self->_params;
-  my %params = map { $_ => $params_in->{$_} } keys %$params_in;
+  my %params    = map { $_ => $params_in->{$_} } keys %$params_in;
   $self->{params} = \%params;
 
   return $self;
@@ -707,7 +707,7 @@ sub data {
   my $sql        = $self->_sql;
 
   # Do we just want bug IDs to pass to the 2nd query or all the data immediately?
-  my $func = $all_in_bugs_table ? 'selectall_arrayref' : 'selectcol_arrayref';
+  my $func    = $all_in_bugs_table ? 'selectall_arrayref' : 'selectcol_arrayref';
   my $bug_ids = $dbh->$func($sql);
   my @extra_data = ({sql => $sql, time => tv_interval($start_time)});
 
@@ -806,13 +806,13 @@ sub search_description {
 sub boolean_charts_to_custom_search {
   my ($self, $cgi_buffer) = @_;
   my $boolean_charts = $self->_boolean_charts;
-  my @as_params = $boolean_charts ? $boolean_charts->as_params : ();
+  my @as_params      = $boolean_charts ? $boolean_charts->as_params : ();
 
   # We need to start our new ids after the last custom search "f" id.
   # We can just pick the last id in the array because they are sorted
   # numerically.
   my $last_id = ($self->_field_ids)[-1];
-  my $count = defined($last_id) ? $last_id + 1 : 0;
+  my $count   = defined($last_id) ? $last_id + 1 : 0;
   foreach my $param_set (@as_params) {
     foreach my $name (keys %$param_set) {
       my $value = $param_set->{$name};
@@ -1329,7 +1329,7 @@ sub _sql_where {
 
   # The newline and this particular spacing makes the resulting
   # SQL a bit more readable for debugging.
-  my $where = join("\n   AND ", $self->_standard_where);
+  my $where      = join("\n   AND ", $self->_standard_where);
   my $clause_sql = $main_clause->as_string;
   $where .= "\n   AND " . $clause_sql if $clause_sql;
   return $where;
@@ -1685,7 +1685,7 @@ sub _boolean_charts {
   my @param_list = keys %$params;
 
   my @all_field_params = grep {/^field-?\d+/} @param_list;
-  my @chart_ids = map { /^field(-?\d+)/; $1 } @all_field_params;
+  my @chart_ids        = map { /^field(-?\d+)/; $1 } @all_field_params;
   @chart_ids = sort { $a <=> $b } uniq @chart_ids;
 
   my $clause = new Bugzilla::Search::Clause();
@@ -1776,7 +1776,7 @@ sub _field_ids {
   my @param_list = keys %$params;
 
   my @field_params = grep {/^f\d+$/} @param_list;
-  my @field_ids = map { /(\d+)/; $1 } @field_params;
+  my @field_ids    = map { /(\d+)/; $1 } @field_params;
   @field_ids = sort { $a <=> $b } @field_ids;
   return @field_ids;
 }
@@ -2843,7 +2843,7 @@ sub _multiselect_negative {
   my ($field, $operator) = @$args{qw(field operator)};
 
   $args->{operator} = $self->_reverse_operator($operator);
-  $args->{term} = $self->_multiselect_term($args, 1);
+  $args->{term}     = $self->_multiselect_term($args, 1);
 }
 
 sub _multiselect_multiple {
@@ -2968,7 +2968,7 @@ sub _multiselect_table {
   }
   elsif ($field eq 'longdesc') {
     $args->{_extra_where} = " AND isprivate = 0" if !$self->_user->is_insider;
-    $args->{full_field} = 'thetext';
+    $args->{full_field}   = 'thetext';
     return "longdescs";
   }
   elsif ($field eq 'longdescs.isprivate') {
@@ -3284,7 +3284,7 @@ sub _changedbefore_changedafter {
   }
 
   my $sql_operator = ($operator =~ /before/) ? '<=' : '>=';
-  my $field_id = $field_object->id;
+  my $field_id     = $field_object->id;
 
   # Charts on changed* fields need to be field-specific. Otherwise,
   # OR chart rows make no sense if they contain multiple fields.
@@ -3308,7 +3308,7 @@ sub _changedfrom_changedto {
   my ($chart_id, $joins, $field, $operator, $quoted)
     = @$args{qw(chart_id joins field operator quoted)};
 
-  my $column = ($operator =~ /from/) ? 'removed' : 'added';
+  my $column       = ($operator =~ /from/) ? 'removed' : 'added';
   my $field_object = $self->_chart_fields->{$field}
     || ThrowCodeError("invalid_field_name", {field => $field});
   my $field_id = $field_object->id;

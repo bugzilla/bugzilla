@@ -54,7 +54,7 @@ if ($action eq 'queue') {
 }
 else {
   my $flagtypes = get_flag_types();
-  my @types = ('all', @$flagtypes);
+  my @types     = ('all', @$flagtypes);
 
   my $vars = {};
   $vars->{'types'}    = \@types;

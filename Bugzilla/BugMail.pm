@@ -59,7 +59,7 @@ sub Send {
   # Bugzilla::User objects of people in various roles. More than one person
   # can 'have' a role, if the person in that role has changed, or people are
   # watching.
-  my @assignees = ($bug->assigned_to);
+  my @assignees   = ($bug->assigned_to);
   my @qa_contacts = $bug->qa_contact || ();
 
   my @ccs = @{$bug->cc_users};
@@ -455,7 +455,7 @@ sub _flatten_object {
 
   # the same objects are used for each recipient, so cache the flattened hash
   my $cache = Bugzilla->request_cache->{bugmail_flat_objects} ||= {};
-  my $key = blessed($object) . '-' . $object->id;
+  my $key   = blessed($object) . '-' . $object->id;
   return $cache->{$key} ||= $object->flatten_to_hash;
 }
 
@@ -559,7 +559,7 @@ sub _get_diffs {
       && $diff->{field_name} eq $changes[-1]->{field_name}
       && $diff->{bug_when} eq $changes[-1]->{bug_when}
       && $diff->{who} eq $changes[-1]->{who}
-      && ($diff->{attach_id} // 0) ==  ($changes[-1]->{attach_id} // 0)
+      && ($diff->{attach_id}  // 0) == ($changes[-1]->{attach_id}  // 0)
       && ($diff->{comment_id} // 0) == ($changes[-1]->{comment_id} // 0))
     {
       my $old_change = pop @changes;
@@ -575,7 +575,7 @@ sub _get_diffs {
 }
 
 sub _get_new_bugmail_fields {
-  my $bug = shift;
+  my $bug    = shift;
   my @fields = @{Bugzilla->fields({obsolete => 0, in_new_bugmail => 1})};
   my @diffs;
   my $params = Bugzilla->params;

@@ -280,7 +280,7 @@ sub _read_products {
     my %product = (name => $name, description => $description);
 
     my @initial_cc = split(',', $cc);
-    @initial_cc = @{$self->translate_value('user', \@initial_cc)};
+    @initial_cc  = @{$self->translate_value('user', \@initial_cc)};
     $assigned_to = $self->translate_value('user', $assigned_to);
     my %component = (
       name         => $self->config('component_name'),

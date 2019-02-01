@@ -228,7 +228,7 @@ sub get_alter_column_ddl {
   my ($self, $table, $column, $new_def, $set_nulls_to) = @_;
 
   my @statements;
-  my $old_def = $self->get_column_abstract($table, $column);
+  my $old_def  = $self->get_column_abstract($table, $column);
   my $specific = $self->{db_specific};
 
   # If the types have changed, we have to deal with that.

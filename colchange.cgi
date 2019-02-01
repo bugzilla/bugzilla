@@ -174,7 +174,7 @@ else {
   @collist = DEFAULT_COLUMN_LIST;
 }
 
-$vars->{'collist'} = \@collist;
+$vars->{'collist'}     = \@collist;
 $vars->{'splitheader'} = $cgi->cookie('SPLITHEADER') ? 1 : 0;
 
 $vars->{'buffer'} = $cgi->query_string();

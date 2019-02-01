@@ -90,7 +90,7 @@ sub _load_constants {
 # If no Accept-Language is present it uses the defined default
 # Templates may also be found in the extensions/ tree
 sub _include_path {
-  my $lang = shift || '';
+  my $lang  = shift || '';
   my $cache = Bugzilla->request_cache;
   $cache->{"template_include_path_$lang"}
     ||= template_include_path({language => $lang});
@@ -381,7 +381,7 @@ sub multiline_sprintf {
   my @parts;
   my @my_sizes = @$sizes;    # Copy this so we don't modify the input array.
   foreach my $string (@$args) {
-    my $size = shift @my_sizes;
+    my $size   = shift @my_sizes;
     my @pieces = split("\n", wrap_hard($string, $size));
     push(@parts, \@pieces);
   }
@@ -782,7 +782,7 @@ sub create {
           my ($context, $isinactive) = @_;
           return sub {
             return $isinactive ? '<span class="bz_inactive">' . $_[0] . '</span>' : $_[0];
-            }
+          }
         },
         1
       ],
@@ -792,7 +792,7 @@ sub create {
           my ($context, $isclosed) = @_;
           return sub {
             return $isclosed ? '<span class="bz_closed">' . $_[0] . '</span>' : $_[0];
-            }
+          }
         },
         1
       ],
@@ -802,7 +802,7 @@ sub create {
           my ($context, $isobsolete) = @_;
           return sub {
             return $isobsolete ? '<span class="bz_obsolete">' . $_[0] . '</span>' : $_[0];
-            }
+          }
         },
         1
       ],

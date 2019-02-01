@@ -486,7 +486,7 @@ sub _create_field_values {
 
     foreach my $field (@multi_selects) {
       my $new_value = create_legal_value($field, 6);
-      my $name = $field->name;
+      my $name      = $field->name;
       $values{$name} = [$values{$name}, $new_value->name];
     }
     push(@{$values{'tag'}}, "6-tag-" . random());
@@ -607,7 +607,7 @@ sub _create_one_bug {
 
   # We need bug 6 to have a unique alias that is not a clone of bug 1's,
   # so we get the alias separately from the other parameters.
-  my $alias = $self->bug_create_value($number, 'alias');
+  my $alias        = $self->bug_create_value($number, 'alias');
   my $update_alias = $self->bug_update_value($number, 'alias');
 
   # Otherwise, make bug 6 a clone of bug 1.
@@ -635,11 +635,9 @@ sub _create_one_bug {
 
   # These are necessary for the changedfrom tests.
   my $extra_values = $self->_extra_bug_create_values->{$number};
-  foreach my $field (
-    qw(comments remaining_time percentage_complete
+  foreach my $field (qw(comments remaining_time percentage_complete
     keyword_objects everconfirmed dependson blocked
-    groups_in classification actual_time)
-    )
+    groups_in classification actual_time))
   {
     $extra_values->{$field} = $bug->$field;
   }
@@ -675,7 +673,7 @@ sub _create_one_bug {
     # writing this test, Bug->create doesn't support setting resolution).
     #
     # Same for see_also.
-    my $timestamp = timestamp($number, $number - 1);
+    my $timestamp   = timestamp($number, $number - 1);
     my $creation_ts = $timestamp->ymd . ' ' . $timestamp->hms;
     $bug->{creation_ts} = $creation_ts;
     $dbh->do('UPDATE longdescs SET bug_when = ? WHERE bug_id = ?',
@@ -748,8 +746,8 @@ sub _create_one_bug {
     $update_params{cc} = {add => \@cc_add, remove => \@cc_remove};
     my $see_also_remove = $bug->see_also;
     my $see_also_add    = [$update_params{see_also}];
-    $update_params{see_also} = {add => $see_also_add, remove => $see_also_remove};
-    $update_params{comment} = {body => $update_params{comment}};
+    $update_params{see_also} = {add  => $see_also_add, remove => $see_also_remove};
+    $update_params{comment}  = {body => $update_params{comment}};
     $update_params{work_time} = $number;
 
     # Setting work_time kills the remaining_time, so we need to
@@ -944,7 +942,7 @@ sub run {
   }
 
   # Rollbacks won't get rid of bugs_fulltext entries, so we do that ourselves.
-  my @bug_ids = map { $_->id } $self->bugs;
+  my @bug_ids       = map { $_->id } $self->bugs;
   my $bug_id_string = join(',', @bug_ids);
   $dbh->do("DELETE FROM bugs_fulltext WHERE bug_id IN ($bug_id_string)");
   $dbh->bz_rollback_transaction();
@@ -969,7 +967,7 @@ sub _setup_dependencies {
   my $bug2 = $self->bug(2);
   my $bug3 = $self->bug(3);
   foreach my $number (1, 6) {
-    my $bug = $self->bug($number);
+    my $bug            = $self->bug($number);
     my @original_delta = ($bug2->delta_ts, $bug3->delta_ts);
     Bugzilla->set_user($bug->reporter);
     $bug->set_dependencies([$bug2->id], [$bug3->id]);

@@ -85,12 +85,10 @@ sub FIELD_MAP {
   # Also, don't allow searching the _accessible stuff via quicksearch
   # (both because it's unnecessary and because otherwise
   # "reporter_accessible" and "reporter" both match "rep".
-  delete @full_map{
-    qw(rep_platform bug_status bug_file_loc bug_group
+  delete @full_map{qw(rep_platform bug_status bug_file_loc bug_group
       bug_severity bug_status
       status_whiteboard
-      cclist_accessible reporter_accessible)
-  };
+      cclist_accessible reporter_accessible)};
 
   Bugzilla::Hook::process('quicksearch_map', {'map' => \%full_map});
 
@@ -256,7 +254,7 @@ sub quicksearch {
   }
 
   # List of quicksearch-specific CGI parameters to get rid of.
-  my @params_to_strip = ('quicksearch', 'load', 'run');
+  my @params_to_strip       = ('quicksearch', 'load', 'run');
   my $modified_query_string = $cgi->canonicalise_query(@params_to_strip);
 
   if ($cgi->param('load')) {
@@ -379,7 +377,7 @@ sub _handle_special_first_chars {
   return 0 if !defined $qsword || length($qsword) <= 1;
 
   my $firstChar = substr($qsword, 0, 1);
-  my $baseWord = substr($qsword, 1);
+  my $baseWord  = substr($qsword, 1);
   my @subWords = split(/,/, $baseWord);
 
   if ($firstChar eq '#') {
@@ -507,7 +505,7 @@ sub _translate_field_name {
 
   # Check if we match, as a starting substring, exactly one field.
   my @field_names = keys %$field_map;
-  my @matches = grep { $_ =~ /^\Q$field\E/ } @field_names;
+  my @matches     = grep { $_ =~ /^\Q$field\E/ } @field_names;
 
   # Eliminate duplicates that are actually the same field
   # (otherwise "assi" matches both "assignee" and "assigned_to", and

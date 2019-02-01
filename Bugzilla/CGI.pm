@@ -35,10 +35,8 @@ sub _init_bz_cgi_globals {
 
   # We don't precompile any functions here, that's done specially in
   # mod_perl code.
-  $invocant->_setup_symbols(
-    qw(:no_xhtml :oldstyle_urls :private_tempfiles
-      :unique_headers)
-  );
+  $invocant->_setup_symbols(qw(:no_xhtml :oldstyle_urls :private_tempfiles
+      :unique_headers));
 }
 
 BEGIN { __PACKAGE__->_init_bz_cgi_globals() if i_am_cgi(); }
@@ -357,7 +355,7 @@ sub _prevent_unsafe_response {
     my $is_safe_content_type = $content_type =~ $safe_content_type_re;
 
     # Safe referers are ones that begin with the urlbase.
-    my $referer = $self->referer;
+    my $referer         = $self->referer;
     my $is_safe_referer = $referer && $referer =~ $safe_referer_re;
 
     if (!$is_safe_referer && !$is_safe_content_type) {

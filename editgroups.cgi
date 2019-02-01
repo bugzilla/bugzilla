@@ -36,7 +36,7 @@ $user->in_group('creategroups')
   {group => "creategroups", action => "edit", object => "groups"});
 
 my $action = trim($cgi->param('action') || '');
-my $token = $cgi->param('token');
+my $token  = $cgi->param('token');
 
 # CheckGroupID checks that a positive integer is given and is
 # actually a valid group ID. If all tests are successful, the

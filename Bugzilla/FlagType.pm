@@ -615,7 +615,7 @@ sub match {
   my $dbh = Bugzilla->dbh;
 
   # Depending on the criteria, we may have to append additional tables.
-  my $tables = [DB_TABLE];
+  my $tables   = [DB_TABLE];
   my @criteria = sqlify_criteria($criteria, $tables);
   $tables   = join(' ',     @$tables);
   $criteria = join(' AND ', @criteria);
@@ -643,7 +643,7 @@ sub count {
   my $dbh = Bugzilla->dbh;
 
   # Depending on the criteria, we may have to append additional tables.
-  my $tables = [DB_TABLE];
+  my $tables   = [DB_TABLE];
   my @criteria = sqlify_criteria($criteria, $tables);
   $tables   = join(' ',     @$tables);
   $criteria = join(' AND ', @criteria);

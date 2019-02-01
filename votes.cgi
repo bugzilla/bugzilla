@@ -21,7 +21,7 @@ use Bugzilla::Error;
 my $is_enabled = grep { $_->NAME eq 'Voting' } @{Bugzilla->extensions};
 $is_enabled || ThrowUserError('extension_disabled', {name => 'Voting'});
 
-my $cgi = Bugzilla->cgi;
+my $cgi    = Bugzilla->cgi;
 my $action = $cgi->param('action') || 'show_user';
 
 if ($action eq "show_bug") {

@@ -158,7 +158,7 @@ sub translated_value {
 sub debug_fail {
   my ($self, $number, $results, $sql) = @_;
   my @expected = @{$self->test->{contains}};
-  my @results = sort map { $self->number($_) } map { $_->[0] } @$results;
+  my @results  = sort map { $self->number($_) } map { $_->[0] } @$results;
   return
       "   Value: '"
     . $self->translated_value . "'\n"
@@ -354,7 +354,7 @@ sub _field_values_for_bug {
   if ($field =~ /^attach.+\.(.+)$/) {
     my $attach_field = $1;
     $attach_field = ATTACHMENT_FIELDS->{$attach_field} || $attach_field;
-    @values = $self->_values_for($number, 'attachments', $attach_field);
+    @values       = $self->_values_for($number, 'attachments', $attach_field);
   }
   elsif (my $flag_field = FLAG_FIELDS->{$field}) {
     @values = $self->_values_for($number, 'flags', $flag_field);
@@ -410,7 +410,7 @@ sub _field_values_for_bug {
     # requestees.login_name is empty for most bugs (but checking
     # blessed(undef) handles that.
     # Values that come from %original_values aren't User objects.
-    @values = map { blessed($_) ? $_->login : $_ } @values;
+    @values = map  { blessed($_) ? $_->login : $_ } @values;
     @values = grep { defined $_ } @values;
   }
 
@@ -503,7 +503,7 @@ sub _translate_value_for_bug {
   }
   if (my $func = $self->test->{transform}) {
     my $transformed = $func->(@bug_values);
-    my $is_equal = $transformed eq $bug_values[0] ? 1 : 0;
+    my $is_equal    = $transformed eq $bug_values[0] ? 1 : 0;
     $self->transformed_value_was_equal($number, $is_equal);
     $string_value = $transformed;
   }
@@ -619,7 +619,7 @@ sub _test_content_for_bug {
   my $contains_known_broken = $self->contains_known_broken($number);
 
   my %result_ids = map { $_->[0] => 1 } @$results;
-  my $bug_id = $self->bug($number)->id;
+  my $bug_id     = $self->bug($number)->id;
 
 TODO: {
     local $TODO = $contains_known_broken if $contains_known_broken;

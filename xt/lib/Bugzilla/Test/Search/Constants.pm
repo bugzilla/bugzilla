@@ -957,13 +957,11 @@ use constant INJECTION_BROKEN_FIELD => {
   'longdescs.count' => {
     search      => 1,
     db_skip     => ['Pg'],
-    operator_ok => [
-      qw(allwords allwordssubstr anywordssubstr casesubstring
+    operator_ok => [qw(allwords allwordssubstr anywordssubstr casesubstring
         changedbefore changedafter greaterthan greaterthaneq
         lessthan lessthaneq notregexp notsubstring
         nowordssubstr regexp substring anywords
-        notequals nowords equals anyexact)
-    ],
+        notequals nowords equals anyexact)],
   },
 };
 

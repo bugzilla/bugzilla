@@ -28,7 +28,7 @@ use constant ID_FIELD => 'series_id';
 
 sub new {
   my $invocant = shift;
-  my $class = ref($invocant) || $invocant;
+  my $class    = ref($invocant) || $invocant;
 
   # Create a ref to an empty hash and bless it
   my $self = {};

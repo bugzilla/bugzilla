@@ -104,7 +104,7 @@ sub check_sslbase {
     my $proto = getprotobyname('tcp');
     socket(SOCK, PF_INET, SOCK_STREAM, $proto);
     my $iaddr = inet_aton($host) || return "The host $host cannot be resolved";
-    my $sin = sockaddr_in($port, $iaddr);
+    my $sin   = sockaddr_in($port, $iaddr);
     if (!connect(SOCK, $sin)) {
       return "Failed to connect to $host:$port ($!); unable to enable SSL";
     }
@@ -115,7 +115,7 @@ sub check_sslbase {
 
 sub check_ip {
   my $inbound_proxies = shift;
-  my @proxies = split(/[\s,]+/, $inbound_proxies);
+  my @proxies         = split(/[\s,]+/, $inbound_proxies);
   foreach my $proxy (@proxies) {
     validate_ip($proxy) || return "$proxy is not a valid IPv4 or IPv6 address";
   }
@@ -176,7 +176,7 @@ sub check_opsys {
 }
 
 sub check_bug_status {
-  my $bug_status = shift;
+  my $bug_status          = shift;
   my @closed_bug_statuses = map { $_->name } closed_bug_statuses();
   if (!grep($_ eq $bug_status, @closed_bug_statuses)) {
     return "Must be a valid closed status: one of "

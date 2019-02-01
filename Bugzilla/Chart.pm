@@ -27,7 +27,7 @@ use List::Util qw(max);
 
 sub new {
   my $invocant = shift;
-  my $class = ref($invocant) || $invocant;
+  my $class    = ref($invocant) || $invocant;
 
   # Create a ref to an empty hash and bless it
   my $self = {};
@@ -255,7 +255,7 @@ sub readData {
 
   my $sth = $dbh->prepare($query);
 
-  my $gt_index = $self->{'gt'} ? scalar(@{$self->{'lines'}}) : undef;
+  my $gt_index   = $self->{'gt'} ? scalar(@{$self->{'lines'}}) : undef;
   my $line_index = 0;
 
   $maxvals[$gt_index] = 0 if $gt_index;

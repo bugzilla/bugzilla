@@ -208,7 +208,7 @@ sub UPDATE_COLUMNS {
   my @custom
     = grep { $_->type != FIELD_TYPE_MULTI_SELECT } Bugzilla->active_custom_fields;
   my @custom_names = map { $_->name } @custom;
-  my @columns = qw(
+  my @columns      = qw(
     assigned_to
     bug_file_loc
     bug_severity
@@ -313,10 +313,10 @@ sub new {
   # make it the "name" param.
   if ( !defined $param
     || (!ref($param) && $param !~ /^[0-9]+$/)
-    || (ref($param)  && $param->{id} !~ /^[0-9]+$/))
+    || (ref($param) && $param->{id} !~ /^[0-9]+$/))
   {
     if ($param) {
-      my $alias = ref($param) ? $param->{id} : $param;
+      my $alias  = ref($param) ? $param->{id} : $param;
       my $bug_id = bug_alias_to_id($alias);
       if (!$bug_id) {
         my $error_self = {};
@@ -365,7 +365,7 @@ sub initialize {
 
 sub object_cache_key {
   my $class = shift;
-  my $key = $class->SUPER::object_cache_key(@_) || return;
+  my $key   = $class->SUPER::object_cache_key(@_) || return;
   return $key . ',' . Bugzilla->user->id;
 }
 
@@ -467,7 +467,7 @@ sub match {
     # so include them in the list if they have been specified.
     if (exists $params->{"${field}_id"}) {
       my $current_ids = $params->{"${field}_id"};
-      my @id_array = ref $current_ids ? @$current_ids : ($current_ids);
+      my @id_array    = ref $current_ids ? @$current_ids : ($current_ids);
       push(@ids, @id_array);
     }
 
@@ -556,7 +556,7 @@ sub _extract_bug_ids {
       push @bug_ids, $comment->extra_data;
       next;
     }
-    my $s = $comment->already_wrapped ? qr/\s/ : qr/\h/;
+    my $s    = $comment->already_wrapped ? qr/\s/ : qr/\h/;
     my $text = $comment->body;
 
     # Full bug links
@@ -803,7 +803,7 @@ sub create {
   if ($see_also) {
     my $see_also_array = $see_also;
     if (!ref $see_also_array) {
-      $see_also = trim($see_also);
+      $see_also       = trim($see_also);
       $see_also_array = [split(/[\s,]+/, $see_also)];
     }
     foreach my $value (@$see_also_array) {
@@ -1893,7 +1893,7 @@ sub _check_keywords {
 
   my $keyword_array = $keywords_in;
   if (!ref $keyword_array) {
-    $keywords_in = trim($keywords_in);
+    $keywords_in   = trim($keywords_in);
     $keyword_array = [split(/[\s,]+/, $keywords_in)];
   }
 
@@ -1956,7 +1956,7 @@ sub _check_qa_contact {
   my $id;
   if ($qa_contact) {
     $qa_contact = Bugzilla::User->check($qa_contact) if !ref $qa_contact;
-    $id = $qa_contact->id;
+    $id         = $qa_contact->id;
 
     # create() checks this another way, so we don't have to run this
     # check during create().
@@ -2017,7 +2017,7 @@ sub _check_resolution {
     && scalar @$dependson
     )
   {
-    my $dep_bugs = Bugzilla::Bug->new_from_list($dependson);
+    my $dep_bugs   = Bugzilla::Bug->new_from_list($dependson);
     my $count_open = grep { $_->isopened } @$dep_bugs;
     if ($count_open) {
       my $bug_id = ref($invocant) ? $invocant->id : undef;
@@ -2641,7 +2641,7 @@ sub set_dependencies {
   my ($self, $dependson, $blocked) = @_;
   my %extra = (blocked => $blocked);
   $dependson = $self->_check_dependencies($dependson, 'dependson', \%extra);
-  $blocked = $extra{blocked};
+  $blocked   = $extra{blocked};
 
   # These may already be detainted, but all setters are supposed to
   # detaint their input if they've run a validator (just as though
@@ -3051,7 +3051,7 @@ sub add_comment {
   $params ||= {};
 
   # Fill out info that doesn't change and callers may not pass in
-  $params->{'bug_id'} = $self;
+  $params->{'bug_id'}  = $self;
   $params->{'thetext'} = defined($comment) ? $comment : '';
 
   # Validate all the entered data
@@ -3139,7 +3139,7 @@ sub add_group {
   # So we have to store and pass the name as entered by the user to
   # the error message, if we have it.
   my $group_name = blessed($group) ? $group->name : $group;
-  my $args = {
+  my $args       = {
     name    => $group_name,
     product => $self->product,
     bug_id  => $self->id,
@@ -3175,7 +3175,7 @@ sub remove_group {
 
   # See add_group() for the reason why we store the user input.
   my $group_name = blessed($group) ? $group->name : $group;
-  my $args = {
+  my $args       = {
     name    => $group_name,
     product => $self->product,
     bug_id  => $self->id,
@@ -4443,7 +4443,7 @@ sub LogActivityEntry {
     if (length($removestr) > MAX_LINE_LENGTH) {
       my $commaposition = find_wrap_point($removed, MAX_LINE_LENGTH);
       $removestr = substr($removed, 0, $commaposition);
-      $removed = substr($removed, $commaposition);
+      $removed   = substr($removed, $commaposition);
     }
     else {
       $removed = "";    # no more entries
@@ -4451,7 +4451,7 @@ sub LogActivityEntry {
     if (length($addstr) > MAX_LINE_LENGTH) {
       my $commaposition = find_wrap_point($added, MAX_LINE_LENGTH);
       $addstr = substr($added, 0, $commaposition);
-      $added = substr($added, $commaposition);
+      $added  = substr($added, $commaposition);
     }
     else {
       $added = "";      # no more entries
@@ -4758,7 +4758,7 @@ sub ValidateDependencies {
     @{$deps{$target}} = @{$deptree{$target}};
     my @stack = @{$deps{$target}};
     while (@stack) {
-      my $i = shift @stack;
+      my $i        = shift @stack;
       my $dep_list = $dbh->selectcol_arrayref($sth{$target}, undef, $i);
       foreach my $t (@$dep_list) {
 

@@ -288,7 +288,7 @@ sub get_rename_column_ddl {
 sub get_add_fks_sql {
   my ($self, $table, $column_fks) = @_;
   my @clauses = $self->_sqlite_table_lines($table);
-  my @add = $self->_column_fks_to_ddl($table, $column_fks);
+  my @add     = $self->_column_fks_to_ddl($table, $column_fks);
   push(@clauses, @add);
   return $self->_sqlite_alter_schema($table, \@clauses);
 }

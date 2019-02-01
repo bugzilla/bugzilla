@@ -22,7 +22,7 @@ use Test::More tests =>
   (scalar(@Support::Files::testitems) + scalar(@Support::Files::test_files))
   * 6;
 
-my @testitems = (@Support::Files::test_files, @Support::Files::testitems);
+my @testitems     = (@Support::Files::test_files, @Support::Files::testitems);
 my @require_taint = qw(email_in.pl importxml.pl mod_perl.pl whine.pl);
 
 foreach my $file (@testitems) {

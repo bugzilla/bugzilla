@@ -153,16 +153,14 @@ sub _update_groups {
   my $dbh           = Bugzilla->dbh;
 
   # Update group settings.
-  my $sth_add_mapping = $dbh->prepare(
-    qq{INSERT INTO user_group_map (
+  my $sth_add_mapping = $dbh->prepare(qq{INSERT INTO user_group_map (
                   user_id, group_id, isbless, grant_type
                  ) VALUES (
                   ?, ?, ?, ?
                  )
           }
   );
-  my $sth_remove_mapping = $dbh->prepare(
-    qq{DELETE FROM user_group_map
+  my $sth_remove_mapping = $dbh->prepare(qq{DELETE FROM user_group_map
             WHERE user_id = ?
               AND group_id = ?
               AND isbless = ?
@@ -753,7 +751,7 @@ sub save_last_search {
         # prevents people from writing over their whole
         # recent-search list by just refreshing a saved search
         # (which doesn't have list_id in the header) over and over.
-        my $list_string = join(',', @$bug_ids);
+        my $list_string     = join(',', @$bug_ids);
         my $existing_search = Bugzilla::Search::Recent->match(
           {user_id => $self->id, bug_list => $list_string});
 
@@ -920,7 +918,7 @@ sub groups {
         # Add all its members to the FIFO check list
         # %group_membership contains arrays of group members
         # for all groups. Accessible by group number.
-        my $members = $group_membership{$member_id};
+        my $members      = $group_membership{$member_id};
         my @new_to_check = grep(!$checked_groups{$_}, @$members);
         push(@$groups_to_check, @new_to_check);
 
@@ -1099,7 +1097,7 @@ sub get_products_by_permission {
 
   # We will restrict the list to products the user can see.
   my $selectable_products = $self->get_selectable_products;
-  my @products = grep { $product_map{$_->id} } @$selectable_products;
+  my @products            = grep { $product_map{$_->id} } @$selectable_products;
   return \@products;
 }
 
@@ -1181,7 +1179,7 @@ sub visible_bugs {
   # Bugzilla::Bug->update automatically removes updated bugs
   # from the cache to force them to be checked again.
   my $visible_cache = $self->{_visible_bugs_cache} ||= {};
-  my @check_ids = grep(!exists $visible_cache->{$_}, @bug_ids);
+  my @check_ids     = grep(!exists $visible_cache->{$_}, @bug_ids);
 
   if (@check_ids) {
     foreach my $id (@check_ids) {
@@ -1361,7 +1359,7 @@ sub get_selectable_classifications {
   my ($self) = @_;
 
   if (!defined $self->{selectable_classifications}) {
-    my $products = $self->get_selectable_products;
+    my $products  = $self->get_selectable_products;
     my %class_ids = map { $_->classification_id => 1 } @$products;
 
     $self->{selectable_classifications}
@@ -1540,7 +1538,7 @@ sub check_can_admin_product {
 sub check_can_admin_flagtype {
   my ($self, $flagtype_id) = @_;
 
-  my $flagtype = Bugzilla::FlagType->check({id => $flagtype_id});
+  my $flagtype       = Bugzilla::FlagType->check({id => $flagtype_id});
   my $can_fully_edit = 1;
 
   if (!$self->in_group('editcomponents')) {
@@ -1704,13 +1702,11 @@ sub derive_regexp_groups {
   );
   $sth->execute($id, GRANT_REGEXP);
 
-  my $group_insert = $dbh->prepare(
-    q{INSERT INTO user_group_map
+  my $group_insert = $dbh->prepare(q{INSERT INTO user_group_map
                                        (user_id, group_id, isbless, grant_type)
                                        VALUES (?, ?, 0, ?)}
   );
-  my $group_delete = $dbh->prepare(
-    q{DELETE FROM user_group_map
+  my $group_delete = $dbh->prepare(q{DELETE FROM user_group_map
                                        WHERE user_id = ?
                                          AND group_id = ?
                                          AND isbless = 0
@@ -1756,7 +1752,7 @@ sub product_responsibilities {
 
   # We cannot |use| it, because Component.pm already |use|s User.pm.
   require Bugzilla::Component;
-  my @comp_ids = map { $_->{'id'} } @$list;
+  my @comp_ids   = map { $_->{'id'} } @$list;
   my $components = Bugzilla::Component->new_from_list(\@comp_ids);
 
   my @prod_list;
@@ -1888,8 +1884,8 @@ sub match {
 }
 
 sub match_field {
-  my $fields = shift;                            # arguments as a hash
-  my $data = shift || Bugzilla->input_params;    # hash to look up fields in
+  my $fields = shift;                              # arguments as a hash
+  my $data   = shift || Bugzilla->input_params;    # hash to look up fields in
   my $behavior       = shift || 0;    # A constant that tells us how to act
   my $matches        = {};            # the values sent to the template
   my $matchsuccess   = 1;             # did the match fail?
@@ -2383,7 +2379,7 @@ sub create {
   # Add the creation date to the profiles_activity table.
   # $who is the user who created the new user account, i.e. either an
   # admin or the new user himself.
-  my $who = Bugzilla->user->id || $user->id;
+  my $who                   = Bugzilla->user->id || $user->id;
   my $creation_date_fieldid = get_field_id('creation_ts');
 
   $dbh->do(
@@ -2536,7 +2532,7 @@ sub check_and_send_account_creation_confirmation {
 # do check() and pull all the user data from the database.
 sub login_to_id {
   my ($login, $throw_error) = @_;
-  my $dbh = Bugzilla->dbh;
+  my $dbh   = Bugzilla->dbh;
   my $cache = Bugzilla->request_cache->{user_login_to_id} ||= {};
 
   # We cache lookups because this function showed up as taking up a

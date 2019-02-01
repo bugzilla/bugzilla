@@ -29,8 +29,7 @@ use constant MORE_SUB_CLASSES => qw(
 sub install_update_db {
   my $dbh = Bugzilla->dbh;
 
-  my $should_rename = $dbh->selectrow_array(
-    q{SELECT 1 FROM bug_see_also
+  my $should_rename = $dbh->selectrow_array(q{SELECT 1 FROM bug_see_also
           WHERE class IN ('Bugzilla::BugUrl::Rietveld', 
                           'Bugzilla::BugUrl::ReviewBoard')}
   );

@@ -250,7 +250,7 @@ sub process_bug {
 
   # Make it possible to remove CCs.
   if ($fields{'removecc'}) {
-    $fields{'cc'} = [split(',', $fields{'removecc'})];
+    $fields{'cc'}       = [split(',', $fields{'removecc'})];
     $fields{'removecc'} = 1;
   }
 
@@ -374,7 +374,7 @@ sub get_text_alternative {
   my @parts = $email->parts;
   my $body;
   foreach my $part (@parts) {
-    my $ct = $part->content_type || 'text/plain';
+    my $ct      = $part->content_type || 'text/plain';
     my $charset = 'iso-8859-1';
 
     # The charset may be quoted.

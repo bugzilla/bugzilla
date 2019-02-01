@@ -1843,8 +1843,7 @@ sub _convert_groups_system_from_groupset {
     my ($admin_gid)
       = $dbh->selectrow_array("SELECT id FROM groups WHERE name = 'admin'");
     if (!$admin_gid) {
-      $dbh->do(
-        q{INSERT INTO groups (name, description)
+      $dbh->do(q{INSERT INTO groups (name, description)
                                    VALUES ('admin', 'Administrators')}
       );
       $admin_gid = $dbh->bz_last_key('groups', 'id');
@@ -2255,7 +2254,7 @@ sub _copy_old_charts_into_database {
       # We also add a new query for "Open", so that migrated products get
       # the same set as new products (see editproducts.cgi.)
       my @openedstatuses = ("UNCONFIRMED", "NEW", "ASSIGNED", "REOPENED");
-      my $query = join("&", map {"bug_status=$_"} @openedstatuses);
+      my $query          = join("&", map {"bug_status=$_"} @openedstatuses);
       my $series
         = new Bugzilla::Series(undef, $product, $all_name, $open_name, undef, 1,
         $query_prod . $query, 1);
@@ -3362,8 +3361,7 @@ sub _initialize_workflow_for_upgrade {
 
 sub _make_lang_setting_dynamic {
   my $dbh   = Bugzilla->dbh;
-  my $count = $dbh->selectrow_array(
-    q{SELECT 1 FROM setting
+  my $count = $dbh->selectrow_array(q{SELECT 1 FROM setting
                                          WHERE name = 'lang'
                                            AND subclass IS NULL}
   );
@@ -3654,7 +3652,7 @@ sub _set_attachment_comment_type {
     my $text = $comments{$id};
     next if $text !~ /^\Q$string\E(\d+)/;
     my $attachment_id = $1;
-    my @lines = split("\n", $text);
+    my @lines         = split("\n", $text);
     if ($type == CMT_ATTACHMENT_CREATED) {
 
       # Now we have to remove the text up until we find a line that's
@@ -3723,7 +3721,7 @@ sub _convert_flagtypes_fks_to_set_null {
 }
 
 sub _fix_decimal_types {
-  my $dbh = Bugzilla->dbh;
+  my $dbh  = Bugzilla->dbh;
   my $type = {TYPE => 'decimal(7,2)', NOTNULL => 1, DEFAULT => '0'};
   $dbh->bz_alter_column('bugs',      'estimated_time', $type);
   $dbh->bz_alter_column('bugs',      'remaining_time', $type);
@@ -3732,7 +3730,7 @@ sub _fix_decimal_types {
 
 sub _fix_series_creator_fk {
   my $dbh = Bugzilla->dbh;
-  my $fk = $dbh->bz_fk_info('series', 'creator');
+  my $fk  = $dbh->bz_fk_info('series', 'creator');
   if ($fk and $fk->{DELETE} eq 'SET NULL') {
     $fk->{DELETE} = 'CASCADE';
     $dbh->bz_alter_fk('series', 'creator', $fk);
@@ -3889,7 +3887,7 @@ sub _migrate_user_tags {
 
     indicate_progress({current => ++$current, total => $total, every => 25});
 
-    my $uri = URI->new("buglist.cgi?$query", 'http');
+    my $uri         = URI->new("buglist.cgi?$query", 'http');
     my $bug_id_list = $uri->query_param_delete('bug_id');
     if (!$bug_id_list) {
       warn "No bug_id param for tag $name from user $user_id: $query";
@@ -3986,7 +3984,7 @@ sub _rename_tags_to_tag {
 
 sub _on_delete_set_null_for_audit_log_userid {
   my $dbh = Bugzilla->dbh;
-  my $fk = $dbh->bz_fk_info('audit_log', 'user_id');
+  my $fk  = $dbh->bz_fk_info('audit_log', 'user_id');
   if ($fk and !defined $fk->{DELETE}) {
     $fk->{DELETE} = 'SET NULL';
     $dbh->bz_alter_fk('audit_log', 'user_id', $fk);
@@ -4027,7 +4025,7 @@ sub _fix_longdescs_primary_key {
 }
 
 sub _fix_longdescs_indexes {
-  my $dbh = Bugzilla->dbh;
+  my $dbh        = Bugzilla->dbh;
   my $bug_id_idx = $dbh->bz_index_info('longdescs', 'longdescs_bug_id_idx');
   if ($bug_id_idx && scalar @{$bug_id_idx->{'FIELDS'}} < 2) {
     $dbh->bz_drop_index('longdescs', 'longdescs_bug_id_idx');
@@ -4126,7 +4124,7 @@ sub _add_password_salt_separator {
 sub _fix_flagclusions_indexes {
   my $dbh = Bugzilla->dbh;
   foreach my $table ('flaginclusions', 'flagexclusions') {
-    my $index = $table . '_type_id_idx';
+    my $index    = $table . '_type_id_idx';
     my $idx_info = $dbh->bz_index_info($table, $index);
     if ($idx_info && $idx_info->{'TYPE'} ne 'UNIQUE') {
 
@@ -4187,8 +4185,7 @@ sub _update_alias {
   return unless $dbh->bz_column_info('bugs', 'alias');
 
   # We need to move the aliases from the bugs table to the bugs_aliases table
-  $dbh->do(
-    q{
+  $dbh->do(q{
         INSERT INTO bugs_aliases (bug_id, alias)
         SELECT bug_id, alias FROM bugs WHERE alias IS NOT NULL
     }

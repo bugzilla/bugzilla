@@ -459,7 +459,7 @@ EOT
   );
 
   my %all_files = (%create_files, %htaccess, %index_html, %files);
-  my %all_dirs = (%create_dirs, %non_recurse_dirs);
+  my %all_dirs  = (%create_dirs,  %non_recurse_dirs);
 
   return {
     create_dirs  => \%create_dirs,
@@ -683,7 +683,7 @@ sub _create_files {
     unless (-e $file) {
       print "Creating $file...\n";
       my $info = $files{$file};
-      my $fh = new IO::File($file, O_WRONLY | O_CREAT, $info->{perms}) || die $!;
+      my $fh   = new IO::File($file, O_WRONLY | O_CREAT, $info->{perms}) || die $!;
       print $fh $info->{contents} if $info->{contents};
       $fh->close;
     }

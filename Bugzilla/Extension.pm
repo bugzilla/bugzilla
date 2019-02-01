@@ -155,7 +155,7 @@ sub my_inc {
   # a "require" on Windows, for example.)
   return if $file !~ /^Bugzilla/;
 
-  my $lib_dir = __do_call($class, 'lib_dir');
+  my $lib_dir     = __do_call($class, 'lib_dir');
   my @class_parts = split('::', $class);
   my ($vol, $dir, $file_name) = File::Spec->splitpath($file);
   my @dir_parts = File::Spec->splitdir($dir);
@@ -190,7 +190,7 @@ sub my_inc {
 use constant enabled => 1;
 
 sub lib_dir {
-  my $invocant = shift;
+  my $invocant    = shift;
   my $package_dir = __do_call($invocant, 'package_dir');
 
   # For extensions that are just files in the extensions/ directory,

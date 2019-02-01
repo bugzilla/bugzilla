@@ -29,7 +29,7 @@ use constant VERSION => BUGZILLA_VERSION;
 use constant CMT_MOVED_TO => 4;
 
 sub install_update_db {
-  my $reso_type = Bugzilla::Field::Choice->type('resolution');
+  my $reso_type  = Bugzilla::Field::Choice->type('resolution');
   my $moved_reso = $reso_type->new({name => 'MOVED'});
 
   # We make the MOVED resolution inactive, so that it doesn't show up

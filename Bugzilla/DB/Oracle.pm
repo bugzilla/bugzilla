@@ -310,7 +310,7 @@ sub adjust_statement {
   # Oracle requires a FROM clause in all SELECT statements, so append
   # "FROM dual" to queries without one (e.g., "SELECT NOW()")
   my $is_select = ($part =~ m/^\s*SELECT\b/io);
-  my $has_from = ($part =~ m/\bFROM\b/io) if $is_select;
+  my $has_from  = ($part =~ m/\bFROM\b/io) if $is_select;
 
   # Oracle includes the time in CURRENT_DATE.
   $part =~ s/\bCURRENT_DATE\b/TRUNC(CURRENT_DATE)/io;
@@ -669,7 +669,7 @@ sub bz_setup_database {
       # triggers ourselves.
       if ($def->{TYPE} =~ /SERIAL/i) {
         my $sequence = "${table}_${column}_SEQ";
-        my $exists = $self->selectrow_array($sth, undef, $sequence);
+        my $exists   = $self->selectrow_array($sth, undef, $sequence);
         if (!$exists) {
           my @sql = $self->_get_create_seq_ddl($table, $column);
           $self->do($_) foreach @sql;
@@ -688,7 +688,7 @@ sub bz_setup_database {
           $to_table = 'tag';
         }
         if ($update =~ /CASCADE/i) {
-          my $trigger_name = uc($fk_name . "_UC");
+          my $trigger_name  = uc($fk_name . "_UC");
           my $exist_trigger = $self->selectcol_arrayref($sth, undef, $trigger_name);
           if (@$exist_trigger) {
             $self->do("DROP TRIGGER $trigger_name");
@@ -713,7 +713,7 @@ sub bz_setup_database {
   }
 
   # Drop the trigger which causes bug 541553
-  my $trigger_name = "PRODUCTS_MILESTONEURL";
+  my $trigger_name  = "PRODUCTS_MILESTONEURL";
   my $exist_trigger = $self->selectcol_arrayref($sth, undef, $trigger_name);
   if (@$exist_trigger) {
     $self->do("DROP TRIGGER $trigger_name");

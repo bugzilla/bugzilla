@@ -59,7 +59,7 @@ $user->in_group('admin')
 # often-used variables
 #
 my $action = trim($cgi->param('action') || '');
-my $token = $cgi->param('token');
+my $token  = $cgi->param('token');
 
 #
 # field = '' -> Show nice list of fields

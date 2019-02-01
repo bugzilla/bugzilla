@@ -27,7 +27,7 @@ my $template = Bugzilla->template;
 my $vars     = {};
 
 my $action = $cgi->param('action') || "";
-my $token = $cgi->param('token');
+my $token  = $cgi->param('token');
 
 if ($action eq "show") {
 

@@ -104,14 +104,12 @@ if ($cgi->param('createmissinggroupcontrolmapentries')) {
 
   my $na        = CONTROLMAPNA;
   my $shown     = CONTROLMAPSHOWN;
-  my $insertsth = $dbh->prepare(
-    qq{INSERT INTO group_control_map
+  my $insertsth = $dbh->prepare(qq{INSERT INTO group_control_map
                        (group_id, product_id, membercontrol, othercontrol)
                 VALUES (?, ?, $shown, $na)}
   );
 
-  my $updatesth = $dbh->prepare(
-    qq{UPDATE group_control_map
+  my $updatesth = $dbh->prepare(qq{UPDATE group_control_map
                                         SET membercontrol = $shown
                                       WHERE group_id   = ?
                                         AND product_id = ?}
@@ -251,8 +249,7 @@ if ($cgi->param('rescanallBugMail')) {
   Status('send_bugmail_start');
   my $time = $dbh->sql_date_math('NOW()', '-', 30, 'MINUTE');
 
-  my $list = $dbh->selectcol_arrayref(
-    qq{
+  my $list = $dbh->selectcol_arrayref(qq{
                                         SELECT bug_id
                                           FROM bugs 
                                          WHERE (lastdiffed IS NULL
@@ -742,8 +739,7 @@ sub check_keywords {
   Status('keyword_check_start');
 
   my %keywordids;
-  my $keywords = $dbh->selectall_arrayref(
-    q{SELECT id, name
+  my $keywords = $dbh->selectall_arrayref(q{SELECT id, name
                                                 FROM keyworddefs}
   );
 
@@ -758,8 +754,7 @@ sub check_keywords {
     }
   }
 
-  my $sth = $dbh->prepare(
-    q{SELECT bug_id, keywordid
+  my $sth = $dbh->prepare(q{SELECT bug_id, keywordid
                                 FROM keywords
                             ORDER BY bug_id, keywordid}
   );
@@ -860,8 +855,7 @@ sub BugCheck {
   my ($middlesql, $errortext, $repairparam, $repairtext) = @_;
   my $dbh = Bugzilla->dbh;
 
-  my $badbugs = $dbh->selectcol_arrayref(
-    qq{SELECT DISTINCT bugs.bug_id
+  my $badbugs = $dbh->selectcol_arrayref(qq{SELECT DISTINCT bugs.bug_id
                                                 FROM $middlesql 
                                             ORDER BY bugs.bug_id}
   );
@@ -995,9 +989,8 @@ BugCheck(
 
 Status('unsent_bugmail_check');
 
-my $time = $dbh->sql_date_math('NOW()', '-', 30, 'MINUTE');
-my $badbugs = $dbh->selectcol_arrayref(
-  qq{
+my $time    = $dbh->sql_date_math('NOW()', '-', 30, 'MINUTE');
+my $badbugs = $dbh->selectcol_arrayref(qq{
                     SELECT bug_id 
                       FROM bugs 
                      WHERE (lastdiffed IS NULL OR lastdiffed < delta_ts)

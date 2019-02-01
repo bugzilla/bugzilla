@@ -301,7 +301,7 @@ sub check {
 sub match {
   my ($invocant, $criteria) = @_;
   my $class = ref($invocant) || $invocant;
-  my $dbh = Bugzilla->dbh;
+  my $dbh   = Bugzilla->dbh;
 
   return [$class->get_all] if !$criteria;
 
@@ -547,7 +547,7 @@ sub update {
     Bugzilla->memcached->clear({table => $table, id => $self->id});
     Bugzilla->memcached->clear_config() if $self->IS_CONFIG;
   }
-  $self->_object_cache_remove({id => $self->id});
+  $self->_object_cache_remove({id   => $self->id});
   $self->_object_cache_remove({name => $self->name}) if $self->name;
 
   if (wantarray) {
@@ -572,7 +572,7 @@ sub remove_from_db {
     Bugzilla->memcached->clear({table => $table, id => $self->id});
     Bugzilla->memcached->clear_config() if $self->IS_CONFIG;
   }
-  $self->_object_cache_remove({id => $self->id});
+  $self->_object_cache_remove({id   => $self->id});
   $self->_object_cache_remove({name => $self->name}) if $self->name;
   undef $self;
 }
@@ -595,7 +595,7 @@ sub audit_log {
     # We put the object's name in the "added" or "removed" field.
     # We do this thing with NAME_FIELD because $self->name returns
     # the wrong thing for Bugzilla::User.
-    my $name = $self->{$self->NAME_FIELD};
+    my $name          = $self->{$self->NAME_FIELD};
     my @added_removed = $changes eq AUDIT_CREATE ? (undef, $name) : ($name, undef);
     $sth->execute($user_id, $class, $self->id, $changes, @added_removed);
     return;

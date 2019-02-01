@@ -133,7 +133,7 @@ sub fields {
   foreach my $field (@fields) {
     my $visibility_field
       = $field->visibility_field ? $field->visibility_field->name : undef;
-    my $vis_values = $field->visibility_values;
+    my $vis_values  = $field->visibility_values;
     my $value_field = $field->value_field ? $field->value_field->name : undef;
 
     my (@values, $has_values);
@@ -142,7 +142,7 @@ sub fields {
       or $field->name eq 'keywords')
     {
       $has_values = 1;
-      @values = @{$self->_legal_field_values({field => $field})};
+      @values     = @{$self->_legal_field_values({field => $field})};
     }
 
     if (grep($_ eq $field->name, PRODUCT_SPECIFIC_FIELDS)) {
@@ -162,7 +162,7 @@ sub fields {
     );
     if ($has_values) {
       $field_data{value_field} = $self->type('string', $value_field);
-      $field_data{values} = \@values;
+      $field_data{values}      = \@values;
     }
     push(@fields_out, filter $params, \%field_data);
   }
@@ -317,7 +317,7 @@ sub comments {
 
   my %comments;
   if (scalar @$comment_ids) {
-    my @ids = map { trim($_) } @$comment_ids;
+    my @ids          = map { trim($_) } @$comment_ids;
     my $comment_data = Bugzilla::Comment->new_from_list(\@ids);
 
     # See if we were passed any invalid comment ids.
@@ -707,7 +707,7 @@ sub update {
 
     my %changes = %{$all_changes{$bug->id}};
     foreach my $field (keys %changes) {
-      my $change = $changes{$field};
+      my $change    = $changes{$field};
       my $api_field = $api_name{$field} || $field;
 
       # We normalize undef to an empty string, so that the API

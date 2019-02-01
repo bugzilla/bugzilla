@@ -21,7 +21,7 @@ use constant type => 'OR';
 
 sub new {
   my $class = shift;
-  my $self = {field_tests => [@_]};
+  my $self  = {field_tests => [@_]};
   return bless $self, $class;
 }
 

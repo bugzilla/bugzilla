@@ -1,5 +1,6 @@
 #!/usr/bin/env perl
-
+use strict;
+use warnings;
 use File::Basename qw(basename dirname);
 use File::Spec::Functions qw(catfile catdir);
 use Cwd qw(realpath);
@@ -14,6 +15,7 @@ BEGIN {
     catdir($BUGZILLA_DIR, qw(local lib perl5))
   );
 }
+use autodie;
 use Env qw(
   @PATH @PERL5LIB
   $MOJO_LISTEN $MOJO_REVERSE_PROXY
@@ -37,7 +39,7 @@ $MOJO_REVERSE_PROXY           //= $BUGZILLA_DIR ne '/vagrant';
 $LOG4PERL_CONFIG_FILE         //= 'log4perl-morbo.conf';
 
 my @files
-  = ('Bugzilla.pm', 'Bugzilla', glob("*.cgi"), 'extensions', 'template');
+  = ('Bugzilla.pm', 'Bugzilla', glob('*.cgi'), 'extensions', 'template');
 my @watch = map { ('-w' => $_) } (@files);
 
-exec morbo => @watch, '-v', 'bugzilla.pl';
+exec morbo => @watch, '-v', 'bugzilla.pl' or die "starting morbo failed: $!";

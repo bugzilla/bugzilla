@@ -149,6 +149,17 @@ sub register {
     }
   );
 
+  $app->helper(
+    'bz_include' => sub {
+      my ($self, $file, %vars) = @_;
+      my $template = Bugzilla->template;
+      my $buffer = "";
+      $template->process($file, \%vars, \$buffer)
+        or die $template->error;
+      return Mojo::ByteStream->new($buffer);
+    }
+  );
+
   $app->log(MojoX::Log::Log4perl::Tiny->new(
     logger => Log::Log4perl->get_logger(ref $app)));
 }

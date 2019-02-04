@@ -1,0 +1,3 @@
+%= bz_include 'global/header.html.tmpl', title => $title;
+%= content
+%= bz_include 'global/footer.html.tmpl';

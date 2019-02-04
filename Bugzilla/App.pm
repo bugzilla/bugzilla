@@ -52,6 +52,7 @@ sub startup {
   $self->plugin('Bugzilla::App::Plugin::OAuth2');
 
   push @{$self->commands->namespaces}, 'Bugzilla::App::Command';
+  push @{$self->renderer->paths}, @{ Bugzilla::Template::_include_path() };
 
   $self->sessions->cookie_name('bugzilla');
 

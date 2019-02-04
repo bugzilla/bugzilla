@@ -9,7 +9,7 @@ package Bugzilla::App::OAuth2::Clients;
 use 5.10.1;
 use Mojo::Base 'Mojolicious::Controller';
 
-use List::Util qw(first);
+use List::Util qw(any first);
 use Bugzilla::Constants;
 use Bugzilla::Error;
 use Bugzilla::Token;
@@ -68,13 +68,12 @@ sub create {
   my $id          = $self->param('id');
   my $secret      = $self->param('secret');
   my @scopes      = $self->param('scopes');
-  $description || ThrowCodeError('param_required', {param => 'description'});
-  $id          || ThrowCodeError('param_required', {param => 'id'});
-  $secret      || ThrowCodeError('param_required', {param => 'secret'});
-  @scopes      || ThrowCodeError('param_required', {param => 'scopes'});
+  $description or ThrowCodeError('param_required', {param => 'description'});
+  $id          or ThrowCodeError('param_required', {param => 'id'});
+  $secret      or ThrowCodeError('param_required', {param => 'secret'});
+  any { $_ > 0 } @scopes or ThrowCodeError('param_required', {param => 'scopes'});
   my $token = $self->param('token');
   check_token_data($token, 'create_oauth_client');
-
 
   $dbh->do('INSERT INTO oauth2_client (client_id, description, secret) VALUES (?, ?, ?)',
     undef, $id, $description, $secret);

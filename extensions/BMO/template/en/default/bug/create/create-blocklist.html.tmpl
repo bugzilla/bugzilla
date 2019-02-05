@@ -1,0 +1,231 @@
+[%# This Source Code Form is subject to the terms of the Mozilla Public
+  # License, v. 2.0. If a copy of the MPL was not distributed with this
+  # file, You can obtain one at http://mozilla.org/MPL/2.0/.
+  #
+  # This Source Code Form is "Incompatible With Secondary Licenses", as
+  # defined by the Mozilla Public License, v. 2.0.
+  #%]
+
+[% PROCESS global/variables.none.tmpl %]
+
+[% inline_style = BLOCK %]
+#blocklist_form h1 {
+  margin-bottom: 0;
+}
+#blocklist_form .required:after {
+  content: " *";
+  color: red;
+}
+#blocklist_form .field_label {
+  font-weight: bold;
+}
+#blocklist_form .field_desc {
+  padding-bottom: 3px;
+}
+#blocklist_form .field_desc,
+#blocklist_form .head_desc {
+  width: 600px;
+  word-wrap: normal;
+}
+#blocklist_form .head_desc {
+  padding-top: 5px;
+  padding-bottom: 12px;
+}
+#blocklist_form .form_section {
+  margin-bottom: 10px;
+}
+#blocklist_form textarea {
+  font-family: inherit;
+  font-size: inherit;
+  margin: 0 !important;
+}
+#blocklist_form em {
+  font-size: 1em;
+}
+
+#blocklist_form.noscript {
+  display: none;
+}
+[% END %]
+
+[% inline_javascript = BLOCK %]
+function compileDescription() {
+  function backtick(str) {
+    return str.replace(/^\s*```/mg, "").trim();
+  }
+  function unlink(str) {
+    return str.replace(/http(s?):\/\/(?!(reviewers\.)?addons.mozilla.org)/g, "hxxp$1://")
+  }
+  function table(arr) {
+    function escapeTable(str) {
+      return str.replace(/\\/g, "\\\\").replace(/\|/g, "\\|");
+    }
+    return "| | |\n|-|-|\n|" + arr.map(function(row) {
+      return row.map(escapeTable).join("|")
+    }).join("|\n|") + "|\n";
+  }
+
+  let severity = document.querySelector("input[name='blocklist_severity']:checked").value;
+  let name = document.getElementById("blocklist_name").value;
+  let versions = document.getElementById("blocklist_versions").value || "<all versions>";
+  let platformVersions = document.getElementById("blocklist_platform_versions").value || "<all platforms>";
+  let reason = document.getElementById("blocklist_reason").value;
+  let guids = document.getElementById("blocklist_guids").value;
+  let additionalInfo = document.getElementById("blocklist_moreinfo").value;
+
+  let descr = table([
+    ["Extension name", name],
+    ["Extension versions affected", versions],
+    ["Platforms affected", platformVersions],
+    ["Block severity", severity]
+  ]);
+  
+  descr += "\n### Reason\n" + unlink(reason);
+  descr += "\n\n### Extension GUIDs\n```\n" + backtick(guids) + "\n```";
+
+  if (additionalInfo) {
+    descr += "\n\n### Additional Information\n" + unlink(additionalInfo.trim());
+  }
+
+  return descr;
+
+}
+
+function validateAndSubmit() {
+  let name = document.getElementById("blocklist_name").value;
+
+  document.getElementById("short_desc").value = `Extension Block Request: ${name}`
+  document.getElementById("comment").value = compileDescription();
+  return true;
+}
+
+window.addEventListener("DOMContentLoaded", function() {
+  document.getElementById("blocklist_form").classList.remove("noscript");
+});
+
+[% END %]
+
+[% PROCESS global/header.html.tmpl
+   title = "Blocklist Policy Request Form"
+   generate_api_token = 1
+   style = inline_style
+   javascript = inline_javascript
+   javascript_urls = [ 'extensions/BMO/web/js/form_validate.js',
+                       'js/field.js', 'js/util.js' ]
+%]
+
+[% USE Bugzilla %]
+[% cgi = Bugzilla.cgi %]
+
+<form id="blocklist_form" method="post" action="[% basepath FILTER none %]post_bug.cgi" enctype="multipart/form-data" class="noscript" onSubmit="return validateAndSubmit()">
+  <input type="hidden" name="product" value="Toolkit">
+  <input type="hidden" name="component" value="Blocklist Policy Requests">
+  <input type="hidden" name="rep_platform" value="All">
+  <input type="hidden" name="op_sys" value="All">
+  <input type="hidden" name="version" value="unspecified">
+  <input type="hidden" name="bug_severity" id="bug_severity" value="normal">
+  <input type="hidden" name="priority" id="priority" value="--">
+  <input type="hidden" name="target_milestone" id="target_milestone" value="---">
+  <input type="hidden" name="bug_severity" id="bug_severity" value="normal">
+  <input type="hidden" name="short_desc" id="short_desc" value="Extension block request">
+  <input type="hidden" name="comment" id="comment" value="It seems JavaScript is disabled. Please fill in the details again.">
+  <input type="hidden" name="token" value="[% token FILTER html %]">
+
+  <h1>Blocklist Policy Request Form</h1>
+
+  <div class="head_desc">
+    <p>
+      Using this form you can report a malicious extension that needs to be blocked. Please provide
+      as much information as possible, and make sure your request is in line with the
+      <a href="https://wiki.mozilla.org/Blocklisting">Blocklisting Policy</a>.
+    </p>
+    <p>
+      It is particularly important that you provide enough information for us to clearly identify
+      the extension that needs to be blocked.
+    </p>
+  </div>
+
+  <div class="form_section">
+    <label for="blocklist_name" class="field_label required">
+      Extension Name:
+    </label>
+    <div class="field_desc">
+      The name of the extension to be blocked. If multiple extensions are to be blocked, please
+      mention a common trait.
+    </div>
+    <input type="text" name="blocklist_name" id="blocklist_name" size="80" required>
+  </div>
+
+  <div class="form_section">
+    <label for="blocklist_reason" class="field_label required">Reason:</label>
+    <div class="field_desc">
+      The reason to block. Please make sure the reason adheres to
+      <a href="https://wiki.mozilla.org/Blocklisting">our guidelines</a>. Links will automatically
+      be replaced with <code>hxxp</code> to avoid accidental clicking of malicious links.
+    </div>
+    <textarea name="blocklist_reason" id="blocklist_reason" cols="80" rows="5" required></textarea>
+  </div>
+
+  <div class="form_section">
+    <label class="field_label required">Block Severity</label>
+    <div class="field_desc">
+      The severity of the block. Hard blocks are employed for malicious extensions. Please see
+      <a href="https://wiki.mozilla.org/Blocklisting#Block_Severity">the blocklisting page</a> for
+      more details.
+    </div>
+    <input type="radio" name="blocklist_severity" id="blocklist_severity_hard" value="hard" checked="checked">
+    <label for="blocklist_severity_extension">Hard</label>
+
+    <input type="radio" name="blocklist_severity" id="blocklist_severity_soft" value="soft">
+    <label for="blocklist_severity_extension">Soft</label>
+  </div>
+
+
+  <div class="form_section">
+    <label for="blocklist_guids" class="field_label">GUIDs:</label>
+    <div class="field_desc">
+      The GUIDs of the extension(s) to be blocked, if known. This is the id of the extension, found in
+      the manifest. If it is not mentioned in the maniest please provide other forms of
+      identification of the extension in the additional information field.
+    </div>
+    <textarea name="blocklist_guids" id="blocklist_guids" cols="80" rows="10"></textarea>
+  </div>
+
+  <div class="form_section">
+    <label for="blocklist_versions" class="field_label">Versions</label>
+    <div class="field_desc">
+      The version of the extension to be blocked. May be left empty all versions should be blocked.
+    </div>
+    <input type="text" name="blocklist_versions" id="blocklist_versions" size="80" placeholder="<All Versions>">
+  </div>
+
+  <div class="form_section">
+    <label for="blocklist_platform_versions" class="field_label">Platforms</label>
+    <div class="field_desc">
+      The applications, application versions, and platform of the extension to be blocked. May be
+      left empty if this [% terms.bug %] affects all Firefox versions on all platforms.
+    </div>
+    <input type="text" name="blocklist_platform_versions" id="blocklist_platform_versions" size="80" placeholder="<All Platforms>">
+  </div>
+
+  <div class="form_section">
+    <label for="blocklist_moreinfo" class="field_label">Additional Information:</label>
+    <div class="field_desc">
+      Additional information, such as the page the extension was found on, AMO listing page, or
+      other references. Links will automatically be replaced with <code>hxxp</code> to avoid
+      accidental clicking of malicious links.
+    </div>
+    <textarea name="blocklist_moreinfo" id="blocklist_moreinfo" cols="80" rows="10"></textarea>
+  </div>
+
+  <input type="submit" id="commit" value="Submit">
+
+  <p>
+    [ <span class="required_star">*</span> <span class="required_explanation">Required Field</span> ]
+  </p>
+</form>
+<noscript>
+  This form requires JavaScript to be enabled.
+</noscript>
+
+[% PROCESS global/footer.html.tmpl %]

@@ -2767,6 +2767,10 @@ sub app_startup {
     ->to(
     'CGI#enter_bug_cgi' => {'format' => 'web-bounty', 'product' => 'mozilla.org'});
   $r->any(
+    '/:REWRITE_blocklist_bug' => [REWRITE_blocklist_bug => qr{form[\.:]blocklist}])
+    ->to(
+    'CGI#enter_bug_cgi' => {'format' => 'blocklist', 'product' => 'Toolkit'});
+  $r->any(
     '/:REWRITE_automative' => [REWRITE_automative => qr{form[\.:]automative}])
     ->to(
     'CGI#enter_bug_cgi' => {'product' => 'Testing', 'format' => 'automative'});

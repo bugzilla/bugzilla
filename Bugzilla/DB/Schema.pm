@@ -626,7 +626,7 @@ use constant ABSTRACT_SCHEMA => {
     FIELDS => [
       id      => {TYPE => 'MEDIUMSERIAL', NOTNULL => 1, PRIMARYKEY => 1},
       type_id => {
-        TYPE       => 'INT2',
+        TYPE       => 'INT3',
         NOTNULL    => 1,
         REFERENCES => {TABLE => 'flagtypes', COLUMN => 'id', DELETE => 'CASCADE'}
       },
@@ -662,7 +662,7 @@ use constant ABSTRACT_SCHEMA => {
   # "flagtypes" defines the types of flags that can be set.
   flagtypes => {
     FIELDS => [
-      id               => {TYPE => 'SMALLSERIAL', NOTNULL => 1, PRIMARYKEY => 1},
+      id               => {TYPE => 'MEDIUMSERIAL', NOTNULL => 1, PRIMARYKEY => 1},
       name             => {TYPE => 'varchar(50)', NOTNULL => 1},
       description      => {TYPE => 'MEDIUMTEXT',  NOTNULL => 1},
       cc_list          => {TYPE => 'varchar(200)'},
@@ -689,7 +689,7 @@ use constant ABSTRACT_SCHEMA => {
   flaginclusions => {
     FIELDS => [
       type_id => {
-        TYPE       => 'INT2',
+        TYPE       => 'INT3',
         NOTNULL    => 1,
         REFERENCES => {TABLE => 'flagtypes', COLUMN => 'id', DELETE => 'CASCADE'}
       },
@@ -711,7 +711,7 @@ use constant ABSTRACT_SCHEMA => {
   flagexclusions => {
     FIELDS => [
       type_id => {
-        TYPE       => 'INT2',
+        TYPE       => 'INT3',
         NOTNULL    => 1,
         REFERENCES => {TABLE => 'flagtypes', COLUMN => 'id', DELETE => 'CASCADE'}
       },

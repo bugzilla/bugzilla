@@ -210,9 +210,9 @@ Bugzilla.FlagTypeComment = class FlagTypeComment {
             }
           }
 
-          return `#### ${label}\n\n${value}`;
+          return `* **${label}**: ${value}`;
         }),
-      ].join('\n\n');
+      ].join('\n');
 
       this.add_comment(text);
       $fieldset.remove();

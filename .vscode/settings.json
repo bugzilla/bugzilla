@@ -7,5 +7,16 @@
         "*.css": "css",
         "*.cgi": "perl"
     },
-    "gitlens.blame.ignoreWhitespace": true
+    "gitlens.blame.ignoreWhitespace": true,
+    "files.exclude": {
+        ".vagrant": true,
+        ".vscode/perl-lang": true,
+        "template_cache": true
+    },
+    "files.watcherExclude": {
+        "**/local/**": true
+    },
+    "search.exclude": {
+        "**/local": true
+    }
 }

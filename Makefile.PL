@@ -109,6 +109,7 @@ my %test_requires = (
   'Test::More'                      => 0,
   'Test::Perl::Critic::Progressive' => 0,
   'Test::Selenium::Firefox'         => 0,
+  'Selenium::Remote::Driver'        => 1.31,
   'Test::WWW::Selenium'             => 0,
   'Test2::V0'                       => 0,
 );

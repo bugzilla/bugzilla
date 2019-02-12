@@ -24,27 +24,25 @@ $(function() {
         var spinnerID = spinner.attr('id');
         var id = spinnerID.substring(spinnerID.indexOf('-') + 1);
 
-        var activitySelector = $('#view-toggle-cc').data('shown') === '1' ? '.activity' : '.activity:not(.cc-only)';
-
         // non-comment toggle
         if (spinnerID.substr(0, 1) == 'a') {
             var changeSet = spinner.parents('.change-set');
             if (forced == 'hide') {
-                changeSet.find(activitySelector).hide();
+                changeSet.find('.activity').hide();
                 changeSet.find('.gravatar').css('width', '16px').css('height', '16px');
                 $('#ar-' + id).hide();
                 update_spinner(spinner, false);
             }
             else if (forced == 'show' || forced == 'reset') {
-                changeSet.find(activitySelector).show();
+                changeSet.find('.activity').show();
                 changeSet.find('.gravatar').css('width', '32px').css('height', '32px');
                 $('#ar-' + id).show();
                 update_spinner(spinner, true);
             }
             else {
-                changeSet.find(activitySelector).slideToggle('fast', function() {
+                changeSet.find('.activity').slideToggle('fast', function() {
                     $('#ar-' + id).toggle();
-                    if (changeSet.find(activitySelector + ':visible').length) {
+                    if (changeSet.find('.activity' + ':visible').length) {
                         changeSet.find('.gravatar').css('width', '32px').css('height', '32px');
                         update_spinner(spinner, true);
                     }
@@ -77,7 +75,7 @@ $(function() {
             $('#ct-' + id).hide();
             if (BUGZILLA.user.id !== 0)
                 $('#ctag-' + id).hide();
-            $('#c' + id).find(activitySelector).hide();
+            $('#c' + id).find('.activity').hide();
             $('#c' + id).find('.comment-tags').hide();
             $('#c' + id).find('.comment-tags').hide();
             $('#c' + id).find('.gravatar').css('width', '16px').css('height', '16px');
@@ -92,7 +90,7 @@ $(function() {
             $('#ct-' + id).show();
             if (BUGZILLA.user.id !== 0)
                 $('#ctag-' + id).show();
-            $('#c' + id).find(activitySelector).show();
+            $('#c' + id).find('.activity').show();
             $('#c' + id).find('.comment-tags').show();
             $('#c' + id).find('.comment-tags').show();
             $('#c' + id).find('.gravatar').css('width', '32px').css('height', '32px');
@@ -101,7 +99,7 @@ $(function() {
         }
         else {
             $('#ct-' + id).slideToggle('fast', function() {
-                $('#c' + id).find(activitySelector).toggle();
+                $('#c' + id).find('.activity').toggle();
                 if ($('#ct-' + id + ':visible').length) {
                     $('#c' + id).find('.comment-tags').show();
                     update_spinner(realSpinner, true);
@@ -164,21 +162,6 @@ $(function() {
             $('.change-spinner:visible').each(function() {
                 toggleChange($(this), this.id.substr(0, 3) === 'cs-' ? 'show' : 'hide');
             });
-        });
-
-    $('#view-toggle-cc')
-        .click(function() {
-            var that = $(this);
-            if (that.data('shown') === '1') {
-                that.data('shown', '0');
-                that.text('Show CC Changes');
-                $('.cc-only').hide();
-            }
-            else {
-                that.data('shown', '1');
-                that.text('Hide CC Changes');
-                $('.cc-only').show();
-            }
         });
 
     $('#view-toggle-treeherder')

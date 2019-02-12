@@ -38,11 +38,8 @@
       <li role="presentation">
         <a id="view-comments-only" role="menuitem" tabindex="-1">Comments Only</a>
       </li>
-      <li role="separator"></li>
-      <li role="presentation">
-        <a id="view-toggle-cc" role="menuitem" tabindex="-1">Show CC Changes</a>
-      </li>
       [% IF treeherder_user_ids.size %]
+        <li role="separator"></li>
         <li role="presentation">
           <a id="view-toggle-treeherder" role="menuitem" data-userids="[[% treeherder_user_ids.join(',') FILTER none %]]">Show Treeherder Comments</a>
         </li>
@@ -55,12 +52,9 @@
   PROCESS bug/time.html.tmpl;
 
   FOREACH change_set IN bug.activity_stream;
+    NEXT IF change_set.cc_only;
     extra_class = change_set.comment.collapsed ? " ca-" _ change_set.comment.author.id : "";
-    IF change_set.cc_only;
-      '<div class="change-set cc-only' _ extra_class _ '" id="' _ change_set.id _ '" style="display:none">';
-    ELSE;
-      '<div class="change-set' _ extra_class _ '" id="' _ change_set.id _ '">';
-    END;
+    '<div class="change-set' _ extra_class _ '" id="' _ change_set.id _ '">';
 
     extra_class = "";
     IF change_set.user_id == bug.assigned_to.id;
@@ -284,23 +278,16 @@
 
 [%
   BLOCK activity_body;
-    classes = "activity";
+    RETURN IF activity.cc_only && !change_set.cc_only;
     style = "";
-    IF activity.cc_only && !change_set.cc_only;
-      classes = classes _ " cc-only";
-      style = ' style="display:none"';
-    END;
     IF change_set.comment && change_set.comment.collapsed;
       style = ' style="display:none"';
     END;
-    '<div class="' _ classes _ '"' _ style _ '>';
+    '<div class="activity"' _ style _ '>';
 
     FOREACH change IN activity.changes;
-      IF change.fieldname == 'cc' && !activity.cc_only && !change_set.cc_only;
-        '<div class="change cc-only" style="display:none">';
-      ELSE;
-        '<div class="change">';
-      END;
+      NEXT IF change.fieldname == 'cc';
+      '<div class="change">';
 
       IF change.attachid;
         %]

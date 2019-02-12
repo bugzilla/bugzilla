@@ -125,6 +125,7 @@ sub on_dbi_connected {
     # better concurrency and don't need 3.6 compatibility, then you can
     # uncomment this line.
     #journal_mode => "'WAL'",
+    legacy_alter_table => 'ON',
   );
 
   while (my ($name, $value) = each %pragmas) {

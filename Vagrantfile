@@ -7,7 +7,9 @@ DB_HOSTNAME  = ENV.fetch "BMO_DB_HOST",  'bmo-db.vm'
 WEB_HOSTNAME = ENV.fetch "BMO_WEB_HOST", 'bmo-web.vm'
 DB_PORT      = ENV.fetch "BMO_DB_PORT",  2221
 WEB_PORT     = ENV.fetch "BMO_WEB_PORT", 2222
+DB_MEM      = ENV.fetch "BMO_DB_MEM",  512
 WEB_MEM      = ENV.fetch "BMO_WEB_MEM",  2048
+DB_CPU      = ENV.fetch "BMO_DB_CPU",  1
 WEB_CPU      = ENV.fetch "BMO_WEB_CPU",  2
 
 # this is for centos 6 / el 6
@@ -89,10 +91,19 @@ Vagrant.configure('2') do |config|
     db.vm.provider "virtualbox" do |v|
       v.customize ["modifyvm", :id, "--natdnshostresolver1", "on"]
       v.customize ["modifyvm", :id, "--natdnsproxy1", "on"]
+      v.memory = DB_MEM
+      v.cpus = DB_CPU
     end
 
     db.vm.provider 'parallels' do |prl, override|
       override.vm.box = 'parallels/centos-6.8'
+      prl.memory = DB_MEM
+      prl.cpus = DB_CPU
+    end
+
+    db.vm.provider 'vmware_fusion' do |v|
+      v.vmx['memsize'] = DB_MEM
+      v.vmx['numvcpus'] = DB_CPU
     end
   end
 

@@ -73,7 +73,7 @@ else {
   # Only check the token if we are running this script from the
   # web browser and a parameter is passed to the script.
   # XXX - Maybe these two parameters should be deleted once logged in?
-  $cgi->delete('GoAheadAndLogIn', 'Bugzilla_restrictlogin', 'hooks_only');
+  $cgi->delete('GoAheadAndLogIn', 'hooks_only');
   if (scalar($cgi->param())) {
     my $token = $cgi->param('token');
     check_hash_token($token, ['sanitycheck']);

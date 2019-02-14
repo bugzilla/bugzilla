@@ -67,7 +67,6 @@ $t->post_ok(
   '/login' => {Referer => $referer} => form => {
     Bugzilla_login         => $oauth_login,
     Bugzilla_password      => $oauth_password,
-    Bugzilla_restrictlogin => 1,
     GoAheadAndLogIn        => 1,
     client_id              => $oauth_client->{client_id},
     response_type          => 'code',

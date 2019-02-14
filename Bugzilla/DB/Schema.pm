@@ -1138,7 +1138,6 @@ use constant ABSTRACT_SCHEMA => {
       ipaddr          => {TYPE => 'varchar(40)'},
       lastused        => {TYPE => 'DATETIME', NOTNULL => 1},
       id              => {TYPE => 'INTSERIAL', NOTNULL => 1, PRIMARYKEY => 1},
-      restrict_ipaddr => {TYPE => 'BOOLEAN', NOTNULL => 1, DEFAULT => 0},
     ],
     INDEXES => [
       logincookies_lastused_idx => ['lastused'],

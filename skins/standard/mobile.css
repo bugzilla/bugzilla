@@ -25,7 +25,7 @@ only screen and (max-device-width : 720px) {
         padding-bottom: 0px;
     }
 
-    #login .field-restrict, #login .field-remember {
+    #login .field-remember {
         margin-left: 0px;
     }
     #login .field-submit {

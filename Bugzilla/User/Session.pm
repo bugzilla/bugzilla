@@ -24,7 +24,6 @@ use constant DB_COLUMNS => qw(
   lastused
   ipaddr
   id
-  restrict_ipaddr
 );
 
 use constant UPDATE_COLUMNS => qw();
@@ -46,6 +45,5 @@ sub userid          { return $_[0]->{userid} }
 sub cookie          { return $_[0]->{cookie} }
 sub lastused        { return $_[0]->{lastused} }
 sub ipaddr          { return $_[0]->{ipaddr} }
-sub restrict_ipaddr { return $_[0]->{restrict_ipaddr} }
 
 1;

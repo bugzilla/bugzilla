@@ -39,13 +39,9 @@ sub persist_login {
 
   my $ip_addr = remote_ip();
   trick_taint($ip_addr);
-  my $restrict = $input_params->{Bugzilla_restrictlogin} ? 1 : 0;
 
-  $dbh->do(
-    "INSERT INTO logincookies (cookie, userid, ipaddr, lastused, restrict_ipaddr)
-              VALUES (?, ?, ?, NOW(), ?)", undef, $login_cookie, $user->id,
-    $ip_addr, $restrict
-  );
+  $dbh->do('INSERT INTO logincookies (cookie, userid, ipaddr, lastused)
+    VALUES (?, ?, ?, NOW())', undef, $login_cookie, $user->id, $ip_addr);
 
   # Issuing a new cookie is a good time to clean up the old
   # cookies.

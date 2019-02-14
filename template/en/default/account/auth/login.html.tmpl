@@ -69,15 +69,7 @@
     [% END %]
 
     [% PROCESS "global/hidden-fields.html.tmpl"
-       exclude="^Bugzilla_(login|password|restrictlogin)$" %]
-
-    <div class="field-restrict">
-      <input type="checkbox" id="Bugzilla_restrictlogin" name="Bugzilla_restrictlogin"
-             checked="checked">
-      <label for="Bugzilla_restrictlogin" class="checkbox-note">
-        Restrict this session to this IP address
-        (using this option improves security)</label>
-    </div>
+       exclude="^Bugzilla_(login|password)$" %]
 
     <div class="field-submit">
       <input type="hidden" name="Bugzilla_login_token"

@@ -28,9 +28,6 @@ name            type     description
 ==============  =======  ========================================================
 **login**       string   The user's login name.
 **password**    string   The user's password.
-restrict_login  boolean  If set to a true value, the token returned by this
-                         method will only be valid from the IP address which
-                         called this method.
 ==============  =======  ========================================================
 
 **Response**

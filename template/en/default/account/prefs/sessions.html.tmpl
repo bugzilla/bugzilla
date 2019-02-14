@@ -35,7 +35,6 @@
   <tr class="column_header">
     <th>Last used</th>
     <th>IP Address</th>
-    <th>IP Restriction</th>
     <th>Logout</th>
   </tr>
 
@@ -43,7 +42,6 @@
     <tr>
       <td>[% session.lastused FILTER time %]</td>
       <td>[% session.ipaddr OR "Unknown" FILTER html %]</td>
-      <td>[% session.restrict_ipaddr ? "Restricted" : "Unrestricted" FILTER html %]
       <td>
         [% IF session.current %]
           <b>(current)</b>

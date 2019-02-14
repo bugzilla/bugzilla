@@ -111,12 +111,7 @@ name                    type     description
 ======================  =======  ==============================================
 **Bugzilla_login**      string   A user's login name.
 **Bugzilla_password**   string   That user's password.
-Bugzilla_restrictlogin  boolean  If true, then your login will only be
-                                 valid for your IP address.
 ======================  =======  ==============================================
-
-The ``Bugzilla_restrictlogin`` option is only used when you have also
-specified ``Bugzilla_login`` and ``Bugzilla_password``.
 
 There is also a deprecated method of authentication described below that will be
 removed in the version after Bugzilla 5.0.

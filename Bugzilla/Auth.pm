@@ -93,7 +93,7 @@ sub login {
     my $cgi    = Bugzilla->cgi;
     my $uri    = URI->new($cgi->self_url);
     foreach
-      my $param (qw( Bugzilla_remember Bugzilla_restrictlogin GoAheadAndLogIn ))
+      my $param (qw( Bugzilla_remember GoAheadAndLogIn ))
     {
       $uri->query_param_delete($param);
     }
@@ -101,7 +101,6 @@ sub login {
       user          => $user,
       type          => $type,
       reason        => 'Logging in as ' . $user->identity,
-      restrictlogin => $params->{Bugzilla_restrictlogin},
       remember      => $params->{Bugzilla_remember},
       url           => $uri->as_string,
       postback =>
@@ -119,8 +118,6 @@ sub mfa_verified {
 
   my $params = Bugzilla->input_params;
   $self->{_info_getter}->{successful} = Bugzilla::Auth::Login::CGI->new();
-  $params->{Bugzilla_restrictlogin} = $event->{restrictlogin}
-    if defined $event->{restrictlogin};
   $params->{Bugzilla_remember} = $event->{remember} if defined $event->{remember};
 
   $self->_handle_login_result({user => $user}, $event->{type});

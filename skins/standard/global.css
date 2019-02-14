@@ -1037,7 +1037,7 @@ input.required, select.required, span.required_explanation {
     font-weight: bold;
 }
 
-#login .field-restrict, #login .field-remember {
+#login .field-remember {
     margin-left: 7em;
 }
 

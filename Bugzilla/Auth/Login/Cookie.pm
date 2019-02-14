@@ -85,23 +85,16 @@ sub get_login_info {
     ($user_id, $login_cookie) = ($token->{'user_id'}, $token->{'login_token'});
   }
 
-  my $ip_addr = remote_ip();
-
   if ($login_cookie && $user_id) {
 
     # Anything goes for these params - they're just strings which
     # we're going to verify against the db
-    trick_taint($ip_addr);
     trick_taint($login_cookie);
     detaint_natural($user_id);
 
     my $db_cookie = $dbh->selectrow_array(
-      'SELECT cookie
-                                   FROM logincookies
-                                  WHERE cookie = ?
-                                        AND userid = ?
-                                        AND (restrict_ipaddr = 0 OR ipaddr = ?)',
-      undef, ($login_cookie, $user_id, $ip_addr)
+      'SELECT cookie FROM logincookies WHERE cookie = ? AND userid = ?',
+      undef, ($login_cookie, $user_id)
     );
 
     # If the cookie is valid, return a valid username.

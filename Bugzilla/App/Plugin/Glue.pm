@@ -99,19 +99,13 @@ sub register {
 
       my $login_cookie = $c->cookie("Bugzilla_logincookie");
       my $user_id      = $c->cookie("Bugzilla_login");
-      my $ip_addr      = $c->tx->remote_address;
 
       return $c->bugzilla->login_redirect_if_required($type)
         unless ($login_cookie && $user_id);
 
       my $db_cookie = Bugzilla->dbh->selectrow_array(
-        q{
-                    SELECT cookie
-                      FROM logincookies
-                     WHERE cookie = ?
-                           AND userid = ?
-                           AND (restrict_ipaddr = 0 OR ipaddr = ?)
-                }, undef, ($login_cookie, $user_id, $ip_addr)
+        'SELECT cookie FROM logincookies WHERE cookie = ? AND userid = ?',
+        undef, ($login_cookie, $user_id)
       );
 
       if (defined $db_cookie && secure_compare($login_cookie, $db_cookie)) {

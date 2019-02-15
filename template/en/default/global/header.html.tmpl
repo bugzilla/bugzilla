@@ -49,6 +49,7 @@
 [% DEFAULT
   subheader = ""
   onload = ""
+  javascript_urls = []
   style_urls = []
   no_yui = 0
   jquery = []
@@ -82,6 +83,10 @@
 [% IF allow_mobile && is_mobile_browser %]
   [% style_urls.push("skins/standard/mobile.css") %]
 [% END %]
+
+[%# Enable syntax highlighting with Prism.js %]
+[% javascript_urls.push('js/lib/prism.js') %]
+[% style_urls.push('skins/lib/prism.css') %]
 
 [%# We should be able to set the default value of the header variable
   # to the value of the title variable using the DEFAULT directive,

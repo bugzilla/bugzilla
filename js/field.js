@@ -898,6 +898,7 @@ function show_comment_preview(bug_id) {
     var Dom = YAHOO.util.Dom;
     var comment = document.getElementById('comment');
     var preview = document.getElementById('comment_preview');
+    const $comment_body = document.querySelector('#comment_preview_text');
 
     if (!comment || !preview) return;
     if (Dom.hasClass('comment_preview_tab', 'active_comment_tab')) return;
@@ -934,7 +935,13 @@ function show_comment_preview(bug_id) {
                 Dom.get('comment_preview_error').innerHTML =
                     data.error.message.htmlEncode();
             } else {
-                document.getElementById('comment_preview_text').innerHTML = data.result.html;
+                $comment_body.innerHTML = data.result.html;
+
+                // Highlight code if possible
+                if (Prism) {
+                  Prism.highlightAllUnder($comment_body);
+                }
+
                 Dom.addClass('comment_preview_loading', 'bz_default_hidden');
                 Dom.removeClass('comment_preview_text', 'bz_default_hidden');
                 last_comment_text = comment.value;

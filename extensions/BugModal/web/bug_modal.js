@@ -1277,6 +1277,11 @@ $(function() {
             function(data) {
                 $('#preview-throbber').hide();
                 preview.html(data.html);
+
+                // Highlight code if possible
+                if (Prism) {
+                  Prism.highlightAllUnder(preview.get(0));
+                }
             },
             function(message) {
                 $('#preview-throbber').hide();

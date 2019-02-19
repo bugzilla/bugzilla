@@ -180,7 +180,7 @@ elsif ($action eq 'list') {
     }
 
     detaint_natural($is_enabled);
-    if ($is_enabled && ($is_enabled == 0 || $is_enabled == 1)) {
+    if (defined($is_enabled) && ($is_enabled == 0 || $is_enabled == 1)) {
       $query .= " $nextCondition profiles.is_enabled = ?";
       $nextCondition = 'AND';
       push(@bindValues, $is_enabled);

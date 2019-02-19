@@ -137,6 +137,7 @@ sub Send {
   if (!$start) {
     push @referenced_bugs, @{$bug->dependson};
     push @referenced_bugs, @{$bug->blocked};
+    push @referenced_bugs, _parse_see_also(map { $_->name } @{$bug->see_also});
   }
 
   # If no changes have been made, there is no need to process further.
@@ -599,6 +600,11 @@ sub _get_diffs {
       push @$referenced_bugs, grep {/^\d+$/} split(/[\s,]+/, $diff->{old});
       push @$referenced_bugs, grep {/^\d+$/} split(/[\s,]+/, $diff->{new});
     }
+    elsif ($diff->{field_name} eq 'see_also') {
+      foreach my $field ('new', 'old') {
+        push @$referenced_bugs, _parse_see_also(split(/[\s,]+/, $diff->{$field}));
+      }
+    }
   }
 
   return ($diffs, $referenced_bugs);
@@ -663,6 +669,14 @@ sub _get_new_bugmail_fields {
   }
 
   return @diffs;
+}
+
+sub _parse_see_also {
+  my (@links) = @_;
+  my $urlbase = Bugzilla->localconfig->{urlbase};
+  my $bug_link_re = qr/^\Q$urlbase\Eshow_bug\.cgi\?id=(\d+)$/;
+
+  return grep { /^\d+$/ } map { /$bug_link_re/ ? int($1) : () } @links;
 }
 
 1;

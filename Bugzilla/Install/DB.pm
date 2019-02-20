@@ -780,6 +780,11 @@ sub update_table_definitions {
   $dbh->bz_add_column('products', 'bug_description_template',
     {TYPE => 'MEDIUMTEXT'});
 
+  # Bug 1522341 - kohei.yoshino@gmail.com
+  $dbh->bz_add_column('bugs', 'bug_type', {TYPE => 'varchar(20)'});
+  $dbh->bz_add_column('components', 'default_bug_type',
+    {TYPE => 'varchar(20)'});
+
   _add_oauth2_jwt_support();
 
   ################################################################

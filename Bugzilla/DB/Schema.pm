@@ -246,6 +246,7 @@ use constant ABSTRACT_SCHEMA => {
       bug_file_loc => {TYPE => 'MEDIUMTEXT',   NOTNULL => 1, DEFAULT => "''"},
       bug_severity => {TYPE => 'varchar(64)',  NOTNULL => 1},
       bug_status   => {TYPE => 'varchar(64)',  NOTNULL => 1},
+      bug_type     => {TYPE => 'varchar(20)'},
       creation_ts  => {TYPE => 'DATETIME'},
       delta_ts     => {TYPE => 'DATETIME',     NOTNULL => 1},
       short_desc   => {TYPE => 'varchar(255)', NOTNULL => 1},
@@ -289,6 +290,7 @@ use constant ABSTRACT_SCHEMA => {
       bugs_delta_ts_idx         => ['delta_ts'],
       bugs_bug_severity_idx     => ['bug_severity'],
       bugs_bug_status_idx       => ['bug_status'],
+      bugs_but_type_idx         => ['bug_type'],
       bugs_op_sys_idx           => ['op_sys'],
       bugs_priority_idx         => ['priority'],
       bugs_product_id_idx       => ['product_id'],
@@ -481,6 +483,26 @@ use constant ABSTRACT_SCHEMA => {
       dependencies_blocked_idx =>
         {FIELDS => [qw(blocked dependson)], TYPE => 'UNIQUE'},
       dependencies_dependson_idx => ['dependson'],
+    ],
+  },
+
+  regressions => {
+    FIELDS => [
+      regressed_by => {
+        TYPE       => 'INT3',
+        NOTNULL    => 1,
+        REFERENCES => {TABLE => 'bugs', COLUMN => 'bug_id', DELETE => 'CASCADE'}
+      },
+      regresses => {
+        TYPE       => 'INT3',
+        NOTNULL    => 1,
+        REFERENCES => {TABLE => 'bugs', COLUMN => 'bug_id', DELETE => 'CASCADE'}
+      },
+    ],
+    INDEXES => [
+      regressions_regresses_idx =>
+        {FIELDS => [qw(regresses regressed_by)], TYPE => 'UNIQUE'},
+      regressions_regressed_by_idx => ['regressed_by'],
     ],
   },
 
@@ -811,6 +833,15 @@ use constant ABSTRACT_SCHEMA => {
 
   # Global Field Values
   # -------------------
+
+  bug_type => {
+    FIELDS  => dclone(FIELD_TABLE_SCHEMA->{FIELDS}),
+    INDEXES => [
+      bug_type_value_idx               => {FIELDS => ['value'], TYPE => 'UNIQUE'},
+      bug_type_sortkey_idx             => ['sortkey',           'value'],
+      bug_type_visibility_value_id_idx => ['visibility_value_id'],
+    ],
+  },
 
   bug_status => {
     FIELDS => [
@@ -1419,6 +1450,7 @@ use constant ABSTRACT_SCHEMA => {
         TYPE       => 'INT3',
         REFERENCES => {TABLE => 'profiles', COLUMN => 'userid', DELETE => 'SET NULL'}
       },
+      default_bug_type  => {TYPE => 'varchar(20)'},
     ],
     INDEXES => [
       components_product_id_idx =>

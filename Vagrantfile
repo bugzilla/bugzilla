@@ -104,6 +104,7 @@ Vagrant.configure('2') do |config|
     db.vm.provider 'vmware_fusion' do |v|
       v.vmx['memsize'] = DB_MEM
       v.vmx['numvcpus'] = DB_CPU
+      v.linked_clone = false
     end
   end
 

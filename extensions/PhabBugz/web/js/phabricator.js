@@ -30,7 +30,7 @@ Phabricator.getBugRevisions = function() {
         var spanRevisionStatusText = span.clone();
 
         var revLink = link.clone();
-        revLink.attr('href', phabUrl + revision.id));
+        revLink.attr('href', phabUrl + revision.id);
         revLink.text(revision.id);
         tdId.append(revLink);
 

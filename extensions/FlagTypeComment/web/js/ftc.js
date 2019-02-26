@@ -24,12 +24,18 @@ Bugzilla.FlagTypeComment = class FlagTypeComment {
     this.$comment = document.querySelector('#comment');
 
     if (this.$flags && this.$comment) {
+      const $extra_patch_types = document.querySelector('meta[name="extra-patch-types"]');
+
+      this.$form = this.$comment.form;
+      this.bug_id = Number(this.$form.bugid.value);
+      this.attachment_id = Number(this.$form.id.value);
+      this.extra_patch_types = $extra_patch_types ? $extra_patch_types.content.split(' ') : [];
       this.selects = [...this.$flags.querySelectorAll('.flag_select')];
       this.selects.forEach($select => $select.addEventListener('change', () => this.flag_onselect($select)));
       this.$fieldset_wrapper = this.$flags.parentElement.appendChild(document.createElement('div'));
       this.$fieldset_wrapper.id = 'approval-request-fieldset-wrapper';
       this.$comment_wrapper = document.querySelector('#smallCommentFrame') || this.$comment.parentElement;
-      this.$comment.form.addEventListener('submit', () => this.form_onsubmit());
+      this.$form.addEventListener('submit', event => this.form_onsubmit(event));
     }
   }
 
@@ -91,13 +97,13 @@ Bugzilla.FlagTypeComment = class FlagTypeComment {
   }
 
   /**
-   * Find a `<select>` element for a requested flag that matches the given fieldset.
+   * Find one or more `<select>` elements that match the requested flag(s) of the given fieldset.
    * @param {HTMLElement} $fieldset `<section>` element with the `data-flags` attribute.
-   * @returns {HTMLSelectElement} Any `<select>` element.
+   * @returns {Array.<HTMLSelectElement>} Any `<select>` element(s).
    */
-  find_select($fieldset) {
+  find_selectors($fieldset) {
     return this.selects
-      .find($_select => $_select.value === '?' && this.check_compatibility($_select.dataset.name, $fieldset));
+      .filter($_select => $_select.value === '?' && this.check_compatibility($_select.dataset.name, $fieldset));
   }
 
   /**
@@ -105,6 +111,50 @@ Bugzilla.FlagTypeComment = class FlagTypeComment {
    */
   toggle_comment_box() {
     this.$comment_wrapper.hidden = this.inserted_fieldsets.length > 0;
+  }
+
+  /**
+   * Parse a fieldset to convert the form values to comment text.
+   * @param {HTMLElement} $fieldset `<section>` element with the `data-flags` attribute.
+   * @returns {String} Comment text formatted in the Markdown syntax.
+   */
+  create_comment($fieldset) {
+    return [
+      `### ${$fieldset.querySelector('h3').innerText}`,
+      ...[...$fieldset.querySelectorAll('tr')].map($tr => {
+        const checkboxes = [...$tr.querySelectorAll('input[type="checkbox"]:checked')];
+        const $radio = $tr.querySelector('input[type="radio"]:checked');
+        const $input = $tr.querySelector('textarea,select,input');
+        const label = $tr.querySelector('th').innerText.replace(/\n/g, ' ');
+        let value = '';
+
+        if (checkboxes.length) {
+          value = checkboxes.map($checkbox => $checkbox.value.trim()).join(', ');
+        } else if ($radio) {
+          value = $radio.value.trim();
+        } else if ($input) {
+          value = $input.value.trim();
+
+          if ($input.dataset.type === 'bug') {
+            if (!value) {
+              value = 'None';
+            } else if (!isNaN(value)) {
+              value = `Bug ${value}`;
+            }
+          }
+
+          if ($input.dataset.type === 'bugs') {
+            if (!value) {
+              value = 'None';
+            } else {
+              value = value.split(/,\s*/).map(str => (!isNaN(str) ? `Bug ${str}` : str)).join(', ');
+            }
+          }
+        }
+
+        return `* **${label}**: ${value}`;
+      }),
+    ].join('\n');
   }
 
   /**
@@ -127,7 +177,7 @@ Bugzilla.FlagTypeComment = class FlagTypeComment {
 
     // Remove the temporary fieldset if not required. One fieldset can support multiple flags, so, for example,
     // if `approval‑mozilla‑release` is unselected but `approval‑mozilla‑beta` is still selected, keep it
-    if (state !== '?' && $fieldset && !this.find_select($fieldset)) {
+    if (state !== '?' && $fieldset && !this.find_selectors($fieldset).length) {
       $fieldset.remove();
     }
 
@@ -137,6 +187,25 @@ Bugzilla.FlagTypeComment = class FlagTypeComment {
 
       if ($fieldset) {
         this.$fieldset_wrapper.appendChild($fieldset);
+
+        // Show any other patches that can be requested for approval
+        bugzilla_ajax({
+          url: `${BUGZILLA.config.basepath}rest/bug/${this.bug_id}/attachment?` +
+            'include_fields=id,summary,content_type,is_patch,is_obsolete',
+        }, ({ bugs }) => {
+          const attachments = bugs ? bugs[this.bug_id] : [];
+          const others = attachments.filter(att => att.id !== this.attachment_id && !att.is_obsolete &&
+            (att.is_patch || this.extra_patch_types.includes(att.content_type)));
+
+          if (others.length) {
+            $fieldset.querySelector('tbody').insertAdjacentHTML('beforeend',
+              '<tr class="other-patches"><th>Do you want to request approval of these patches as well?</th><td>' +
+              `${others.map(patch =>
+                `<div><label><input type="checkbox" checked data-id="${patch.id}"> ${patch.summary}</label></div>`
+              ).join('')}` +
+              '</td></tr>');
+          }
+        });
       }
     }
 
@@ -166,59 +235,57 @@ Bugzilla.FlagTypeComment = class FlagTypeComment {
 
   /**
    * Convert the input values into comment text and remove the temporary fieldset before submitting the form.
-   * @returns {Boolean} Always `true` to allow submitting the form.
+   * @param {Event} event `submit` event.
+   * @returns {Boolean} `true` when submitting the form normally if no fieldset has been inserted, `false` otherwise.
    */
-  form_onsubmit() {
-    const $markdown_off = this.$comment.form.querySelector('input[name="markdown_off"]');
+  async form_onsubmit(event) {
+    if (!this.inserted_fieldsets.length) {
+      return true;
+    }
+
+    // Prevent auto-submission
+    event.preventDefault();
+
+    const $markdown_off = this.$form.querySelector('input[name="markdown_off"]');
 
     // Enable Markdown for any regular patches. Phabricator requests don't come with this hidden `<input>`
-    if (this.inserted_fieldsets.length && $markdown_off) {
+    if ($markdown_off) {
       $markdown_off.remove();
     }
 
-    for (const $fieldset of this.inserted_fieldsets) {
-      const text = [
-        `### ${$fieldset.querySelector('h3').innerText}`,
-        ...[...$fieldset.querySelectorAll('tr')].map($tr => {
-          const checkboxes = [...$tr.querySelectorAll('input[type="checkbox"]:checked')];
-          const $radio = $tr.querySelector('input[type="radio"]:checked');
-          const $input = $tr.querySelector('textarea,select,input');
-          const label = $tr.querySelector('th').innerText.replace(/\n/g, ' ');
-          let value = '';
+    // Convert the form values to Markdown comment
+    this.inserted_fieldsets.forEach($fieldset => this.add_comment(this.create_comment($fieldset)));
 
-          if (checkboxes.length) {
-            value = checkboxes.map($checkbox => $checkbox.value.trim()).join(', ');
-          } else if ($radio) {
-            value = $radio.value.trim();
-          } else if ($input) {
-            value = $input.value.trim();
+    // Submit the form via XHR before API requests to make sure the change is notified via email
+    await new Promise(resolve => {
+      const request = new XMLHttpRequest();
 
-            if ($input.dataset.type === 'bug') {
-              if (!value) {
-                value = 'None';
-              } else if (!isNaN(value)) {
-                value = `Bug ${value}`;
-              }
-            }
+      request.open('POST', `${BUGZILLA.config.basepath}attachment.cgi`);
+      request.addEventListener('loadend', () => resolve());
+      request.send(new FormData(this.$form));
+    });
 
-            if ($input.dataset.type === 'bugs') {
-              if (!value) {
-                value = 'None';
-              } else {
-                value = value.split(/,\s*/).map(str => (!isNaN(str) ? `Bug ${str}` : str)).join(', ');
-              }
-            }
-          }
+    // Request approval for other patches if any
+    await Promise.all([...this.inserted_fieldsets].map($fieldset => new Promise(resolve => {
+      const ids = [...$fieldset.querySelectorAll('tr.other-patches input:checked')]
+        .map($input => Number($input.dataset.id));
+      const flags = this.find_selectors($fieldset).map($select => ({ name: $select.dataset.name, status: '?' }));
 
-          return `* **${label}**: ${value}`;
-        }),
-      ].join('\n');
+      if (ids.length && flags.length) {
+        bugzilla_ajax({
+          type: 'PUT',
+          url: `${BUGZILLA.config.basepath}rest/bug/attachment/${ids[0]}`,
+          data: { ids, flags },
+        }, () => resolve(), () => resolve());
+      } else {
+        resolve();
+      }
+    })));
 
-      this.add_comment(text);
-      $fieldset.remove();
-    }
+    // Redirect to the bug once everything is done
+    location.href = `${BUGZILLA.config.basepath}show_bug.cgi?id=${this.bug_id}`;
 
-    return true;
+    return false;
   }
 };
 

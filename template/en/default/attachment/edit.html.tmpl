@@ -50,6 +50,7 @@
 [% editable_or_hide = can_edit ? "" : " bz_hidden_option" %]
 
 <form method="post" action="[% basepath FILTER none %]attachment.cgi" onsubmit="normalizeComments();">
+  <input type="hidden" name="bugid" value="[% attachment.bug_id %]">
   <input type="hidden" name="id" value="[% attachment.id %]">
   <input type="hidden" name="action" value="update">
   <input type="hidden" name="contenttypemethod" value="manual">

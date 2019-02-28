@@ -282,6 +282,21 @@ Bugzilla.FlagTypeComment = class FlagTypeComment {
       }
     })));
 
+    // Collect bug flags from checkboxes
+    const bug_flags = [...this.$fieldset_wrapper.querySelectorAll('input[data-bug-flag]:checked')]
+      .map($input => ({ name: $input.getAttribute('data-bug-flag'), status: '?' }));
+
+    // Update bug flags if needed
+    if (bug_flags.length) {
+      await new Promise(resolve => {
+        bugzilla_ajax({
+          type: 'PUT',
+          url: `${BUGZILLA.config.basepath}rest/bug/${this.bug_id}`,
+          data: { flags: bug_flags },
+        }, () => resolve(), () => resolve());
+      });
+    }
+
     // Redirect to the bug once everything is done
     location.href = `${BUGZILLA.config.basepath}show_bug.cgi?id=${this.bug_id}`;
 

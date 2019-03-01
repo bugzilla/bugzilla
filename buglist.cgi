@@ -1080,6 +1080,9 @@ if ($dotweak && scalar @bugs) {
         = [map($_->name, grep($_->is_active, @{$one_product->milestones}))];
     }
   }
+
+  # Allow to edit flags as well
+  $vars->{'flag_types'} = Bugzilla::FlagType::match({target_type => 'bug'});
 }
 
 # If we're editing a stored query, use the existing query name as default for

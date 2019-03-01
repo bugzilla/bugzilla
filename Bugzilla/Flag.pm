@@ -872,7 +872,6 @@ sub extract_flags_from_cgi {
 
   # Extract a list of flag type IDs from field names.
   my @flagtype_ids = map(/^flag_type-(\d+)$/ ? $1 : (), $cgi->param());
-  @flagtype_ids = grep($cgi->param("flag_type-$_") ne 'X', @flagtype_ids);
 
   # Extract a list of existing flag IDs.
   my @flag_ids = map(/^flag-(\d+)$/ ? $1 : (), $cgi->param());
@@ -957,17 +956,13 @@ sub extract_flags_from_cgi {
     # We are only interested in flags the user tries to create.
     next unless scalar(grep { $_ == $type_id } @flagtype_ids);
 
-    # Get the number of flags of this type already set for this target.
-    my $has_flags = $class->count({
+    # Get the current flags of this type already set for this target.
+    my $current_flags = $class->match({
       'type_id'     => $type_id,
       'target_type' => $attachment ? 'attachment' : 'bug',
       'bug_id'      => $bug->bug_id,
       'attach_id'   => $attachment ? $attachment->id : undef
     });
-
-    # Do not create a new flag of this type if this flag type is
-    # not multiplicable and already has a flag set.
-    next if (!$flag_type->is_multiplicable && $has_flags);
 
     my $status = $cgi->param("flag_type-$type_id");
     trick_taint($status);
@@ -986,6 +981,10 @@ sub extract_flags_from_cgi {
         );
         last unless $flag_type->is_multiplicable;
       }
+    }
+    elsif (!$flag_type->is_multiplicable && scalar @$current_flags) {
+      # Update or delete the current flag if the type is not multiplicable.
+      push(@new_flags, {id => @$current_flags[0]->id, status => $status});
     }
     else {
       push(@new_flags, {type_id => $type_id, status => $status});

@@ -396,14 +396,13 @@ foreach my $b (@bug_objects) {
   }
 }
 
-if (defined $cgi->param('id')) {
-
-  # Flags should be set AFTER the bug has been moved into another
-  # product/component. The structure of flags code doesn't currently
-  # allow them to be set using set_all.
+# Flags should be set AFTER the bug has been moved into another
+# product/component. The structure of flags code doesn't currently
+# allow them to be set using set_all.
+foreach my $bug (@bug_objects) {
   my ($flags, $new_flags)
-    = Bugzilla::Flag->extract_flags_from_cgi($first_bug, undef, $vars);
-  $first_bug->set_flags($flags, $new_flags);
+    = Bugzilla::Flag->extract_flags_from_cgi($bug, undef, $vars);
+  $bug->set_flags($flags, $new_flags);
 }
 
 ##############################

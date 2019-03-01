@@ -290,6 +290,8 @@
 
 </table>
 
+[% PROCESS "flag/list.html.tmpl" any_flags_requesteeble = 1 %]
+
 <b><label for="comment">Additional Comments:</label></b>
 [% IF user.is_insider %]
   <input type="checkbox" name="comment_is_private" value="1"

@@ -55,6 +55,7 @@ sub startup {
   push @{$self->renderer->paths}, @{ Bugzilla::Template::_include_path() };
 
   $self->sessions->cookie_name('bugzilla');
+  $self->sessions->default_expiration(60 * 60 * 24 * 7); # 1 week
 
   $self->hook(
     before_routes => sub {

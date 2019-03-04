@@ -793,51 +793,32 @@ sub _fix_defaults {
 }
 
 sub utf8_charset {
-  return 'utf8' unless Bugzilla->params->{'utf8'};
-  return Bugzilla->params->{'utf8'} eq 'utf8mb4' ? 'utf8mb4' : 'utf8';
+  return 'utf8mb4';
 }
 
 sub utf8_collate {
-  my $charset = utf8_charset();
-  if ($charset eq 'utf8') {
-    return 'utf8_general_ci';
-  }
-  elsif ($charset eq 'utf8mb4') {
-    return 'utf8mb4_unicode_520_ci';
-  }
-  else {
-    croak "invalid charset: $charset";
-  }
+  return 'utf8mb4_unicode_520_ci';
 }
 
 sub default_row_format {
   my ($class, $table) = @_;
-  my $charset = utf8_charset();
-  if ($charset eq 'utf8') {
-    return 'Compact';
-  }
-  elsif ($charset eq 'utf8mb4') {
-    my @no_compress = qw(
-      bug_user_last_visit
-      cc
-      email_rates
-      logincookies
-      token_data
-      tokens
-      ts_error
-      ts_exitstatus
-      ts_funcmap
-      ts_job
-      ts_note
-      user_request_log
-      votes
-    );
-    return 'Dynamic' if any { $table eq $_ } @no_compress;
-    return 'Compressed';
-  }
-  else {
-    croak "invalid charset: $charset";
-  }
+  my @no_compress = qw(
+    bug_user_last_visit
+    cc
+    email_rates
+    logincookies
+    token_data
+    tokens
+    ts_error
+    ts_exitstatus
+    ts_funcmap
+    ts_job
+    ts_note
+    user_request_log
+    votes
+  );
+  return 'Dynamic' if any { $table eq $_ } @no_compress;
+  return 'Compressed';
 }
 
 sub _alter_db_charset_to_utf8 {

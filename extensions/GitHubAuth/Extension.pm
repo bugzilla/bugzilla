@@ -16,7 +16,6 @@ use parent qw(Bugzilla::Extension);
 use Bugzilla::Extension::GitHubAuth::Client;
 
 use Bugzilla::Error;
-use Bugzilla::Util qw(trick_taint);
 use List::Util qw(first);
 use URI;
 use URI::QueryParam;

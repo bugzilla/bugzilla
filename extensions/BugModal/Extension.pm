@@ -18,7 +18,7 @@ use Bugzilla::Extension::BugModal::MonkeyPatches;
 use Bugzilla::Extension::BugModal::Util qw(date_str_to_time);
 use Bugzilla::Constants;
 use Bugzilla::User::Setting;
-use Bugzilla::Util qw(trick_taint datetime_from html_quote time_ago);
+use Bugzilla::Util qw(datetime_from html_quote time_ago);
 use List::MoreUtils qw(any);
 use Template::Stash;
 use JSON::XS qw(encode_json);

@@ -14,7 +14,6 @@ use warnings;
 use Bugzilla::Logging;
 use Bugzilla::Extension::Push::Util;
 use Bugzilla::Constants;
-use Bugzilla::Util qw(trick_taint);
 use File::Basename;
 use Try::Tiny;
 
@@ -48,7 +47,6 @@ sub _load {
   foreach my $name (@{$self->{names}}) {
     next if exists $self->{objects}->{$name};
     my $file = $self->{path} . "/$name.pm";
-    trick_taint($file);
     require $file;
     my $package = "Bugzilla::Extension::Push::Connector::$name";
 

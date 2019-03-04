@@ -28,7 +28,7 @@ use Bugzilla;
 use Bugzilla::Constants;
 use Bugzilla::Error;
 use Bugzilla::WebService::Util qw(validate);
-use Bugzilla::Util qw(trim detaint_natural trick_taint);
+use Bugzilla::Util qw(trim detaint_natural );
 
 use constant READ_ONLY      => qw( suggest_users );
 use constant PUBLIC_METHODS => qw( suggest_users );
@@ -44,7 +44,6 @@ sub suggest_users {
 
   ThrowUserError('user_access_by_match_denied') unless Bugzilla->user->id;
 
-  trick_taint($params->{match});
   my $results = Bugzilla->elastic->suggest_users($params->{match} . "");
   my @users = map { {
     real_name => $self->type(string => $_->{real_name}),

@@ -170,7 +170,6 @@ sub sql_from_days {
 sub sql_fulltext_search {
   my ($self, $column, $text) = @_;
   $text = $self->quote($text);
-  trick_taint($text);
   $fulltext_label++;
   return "CONTAINS($column,$text,$fulltext_label) > 0", "SCORE($fulltext_label)";
 }

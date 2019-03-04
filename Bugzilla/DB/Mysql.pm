@@ -181,9 +181,6 @@ sub sql_fulltext_search {
   # quote the text for use in the MATCH AGAINST expression
   $text = $self->quote($text);
 
-  # untaint the text, since it's safe to use now that we've quoted it
-  trick_taint($text);
-
   return "MATCH($column) AGAINST($text $mode)";
 }
 

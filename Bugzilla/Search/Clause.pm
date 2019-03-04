@@ -13,7 +13,6 @@ use warnings;
 
 use Bugzilla::Error;
 use Bugzilla::Search::Condition qw(condition);
-use Bugzilla::Util qw(trick_taint);
 
 sub new {
   my ($class, $joiner) = @_;
@@ -21,8 +20,6 @@ sub new {
     ThrowCodeError('search_invalid_joiner', {joiner => $joiner});
   }
 
-  # This will go into SQL directly so needs to be untainted.
-  trick_taint($joiner) if $joiner;
   bless {joiner => $joiner || 'AND'}, $class;
 }
 

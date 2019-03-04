@@ -350,11 +350,10 @@ if ($cmdtype eq "dorem") {
   elsif ($remaction eq "forget") {
     $user = Bugzilla->login(LOGIN_REQUIRED);
 
-    # Copy the name into a variable, so that we can trick_taint it for
+    # Copy the name into a variable for
     # the DB. We know it's safe, because we're using placeholders in
     # the SQL, and the SQL is only a DELETE.
     my $qname = $cgi->param('namedcmd');
-    trick_taint($qname);
 
     # Do not forget the saved search if it is being used in a whine
     my $whines_in_use = $dbh->selectcol_arrayref(
@@ -547,8 +546,8 @@ else {
 
 # Weed out columns that don't actually exist to prevent the user
 # from hacking their column list cookie to grab data to which they
-# should not have access.  Detaint the data along the way.
-@displaycolumns = grep($columns->{$_} && trick_taint($_), @displaycolumns);
+# should not have access.
+@displaycolumns = grep { $columns->{$_} } @displaycolumns;
 
 # Remove the "ID" column from the list because bug IDs are always displayed
 # and are hard-coded into the display templates.

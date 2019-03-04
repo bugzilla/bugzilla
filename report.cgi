@@ -107,13 +107,13 @@ my $valid_columns = Bugzilla::Search::REPORT_COLUMNS;
 
 # Validate the values in the axis fields or throw an error.
 !$row_field
-  || ($valid_columns->{$row_field} && trick_taint($row_field))
+  || $valid_columns->{$row_field}
   || ThrowCodeError("report_axis_invalid", {fld => "x", val => $row_field});
 !$col_field
-  || ($valid_columns->{$col_field} && trick_taint($col_field))
+  || $valid_columns->{$col_field}
   || ThrowCodeError("report_axis_invalid", {fld => "y", val => $col_field});
 !$tbl_field
-  || ($valid_columns->{$tbl_field} && trick_taint($tbl_field))
+  || $valid_columns->{$tbl_field}
   || ThrowCodeError("report_axis_invalid", {fld => "z", val => $tbl_field});
 
 my @axis_fields = grep {$_} ($row_field, $col_field, $tbl_field);

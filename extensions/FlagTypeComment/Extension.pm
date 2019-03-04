@@ -29,7 +29,6 @@ use base qw(Bugzilla::Extension);
 use Bugzilla::Extension::FlagTypeComment::Constants;
 
 use Bugzilla::FlagType;
-use Bugzilla::Util qw(trick_taint);
 use Scalar::Util qw(blessed);
 
 our $VERSION = '1';
@@ -84,7 +83,6 @@ sub _set_ftc_states {
     }
     else {
       ($target_type, $id) = ($type->{target_type}, $type->{id});
-      trick_taint($id) if $id;
     }
     if ($target_type eq 'bug') {
       return unless FLAGTYPE_COMMENT_BUG_FLAGS;
@@ -167,7 +165,6 @@ sub _set_flagtypes {
     my $text
       = $input->{"ftc_${flagtype_id}_$state"} || $input->{"ftc_new_$state"} || '';
     $text =~ s/\r\n/\n/g;
-    trick_taint($text);
 
     if ($text ne '') {
       if ($dbh->selectrow_array(

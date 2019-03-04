@@ -159,7 +159,6 @@ sub initFromCGI {
     "subcategory", "name",  "frequency", "public",
     "query_format"
   );
-  trick_taint($self->{'query'});
 
   $self->{'public'} = $cgi->param('public') ? 1 : 0;
 
@@ -239,7 +238,6 @@ sub existsInDatabase {
   my $category_id    = getCategoryID($self->{'category'});
   my $subcategory_id = getCategoryID($self->{'subcategory'});
 
-  trick_taint($self->{'name'});
   my $series_id
     = $dbh->selectrow_array("SELECT series_id "
       . "FROM series WHERE category = $category_id "
@@ -257,9 +255,6 @@ sub getCategoryID {
 
   # This seems for the best idiom for "Do A. Then maybe do B and A again."
   while (1) {
-
-    # We are quoting this to put it in the DB, so we can remove taint
-    trick_taint($category);
 
     $category_id
       = $dbh->selectrow_array("SELECT id "

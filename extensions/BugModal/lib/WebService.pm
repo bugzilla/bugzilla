@@ -22,7 +22,6 @@ use Bugzilla::Milestone;
 use Bugzilla::Product;
 use Bugzilla::Version;
 use List::MoreUtils qw(any first_value);
-use Taint::Util qw(untaint);
 
 # these methods are much lighter than our public API calls
 
@@ -95,7 +94,6 @@ sub initial_field_values {
 sub product_info {
   my ($self, $params) = @_;
   if (!ref $params->{product_name}) {
-    untaint($params->{product_name});
   }
   else {
     ThrowCodeError('params_required',

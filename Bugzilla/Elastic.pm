@@ -9,7 +9,6 @@ use 5.10.1;
 use Moo;
 
 use Bugzilla::Elastic::Search;
-use Bugzilla::Util qw(trick_taint);
 
 with 'Bugzilla::Elastic::Role::HasClient';
 

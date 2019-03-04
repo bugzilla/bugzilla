@@ -23,7 +23,7 @@ use Bugzilla::WebService::Util
   qw(extract_flags filter filter_wants validate translate);
 use Bugzilla::Bug;
 use Bugzilla::BugMail;
-use Bugzilla::Util qw(trick_taint trim detaint_natural remote_ip);
+use Bugzilla::Util qw(trim detaint_natural remote_ip);
 use Bugzilla::Version;
 use Bugzilla::Milestone;
 use Bugzilla::Status;
@@ -898,7 +898,6 @@ sub legal_values {
   if (grep($_->name eq $field, @global_selects)) {
 
     # The field is a valid one.
-    trick_taint($field);
     $values = get_legal_field_values($field);
   }
   elsif (grep($_ eq $field, PRODUCT_SPECIFIC_FIELDS)) {

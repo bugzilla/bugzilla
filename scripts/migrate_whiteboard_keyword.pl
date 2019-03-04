@@ -39,7 +39,7 @@ use Bugzilla::Constants;
 use Bugzilla::Field;
 use Bugzilla::Keyword;
 use Bugzilla::User;
-use Bugzilla::Util qw(trick_taint trim);
+use Bugzilla::Util qw(trim);
 
 use Getopt::Long;
 use Term::ANSIColor qw(colored);
@@ -77,8 +77,6 @@ my $whiteboard = shift;
 my $keyword    = shift;
 ($whiteboard && $keyword)
   || usage("Whiteboard or keyword strings were not provided\n");
-trick_taint($whiteboard);
-trick_taint($keyword);
 
 # User to make changes as automation@bmo.tld
 my $auto_user = Bugzilla::User->check({name => 'automation@bmo.tld'});

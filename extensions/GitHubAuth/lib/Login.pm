@@ -17,7 +17,7 @@ use fields qw(github_failure);
 use Scalar::Util qw(blessed);
 
 use Bugzilla::Constants qw(AUTH_NODATA AUTH_ERROR USAGE_MODE_BROWSER);
-use Bugzilla::Util qw(trick_taint generate_random_password);
+use Bugzilla::Util qw(generate_random_password);
 use Bugzilla::Token qw(issue_short_lived_session_token set_token_extra_data);
 use List::MoreUtils qw(any);
 use Bugzilla::Extension::GitHubAuth::Client;
@@ -76,8 +76,6 @@ sub _get_login_info_from_github {
   my $code     = $cgi->param('code');
 
   return {failure => AUTH_ERROR, error => 'github_missing_code'} unless $code;
-
-  trick_taint($code);
 
   my $client = Bugzilla::Extension::GitHubAuth::Client->new;
 
@@ -165,7 +163,6 @@ sub _get_login_info_from_email {
     user_error => 'github_invalid_email',
     details    => {email => ''}
     };
-  trick_taint($email);
 
   unless (any { $_ eq $email } @{Bugzilla->request_cache->{github_emails}}) {
     return {

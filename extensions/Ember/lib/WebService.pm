@@ -21,7 +21,6 @@ use Bugzilla::Product;
 use Bugzilla::Constants;
 use Bugzilla::Error;
 use Bugzilla::Field;
-use Bugzilla::Util qw(trick_taint);
 
 use Bugzilla::Extension::Ember::FakeBug;
 
@@ -144,7 +143,6 @@ sub show {
   # Only return changes since last_updated if provided
   my $last_updated = delete $params->{last_updated};
   if ($last_updated) {
-    trick_taint($last_updated);
 
     my $updated_fields = $dbh->selectcol_arrayref(
       'SELECT fieldid FROM bugs_activity
@@ -244,7 +242,6 @@ sub bug {
   # Only return changes since last_updated if provided
   my $last_updated = delete $params->{last_updated};
   if ($last_updated) {
-    trick_taint($last_updated);
     my $updated_fields = $dbh->selectcol_arrayref(
       'SELECT fielddefs.name
                                                          FROM fielddefs INNER JOIN bugs_activity

@@ -18,7 +18,7 @@ use Bugzilla::Constants;
 use Bugzilla::Error;
 use Bugzilla::Logging;
 use Bugzilla::User;
-use Bugzilla::Util qw(detaint_natural trick_taint);
+use Bugzilla::Util qw(detaint_natural);
 use Bugzilla::WebService::Constants;
 use Types::Standard qw(-types slurpy);
 use Type::Params qw(compile);

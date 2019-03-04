@@ -1884,7 +1884,6 @@ sub _handle_chart {
 
   $self->_chart_fields->{$field}
     or ThrowCodeError("invalid_field_name", {field => $field});
-  trick_taint($field);
 
   # This is the field as you'd reference it in a SQL statement.
   my $full_field = $field =~ /\./ ? $field : "bugs.$field";
@@ -2091,7 +2090,6 @@ sub _quote_unless_numeric {
   my $is_numeric       = $numeric_operator && $numeric_field && $numeric_value;
   if ($is_numeric) {
     my $quoted = $value;
-    trick_taint($quoted);
     return $quoted;
   }
   return Bugzilla->dbh->quote($value);

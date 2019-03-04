@@ -51,7 +51,6 @@ sub get_login_info {
       @{$cgi->{'Bugzilla_cookie_list'}};
       $user_id = $cookie->value if $cookie;
     }
-    trick_taint($login_cookie) if $login_cookie;
     $self->cookie($login_cookie);
 
     # If the call is for a web service, and an api token is provided, check
@@ -89,7 +88,6 @@ sub get_login_info {
 
     # Anything goes for these params - they're just strings which
     # we're going to verify against the db
-    trick_taint($login_cookie);
     detaint_natural($user_id);
 
     my $db_cookie = $dbh->selectrow_array(

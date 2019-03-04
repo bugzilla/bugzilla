@@ -29,7 +29,7 @@ use warnings;
 use base qw(Bugzilla::Extension);
 
 use Bugzilla::Constants;
-use Bugzilla::Util qw(trick_taint trim detaint_natural);
+use Bugzilla::Util qw(trim detaint_natural);
 use Bugzilla::Token;
 use Bugzilla::Error;
 use List::Util qw(first);
@@ -155,7 +155,6 @@ sub _remo_form_payment {
     $bug->update($timestamp);
 
     if ($token) {
-      trick_taint($token);
       $dbh->do('UPDATE tokens SET eventdata = ? WHERE token = ?',
         undef, ("remo_form_payment:" . $attachment->id, $token));
     }

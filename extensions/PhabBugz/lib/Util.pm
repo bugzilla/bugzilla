@@ -21,7 +21,6 @@ use Bugzilla::Extension::PhabBugz::Constants;
 use Bugzilla::Extension::PhabBugz::Types qw(:types);
 
 use List::Util qw(first);
-use Taint::Util qw(untaint);
 use Try::Tiny;
 use Type::Params qw( compile );
 use Type::Utils;

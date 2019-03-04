@@ -38,7 +38,6 @@ sub persist_login {
     = Bugzilla::Token::GenerateUniqueToken('logincookies', 'cookie');
 
   my $ip_addr = remote_ip();
-  trick_taint($ip_addr);
 
   $dbh->do('INSERT INTO logincookies (cookie, userid, ipaddr, lastused)
     VALUES (?, ?, ?, NOW())', undef, $login_cookie, $user->id, $ip_addr);
@@ -144,7 +143,6 @@ sub logout {
   # logged in and got the same cookie, we could be logging the other
   # user out here. Yes, this is very very very unlikely, but why take
   # chances? - bbaetz
-  map { trick_taint($_) } @login_cookies;
   @login_cookies = map { $dbh->quote($_) } @login_cookies;
   if ($type == LOGOUT_KEEP_CURRENT) {
     $dbh->do(

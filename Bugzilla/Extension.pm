@@ -17,7 +17,6 @@ use Bugzilla::Install::Util qw( extension_code_files );
 
 use File::Basename;
 use File::Spec;
-use Taint::Util qw(untaint);
 
 BEGIN { push @INC, \&INC_HOOK }
 
@@ -35,7 +34,6 @@ sub INC_HOOK {
       = Cwd::realpath(File::Spec->catpath($vol, File::Spec->catdir(@dirs), $file));
 
     my $first = 1;
-    untaint($real_file);
     $INC{$fake_file} = $real_file;
     my $found = open my $fh, '<', $real_file;
     unless ($found) {
@@ -48,7 +46,6 @@ sub INC_HOOK {
       if (!$first) {
         return 0 if eof $fh;
         $_ = readline $fh or return 0;
-        untaint($_);
         return 1;
       }
       else {

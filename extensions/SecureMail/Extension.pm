@@ -33,7 +33,7 @@ use Bugzilla::Comment;
 use Bugzilla::Group;
 use Bugzilla::Object;
 use Bugzilla::User;
-use Bugzilla::Util qw(trim trick_taint is_7bit_clean);
+use Bugzilla::Util qw(trim is_7bit_clean);
 use Bugzilla::Error;
 use Bugzilla::Mailer;
 use Bugzilla::Extension::SecureMail::TCT;
@@ -138,12 +138,6 @@ sub object_validators {
         }
       }
       elsif ($value =~ /BEGIN CERTIFICATE/) {
-
-        # S/MIME Keys must be in PEM format (Base64-encoded X.509)
-        #
-        # Crypt::SMIME seems not to like tainted values - it claims
-        # they aren't scalars!
-        trick_taint($value);
 
         my $smime = Crypt::SMIME->new();
         eval { $smime->setPublicKey([$value]); };

@@ -47,7 +47,6 @@ sub create_or_update_user {
     my $username_user_id = login_to_id($username || '');
     my $extern_user_id;
     if ($extern_id) {
-      trick_taint($extern_id);
       $extern_user_id = $dbh->selectrow_array(
         'SELECT userid
                  FROM profiles WHERE extern_id = ?', undef, $extern_id
@@ -81,8 +80,6 @@ sub create_or_update_user {
 
       # external authentication
       # systems might follow different standards than ours. So in this
-      # place here, we call trick_taint without checks.
-      trick_taint($password);
 
       # XXX Theoretically this could fail with an error, but the fix for
       # that is too involved to be done right now.
@@ -133,7 +130,6 @@ sub create_or_update_user {
 
     # $real_name is more than likely tainted, but we only use it
     # in a placeholder and we never use it after this.
-    trick_taint($real_name);
     $user->set_name($real_name);
     $user_updated = 1;
   }

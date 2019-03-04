@@ -31,7 +31,6 @@ use List::Util qw(first);
 use Tie::Hash::NamedCapture;
 use Safe;
 use Term::ANSIColor;
-use Taint::Util qw(untaint);
 use Sys::Hostname qw(hostname);
 
 use parent qw(Exporter);
@@ -124,17 +123,14 @@ sub _read_localconfig_from_env {
       foreach my $override (PARAM_OVERRIDE) {
         my $o_key = ENV_PREFIX . $override;
         $localconfig{param_override}{$override} = $ENV{$o_key};
-        untaint($localconfig{param_override}{$override});
       }
     }
     elsif (exists $ENV{$key}) {
       $localconfig{$name} = $ENV{$key};
-      untaint($localconfig{$name});
     }
     else {
       my $default = $var->{default};
       $localconfig{$name} = ref($default) eq 'CODE' ? $default->() : $default;
-      untaint($localconfig{$name});
     }
   }
 

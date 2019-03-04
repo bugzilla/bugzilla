@@ -99,7 +99,6 @@ else {
   $image_file = hmac_sha256_base64($image_file, $key) . '.png';
   $image_file =~ s/\+/-/g;
   $image_file =~ s/\//_/g;
-  trick_taint($image_file);
 
   if (!-e "$graph_dir/$image_file") {
     generate_chart($dir, "$graph_dir/$image_file", $product, \@datasets);

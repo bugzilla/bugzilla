@@ -12,7 +12,7 @@ use strict;
 use warnings;
 
 use base qw(Exporter);
-@Bugzilla::Util::EXPORT = qw(trick_taint detaint_natural
+@Bugzilla::Util::EXPORT = qw(detaint_natural
   detaint_signed
   with_writable_database with_readonly_database
   html_quote url_quote xml_quote
@@ -45,7 +45,6 @@ use English qw(-no_match_vars $EGID);
 use List::MoreUtils qw(any none);
 use POSIX qw(floor ceil);
 use Scalar::Util qw(tainted blessed);
-use Taint::Util qw(untaint);
 use Text::Wrap;
 use Try::Tiny;
 
@@ -73,12 +72,6 @@ sub with_readonly_database(&) {
   local Bugzilla->request_cache->{error_mode} = ERROR_MODE_DIE;
   Bugzilla->switch_to_shadow_db();
   $code->();
-}
-
-sub trick_taint {
-  untaint($_[0]);
-
-  return defined $_[0];
 }
 
 sub detaint_natural {
@@ -424,9 +417,6 @@ sub is_ipv6 {
 
   my $ipv6 = join(':', @chunks);
 
-  # The IP address is valid and can now be detainted.
-  untaint($ipv6);
-
   # Need to handle the exception of trailing :: being valid.
   return "${ipv6}::" if $ip =~ /::$/;
   return $ipv6;
@@ -722,12 +712,6 @@ sub bz_crypt {
 
     # Crypt the password.
     $crypted_password = crypt($password, $salt);
-
-    # HACK: Perl has bug where returned crypted password is considered
-    # tainted. See http://rt.perl.org/rt3/Public/Bug/Display.html?id=59998
-    unless (tainted($password) || tainted($salt)) {
-      untaint($crypted_password);
-    }
   }
   else {
     my $hasher = Digest->new($algorithm);
@@ -771,8 +755,6 @@ sub validate_email_syntax {
     && $email =~ /^$addr_spec$/
     && length($email) <= 127)
   {
-    # We assume these checks to suffice to consider the address untainted.
-    untaint($_[0]);
     return 1;
   }
   return 0;
@@ -993,7 +975,6 @@ Bugzilla::Util - Generic utility functions for bugzilla
   use Bugzilla::Util;
 
   # Functions for dealing with variable tainting
-  trick_taint($var);
   detaint_natural($var);
   detaint_signed($var);
 
@@ -1055,17 +1036,6 @@ Several functions are available to deal with tainted variables. B<Use these
 with care> to avoid security holes.
 
 =over 4
-
-=item C<trick_taint($val)>
-
-Tricks perl into untainting a particular variable.
-
-Use trick_taint() when you know that there is no way that the data
-in a scalar can be tainted, but taint mode still bails on it.
-
-B<WARNING!! Using this routine on data that really could be tainted defeats
-the purpose of taint mode.  It should only be used on variables that have been
-sanity checked in some way and have been determined to be OK.>
 
 =item C<detaint_natural($num)>
 

@@ -137,7 +137,6 @@ sub extension_code_files {
     # We know that these paths are safe, because they came from
     # extensionsdir and we checked them specifically for their format.
     # Also, the only thing we ever do with them is pass them to "require".
-    trick_taint($_) foreach @load_files;
     push(@files, \@load_files);
   }
 
@@ -308,7 +307,6 @@ sub _template_lang_directories {
     foreach my $dir (@add) {
       my $full_dir = "$templatedir/$lang/$dir";
       if (-d $full_dir) {
-        trick_taint($full_dir);
         push(@result, $full_dir);
       }
     }
@@ -592,14 +590,6 @@ use constant _cache => {};
 ###############################
 # Copied from Bugzilla::Util #
 ##############################
-
-sub trick_taint {
-  require Carp;
-  Carp::confess("Undef to trick_taint") unless defined $_[0];
-  my $match = $_[0] =~ /^(.*)$/s;
-  $_[0] = $match ? $1 : undef;
-  return (defined($_[0]));
-}
 
 sub trim {
   my ($str) = @_;

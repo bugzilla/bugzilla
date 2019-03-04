@@ -11,8 +11,6 @@ use 5.10.1;
 use strict;
 use warnings;
 
-use Bugzilla::Util qw(trick_taint);
-
 sub new {
   return bless({}, shift);
 }
@@ -22,7 +20,6 @@ sub store {
   my $dbh = Bugzilla->dbh;
   my $sth = $dbh->prepare(
     "INSERT INTO attach_data (id, thedata) VALUES ($attach_id, ?)");
-  trick_taint($data);
   $sth->bind_param(1, $data, $dbh->BLOB_TYPE);
   $sth->execute();
 }

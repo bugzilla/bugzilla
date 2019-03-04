@@ -23,7 +23,7 @@ use base qw(Exporter);
 );
 
 use Bugzilla::Error;
-use Bugzilla::Util qw(trick_taint get_text);
+use Bugzilla::Util qw(get_text);
 use Module::Runtime qw(require_module);
 
 ###############################
@@ -286,7 +286,7 @@ sub validate_value {
   my $self = shift;
 
   if (grep(/^$_[0]$/, @{$self->legal_values()})) {
-    trick_taint($_[0]);
+    # do nothing
   }
   else {
     ThrowCodeError('setting_value_invalid',

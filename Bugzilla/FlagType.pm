@@ -345,7 +345,6 @@ sub _check_group {
   my ($invocant, $group) = @_;
   return unless $group;
 
-  trick_taint($group);
   $group = Bugzilla::Group->check($group);
   return $group->id;
 }
@@ -682,7 +681,6 @@ sub sqlify_criteria {
 
   if ($criteria->{name}) {
     my $name = $dbh->quote($criteria->{name});
-    trick_taint($name);    # Detaint data as we have quoted it.
     push(@criteria, "flagtypes.name = $name");
   }
   if ($criteria->{target_type}) {

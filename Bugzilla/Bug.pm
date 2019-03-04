@@ -2368,7 +2368,6 @@ sub _check_tag_name {
   $tag = clean_text($tag);
   $tag || ThrowUserError('no_tag_to_edit');
   ThrowUserError('tag_name_too_long') if length($tag) > MAX_LEN_QUERY_NAME;
-  trick_taint($tag);
 
   # Tags are all lowercase.
   return lc($tag);
@@ -3451,7 +3450,6 @@ sub add_see_also {
 
   my $field_values = $class->run_create_validators($params);
   my $value        = $field_values->{value}->as_string;
-  trick_taint($value);
   $field_values->{value} = $value;
 
   # We only add the new URI if it hasn't been added yet. URIs are
@@ -4345,7 +4343,6 @@ sub bug_alias_to_id {
   my ($alias) = @_;
   return undef unless Bugzilla->params->{"usebugaliases"};
   my $dbh = Bugzilla->dbh;
-  trick_taint($alias);
   return $dbh->selectrow_array("SELECT bug_id FROM bugs WHERE alias = ?",
     undef, $alias);
 }
@@ -4445,7 +4442,6 @@ sub GetBugActivity {
   # Only consider changes since $starttime, if given.
   my $datepart = "";
   if (defined $starttime) {
-    trick_taint($starttime);
     push(@args, $starttime);
     $datepart = "AND bug_when > ?";
   }
@@ -4674,8 +4670,6 @@ sub LogActivityEntry {
     else {
       $added = "";      # no more entries
     }
-    trick_taint($addstr);
-    trick_taint($removestr);
     my $fieldid = get_field_id($col);
     $dbh->do(
       "INSERT INTO bugs_activity

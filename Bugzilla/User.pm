@@ -2091,7 +2091,6 @@ sub match {
   if ($wildstr =~ s/\*/\%/g && $user->id) {
 
     # Build the query.
-    trick_taint($wildstr);
     my $query = "SELECT DISTINCT userid FROM profiles ";
     if (Bugzilla->params->{'usevisibilitygroups'}) {
       $query .= "INNER JOIN user_group_map
@@ -2117,7 +2116,6 @@ sub match {
   }
   else {    # try an exact match
             # Exact matches don't care if a user is disabled.
-    trick_taint($str);
     my $user_id = $dbh->selectrow_array(
       'SELECT userid FROM profiles
                                              WHERE '
@@ -2129,7 +2127,6 @@ sub match {
 
   # then try substring search
   if (!scalar(@users) && length($str) >= 3 && $user->id) {
-    trick_taint($str);
 
     my $query = "SELECT DISTINCT userid FROM profiles ";
     if (Bugzilla->params->{'usevisibilitygroups'}) {
@@ -2720,7 +2717,6 @@ sub account_is_locked_out {
 sub note_login_failure {
   my $self    = shift;
   my $ip_addr = remote_ip();
-  trick_taint($ip_addr);
   Bugzilla->dbh->do(
     "INSERT INTO login_failure (user_id, ip_addr, login_time)
                        VALUES (?, ?, LOCALTIMESTAMP(0))", undef, $self->id, $ip_addr
@@ -2731,7 +2727,6 @@ sub note_login_failure {
 sub clear_login_failures {
   my $self    = shift;
   my $ip_addr = remote_ip();
-  trick_taint($ip_addr);
   Bugzilla->dbh->do('DELETE FROM login_failure WHERE user_id = ? AND ip_addr = ?',
     undef, $self->id, $ip_addr);
   delete $self->{account_ip_login_failures};
@@ -2743,7 +2738,6 @@ sub account_ip_login_failures {
   my $time = $dbh->sql_date_math('LOCALTIMESTAMP(0)', '-', LOGIN_LOCKOUT_INTERVAL,
     'MINUTE');
   my $ip_addr = remote_ip();
-  trick_taint($ip_addr);
   $self->{account_ip_login_failures} ||= Bugzilla->dbh->selectall_arrayref(
     "SELECT login_time, ip_addr, user_id FROM login_failure
           WHERE user_id = ? AND login_time > $time
@@ -2765,9 +2759,6 @@ sub is_available_username {
   }
 
   my $dbh = Bugzilla->dbh;
-
-  # $username is safe because it is only used in SELECT placeholders.
-  trick_taint($username);
 
   # Reject if the new login is part of an email change which is
   # still in progress
@@ -2846,9 +2837,6 @@ sub login_to_id {
     $user_id = $cache->{$login};
   }
   else {
-    # No need to validate $login -- it will be used by the following SELECT
-    # statement only, so it's safe to simply trick_taint.
-    trick_taint($login);
     $user_id = $dbh->selectrow_array(
       "SELECT userid FROM profiles
               WHERE " . $dbh->sql_istrcmp('login_name', '?'), undef, $login

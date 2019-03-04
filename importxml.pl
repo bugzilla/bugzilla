@@ -1189,7 +1189,6 @@ sub process_bug {
       "INSERT INTO attach_data (id, thedata)
                                  VALUES ($att_id, ?)"
     );
-    trick_taint($att_data);
     $sth->bind_param(1, $att_data, $dbh->BLOB_TYPE);
     $sth->execute();
 

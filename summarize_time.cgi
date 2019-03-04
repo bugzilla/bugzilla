@@ -149,8 +149,6 @@ sub sqlize_dates {
   my @date_values;
   if ($start_date) {
 
-    # we've checked, trick_taint is fine
-    trick_taint($start_date);
     $date_bits = " AND longdescs.bug_when > ?";
     push @date_values, $start_date;
   }

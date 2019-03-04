@@ -626,8 +626,6 @@ sub SaveSavedSearches {
       # allowed to.
       next unless grep($_ eq $group_id, @{$user->queryshare_groups});
 
-      # $group_id is now definitely a valid ID of a group the
-      # user can share queries with, so we can trick_taint.
       detaint_natural($group_id);
       if ($q->shared_with_group) {
         $sth_update_ngm->execute($group_id, $q->id);
@@ -775,7 +773,6 @@ sub DoMFA {
       || ThrowTemplateError($template->error());
   }
   elsif ($provider =~ /^[a-z]+$/) {
-    trick_taint($provider);
     $template->process("mfa/$provider/enroll.html.tmpl", $vars)
       || ThrowTemplateError($template->error());
   }
@@ -984,9 +981,6 @@ my $mfa_token       = $cgi->param('mfa_token');
 $vars->{'changes_saved'} = $save_changes || $mfa_token;
 
 my $current_tab_name = $cgi->param('tab') || "account";
-
-# The SWITCH below makes sure that this is valid
-trick_taint($current_tab_name);
 
 $vars->{'current_tab_name'} = $current_tab_name;
 

@@ -370,7 +370,6 @@ sub Cancel {
   $vars ||= {};
 
   # Get information about the token being canceled.
-  trick_taint($token);
   my ($db_token, $issuedate, $tokentype, $eventdata, $userid)
     = $dbh->selectrow_array(
     'SELECT token, '
@@ -451,7 +450,6 @@ sub GetTokenData {
 
   return unless defined $token;
   $token = clean_text($token);
-  trick_taint($token);
 
   my @token_data = $dbh->selectrow_array(
         "SELECT token, userid, "
@@ -475,7 +473,6 @@ sub delete_token {
   my $dbh = Bugzilla->dbh;
 
   return unless defined $token;
-  trick_taint($token);
 
   $dbh->do("DELETE FROM tokens WHERE token = ?", undef, $token);
 }
@@ -543,7 +540,6 @@ sub set_token_extra_data {
 
 sub get_token_extra_data {
   my ($token) = @_;
-  trick_taint($token);
   my ($data)
     = Bugzilla->dbh->selectrow_array(
     "SELECT extra_data FROM token_data WHERE token = ?",
@@ -565,8 +561,6 @@ sub _create_token {
   my $dbh = Bugzilla->dbh;
 
   detaint_natural($userid) if defined $userid;
-  trick_taint($tokentype);
-  trick_taint($eventdata);
 
   my $is_shadow = Bugzilla->is_shadow_db;
   $dbh = Bugzilla->switch_to_main_db() if $is_shadow;

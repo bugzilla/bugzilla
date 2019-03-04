@@ -243,7 +243,6 @@ sub bug_end_of_update {
         && defined $params->{"edit_comment_checkbox_$comment_id"}
         && $params->{"edit_comment_checkbox_$comment_id"} == 'on') ? 1 : 0;
 
-    trick_taint($new_comment);
     $dbh->do(
       "UPDATE longdescs SET thetext = ?, edit_count = edit_count + 1
                   WHERE comment_id = ?", undef, $new_comment, $comment_id

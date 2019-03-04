@@ -127,9 +127,6 @@ if ($cgi->param('update')) {
         my $body    = ($cgi->param("event_${eventid}_body")    or '');
         my $mailifnobugs = $cgi->param("event_${eventid}_mailifnobugs") ? 1 : 0;
 
-        trick_taint($subject) if $subject;
-        trick_taint($body)    if $body;
-
         if ( ($subject ne $events->{$eventid}->subject)
           || ($mailifnobugs != $events->{$eventid}->mail_if_no_bugs)
           || ($body ne $events->{$eventid}->body))
@@ -224,7 +221,6 @@ if ($cgi->param('update')) {
             elsif ($mailto_type == MAILTO_GROUP) {
 
               # The group name is used in a placeholder.
-              trick_taint($mailto);
               $mailto_id = Bugzilla::Group::ValidateGroupName($mailto, ($user))
                 || ThrowUserError('invalid_group_name', {name => $mailto});
             }
@@ -242,10 +238,6 @@ if ($cgi->param('update')) {
             || ($o_mailto ne $mailto)
             || ($o_mailto_type != $mailto_type))
           {
-
-            trick_taint($day);
-            trick_taint($time);
-
             # the schedule table must be locked
             $sth
               = $dbh->prepare("UPDATE whine_schedules "
@@ -296,8 +288,6 @@ if ($cgi->param('update')) {
           {
 
             detaint_natural($sort);
-            trick_taint($queryname);
-            trick_taint($title);
 
             $sth
               = $dbh->prepare("UPDATE whine_queries "

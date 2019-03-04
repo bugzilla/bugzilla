@@ -201,7 +201,6 @@ if ($action eq 'reclassify') {
     check_token_data($token, 'reclassify_classifications');
     if (defined $cgi->param('prodlist')) {
       foreach my $prod ($cgi->param("prodlist")) {
-        trick_taint($prod);
         $sth->execute($classification->id, $prod);
         push @names, $prod;
       }
@@ -212,7 +211,6 @@ if ($action eq 'reclassify') {
     check_token_data($token, 'reclassify_classifications');
     if (defined $cgi->param('myprodlist')) {
       foreach my $prod ($cgi->param("myprodlist")) {
-        trick_taint($prod);
         $sth->execute(1, $prod);
         push @names, $prod;
       }

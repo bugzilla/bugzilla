@@ -1130,7 +1130,6 @@ sub bug_end_of_create {
 
   # store user-agent
   if (my $ua = Bugzilla->cgi->user_agent) {
-    trick_taint($ua);
     Bugzilla->dbh->do(
       "INSERT INTO bug_user_agent (bug_id, user_agent) VALUES (?, ?)",
       undef, $bug->id, $ua);
@@ -2438,7 +2437,6 @@ sub query_database {
     }
 
     check_hash_token($input->{token}, ['query_database']);
-    trick_taint($query);
     $vars->{executed} = 1;
 
     # add limit if missing

@@ -151,10 +151,6 @@ elsif ($action eq 'list') {
         $matchstr = '' unless defined $matchstr;
       }
 
-      # We can trick_taint because we use the value in a SELECT only,
-      # using a placeholder.
-      trick_taint($matchstr);
-
       if ($matchtype eq 'regexp') {
         $query .= $dbh->sql_regexp($expr, '?', 0, $dbh->quote($matchstr));
       }

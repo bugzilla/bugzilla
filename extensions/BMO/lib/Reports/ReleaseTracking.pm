@@ -15,7 +15,7 @@ use Bugzilla::Constants;
 use Bugzilla::Error;
 use Bugzilla::Field;
 use Bugzilla::FlagType;
-use Bugzilla::Util qw(trick_taint validate_date);
+use Bugzilla::Util qw(validate_date);
 use JSON qw(-convert_blessed_universally);
 use List::MoreUtils qw(uniq);
 
@@ -340,7 +340,6 @@ sub _parse_query {
   my $flag_name = shift @query;
   @{Bugzilla::FlagType::match({name => $flag_name, is_active => 1})}
     or ThrowUserError('report_invalid_parameter', {name => 'flag_name'});
-  trick_taint($flag_name);
   $query->{flag_name} = $flag_name;
 
   # flag_status

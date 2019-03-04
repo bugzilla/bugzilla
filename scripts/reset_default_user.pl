@@ -15,7 +15,6 @@ use Bugzilla;
 use Bugzilla::Constants;
 use Bugzilla::User;
 use Bugzilla::Field;
-use Bugzilla::Util qw(trick_taint);
 
 use Getopt::Long;
 
@@ -58,7 +57,6 @@ if (!$product
 my $who = Bugzilla::User->new({name => 'nobody@mozilla.org'});
 my $field = Bugzilla::Field->new({name => $field_name});
 
-trick_taint($product);
 my $product_id = $dbh->selectrow_array("SELECT id FROM products WHERE name = ?",
   undef, $product);
 $product_id or die "Can't find product ID for '$product'.\n";
@@ -66,7 +64,6 @@ $product_id or die "Can't find product ID for '$product'.\n";
 my $component_id;
 my $default_user_id;
 if ($component) {
-  trick_taint($component);
   my $colname
     = $field->name eq 'qa_contact' ? 'initialqacontact' : 'initialowner';
   ($component_id, $default_user_id)

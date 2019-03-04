@@ -177,14 +177,12 @@ sub queue {
   # Filter results by exact email address of requester or requestee.
   if (defined $cgi->param('requester') && $cgi->param('requester') ne "") {
     my $requester = $dbh->quote($cgi->param('requester'));
-    trick_taint($requester);    # Quoted above
     push(@criteria, $dbh->sql_istrcmp('requesters.login_name', $requester));
     push(@excluded_columns, 'requester') unless $do_union;
   }
   if (defined $cgi->param('requestee') && $cgi->param('requestee') ne "") {
     if ($cgi->param('requestee') ne "-") {
       my $requestee = $dbh->quote($cgi->param('requestee'));
-      trick_taint($requestee);    # Quoted above
       push(@criteria, $dbh->sql_istrcmp('requestees.login_name', $requestee));
     }
     else {
@@ -240,7 +238,6 @@ sub queue {
     if (!$has_attachment_type) { push(@excluded_columns, 'attachment') }
 
     my $quoted_form_type = $dbh->quote($form_type);
-    trick_taint($quoted_form_type);    # Already SQL quoted
     push(@criteria,         "flagtypes.name = " . $quoted_form_type);
     push(@excluded_columns, 'type');
   }
@@ -347,7 +344,6 @@ sub validateStatus {
 
   grep($status eq $_, qw(? +- + - all))
     || ThrowUserError("flag_status_invalid", {status => $status});
-  trick_taint($status);
   return $status;
 }
 
@@ -357,7 +353,6 @@ sub validateGroup {
 
   grep($group eq $_, qw(requester requestee category type))
     || ThrowUserError("request_queue_group_invalid", {group => $group});
-  trick_taint($group);
   return $group;
 }
 

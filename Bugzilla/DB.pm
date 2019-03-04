@@ -118,7 +118,6 @@ use constant INDEX_DROPS_REQUIRE_FK_DROPS => 1;
 sub quote {
   my $self   = shift;
   my $retval = $self->dbh->quote(@_);
-  trick_taint($retval) if defined $retval;
   return $retval;
 }
 
@@ -473,9 +472,6 @@ sub sql_fulltext_search {
   # surround the words with wildcards and SQL quotes so we can use them
   # in LIKE search clauses
   @words = map($self->quote("\%$_\%"), @words);
-
-  # untaint words, since they are safe to use now that we've quoted them
-  trick_taint($_) foreach @words;
 
   # turn the words into a set of LIKE search clauses
   @words = map("LOWER($column) LIKE $_", @words);

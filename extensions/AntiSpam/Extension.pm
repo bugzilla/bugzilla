@@ -15,7 +15,7 @@ use base qw(Bugzilla::Extension);
 
 use Bugzilla::Error;
 use Bugzilla::Group;
-use Bugzilla::Util qw(remote_ip trick_taint);
+use Bugzilla::Util qw(remote_ip);
 use Email::Address;
 use Socket;
 
@@ -101,7 +101,6 @@ sub _domain_blocking {
 sub _ip_blocking {
   my ($self, $login) = @_;
   my $ip = remote_ip();
-  trick_taint($ip);
   my $blocked
     = Bugzilla->dbh->selectrow_array(
     "SELECT 1 FROM antispam_ip_blocklist WHERE ip_address=?",
@@ -192,7 +191,6 @@ sub comment_after_add_tag {
   return if $author->comment_count < $count;
 
   # get user's comments
-  trick_taint($tag);
   my $comments = Bugzilla->dbh->selectall_arrayref("
         SELECT longdescs.comment_id,longdescs_tags.id
           FROM longdescs

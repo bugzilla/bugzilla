@@ -34,11 +34,9 @@ sub my_rmtree {
       $this->my_rmtree($file);
     }
     else {
-      trick_taint($file);
       unlink $file;
     }
   }
-  trick_taint($dir);
   rmdir $dir;
 }
 
@@ -215,7 +213,6 @@ sub push_context_lines {
     open(my $fh, '<', $this->{FILENAME}) or die "Could not open $this->{FILENAME}";
     $this->{FILE}           = $fh;
     $this->{NEXT_FILE_LINE} = 1;
-    trick_taint($olddir);    # $olddir comes from getcwd()
     chdir($olddir) or die "Could not cd back to $olddir";
   }
 
@@ -240,10 +237,5 @@ sub push_context_lines {
   $this->{SECTION_END} = $i - 1;
 }
 
-sub trick_taint {
-  $_[0] =~ /^(.*)$/s;
-  $_[0] = $1;
-  return (defined($_[0]));
-}
 
 1;

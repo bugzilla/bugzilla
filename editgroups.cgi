@@ -66,7 +66,6 @@ sub CheckGroupID {
 sub CheckGroupRegexp {
   my ($regexp) = @_;
   $regexp = trim($regexp || '');
-  trick_taint($regexp);
   ThrowUserError("invalid_regexp") unless (eval {qr/$regexp/});
   return $regexp;
 }

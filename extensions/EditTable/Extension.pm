@@ -25,7 +25,6 @@ use base qw(Bugzilla::Extension);
 use Bugzilla::Error;
 use Bugzilla::Hook;
 use Bugzilla::Token;
-use Bugzilla::Util qw(trick_taint);
 use JSON;
 use Storable qw(dclone);
 
@@ -68,7 +67,6 @@ sub page_before_template {
   my $id_field = $table->{id_field};
   my $order_by = $table->{order_by} || $id_field;
   my $group    = $table->{group} || 'admin';
-  trick_taint($table_name);
 
   Bugzilla->user->in_group($group)
     || ThrowUserError('auth_failure',
@@ -94,7 +92,6 @@ sub page_before_template {
       $dbh->bz_start_transaction;
 
       foreach my $row (@$data) {
-        map { trick_taint($_) } @$row;
         if ($row->[0] eq '-') {
 
           # add

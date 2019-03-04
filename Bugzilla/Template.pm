@@ -101,8 +101,6 @@ sub get_format {
   # Security - allow letters and a hyphen only
   $ctype =~ s/[^a-zA-Z\-]//g;
   $format =~ s/[^a-zA-Z\-]//g;
-  trick_taint($ctype);
-  trick_taint($format);
 
   $template .= ($format ? "-$format" : "");
   $template .= ".$ctype.tmpl";

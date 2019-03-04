@@ -172,7 +172,6 @@ sub update {
           $weighted->update();
         }
       }
-      trick_taint($tag);
       $sth_delete->execute($self->id, $tag);
       $sth_activity->execute($self->bug_id, $self->id, Bugzilla->user->id, $when, '',
         $tag);
@@ -187,7 +186,6 @@ sub update {
       else {
         Bugzilla::Comment::TagWeights->create({tag => $tag, weight => 1});
       }
-      trick_taint($tag);
       $sth_insert->execute($self->id, $tag);
       $sth_activity->execute($self->bug_id, $self->id, Bugzilla->user->id, $when,
         $tag, '');

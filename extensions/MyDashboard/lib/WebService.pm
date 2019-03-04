@@ -14,7 +14,7 @@ use base qw(Bugzilla::WebService Bugzilla::WebService::Bug);
 
 use Bugzilla::Constants;
 use Bugzilla::Error;
-use Bugzilla::Util qw(detaint_natural trick_taint template_var datetime_from);
+use Bugzilla::Util qw(detaint_natural template_var datetime_from);
 use Bugzilla::WebService::Util qw(validate);
 
 use Bugzilla::Extension::MyDashboard::Queries
@@ -38,9 +38,6 @@ sub run_last_changes {
 
   my $dbh  = Bugzilla->dbh;
   my $user = Bugzilla->login(LOGIN_REQUIRED);
-
-  trick_taint($params->{changeddate_api});
-  trick_taint($params->{bug_id});
 
   my $last_comment_sql = "
         SELECT comment_id

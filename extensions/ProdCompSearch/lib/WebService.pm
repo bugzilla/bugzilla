@@ -14,7 +14,7 @@ use warnings;
 use base qw(Bugzilla::WebService);
 
 use Bugzilla::Error;
-use Bugzilla::Util qw(detaint_natural trick_taint trim);
+use Bugzilla::Util qw(detaint_natural trim);
 
 #############
 # Constants #
@@ -90,7 +90,6 @@ sub prod_comp_search {
 
   return {products => []} if !scalar @$enterable_ids;
 
-  trick_taint($search);
   my @terms;
   my @order;
 

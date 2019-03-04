@@ -18,7 +18,7 @@ use Bugzilla::Comment;
 use Bugzilla::Constants;
 use Bugzilla::Error;
 use Bugzilla::Template;
-use Bugzilla::Util qw(trick_taint trim);
+use Bugzilla::Util qw(trim);
 use Bugzilla::WebService::Util qw(validate);
 
 use constant PUBLIC_METHODS => qw(
@@ -124,7 +124,6 @@ sub update_comment {
       && $params->{is_hidden} == 1) ? 1 : 0;
 
   # Update the `longdescs` (comments) table
-  trick_taint($new_comment);
   $dbh->do(
     'UPDATE longdescs SET thetext = ?, edit_count = edit_count + 1 WHERE comment_id = ?',
     undef, $new_comment, $comment_id

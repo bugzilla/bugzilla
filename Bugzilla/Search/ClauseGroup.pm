@@ -15,7 +15,6 @@ use base qw(Bugzilla::Search::Clause);
 
 use Bugzilla::Error;
 use Bugzilla::Search::Condition qw(condition);
-use Bugzilla::Util qw(trick_taint);
 use List::MoreUtils qw(uniq);
 
 use constant UNSUPPORTED_FIELDS => qw(

@@ -10,7 +10,6 @@ use Mojo::Base 'Mojolicious::Controller';
 
 use CGI::Compile;
 use Try::Tiny;
-use Taint::Util qw(untaint);
 use Sys::Hostname;
 use Sub::Quote 2.005000;
 use Sub::Name;
@@ -52,7 +51,6 @@ sub load_one {
   my $package = __PACKAGE__ . "::$name", my $inner_name = "_$name";
   my $content = path(bz_locations->{cgi_path}, $file)->slurp;
   $content = "package $package; $content";
-  untaint($content);
   my %options = (package => $package, file => $file, line => 1, no_defer => 1,);
   die "Tried to load $file more than once" if $SEEN{$file}++;
   my $inner = quote_sub $inner_name, $content, {}, \%options;

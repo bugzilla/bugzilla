@@ -45,7 +45,6 @@ sub do_namedqueries {
       my ($id, $old_query) = @$row;
       my $new_query = all_open_states($new_status, $old_query);
       if ($new_query) {
-        trick_taint($new_query);
         $sth->execute($new_query, $id);
         $replace_count++;
       }
@@ -74,7 +73,6 @@ sub do_series {
       my ($series_id, $old_query) = @$row;
       my $new_query = all_open_states($new_status, $old_query);
       if ($new_query) {
-        trick_taint($new_query);
         $sth->execute($new_query, $series_id);
         $replace_count++;
       }

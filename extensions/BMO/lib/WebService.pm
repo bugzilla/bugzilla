@@ -27,7 +27,7 @@ use base qw(Bugzilla::WebService);
 
 use Bugzilla::Constants;
 use Bugzilla::Error;
-use Bugzilla::Util qw(detaint_natural trick_taint);
+use Bugzilla::Util qw(detaint_natural);
 use Bugzilla::WebService::Util qw(validate);
 use Bugzilla::Field;
 

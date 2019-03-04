@@ -21,8 +21,6 @@ use Template::Constants qw( STATUS_ERROR );
 use Template::Document;
 use Template::Config;
 
-use Bugzilla::Util qw(trick_taint);
-
 sub _init {
   my $self = shift;
   $self->SUPER::_init(@_);
@@ -41,7 +39,6 @@ sub _init {
         unless ($search->{$key}) {
           $search->{$key} = $name;
         }
-        trick_taint($name);
         my $data = {
           path => $name,
           name => $key,
@@ -52,7 +49,6 @@ sub _init {
           },
           time => (stat($name))[9],
         };
-        trick_taint($data->{text}) if $data->{text};
         $cache->{$name} = $self->_bz_compile($data) or die "compile error: $name";
       }
     };

@@ -442,7 +442,6 @@ sub _check_content_type {
   {
     ThrowUserError("invalid_content_type", {contenttype => $content_type});
   }
-  trick_taint($content_type);
 
   return $content_type;
 }
@@ -498,7 +497,6 @@ sub _check_filename {
   # Truncate the filename to 100 characters, counting from the end of the
   # string to make sure we keep the filename extension.
   $filename = substr($filename, -100, 100);
-  trick_taint($filename);
 
   return $filename;
 }

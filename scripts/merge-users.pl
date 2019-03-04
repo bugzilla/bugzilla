@@ -61,7 +61,6 @@ if ($old =~ /^id:(\d+)$/) {
   $old_id = $1;
 }
 else {
-  trick_taint($old);
   $old_id = $dbh->selectrow_array(
     'SELECT userid FROM profiles
                                       WHERE login_name = ?', undef, $old
@@ -86,7 +85,6 @@ if ($new =~ /^id:(\d+)$/) {
   );
 }
 else {
-  trick_taint($new);
   $new_id = $dbh->selectrow_array(
     'SELECT userid FROM profiles
                                       WHERE login_name = ?', undef, $new

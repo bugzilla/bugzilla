@@ -72,7 +72,6 @@ if ($action eq "add") {
     || 0;
   my $comment = $cgi->param("quip");
   $comment || ThrowUserError("need_quip");
-  trick_taint($comment);    # Used in a placeholder below
 
   $dbh->do("INSERT INTO quips (userid, quip, approved) VALUES (?, ?, ?)",
     undef, ($user->id, $comment, $approved));

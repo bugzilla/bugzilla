@@ -10,7 +10,6 @@ use 5.10.1;
 use Moo;
 use Bugzilla::Search;
 use Bugzilla::Search::Quicksearch;
-use Bugzilla::Util qw(trick_taint);
 use namespace::clean;
 
 use Bugzilla::Elastic::Search::FakeCGI;
@@ -104,9 +103,7 @@ sub data {
     $source->{relevance} = $hit->{_score};
     foreach my $val (values %$source) {
       next unless defined $val;
-      trick_taint($val);
     }
-    trick_taint($hit->{_id});
     if ($source) {
       $hits{$hit->{_id}} = [@$source{@fields}];
     }

@@ -24,7 +24,7 @@ use Bugzilla::Field;
 use Bugzilla::Mailer;
 use Bugzilla::Product;
 use Bugzilla::User;
-use Bugzilla::Util qw(trim trick_taint);
+use Bugzilla::Util qw(trim);
 use Email::MIME;
 use FileHandle;
 use LWP;
@@ -122,7 +122,6 @@ sub options {
 sub options_validate {
   my ($self, $config) = @_;
   my $host = $config->{ldap_host};
-  trick_taint($host);
   my $scheme = lc($config->{ldap_scheme});
   eval {
     my $ldap
@@ -400,7 +399,6 @@ sub _ldap_cache {
     my $cache = {};
 
     my $host = $config->{ldap_host};
-    trick_taint($host);
     my $scheme = lc($config->{ldap_scheme});
     my $ldap = Net::LDAP->new($host, scheme => $scheme, onerror => 'die') or die $!;
     $ldap->bind($config->{ldap_user}, password => $config->{ldap_pass});

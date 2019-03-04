@@ -1466,7 +1466,6 @@ sub check_field {
     or !grep { $_ eq $value } @$legalsRef)
   {
     return 0 if $no_warn;    # We don't want an error to be thrown; return.
-    trick_taint($name);
 
     my $field = new Bugzilla::Field({name => $name});
     my $field_desc = $field ? $field->description : $name;
@@ -1497,7 +1496,6 @@ sub get_field_id {
   my ($name) = @_;
   my $dbh = Bugzilla->dbh;
 
-  trick_taint($name);
   my $id = $dbh->selectrow_array(
     'SELECT id FROM fielddefs
                                     WHERE name = ?', undef, $name

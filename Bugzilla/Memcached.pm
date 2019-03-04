@@ -16,7 +16,7 @@ use Log::Log4perl qw(:easy);
 use Bugzilla::Error;
 use Scalar::Util qw(blessed);
 use List::Util qw(sum);
-use Bugzilla::Util qw(trick_taint trim);
+use Bugzilla::Util qw(trim);
 use URI::Escape;
 use Encode;
 use Sys::Syslog qw(:DEFAULT);
@@ -346,7 +346,6 @@ sub _bloomfilter_prefix {
 sub _encode_key {
   my ($self, $key) = @_;
   $key = $self->_global_prefix . '.' . uri_escape_utf8($key);
-  trick_taint($key) if defined $key;
   return length($self->{namespace} . $key) > MAX_KEY_LENGTH ? undef : $key;
 }
 

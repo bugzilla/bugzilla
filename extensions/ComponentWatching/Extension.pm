@@ -18,7 +18,7 @@ use Bugzilla::Error;
 use Bugzilla::Group;
 use Bugzilla::User;
 use Bugzilla::User::Setting;
-use Bugzilla::Util qw(detaint_natural trim trick_taint);
+use Bugzilla::Util qw(detaint_natural trim);
 
 our $VERSION = '2';
 
@@ -571,7 +571,6 @@ sub _addPrefixWatch {
   my ($user, $product, $prefix) = @_;
   my $dbh = Bugzilla->dbh;
 
-  trick_taint($prefix);
   my $sth = $dbh->prepare("
         SELECT 1
           FROM component_watch

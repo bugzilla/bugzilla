@@ -17,7 +17,7 @@ use Bugzilla::Extension::BzAPI::Constants;
 use Bugzilla::Extension::BzAPI::Util qw(fix_credentials filter_wants_nocache);
 
 use Bugzilla::Error;
-use Bugzilla::Util qw(trick_taint datetime_from);
+use Bugzilla::Util qw(datetime_from);
 use Bugzilla::Constants;
 use Bugzilla::Install::Filesystem;
 use Bugzilla::WebService::Constants;
@@ -269,7 +269,6 @@ sub _preload_handlers {
     my $all_handlers = {};
     foreach my $module (_resource_modules()) {
       my $resource_class = "Bugzilla::Extension::BzAPI::Resources::$module";
-      trick_taint($resource_class);
       eval { require_module($resource_class) };
       next if ($@ || !$resource_class->can('rest_handlers'));
       my $handlers = $resource_class->rest_handlers;

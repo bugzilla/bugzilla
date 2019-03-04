@@ -16,7 +16,7 @@ use base qw(Bugzilla::WebService);
 use Bugzilla::Bug;
 use Bugzilla::Component;
 use Bugzilla::Error;
-use Bugzilla::Util qw(detaint_natural trick_taint);
+use Bugzilla::Util qw(detaint_natural );
 use Bugzilla::WebService::Util 'filter';
 
 use constant PUBLIC_METHODS => qw(
@@ -111,7 +111,6 @@ sub flag_activity {
   }
 
   if (my $type_name = $params->{type_name}) {
-    trick_taint($type_name);
     my $flag_types = Bugzilla::FlagType::match({name => $type_name});
     $match_criteria{type_id} = [map { $_->id } @$flag_types];
   }

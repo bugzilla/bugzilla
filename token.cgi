@@ -46,9 +46,6 @@ $action || ThrowUserError('unknown_action');
 if ($token) {
   Bugzilla::Token::CleanTokenTable();
 
-  # It's safe to detaint the token as it's used in a placeholder.
-  trick_taint($token);
-
   # Make sure the token exists in the database.
   my ($db_token, $tokentype) = $dbh->selectrow_array(
     'SELECT token, tokentype FROM tokens

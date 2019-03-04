@@ -16,7 +16,6 @@ use Bugzilla;
 use Bugzilla::Constants;
 use Bugzilla::Error;
 use Bugzilla::Hook;
-use Bugzilla::Util qw(trick_taint);
 use Bugzilla::Token qw(issue_auth_delegation_token check_auth_delegation_token);
 use Bugzilla::Mailer qw(MessageToMTA);
 
@@ -38,9 +37,6 @@ my $callback = $cgi->param('callback')
   or ThrowUserError("auth_delegation_missing_callback");
 my $description = $cgi->param('description')
   or ThrowUserError("auth_delegation_missing_description");
-
-trick_taint($callback);
-trick_taint($description);
 
 ThrowUserError("auth_delegation_invalid_description")
   unless $description =~ /^[\w\s]{3,255}$/;
@@ -76,7 +72,6 @@ if ($confirmed || $skip_confirmation) {
   my $token = $cgi->param('token');
   unless ($skip_confirmation) {
     ThrowUserError("auth_delegation_missing_token") unless $token;
-    trick_taint($token);
 
     unless (check_auth_delegation_token($token, $callback)) {
       ThrowUserError('auth_delegation_invalid_token',

@@ -602,9 +602,6 @@ sub log_user_request {
     $user_id, remote_ip(), $user_agent, $request_url, $method,
     $bug_id,  $attach_id,  $action,     $server
   );
-  foreach my $param (@params) {
-    trick_taint($param) if defined $param;
-  }
 
   eval {
     local request_cache->{dbh};

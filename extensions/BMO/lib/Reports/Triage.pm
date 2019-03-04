@@ -28,7 +28,7 @@ use constant MAX_NUMBER_BUGS => 4000;
 use constant DEFAULT_OWNER_PRODUCTS => (
   'Core', 'DevTools', 'External Software Affecting Firefox',
   'Firefox', 'Firefox for Android', 'Firefox Build System',
-  'GeckoView', 'Remote Protocol', 'Testing', 
+  'GeckoView', 'NSPR', 'NSS', 'Remote Protocol', 'Testing',
   'Toolkit', 'WebExtensions',
 );
 

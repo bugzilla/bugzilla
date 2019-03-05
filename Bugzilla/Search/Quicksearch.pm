@@ -145,8 +145,6 @@ sub quicksearch {
     _bug_numbers_only($searchstring);
   }
   else {
-    _handle_alias($searchstring);
-
     # Retain backslashes and quotes, to know which strings are quoted,
     # and which ones are not.
     my @words = _parse_line('\s+', 1, $searchstring);
@@ -344,27 +342,6 @@ sub _bug_numbers_only {
     $cgi->param('bug_id',      $searchstring);
     $cgi->param('order',       'bugs.bug_id');
     $cgi->param('bug_id_type', 'anyexact');
-  }
-}
-
-sub _handle_alias {
-  my $searchstring = shift;
-  if ($searchstring =~ /^([^,\s]+)$/) {
-    my $alias = $1;
-
-    # We use this direct SQL because we want quicksearch to be VERY fast.
-    my $bug_id
-      = Bugzilla->dbh->selectrow_array(q{SELECT bug_id FROM bugs WHERE alias = ?},
-      undef, $alias);
-
-    # If the user cannot see the bug or if we are using a webservice,
-    # do not resolve its alias.
-    if ($bug_id && Bugzilla->user->can_see_bug($bug_id) && !i_am_webservice()) {
-      $alias = url_quote($alias);
-      print Bugzilla->cgi->redirect(
-        -uri => Bugzilla->localconfig->{urlbase} . "show_bug.cgi?id=$alias");
-      exit;
-    }
   }
 }
 

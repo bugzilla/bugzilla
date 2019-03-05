@@ -54,7 +54,7 @@
 <p>This is an overview of how to effectively use search in [% terms.Bugzilla %].
   For more general information about [% terms.Bugzilla %] usage, including the jargon and
   shorthand that the Mozilla commmunity uses in [% terms.bug %] discussions, please look at
-  <a href="https://wiki.mozilla.org/Introduction_to_B[% %]ugzilla">Introduction to 
+  <a href="https://wiki.mozilla.org/Introduction_to_B[% %]ugzilla">Introduction to
   [% terms.Bugzilla %]</a> page on <a href="https://wiki.mozilla.org/">Wiki.m.o</a>.</p>
 
 <h2 id="basics">The Basics</h2>
@@ -71,12 +71,7 @@
     and [% field_descs.longdesc FILTER html %] fields for your word or words.</li>
 
   <li>Typing just a <strong>number</strong> in the search box will take
-    you directly to the [% terms.bug %] with that ID.
-    [% IF Param('usebugaliases') %]
-      Also, just typing the <strong>alias</strong> of [% terms.abug %]
-      will take you to that [% terms.bug %].
-    [% END %]
-  </li>
+    you directly to the [% terms.bug %] with that ID.</li>
 
   <li>Adding more terms <strong>narrows down</strong> the search, it does not
      expand it. (In other words, [% terms.Bugzilla %] searches for

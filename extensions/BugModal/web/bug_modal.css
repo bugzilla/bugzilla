@@ -509,14 +509,28 @@ td.flag-requestee {
 }
 
 .new-changes-link {
-    margin: 8px 0;
+    position: sticky;
+    top: 8px;
+    left: 0;
+    right: 0;
+    z-index: 10;
+    overflow: hidden;
+    margin: 8px -8px;
     border-radius: 4px;
     padding: 4px;
     font-size: 12px;
     text-align: center;
     color: #FFF;
     background: #277AC1;
+    opacity: 1;
     cursor: pointer;
+    transition: all .2s 2s;
+    will-change: transform; /* for performance */
+}
+
+.new-changes-link[hidden] {
+    display: block;
+    opacity: 0;
 }
 
 .new-changes-separator {

@@ -182,7 +182,7 @@
     [% FOREACH jq_name = jquery.unique %]
       [% starting_js_urls.push("js/jquery/plugins/$jq_name/${jq_name}-min.js") %]
     [% END %]
-    [% starting_js_urls.push('js/global.js', 'js/dropdown.js') %]
+    [% starting_js_urls.push('js/global.js', 'js/util.js', 'js/dropdown.js') %]
 
     [% FOREACH asset_url = starting_js_urls %]
       [% PROCESS format_js_link %]

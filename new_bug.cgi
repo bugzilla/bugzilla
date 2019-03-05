@@ -123,8 +123,7 @@ if (lc($cgi->request_method) eq 'post') {
     push(@all_mail_results, $ref_sent);
   }
 
-  print $cgi->redirect(
-    Bugzilla->localconfig->{urlbase} . 'show_bug.cgi?id=' . $new_bug->bug_id);
+  $cgi->base_redirect('show_bug.cgi?id=' . $new_bug->bug_id);
 }
 else {
   print $cgi->header();

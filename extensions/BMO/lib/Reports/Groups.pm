@@ -84,8 +84,7 @@ sub membership_report {
   my $who = $cgi->param('who');
   if (!defined($who) || $who eq '') {
     if ($page eq 'group_membership.txt') {
-      print $cgi->redirect("page.cgi?id=group_membership.html&output=txt");
-      exit;
+      $cgi->base_redirect('page.cgi?id=group_membership.html&output=txt');
     }
     $vars->{'output'} = $cgi->param('output');
     return;

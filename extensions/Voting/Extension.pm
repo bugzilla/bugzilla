@@ -534,8 +534,7 @@ sub _update_votes {
       exit;
     }
     elsif ($cgi->param('delete_all_votes') == 0) {
-      print $cgi->redirect("page.cgi?id=voting/user.html");
-      exit;
+      $cgi->base_redirect('page.cgi?id=voting/user.html');
     }
   }
   else {

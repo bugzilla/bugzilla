@@ -48,5 +48,4 @@ else {
   ThrowUserError('unknown_action', {action => $action});
 }
 
-print $cgi->redirect('page.cgi?' . $cgi->query_string);
-exit;
+$cgi->base_redirect('page.cgi?' . $cgi->query_string);

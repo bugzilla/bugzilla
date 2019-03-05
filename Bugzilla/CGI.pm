@@ -885,6 +885,15 @@ sub redirect_to_urlbase {
   exit;
 }
 
+sub base_redirect {
+  my ($self, $path, $is_perm) = @_;
+  print $self->redirect(
+    -location => Bugzilla->localconfig->{basepath} . ($path || ''),
+    -status   => $is_perm ? '301 Moved Permanently' : '302 Found'
+  );
+  exit;
+}
+
 sub url_is_attachment_base {
   my ($self, $id) = @_;
   return 0 if !use_attachbase() or !i_am_cgi();
@@ -1041,6 +1050,11 @@ instead of calling this directly.
 =item C<redirect_to_urlbase>
 
 Redirects from the current URL to one prefixed by the urlbase parameter.
+
+=item C<base_redirect>
+
+Redirects to the given path relative to the `basepath` parameter which is
+typically the root (`/`).
 
 =item C<set_dated_content_disp>
 

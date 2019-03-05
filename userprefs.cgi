@@ -214,8 +214,7 @@ sub DisableAccount {
   $user->update();
 
   Bugzilla->logout();
-  print Bugzilla->cgi->redirect(Bugzilla->localconfig->{urlbase});
-  exit;
+  Bugzilla->cgi->base_redirect();
 }
 
 sub DoSettings {

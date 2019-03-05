@@ -230,7 +230,7 @@ sub page_before_template {
     Bugzilla::Extension::BMO::Reports::Internship::report($vars);
   }
   elsif ($page eq 'email_queue.html') {
-    print Bugzilla->cgi->redirect('view_job_queue.cgi');
+    Bugzilla->cgi->base_redirect('view_job_queue.cgi');
   }
   elsif ($page eq 'release_tracking_report.html') {
     require Bugzilla::Extension::BMO::Reports::ReleaseTracking;
@@ -305,8 +305,7 @@ sub bounty_attachment {
 
     Bugzilla::BugMail::Send($bug->id, {changer => $user});
 
-    print Bugzilla->cgi->redirect('show_bug.cgi?id=' . $bug->id);
-    exit;
+    Bugzilla->cgi->base_redirect('show_bug.cgi?id=' . $bug->id);
   }
 
   if ($attachment) {

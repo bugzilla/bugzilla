@@ -73,13 +73,12 @@ elsif (lc($cgi->request_method) eq 'get') {
   my $state_cookie = $cgi->cookie('github_state');
 
   # If the state or params are missing, or the github_state cookie is missing
-  # we just redirect to index.cgi.
+  # we just redirect to the homepage.
   unless ($state_param
     && $state_cookie
     && ($cgi->param('code') || $cgi->param('email')))
   {
-    print $cgi->redirect($urlbase . "index.cgi");
-    exit;
+    $cgi->base_redirect();
   }
 
   my $invalid_request = $state_param ne $state_cookie;
@@ -118,13 +117,13 @@ elsif (lc($cgi->request_method) eq 'get') {
   $target_uri->query_param_delete('logout');
 
   if ($target_uri->path =~ /attachment\.cgi/) {
-    my $attachment_uri = URI->new($urlbase . "attachment.cgi");
+    my $attachment_uri = URI->new('attachment.cgi');
     $attachment_uri->query_param(id => scalar $target_uri->query_param('id'));
     if ($target_uri->query_param('action')) {
       $attachment_uri->query_param(
         action => scalar $target_uri->query_param('action'));
     }
-    print $cgi->redirect($attachment_uri);
+    $cgi->base_redirect($attachment_uri->as_string);
   }
   else {
     print $cgi->redirect($target_uri);

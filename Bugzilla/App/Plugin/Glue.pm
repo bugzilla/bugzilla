@@ -73,7 +73,7 @@ sub register {
       my ($c, $type) = @_;
 
       if ($type == LOGIN_REQUIRED) {
-        $c->redirect_to('/login');
+        $c->redirect_to(Bugzilla->localconfig->{basepath} . 'login');
         return undef;
       }
       else {

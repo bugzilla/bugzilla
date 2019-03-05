@@ -40,4 +40,4 @@ if (defined $cgi->param('id')) {
 
 my $ids = join('', map { $_ = "&id=" . $_ } @ids);
 
-print $cgi->redirect("show_bug.cgi?ctype=xml$ids");
+$cgi->base_redirect("show_bug.cgi?ctype=xml$ids");

@@ -266,8 +266,7 @@ sub get_attachment {
         unless ($userid && $valid_token) {
 
           # Not a valid token.
-          print $cgi->redirect('-location' => Bugzilla->localconfig->{urlbase} . $path);
-          exit;
+          $cgi->base_redirect($path);
         }
 
         # Change current user without creating cookies.
@@ -389,12 +388,10 @@ sub view {
     {do_redirect => \$do_redirect});
 
   if ($do_redirect) {
-    my $uri = URI->new(Bugzilla->localconfig->{urlbase} . 'attachment.cgi');
+    my $uri = URI->new('attachment.cgi');
     $uri->query_param(id => $attachment->id);
     $uri->query_param(content_type => $contenttype) if $contenttype_override;
-
-    print $cgi->redirect('-location' => $uri);
-    exit 0;
+    $cgi->base_redirect($uri->as_string);
   }
 
   # Don't send a charset header with attachments--they might not be UTF-8.

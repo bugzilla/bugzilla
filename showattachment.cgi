@@ -36,9 +36,4 @@ my $id = $cgi->param('attach_id');
 detaint_natural($id) if defined $id;
 $id ||= "";
 
-print $cgi->redirect(
-  -location => "attachment.cgi?id=$id",
-  -status   => '301 Permanent Redirect'
-);
-
-exit;
+$cgi->base_redirect("attachment.cgi?id=$id", 1);

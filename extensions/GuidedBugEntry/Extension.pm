@@ -42,12 +42,11 @@ sub enter_bug_start {
 
     # skip the first step if a product is provided
     if ($cgi->param('product')) {
-      print $cgi->redirect('enter_bug.cgi?format=guided'
+      $cgi->base_redirect('enter_bug.cgi?format=guided'
           . ($cgi->param('format_forced') ? '&format_forced=1' : '')
           . '#h=dupes' . '|'
           . url_quote($cgi->param('product')) . '|'
           . url_quote($cgi->param('component') || ''));
-      exit;
     }
 
     # Do not redirect to product forms if we came from there already

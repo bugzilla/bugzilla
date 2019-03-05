@@ -89,8 +89,7 @@ sub verify_token {
   my $event = get_token_extra_data($token);
   delete_token($token);
   if (!$event) {
-    print Bugzilla->cgi->redirect('index.cgi');
-    exit;
+    Bugzilla->cgi->base_redirect();
   }
   return $event;
 }

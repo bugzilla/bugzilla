@@ -304,11 +304,7 @@ sub report {
     my $bugs = $dbh->selectcol_arrayref($query, undef, @params);
     push @$bugs, 0 unless @$bugs;
 
-    my $urlbase = Bugzilla->localconfig->{urlbase};
-    my $cgi     = Bugzilla->cgi;
-    print $cgi->redirect(
-      -url => "${urlbase}buglist.cgi?bug_id=" . join(',', @$bugs));
-    exit;
+    Bugzilla->cgi->base_redirect('buglist.cgi?bug_id=' . join(',', @$bugs));
   }
 
   #

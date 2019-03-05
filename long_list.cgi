@@ -38,4 +38,4 @@ my @ids = split(/[\s,]+/, $buglist);
 
 my $ids = join('', map { $_ = "&id=" . $_ } @ids);
 
-print $cgi->redirect("show_bug.cgi?format=multiple$ids");
+$cgi->base_redirect("show_bug.cgi?format=multiple$ids");

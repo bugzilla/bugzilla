@@ -282,11 +282,8 @@ sub quicksearch {
   my $modified_query_string = $cgi->canonicalise_query(@params_to_strip);
 
   if ($cgi->param('load')) {
-    my $urlbase = Bugzilla->localconfig->{urlbase};
-
     # Param 'load' asks us to display the query in the advanced search form.
-    print $cgi->redirect(
-      -uri => "${urlbase}query.cgi?format=advanced&amp;" . $modified_query_string);
+    $cgi->base_redirect("query.cgi?format=advanced&$modified_query_string");
   }
 
   # Otherwise, pass the modified query string to the caller.
@@ -333,9 +330,7 @@ sub _bug_numbers_only {
   if ($searchstring !~ /,/ && !i_am_webservice()) {
 
     # Single bug number; shortcut to show_bug.cgi.
-    print $cgi->redirect(
-      -uri => Bugzilla->localconfig->{urlbase} . "show_bug.cgi?id=$searchstring");
-    exit;
+    $cgi->base_redirect("show_bug.cgi?id=$searchstring");
   }
   else {
     # List of bug numbers.

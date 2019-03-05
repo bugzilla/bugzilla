@@ -31,9 +31,8 @@ my $target;
 
 if (!$action) {
 
-  # redirect to index.cgi if no action is defined.
-  print $cgi->redirect(Bugzilla->localconfig->{urlbase} . 'index.cgi');
-  exit;
+  # redirect to the homepage if no action is defined.
+  $cgi->base_redirect();
 }
 
 # prepare-sudo: Display the sudo information & login page

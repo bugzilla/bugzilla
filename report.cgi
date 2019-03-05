@@ -30,13 +30,8 @@ $cgi->content_security_policy(report_only => 0);
 # Go straight back to query.cgi if we are adding a boolean chart.
 if (grep(/^cmd-/, $cgi->param())) {
   my $params = $cgi->canonicalise_query("format", "ctype");
-  my $location
-    = "query.cgi?format="
-    . $cgi->param('query_format')
-    . ($params ? "&$params" : "");
-
-  print $cgi->redirect($location);
-  exit;
+  $cgi->base_redirect('query.cgi?format='
+      . $cgi->param('query_format') . ($params ? "&$params" : ''));
 }
 
 Bugzilla->login();

@@ -62,10 +62,8 @@ if (!Bugzilla->feature('new_charts')) {
 # Go back to query.cgi if we are adding a boolean chart parameter.
 if (grep(/^cmd-/, $cgi->param())) {
   my $params = $cgi->canonicalise_query("format", "ctype", "action");
-  print $cgi->redirect("query.cgi?format="
-      . $cgi->param('query_format')
-      . ($params ? "&$params" : ""));
-  exit;
+  $cgi->base_redirect("query.cgi?format="
+      . $cgi->param('query_format') . ($params ? "&$params" : ''));
 }
 
 my $action    = $cgi->param('action');
@@ -87,8 +85,7 @@ $action ||= "assemble";
 # Go to buglist.cgi if we are doing a search.
 if ($action eq "search") {
   my $params = $cgi->canonicalise_query("format", "ctype", "action");
-  print $cgi->redirect("buglist.cgi" . ($params ? "?$params" : ""));
-  exit;
+  $cgi->base_redirect('buglist.cgi' . ($params ? "?$params" : ""));
 }
 
 $user->in_group(Bugzilla->params->{"chartgroup"}) || ThrowUserError(
@@ -224,11 +221,9 @@ elsif ($action eq "convert_search") {
     my $params = new Bugzilla::CGI($query->edit_link);
 
     # These two parameters conflict with the one below.
-    $url = $params->canonicalise_query('format', 'query_format');
-    $url = '&amp;' . html_quote($url);
+    $url = '&' . $params->canonicalise_query('format', 'query_format');
   }
-  print $cgi->redirect(-location => Bugzilla->localconfig->{urlbase}
-      . "query.cgi?format=create-series$url");
+  $cgi->base_redirect("query.cgi?format=create-series$url");
 }
 else {
   ThrowUserError('unknown_action', {action => $action});

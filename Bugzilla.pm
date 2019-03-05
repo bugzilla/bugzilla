@@ -303,11 +303,9 @@ sub login {
       my $self_url     = trim($cgi->self_url);
       my $sig_type     = 'prev_url:' . $authenticated_user->id;
       my $self_url_sig = issue_hash_sig($sig_type, $self_url);
-      my $redir_url
-        = URI->new(Bugzilla->localconfig->{urlbase} . "reset_password.cgi");
+      my $redir_url    = URI->new('reset_password.cgi');
       $redir_url->query_form(prev_url => $self_url, prev_url_sig => $self_url_sig);
-      print $cgi->redirect($redir_url);
-      exit;
+      $cgi->base_redirect($redir_url->as_string);
     }
   }
   elsif (!i_am_webservice()
@@ -329,8 +327,7 @@ sub login {
 
     if ($grace_period == 0 || $expired) {
       if (!($on_mfa_page || $on_token_page || $do_logout)) {
-        print Bugzilla->cgi->redirect("userprefs.cgi?tab=mfa");
-        exit;
+        $cgi->base_redirect('userprefs.cgi?tab=mfa');
       }
     }
     else {

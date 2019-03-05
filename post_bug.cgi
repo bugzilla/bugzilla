@@ -44,8 +44,7 @@ my $vars     = {};
 
 # redirect to enter_bug if no field is passed.
 unless ($cgi->param()) {
-  print $cgi->redirect(Bugzilla->localconfig->{urlbase} . 'enter_bug.cgi');
-  exit;
+  $cgi->base_redirect('enter_bug.cgi');
 }
 
 # BMO: Don't allow updating of bugs if disabled

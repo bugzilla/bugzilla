@@ -461,8 +461,13 @@ sub verify_mfa_login {
   my $token = shift;
   my ($user, $event) = mfa_event_from_token($token);
   $user->authorizer->mfa_verified($user, $event);
-  print Bugzilla->cgi->redirect($event->{url} // 'index.cgi');
-  exit;
+
+  if ($event->{url}) {
+    print Bugzilla->cgi->redirect($event->{url});
+    exit;
+  }
+
+  Bugzilla->cgi->base_redirect();
 }
 
 sub mfa_event_from_token {
@@ -475,8 +480,7 @@ sub mfa_event_from_token {
   # sanity check
   if (!$user->mfa) {
     delete_token($token);
-    print Bugzilla->cgi->redirect('index.cgi');
-    exit;
+    Bugzilla->cgi->base_redirect();
   }
 
   # verify

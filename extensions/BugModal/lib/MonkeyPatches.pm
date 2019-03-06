@@ -54,4 +54,14 @@ sub is_image {
   return substr($self->contenttype, 0, 6) eq 'image/';
 }
 
+sub is_audio {
+  my ($self) = @_;
+  return substr($self->contenttype, 0, 6) eq 'audio/';
+}
+
+sub is_video {
+  my ($self) = @_;
+  return substr($self->contenttype, 0, 6) eq 'video/';
+}
+
 1;

@@ -75,9 +75,7 @@ $(function() {
             $('#ct-' + id).hide();
             if (BUGZILLA.user.id !== 0)
                 $('#ctag-' + id).hide();
-            $('#c' + id).find('.activity').hide();
-            $('#c' + id).find('.comment-tags').hide();
-            $('#c' + id).find('.comment-tags').hide();
+            $('#c' + id).find('.activity, .attachment, .comment-tags').hide();
             $('#c' + id).find('.gravatar').css('width', '16px').css('height', '16px');
             $('#cr-' + id).hide();
             update_spinner(realSpinner, false);
@@ -90,9 +88,7 @@ $(function() {
             $('#ct-' + id).show();
             if (BUGZILLA.user.id !== 0)
                 $('#ctag-' + id).show();
-            $('#c' + id).find('.activity').show();
-            $('#c' + id).find('.comment-tags').show();
-            $('#c' + id).find('.comment-tags').show();
+            $('#c' + id).find('.activity, .attachment, .comment-tags').show();
             $('#c' + id).find('.gravatar').css('width', '32px').css('height', '32px');
             $('#cr-' + id).show();
             update_spinner(realSpinner, true);
@@ -100,6 +96,7 @@ $(function() {
         else {
             $('#ct-' + id).slideToggle('fast', function() {
                 $('#c' + id).find('.activity').toggle();
+                $('#c' + id).find('.attachment').slideToggle();
                 if ($('#ct-' + id + ':visible').length) {
                     $('#c' + id).find('.comment-tags').show();
                     update_spinner(realSpinner, true);
@@ -493,3 +490,125 @@ $(function() {
 
     updateTagsMenu();
 });
+
+/**
+ * Reference or define the Bugzilla app namespace.
+ * @namespace
+ */
+var Bugzilla = Bugzilla || {};
+
+/**
+ * Reference or define the Review namespace.
+ * @namespace
+ */
+Bugzilla.BugModal = Bugzilla.BugModal || {};
+
+/**
+ * Implement the modal bug view's comment-related functionality.
+ */
+Bugzilla.BugModal.Comments = class Comments {
+  /**
+   * Initiate a new Comments instance.
+   */
+  constructor() {
+    this.prepare_inline_attachments();
+  }
+
+  /**
+   * Prepare to show image and text attachments inline if possible. For a better performance, this functionality uses
+   * the Intersection Observer API to show attachments when the associated comment goes into the viewport, when the page
+   * is scrolled down or the collapsed comment is expanded. This also utilizes the Network Information API to save
+   * bandwidth over cellular networks.
+   * @see https://developer.mozilla.org/en-US/docs/Web/API/Intersection_Observer_API
+   * @see https://developer.mozilla.org/en-US/docs/Web/API/Network_Information_API
+   */
+  prepare_inline_attachments() {
+    // Check the user setting, API support and connectivity
+    if (!BUGZILLA.user.settings.inline_attachments || typeof IntersectionObserver !== 'function' ||
+        (navigator.connection && navigator.connection.type === 'cellular')) {
+      return;
+    }
+
+    const observer = new IntersectionObserver(entries => entries.forEach(entry => {
+      const $att = entry.target;
+
+      if (entry.intersectionRatio > 0) {
+        observer.unobserve($att);
+        this.show_attachment($att);
+      }
+    }), { root: document.querySelector('#bugzilla-body') });
+
+    // Show only non-obsolete attachments
+    document.querySelectorAll('.change-set .attachment:not(.obsolete)').forEach($att => observer.observe($att));
+  }
+
+  /**
+   * Load and show an image, audio, video or text attachment.
+   * @param {HTMLElement} $att An attachment wrapper element.
+   */
+  async show_attachment($att) {
+    const id = Number($att.dataset.id);
+    const link = $att.querySelector('.link').href;
+    const name = $att.querySelector('[itemprop="name"]').textContent;
+    const type = $att.querySelector('[itemprop="encodingFormat"]').content;
+    const size = Number($att.querySelector('[itemprop="contentSize"]').content);
+    const max_size = 2000000;
+
+    // Show image smaller than 2 MB
+    if (type.match(/^image\/(?!vnd).+$/) && size < max_size) {
+      $att.insertAdjacentHTML('beforeend', `
+        <a href="${link}" class="outer lightbox"><img src="${link}" alt="${name}" itemprop="image"></a>`);
+
+      // Add lightbox support
+      $att.querySelector('.outer.lightbox').addEventListener('click', event => {
+        if (event.metaKey || event.ctrlKey || event.altKey || event.shiftKey) {
+          return;
+        }
+
+        event.preventDefault();
+        lb_show(event.target);
+      });
+    }
+
+    // Show audio and video
+    if (type.match(/^(?:audio|video)\/(?!vnd).+$/)) {
+      const media = type.split('/')[0];
+
+      if (document.createElement(media).canPlayType(type)) {
+        $att.insertAdjacentHTML('beforeend', `
+          <span class="outer"><${media} src="${link}" controls itemprop="${media}"></span>`);
+      }
+    }
+
+    // Detect text (code from attachment.js)
+    const is_patch = !!name.match(/\.(?:diff|patch)$/) || !!type.match(/^text\/x-(?:diff|patch)$/);
+    const is_markdown = !!name.match(/\.(?:md|mkdn?|mdown|markdown)$/);
+    const is_source = !!name.match(/\.(?:cpp|es|h|js|json|rs|rst|sh|toml|ts|tsx|xml|yaml|yml)$/);
+    const is_text = type.startsWith('text/') || is_patch || is_markdown || is_source;
+
+    // Show text smaller than 2 MB
+    if (is_text && size < max_size) {
+      // Load text body
+      try {
+        const response = await fetch(`/attachment.cgi?id=${id}`, { credentials: 'same-origin' });
+
+        if (!response.ok) {
+          throw new Error();
+        }
+
+        const text = await response.text();
+        const lang = is_patch ? 'diff' : type.match(/\w+$/)[0];
+
+        $att.insertAdjacentHTML('beforeend', `
+          <a href="${link}" title="${name}" class="outer">
+          <pre class="language-${lang}" role="img" itemprop="text">${text}</pre></a>`);
+
+        if (Prism) {
+          Prism.highlightElement($att.querySelector('pre'));
+        }
+      } catch (ex) {}
+    }
+  }
+};
+
+document.addEventListener('DOMContentLoaded', () => new Bugzilla.BugModal.Comments(), { once: true });

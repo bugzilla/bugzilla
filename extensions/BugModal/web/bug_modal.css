@@ -745,6 +745,94 @@ h3.change-name {
     text-decoration: line-through;
 }
 
+/* inline attachments */
+
+.change-set .attachment {
+    border-top: 1px solid #ddd;
+    background-color: #FFF;
+}
+
+.change-set .attachment {
+    background-color: #FFF;
+    padding: 8px;
+}
+
+.change-set .attachment .label {
+    font-size: 14px;
+    font-style: italic;
+    color: grey;
+}
+
+.change-set .attachment .label [itemprop="name"] {
+    font-weight: 600;
+}
+
+.change-set .attachment .outer {
+    display: inline-block;
+    margin: 8px 0 0;
+    overflow: hidden;
+    border: 1px solid lightgrey;
+    border-radius: 4px;
+    vertical-align: top;
+    text-decoration: none;
+    color: #333;
+}
+
+.change-set .attachment .lightbox {
+    cursor: zoom-in;
+}
+
+.change-set .attachment .lightbox * {
+    pointer-events: none;
+}
+
+.change-set .attachment img,
+.change-set .attachment audio,
+.change-set .attachment video {
+    margin: 0;
+    vertical-align: top;
+    max-width: 426px;
+}
+
+.change-set .attachment [content="image/svg+xml"] ~ .outer img {
+    width: 426px;
+}
+
+.change-set .attachment pre {
+    position: relative;
+    overflow: hidden;
+    box-sizing: border-box;
+    margin: 0;
+    padding: 8px;
+    width: 426px;
+    height: 240px;
+    font-family: "Fira Mono","Droid Sans Mono",Menlo,Monaco,"Courier New",monospace;
+    font-size: 12px;
+    -moz-user-select: none;
+    -webkit-user-select: none;
+    user-select: none;
+    pointer-events: none;
+}
+
+.change-set .attachment pre::after {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-image: linear-gradient(to bottom, transparent 75%, #FFF);
+    content: '';
+}
+
+
+.change-set .attachment pre .token {
+    background-color: transparent !important; /* Override Prism.js */
+}
+
+.change-set .attachment ~ .comment-text {
+    padding-top: 0;
+}
+
 /* add comment */
 
 #add-comment {

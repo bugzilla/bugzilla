@@ -204,6 +204,12 @@ sub SETTINGS {
       default  => 'on',
       category => 'User Interface'
     },
+    {
+        name     => 'inline_attachments',
+        options  => ['on', 'off'],
+        default  => 'on',
+        category => 'User Interface'
+    },
   ];
 }
 

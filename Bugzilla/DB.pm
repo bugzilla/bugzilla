@@ -13,8 +13,6 @@ use Moo;
 use DBI;
 use DBIx::Connector;
 
-has 'connector' => (is => 'lazy', handles => [qw( dbh )],);
-
 use Bugzilla::Logging;
 use Bugzilla::Constants;
 use Bugzilla::Install::Requirements;
@@ -33,8 +31,26 @@ use Storable qw(dclone);
 use English qw(-no_match_vars);
 use Module::Runtime qw(require_module);
 
-has [qw(dsn user pass attrs)] => (is => 'ro', required => 1,);
+has 'connector' => (is => 'lazy', handles => [qw( dbh )]);
+has 'model'     => (is => 'lazy');
+has [qw(dsn user pass attrs)] => (is => 'ro', required => 1);
 
+around 'attrs' => sub {
+  my ($method, $self) = @_;
+  my $attrs = dclone($self->$method);
+  my $class = ref $self;
+
+  # This is only used by the DBIx::Class code DBIx::Connector does something
+  # different because the old bugzilla code has its own ideas about
+  # transactions.
+  $attrs->{Callbacks}{connected} = sub {
+    my ($dbh, $dsn) = @_;
+    $class->on_dbi_connected(@_) if $class->can('on_dbi_connected');
+    return;
+  };
+
+  return $attrs;
+};
 
 # Install proxy methods to the DBI object.
 # We can't use handles() as DBIx::Connector->dbh has to be called each
@@ -239,7 +255,7 @@ sub bz_check_server_version {
 
   my $sql_vers = $self->bz_server_version;
 
-  my $sql_want = $db->{db_version};
+  my $sql_want   = $db->{db_version};
   my $version_ok = vers_cmp($sql_vers, $sql_want) > -1 ? 1 : 0;
 
   my $sql_server = $db->{name};
@@ -275,7 +291,7 @@ sub bz_create_database {
 
   # See if we can connect to the actual Bugzilla database.
   my $conn_success = eval { $dbh = connect_main() };
-  my $db_name = Bugzilla->localconfig->{db_name};
+  my $db_name      = Bugzilla->localconfig->{db_name};
 
   if (!$conn_success) {
     $dbh = _get_no_db_connection();
@@ -1152,7 +1168,7 @@ sub _bz_schema {
   my ($self) = @_;
   return $self->{private_bz_schema} if exists $self->{private_bz_schema};
   my @module_parts = split('::', ref $self);
-  my $module_name = pop @module_parts;
+  my $module_name  = pop @module_parts;
   $self->{private_bz_schema} = Bugzilla::DB::Schema->new($module_name);
   return $self->{private_bz_schema};
 }
@@ -1316,6 +1332,12 @@ sub bz_rollback_transaction {
 # Subclass Helpers
 #####################################################################
 
+sub _build_model {
+  my ($self) = @_;
+  require Bugzilla::Model;
+  Bugzilla::Model->connect($self->dsn, $self->user, $self->pass, $self->attrs);
+}
+
 sub _build_connector {
   my ($self) = @_;
   my ($dsn, $user, $pass, $override_attrs)
@@ -1344,6 +1366,9 @@ sub _build_connector {
     }
   }
   my $class = ref $self;
+
+# This is different from the around 'attrs' above because we need a reference to $self.
+# If we ever kill $dbh->bz_start_transaction() this hack can go away.
   weaken($self);
   $attributes->{Callbacks} = {
     connected => sub {
@@ -1518,7 +1543,7 @@ sub _bz_populate_enum_table {
     my $insert
       = $self->prepare("INSERT INTO $sql_table (value,sortkey) VALUES (?,?)");
     my $sortorder = 0;
-    my $maxlen = max(map(length($_), @$valuelist)) + 2;
+    my $maxlen    = max(map(length($_), @$valuelist)) + 2;
     foreach my $value (@$valuelist) {
       $sortorder += 100;
       $insert->execute($value, $sortorder);

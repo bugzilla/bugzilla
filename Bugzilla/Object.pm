@@ -883,6 +883,22 @@ sub _insert_dep_field {
 # hooks to only run once per request instead of multiple times on each
 # page.
 
+sub DB_COLUMN_NAMES {
+  my ($class) = @_;
+  my $table = $class->DB_TABLE;
+  my $_error = sub { die "$class: cannot determine attribute name from $_[0]\n" };
+
+  my $column_re = qr{
+      ^(?:\Q$table.\E)?(?<name>\w+)$
+    | ^(?:\Q$table.\E)?(?<name>\w+)\s+AS\s+\w+$
+    | (?<name>\w+)\b.+AS\s+\g{name}$
+  }six;
+
+  return map { trim($_) =~ $column_re ? $+{name} : $_error->($_) }
+    $class->_get_db_columns;
+}
+
+
 sub _get_db_columns {
   my $invocant  = shift;
   my $class     = ref($invocant) || $invocant;

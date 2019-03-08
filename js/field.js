@@ -700,9 +700,6 @@ function browserCanHideOptions(aSelect) {
  */
 
 $(function() {
-
-    // single user
-
     function searchComplete() {
         var that = $(this);
         that.data('counter', that.data('counter') - 1);
@@ -726,22 +723,55 @@ $(function() {
         noCache: true,
         tabDisabled: true,
         autoSelectFirst: true,
+        preserveInput: true,
         triggerSelectOnValidInput: false,
         transformResult: function(response) {
             response = $.parseJSON(response);
             return {
-                suggestions: $.map(response.users, function(dataItem) {
+                suggestions: $.map(response.users, function({ name, real_name, requests, gravatar } = {}) {
                     return {
-                        value: dataItem.name,
-                        data : { login: dataItem.name, name: dataItem.real_name }
+                        value: name,
+                        data : { email: name, real_name, requests, gravatar }
                     };
                 })
             };
         },
-        formatResult: function(suggestion, currentValue) {
-            return (suggestion.data.name === '' ?
-                suggestion.data.login : suggestion.data.name + ' (' + suggestion.data.login + ')')
-                .htmlEncode();
+        formatResult: function(suggestion) {
+            const $input = this;
+            const user = suggestion.data;
+            const request_type = $input.getAttribute('data-request-type');
+            const blocked = user.requests && request_type ? user.requests[request_type].blocked : false;
+            const pending = user.requests && request_type ? user.requests[request_type].pending : 0;
+            const image = user.gravatar ? `<img itemprop="image" alt="" src="${user.gravatar}">` : '';
+            const description = blocked ? '<span class="icon" aria-hidden="true"></span> Requests blocked' :
+                pending ? `${pending} pending ${request_type}${pending === 1 ? '' : 's'}` : '';
+
+            return `<div itemscope itemtype="http://schema.org/Person">${image} ` +
+                `<span itemprop="name">${user.real_name.htmlEncode()}</span> ` +
+                `<span class="minor" itemprop="email">${user.email.htmlEncode()}</span> ` +
+                `<span class="minor${blocked ? ' blocked' : ''}" itemprop="description">${description}</span></div>`;
+        },
+        onSelect: function (suggestion) {
+            const $input = this;
+            const user = suggestion.data;
+            const is_multiple = !!$input.getAttribute('data-multiple');
+            const request_type = $input.getAttribute('data-request-type');
+            const blocked = user.requests && request_type ? user.requests[request_type].blocked : false;
+
+            if (blocked) {
+                window.alert(`${user.real_name} is not accepting ${request_type} requests at this time. ` +
+                    'If you’re in a hurry, ask someone else for help.');
+            } else if (is_multiple) {
+                const _values = $input.value.split(',').map(value => value.trim());
+
+                _values.pop();
+                _values.push(suggestion.value);
+                $input.value = _values.join(', ') + ', ';
+            } else {
+                $input.value = suggestion.value;
+            }
+
+            $input.focus();
         },
         onSearchStart: function(params) {
             var that = $(this);
@@ -766,28 +796,21 @@ $(function() {
         onSearchError: searchComplete
     };
 
-    // multiple users (based on single user)
-    var options_users = {
-        delimiter: /,\s*/,
-        onSelect: function() {
-            this.value = this.value + ', ';
-            this.focus();
-        },
-    };
-    $.extend(options_users, options_user);
-
     // init user autocomplete fields
     $('.bz_autocomplete_user')
         .each(function() {
-            var that = $(this);
-            that.data('counter', 0);
-            if (that.data('multiple')) {
-                that.devbridgeAutocomplete(options_users);
-            }
-            else {
-                that.devbridgeAutocomplete(options_user);
-            }
-            that.addClass('bz_autocomplete');
+            const $input = this;
+            const is_multiple = !!$input.getAttribute('data-multiple');
+            const options = Object.assign({}, options_user);
+
+            options.delimiter = is_multiple ? /,\s*/ : undefined;
+            // Override `this` in the relevant functions
+            options.formatResult = options.formatResult.bind($input);
+            options.onSelect = options.onSelect.bind($input);
+
+            $input.dataset.counter = 0;
+            $input.classList.add('bz_autocomplete');
+            $(this).devbridgeAutocomplete(options);
         });
 
     // init autocomplete fields with array of values

@@ -186,6 +186,7 @@
                          classes  => ["requestee"]
                          custom_userlist => grant_list
                          disabled => !can_edit_flag
+                         request_type => type.name
               %]
               [% Hook.process("requestee", "flag/list.html.tmpl") %]
             </span>

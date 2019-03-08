@@ -488,11 +488,13 @@ creator           string    The login name of the user who created the bug. You
 id                int       The numeric ID of the bug.
 last_change_time  datetime  Searches for bugs that were modified at this time
                             or later. May not be an array.
-limit             int       Limit the number of results returned. If the limit
-                            is more than zero and higher than the maximum limit
-                            set by the administrator, then the maximum limit will
-                            be used instead. If you set the limit equal to zero,
-                            then all matching results will be returned instead.
+limit             int       Limit the number of results returned. If the value is
+                            unset, zero or greater than the maximum value set by
+                            the administrator, which is 10,000 by default, then
+                            the maximum value will be used instead. This is a
+                            preventive measure against DoS-like attacks on
+                            Bugzilla. Use the ``offset`` argument described below
+                            to retrieve more results.
 longdescs.count   int       The number of comments a bug has. The bug's description
                             is the first comment. For example, to find bugs which someone
                             has commented on after they have been filed, search on
@@ -1132,11 +1134,11 @@ id       int     The id of a bug to find duplicates of.
 summary  string  A summary to search for duplicates of, only used if no bug id is
                  given.
 product  string  A product group to limit the search in.
-limit    int     Limit the number of results returned. If the limit
-                 is more than zero and higher than the maximum limit
-                 set by the administrator, then the maximum limit will
-                 be used instead. If you set the limit equal to zero,
-                 then all matching results will be returned instead.
+limit    int     Limit the number of results returned. If the value is unset,
+                 zero or greater than the maximum value set by the administrator,
+                 which is 10,000 by default, then the maximum value will be used
+                 instead. This is a preventive measure against DoS-like attacks
+                 on Bugzilla.
 =======  ======  ================================================================
 
 **Response**

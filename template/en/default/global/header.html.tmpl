@@ -102,6 +102,10 @@
     [% IF Param('utf8') %]
       <meta charset="UTF-8">
     [% END %]
+    [% IF meta_refresh %]
+      <meta http-equiv="refresh"
+        content="[% meta_refresh FILTER html %]">
+    [% END %]
     [% USE Bugzilla %]
 
     [% IF Bugzilla.cgi.should_block_referrer %]
@@ -291,7 +295,7 @@
 
 <header id="header" role="banner">
   <div class="inner">
-    <h1 id="header-title" class="title"><a href="[% basepath FILTER none %]" title="Go to home page">[% terms.Bugzilla %]</a></h1>
+    <h1 id="header-title" class="title"><a href="[% c.url_for('/home').to_abs FILTER html %]" title="Go to home page">[% terms.Bugzilla %]</a></h1>
     <form role="search" id="header-search" class="quicksearch" action="[% basepath FILTER none %]buglist.cgi" data-no-csrf>
       <section class="searchbox-outer dropdown" role="combobox" aria-expanded="false" aria-haspopup="listbox"
                aria-owns="header-search-dropdown">

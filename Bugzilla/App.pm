@@ -24,7 +24,7 @@ use Bugzilla::Logging;
 use Bugzilla::App::CGI;
 use Bugzilla::App::OAuth2::Clients;
 use Bugzilla::App::SES;
-use Bugzilla::App::Home;
+use Bugzilla::App::Main;
 use Bugzilla::App::API;
 use Bugzilla::App::Static;
 use Mojo::Loader qw( find_modules );
@@ -152,22 +152,10 @@ sub setup_routes {
 
   my $r = $self->routes;
   Bugzilla::App::CGI->setup_routes($r);
-  Bugzilla::App::CGI->load_one('bzapi_cgi', 'extensions/BzAPI/bin/rest.cgi');
-
-  $r->get('/home')->to('Home#index');
-  $r->any('/')->to('CGI#index_cgi');
-  $r->any('/bug/<id:num>')->to('CGI#show_bug_cgi');
-  $r->any('/<id:num>')->to('CGI#show_bug_cgi');
-  $r->get('/testagent.cgi')->to('CGI#testagent');
-  $r->add_type('hex32' => qr/[[:xdigit:]]{32}/);
-  $r->post('/announcement/hide/<checksum:hex32>')->to('CGI#announcement_hide');
-
-  $r->any('/rest')->to('CGI#rest_cgi');
-  $r->any('/rest.cgi/*PATH_INFO')->to('CGI#rest_cgi' => {PATH_INFO => ''});
-  $r->any('/rest/*PATH_INFO')->to('CGI#rest_cgi' => {PATH_INFO => ''});
-  $r->any('/extensions/BzAPI/bin/rest.cgi/*PATH_INFO')->to('CGI#bzapi_cgi');
-  $r->any('/latest/*PATH_INFO')->to('CGI#bzapi_cgi');
-  $r->any('/bzapi/*PATH_INFO')->to('CGI#bzapi_cgi');
+  Bugzilla::App::Main->setup_routes($r);
+  Bugzilla::App::API->setup_routes($r);
+  Bugzilla::App::SES->setup_routes($r);
+  Bugzilla::App::OAuth2::Clients->setup_routes($r);
 
   $r->static_file('/__lbheartbeat__');
   $r->static_file(
@@ -178,15 +166,6 @@ sub setup_routes {
   $r->page('/user_profile',  'user_profile.html');
   $r->page('/userprofile',   'user_profile.html');
   $r->page('/request_defer', 'request_defer.html');
-
-  $r->get('/__heartbeat__')->to('CGI#heartbeat_cgi');
-  $r->get('/robots.txt')->to('CGI#robots_cgi');
-  $r->any('/login')->to('CGI#index_cgi' => {'GoAheadAndLogIn' => '1'});
-  $r->any('/:new_bug' => [new_bug => qr{new[-_]bug}])->to('CGI#new_bug_cgi');
-
-  Bugzilla::App::API->setup_routes($r);
-  Bugzilla::App::SES->setup_routes($r);
-  Bugzilla::App::OAuth2::Clients->setup_routes($r);
 }
 
 1;

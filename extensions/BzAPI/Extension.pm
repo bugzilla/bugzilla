@@ -278,7 +278,21 @@ sub _preload_handlers {
     $cache->{rest_handlers} = $all_handlers;
   }
 
+
+
+
   return $cache->{rest_handlers};
+}
+
+sub app_startup {
+  my ($self, $args) = @_;
+  my $app = $args->{app};
+  my $r   = $app->routes;
+
+  Bugzilla::App::CGI->load_one('bzapi_cgi', 'extensions/BzAPI/bin/rest.cgi');
+  $r->any('/extensions/BzAPI/bin/rest.cgi/*PATH_INFO')->to('CGI#bzapi_cgi');
+  $r->any('/latest/*PATH_INFO')->to('CGI#bzapi_cgi');
+  $r->any('/bzapi/*PATH_INFO')->to('CGI#bzapi_cgi');
 }
 
 __PACKAGE__->NAME;

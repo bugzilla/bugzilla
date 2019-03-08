@@ -22,20 +22,6 @@ use Bugzilla::Constants qw(bz_locations USAGE_MODE_BROWSER);
 our $C;
 my %SEEN;
 
-sub testagent {
-  my ($self) = @_;
-  $self->render(text => "OK Mojolicious");
-}
-
-sub announcement_hide {
-  my ($self) = @_;
-  my $checksum = $self->param('checksum');
-  if ($checksum && $checksum =~ /^[[:xdigit:]]{32}$/) {
-    $self->session->{announcement_checksum} = $checksum;
-  }
-  $self->render(json => {});
-}
-
 sub setup_routes {
   my ($class, $r) = @_;
 
@@ -44,6 +30,19 @@ sub setup_routes {
     $class->load_one($name, $file);
     $r->any("/$file")->to("CGI#$name");
   }
+  $r->get('/home')->to('CGI#index_cgi');
+
+  $r->any('/bug/<id:num>')->to('CGI#show_bug_cgi');
+  $r->any('/<id:num>')->to('CGI#show_bug_cgi');
+
+  $r->any('/rest')->to('CGI#rest_cgi');
+  $r->any('/rest.cgi/*PATH_INFO')->to('CGI#rest_cgi' => {PATH_INFO => ''});
+  $r->any('/rest/*PATH_INFO')->to('CGI#rest_cgi' => {PATH_INFO => ''});
+
+  $r->get('/__heartbeat__')->to('CGI#heartbeat_cgi');
+  $r->get('/robots.txt')->to('CGI#robots_cgi');
+  $r->any('/login')->to('CGI#index_cgi' => {'GoAheadAndLogIn' => '1'});
+  $r->any('/:new_bug' => [new_bug => qr{new[-_]bug}])->to('CGI#new_bug_cgi');
 }
 
 sub load_one {

@@ -301,6 +301,7 @@ Bugzilla.AttachmentForm = class AttachmentForm {
     this.$filename = document.querySelector('#att-filename');
     this.$dropbox = document.querySelector('#att-dropbox');
     this.$browse_label = document.querySelector('#att-browse-label');
+    this.$capture_label = document.querySelector('#att-capture-label');
     this.$textarea = document.querySelector('#att-textarea');
     this.$preview = document.querySelector('#att-preview');
     this.$preview_name = this.$preview.querySelector('[itemprop="name"]');
@@ -326,6 +327,7 @@ Bugzilla.AttachmentForm = class AttachmentForm {
     this.$dropbox.addEventListener('dragend', () => this.dropbox_ondragend());
     this.$dropbox.addEventListener('drop', event => this.dropbox_ondrop(event));
     this.$browse_label.addEventListener('click', () => this.$file.click());
+    this.$capture_label.addEventListener('click', () => this.capture_onclick());
     this.$textarea.addEventListener('input', () => this.textarea_oninput());
     this.$textarea.addEventListener('paste', event => this.textarea_onpaste(event));
     this.$remove_button.addEventListener('click', () => this.remove_button_onclick());
@@ -559,6 +561,50 @@ Bugzilla.AttachmentForm = class AttachmentForm {
     if (text) {
       this.$textarea.hidden = false;
     }
+  }
+
+  /**
+   * Called whenever the Take a Screenshot button is clicked. Capture a screen, window or browser tab if the Screen
+   * Capture API is supported, then attach it as a PNG image.
+   * @see https://developer.mozilla.org/en-US/docs/Web/API/Screen_Capture_API
+   */
+  capture_onclick() {
+    if (typeof navigator.mediaDevices.getDisplayMedia !== 'function') {
+      alert('This function requires the most recent browser version such as Firefox 66 or Chrome 72.');
+      return;
+    }
+
+    const $video = document.createElement('video');
+    const $canvas = document.createElement('canvas');
+
+    navigator.mediaDevices.getDisplayMedia({ video: { displaySurface: 'window' } }).then(stream => {
+      // Render a captured screenshot on `<video>`
+      $video.srcObject = stream;
+
+      return $video.play();
+    }).then(() => {
+      const width = $canvas.width = $video.videoWidth;
+      const height = $canvas.height = $video.videoHeight;
+
+      // Draw a video frame on `<canvas>`
+      $canvas.getContext('2d').drawImage($video, 0, 0, width, height);
+
+      // Clean up `<video>`
+      $video.pause();
+      $video.srcObject.getTracks().forEach(track => track.stop());
+      $video.srcObject = null;
+
+      // Convert to PNG
+      return new Promise(resolve => $canvas.toBlob(blob => resolve(blob)));
+    }).then(blob => {
+      const [date, time] = (new Date()).toISOString().match(/^(.+)T(.+)\./).splice(1);
+      const file = new File([blob], `Screenshot on ${date} at ${time}.png`, { type: 'image/png' });
+
+      this.process_file(file);
+      this.update_ispatch(false, true);
+    }).catch(() => {
+      alert('Unable to capture a screenshot.');
+    });
   }
 
   /**

@@ -38,7 +38,7 @@ sub _user_gravatar {
       = 'https://secure.gravatar.com/avatar/' . md5_hex(lc($email)) . '?d=mm';
   }
   $size ||= 64;
-  return $self->{gravatar} . '&amp;size=' . $size;
+  return $self->{gravatar} . '&size=' . $size;
 }
 
 sub install_before_final_checks {

@@ -39,4 +39,14 @@
   [% title = "Unauthorized User" %]
   You do not have permission to use this endpoint.
 
+[% ELSIF error == "phabricator_merge_user_abort" %]
+  [% title = "Cannot Merge User" %]
+  ERROR: Cannot merge old user [% user.login FILTER html %] since old user
+  has a linked account in Phabricator and the user will no longer match the
+  account in [% terms.Bugzilla %]. User needs to create new user in Phabricator
+  and link it to the newer account in [% terms.Bugzilla %]. Then file a [% terms.bug %]
+  for a phabricator admin to fix the accounts in phabricator.
+  Instructions: https://mana.mozilla.org/wiki/display/EW/Phabricator+-+Renaming+a+user+account.
+  Once this is complete, re-run merge-users.pl using --force switch.
+
 [% END %]

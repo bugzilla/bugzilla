@@ -80,6 +80,8 @@ sub startup {
     }
   );
 
+  $ENV{MOJO_MAX_LINE_SIZE} ||= 1024 * 10; # Mojo default is 8kb
+
   # hypnotoad is weird and doesn't look for MOJO_LISTEN itself.
   $self->config(
     hypnotoad => {

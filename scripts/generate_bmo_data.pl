@@ -78,20 +78,21 @@ foreach my $pref (keys %user_prefs) {
 ############################################################
 
 my @priorities = qw(
-  --
   P1
   P2
   P3
   P4
   P5
+  --
 );
 
 if (!$dbh->selectrow_array("SELECT 1 FROM priority WHERE value = 'P1'")) {
   $dbh->do("DELETE FROM priority");
-  my $count = 100;
+  my $count = 1;
   foreach my $priority (@priorities) {
     $dbh->do("INSERT INTO priority (value, sortkey) VALUES (?, ?)",
-      undef, ($priority, $count + 100));
+      undef, ($priority, $count));
+    $count++;
   }
 }
 

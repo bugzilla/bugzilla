@@ -86,7 +86,10 @@ attachment_id  int       If the comment was made on an attachment, this will be
                          the ID of that attachment. Otherwise it will be null.
 count          int       The number of the comment local to the bug. The
                          Description is 0, comments start with 1.
-text           string    The actual text of the comment.
+text           string    The body of the comment, including any special text
+                         (such as "this bug was marked as a duplicate of...").
+raw_text       string    The body of the comment without any special additional
+                         text.
 creator        string    The login name of the comment's author.
 time           datetime  The time (in Bugzilla's timezone) that the comment was
                          added.

@@ -110,6 +110,16 @@ use constant ATTACHMENT_MAPPED_RETURNS => {
   mimetype    => 'content_type',
 };
 
+our %api_field_types = (
+  %{{map { $_ => 'double' } Bugzilla::Bug::NUMERIC_COLUMNS()}},
+  %{{map { $_ => 'dateTime' } Bugzilla::Bug::DATE_COLUMNS()}},
+);
+
+our %api_field_names = reverse %{Bugzilla::Bug::FIELD_MAP()};
+# This doesn't normally belong in FIELD_MAP, but we do want to translate
+# "bug_group" back into "groups".
+$api_field_names{'bug_group'} = 'groups';
+
 ######################################################
 # Add aliases here for old method name compatibility #
 ######################################################
@@ -396,6 +406,7 @@ sub _translate_comment {
     creation_time => $self->type('dateTime', $comment->creation_ts),
     is_private    => $self->type('boolean',  $comment->is_private),
     text          => $self->type('string',   $comment->body_full),
+    raw_text      => $self->type('string',   $comment->body),
     attachment_id => $self->type('int',      $attach_id),
     count         => $self->type('int',      $comment->count),
   };
@@ -471,13 +482,6 @@ sub history {
   my $ids = $params->{ids};
   defined $ids || ThrowCodeError('param_required', {param => 'ids'});
 
-  my %api_type = (
-    %{{map { $_ => 'double' } Bugzilla::Bug::NUMERIC_COLUMNS()}},
-    %{{map { $_ => 'dateTime' } Bugzilla::Bug::DATE_COLUMNS()}},
-  );
-  my %api_name = reverse %{Bugzilla::Bug::FIELD_MAP()};
-  $api_name{'bug_group'} = 'groups';
-
   my @return;
   foreach my $bug_id (@$ids) {
     my %item;
@@ -490,25 +494,7 @@ sub history {
 
     my @history;
     foreach my $changeset (@$activity) {
-      my %bug_history;
-      $bug_history{when} = $self->type('dateTime', $changeset->{when});
-      $bug_history{who}  = $self->type('email',    $changeset->{who});
-      $bug_history{changes} = [];
-      foreach my $change (@{$changeset->{changes}}) {
-        my $field_name     = delete $change->{fieldname};
-        my $api_field_type = $api_type{$field_name} || 'string';
-        my $api_field_name = $api_name{$field_name} || $field_name;
-        my $attach_id      = delete $change->{attachid};
-        if ($attach_id) {
-          $change->{attachment_id} = $self->type('int', $attach_id);
-        }
-        $change->{removed}    = $self->type($api_field_type, $change->{removed});
-        $change->{added}      = $self->type($api_field_type, $change->{added});
-        $change->{field_name} = $self->type('string',        $api_field_name);
-        push(@{$bug_history{changes}}, $change);
-      }
-
-      push(@history, \%bug_history);
+      push(@history, $self->_changeset_to_hash($changeset, $params));
     }
 
     $item{history} = \@history;
@@ -791,12 +777,6 @@ sub update {
     $bug->send_changes($all_changes{$bug->id});
   }
 
-  my %api_name = reverse %{Bugzilla::Bug::FIELD_MAP()};
-
-  # This doesn't normally belong in FIELD_MAP, but we do want to translate
-  # "bug_group" back into "groups".
-  $api_name{'bug_group'} = 'groups';
-
   my @result;
   foreach my $bug (@bugs) {
     my %hash = (
@@ -820,7 +800,7 @@ sub update {
     my %changes = %{$all_changes{$bug->id}};
     foreach my $field (keys %changes) {
       my $change = $changes{$field};
-      my $api_field = $api_name{$field} || $field;
+      my $api_field = $api_field_names{$field} || $field;
 
       # We normalize undef to an empty string, so that the API
       # stays consistent for things like Deadline that can become
@@ -1411,6 +1391,7 @@ sub search_comment_tags {
 
 sub _bug_to_hash {
   my ($self, $bug, $params) = @_;
+  my $user = Bugzilla->user;
 
   # All the basic bug attributes are here, in alphabetical order.
   # A bug attribute is "basic" if it doesn't require an additional
@@ -1446,12 +1427,32 @@ sub _bug_to_hash {
     $item{'assigned_to_detail'}
       = $self->_user_to_hash($bug->assigned_to, $params, undef, 'assigned_to');
   }
+  if (filter_wants $params, 'attachments', ['extra']) {
+    my @result;
+    foreach my $attachment (@{$bug->attachments}) {
+      next if $attachment->isprivate && !$user->is_insider;
+      push(@result,
+           $self->_attachment_to_hash($attachment, $params, ['extra'], 'attachments'));
+    }
+    $item{'attachments'} = \@result;
+  }
   if (filter_wants $params, 'blocks') {
     my @blocks = map { $self->type('int', $_) } @{$bug->blocked};
     $item{'blocks'} = \@blocks;
   }
   if (filter_wants $params, 'classification') {
     $item{classification} = $self->type('string', $bug->classification);
+  }
+  if (filter_wants $params, 'comments', ['extra']) {
+    my @result;
+    my $comments
+      = $bug->comments({order => 'oldest_to_newest', after => $params->{new_since}});
+    foreach my $comment (@$comments) {
+      next if $comment->is_private && !$user->is_insider;
+      push(@result,
+           $self->_translate_comment($comment, $params, ['extra'], 'comments'));
+    }
+    $item{'comments'} = \@result;
   }
   if (filter_wants $params, 'component') {
     $item{component} = $self->type('string', $bug->component);
@@ -1483,6 +1484,16 @@ sub _bug_to_hash {
   if (filter_wants $params, 'groups') {
     my @groups = map { $self->type('string', $_->name) } @{$bug->groups_in};
     $item{'groups'} = \@groups;
+  }
+  if (filter_wants $params, 'history', ['extra']) {
+    my @result;
+    my ($activity)
+      = Bugzilla::Bug::GetBugActivity($bug->id, undef, $params->{new_since});
+    foreach my $changeset (@$activity) {
+      push(@result,
+           $self->_changeset_to_hash($changeset, $params, ['extra'], 'history'));
+    }
+    $item{'history'} = \@result;
   }
   if (filter_wants $params, 'is_open') {
     $item{'is_open'} = $self->type('boolean', $bug->status->is_open);
@@ -1550,7 +1561,7 @@ sub _bug_to_hash {
   }
 
   # Timetracking fields are only sent if the user can see them.
-  if (Bugzilla->user->is_timetracker) {
+  if ($user->is_timetracker) {
     if (filter_wants $params, 'estimated_time') {
       $item{'estimated_time'} = $self->type('double', $bug->estimated_time);
     }
@@ -1648,6 +1659,32 @@ sub _attachment_to_hash {
   }
 
   return $item;
+}
+
+sub _changeset_to_hash {
+  my ($self, $changeset, $filters, $types, $prefix) = @_;
+
+  my $item = {
+    when    => $self->type('dateTime', $changeset->{when}),
+    who     => $self->type('email',    $changeset->{who}),
+    changes => []
+  };
+
+  foreach my $change (@{$changeset->{changes}}) {
+    my $field_name     = delete $change->{fieldname};
+    my $api_field_type = $api_field_types{$field_name} || 'string';
+    my $api_field_name = $api_field_names{$field_name} || $field_name;
+    my $attach_id      = delete $change->{attachid};
+
+    $change->{field_name}    = $self->type('string',        $api_field_name);
+    $change->{removed}       = $self->type($api_field_type, $change->{removed});
+    $change->{added}         = $self->type($api_field_type, $change->{added});
+    $change->{attachment_id} = $self->type('int', $attach_id) if $attach_id;
+
+    push (@{$item->{changes}}, $change);
+  }
+
+  return filter($filters, $item, $types, $prefix);
 }
 
 sub _flag_to_hash {
@@ -2478,7 +2515,12 @@ ID of that attachment. Otherwise it will be null.
 
 =item text
 
-C<string> The actual text of the comment.
+C<string> The body of the comment, including any special text (such as
+"this bug was marked as a duplicate of...").
+
+=item raw_text
+
+C<string> The body of the comment without any special additional text.
 
 =item creator
 
@@ -2543,6 +2585,8 @@ C<creator>.
 =item C<creation_time> was added in Bugzilla B<4.4>.
 
 =item REST API call added in Bugzilla B<5.0>.
+
+=item C<raw_text> was added in Bugzilla B<6.0>.
 
 =back
 
@@ -2634,6 +2678,14 @@ C<string> The login name of the user to whom the bug is assigned.
 C<hash> A hash containing detailed user information for the assigned_to. To see the
 keys included in the user detail hash, see below.
 
+=item C<attachments>
+
+C<array> of hashes containing attachment details of the bug. See the attachments
+section above for the object format.
+
+This is an B<extra> field returned only by specifying C<attachments> or
+C<_extra> in C<include_fields>.
+
 =item C<blocks>
 
 C<array> of C<int>s. The ids of bugs that are "blocked" by this bug.
@@ -2651,6 +2703,14 @@ members. To see the keys included in the user detail hash, see below.
 =item C<classification>
 
 C<string> The name of the current classification the bug is in.
+
+=item C<comments>
+
+C<array> of hashes containing comment details of the bug. See the comments
+section above for the object format.
+
+This is an B<extra> field returned only by specifying C<comments> or C<_extra>
+in C<include_fields>.
 
 =item C<component>
 
@@ -2743,6 +2803,14 @@ Note, this field is only returned if a requestee is set.
 =item C<groups>
 
 C<array> of C<string>s. The names of all the groups that this bug is in.
+
+=item C<history>
+
+C<array> of hashes containing change details of the bug. See the history section
+below for the object format.
+
+This is an B<extra> field returned only by specifying C<history> or C<_extra>
+in C<include_fields>.
 
 =item C<id>
 
@@ -3027,7 +3095,8 @@ and all custom fields.
 =item The C<actual_time> item was added to the C<bugs> return value
 in Bugzilla B<4.4>.
 
-=item The C<duplicates> and C<triage_owner> items were added in Bugzilla B<6.0>.
+=item The C<attachments>, C<comments>, C<duplicates>, C<history> and
+C<triage_owner> fields were added in Bugzilla B<6.0>.
 
 =back
 

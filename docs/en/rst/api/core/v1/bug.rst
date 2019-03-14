@@ -246,6 +246,12 @@ These fields are returned only by specifying ``_extra`` or the field name in
 ===================  ======  ====================================================
 name                 type    description
 ===================  ======  ====================================================
+attachments          array   Each array item is an Attachment object. See
+                             :ref:`rest_attachments` for details of the object.
+comments             array   Each array item is a Comment object. See
+                             :ref:`rest_comments` for details of the object.
+history              array   Each array item is a History object. See
+                             :ref:`rest_history` for details of the object.
 tags                 array   Each array item is a tag name. Note that tags are
                              personal to the currently logged in user and are not
                              the same as comment tags.

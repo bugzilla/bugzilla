@@ -18,8 +18,6 @@ use Bugzilla::Util;
 use Bugzilla::Error;
 use Bugzilla::Config::Common;
 use Bugzilla::Config::GroupSecurity;
-use Bugzilla::WebService::Bug;
-use Bugzilla::WebService::Util qw(filter_wants);
 
 our $VERSION = '1.0';
 
@@ -102,21 +100,6 @@ BEGIN {
   no warnings 'redefine';
   *Bugzilla::Comment::activity   = \&_get_activity;
   *Bugzilla::Comment::edit_count = \&_edit_count;
-  *Bugzilla::WebService::Bug::_super_translate_comment
-    = \&Bugzilla::WebService::Bug::_translate_comment;
-  *Bugzilla::WebService::Bug::_translate_comment = \&_new_translate_comment;
-}
-
-sub _new_translate_comment {
-  my ($self, $comment, $filters) = @_;
-
-  my $comment_hash = $self->_super_translate_comment($comment, $filters);
-
-  if (filter_wants $filters, 'raw_text') {
-    $comment_hash->{raw_text} = $self->type('string', $comment->body);
-  }
-
-  return $comment_hash;
 }
 
 sub _edit_count { return $_[0]->{'edit_count'}; }

@@ -70,6 +70,7 @@ use constant SUB_CLASSES => qw(
   Bugzilla::BugUrl::WebCompat
   Bugzilla::BugUrl::ServiceNow
   Bugzilla::BugUrl::Splat
+  Bugzilla::BugUrl::Phabricator
 );
 
 ###############################

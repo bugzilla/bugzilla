@@ -46,6 +46,18 @@
 #blocklist_form.noscript {
   display: none;
 }
+
+#standard_link {
+  margin-top: 2em;
+}
+
+#standard_link img {
+  vertical-align: middle;
+}
+
+#standard_link a {
+  cursor: pointer;
+}
 [% END %]
 
 [% inline_javascript = BLOCK %]
@@ -101,6 +113,12 @@ function validateAndSubmit() {
 
 window.addEventListener("DOMContentLoaded", function() {
   document.getElementById("blocklist_form").classList.remove("noscript");
+
+  const canonical_path = `${BUGZILLA.config.basepath}form.blocklist`;
+
+  if (location.pathname !== canonical_path) {
+    history.replaceState(null, document.title, canonical_path);
+  }
 });
 
 [% END %]
@@ -227,5 +245,12 @@ window.addEventListener("DOMContentLoaded", function() {
 <noscript>
   This form requires JavaScript to be enabled.
 </noscript>
+
+<div id="standard_link">
+  <a href="[% basepath FILTER none %]enter_bug.cgi?product=Toolkit&amp;component=Blocklist%20Policy%20Requests&amp;format=__standard__">
+    <img src="[% basepath FILTER none %]extensions/BMO/web/images/advanced.png" width="16" height="16" border="0">
+    Switch to the standard [% terms.bug %] entry form</a>
+  </a>
+</div>
 
 [% PROCESS global/footer.html.tmpl %]

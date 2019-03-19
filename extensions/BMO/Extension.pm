@@ -2344,7 +2344,7 @@ sub enter_bug_start {
       $cgi->param('format_forced', 1);
     }
   }
-  elsif (my $format = forced_format($cgi->param('product'))) {
+  elsif (my $format = forced_format($cgi->param('product'), $cgi->param('component'))) {
     $cgi->param('format', $format);
   }
 
@@ -2389,7 +2389,7 @@ sub _map_groups {
 sub forced_format {
 
   # note: this is also called from the guided bug entry extension
-  my ($product) = @_;
+  my ($product, $component) = @_;
   return undef unless defined $product;
 
   # always work on the correct product name
@@ -2399,6 +2399,9 @@ sub forced_format {
 
   # check for a forced-format entry
   my $forced = $create_bug_formats{$product->name} || return;
+
+  # check if the form is component-specific
+  return if $forced->{component} && $forced->{component} ne $component;
 
   # should this user be included?
   my $user = Bugzilla->user;

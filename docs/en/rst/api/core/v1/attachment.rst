@@ -92,6 +92,9 @@ is_patch          boolean   ``true`` if the attachment is a patch, ``false``
                             otherwise.
 creator           string    The login name of the user that created the
                             attachment.
+creator_detail    object    An object containing detailed user information for
+                            the creator. To see the keys included in the user
+                            detail object, see :ref:`rest_single_bug`.
 flags             array     Array of objects, each containing the information
                             about the flag currently set for each attachment.
                             Each flag object contains items descibed in the

@@ -1646,6 +1646,11 @@ sub _attachment_to_hash {
     }
   }
 
+  if (filter_wants $filters, 'creator', $types, $prefix) {
+    $item->{'creator_detail'}
+      = $self->_user_to_hash($attach->attacher, $filters, undef, 'creator');
+  }
+
   if (filter_wants $filters, 'data', $types, $prefix) {
     $item->{'data'} = $self->type('base64', $attach->data);
   }
@@ -2331,6 +2336,12 @@ Also returned as C<attacher>, for backwards-compatibility with older
 Bugzillas. (However, this backwards-compatibility will go away in Bugzilla
 5.0.)
 
+=item C<creator_detail>
+
+C<hash> A hash containing detailed user information for the creator. The keys
+included in the user detail hash are the same as ones returned for the Get Bug
+method.
+
 =item C<flags>
 
 An array of hashes containing the information about flags currently set
@@ -2412,6 +2423,8 @@ C<summary>.
 =item The C<flags> array was added in Bugzilla B<4.4>.
 
 =item REST API call added in Bugzilla B<5.0>.
+
+=item The C<creator_detail> field was added in Bugzilla B<6.0>.
 
 =back
 

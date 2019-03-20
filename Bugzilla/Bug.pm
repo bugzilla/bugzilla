@@ -4638,7 +4638,7 @@ sub _join_activity_entries {
     return $current_change . $new_change;
   }
   else {
-    return $current_change . ' ' . $new_change;
+    return $current_change . ($current_change && $new_change ? ' ' : '') . $new_change;
   }
 }
 

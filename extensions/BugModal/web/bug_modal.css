@@ -1045,6 +1045,8 @@ a.lightbox-icon.markdown {
 
 #lb_overlay2 {
     position: absolute;
+    overflow: auto;
+    bottom: 0;
     left: 0px;
     width: 100%;
     text-align: center;

@@ -145,7 +145,7 @@ sub suggest {
 
   my $dbh    = Bugzilla->dbh;
   my @select = ('userid AS id', 'realname AS real_name', 'login_name AS name');
-  my $order  = 'last_seen_date DESC';
+  my $order  = 'last_activity_ts DESC';
   my $where;
   state $have_mysql = $dbh->isa('Bugzilla::DB::Mysql');
 

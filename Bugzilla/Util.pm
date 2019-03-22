@@ -913,6 +913,12 @@ sub detect_encoding {
     $encoding = $decoded_as if $decoded_as;
   }
 
+  # Encode::Detect sometimes mis-detects UTF-8 as Windows-1252
+  if ($encoding && $encoding eq 'cp1252') {
+    my $decoder = guess_encoding($data, ('utf8', 'cp1252'));
+    $encoding = $decoder->name if ref $decoder;
+  }
+
   return $encoding;
 }
 

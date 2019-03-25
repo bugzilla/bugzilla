@@ -66,7 +66,7 @@ function compileDescription() {
     return str.replace(/^\s*```/mg, "").trim();
   }
   function unlink(str) {
-    return str.replace(/http(s?):\/\/(?!(reviewers\.)?addons.mozilla.org)/g, "hxxp$1://")
+    return str.replace(/http(s?):\/\/(?![a-zA-Z0-9_.-]+\.mozilla\.org(\/|$))/g, "hxxp$1://");
   }
   function table(arr) {
     function escapeTable(str) {
@@ -93,7 +93,7 @@ function compileDescription() {
   ]);
 
   descr += "\n### Reason\n" + unlink(reason);
-  descr += "\n\n### Extension GUIDs\n```\n" + backtick(guids) + "\n```";
+  descr += "\n\n### Extension IDs\n```\n" + backtick(guids) + "\n```";
 
   if (additionalInfo) {
     descr += "\n\n### Additional Information\n" + unlink(additionalInfo.trim());
@@ -153,29 +153,32 @@ window.addEventListener("DOMContentLoaded", function() {
 
   <div class="head_desc">
     <p>
-      Using this form you can report a malicious extension that needs to be blocked. Please provide
-      as much information as possible, and make sure your request is in line with the
+      Please complete and submit this form to report a malicious extension that needs to be blocked.
+      Before filing this report, please make sure your request is in line with the
       <a href="https://wiki.mozilla.org/Blocklisting">Blocklisting Policy</a>.
     </p>
     <p>
-      It is particularly important that you provide enough information for us to clearly identify
-      the extension that needs to be blocked.
+      To help us clearly identify the extension(s) that needs to be blocked, please provide as much
+      information as possible.
+    </p>
+    <p>
+      Thank you for helping our efforts to keep the add-ons ecosystem safe for users!
     </p>
   </div>
 
   <div class="form_section">
     <label for="blocklist_name" class="field_label required">
-      Extension Name:
+      Extension Name
     </label>
     <div class="field_desc">
       The name of the extension to be blocked. If multiple extensions are to be blocked, please
-      mention a common trait.
+      mention a common trait (for example, Multiple Youtube downloaders).
     </div>
     <input type="text" name="blocklist_name" id="blocklist_name" size="80" required>
   </div>
 
   <div class="form_section">
-    <label for="blocklist_reason" class="field_label required">Reason:</label>
+    <label for="blocklist_reason" class="field_label required">Reason</label>
     <div class="field_desc">
       The reason to block. Please make sure the reason adheres to
       <a href="https://wiki.mozilla.org/Blocklisting">our guidelines</a>. Links will automatically
@@ -187,9 +190,7 @@ window.addEventListener("DOMContentLoaded", function() {
   <div class="form_section">
     <label class="field_label required">Block Severity</label>
     <div class="field_desc">
-      The severity of the block. Hard blocks are employed for malicious extensions. Please see
-      <a href="https://wiki.mozilla.org/Blocklisting#Block_Severity">the blocklisting page</a> for
-      more details.
+      The severity of the block. Hard blocks are employed for malicious extensions.
     </div>
     <input type="radio" name="blocklist_severity" id="blocklist_severity_hard" value="hard" checked="checked">
     <label for="blocklist_severity_extension">Hard</label>
@@ -200,10 +201,11 @@ window.addEventListener("DOMContentLoaded", function() {
 
 
   <div class="form_section">
-    <label for="blocklist_guids" class="field_label">GUIDs:</label>
+    <label for="blocklist_guids" class="field_label">Extension ID(s)</label>
     <div class="field_desc">
-      The GUIDs of the extension(s) to be blocked, if known. This is the id of the extension, found in
-      the manifest. If it is not mentioned in the maniest please provide other forms of
+      The ID(s) of the extension(s) to be blocked. If the extension is installed, the ID can be
+      found on about:support. It can also be part of the extension manifest file. If it is not
+      mentioned in the manifest please attach the extension file or provide other forms of
       identification of the extension in the additional information field.
     </div>
     <textarea name="blocklist_guids" id="blocklist_guids" cols="80" rows="10"></textarea>
@@ -212,7 +214,7 @@ window.addEventListener("DOMContentLoaded", function() {
   <div class="form_section">
     <label for="blocklist_versions" class="field_label">Versions</label>
     <div class="field_desc">
-      The version of the extension to be blocked. May be left empty all versions should be blocked.
+      The version of the extension to be blocked. May be left empty if all versions should be blocked.
     </div>
     <input type="text" name="blocklist_versions" id="blocklist_versions" size="80" placeholder="<All Versions>">
   </div>
@@ -227,7 +229,7 @@ window.addEventListener("DOMContentLoaded", function() {
   </div>
 
   <div class="form_section">
-    <label for="blocklist_moreinfo" class="field_label">Additional Information:</label>
+    <label for="blocklist_moreinfo" class="field_label">Additional Information</label>
     <div class="field_desc">
       Additional information, such as the page the extension was found on, AMO listing page, or
       other references. Links will automatically be replaced with <code>hxxp</code> to avoid

@@ -522,7 +522,6 @@ sub search {
   my $user = Bugzilla->user;
   my $dbh  = Bugzilla->dbh;
 
-  local $Bugzilla::Extension::TrackingFlags::Flag::SKIP_PRELOAD = 1;
   Bugzilla->switch_to_shadow_db();
 
   my $match_params = dclone($params);

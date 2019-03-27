@@ -1531,6 +1531,18 @@ sub _bug_to_hash {
     $item{'flags'} = [map { $self->_flag_to_hash($_) } @{$bug->flags}];
   }
 
+  # Regressions
+  if (Bugzilla->params->{use_regression_fields}) {
+    if (filter_wants $params, 'regressed_by') {
+      my @regressed_by = map { $self->type('int', $_) } @{$bug->regressed_by};
+      $item{'regressed_by'} = \@regressed_by;
+    }
+    if (filter_wants $params, 'regressions') {
+      my @regressions = map { $self->type('int', $_) } @{$bug->regresses};
+      $item{'regressions'} = \@regressions;
+    }
+  }
+
   # And now custom fields
   my @custom_fields = Bugzilla->active_custom_fields(
     {
@@ -2882,6 +2894,14 @@ C<string> The login name of the current QA Contact on the bug.
 C<hash> A hash containing detailed user information for the qa_contact. To see the
 keys included in the user detail hash, see below.
 
+=item C<regressed_by>
+
+C<array> of C<int>s. The ids of bugs that introduced this bug.
+
+=item C<regressions>
+
+C<array> of C<int>s. The ids of bugs bugs that are introduced by this bug.
+
 =item C<remaining_time>
 
 C<double> The number of hours of work remaining until work on this bug
@@ -3107,8 +3127,9 @@ and all custom fields.
 =item The C<actual_time> item was added to the C<bugs> return value
 in Bugzilla B<4.4>.
 
-=item The C<attachments>, C<comments>, C<duplicates>, C<history> and
-C<triage_owner> fields were added in Bugzilla B<6.0>.
+=item The C<attachments>, C<comments>, C<duplicates>, C<history>,
+C<regressed_by>, C<regressions> and C<triage_owner> fields were added in
+Bugzilla B<6.0>.
 
 =back
 
@@ -3712,8 +3733,9 @@ You didn't specify a summary for the bug.
 
 =item 116 (Dependency Loop)
 
-You specified values in the C<blocks> or C<depends_on> fields
-that would cause a circular dependency between bugs.
+You specified values in the C<blocks> and C<depends_on> fields,
+or the C<regressions> and C<regressed_by> fields, that would cause a
+circular dependency between bugs.
 
 =item 120 (Group Restriction Denied)
 
@@ -4541,6 +4563,14 @@ C<boolean> Whether or not the bug's reporter is allowed to access
 the bug, even if he or she isn't in a group that can normally access
 the bug.
 
+=item C<regressed_by>
+
+C<array> of C<int>s. The ids of bugs that introduced this bug.
+
+=item C<regressions>
+
+C<array> of C<int>s. The ids of bugs bugs that are introduced by this bug.
+
 =item C<remaining_time>
 
 C<double> How much work time is remaining to fix the bug, in hours.
@@ -4742,8 +4772,9 @@ The error message will have more detail.
 
 =item 116 (Dependency Loop)
 
-You specified a value in the C<blocks> or C<depends_on> fields that causes
-a dependency loop.
+You specified values in the C<blocks> and C<depends_on> fields,
+or the C<regressions> and C<regressed_by> fields, that would cause a
+circular dependency between bugs.
 
 =item 117 (Invalid Comment ID)
 

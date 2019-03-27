@@ -101,7 +101,9 @@
             change.fieldname == 'work_time' %]
         [% PROCESS formattimeunit time_unit=change_type %]
       [% ELSIF change.fieldname == 'blocked' ||
-               change.fieldname == 'dependson' %]
+               change.fieldname == 'dependson' ||
+               change.fieldname == 'regresses' ||
+               change.fieldname == 'regressed_by' %]
         [% change_type FILTER bug_list_link FILTER none %]
       [% ELSIF change.fieldname == 'assigned_to' ||
                change.fieldname == 'reporter' ||

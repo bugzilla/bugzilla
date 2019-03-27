@@ -399,7 +399,7 @@ sub invalid_values {
       },
       {
         value => {add => [$public_id]},
-        error => 'block itself or depend on itself',
+        error => 'block itself, depend on itself',
         test  => "can't add this bug itself in a dep field"
       },
 

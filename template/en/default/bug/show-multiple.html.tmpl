@@ -214,6 +214,11 @@
       [% PROCESS dependencies name = "blocked"  %]
     [% END %]
 
+    [% IF (bug.regressed_by.size || bug.regresses.size) %]
+      [% PROCESS dependencies name = "regresses"  %]
+      [% PROCESS dependencies name = "regressed_by" %]
+    [% END %]
+
     [% IF user.is_timetracker %]
       <tr>
         <th>Time tracking:</th>

@@ -129,6 +129,10 @@ sub create_bug {
     {default => ""},
     blocked => Str,
     {default => ""},
+    regressed_by => Str,
+    {default => ""},
+    regresses => Str,
+    {default => ""},
     assigned_to => Str,
     bug_mentors => ArrayRef [Str],
     {

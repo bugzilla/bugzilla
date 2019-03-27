@@ -57,6 +57,12 @@ use constant ID_FIELD   => 'bug_id';
 use constant NAME_FIELD => 'alias';
 use constant LIST_ORDER => ID_FIELD;
 
+# Set up Dependencies and Regressions
+use constant BUG_RELATIONS => (
+  [dependencies => qw(dependson blocked)],
+  [regressions  => qw(regressed_by regresses)],
+);
+
 # Bugs have their own auditing table, bugs_activity.
 use constant AUDIT_CREATES => 0;
 use constant AUDIT_UPDATES => 0;
@@ -272,6 +278,7 @@ use constant FIELD_MAP => {
   last_change_time      => 'delta_ts',
   comment_count         => 'longdescs.count',
   platform              => 'rep_platform',
+  regressions           => 'regresses',
   severity              => 'bug_severity',
   status                => 'bug_status',
   summary               => 'short_desc',
@@ -549,6 +556,8 @@ sub CLEANUP {
     next unless $bug;
     delete $bug->{depends_on_obj};
     delete $bug->{blocks_obj};
+    delete $bug->{regressed_by_obj};
+    delete $bug->{regresses_obj};
   }
   %CLEANUP = ();
 }
@@ -580,7 +589,14 @@ sub check {
     }
   }
 
-  unless ($field && $field =~ /^(dependson|blocked|dup_id)$/) {
+  state $relation_field = {
+    dependson    => 1,
+    blocked      => 1,
+    regressed_by => 1,
+    regresses    => 1,
+    dup_id       => 1
+  };
+  unless ($field && $relation_field->{$field}) {
     $self->check_is_visible;
   }
   return $self;
@@ -677,7 +693,8 @@ sub preload {
   # to the more complex method.
   my @all_dep_ids;
   foreach my $bug (@$bugs) {
-    push(@all_dep_ids, @{$bug->blocked}, @{$bug->dependson});
+    push(@all_dep_ids,
+      map { @{$bug->$_ || []} } qw(dependson blocked regressed_by regresses));
   }
   @all_dep_ids = uniq @all_dep_ids;
 
@@ -902,12 +919,12 @@ sub create {
   # insert_create_data.
   my $cc_ids           = delete $params->{cc};
   my $groups           = delete $params->{groups};
-  my $depends_on       = delete $params->{dependson};
-  my $blocked          = delete $params->{blocked};
   my $keywords         = delete $params->{keywords};
   my $creation_comment = delete $params->{comment};
   my $see_also         = delete $params->{see_also};
   my $comment_tags     = delete $params->{comment_tags};
+  my %relation_values  = map { $_ => delete $params->{$_} }
+    qw(dependson blocked regressed_by regresses);
 
   # We don't want the bug to appear in the system until it's correctly
   # protected by groups.
@@ -942,25 +959,27 @@ sub create {
     $sth_keyword->execute($bug->bug_id, $keyword_id);
   }
 
-  # Set up dependencies (blocked/dependson)
-  my $sth_deps = $dbh->prepare(
-    'INSERT INTO dependencies (blocked, dependson) VALUES (?, ?)');
+  foreach my $rel (BUG_RELATIONS) {
+    my ($table, $field1, $field2) = @$rel;
+    my $sth = $dbh->prepare("INSERT INTO $table ($field1, $field2) VALUES (?, ?)");
 
-  foreach my $depends_on_id (@$depends_on) {
-    $sth_deps->execute($bug->bug_id, $depends_on_id);
+    foreach my $id (@{$relation_values{$field1}}) {
+      $sth->execute($id, $bug->bug_id);
 
-    # Log the reverse action on the other bug.
-    LogActivityEntry($depends_on_id, 'blocked', '', $bug->bug_id,
-      $bug->{reporter_id}, $timestamp);
-    _update_delta_ts($depends_on_id, $timestamp);
-  }
-  foreach my $blocked_id (@$blocked) {
-    $sth_deps->execute($blocked_id, $bug->bug_id);
+      # Log the reverse action on the other bug.
+      LogActivityEntry($id, $field2, '', $bug->bug_id, $bug->{reporter_id},
+        $timestamp);
+      _update_delta_ts($id, $timestamp);
+    }
 
-    # Log the reverse action on the other bug.
-    LogActivityEntry($blocked_id, 'dependson', '', $bug->bug_id,
-      $bug->{reporter_id}, $timestamp);
-    _update_delta_ts($blocked_id, $timestamp);
+    foreach my $id (@{$relation_values{$field2}}) {
+      $sth->execute($bug->bug_id, $id);
+
+      # Log the reverse action on the other bug.
+      LogActivityEntry($id, $field1, '', $bug->bug_id, $bug->{reporter_id},
+        $timestamp);
+      _update_delta_ts($id, $timestamp);
+    }
   }
 
   # Insert the values into the multiselect value tables
@@ -1057,9 +1076,15 @@ sub run_create_validators {
   $class->_check_strict_isolation($params->{cc}, $params->{assigned_to},
     $params->{qa_contact}, $product);
 
-  ($params->{dependson}, $params->{blocked})
-    = $class->_check_dependencies($params->{dependson}, $params->{blocked},
-    $product);
+  my %dep_lists = $class->_check_relationship($product, 'dependencies',
+    map { $_ => $params->{$_} } qw(dependson blocked));
+  my %reg_lists = $class->_check_relationship($product, 'regressions',
+    map { $_ => $params->{$_} } qw(regressed_by regresses));
+
+  $params->{dependson}    = $dep_lists{'dependson'};
+  $params->{blocked}      = $dep_lists{'blocked'};
+  $params->{regressed_by} = $reg_lists{'regressed_by'};
+  $params->{regresses}    = $reg_lists{'regresses'};
 
   # You can't set these fields on bug creation (or sometimes ever).
   delete $params->{resolution};
@@ -1165,36 +1190,39 @@ sub update {
     $changes->{keywords} = [$removed_names, $added_names];
   }
 
-  # Dependencies
-  foreach my $pair ([qw(dependson blocked)], [qw(blocked dependson)]) {
-    my ($type, $other) = @$pair;
-    my $old = $old_bug->$type;
-    my $new = $self->$type;
+  # Dependencies and Regressions
+  foreach my $rel (BUG_RELATIONS) {
+    my ($table, $field1, $field2) = @$rel;
 
-    my ($removed, $added) = diff_arrays($old, $new);
-    foreach my $removed_id (@$removed) {
-      $dbh->do("DELETE FROM dependencies WHERE $type = ? AND $other = ?",
-        undef, $removed_id, $self->id);
+    foreach my $pair ([$field1, $field2], [$field2, $field1]) {
+      my ($field, $other_field) = @$pair;
+      my ($removed, $added) = diff_arrays($old_bug->$field, $self->$field);
 
-      # Add an activity entry for the other bug.
-      LogActivityEntry($removed_id, $other, $self->id, '', $user->id, $delta_ts);
+      foreach my $id (@$removed) {
+        $dbh->do("DELETE FROM $table WHERE $field = ? AND $other_field = ?",
+          undef, $id, $self->id);
 
-      # Update delta_ts on the other bug so that we trigger mid-airs.
-      _update_delta_ts($removed_id, $delta_ts);
-    }
-    foreach my $added_id (@$added) {
-      $dbh->do("INSERT INTO dependencies ($type, $other) VALUES (?,?)",
-        undef, $added_id, $self->id);
+        # Add an activity entry for the other bug.
+        LogActivityEntry($id, $other_field, $self->id, '', $user->id, $delta_ts);
 
-      # Add an activity entry for the other bug.
-      LogActivityEntry($added_id, $other, '', $self->id, $user->id, $delta_ts);
+        # Update delta_ts on the other bug so that we trigger mid-airs.
+        _update_delta_ts($id, $delta_ts);
+      }
 
-      # Update delta_ts on the other bug so that we trigger mid-airs.
-      _update_delta_ts($added_id, $delta_ts);
-    }
+      foreach my $id (@$added) {
+        $dbh->do("INSERT INTO $table ($field, $other_field) VALUES (?, ?)",
+          undef, $id, $self->id);
 
-    if (scalar(@$removed) || scalar(@$added)) {
-      $changes->{$type} = [join(', ', @$removed), join(', ', @$added)];
+        # Add an activity entry for the other bug.
+        LogActivityEntry($id, $other_field, '', $self->id, $user->id, $delta_ts);
+
+        # Update delta_ts on the other bug so that we trigger mid-airs.
+        _update_delta_ts($id, $delta_ts);
+      }
+
+      if (@$removed || @$added) {
+        $changes->{$field} = [join(', ', @$removed), join(', ', @$added)];
+      }
     }
   }
 
@@ -1533,6 +1561,8 @@ sub remove_from_db {
   $dbh->do("DELETE FROM cc WHERE bug_id = ?",            undef, $bug_id);
   $dbh->do("DELETE FROM dependencies WHERE blocked = ? OR dependson = ?",
     undef, ($bug_id, $bug_id));
+  $dbh->do("DELETE FROM regressions WHERE regresses = ? OR regressed_by = ?",
+    undef, ($bug_id, $bug_id));
   $dbh->do("DELETE FROM duplicates WHERE dupe = ? OR dupe_of = ?",
     undef, ($bug_id, $bug_id));
   $dbh->do("DELETE FROM flags WHERE bug_id = ?",    undef, $bug_id);
@@ -1616,12 +1646,16 @@ sub send_changes {
     }
   }
 
-  # To get a list of all changed dependencies, convert the "changes" arrays
-  # into a long string, then collapse that string into unique numbers in
-  # a hash.
+  # To get a list of all changed dependencies and regressoins, convert the
+  # "changes" arrays into a long string, then collapse that string into unique
+  # numbers in a hash.
   my $all_changed_deps = join(', ', @{$changes->{'dependson'} || []});
   $all_changed_deps
     = join(', ', @{$changes->{'blocked'} || []}, $all_changed_deps);
+  $all_changed_deps
+    = join(', ', @{$changes->{'regressed_by'} || []}, $all_changed_deps);
+  $all_changed_deps
+    = join(', ', @{$changes->{'regresses'} || []}, $all_changed_deps);
   my %changed_deps = map { $_ => 1 } split(', ', $all_changed_deps);
 
   # When clearning one field (say, blocks) and filling in the other
@@ -1924,10 +1958,11 @@ sub _check_deadline {
   return $date;
 }
 
-# Takes two comma/space-separated strings and returns arrayrefs
-# of valid bug IDs.
-sub _check_dependencies {
-  my ($invocant, $depends_on, $blocks, $product) = @_;
+# Take a hash containing two keys (dependson/blocked for dependencies or
+# regressed_by/regresses for regressions) and bug IDs as a comma/space-separated
+# string value for each, and return arrayrefs of valid bug IDs.
+sub _check_relationship {
+  my ($invocant, $product, $table, %deps_in) = @_;
 
   if (!ref $invocant) {
 
@@ -1935,13 +1970,11 @@ sub _check_dependencies {
     return ([], []) unless Bugzilla->user->in_group('editbugs', $product->id);
   }
 
-  my %deps_in = (dependson => $depends_on || '', blocked => $blocks || '');
-
-  foreach my $type (qw(dependson blocked)) {
+  foreach my $type (keys %deps_in) {
     my @bug_ids
       = ref($deps_in{$type})
       ? @{$deps_in{$type}}
-      : split(/[\s,]+/, $deps_in{$type});
+      : split(/[\s,]+/, $deps_in{$type} || '');
 
     # Eliminate nulls.
     @bug_ids = grep {$_} @bug_ids;
@@ -1996,10 +2029,9 @@ sub _check_dependencies {
 
   # And finally, check for dependency loops.
   my $bug_id = ref($invocant) ? $invocant->id : 0;
-  my %deps
-    = ValidateDependencies($deps_in{dependson}, $deps_in{blocked}, $bug_id);
+  my %deps = validate_relationship($bug_id, $table, %deps_in);
 
-  return ($deps{'dependson'}, $deps{'blocked'});
+  return %deps;
 }
 
 sub _check_dup_id {
@@ -2596,9 +2628,10 @@ sub fields {
       bug_status resolution dup_id see_also
       bug_file_loc status_whiteboard keywords
       priority bug_severity target_milestone
-      dependson blocked everconfirmed
-      reporter assigned_to cc estimated_time
-      remaining_time actual_time deadline),
+      dependson blocked regressed_by regresses
+      everconfirmed reporter assigned_to cc
+      estimated_time remaining_time actual_time
+      deadline),
 
     # Conditional Fields
     Bugzilla->params->{'useqacontact'} ? "qa_contact" : (),
@@ -2681,9 +2714,14 @@ sub set_all {
   # immediately after changing the product.
   $self->_add_remove($params, 'groups');
 
-  if (exists $params->{'dependson'} or exists $params->{'blocked'}) {
+  # Dependencies and Regressions
+  foreach my $rel (BUG_RELATIONS) {
+    my ($table, $field1, $field2) = @$rel;
+
+    next unless (exists $params->{$field1} || exists $params->{$field2});
+
     my %set_deps;
-    foreach my $name (qw(dependson blocked)) {
+    foreach my $name ($field1, $field2) {
       my @dep_ids = @{$self->$name};
 
       # If only one of the two fields was passed in, then we need to
@@ -2709,7 +2747,7 @@ sub set_all {
       $set_deps{$name} = \@dep_ids;
     }
 
-    $self->set_dependencies($set_deps{'dependson'}, $set_deps{'blocked'});
+    $self->set_relationship($table, %set_deps);
   }
 
   if (exists $params->{'keywords'}) {
@@ -2863,18 +2901,20 @@ sub set_custom_field {
 }
 sub set_deadline { $_[0]->set('deadline', $_[1]); }
 
-sub set_dependencies {
-  my ($self, $dependson, $blocked) = @_;
-  ($dependson, $blocked) = $self->_check_dependencies($dependson, $blocked);
+sub set_relationship {
+  my ($self, $table, %fields) = @_;
+  my ($key1, $key2) = keys %fields;
+  my %lists = $self->_check_relationship(undef, $table, %fields);
+  my ($list1, $list2) = ($lists{$key1}, $lists{$key2});
 
   # These may already be detainted, but all setters are supposed to
   # detaint their input if they've run a validator (just as though
   # we had used Bugzilla::Object::set), so we do that here.
-  detaint_natural($_) foreach (@$dependson, @$blocked);
-  $self->{'dependson'} = $dependson;
-  $self->{'blocked'}   = $blocked;
-  delete $self->{depends_on_obj};
-  delete $self->{blocks_obj};
+  detaint_natural($_) foreach (@$list1, @$list2);
+  $self->{$key1} = $list1;
+  $self->{$key2} = $list2;
+  delete $self->{$key1 eq 'dependson' ? 'depends_on_obj' : "${key1}_obj"};
+  delete $self->{$key2 eq 'dependson' ? 'depends_on_obj' : "${key2}_obj"};
 }
 sub _clear_dup_id { $_[0]->{dup_id} = undef; }
 
@@ -3754,7 +3794,8 @@ sub blocked {
   my ($self) = @_;
   return $self->{'blocked'} if exists $self->{'blocked'};
   return [] if $self->{'error'};
-  $self->{'blocked'} = EmitDependList("dependson", "blocked", $self->bug_id);
+  $self->{'blocked'}
+    = list_relationship('dependencies', 'dependson', 'blocked', $self->bug_id);
   return $self->{'blocked'};
 }
 
@@ -3853,7 +3894,8 @@ sub dependson {
   my ($self) = @_;
   return $self->{'dependson'} if exists $self->{'dependson'};
   return [] if $self->{'error'};
-  $self->{'dependson'} = EmitDependList("blocked", "dependson", $self->bug_id);
+  $self->{'dependson'}
+    = list_relationship('dependencies', 'blocked', 'dependson', $self->bug_id);
   return $self->{'dependson'};
 }
 
@@ -4040,6 +4082,38 @@ sub qa_contact {
     $self->{'qa_contact_obj'} = undef;
   }
   return $self->{'qa_contact_obj'};
+}
+
+sub regressed_by {
+  my ($self) = @_;
+  return $self->{'regressed_by'} if exists $self->{'regressed_by'};
+  return [] if $self->{'error'};
+  $self->{'regressed_by'}
+    = list_relationship('regressions', 'regresses', 'regressed_by',
+    $self->bug_id);
+  return $self->{'regressed_by'};
+}
+
+sub regressed_by_obj {
+  my ($self) = @_;
+  $self->{'regressed_by_obj'} ||= $self->_bugs_in_order($self->regressed_by);
+  return $self->{'regressed_by_obj'};
+}
+
+sub regresses {
+  my ($self) = @_;
+  return $self->{'regresses'} if exists $self->{'regresses'};
+  return [] if $self->{'error'};
+  $self->{'regresses'}
+    = list_relationship('regressions', 'regressed_by', 'regresses',
+    $self->bug_id);
+  return $self->{'regresses'};
+}
+
+sub regresses_obj {
+  my ($self) = @_;
+  $self->{'regresses_obj'} ||= $self->_bugs_in_order($self->regresses);
+  return $self->{'regresses_obj'};
 }
 
 sub reporter {
@@ -4381,13 +4455,11 @@ sub editable_bug_fields {
   return sort(@fields);
 }
 
-# XXX - When Bug::update() will be implemented, we should make this routine
-#       a private method.
-# Join with bug_status and bugs tables to show bugs with open statuses first,
-# and then the others
-sub EmitDependList {
-  my ($my_field, $target_field, $bug_id, $exclude_resolved) = @_;
-  my $cache = Bugzilla->request_cache->{bug_dependency_list} ||= {};
+# Emit a list of dependencies or regressions. Join with bug_status and bugs
+# tables to show bugs with open statuses first, and then the others
+sub list_relationship {
+  my ($table, $my_field, $target_field, $bug_id, $exclude_resolved) = @_;
+  my $cache = Bugzilla->request_cache->{"bug_$table"} ||= {};
 
   my $dbh = Bugzilla->dbh;
   $exclude_resolved = $exclude_resolved ? 1 : 0;
@@ -4395,8 +4467,8 @@ sub EmitDependList {
 
   $cache->{"${target_field}_sth_$exclude_resolved"} ||= $dbh->prepare(
     "SELECT $target_field
-             FROM dependencies
-                  INNER JOIN bugs ON dependencies.$target_field = bugs.bug_id
+             FROM $table
+                  INNER JOIN bugs ON $table.$target_field = bugs.bug_id
                   INNER JOIN bug_status ON bugs.bug_status = bug_status.value
             WHERE $my_field = ? $is_open_clause
             ORDER BY is_open DESC, $target_field"
@@ -4618,7 +4690,7 @@ sub _join_activity_entries {
   return $new_change if $current_change eq '';
 
   # Buglists and see_also need the comma restored
-  if ($field eq 'dependson' || $field eq 'blocked' || $field eq 'see_also') {
+  if ($field =~ /^(?:dependson|blocked|regress(?:ed_by|es)|see_also)$/) {
     if (substr($new_change, 0, 1) eq ',' || substr($new_change, 0, 1) eq ' ') {
       return $current_change . $new_change;
     }
@@ -4945,35 +5017,29 @@ sub _changes_everconfirmed {
 # Field Validation
 #
 
-# Validate and return a hash of dependencies
-sub ValidateDependencies {
-  my $fields = {};
+# Validate and return a hash of dependencies or regressions
+sub validate_relationship {
+  my ($bug_id, $table, %fields) = @_;
+  my ($key1, $key2) = keys %fields;
 
-  # These can be arrayrefs or they can be strings.
-  $fields->{'dependson'} = shift;
-  $fields->{'blocked'}   = shift;
-  my $id = shift || 0;
-
-  unless (defined($fields->{'dependson'}) || defined($fields->{'blocked'})) {
-    return;
-  }
+  return unless (defined($fields{$key1}) || defined($fields{$key2}));
 
   my $dbh = Bugzilla->dbh;
   my %deps;
   my %deptree;
-  foreach my $pair (["blocked", "dependson"], ["dependson", "blocked"]) {
+  foreach my $pair ([$key1, $key2], [$key2, $key1]) {
     my ($me, $target) = @{$pair};
     $deptree{$target} = [];
     $deps{$target}    = [];
-    next unless $fields->{$target};
+    next unless $fields{$target};
 
     my %seen;
     my $target_array
-      = ref($fields->{$target})
-      ? $fields->{$target}
-      : [split(/[\s,]+/, $fields->{$target})];
+      = ref($fields{$target})
+      ? $fields{$target}
+      : [split(/[\s,]+/, $fields{$target})];
     foreach my $i (@$target_array) {
-      if ($id == $i) {
+      if ($bug_id == $i) {
         ThrowUserError("dependency_loop_single");
       }
       if (!exists $seen{$i}) {
@@ -4987,17 +5053,15 @@ sub ValidateDependencies {
     @{$deps{$target}} = @{$deptree{$target}};
     my @stack = @{$deps{$target}};
     while (@stack) {
-      my $i        = shift @stack;
-      my $dep_list = $dbh->selectcol_arrayref(
-        "SELECT $target
-                                          FROM dependencies
-                                          WHERE $me = ?", undef, $i
-      );
+      my $i = shift @stack;
+      my $dep_list
+        = $dbh->selectcol_arrayref("SELECT $target FROM $table WHERE $me = ?",
+        undef, $i);
       foreach my $t (@$dep_list) {
 
         # ignore any _current_ dependencies involving this bug,
         # as they will be overwritten with data from the form.
-        if ($t != $id && !exists $seen{$t}) {
+        if ($t != $bug_id && !exists $seen{$t}) {
           push(@{$deptree{$target}}, $t);
           push @stack, $t;
           $seen{$t} = 1;
@@ -5006,8 +5070,8 @@ sub ValidateDependencies {
     }
   }
 
-  my @deps   = @{$deptree{'dependson'}};
-  my @blocks = @{$deptree{'blocked'}};
+  my @deps   = @{$deptree{$key1}};
+  my @blocks = @{$deptree{$key2}};
   my %union  = ();
   my %isect  = ();
   foreach my $b (@deps, @blocks) { $union{$b}++ && $isect{$b}++ }

@@ -133,10 +133,10 @@ sub Send {
     }
   }
 
-  # Add dependencies to referenced bug list on new bugs
+  # Add dependencies and regressions to referenced bug list on new bugs
   if (!$start) {
-    push @referenced_bugs, @{$bug->dependson};
-    push @referenced_bugs, @{$bug->blocked};
+    push(@referenced_bugs,
+      map { @{$bug->$_} } qw(dependson blocked regressed_by regresses));
     push @referenced_bugs, _parse_see_also(map { $_->name } @{$bug->see_also});
   }
 
@@ -596,7 +596,7 @@ sub _get_diffs {
       $diff->{num}       = $comment->count;
       $diff->{isprivate} = $diff->{new};
     }
-    elsif ($diff->{field_name} eq 'dependson' || $diff->{field_name} eq 'blocked') {
+    elsif ($diff->{field_name} =~ /^(?:dependson|blocked|regress(?:ed_by|es))$/) {
       push @$referenced_bugs, grep {/^\d+$/} split(/[\s,]+/, $diff->{old});
       push @$referenced_bugs, grep {/^\d+$/} split(/[\s,]+/, $diff->{new});
     }

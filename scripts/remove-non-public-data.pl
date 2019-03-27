@@ -150,6 +150,11 @@ my %whitelist = (
       userid login_name realname is_enabled creation_ts
       )
   ],
+  regressions => [
+    qw(
+      regresses regressed_by
+      )
+  ],
   tracking_flags => [
     qw(
       id field_id name description type sortkey is_active

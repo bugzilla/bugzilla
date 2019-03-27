@@ -245,6 +245,12 @@ usestatuswhiteboard
     easily searchable field for indexing bugs that have some trait in
     common.
 
+use_regression_fields
+    Do you wish to use the :field:`Regressions` and :field:`Regressed by`
+    fields? These allow you to efficiently track software regressions,
+    which might previously be managed using the :field:`Depends on` and
+    :field:`Blocks` fields along with the “regression” keyword.
+
 use_see_also
     Do you wish to use the :field:`See Also` field? It allows you mark bugs
     in other bug tracker installations as being related. Disabling this field

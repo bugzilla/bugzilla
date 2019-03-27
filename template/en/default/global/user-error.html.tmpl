@@ -507,9 +507,10 @@
 
   [% ELSIF error == "dependency_loop_multi" %]
     [% title = "Dependency Loop Detected" %]
-    The following [% terms.bug %](s) would appear on both the "depends on"
-    and "blocks" parts of the dependency tree if these changes
-    are committed:
+    The following [% IF deps.size > 1; terms.bugs; ELSE; terms.bug; END %]
+    would appear on both the “Depends on” and “blocks” fields, or both the
+    “Regressions” and “Regressed by” fields, of the dependency tree if these
+    changes are committed:
     [% FOREACH dep = deps %]
       [%+ dep FILTER bug_link(dep) FILTER none %]
     [% END %].
@@ -517,7 +518,8 @@
 
   [% ELSIF error == "dependency_loop_single" %]
     [% title = "Dependency Loop Detected" %]
-    You can't make [% terms.abug %] block itself or depend on itself.
+    You can’t make [% terms.abug %] block itself, depend on itself, regress
+    itself, or regressed by itself.
 
   [% ELSIF error == "dupe_id_required" %]
     [% title = "Duplicate $terms.Bug Id Required" %]

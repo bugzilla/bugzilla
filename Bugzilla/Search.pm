@@ -287,6 +287,8 @@ use constant OPERATOR_FIELD_OVERRIDE => {
     _default      => \&_invalid_combination,
   },
   product     => {_non_changed => \&_product_nonchanged,},
+  regressed_by  => MULTI_SELECT_OVERRIDE,
+  regresses     => MULTI_SELECT_OVERRIDE,
   tag         => MULTI_SELECT_OVERRIDE,
   comment_tag => MULTI_SELECT_OVERRIDE,
 
@@ -483,6 +485,8 @@ sub COLUMN_JOINS {
     },
     blocked           => {table => 'dependencies', to   => 'dependson',},
     dependson         => {table => 'dependencies', to   => 'blocked',},
+    regresses         => {table => 'regressions',  to   => 'regressed_by',},
+    regressed_by      => {table => 'regressions',  to   => 'regresses',},
     'longdescs.count' => {table => 'longdescs',    join => 'INNER',},
     last_visit_ts     => {
       as    => 'bug_user_last_visit',
@@ -565,6 +569,9 @@ sub COLUMNS {
 
     blocked   => $dbh->sql_group_concat('DISTINCT map_blocked.blocked'),
     dependson => $dbh->sql_group_concat('DISTINCT map_dependson.dependson'),
+
+    regresses     => $dbh->sql_group_concat('DISTINCT map_regresses.regresses'),
+    regressed_by  => $dbh->sql_group_concat('DISTINCT map_regressed_by.regressed_by'),
 
     'longdescs.count'   => 'COUNT(DISTINCT map_longdescs_count.comment_id)',
     last_visit_ts       => 'bug_user_last_visit.last_visit_ts',
@@ -677,6 +684,8 @@ use constant GROUP_BY_SKIP => qw(
   keywords
   longdescs.count
   percentage_complete
+  regressed_by
+  regresses
 );
 
 ###############
@@ -3097,6 +3106,12 @@ sub _multiselect_table {
     $args->{full_field}    = $field;
     return "dependencies";
   }
+  elsif ($field eq 'regresses' or $field eq 'regressed_by') {
+    my $select = $field eq 'regresses' ? 'regressed_by' : 'regresses';
+    $args->{_select_field} = $select;
+    $args->{full_field}    = $field;
+    return "regressions";
+  }
   elsif ($field eq 'longdesc') {
     $args->{_extra_where} = " AND isprivate = 0" if !$self->_user->is_insider;
     $args->{full_field} = 'thetext';
@@ -3197,6 +3212,17 @@ sub _multiselect_isempty {
       to    => $to,
       };
     return "dependencies_$chart_id.$to IS $not NULL";
+  }
+  elsif ($field eq 'regresses' or $field eq 'regressed_by') {
+    my $to = $field eq 'regresses' ? 'regressed_by' : 'regresses';
+    push @$joins,
+      {
+      table => 'regressions',
+      as    => "regressions_$chart_id",
+      from  => 'bug_id',
+      to    => $to,
+      };
+    return "regressions_$chart_id.$to IS $not NULL";
   }
   elsif ($field eq 'longdesc') {
     my @extra = ("longdescs_$chart_id.type != " . CMT_HAS_DUPE);

@@ -285,6 +285,20 @@ use constant DEFAULT_FIELDS => (
     is_numeric     => 1,
     buglist        => 1
   },
+  {
+    name           => 'regressed_by',
+    desc           => 'Regressed by',
+    in_new_bugmail => 1,
+    is_numeric     => 1,
+    buglist        => 1
+  },
+  {
+    name           => 'regresses',
+    desc           => 'Regressions',
+    in_new_bugmail => 1,
+    is_numeric     => 1,
+    buglist        => 1
+  },
 
   {
     name    => 'assignee_last_login',

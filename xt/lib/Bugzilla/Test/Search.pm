@@ -987,7 +987,8 @@ sub _setup_dependencies {
     my $bug = $self->bug($number);
     my @original_delta = ($bug2->delta_ts, $bug3->delta_ts);
     Bugzilla->set_user($bug->reporter);
-    $bug->set_dependencies([$bug2->id], [$bug3->id]);
+    $bug->set_relationship('dependencies',
+      ('dependson' => $bug2->id, 'blocked' => $bug3->id));
     $bug->update($bug->delta_ts);
 
     # Setting dependencies changed the delta_ts on bug2 and bug3, so

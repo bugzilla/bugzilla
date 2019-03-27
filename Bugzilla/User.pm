@@ -2374,6 +2374,8 @@ our %names_to_events = (
   'attachments.ispatch'     => EVT_ATTACHMENT_DATA,
   'dependson'               => EVT_DEPEND_BLOCK,
   'blocked'                 => EVT_DEPEND_BLOCK,
+  'regressed_by'            => EVT_DEPEND_BLOCK,
+  'regresses'               => EVT_DEPEND_BLOCK,
   'product'                 => EVT_COMPONENT,
   'component'               => EVT_COMPONENT
 );

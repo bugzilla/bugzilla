@@ -120,6 +120,8 @@ push(
     short_desc
     op_sys
     priority
+    regressed_by
+    regresses
     rep_platform
     version
     target_milestone
@@ -276,7 +278,9 @@ $bug_sent->{type} = 'created';
 $bug_sent->{id}   = $id;
 my @all_mail_results = ($bug_sent);
 
-foreach my $dep (@{$bug->dependson || []}, @{$bug->blocked || []}) {
+foreach my $dep (
+  map { @{$bug->{$_} || []} } qw(dependson blocked regressed_by regresses)
+) {
   my $dep_sent = Bugzilla::BugMail::Send($dep, $recipients);
   $dep_sent->{type} = 'dep';
   $dep_sent->{id}   = $dep;

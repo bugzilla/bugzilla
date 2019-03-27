@@ -208,6 +208,7 @@ Example response for authenticated user:
           "rememberlogin" : "on",
           "requirelogin" : "0",
           "urlbase" : "http://bugzilla.example.com/",
+          "use_regression_fields" : "1",
           "use_see_also" : "1",
           "useclassification" : "1",
           "usemenuforusers" : "0",
@@ -247,6 +248,7 @@ A logged-in user can access the following parameters (listed alphabetically):
 * requirelogin
 * search_allow_no_criteria
 * urlbase
+* use_regression_fields
 * use_see_also
 * useclassification
 * usemenuforusers

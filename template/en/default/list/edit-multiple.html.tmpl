@@ -253,6 +253,38 @@
     </td>
   </tr>
 
+  [% IF Param('use_regression_fields') %]
+    <tr>
+      <th>
+        <label for="regresses">
+            Regressions:
+        </label>
+      </th>
+      <td colspan="3">
+        <input id="regresses" name="regresses" size="40">
+        <select name="regresses_action">
+            <option value="add">Add these IDs</option>
+            <option value="remove">Delete these IDs</option>
+        </select>
+      </td>
+    </tr>
+
+    <tr>
+      <th>
+        <label for="regressed_by">
+            Regressed by:
+        </label>
+      </th>
+      <td colspan="3">
+        <input id="regressed_by" name="regressed_by" size="40">
+        <select name="regressed_by_action">
+            <option value="add">Add these IDs</option>
+            <option value="remove">Delete these IDs</option>
+        </select>
+      </td>
+    </tr>
+  [% END %]
+
   [% IF Param('usestatuswhiteboard') %]
     <tr>
       <td align="right">

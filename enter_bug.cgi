@@ -262,6 +262,7 @@ if ($cloned_bug_id) {
   $vars->{'keywords'}     = $cloned_bug->keywords;
   $vars->{'dependson'}    = join(", ", $cloned_bug_id, @{$cloned_bug->dependson});
   $vars->{'blocked'}      = join(", ", @{$cloned_bug->blocked});
+  $vars->{'regressed_by'} = join(", ", $cloned_bug_id, @{$cloned_bug->regressed_by});
   $vars->{'deadline'}     = $cloned_bug->deadline;
   $vars->{'estimated_time'}    = $cloned_bug->estimated_time;
   $vars->{'status_whiteboard'} = $cloned_bug->status_whiteboard;
@@ -328,6 +329,7 @@ else {
   $vars->{'keywords'}       = formvalue('keywords');
   $vars->{'dependson'}      = formvalue('dependson');
   $vars->{'blocked'}        = formvalue('blocked');
+  $vars->{'regressed_by'}   = formvalue('regressed_by');
   $vars->{'deadline'}       = formvalue('deadline');
   $vars->{'estimated_time'} = formvalue('estimated_time');
   $vars->{'bug_ignored'}    = formvalue('bug_ignored');

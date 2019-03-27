@@ -121,6 +121,8 @@ name              type   description
          },
          "cf_free_text": "",
          "blocks": [],
+         "regressed_by": [],
+         "regressions": [],
          "comment_count": 12
        }
      ]
@@ -205,6 +207,8 @@ qa_contact             string    The login name of the current QA Contact on the
 qa_contact_detail      object    An object containing detailed user information
                                  for the qa_contact. To see the keys included in
                                  the user detail object, see below.
+regressed_by           array     The IDs of bugs that introduced this bug.
+regressions            array     The IDs of bugs that are introduced by this bug.
 remaining_time         double    The number of hours of work remaining until work
                                  on this bug is complete. If you are not in the
                                  time-tracking group, this field will not be
@@ -673,6 +677,7 @@ flags               array    Flags objects to add to the bug. The object format
 keywords            array    One or more valid keywords to add to this bug.
 dependson           array    One or more valid bug ids that this bug depends on.
 blocked             array    One or more valid bug ids that this bug blocks.
+regressed_by        array    One or more valid bug ids that introduced this bug.
 ==================  =======  ====================================================
 
 Flag object:
@@ -728,8 +733,9 @@ id    int   This is the ID of the newly-filed bug.
 * 107 (Invalid Summary)
   You didn't specify a summary for the bug.
 * 116 (Dependency Loop)
-  You specified values in the "blocks" or "depends_on" fields
-  that would cause a circular dependency between bugs.
+  You specified values in the "blocks" and "depends_on" fields,
+  or the "regressions" and "regressed_by" fields, that would cause a
+  circular dependency between bugs.
 * 120 (Group Restriction Denied)
   You tried to restrict the bug to a group which does not exist, or which
   you cannot use with this product.
@@ -818,11 +824,14 @@ alias                  object   These specify the aliases of a bug that can be
                                 if you specified the set key above.
 assigned_to            string   The full login name of the user this bug is
                                 assigned to.
-blocks                 object   (Same as ``depends_on`` below)
-depends_on             object   These specify the bugs that this bug blocks or
-                                depends on, respectively. To set these, you
-                                should pass an object as the value. The object
-                                may contain the following items:
+blocks                 object   (Same as ``regressed_by`` below)
+depends_on             object   (Same as ``regressed_by`` below)
+regressions            object   (Same as ``regressed_by`` below)
+regressed_by           object   These specify the bugs that this bug blocks,
+                                depends on, regresses, or is regressed by,
+                                respectively. To set these, you should pass an
+                                object as the value. The object may contain the
+                                following items:
 
                                 * ``add`` (array) Bug IDs to add to this field.
                                 * ``remove`` (array) Bug IDs to remove from this

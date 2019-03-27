@@ -133,10 +133,14 @@
 
           [% PROCESS section_spacer %]
 
-          [%# *** Dependencies and duplicates *** %]
+          [%# *** Duplicates, Dependencies and Regressions *** %]
           [% PROCESS section_duplicates %]
 
           [% PROCESS section_dependson_blocks %]
+
+          [% IF Param('use_regression_fields') %]
+            [% PROCESS section_regressions %]
+          [% END %]
 
           [% IF user.id %]
             <tr>
@@ -704,6 +708,24 @@
   </tr>
 [% END %]
 
+[%############################################################################%]
+[%# Block for Regressed by / Regressions                                     #%]
+[%############################################################################%]
+
+[% BLOCK section_regressions %]
+  <tr>
+    [% INCLUDE dependencies
+      field = bug_fields.regresses
+      deps = bug.regresses_obj
+    %]
+  </tr>
+  <tr>
+    [% INCLUDE dependencies
+      field = bug_fields.regressed_by
+      deps = bug.regressed_by_obj
+    %]
+  </tr>
+[% END %]
 
 [%############################################################################%]
 [%# Block for Restricting Visibility                                         #%]

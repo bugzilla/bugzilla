@@ -548,6 +548,14 @@ sub process_bug {
     $comments .= "This bug blocked bug(s) "
       . join(' ', _to_array($bug_fields{'blocked'})) . ".\n";
   }
+  if (defined $bug_fields{'regressed_by'}) {
+    $comments .= "This bug is regressed by bug(s) "
+      . join(' ', _to_array($bug_fields{'regressed_by'})) . ".\n";
+  }
+  if (defined $bug_fields{'regresses'}) {
+    $comments .= "This bug regressed bug(s) "
+      . join(' ', _to_array($bug_fields{'regresses'})) . ".\n";
+  }
 
   # Now we process each of the fields in turn and make sure they contain
   # valid data. We will create two parallel arrays, one for the query

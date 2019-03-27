@@ -799,11 +799,18 @@
   sub = [];
   open_deps = bug.depends_on_obj.only("resolution", "").size;
   IF open_deps;
-    sub.push("Depends on: " _ open_deps _ " bug" _ (open_deps == 1 ? "" : "s"));
+    sub.push("Depends on " _ open_deps _ " bug" _ (open_deps == 1 ? "" : "s"));
   END;
   open_deps = bug.blocks_obj.only("resolution", "").size;
   IF open_deps;
-    sub.push("Blocks: " _ open_deps _ " bug" _ (open_deps == 1 ? "" : "s"));
+    sub.push("Blocks " _ open_deps _ " bug" _ (open_deps == 1 ? "" : "s"));
+  END;
+  IF bug.regressed_by.size;
+    sub.push("Regression");
+  END;
+  open_regs = bug.regresses_obj.only("resolution", "").size;
+  IF open_regs;
+    sub.push("Regressed " _ open_regs _ " bug" _ (open_regs == 1 ? "" : "s"));
   END;
   IF bug.keyword_objects.size;
     IF bug.keyword_objects.size <= 3;
@@ -952,6 +959,24 @@
         Dependency <a href="[% basepath FILTER none %]showdependencytree.cgi?id=[% bug.bug_id FILTER none %]&amp;hide_resolved=1">tree</a>
         / <a href="[% basepath FILTER none %]showdependencygraph.cgi?id=[% bug.bug_id FILTER none %]">graph</a>
       [% END %]
+    [% END %]
+
+    [%# regressions %]
+    [% IF Param('use_regression_fields') %]
+      [% INCLUDE bug_modal/field.html.tmpl
+        field = bug_fields.regresses
+        field_type = constants.FIELD_TYPE_BUG_LIST
+        values = bug.regresses_obj
+        hide_on_view = bug.regresses.size == 0
+        help = "https://wiki.mozilla.org/BMO/UserGuide/BugFields#regresses"
+      %]
+      [% INCLUDE bug_modal/field.html.tmpl
+        field = bug_fields.regressed_by
+        field_type = constants.FIELD_TYPE_BUG_LIST
+        values = bug.regressed_by_obj
+        hide_on_view = bug.regressed_by.size == 0
+        help = "https://wiki.mozilla.org/BMO/UserGuide/BugFields#regressed_by"
+      %]
     [% END %]
 
     [%# duplicates %]
@@ -1397,6 +1422,10 @@
           <li role="presentation">
             <a href="[% basepath FILTER none %]enter_bug.cgi?format=__default__&amp;product=[% bug.product FILTER uri %]&amp;dependson=[% bug.id FILTER uri %]"
                role="menuitem" tabindex="-1" target="_blank">&#8230; that depends on this [% terms.bug %]</a>
+          </li>
+          <li role="presentation">
+            <a href="[% basepath FILTER none %]enter_bug.cgi?format=__default__&amp;product=[% bug.product FILTER uri %]&amp;regressed_by=[% bug.id FILTER uri %]"
+               role="menuitem" tabindex="-1" target="_blank">&#8230; that is regressed by this [% terms.bug %]</a>
           </li>
           <li role="separator"></li>
           <li role="presentation">

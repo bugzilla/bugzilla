@@ -446,10 +446,10 @@ sub update_bug_request {
     }
   }
 
-  # Other fields such as keywords, blocks depends_on
+  # Other fields such as dependencies, regressions and keywords
   # support 'set' which will make the list exactly what
   # the user passes in.
-  foreach my $field (qw(blocks depends_on dependson keywords)) {
+  foreach my $field (qw(blocks depends_on dependson regresses regressed_by keywords)) {
     if (exists $params->{$field}) {
       $params->{$field} = {set => $params->{$field}};
     }

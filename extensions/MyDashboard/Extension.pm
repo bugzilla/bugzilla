@@ -223,7 +223,8 @@ sub bug_end_of_update {
   if ($changes->{bug_status}) {
     my ($old_status, $new_status) = @{$changes->{bug_status}};
     if (is_open_state($old_status) && !is_open_state($new_status)) {
-      my @related_bugs = (@{$bug->blocks_obj}, @{$bug->depends_on_obj});
+      my @related_bugs = map { @{$bug->{$_} || []} }
+          qw(blocks_obj depends_on_obj regresses_obj regressed_by_obj);
       my %involved;
 
       foreach my $related_bug (@related_bugs) {

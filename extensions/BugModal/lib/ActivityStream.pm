@@ -268,9 +268,7 @@ sub _add_activities_to_stream {
       }
 
       # identify buglist changes
-      if ( $change->{fieldname} eq 'blocked'
-        || $change->{fieldname} eq 'dependson'
-        || $change->{fieldname} eq 'dupe'
+      if ($change->{fieldname} =~ /^(?:dependson|blocked|regress(?:ed_by|es)|dupe)$/
         || ($field_obj && $field_obj->type == FIELD_TYPE_BUG_ID))
       {
         $change->{buglist} = 1;

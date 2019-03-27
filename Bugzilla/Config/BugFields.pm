@@ -35,6 +35,8 @@ sub get_param_list {
 
     {name => 'usebugaliases', type => 'b', default => 0},
 
+    {name => 'use_regression_fields', type => 'b', default => 1},
+
     {name => 'use_see_also', type => 'b', default => 1},
 
     {

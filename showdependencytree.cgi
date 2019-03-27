@@ -143,9 +143,9 @@ sub _get_dependencies {
   my $cache = Bugzilla->request_cache->{dependency_cache} ||= {};
   return $cache->{$bug_id}->{$relationship}
     ||= $relationship eq 'dependson'
-    ? Bugzilla::Bug::EmitDependList('blocked', 'dependson', $bug_id,
-    $hide_resolved)
-    : Bugzilla::Bug::EmitDependList('dependson', 'blocked', $bug_id,
-    $hide_resolved);
+    ? Bugzilla::Bug::list_relationship('dependencies', 'blocked', 'dependson',
+      $bug_id, $hide_resolved)
+    : Bugzilla::Bug::list_relationship('dependencies', 'dependson', 'blocked',
+      $bug_id, $hide_resolved);
 }
 

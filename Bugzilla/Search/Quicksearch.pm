@@ -34,6 +34,9 @@ use constant MAPPINGS => {
   "os"       => "op_sys",
   "severity" => "bug_severity",
 
+  # Dependencies, Regressions
+  "regressions" => "regresses",
+
   # People: AssignedTo, Reporter, QA Contact, CC, etc.
   "assignee" => "assigned_to",
   "owner"    => "assigned_to",

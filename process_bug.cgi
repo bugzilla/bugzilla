@@ -284,7 +284,7 @@ if (should_set('see_also')) {
 if (should_set('remove_see_also')) {
   $set_all_fields{'see_also'}->{remove} = [$cgi->param('remove_see_also')];
 }
-foreach my $dep_field (qw(dependson blocked)) {
+foreach my $dep_field (qw(dependson blocked regressed_by regresses)) {
   if (should_set($dep_field)) {
     if (my $dep_action = $cgi->param("${dep_field}_action")) {
       $set_all_fields{$dep_field}->{$dep_action}

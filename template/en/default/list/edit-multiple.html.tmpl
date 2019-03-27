@@ -124,7 +124,17 @@
 
   <tr>
     <th><label for="bug_status">Status:</label></th>
-    <td colspan="3">[% PROCESS status_section %]</td>
+    <td>[% PROCESS status_section %]</td>
+
+    <th>
+      <label for="bug_type">
+        <a href="https://wiki.mozilla.org/BMO/UserGuide/BugFields#bug_type">Type</a>:
+      </label>
+    </th>
+    <td>
+      [% PROCESS selectmenu menuname = "bug_type"
+                            menuitems = types %]
+    </td>
   </tr>
   [% IF user.is_timetracker %]
     <tr>

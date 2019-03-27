@@ -61,6 +61,7 @@
     <table width="100%">
       <tr>
         <th align="left">ID</th>
+        <th align="left">Type</th>
         <th align="left">Sev</th>
         <th align="left">Pri</th>
         <th align="left">Plt</th>
@@ -74,6 +75,7 @@
         <tr>
           <td align="left"><a href="[%+ urlbase FILTER html %]show_bug.cgi?id=
               [%- bug.bug_id %]">[% bug.bug_id %]</a></td>
+          <td align="left">[% display_value("bug_type", bug.bug_type) FILTER html %]</td>
           <td align="left">[% display_value("bug_severity", bug.bug_severity) FILTER html %]</td>
           <td align="left">[% display_value("priority", bug.priority) FILTER html %]</td>
           <td align="left">[% display_value("rep_platform", bug.rep_platform) FILTER html %]</td>

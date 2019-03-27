@@ -136,6 +136,8 @@
       [% PROCESS rightcell %]
     </tr>
 
+    [% PROCESS row cell = "bug_type" %]
+
     <tr>
       <th>[% field_descs.bug_severity FILTER html %]:</th>
       <td class="bz_[% bug.bug_severity FILTER css_class_quote -%]">

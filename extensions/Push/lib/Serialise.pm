@@ -211,6 +211,7 @@ sub _bug {
     status           => $self->_status($status),
     summary          => _string($bug->short_desc),
     target_milestone => $self->_milestone($milestone),
+    type             => _string($bug->bug_type),
     url              => _string($bug->bug_file_loc),
     version          => $self->_version($version),
     whiteboard       => _string($bug->status_whiteboard),

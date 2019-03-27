@@ -2365,6 +2365,7 @@ our %names_to_events = (
   'resolution'              => EVT_OPENED_CLOSED,
   'keywords'                => EVT_KEYWORD,
   'cc'                      => EVT_CC,
+  'bug_type'                => EVT_PROJ_MANAGEMENT,
   'bug_severity'            => EVT_PROJ_MANAGEMENT,
   'priority'                => EVT_PROJ_MANAGEMENT,
   'bug_status'              => EVT_PROJ_MANAGEMENT,

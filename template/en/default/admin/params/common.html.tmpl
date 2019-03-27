@@ -120,7 +120,9 @@
           [% FOREACH item = param.choices %]
             <option value="[% item FILTER html %]"
                     [% " selected=\"selected\"" IF item == Param(param.name) %]>
-              [% IF param.name == "defaultseverity" %]
+              [% IF param.name == "default_bug_type" %]
+                [% display_value("bug_type", item) FILTER html %]
+              [% ELSIF param.name == "defaultseverity" %]
                 [% display_value("bug_severity", item) FILTER html %]
               [% ELSIF param.name == "defaultplatform" %]
                 [% display_value("rep_platform", item) FILTER html %]

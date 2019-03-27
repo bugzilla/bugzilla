@@ -62,6 +62,7 @@ name              type   description
          ],
          "resolution": "INVALID",
          "id": 35,
+         "type": "defect",
          "qa_contact": "",
          "triage_owner": "",
          "version": "1.0",
@@ -222,6 +223,7 @@ summary                string    The summary of this bug.
 target_milestone       string    The milestone that this bug is supposed to be
                                  fixed by, or for closed bugs, the milestone that
                                  it was fixed for.
+type                   string    The type of the bug.
 update_token           string    The token that you would have to pass to the
                                  ``process_bug.cgi`` page in order to update this
                                  bug. This changes every time the bug is updated.
@@ -553,6 +555,7 @@ qa_contact        string    The login name of the bug's QA Contact. Note that
                             QA Contact set, if the field is disabled).
 triage_owner      string    The login name of the Triage Owner of a bug's
                             component.
+type              string    The Type field on a bug.
 url               string    The "URL" field of a bug.
 version           string    The Version field of a bug.
 whiteboard        string    Search the "Status Whiteboard" field on bugs for a
@@ -643,6 +646,7 @@ priority            string   (defaulted) What order the bug will be fixed in by
                              the developer, compared to the developer's other
                              bugs.
 severity            string   (defaulted) How severe the bug is.
+type                string   (defaulted) The basic category of the bug.
 alias               array    One or more brief aliases for the bug that can be
                              used instead of a bug number when accessing this bug.
                              Must be unique in all of this Bugzilla.
@@ -997,6 +1001,7 @@ status                 string   The status you want to change the bug to. Note
                                 you should also specify a ``resolution``.
 summary                string   The Summary field of the bug.
 target_milestone       string   The bug's Target Milestone.
+type                   string   The Type field on the bug.
 url                    string   The "URL" field of a bug.
 version                string   The bug's Version field.
 whiteboard             string   The Status Whiteboard field of a bug.

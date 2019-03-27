@@ -23,7 +23,7 @@ use Bugzilla::Status;
 use base qw(Exporter);
 @Bugzilla::Config::Common::EXPORT = qw(
   check_multi check_numeric check_regexp check_url check_group
-  check_priority check_severity check_platform
+  check_bug_type check_priority check_severity check_platform
   check_opsys check_shadowdb check_urlbase check_webdotbase
   check_user_verify_class
   check_mail_delivery_method check_notification check_utf8
@@ -96,6 +96,16 @@ sub check_utf8 {
     return "You cannot disable UTF8-MB4 support.";
   }
 
+  return "";
+}
+
+sub check_bug_type {
+  my ($value) = (@_);
+  my $legal_types = get_legal_field_values('bug_type');
+  if (!grep($_ eq $value, @$legal_types)) {
+    return "Must be a legal type value: one of "
+      . join(", ", @$legal_types);
+  }
   return "";
 }
 

@@ -698,8 +698,21 @@ sub process_bug {
     push(@query, "target_milestone");
   }
 
-  # For priority, severity, opsys and platform we check that the one being
+  # For type, priority, severity, opsys and platform we check that the one being
   # imported is valid. If it is not we use the defaults set in the parameters.
+  if (defined($bug_fields{'bug_type'})
+    && check_field('bug_type', scalar $bug_fields{'bug_type'}, undef, ERR_LEVEL))
+  {
+    push(@values, $bug_fields{'bug_type'});
+  }
+  else {
+    push(@values, $params->{'default_bug_type'});
+    $err .= "Unknown type ";
+    $err .= (defined $bug_fields{'bug_type'}) ? $bug_fields{'bug_type'} : "unknown";
+    $err .= ". Setting to default type \"" . $params->{'default_bug_type'} . "\".\n";
+  }
+  push(@query, "bug_type");
+
   if (
     defined($bug_fields{'bug_severity'})
     && check_field(

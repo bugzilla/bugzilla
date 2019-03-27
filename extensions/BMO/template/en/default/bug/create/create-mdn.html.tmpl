@@ -131,9 +131,7 @@ strong.required:before {
       }
       var whiteboard = Dom.get('status_whiteboard');
       whiteboard.value = "[specification][type:" + request_type.toLowerCase() + "]";
-      if (request_type == 'feature') {
-        Dom.get('bug_severity').value = 'enhancement';
-      }
+      document.querySelector('[name="bug_type"]').value = request_type == 'bug' ? 'defect' : 'enhancement';
       return true;
     },
     _getRadioValueByClass: function(class_name) {
@@ -185,7 +183,8 @@ strong.required:before {
   <input type="hidden" name="rep_platform" value="All">
   <input type="hidden" name="op_sys" value="Other">
   <input type="hidden" name="version" value="unspecified">
-  <input type="hidden" name="bug_severity" id="bug_severity" value="normal">
+  <input type="hidden" name="bug_type" value="task">
+  <input type="hidden" name="bug_severity" value="normal">
   <input type="hidden" name="token" value="[% token FILTER html %]">
   <input type="hidden" name="status_whiteboard" id="status_whiteboard" value="">
 

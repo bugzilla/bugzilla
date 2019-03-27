@@ -45,6 +45,7 @@
 [%# Setting maxlength => 0 means no limit. We set it for performance reasons. %]
 [% abbrev =
   {
+    "bug_type"             => { maxlength => 0 } ,
     "bug_severity"         => { maxlength => 3 , title => "Sev" } ,
     "priority"             => { maxlength => 7 , title => "Pri" } ,
     "rep_platform"         => { maxlength => 3 , title => "Plt" } ,
@@ -183,6 +184,7 @@
   [% count = loop.count() %]
 
   <tr id="b[% bug.bug_id %]" class="bz_bugitem
+             bz_[% bug.bug_type FILTER css_class_quote -%]
              bz_[% bug.bug_severity FILTER css_class_quote -%]
              bz_[% bug.priority FILTER css_class_quote -%]
              bz_[% bug.bug_status FILTER css_class_quote -%]
@@ -221,6 +223,11 @@
       [% END %]
       [% IF col_abbrev.format_value %]
         [%- bug.$column FILTER format(col_abbrev.format_value) FILTER html -%]
+      [% ELSIF column == 'bug_type' %]
+        <span class="bug-type-label iconic" title="[% bug.bug_type FILTER html %]"
+              aria-label="[% bug.bug_type FILTER html %]" data-type="[% bug.bug_type FILTER html %]">
+          <span class="icon" aria-hidden="true"></span>
+        </span>
       [% ELSIF column == 'actual_time' ||
                column == 'remaining_time' ||
                column == 'estimated_time' %]

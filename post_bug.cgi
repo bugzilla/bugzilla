@@ -115,6 +115,7 @@ push(
     bug_file_loc
     bug_severity
     bug_status
+    bug_type
     dependson
     keywords
     short_desc

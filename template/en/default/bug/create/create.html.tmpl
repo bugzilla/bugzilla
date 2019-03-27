@@ -66,6 +66,7 @@ function initCrashSignatureField() {
 
 var initialowners = new Array([% product.components.size %]);
 var last_initialowner;
+var default_bug_types = new Array([% product.components.size %]);
 var initialccs = new Array([% product.components.size %]);
 var components = new Array([% product.components.size %]);
 var comp_desc = new Array([% product.components.size %]);
@@ -80,6 +81,7 @@ var flags = new Array([% product.components.size %]);
     components[[% count %]] = "[% c.name FILTER js %]";
     comp_desc[[% count %]] = "[% c.description FILTER html_light FILTER js %]";
     initialowners[[% count %]] = "[% c.default_assignee.login FILTER js %]";
+    default_bug_types[[% count %]] = "[% c.default_bug_type FILTER js %]";
     [% flag_list = [] %]
     [% FOREACH f = c.flag_types.bug %]
       [% flag_list.push(f.id) %]
@@ -129,6 +131,7 @@ function set_assign_to() {
             last_initialowner = owner;
         }
 
+        form.bug_type.value = default_bug_types[index];
         document.getElementById('initial_cc').innerHTML = initialccs[index];
         document.getElementById('comp_desc').innerHTML = comp_desc[index];
 
@@ -301,9 +304,9 @@ TUI_hide_default('expert_fields');
 
   <tr>
     [% INCLUDE "bug/field-label.html.tmpl"
-      field = bug_fields.version editable = 1 rowspan = 3
+      field = bug_fields.version editable = 1 rowspan = 4
     %]
-    <td rowspan="3">
+    <td rowspan="4">
       <select name="version" id="version" size="5">
         [%- FOREACH v = version %]
           [% NEXT IF NOT v.is_active %]
@@ -314,6 +317,12 @@ TUI_hide_default('expert_fields');
       </select>
     </td>
 
+    [% INCLUDE bug/field.html.tmpl
+      bug = default, field = bug_fields.bug_type, editable = 1,
+      value = default.bug_type %]
+  </tr>
+
+  <tr>
     [% INCLUDE bug/field.html.tmpl
       bug = default, field = bug_fields.bug_severity, editable = 1,
       value = default.bug_severity %]

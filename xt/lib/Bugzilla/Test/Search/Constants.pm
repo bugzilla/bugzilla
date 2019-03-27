@@ -487,6 +487,7 @@ use constant GREATERTHAN_OVERRIDE => (
   assigned_to    => {contains => [2, 3, 4, 5]},
   bug_id         => {contains => [2, 3, 4, 5]},
   bug_group      => {contains => [1, 2, 3, 4]},
+  bug_type       => {contains => [2, 3, 4, 5]},
   bug_severity   => {contains => [2, 3, 4, 5]},
   bug_status     => {contains => [2, 3, 4, 5]},
   component      => {contains => [2, 3, 4, 5]},

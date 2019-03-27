@@ -91,8 +91,9 @@ use constant ISOLATION_LEVEL => 'REPEATABLE READ';
 # Bugzilla with enums. After that, they are either controlled through
 # the Bugzilla UI or through the DB.
 use constant ENUM_DEFAULTS => {
+  bug_type => ['defect', 'enhancement', 'task'],
   bug_severity =>
-    ['blocker', 'critical', 'major', 'normal', 'minor', 'trivial', 'enhancement'],
+    ['blocker', 'critical', 'major', 'normal', 'minor', 'trivial'],
   priority     => ["Highest", "High",    "Normal",    "Low",   "Lowest", "---"],
   op_sys       => ["All",     "Windows", "Mac OS",    "Linux", "Other"],
   rep_platform => ["All",     "PC",      "Macintosh", "Other"],

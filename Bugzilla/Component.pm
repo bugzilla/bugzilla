@@ -36,6 +36,7 @@ use constant DB_COLUMNS => qw(
   id
   name
   product_id
+  default_bug_type
   initialowner
   initialqacontact
   description
@@ -45,6 +46,7 @@ use constant DB_COLUMNS => qw(
 
 use constant UPDATE_COLUMNS => qw(
   name
+  default_bug_type
   initialowner
   initialqacontact
   description
@@ -57,6 +59,7 @@ use constant REQUIRED_FIELD_MAP => {product_id => 'product',};
 use constant VALIDATORS => {
   create_series    => \&Bugzilla::Object::check_boolean,
   product          => \&_check_product,
+  default_bug_type => \&_check_default_bug_type,
   initialowner     => \&_check_initialowner,
   initialqacontact => \&_check_initialqacontact,
   description      => \&_check_description,
@@ -200,6 +203,13 @@ sub _check_description {
   return $description;
 }
 
+sub _check_default_bug_type {
+  my ($invocant, $type) = @_;
+  return $type if Bugzilla::Config::Common::check_bug_type($type) eq '';
+  # Ignore silently just in case
+  return undef;
+}
+
 sub _check_initialowner {
   my ($invocant, $owner) = @_;
 
@@ -306,9 +316,10 @@ sub _create_series {
   }
 }
 
-sub set_name        { $_[0]->set('name',        $_[1]); }
-sub set_description { $_[0]->set('description', $_[1]); }
-sub set_is_active   { $_[0]->set('isactive',    $_[1]); }
+sub set_name             { $_[0]->set('name',             $_[1]); }
+sub set_description      { $_[0]->set('description',      $_[1]); }
+sub set_is_active        { $_[0]->set('isactive',         $_[1]); }
+sub set_default_bug_type { $_[0]->set('default_bug_type', $_[1]); }
 
 sub set_default_assignee {
   my ($self, $owner) = @_;
@@ -371,6 +382,10 @@ sub bug_ids {
     );
   }
   return $self->{'bugs_ids'};
+}
+
+sub default_bug_type {
+  return $_[0]->{'default_bug_type'} ||= Bugzilla->params->{'default_bug_type'};
 }
 
 sub default_assignee {
@@ -508,6 +523,7 @@ Bugzilla::Component - Bugzilla product component class.
     my $name               = $component->name;
     my $description        = $component->description;
     my $product_id         = $component->product_id;
+    my $default_bug_type   = $component->default_bug_type;
     my $default_assignee   = $component->default_assignee;
     my $default_qa_contact = $component->default_qa_contact;
     my $initial_cc         = $component->initial_cc;
@@ -521,6 +537,7 @@ Bugzilla::Component - Bugzilla product component class.
     my $component =
       Bugzilla::Component->create({ name             => $name,
                                     product          => $product,
+                                    default_bug_type => $default_bug_type,
                                     initialowner     => $user_login1,
                                     initialqacontact => $user_login2,
                                     triage_owner     => $user_login3,
@@ -528,6 +545,7 @@ Bugzilla::Component - Bugzilla product component class.
 
     $component->set_name($new_name);
     $component->set_description($new_description);
+    $component->set_default_bug_type($new_type);
     $component->set_default_assignee($new_login_name);
     $component->set_default_qa_contact($new_login_name);
     $component->set_cc_list(\@new_login_names);
@@ -574,6 +592,16 @@ Component.pm represents a Product Component object.
  Params:      none.
 
  Returns:     A reference to an array of bug IDs.
+
+=item C<default_bug_type()>
+
+ Description: Returns the default type for bugs filed under this component.
+              Returns the installation's global default bug type if the
+              component's specific type is not set.
+
+ Params:      none.
+
+ Returns:     A string.
 
 =item C<default_assignee()>
 
@@ -656,6 +684,14 @@ Component.pm represents a Product Component object.
 
  Returns:     Nothing.
 
+=item C<set_default_bug_type($new_type)>
+
+ Description: Changes the default bug type of the component.
+
+ Params:      $new_type - one of legal bug types or undef.
+
+ Returns:     Nothing.
+
 =item C<set_default_assignee($new_assignee)>
 
  Description: Changes the default assignee of the component.
@@ -724,6 +760,8 @@ Component.pm represents a Product Component object.
               product         - a Bugzilla::Product object to which
                                 the Component is being added.
               description     - description of the new component (string).
+              default_bug_type  - the default type for bugs filed under this
+                                  component (string).
               initialowner    - login name of the default assignee (string).
               The following keys are optional:
               initiaqacontact - login name of the default QA contact (string),

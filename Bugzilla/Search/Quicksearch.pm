@@ -28,7 +28,8 @@ use base qw(Exporter);
 # Custom mappings for some fields.
 use constant MAPPINGS => {
 
-  # Status, Resolution, Platform, OS, Priority, Severity
+  # Type, Status, Resolution, Platform, OS, Priority, Severity
+  "type"     => "bug_type",
   "status"   => "bug_status",
   "platform" => "rep_platform",
   "os"       => "op_sys",
@@ -89,7 +90,7 @@ sub FIELD_MAP {
   # "reporter_accessible" and "reporter" both match "rep".
   delete @full_map{
     qw(rep_platform bug_status bug_file_loc bug_group
-      bug_severity bug_status
+      bug_severity bug_status bug_type
       status_whiteboard
       cclist_accessible reporter_accessible)
   };

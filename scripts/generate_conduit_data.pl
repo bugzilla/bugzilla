@@ -139,6 +139,7 @@ Bugzilla->set_user(Bugzilla::User->check({name => 'conduit@mozilla.bugs'}));
 Bugzilla::Bug->create({
   product      => 'Firefox',
   component    => 'General',
+  bug_type     => 'defect',
   priority     => '--',
   bug_status   => 'NEW',
   version      => 'unspecified',

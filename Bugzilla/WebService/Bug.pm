@@ -732,7 +732,7 @@ sub update {
   # We skip certain fields because their set_ methods actually use
   # the external names instead of the internal names.
   $params = Bugzilla::Bug::map_fields($params,
-    {summary => 1, platform => 1, severity => 1, url => 1});
+    {summary => 1, platform => 1, severity => 1, type => 1, url => 1});
 
   my $ids = delete $params->{ids};
   defined $ids || ThrowCodeError('param_required', {param => 'ids'});
@@ -1408,6 +1408,7 @@ sub _bug_to_hash {
       status           => $self->type('string',  $bug->bug_status),
       summary          => $self->type('string',  $bug->short_desc),
       target_milestone => $self->type('string',  $bug->target_milestone),
+      type             => $self->type('string',  $bug->bug_type),
       url              => $self->type('string',  $bug->bug_file_loc),
       version          => $self->type('string',  $bug->version),
       whiteboard       => $self->type('string',  $bug->status_whiteboard),
@@ -2953,6 +2954,10 @@ see the keys included in the user detail hash, see below.
 As with C<triage_owner>, this is an B<extra> field returned only by specifying
 C<triage_owner> or C<_extra> in C<include_fields>.
 
+=item C<type>
+
+C<string> The type of the bug.
+
 =item C<update_token>
 
 C<string> The token that you would have to pass to the F<process_bug.cgi>
@@ -3128,8 +3133,8 @@ and all custom fields.
 in Bugzilla B<4.4>.
 
 =item The C<attachments>, C<comments>, C<duplicates>, C<history>,
-C<regressed_by>, C<regressions> and C<triage_owner> fields were added in
-Bugzilla B<6.0>.
+C<regressed_by>, C<regressions>, C<triage_owner> and C<type> fields were added
+in Bugzilla B<6.0>.
 
 =back
 
@@ -3479,6 +3484,10 @@ will have a QA Contact set, if the field is disabled).
 
 C<string> The login name of the Triage Owner of a bug's component.
 
+=item C<type>
+
+C<string> The Type field on a bug.
+
 =item C<url>
 
 C<string> The "URL" field of a bug.
@@ -3629,6 +3638,8 @@ experienced on.
 in by the developer, compared to the developer's other bugs.
 
 =item C<severity> (string) B<Defaulted> - How severe the bug is.
+
+=item C<type> (string) B<Defaulted> - The basic category of the bug.
 
 =item C<alias> (string) - A brief alias for the bug that can be used
 instead of a bug number when accessing this bug. Must be unique in
@@ -4636,6 +4647,10 @@ C<string> The Summary field of the bug.
 =item C<target_milestone>
 
 C<string> The bug's Target Milestone.
+
+=item C<type>
+
+C<string> The Type field on the bug.
 
 =item C<url>
 

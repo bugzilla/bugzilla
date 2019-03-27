@@ -425,6 +425,7 @@ sub run_queries {
     # Execute the saved query
     my @searchfields = qw(
       bug_id
+      bug_type
       bug_severity
       priority
       rep_platform

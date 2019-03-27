@@ -257,6 +257,9 @@ use_see_also
     prevents addition of new relationships, but existing ones will continue to
     appear.
 
+default_bug_type
+    This is the type that newly entered bugs are set to.
+
 defaultpriority
     This is the priority that newly entered bugs are set to.
 

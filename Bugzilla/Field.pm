@@ -249,6 +249,13 @@ use constant DEFAULT_FIELDS => (
     buglist => 1
   },
   {
+    name           => 'bug_type',
+    desc           => 'Type',
+    in_new_bugmail => 1,
+    type           => FIELD_TYPE_SINGLE_SELECT,
+    buglist        => 1
+  },
+  {
     name           => 'bug_severity',
     desc           => 'Severity',
     in_new_bugmail => 1,

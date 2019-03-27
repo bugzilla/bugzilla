@@ -273,6 +273,8 @@ is_deeply(\@email_sentto, \@email_both, "Admin and normal user got bugmail");
 go_to_bug($sel, $bug1_id);
 
 # Severity change (bugmail to normal user but not admin)
+$sel->select_ok("bug_type", "label=defect");
+$sel->selected_label_is("bug_type", "defect");
 $sel->select_ok("bug_severity", "label=blocker");
 $sel->selected_label_is("bug_severity", "blocker");
 $sel->click_ok("commit");
@@ -320,6 +322,8 @@ log_in($sel, $config, 'admin');
 go_to_bug($sel, $bug1_id);
 
 # Severity change (bugmail to normal user but not admin)
+$sel->select_ok("bug_type", "label=defect");
+$sel->selected_label_is("bug_type", "defect");
 $sel->select_ok("bug_severity", "label=trivial");
 $sel->selected_label_is("bug_severity", "trivial");
 $sel->click_ok("commit");
@@ -384,6 +388,8 @@ log_in($sel, $config, 'editbugs');
 go_to_bug($sel, $bug1_id);
 
 # Severity change (bugmail to both admin and normal user)
+$sel->select_ok("bug_type", "label=defect");
+$sel->selected_label_is("bug_type", "defect");
 $sel->select_ok("bug_severity", "label=normal");
 $sel->selected_label_is("bug_severity", "normal");
 $sel->click_ok("commit");

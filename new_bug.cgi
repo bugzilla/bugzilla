@@ -58,6 +58,7 @@ if (lc($cgi->request_method) eq 'post') {
     short_desc   => scalar($cgi->param('short_desc')),
     product      => scalar($cgi->param('product')),
     component    => scalar($cgi->param('component')),
+    bug_type     => scalar($cgi->param('bug_type')),
     bug_severity => 'normal',
     groups       => \@groups,
     op_sys       => 'Unspecified',

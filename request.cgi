@@ -109,7 +109,8 @@ sub queue {
                 attachments.ispatch,
                 bugs.bug_status,
                 bugs.priority,
-                bugs.bug_severity " .
+                bugs.bug_severity,
+                bugs.bug_type " .
 
     # Use the flags and flagtypes tables for information about the flags,
     # the bugs and attachments tables for target info, the profiles tables
@@ -305,6 +306,7 @@ sub queue {
       'bug_status'      => $data->[17],
       'priority'        => $data->[18],
       'bug_severity'    => $data->[19],
+      'bug_type'        => $data->[20],
     };
     push(@requests, $request);
   }

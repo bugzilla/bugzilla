@@ -60,6 +60,7 @@ use constant CLASS_MAP => {
 };
 
 use constant DEFAULT_MAP => {
+  bug_type     => 'default_bug_type',
   op_sys       => 'defaultopsys',
   rep_platform => 'defaultplatform',
   priority     => 'defaultpriority',

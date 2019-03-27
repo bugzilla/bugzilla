@@ -19,6 +19,7 @@ our $sortkey = 600;
 sub get_param_list {
   my $class = shift;
 
+  my @legal_types      = @{get_legal_field_values('bug_type')};
   my @legal_priorities = @{get_legal_field_values('priority')};
   my @legal_severities = @{get_legal_field_values('bug_severity')};
   my @legal_platforms  = @{get_legal_field_values('rep_platform')};
@@ -38,6 +39,14 @@ sub get_param_list {
     {name => 'use_regression_fields', type => 'b', default => 1},
 
     {name => 'use_see_also', type => 'b', default => 1},
+
+    {
+      name    => 'default_bug_type',
+      type    => 's',
+      choices => \@legal_types,
+      default => 'defect',
+      checker => \&check_bug_type
+    },
 
     {
       name    => 'defaultpriority',

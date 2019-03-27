@@ -2821,3 +2821,70 @@ pre.comment-text {
 .markdown-body hr {
   border-bottom-color: #eee;
 }
+
+/* Bug types */
+
+:root {
+  --bug-type-color-defect: #D62935;
+  --bug-type-color-enhancement: #2BC028;
+  --bug-type-color-task: #2886C9;
+}
+
+.bug-type-label .icon {
+  font-family: 'Material Icons';
+  line-height: 100%;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+.bug-type-label[data-type="defect"] .icon::before {
+  content: '\E85F';
+  color: var(--bug-type-color-defect);
+}
+
+.bug-type-label[data-type="enhancement"] .icon::before {
+  content: '\E862';
+  color: var(--bug-type-color-enhancement);
+}
+
+.bug-type-label[data-type="task"] .icon::before {
+  content: '\E85D';
+  color: var(--bug-type-color-task);
+}
+
+.bug-type-label.iconic .icon {
+  font-size: 18px;
+  vertical-align: middle;
+}
+
+.bug-type-label.iconic-text {
+  border-radius: .2em;
+  padding: .2em .4em .2em .2em;
+  color: #FFF;
+  background-color: #666;
+  line-height: 16px;
+  font-weight: 600;
+}
+
+.bug-type-label.iconic-text[data-type="defect"] {
+  background-color: var(--bug-type-color-defect);
+}
+
+.bug-type-label.iconic-text[data-type="enhancement"] {
+  background-color: var(--bug-type-color-enhancement);
+}
+
+.bug-type-label.iconic-text[data-type="task"] {
+  background-color: var(--bug-type-color-task);
+}
+
+.bug-type-label.iconic-text .icon {
+  margin-right: .2em;
+  font-size: 16px;
+  vertical-align: bottom;
+}
+
+.bug-type-label.iconic-text .icon::before {
+  color: #FFF !important;
+  vertical-align: bottom;
+}

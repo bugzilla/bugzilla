@@ -49,6 +49,7 @@ logout($sel);
 
 log_in($sel, $config, 'QA_Selenium_TEST');
 file_bug_in_product($sel, 'TestProduct');
+$sel->select_ok("bug_type",     "label=defect");
 $sel->select_ok("bug_severity", "label=critical");
 $sel->type_ok("short_desc", "Test bug editing");
 $sel->type_ok("comment",    "ploc");
@@ -64,6 +65,7 @@ $sel->is_text_present_ok('has been added to the database',
 $sel->select_ok("rep_platform", "label=Other");
 $sel->select_ok("op_sys",       "label=Other");
 $sel->select_ok("priority",     "label=Highest");
+$sel->select_ok("bug_type",     "label=defect");
 $sel->select_ok("bug_severity", "label=blocker");
 $sel->type_ok("bug_file_loc",      "foo.cgi?action=bar");
 $sel->type_ok("status_whiteboard", "[Selenium was here]");
@@ -104,6 +106,7 @@ $sel->click_ok("link=bug $bug1_id");
 check_page_load($sel, WAIT_TIME,
   qq{http://HOSTNAME:8000/show_bug.cgi?id=$bug1_id});
 $sel->title_like(qr/^$bug1_id /);
+$sel->select_ok("bug_type",     "label=defect");
 $sel->select_ok("bug_severity", "label=normal");
 $sel->select_ok("priority",     "label=High");
 $sel->select_ok("rep_platform", "label=All");
@@ -137,6 +140,7 @@ logout($sel);
 
 log_in($sel, $config, 'admin');
 go_to_bug($sel, $bug1_id);
+$sel->select_ok("bug_type",     "label=defect");
 $sel->select_ok("bug_severity", "label=blocker");
 $sel->select_ok("priority",     "label=Highest");
 $sel->type_ok("status_whiteboard", "[Selenium was here][admin too]");
@@ -261,6 +265,8 @@ $sel->type_ok("comment",
   "I have no privs, I can only comment (and remove people from the CC list)");
 ok(!$sel->is_element_present('//select[@name="product"]'),
   "Product field not editable");
+ok(!$sel->is_element_present('//select[@name="bug_type"]'),
+  "Type field not editable");
 ok(!$sel->is_element_present('//select[@name="bug_severity"]'),
   "Severity field not editable");
 ok(!$sel->is_element_present('//select[@name="priority"]'),
@@ -371,6 +377,7 @@ logout($sel);
 
 log_in($sel, $config, 'QA_Selenium_TEST');
 file_bug_in_product($sel, 'TestProduct');
+$sel->select_ok("bug_type", "label=defect");
 $sel->select_ok("bug_severity", "label=blocker");
 $sel->type_ok("short_desc", "New bug from me");
 

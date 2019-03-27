@@ -235,7 +235,7 @@ foreach my $bug (@bug_objects) {
 # Component, target_milestone, and version are in here just in case
 # the 'product' field wasn't defined in the CGI. It doesn't hurt to set
 # them twice.
-my @set_fields = qw(op_sys rep_platform priority bug_severity
+my @set_fields = qw(op_sys rep_platform priority bug_severity bug_type
   component target_milestone version
   bug_file_loc status_whiteboard short_desc
   deadline remaining_time estimated_time
@@ -246,6 +246,7 @@ my @set_fields = qw(op_sys rep_platform priority bug_severity
 push(@set_fields, 'assigned_to') if !$cgi->param('set_default_assignee');
 push(@set_fields, 'qa_contact')  if !$cgi->param('set_default_qa_contact');
 my %field_translation = (
+  bug_type               => 'type',
   bug_severity           => 'severity',
   rep_platform           => 'platform',
   short_desc             => 'summary',

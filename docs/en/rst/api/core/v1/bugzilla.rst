@@ -193,6 +193,7 @@ Example response for authenticated user:
           "defaultplatform" : "",
           "defaultpriority" : "--",
           "defaultseverity" : "normal",
+          "default_bug_type" : "defect",
           "duplicate_or_move_bug_status" : "RESOLVED",
           "emailregexp" : "^[\\w\\.\\+\\-=']+@[\\w\\.\\-]+\\.[\\w\\-]+$",
           "emailsuffix" : "",
@@ -232,6 +233,7 @@ A logged-in user can access the following parameters (listed alphabetically):
 * defaultplatform
 * defaultpriority
 * defaultseverity
+* default_bug_type
 * duplicate_or_move_bug_status
 * emailregexpdesc
 * emailsuffix

@@ -190,6 +190,7 @@ else {
 }
 @chfields = (sort(@chfields));
 $vars->{'chfield'} = \@chfields;
+$vars->{'bug_type'} = Bugzilla::Field->new({name => 'bug_type'})->legal_values;
 $vars->{'bug_status'}
   = Bugzilla::Field->new({name => 'bug_status'})->legal_values;
 $vars->{'rep_platform'}

@@ -135,6 +135,14 @@
             edit_only = 1
             editable = 1
           %]
+
+          [% INCLUDE bug_modal/field.html.tmpl
+            field = bug_fields.bug_type
+            field_type = constants.FIELD_TYPE_SINGLE_SELECT
+            help = "https://wiki.mozilla.org/BMO/UserGuide/BugFields#bug_type"
+            edit_only = 1
+            editable = 1
+          %]
         [% END %]
         [% WRAPPER bug_modal/module.html.tmpl title = "Tracking" %]
           [%# keywords %]

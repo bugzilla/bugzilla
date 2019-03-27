@@ -85,6 +85,7 @@ sub DB_COLUMNS {
       bug_id
       bug_severity
       bug_status
+      bug_type
       cclist_accessible
       component_id
       creation_ts
@@ -121,6 +122,7 @@ sub VALIDATORS {
     bug_file_loc      => \&_check_bug_file_loc,
     bug_severity      => \&_check_select_field,
     bug_status        => \&_check_bug_status,
+    bug_type          => \&_check_select_field,
     cc                => \&_check_cc,
     comment           => \&_check_comment,
     component         => \&_check_component,
@@ -219,6 +221,7 @@ sub UPDATE_COLUMNS {
     bug_file_loc
     bug_severity
     bug_status
+    bug_type
     cclist_accessible
     component_id
     deadline
@@ -282,6 +285,7 @@ use constant FIELD_MAP => {
   severity              => 'bug_severity',
   status                => 'bug_status',
   summary               => 'short_desc',
+  type                  => 'bug_type',
   url                   => 'bug_file_loc',
   whiteboard            => 'status_whiteboard',
 };
@@ -384,7 +388,7 @@ sub _bz_field {
 sub ES_PROPERTIES {
   return {
     _bz_field('priority'), _bz_field('bug_severity'), _bz_field('bug_status'),
-    _bz_field('resolution'),
+    _bz_field('resolution'), _bz_field('bug_type'),
     status_whiteboard =>
       {type => 'string', analyzer => 'whiteboard_shingle_tokens'},
     delta_ts => {type => 'string', index => 'not_analyzed'},
@@ -401,7 +405,7 @@ sub ES_SELECT_UPDATED_SQL {
   my @fields = (
     'keywords',           'short_desc', 'product',           'component',
     'cf_crash_signature', 'alias',      'status_whiteboard', 'bug_status',
-    'resolution',         'priority',   'assigned_to'
+    'resolution',         'priority',   'assigned_to',       'bug_type'
   );
   my $fields = join(', ', ("?") x @fields);
 
@@ -478,6 +482,7 @@ sub es_document {
     reporter          => $self->reporter->login,
     delta_ts          => $self->delta_ts,
     bug_severity      => $self->bug_severity,
+    bug_type          => $self->bug_type,
   };
 }
 
@@ -854,6 +859,7 @@ sub possible_duplicates {
 # C<component>   - B<Required> The name of the component this bug is being
 #                  filed against.
 #
+# C<bug_type>     - B<Required> The initial type for the bug.
 # C<bug_severity> - B<Required> The severity for the bug, a string.
 # C<creation_ts>  - B<Required> A SQL timestamp for when the bug was created.
 # C<short_desc>   - B<Required> A summary for the bug.
@@ -894,6 +900,8 @@ sub create {
   $dbh->bz_start_transaction();
 
   # These fields have default values which we can use if they are undefined.
+  $params->{bug_type} = Bugzilla->params->{default_bug_type}
+    unless defined $params->{bug_type};
   $params->{bug_severity} = Bugzilla->params->{defaultseverity}
     unless defined $params->{bug_severity};
   $params->{priority} = Bugzilla->params->{defaultpriority}
@@ -2625,7 +2633,7 @@ sub fields {
       reporter_accessible cclist_accessible
       classification_id classification
       product component version rep_platform op_sys
-      bug_status resolution dup_id see_also
+      bug_type bug_status resolution dup_id see_also
       bug_file_loc status_whiteboard keywords
       priority bug_severity target_milestone
       dependson blocked regressed_by regresses
@@ -3253,6 +3261,13 @@ sub set_bug_status {
     }
   }
 }
+
+sub set_type {
+  # The bug_type table column is nullable, but make sure to use the default type
+  # in case it's not set
+  $_[0]->set('bug_type', $_[1] || Bugzilla->params->{'default_bug_type'});
+}
+
 sub set_status_whiteboard { $_[0]->set('status_whiteboard', $_[1]); }
 sub set_summary           { $_[0]->set('short_desc',        $_[1]); }
 sub set_target_milestone  { $_[0]->set('target_milestone',  $_[1]); }
@@ -3649,6 +3664,7 @@ sub bug_file_loc        { return $_[0]->{bug_file_loc} }
 sub bug_id              { return $_[0]->{bug_id} }
 sub bug_severity        { return $_[0]->{bug_severity} }
 sub bug_status          { return $_[0]->{bug_status} }
+sub bug_type            { return $_[0]->{bug_type} }
 sub cclist_accessible   { return $_[0]->{cclist_accessible} }
 sub component_id        { return $_[0]->{component_id} }
 sub creation_ts         { return $_[0]->{creation_ts} }

@@ -595,6 +595,8 @@ CrossCheck(
   ["flaginclusions", "component_id", "type_id"]
 );
 
+CrossCheck("bug_type", "value", ["bugs", "bug_type", "bug_id"]);
+
 # Check the former enum types -mkanat@bugzilla.org
 CrossCheck("bug_status", "value", ["bugs", "bug_status", "bug_id"]);
 

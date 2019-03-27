@@ -79,6 +79,7 @@ use constant BUG_CHOICE_FIELDS => qw(
 );
 
 use constant DEFAULT_VALUE_MAP => {
+  type_id      => 'default_bug_type',
   op_sys       => 'defaultopsys',
   rep_platform => 'defaultplatform',
   priority     => 'defaultpriority',

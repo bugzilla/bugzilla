@@ -41,6 +41,16 @@
   </td>
 </tr>
 <tr>
+  <th class="field_label"><label for="default_bug_type">Default [% terms.Bug %] Type:</label></th>
+  <td>
+    [% INCLUDE default_select
+        field_name   = 'default_bug_type'
+        field_value  = comp.default_bug_type
+        field_values = bug_fields.bug_type.legal_values
+    %]
+  </td>
+</tr>
+<tr>
   <th class="field_label"><label for="initialowner">Default Assignee:</label></th>
   <td>
     [% INCLUDE global/userselect.html.tmpl
@@ -95,3 +105,13 @@
 </tr>
 
 [% Hook.process('rows') %]
+
+[% BLOCK default_select %]
+  <select name="[% field_name FILTER html %]">
+    [% FOREACH v IN field_values %]
+      <option value="[% v.value FILTER html %]" [% " selected" IF field_value == v.value %]>
+        [% v.value FILTER html %]
+      </option>
+    [% END %]
+  </select>
+[% END %]

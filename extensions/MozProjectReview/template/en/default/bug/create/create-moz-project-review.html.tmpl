@@ -48,6 +48,7 @@
 </p>
 
 <form method="post" action="[% basepath FILTER none %]post_bug.cgi" id="mozProjectForm" enctype="multipart/form-data">
+  <input type="hidden" id="bug_type" name="bug_type" value="task">
   <input type="hidden" id="product" name="product" value="Legal">
   <input type="hidden" id="component" name="component" value="General">
   <input type="hidden" id="rep_platform" name="rep_platform" value="All">

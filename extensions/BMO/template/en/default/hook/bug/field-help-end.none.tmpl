@@ -21,6 +21,23 @@
 [% USE Bugzilla %]
 [% IF Bugzilla.request_cache.bmo_fields_page %]
   [%
+    vars.help_html.bug_type =
+      "This field describes the type of ${terms.abug}.
+       <table>
+        <tr>
+          <th>defect</th>
+          <td>regression, crash, hang, security vulnerability and any other general issue</td>
+        </tr>
+        <tr>
+          <th>enhancement</th>
+          <td>new feature, improvement in UI, performance, etc. and any other request for enhancement</td>
+        </tr>
+        <tr>
+          <th>task</th>
+          <td>refactoring, removal, replacement, enabling or disabling of functionality and any other task</td>
+        </tr>
+      </table>"
+
     vars.help_html.priority =
       "This field describes the importance and order in which $terms.abug
        should be fixed compared to other ${terms.bugs}. This field is utilized
@@ -56,9 +73,6 @@
           <td>cosmetic problem like misspelled words or misaligned
           text</td>
         </tr>
-        <tr>
-          <th>enhancement</th>
-          <td>Request for enhancement</td>
       </table>"
 
     vars.help_html.rep_platform =

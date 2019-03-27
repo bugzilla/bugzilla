@@ -575,12 +575,12 @@ if (grep('relevance', @displaycolumns) && !$fulltext) {
 
 # Generate the list of columns that will be selected in the SQL query.
 
-# The bug ID is always selected because bug IDs are always displayed.
-# Severity, priority, resolution and status are required for buglist
+# The bug ID is always selected because bug IDs are always displayed. Type,
+# severity, priority, status, resolution and product are required for buglist
 # CSS classes.
 my @selectcolumns
-  = ("bug_id", "bug_severity", "priority", "bug_status", "resolution",
-  "product");
+  = ("bug_id", "bug_type", "bug_severity", "priority", "bug_status",
+  "resolution", "product");
 
 # remaining and actual_time are required for percentage_complete calculation:
 if (grep { $_ eq "percentage_complete" } @displaycolumns) {
@@ -623,7 +623,7 @@ if ($format->{'extension'} eq 'atom') {
     'short_desc',           'opendate',   'changeddate',  'reporter',
     'reporter_realname',    'priority',   'bug_severity', 'assigned_to',
     'assigned_to_realname', 'bug_status', 'product',      'component',
-    'resolution'
+    'resolution',           'bug_type'
   );
   push(@required_atom_columns, 'target_milestone')
     if Bugzilla->params->{'usetargetmilestone'};
@@ -1028,6 +1028,7 @@ if ($dotweak && scalar @bugs) {
   Bugzilla->switch_to_shadow_db();
 
   $vars->{'products'}    = $user->get_enterable_products;
+  $vars->{'types'}       = get_legal_field_values('bug_type');
   $vars->{'platforms'}   = get_legal_field_values('rep_platform');
   $vars->{'op_sys'}      = get_legal_field_values('op_sys');
   $vars->{'priorities'}  = get_legal_field_values('priority');

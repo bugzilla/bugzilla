@@ -75,6 +75,9 @@
       </tr><tr class="bz_feed_resolution">
         <td>[% columns.resolution.title FILTER html %] </td>
         <td>[% display_value("resolution", bug.resolution) FILTER html %]</td>
+      </tr><tr class="bz_feed_type">
+        <td>[% columns.bug_type.title FILTER html %]</td>
+        <td>[% display_value("bug_type", bug.bug_type) FILTER html %]</td>
       </tr><tr class="bz_feed_priority">
         <td>[% columns.priority.title FILTER html %]</td>
         <td>[% display_value("priority", bug.priority) FILTER html %]</td>

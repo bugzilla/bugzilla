@@ -1,5 +1,6 @@
 var initial = {}
 var comp_desc = {}
+var comp_default_bug_type = {}
 var product_name = '';
 
 var component_load = function(product) {
@@ -20,8 +21,10 @@ var component_load = function(product) {
                 callback(data.components)
             });
 
-            for (var i in data.components)
-                comp_desc[data.components[i]["name"]] = data.components[i]["description"];
+            for (const comp of data.components) {
+                comp_desc[comp.name] = comp.description;
+                comp_default_bug_type[comp.name] = comp.default_bug_type;
+            }
 
             selectize = $("#version")[0].selectize;
             selectize.clear();
@@ -67,6 +70,16 @@ $(document).ready(function() {
                         callback(initial.products);
                     }
                 });
+
+                $("#bug_type").selectize({
+                    valueField: 'value',
+                    labelField: 'label',
+                    placeholder: 'Type',
+                    searchField: 'value',
+                    options: initial.default_bug_types.map(type => ({ label: type, value: type })),
+                    preload: true,
+                    create: false,
+                });
             },
             function() {
                 alert("Network issues. Please refresh the page and try again");
@@ -107,8 +120,9 @@ $(document).ready(function() {
     });
 
     component_sel.on("change", function () {
-        var selectize = $("#component")[0].selectize;
-        $('#comp_desc').text(comp_desc[selectize.getValue()]);
+        const name = $("#component")[0].selectize.getValue();
+        $('#comp_desc').text(comp_desc[name]);
+        $("#bug_type")[0].selectize.setValue(comp_default_bug_type[name]);
     });
 
     $('.create-btn')

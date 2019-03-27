@@ -130,7 +130,7 @@ sub template_before_process {
 
     # fields that have a custom sortkey. (So they are correctly sorted
     # when using js)
-    my @sortkey_fields = qw(bug_status resolution bug_severity priority
+    my @sortkey_fields = qw(bug_status resolution bug_type bug_severity priority
       rep_platform op_sys);
 
     my %columns_sortkey;
@@ -1598,6 +1598,7 @@ sub field_end_of_create {
     short_desc   => "Custom field '$name' added to bugzilla.mozilla.org",
     product      => 'Data & BI Services Team',
     component    => 'Database Operations',
+    bug_type     => 'task',
     bug_severity => 'normal',
     op_sys       => 'All',
     rep_platform => 'All',
@@ -1969,6 +1970,7 @@ sub _post_employee_incident_bug {
       product           => 'mozilla.org',
       component         => 'Security Assurance: Incident',
       status_whiteboard => '[infrasec:incident]',
+      bug_type          => 'task',
       bug_severity      => 'critical',
       cc                => ['jstevensen@mozilla.com'],
       groups            => ['infrasec'],
@@ -1993,6 +1995,7 @@ sub _post_employee_incident_bug {
       short_desc   => 'Disable/Regenerate SSH Key',
       product      => $bug->product,
       component    => $bug->component,
+      bug_type     => 'task',
       bug_severity => 'critical',
       cc           => $bug->cc,
       groups       => [map { $_->{name} } @{$bug->groups}],
@@ -2130,6 +2133,7 @@ sub _post_shield_studies {
     short_desc   => '[SHIELD] Study Validation Review for ' . $params->{hypothesis},
     product      => 'Shield',
     component    => 'Shield Study',
+    bug_type     => 'task',
     bug_severity => 'normal',
     op_sys       => 'All',
     rep_platform => 'All',
@@ -2144,6 +2148,7 @@ sub _post_shield_studies {
     short_desc   => '[SHIELD] Shipping Status for ' . $params->{hypothesis},
     product      => 'Shield',
     component    => 'Shield Study',
+    bug_type     => 'task',
     bug_severity => 'normal',
     op_sys       => 'All',
     rep_platform => 'All',
@@ -2158,6 +2163,7 @@ sub _post_shield_studies {
     short_desc   => '[SHIELD] Data Review for ' . $params->{hypothesis},
     product      => 'Shield',
     component    => 'Shield Study',
+    bug_type     => 'task',
     bug_severity => 'normal',
     op_sys       => 'All',
     rep_platform => 'All',
@@ -2172,6 +2178,7 @@ sub _post_shield_studies {
     short_desc   => '[SHIELD] Legal Review for ' . $params->{hypothesis},
     product      => 'Legal',
     component    => 'Firefox',
+    bug_type     => 'task',
     bug_severity => 'normal',
     op_sys       => 'All',
     rep_platform => 'All',

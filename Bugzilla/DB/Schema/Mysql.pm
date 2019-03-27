@@ -51,6 +51,7 @@ use constant BOOLEAN_MAP => {
     is_multiplicable => 1
   },
   fielddefs    => {mailhead     => 1, obsolete => 1},
+  bug_type     => {isactive     => 1},
   bug_status   => {isactive     => 1},
   resolution   => {isactive     => 1},
   bug_severity => {isactive     => 1},

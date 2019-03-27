@@ -37,6 +37,7 @@ if (Bugzilla->params->{'requirelogin'} && !$user->id) {
 
 # Pass a bunch of Bugzilla configuration to the templates.
 my $vars = {};
+$vars->{'type'}       = get_legal_field_values('bug_type');
 $vars->{'priority'}   = get_legal_field_values('priority');
 $vars->{'severity'}   = get_legal_field_values('bug_severity');
 $vars->{'platform'}   = get_legal_field_values('rep_platform');

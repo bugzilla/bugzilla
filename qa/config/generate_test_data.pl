@@ -349,6 +349,7 @@ my $admin_user = Bugzilla::User->check($config->{admin_user_login});
 Bugzilla->set_user($admin_user);
 
 my %field_values = (
+  'bug_type'     => 'defect',
   'priority'     => 'Highest',
   'bug_status'   => 'CONFIRMED',
   'version'      => 'unspecified',

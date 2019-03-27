@@ -12,14 +12,14 @@
 use strict;
 use warnings;
 use lib qw(lib ../../lib ../../local/lib/perl5);
-use Test::More tests => 269;
+use Test::More tests => 275;
 use QA::Util;
 my ($config, @clients) = get_rpc_clients();
 
 use constant INVALID_PRODUCT_ID => -1;
 use constant INVALID_FIELD_NAME => 'invalid_field';
 use constant GLOBAL_FIELDS =>
-  qw(bug_severity bug_status op_sys priority rep_platform resolution
+  qw(bug_type bug_severity bug_status op_sys priority rep_platform resolution
   cf_qa_status cf_single_select);
 use constant PRODUCT_FIELDS => qw(version target_milestone component);
 

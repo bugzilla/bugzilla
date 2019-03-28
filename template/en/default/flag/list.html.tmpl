@@ -131,7 +131,7 @@
                 title="[% type.description FILTER html %]"
                 onchange="toggleRequesteeField(this);"
                 class="flag_select flag_type-[% type.id %]"
-                data-id="[% type.id %]" data-name="[% type.name FILTER html FILTER no_break %]"
+                data-id="[% type.id %]" data-name="[% type.name FILTER html %]"
                 [% IF !can_edit_flag %] disabled="disabled"[% END %]>
         [% IF dontchange %]
           <option value="[% dontchange FILTER html %]" selected>[% dontchange FILTER html %]</option>

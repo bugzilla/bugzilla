@@ -121,7 +121,7 @@ Bugzilla.FlagTypeComment = class FlagTypeComment {
   create_comment($fieldset) {
     return [
       `### ${$fieldset.querySelector('h3').innerText}`,
-      ...[...$fieldset.querySelectorAll('tr')].map($tr => {
+      ...[...$fieldset.querySelectorAll('tr:not(.other-patches)')].map($tr => {
         const checkboxes = [...$tr.querySelectorAll('input[type="checkbox"]:checked')];
         const $radio = $tr.querySelector('input[type="radio"]:checked');
         const $input = $tr.querySelector('textarea,select,input');

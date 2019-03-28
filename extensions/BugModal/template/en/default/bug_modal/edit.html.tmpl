@@ -49,7 +49,6 @@
   obsolete_attachments = 0;
   FOREACH attachment IN bug.attachments;
     NEXT IF attachment.isprivate && !(user.is_insider || attachment.attacher.id == user.id);
-    NEXT IF phabricator_revisions.size && attachment.contenttype == phabricator_content_type;
     IF attachment.isobsolete;
       obsolete_attachments = obsolete_attachments + 1;
     ELSE;

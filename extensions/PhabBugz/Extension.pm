@@ -38,7 +38,6 @@ sub template_before_process {
       $active_revision_count++ if !$attachment->isobsolete;
       $has_revisions = 1;
     }
-    $vars->{phabricator_content_type} = PHAB_CONTENT_TYPE;
     $vars->{phabricator_revisions} = $has_revisions;
     $vars->{phabricator_active_revision_count} = $active_revision_count;
   }

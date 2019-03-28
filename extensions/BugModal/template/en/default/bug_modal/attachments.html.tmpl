@@ -24,7 +24,6 @@
         [%~ " bz_private" IF attachment.isprivate %]
         [%~ " attach-obsolete" IF attachment.isobsolete %]
         [%~ " attach-patch" IF attachment.can_review %]
-        [%~ " bz_default_hidden" IF phabricator_revisions.size && attachment.contenttype == phabricator_content_type %]
     " [% IF attachment.isobsolete %]style="display:none"[% END %]>
       <td class="attach-desc-td">
         <div class="attach-desc">

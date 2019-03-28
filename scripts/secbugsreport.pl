@@ -25,18 +25,21 @@ use Bugzilla::Report::SecurityRisk;
 use DateTime;
 use URI;
 use JSON::MaybeXS;
-use Mojo::File;
+use Mojo::File qw(path);
+use Data::Dumper;
+use Types::Standard qw(Int);
 
 BEGIN { Bugzilla->extensions }
 Bugzilla->usage_mode(USAGE_MODE_CMDLINE);
 
+my ($year, $month, $day) = @ARGV;
+
 exit 0 unless Bugzilla->params->{report_secbugs_active};
-exit 0 unless defined $ARGV[0] && defined $ARGV[1] && defined $ARGV[2];
+exit 0 unless Int->check($year) && Int->check($month) && Int->check($day);
 
 my $html;
-my $template = Bugzilla->template();
-my $end_date
-  = DateTime->new(year => $ARGV[0], month => $ARGV[1], day => $ARGV[2]);
+my $template     = Bugzilla->template();
+my $end_date     = DateTime->new(year => $year, month => $month, day => $day);
 my $start_date   = $end_date->clone()->subtract(months => 12);
 my $report_week  = $end_date->ymd('-');
 my $teams        = decode_json(Bugzilla->params->{report_secbugs_teams});
@@ -106,6 +109,9 @@ my $email = Email::MIME->create(
 );
 
 MessageToMTA($email);
+
+my $report_dump_file = path(bz_locations->{datadir}, "$year-$month-$day.dump");
+$report_dump_file->spurt(Dumper($report));
 
 sub build_bugs_link {
   my ($arr, $product) = @_;

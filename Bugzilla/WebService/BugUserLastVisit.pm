@@ -44,8 +44,7 @@ sub update {
   foreach my $bug_id (@$ids) {
     my $bug = Bugzilla::Bug->check({id => $bug_id, cache => 1});
 
-    ThrowUserError('user_not_involved', {bug_id => $bug->id})
-      unless $user->is_involved_in_bug($bug);
+    next unless $user->can_see_bug($bug->id);
 
     $bug->update_user_last_visit($user, $last_visit_ts);
 

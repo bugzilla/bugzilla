@@ -83,7 +83,7 @@
   [% END %]
 
   [%# update last-visited %]
-  [% IF user.id && user.is_involved_in_bug(bug) %]
+  [% IF user.id %]
     document.addEventListener('DOMContentLoaded', () => show_new_changes_indicator(), { once: true });
   [% END %]
 

@@ -810,10 +810,11 @@ $(function() {
             var id = target.prop('id').replace(/^flag(_type)?-(\d+)/, "#requestee$1-$2");
             if (target.val() == '?') {
                 $(id + '-container').show();
-                $(id).focus().select();
+                $(id).focus().select().prop('required', true);
             }
             else {
                 $(id + '-container').hide();
+                $(id).prop('required', false);
             }
         });
 

@@ -229,6 +229,7 @@ $sel->select_ok("component", "label=c1");
 $sel->is_editable_ok("flag_type-$flagtype1_id",
   "The selenium bug flag type is not selectable");
 $sel->select_ok("flag_type-$flagtype1_id", "label=?");
+$sel->type_ok("requestee_type-$flagtype1_id", $config->{admin_user_login});
 $sel->type_ok("short_desc", "Create a new selenium flag for c2");
 $sel->type_ok("comment",    ".");
 $sel->click_ok("commit");

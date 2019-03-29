@@ -38,9 +38,12 @@ function toggleRequesteeField(flagField, no_focus)
   // of the flag field.
   if (flagField.value == "?") {
       YAHOO.util.Dom.removeClass(requesteeField.parentNode, 'bz_default_hidden');
+      requesteeField.required = true;
       if (!no_focus) requesteeField.focus();
-  } else
+  } else {
       YAHOO.util.Dom.addClass(requesteeField.parentNode, 'bz_default_hidden');
+      requesteeField.required = false;
+  }
 }
 
 // Hides requestee fields when the window is loaded since they shouldn't

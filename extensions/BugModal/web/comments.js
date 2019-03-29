@@ -515,10 +515,9 @@ Bugzilla.BugModal.Comments = class Comments {
   }
 
   /**
-   * Prepare to show image and text attachments inline if possible. For a better performance, this functionality uses
-   * the Intersection Observer API to show attachments when the associated comment goes into the viewport, when the page
-   * is scrolled down or the collapsed comment is expanded. This also utilizes the Network Information API to save
-   * bandwidth over cellular networks.
+   * Prepare to show image, media and text attachments inline if possible. For a better performance, this functionality
+   * uses the Intersection Observer API to show attachments when the associated comment goes into the viewport, when the
+   * page is scrolled down or the collapsed comment is expanded. This also utilizes the Network Information API to save
    * @see https://developer.mozilla.org/en-US/docs/Web/API/Intersection_Observer_API
    * @see https://developer.mozilla.org/en-US/docs/Web/API/Network_Information_API
    */
@@ -538,8 +537,9 @@ Bugzilla.BugModal.Comments = class Comments {
       }
     }), { root: document.querySelector('#bugzilla-body') });
 
-    // Show only non-obsolete attachments
-    document.querySelectorAll('.change-set .attachment:not(.obsolete)').forEach($att => observer.observe($att));
+    // Show attachments except for obsolete or deleted ones
+    document.querySelectorAll('.change-set .attachment:not(.obsolete):not(.deleted)')
+      .forEach($att => observer.observe($att));
   }
 
   /**
@@ -581,32 +581,34 @@ Bugzilla.BugModal.Comments = class Comments {
     }
 
     // Detect text (code from attachment.js)
-    const is_patch = !!name.match(/\.(?:diff|patch)$/) || !!type.match(/^text\/x-(?:diff|patch)$/);
+    const is_patch = $att.matches('.patch');
     const is_markdown = !!name.match(/\.(?:md|mkdn?|mdown|markdown)$/);
     const is_source = !!name.match(/\.(?:cpp|es|h|js|json|rs|rst|sh|toml|ts|tsx|xml|yaml|yml)$/);
-    const is_text = type.startsWith('text/') || is_patch || is_markdown || is_source;
+    const is_text = type.match(/^text\/(?!x-).+$/) || is_patch || is_markdown || is_source;
 
     // Show text smaller than 2 MB
     if (is_text && size < max_size) {
       // Load text body
-      try {
-        const response = await fetch(`/attachment.cgi?id=${id}`, { credentials: 'same-origin' });
-
-        if (!response.ok) {
-          throw new Error();
+      bugzilla_ajax({ url: `${BUGZILLA.config.basepath}rest/bug/attachment/${id}?include_fields=data` }, data => {
+        if (data.error) {
+          return;
         }
 
-        const text = await response.text();
+        const text = decodeURIComponent(escape(atob(data.attachments[id].data)));
         const lang = is_patch ? 'diff' : type.match(/\w+$/)[0];
 
         $att.insertAdjacentHTML('beforeend', `
-          <a href="${link}" title="${name}" class="outer">
-          <pre class="language-${lang}" role="img" itemprop="text">${text}</pre></a>`);
+          <button type="button" role="link" title="${name}" class="outer">
+          <pre class="language-${lang}" role="img" itemprop="text">${text.htmlEncode()}</pre></button>`);
+
+        // Make the button work as a link. It cannot be `<a>` because Prism Autolinker plugin may add links to `<pre>`
+        $att.querySelector('[role="link"]').addEventListener('click', () => location.href = link);
 
         if (Prism) {
           Prism.highlightElement($att.querySelector('pre'));
+          $att.querySelectorAll('pre a').forEach($a => $a.tabIndex = -1);
         }
-      } catch (ex) {}
+      });
     }
   }
 };

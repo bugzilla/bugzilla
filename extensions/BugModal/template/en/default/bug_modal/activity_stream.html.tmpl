@@ -258,7 +258,7 @@
   [% IF comment.type == constants.CMT_ATTACHMENT_CREATED %]
     [% att = comment.attachment; link = 'attachment.cgi?id=' _ att.id %]
     <div id="att-[% att.id FILTER none %]"
-         class="attachment[% " patch" IF att.ispatch %][% " obsolete" IF att.isobsolete %]"
+         class="attachment[% " patch" IF att.ispatch; " obsolete" IF att.isobsolete; " deleted" IF !att.datasize %]"
          data-id="[% att.id FILTER none %]" itemscope itemtype="http://schema.org/MediaObject"
          [% IF comment.collapsed +%] style="display:none"[% END ~%]>
       <meta itemprop="contentSize" content="[% att.datasize FILTER none %]">
@@ -274,7 +274,7 @@
           <a class="link[% " lightbox" IF att.is_image %]" href="[% link FILTER html %]" itemprop="contentUrl">
         [% END %]
         <span id="att-[% att.id FILTER none %]-description" itemprop="name">[% att.description FILTER html %]</span></a>
-        [% " (obsolete)" IF att.isobsolete %]
+        [% " (obsolete)" IF att.isobsolete; " (deleted)" IF !att.datasize %]
         — <a href="[% link FILTER html %]&amp;action=edit" itemprop="url">Details</a>
         [% IF att.ispatch && Param('splinter_base') %]
           — <a href="[% Bugzilla.splinter_review_url(bug.bug_id, att.id) FILTER none %]">Splinter Review</a>
@@ -288,19 +288,15 @@
     [% comment_tag = 'pre' %]
   [% END %]
 
-  <[% comment_tag FILTER none %] class="comment-text [%= "markdown-body" IF comment.is_markdown %] [%= "bz_private" IF comment.is_private %]"
-                     id="ct-[% comment.count FILTER none %]"
-                     data-comment-id="[% comment.id FILTER none %]"
-                     [% IF comment.is_markdown +%] data-ismarkdown="true" [% END ~%]
-                     [% IF comment.collapsed +%] style="display:none"[% END ~%]
-  >[% FILTER collapse %]
-    [% IF comment.is_about_attachment && comment.attachment.is_image ~%]
-      <a href="attachment.cgi?id=[% comment.attachment.id FILTER none %]"
-        title="[% comment.attachment.description FILTER html %]"
-        class="lightbox lightbox-icon [%= "markdown" IF comment_tag == 'div' %]"><img src="extensions/BugModal/web/image.png" width="16" height="16"></a>
-    [% END %]
+  [% IF comment.body %]
+    <[% comment_tag FILTER none %]
+        class="comment-text [%= "markdown-body" IF comment.is_markdown %] [%= "bz_private" IF comment.is_private %]"
+        id="ct-[% comment.count FILTER none %]" data-comment-id="[% comment.id FILTER none %]"
+        [% IF comment.is_markdown +%] data-ismarkdown="true" [% END ~%]
+        [% IF comment.collapsed +%] style="display:none"[% END ~%]>
+      [%~ comment.body_full({ exclude_attachment => 1 }) FILTER renderMarkdown(bug, comment) ~%]
+    </[% comment_tag FILTER none %]>
   [% END %]
-  [%~ comment.body_full({ exclude_attachment => 1 }) FILTER renderMarkdown(bug, comment) ~%]</[% comment_tag FILTER none %]>
 [% END %]
 
 [%

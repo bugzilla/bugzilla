@@ -160,8 +160,10 @@ function display_value(field, value) {
 function bugzilla_ajax(request, done_fn, error_fn) {
     $('#xhr-error').hide('');
     $('#xhr-error').html('');
-    request.url += (request.url.match('\\?') ? '&' : '?') +
-        'Bugzilla_api_token=' + encodeURIComponent(BUGZILLA.api_token);
+    if (BUGZILLA.api_token) {
+        request.url += (request.url.match('\\?') ? '&' : '?') +
+            'Bugzilla_api_token=' + encodeURIComponent(BUGZILLA.api_token);
+    }
     if (request.type != 'GET') {
         request.contentType = 'application/json';
         request.processData = false;

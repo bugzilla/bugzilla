@@ -754,12 +754,8 @@ h3.change-name {
 
 .change-set .attachment {
     border-top: 1px solid #ddd;
-    background-color: #FFF;
-}
-
-.change-set .attachment {
-    background-color: #FFF;
     padding: 8px;
+    background-color: #FFF;
 }
 
 .change-set .attachment .label {
@@ -781,6 +777,13 @@ h3.change-name {
     vertical-align: top;
     text-decoration: none;
     color: #333;
+}
+
+.change-set .attachment button.outer {
+  padding: 0;
+  font-weight: normal;
+  box-shadow: none;
+  transition: none;
 }
 
 .change-set .attachment .lightbox {
@@ -836,6 +839,10 @@ h3.change-name {
 
 .change-set .attachment ~ .comment-text {
     padding-top: 0;
+}
+
+.change-set .attachment ~ .comment-text:empty {
+    padding-bottom: 0;
 }
 
 /* add comment */

@@ -2139,10 +2139,9 @@ pre.comment-text {
     font-family: "Droid Sans Mono",Menlo,Monaco,"Courier New",monospace;
     background: #fff;
     color: #222;
-    margin: 1px 0 0 0;
+    margin: 0;
     overflow: auto;
     padding: 8px;
-    border-top: 1px solid #ddd;
 }
 
 .comment-text span.quote, .comment-text span.quote_wrapped {

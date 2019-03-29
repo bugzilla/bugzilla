@@ -89,6 +89,7 @@ sub SHOW_BUG_MODAL_CSP {
       'https://www.google-analytics.com'
     ],
     img_src     => ['self', 'https://secure.gravatar.com'],
+    media_src   => ['self'],
     connect_src => [
       'self',
 
@@ -113,6 +114,7 @@ sub SHOW_BUG_MODAL_CSP {
     my $attach_base = Bugzilla->localconfig->{'attachment_base'};
     $attach_base =~ s/\%bugid\%/$bug_id/g;
     push @{$policy{img_src}}, $attach_base;
+    push @{$policy{media_src}}, $attach_base;
   }
 
   return %policy;

@@ -94,7 +94,8 @@
 [% END %]
 
 [% BLOCK comment_header %]
-  <div class="comment" data-id="[% comment.id FILTER none %]" data-no="[% comment.count FILTER none %]">
+  <div class="comment" data-id="[% comment.id FILTER none %]" data-no="[% comment.count FILTER none %]"
+       data-tags="[% comment.tags.join(' ') FILTER html %]">
     [%# normal comment header %]
     <table class="layout-table change-head [% extra_class FILTER none %]" id="ch-[% comment.count FILTER none %]"
       [% IF comment.collapsed +%] style="display:none"[% END %]>

@@ -320,6 +320,7 @@ $(function() {
             root.append(span);
         });
         $('#ctag-' + commentNo + ' .comment-tags').append($('#ctag-error'));
+        $(`.comment[data-no="${commentNo}"]`).attr('data-tags', tags.join(' '));
     }
 
     var refreshXHR;
@@ -522,9 +523,10 @@ Bugzilla.BugModal.Comments = class Comments {
    * @see https://developer.mozilla.org/en-US/docs/Web/API/Network_Information_API
    */
   prepare_inline_attachments() {
-    // Check the user setting, API support and connectivity
-    if (!BUGZILLA.user.settings.inline_attachments || typeof IntersectionObserver !== 'function' ||
-        (navigator.connection && navigator.connection.type === 'cellular')) {
+    // Check the connectivity, API support, user setting and sensitive keywords
+    if ((navigator.connection && navigator.connection.type === 'cellular') ||
+        typeof IntersectionObserver !== 'function' || !BUGZILLA.user.settings.inline_attachments ||
+        BUGZILLA.bug_keywords.split(', ').find(keyword => keyword.match(/^(hang|assertion|crash)$/))) {
       return;
     }
 
@@ -537,9 +539,18 @@ Bugzilla.BugModal.Comments = class Comments {
       }
     }), { root: document.querySelector('#bugzilla-body') });
 
-    // Show attachments except for obsolete or deleted ones
-    document.querySelectorAll('.change-set .attachment:not(.obsolete):not(.deleted)')
-      .forEach($att => observer.observe($att));
+    document.querySelectorAll('.change-set').forEach($set => {
+      // Skip if the comment has the `hide-attachment` tag
+      const $comment = $set.querySelector('.comment:not([data-tags~="hide-attachment"])');
+      // Skip if the attachment is obsolete or deleted
+      const $attachment = $set.querySelector('.attachment:not(.obsolete):not(.deleted)');
+      // Skip if the attachment is SVG image
+      const is_svg = !!$set.querySelector('.attachment [itemprop="encodingFormat"][content="image/svg+xml"]');
+
+      if ($comment && $attachment && !is_svg) {
+        observer.observe($attachment);
+      }
+    });
   }
 
   /**

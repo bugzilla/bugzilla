@@ -802,10 +802,6 @@ h3.change-name {
     max-width: 426px;
 }
 
-.change-set .attachment [content="image/svg+xml"] ~ .outer img {
-    width: 426px;
-}
-
 .change-set .attachment pre {
     position: relative;
     overflow: hidden;

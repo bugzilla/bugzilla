@@ -23,8 +23,7 @@ sub run {
   my $json
     = JSON::MaybeXS->new(convert_blessed => 1, canonical => 1, pretty => 1);
   my $report_type = 'Simple';
-  my $page        = 1;
-  my ($rows, $base_url, $test, $dump_schema);
+  my ($page, $rows, $base_url, $test, $dump_schema);
 
 
   Bugzilla->usage_mode(USAGE_MODE_CMDLINE);
@@ -57,7 +56,7 @@ sub run {
   if ($test) {
     foreach my $p ($report->page .. $report->pager->last_page) {
       # get the next page, except for page 1.
-      $rs = $rs->page($p) if $p > $report->page;
+      $rs = $rs->page($p);
       say "Testing page $p of ", $report->pager->last_page;
       foreach my $result ($rs->all) {
         my @error = $report->test($result);
@@ -71,7 +70,7 @@ sub run {
   else {
     foreach my $p ($report->page .. $report->pager->last_page) {
       # get the next page, except for page 1.
-      $rs = $rs->page($p) if $p > $page;
+      $rs = $rs->page($p);
       say "Sending page $p of ", $report->pager->last_page;
       Mojo::Promise->all(map { $report->send($_) } $rs->all)->wait;
     }

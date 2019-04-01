@@ -845,6 +845,7 @@ sub remove_from_db {
 sub get_content_type {
   my $cgi = Bugzilla->cgi;
 
+  return 'application/octet-stream' if ($cgi->param('hide_preview'));
   return 'text/plain' if ($cgi->param('ispatch') || $cgi->param('attach_text'));
 
   my $content_type;

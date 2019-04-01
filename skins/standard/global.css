@@ -1027,7 +1027,8 @@ input.required, select.required, span.required_explanation {
 }
 
 .autocomplete-suggestion [itemtype] > span:first-of-type,
-.autocomplete-suggestion [itemtype] > span:empty {
+.autocomplete-suggestion [itemtype] > span:empty,
+.autocomplete-suggestion [itemtype] > span:empty + span {
     margin-left: 0;
 }
 
@@ -1036,6 +1037,12 @@ input.required, select.required, span.required_explanation {
     border-radius: 50%;
     width: 20px;
     height: 20px;
+}
+
+.autocomplete-suggestion [itemprop="name"] {
+    overflow: hidden;
+    max-width: 20em;
+    text-overflow: ellipsis;
 }
 
 .autocomplete-suggestion [itemtype] .minor {

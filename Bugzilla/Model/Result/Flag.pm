@@ -8,8 +8,20 @@
 package Bugzilla::Model::Result::Flag;
 use Mojo::Base 'DBIx::Class::Core';
 
+__PACKAGE__->load_components('Helper::Row::NumifyGet');
+
 __PACKAGE__->table(Bugzilla::Flag->DB_TABLE);
 __PACKAGE__->add_columns(Bugzilla::Flag->DB_COLUMN_NAMES);
+
+__PACKAGE__->add_columns(
+  '+id'           => {is_numeric => 1},
+  '+type_id'      => {is_numeric => 1},
+  '+bug_id'       => {is_numeric => 1},
+  '+attach_id'    => {is_numeric => 1},
+  '+setter_id'    => {is_numeric => 1},
+  '+requestee_id' => {is_numeric => 1},
+);
+
 __PACKAGE__->set_primary_key(Bugzilla::Flag->ID_FIELD);
 
 __PACKAGE__->belongs_to(bug => 'Bugzilla::Model::Result::Bug', 'bug_id');

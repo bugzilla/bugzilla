@@ -8,8 +8,11 @@
 package Bugzilla::Model::Result::User;
 use Mojo::Base 'DBIx::Class::Core';
 
+__PACKAGE__->load_components('Helper::Row::NumifyGet');
+
 __PACKAGE__->table(Bugzilla::User->DB_TABLE);
 __PACKAGE__->add_columns(Bugzilla::User->DB_COLUMN_NAMES);
+__PACKAGE__->add_columns('+userid' => {is_numeric => 1});
 __PACKAGE__->set_primary_key(Bugzilla::User->ID_FIELD);
 
 sub name {

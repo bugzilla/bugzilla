@@ -8,8 +8,16 @@
 package Bugzilla::Model::Result::Bug;
 use Mojo::Base 'DBIx::Class::Core';
 
+__PACKAGE__->load_components('Helper::Row::NumifyGet');
+
 __PACKAGE__->table(Bugzilla::Bug->DB_TABLE);
 __PACKAGE__->add_columns(Bugzilla::Bug->DB_COLUMN_NAMES);
+__PACKAGE__->add_columns(
+  '+bug_id'   => {is_numeric => 1},
+  '+reporter' => {is_numeric => 1}
+  '+qa_contact' => {is_numeric => 1}
+  '+assigned_to' => {is_numeric => 1}
+);
 __PACKAGE__->set_primary_key(Bugzilla::Bug->ID_FIELD);
 
 __PACKAGE__->has_one(
@@ -27,19 +35,31 @@ __PACKAGE__->might_have(
 );
 
 __PACKAGE__->has_many(
-  bug_keywords => 'Bugzilla::Model::Result::BugKeyword',
+  map_keywords => 'Bugzilla::Model::Result::BugKeyword',
   'bug_id'
 );
 
-__PACKAGE__->many_to_many(keywords => 'bug_keywords', 'keyword');
+__PACKAGE__->many_to_many(keywords => 'map_keywords', 'keyword');
 
 __PACKAGE__->has_many(flags => 'Bugzilla::Model::Result::Flag', 'bug_id');
 
 __PACKAGE__->has_many(
-  bug_groups => 'Bugzilla::Model::Result::BugGroup',
+  map_groups => 'Bugzilla::Model::Result::BugGroup',
   'bug_id'
 );
-__PACKAGE__->many_to_many(groups => 'bug_groups', 'group');
+__PACKAGE__->many_to_many(groups => 'map_groups', 'group');
+
+__PACKAGE__->has_many(
+  map_depends_on => 'Bugzilla::Model::Result::Dependency',
+  'dependson'
+);
+__PACKAGE__->many_to_many(depends_on => 'map_depends_on', 'depends_on');
+
+__PACKAGE__->has_many(
+  map_blocked_by => 'Bugzilla::Model::Result::Dependency',
+  'blocked'
+);
+__PACKAGE__->many_to_many(blocked_by => 'map_depends_on', 'blocked_by');
 
 __PACKAGE__->has_one(
   product => 'Bugzilla::Model::Result::Product',
@@ -51,6 +71,23 @@ __PACKAGE__->has_one(
   {'foreign.id' => 'self.component_id'}
 );
 
+
+__PACKAGE__->has_many(
+  map_duplicates => 'Bugzilla::Model::Result::Duplicate',
+  'dupe_of'
+);
+
+__PACKAGE__->many_to_many('duplicates', 'map_duplicates', 'duplicate');
+
+__PACKAGE__->might_have( map_duplicate_of => 'Bugzilla::Model::Result::Duplicate', 'dupe');
+
+sub duplicate_of {
+  my ($self) = @_;
+
+  my $duplicate = $self->map_duplicate_of;
+  return $duplicate->duplicate_of if $duplicate;
+  return undef;
+}
 
 1;
 

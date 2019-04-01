@@ -12,7 +12,7 @@ use strict;
 use warnings;
 
 use Type::Library -base,
-  -declare => qw( Bug User Group Attachment Comment JSONBool Task );
+  -declare => qw( Bug User Group Attachment Comment JSONBool URI URL Task );
 use Type::Utils -all;
 use Types::Standard -types;
 
@@ -22,6 +22,11 @@ class_type Group,      {class => 'Bugzilla::Group'};
 class_type Attachment, {class => 'Bugzilla::Attachment'};
 class_type Comment,    {class => 'Bugzilla::Comment'};
 class_type JSONBool,   {class => 'JSON::PP::Boolean'};
+class_type URI         {class => 'URI'};
+class_type URL         {class => 'Mojo::URL'};
 role_type Task,        {role  => 'Bugzilla::Task'};
+
+coerce URL, from Str() => q{ Mojo::URL->new($_) },
+            from URI() => q{ Mojo::URL->new("$_") };
 
 1;

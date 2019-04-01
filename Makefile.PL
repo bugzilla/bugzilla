@@ -65,6 +65,7 @@ my %requires = (
   'IO::Async'                           => '0.71',
   'IPC::System::Simple'                 => 0,
   'JSON::MaybeXS'                       => '1.003008',
+  'JSON::Validator'                     => '3.05',
   'JSON::XS'                            => '2.01',
   'LWP::Protocol::https'                => '6.07',
   'LWP::UserAgent'                      => '6.26',

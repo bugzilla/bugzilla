@@ -14,6 +14,8 @@ use 5.10.1;
 use lib qw(. lib local/lib/perl5);
 
 use Bugzilla;
+use Mojo::File qw(path);
+use Mojo::Util qw(getopt);
 
 # List of products and components that use a bug type other than "defect"
 my @MIGRATION_MAP = (
@@ -108,21 +110,16 @@ my @MIGRATION_MAP = (
 );
 
 my $dbh = Bugzilla->dbh;
-
 $dbh->bz_start_transaction;
+
+say 'Change the type of all bugs with the "enhancement" severity to "enhancement"';
+$dbh->do('UPDATE bugs SET bug_type = "enhancement" WHERE bug_severity = "enhancement"');
 
 say 'Disable the "enhancement" severity';
 $dbh->do('UPDATE bug_severity SET isactive = 0 WHERE value = "enhancement"');
 
-say 'Change the type of all bugs to "defect"';
-$dbh->do('UPDATE bugs SET bug_type = "defect"');
-
-$dbh->bz_commit_transaction;
-
 foreach my $target (@MIGRATION_MAP) {
   my ($product, $component, $type) = @$target;
-
-  $dbh->bz_start_transaction;
 
   say 'Select bugs in the product (and component)';
   my $bug_ids = $dbh->selectcol_arrayref(
@@ -151,8 +148,31 @@ foreach my $target (@MIGRATION_MAP) {
     $dbh->do('UPDATE components SET default_bug_type = ?
       WHERE ' . $dbh->sql_in('id', $comp_ids), undef, ($type));
   }
-
-  $dbh->bz_commit_transaction;
 }
+
+my $csv_file;
+getopt \@ARGV, 'csv=s' => \$csv_file;
+
+if ($csv_file) {
+  my $fh = path($csv_file)->open('<');
+  say 'Change the type of bugs according to bugbug';
+  my $bug_ids = {defect => [], enhancement => []};
+
+  while (my $line = <$fh>) {
+    if ($line =~ /^(\d+),(\w)/) {
+      push(@{$bug_ids->{$2 eq 'e' ? 'enhancement' : 'defect'}}, $1);
+    }
+  }
+
+  $dbh->do('UPDATE bugs SET bug_type = "defect" WHERE ' .
+    $dbh->sql_in('bug_id', $bug_ids->{defect}));
+  $dbh->do('UPDATE bugs SET bug_type = "enhancement" WHERE ' .
+    $dbh->sql_in('bug_id', $bug_ids->{enhancement}));
+}
+
+say 'Change the type of all other bugs to "defect"';
+$dbh->do('UPDATE bugs SET bug_type = "defect" WHERE bug_type = NULL');
+
+$dbh->bz_commit_transaction;
 
 Bugzilla->memcached->clear_all();

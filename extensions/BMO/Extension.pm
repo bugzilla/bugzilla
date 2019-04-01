@@ -2565,6 +2565,9 @@ sub install_filesystem {
     contents  => $json->encode($version_obj),
   };
 
+  $files->{"$extensions_dir/BMO/bin/migrate-bug-type.pl"}
+    = {perms => Bugzilla::Install::Filesystem::OWNER_EXECUTE};
+
   $files->{"$extensions_dir/BMO/bin/migrate-github-pull-requests.pl"}
     = {perms => Bugzilla::Install::Filesystem::OWNER_EXECUTE};
 }

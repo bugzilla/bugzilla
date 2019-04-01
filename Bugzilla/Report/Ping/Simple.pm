@@ -65,31 +65,25 @@ sub _build_resultset {
 sub prepare {
   my ($self, $bug) = @_;
   my $doc = {
-    reporter     => $bug->reporter->id,
-    assigned_to  => $bug->assigned_to->id,
-    qa_contact   => $bug->qa_contact ? $bug->qa_contact->id : undef,
-    bug_id       => 0 + $bug->id,
-    product      => $bug->product->name,
-    component    => $bug->component->name,
-    bug_status   => $bug->bug_status,
-    priority     => $bug->priority,
-    resolution   => $bug->resolution,
-    bug_severity => $bug->bug_severity,
-    keywords     => [map { $_->name } $bug->keywords->all],
-    groups       => [map { $_->name } $bug->groups->all],
-    duplicate_of => $bug->duplicate_of ? $bug->duplicate_of->id : undef,
-    duplicates   => [map { $_->id } $bug->duplicates->all ],
-    version => $bug->version,
+    reporter         => $bug->reporter->id,
+    assigned_to      => $bug->assigned_to->id,
+    qa_contact       => $bug->qa_contact ? $bug->qa_contact->id : undef,
+    bug_id           => $bug->id,
+    product          => $bug->product->name,
+    component        => $bug->component->name,
+    bug_status       => $bug->bug_status,
+    priority         => $bug->priority,
+    resolution       => $bug->resolution,
+    bug_severity     => $bug->bug_severity,
+    version          => $bug->version,
     target_milestone => $bug->target_milestone,
-    blocked_by => [
-      map { $_->dependson } $bug->map_blocked_by->all
-    ],
-    depends_on => [
-      map { $_->blocked } $bug->map_depends_on->all
-    ],
-    flags        => [
-      map { $self->_prepare_flag($_) } $bug->flags->all
-    ],
+    keywords         => [map { $_->name } $bug->keywords->all],
+    groups           => [map { $_->name } $bug->groups->all],
+    duplicate_of     => $bug->duplicate_of ? $bug->duplicate_of->id : undef,
+    duplicates       => [map { $_->id } $bug->duplicates->all],
+    blocked_by       => [map { $_->dependson } $bug->map_blocked_by->all],
+    depends_on       => [map { $_->blocked } $bug->map_depends_on->all],
+    flags            => [map { $self->_prepare_flag($_) } $bug->flags->all],
   };
 
   return ($bug->id, $doc);

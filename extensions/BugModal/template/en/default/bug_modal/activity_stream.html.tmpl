@@ -353,6 +353,11 @@
           [%+
         ELSIF change.fieldname == 'reporter_accessible';
           "";
+        ELSIF change.fieldname.match('^cf_(status|tracking)_');
+          %]
+          <a href="[% basepath FILTER none %]buglist.cgi?f1=[% change.fieldname FILTER uri %]&amp;o1=isnotempty">
+            [%~ field_descs.${change.fieldname} FILTER html %]</a>:
+          [%+
         ELSE;
           field_descs.${change.fieldname} _ ": " FILTER html;
         END;
@@ -415,6 +420,14 @@
           "Not accessible to reporter";
         END;
 
+      CASE 'keywords';
+        FOREACH keyword IN value.split(', ');
+          %]
+            <a href="[% basepath FILTER none %]buglist.cgi?keywords=[% keyword FILTER uri %]&amp;resolution=---">
+              [%~ keyword FILTER html %]</a>[% ", " UNLESS loop.last %]
+          [%+
+        END;
+
       CASE;
         IF change.fieldtype == constants.FIELD_TYPE_DATETIME;
           INCLUDE bug_modal/rel_time.html.tmpl ts=value;
@@ -422,6 +435,11 @@
         ELSIF change.buglist;
           value FILTER bug_list_link;
 
+        ELSIF change.fieldname.match('^cf_(status|tracking)_') && value != '---';
+          %]
+          <a href="[% basepath FILTER none %]buglist.cgi?f1=[% change.fieldname FILTER uri %]&amp;o1=equals&amp;v1=
+            [%~ value FILTER uri %]">[% value FILTER html %]</a>
+          [%+
         ELSE;
           value FILTER truncate(256, '…') FILTER html;
 

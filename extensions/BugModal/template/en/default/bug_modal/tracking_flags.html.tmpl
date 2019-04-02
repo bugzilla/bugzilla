@@ -43,9 +43,23 @@
         <tr>
           <td class="tracking-flag-name">[% row.name FILTER html %]</td>
           [% IF type == "tracking" %]
-            <td class="tracking-flag-tracking">[% tracking_value FILTER html %]</td>
+            <td class="tracking-flag-tracking">
+              [% IF tracking_value != '---' %]
+                <a href="[% basepath FILTER none %]buglist.cgi?f1=[% row.tracking.name FILTER uri ~%]
+                  &amp;o1=equals&amp;v1=[% tracking_value FILTER uri %]">
+              [% END %]
+              [%~ tracking_value FILTER html ~%]
+              [% '</a>' IF tracking_value != '---' %]
+            </td>
           [% END %]
-          <td class="tracking-flag-status">[% status_value FILTER html %]</td>
+          <td class="tracking-flag-status">
+            [% IF status_value != '---' %]
+              <a href="[% basepath FILTER none %]buglist.cgi?f1=[% row.status.name FILTER uri ~%]
+                &amp;o1=equals&amp;v1=[% status_value FILTER uri %]">
+            [% END %]
+            [%~ status_value FILTER html ~%]
+            [% '</a>' IF status_value != '---' %]
+          </td>
         </tr>
       [% END %]
     </table>

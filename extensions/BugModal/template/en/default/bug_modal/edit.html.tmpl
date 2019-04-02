@@ -893,7 +893,14 @@
         hide_on_view = bug.keyword_objects.size == 0
         help = basepath _ "describekeywords.cgi"
     %]
-      [% bug.keyword_objects.pluck("name").join(", ") || "---" FILTER html %]
+      [% IF bug.keyword_objects.size %]
+        [% FOREACH keyword IN bug.keyword_objects.pluck("name") %]
+          <a href="[% basepath FILTER none %]buglist.cgi?keywords=[% keyword FILTER html %]&amp;resolution=---">
+            [%~ keyword FILTER html %]</a>[% ", " UNLESS loop.last %]
+        [% END %]
+      [% ELSE %]
+        [% "---" FILTER html %]
+      [% END %]
     [% END %]
 
     [% UNLESS cf_hidden_in_product('cf_fx_iteration', bug.product, bug.component, bug) %]

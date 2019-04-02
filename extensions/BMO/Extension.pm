@@ -1692,6 +1692,31 @@ sub search_operator_field_override {
     $operators->{'content'}->{matches}    = $search_content_matches;
     $operators->{'content'}->{notmatches} = $search_content_matches;
   }
+
+  $operators->{'attachments.ispatch'} = {
+    _non_changed => \&_attachments_ispatch_nonchanged,
+  };
+}
+
+# Treat external review requests as patches
+# Derived from Bugzilla::Search::_multiselect_term
+sub _attachments_ispatch_nonchanged {
+  my ($self, $args, $not) = @_;
+
+  # 'empty' operators require special handling
+  return $self->_multiselect_isempty($args, $not)
+    if $args->{operator} =~ /^is(not)?empty$/;
+
+  $args->{_extra_where} = ' AND isprivate = 0' unless $self->_user->is_insider;
+  $args->{full_field} = '(ispatch OR mimetype LIKE "text/x-%-request")';
+
+  my $table = 'attachments';
+  $self->_do_operator_function($args);
+  my $term = $args->{term};
+  $term .= $args->{_extra_where} || '';
+  my $select = $args->{_select_field} || 'bug_id';
+  $args->{term} = Bugzilla::Search::build_subselect(
+    "$args->{bugs_table}.bug_id", $select, $table, $term, $not);
 }
 
 sub _short_desc_matches {
@@ -2336,6 +2361,25 @@ sub buglist_columns {
     name =>
       '(SELECT COUNT(*) FROM duplicates WHERE duplicates.dupe_of = bugs.bug_id)',
     title => 'Duplicate Count',
+  };
+
+  $columns->{'attachments.ispatch'} = {
+    # Return `1` if the bug has any regular patch or external review request,
+    # `0` otherwise
+    name  => 'COALESCE(MAX(attachments.ispatch OR ' .
+      'attachments.mimetype LIKE "text/x-%-request"), 0)',
+  }
+}
+
+sub buglist_column_joins {
+  my ($self, $args) = @_;
+  my $column_joins = $args->{column_joins};
+  $column_joins->{'attachments.ispatch'} = {
+    as    => 'attachments',
+    from  => 'bug_id',
+    to    => 'bug_id',
+    table => 'attachments',
+    join  => 'LEFT',
   };
 }
 

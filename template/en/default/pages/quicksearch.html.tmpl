@@ -366,8 +366,10 @@
       <td class="field_name">Comment Searching</td>
       <td class="field_nickname">
         Allows overriding of the comment searching preference.<br>
-        "<strong>++comments</strong>" will always enable comment searching.<br>
-        "<strong>--comments</strong>" will always disable searching.<br>
+        "<strong>++comments</strong>" enables full-text search (all comments, slow)<br>
+        "<strong>--comments</strong>" disables full-text search<br>
+        "<strong>++description</strong>" enables description search (initial comment only)<br>
+        "<strong>--description</strong>" disables description search<br>
       </td>
     </tr>
     [% IF Param('usestatuswhiteboard') %]

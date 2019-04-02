@@ -131,7 +131,8 @@ use constant COMPONENT_EXCEPTIONS => (
 );
 
 # Quicksearch-wide globals for boolean charts.
-our ($chart, $and, $or, $fulltext, $bug_status_set, $bug_product_set, $ELASTIC);
+our ($chart, $and, $or, $longdesc_initial, $fulltext, $bug_status_set,
+     $bug_product_set, $ELASTIC);
 
 sub quicksearch {
   my ($searchstring) = (@_);
@@ -197,6 +198,12 @@ sub quicksearch {
             {operators => ['NOT', $word], quicksearch => $searchstring});
         }
         unshift(@words, "-$word");
+      }
+
+      # --description and ++description disable or enable description searching
+      elsif ($word =~ /^(--|\+\+)description?$/i) {
+        $longdesc_initial = $1 eq '--' ? 0 : 1;
+        $cgi->param('longdesc_initial', $longdesc_initial);
       }
 
       # --comment and ++comment disable or enable fulltext searching
@@ -410,6 +417,8 @@ sub _handle_special_first_chars {
 
   if ($firstChar eq '#') {
     addChart('short_desc', 'substring', $baseWord, $negate);
+    addChart('longdesc',   'substring', $baseWord, $negate)
+      if $longdesc_initial;
     addChart('content', 'matches', _matches_phrase($baseWord), $negate)
       if $fulltext;
     return 1;
@@ -628,7 +637,8 @@ sub _default_quicksearch_word {
   addChart('alias',             'substring', $word, $negate);
   addChart('short_desc',        'substring', $word, $negate);
   addChart('status_whiteboard', 'substring', $word, $negate);
-  addChart('longdesc',          'substring', $word, $negate) if $ELASTIC;
+  addChart('longdesc',          'substring', $word, $negate)
+    if $longdesc_initial || $ELASTIC;
   addChart('content', 'matches', _matches_phrase($word), $negate)
     if $fulltext && !$ELASTIC;
 

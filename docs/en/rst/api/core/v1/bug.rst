@@ -256,6 +256,7 @@ attachments          array   Each array item is an Attachment object. See
                              :ref:`rest_attachments` for details of the object.
 comments             array   Each array item is a Comment object. See
                              :ref:`rest_comments` for details of the object.
+description          string  The description (initial comment) of the bug.
 history              array   Each array item is a History object. See
                              :ref:`rest_history` for details of the object.
 tags                 array   Each array item is a tag name. Note that tags are
@@ -497,6 +498,7 @@ creator           string    The login name of the user who created the bug. You
                             can also pass this argument with the name
                             ``reporter``, for backwards compatibility with
                             older Bugzillas.
+description       string    The description (initial comment) of the bug.
 id                int       The numeric ID of the bug.
 last_change_time  datetime  Searches for bugs that were modified at this time
                             or later. May not be an array.
@@ -635,9 +637,9 @@ name                type     description
 **summary**         string   A brief description of the bug being filed.
 **version**         string   A version of the product above; the version the
                              bug was found in.
-description         string   (defaulted) The initial description for this bug.
-                             Some Bugzilla installations require this to not be
-                             blank.
+description         string   (defaulted) The description (initial comment) of the
+                             bug. Some Bugzilla installations require this to not
+                             be blank.
 op_sys              string   (defaulted) The operating system the bug was
                              discovered on.
 platform            string   (defaulted) What type of hardware the bug was

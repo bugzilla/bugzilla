@@ -551,6 +551,12 @@ sub search {
     delete $match_params->{offset};
   }
 
+  # Allow to search only in bug description (initial comment)
+  if (defined $match_params->{description}) {
+    $match_params->{longdesc} = delete $match_params->{description};
+    $match_params->{longdesc_initial} = 1;
+  }
+
   $match_params = Bugzilla::Bug::map_fields($match_params);
 
   my %options = (fields => ['bug_id']);
@@ -1474,6 +1480,12 @@ sub _bug_to_hash {
   if (filter_wants $params, 'depends_on') {
     my @depends_on = map { $self->type('int', $_) } @{$bug->dependson};
     $item{'depends_on'} = \@depends_on;
+  }
+  if (filter_wants $params, 'description', ['extra']) {
+    my $comment = Bugzilla::Comment->match({bug_id => $bug->id, LIMIT => 1})->[0];
+    $item{'description'}
+      = ($comment && (!$comment->is_private || Bugzilla->user->is_insider))
+      ? $comment->body : '';
   }
   if (filter_wants $params, 'dupe_of') {
     $item{'dupe_of'} = $self->type('int', $bug->dup_id);
@@ -2766,6 +2778,13 @@ in the return value.
 
 C<array> of C<int>s. The ids of bugs that this bug "depends on".
 
+=item C<description>
+
+C<string> The description (initial comment) of the bug.
+
+This is an B<extra> field returned only by specifying C<description> or
+C<_extra> in C<include_fields>.
+
 =item C<dupe_of>
 
 C<int> The bug ID of the bug that this bug is a duplicate of. If this bug
@@ -3132,9 +3151,9 @@ and all custom fields.
 =item The C<actual_time> item was added to the C<bugs> return value
 in Bugzilla B<4.4>.
 
-=item The C<attachments>, C<comments>, C<duplicates>, C<history>,
-C<regressed_by>, C<regressions>, C<triage_owner> and C<type> fields were added
-in Bugzilla B<6.0>.
+=item The C<attachments>, C<comments>, C<description>, C<duplicates>,
+C<history>, C<regressed_by>, C<regressions>, C<triage_owner> and C<type> fields
+were added in Bugzilla B<6.0>.
 
 =back
 
@@ -3401,6 +3420,10 @@ C<string> The login name of the user who created the bug.
 You can also pass this argument with the name C<reporter>, for
 backwards compatibility with older Bugzillas.
 
+=item C<description>
+
+C<string> The description (initial comment) of the bug.
+
 =item C<id>
 
 C<int> The numeric id of the bug.
@@ -3557,6 +3580,8 @@ in Bugzilla B<5.0>.
 
 =item Updated to allow quicksearch capability in Bugzilla B<5.0>.
 
+=item The C<description> field was added in Bugzilla B<6.0>.
+
 =back
 
 =back
@@ -3625,8 +3650,8 @@ filed.
 =item C<version> (string) B<Required> - A version of the product above;
 the version the bug was found in.
 
-=item C<description> (string) B<Defaulted> - The initial description for
-this bug. Some Bugzilla installations require this to not be blank.
+=item C<description> (string) B<Defaulted> - The description (initial comment)
+of the bug. Some Bugzilla installations require this to not be blank.
 
 =item C<op_sys> (string) B<Defaulted> - The operating system the bug was
 discovered on.

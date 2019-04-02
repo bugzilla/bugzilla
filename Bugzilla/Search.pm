@@ -2667,6 +2667,12 @@ sub _long_desc_nonchanged {
   };
   $self->_do_operator_function($join_args);
 
+  # Allow to search only in bug description (initial comment)
+  if ($self->_params->{longdesc_initial}) {
+    $join_args->{term}
+      .= ($join_args->{term} ? " AND " : "") . "$table.bug_when = bugs.creation_ts";
+  }
+
   # If the user is not part of the insiders group, they cannot see
   # private comments
   if (!$self->_user->is_insider) {

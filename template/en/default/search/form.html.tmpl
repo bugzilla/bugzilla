@@ -233,6 +233,10 @@ TUI_hide_default('information_query');
           value => default.${field_container.field.name}.0
           type_selected => default.$type.0
       %]
+      [% IF field_container.field.name == 'longdesc' %]
+        <label><input type="checkbox" name="longdesc_initial" value="1"
+          [%- " checked" IF default.longdesc_initial.0 == "1" %]> Description (initial comment) only</label>
+      [% END %]
     </div>
   [% END %]
 

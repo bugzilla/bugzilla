@@ -784,7 +784,7 @@
               IF bug.cc.size == 1;
                 is_cced ? "Just you" : "1 person";
               ELSE;
-                bug.cc.size _ " people";
+                bug.cc.size _ " people" _ (is_cced ? " including you" : "");
               END;
             %]
           </span>

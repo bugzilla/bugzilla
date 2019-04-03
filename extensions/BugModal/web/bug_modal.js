@@ -677,7 +677,7 @@ $(function() {
                 $('#cc-summary').text(is_cced ? 'Just you' : '1 person');
             }
             else {
-                $('#cc-summary').text(cc_count + ' people');
+                $('#cc-summary').text(`${cc_count} people${is_cced ? ' including you' : ''}`);
             }
 
             // clear/update user list

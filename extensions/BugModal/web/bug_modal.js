@@ -81,8 +81,13 @@ $(function() {
 
     // restore edit mode after navigating back
     function restoreEditMode() {
-        if (!$('#editing').val())
+        if (!$('#editing').val()) {
+            if (localStorage.getItem('modal-perm-edit-mode') === 'true') {
+                $('#mode-btn').click();
+                $('#action-enable-perm-edit').attr('aria-checked', 'true');
+            }
             return;
+        }
         $('.module')
             .each(function() {
                 slide_module($(this), 'hide', true);
@@ -387,6 +392,15 @@ $(function() {
         });
 
     // action button actions
+
+    // enable perm edit mode
+    $('#action-enable-perm-edit')
+        .click(function(event) {
+            event.preventDefault();
+            const enabled = $(this).attr('aria-checked') !== 'true';
+            $(this).attr('aria-checked', enabled);
+            localStorage.setItem('modal-perm-edit-mode', enabled);
+        });
 
     // reset
     $('#action-reset')

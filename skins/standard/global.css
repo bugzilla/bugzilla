@@ -1971,12 +1971,12 @@ a.controller {
   list-style: none;
 }
 
-.dropdown-content [role="menuitem"],
+.dropdown-content [role^="menuitem"],
 .dropdown-content [role="option"],
 .dropdown-content li > div {
   display: block;
   box-sizing: border-box;
-  padding: 2px 16px;
+  padding: 2px 8px 2px 24px;
   width: 100%;
   color: #555;
   line-height: 1.5;
@@ -1984,17 +1984,17 @@ a.controller {
   background: none transparent;
 }
 
-.dropdown-content [role="menuitem"],
+.dropdown-content [role^="menuitem"],
 .dropdown-content [role="option"] {
   outline: 0;
   text-decoration: none;
   cursor: pointer;
 }
 
-.dropdown-content [role="menuitem"]:hover,
-.dropdown-content [role="menuitem"]:focus,
-.dropdown-content [role="menuitem"]:active,
-.dropdown-content [role="menuitem"].active,
+.dropdown-content [role^="menuitem"]:hover,
+.dropdown-content [role^="menuitem"]:focus,
+.dropdown-content [role^="menuitem"]:active,
+.dropdown-content [role^="menuitem"].active,
 .dropdown-content [role="option"]:hover,
 .dropdown-content [role="option"]:focus,
 .dropdown-content [role="option"]:active,
@@ -2003,7 +2003,7 @@ a.controller {
   background-color: rgba(0, 0, 0, .1) !important;
 }
 
-.dropdown-content button[role="menuitem"] {
+.dropdown-content button[role^="menuitem"] {
   -moz-appearance: none;
   -webkit-appearance: none;
   appearance: none;
@@ -2015,8 +2015,18 @@ a.controller {
   text-align: left;
 }
 
-.dropdown-content button[role="menuitem"]::-moz-focus-inner {
+.dropdown-content button[role^="menuitem"]::-moz-focus-inner {
   border: 0;
+}
+
+.dropdown-content [role="menuitemcheckbox"][aria-checked="true"]::before {
+  display: inline-block;
+  content: '\E5CA';
+  font-size: 18px;
+  line-height: 1;
+  font-family: 'Material Icons';
+  vertical-align: text-bottom;
+  text-indent: -20px;
 }
 
 .dropdown-content [role="separator"] {

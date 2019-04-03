@@ -93,15 +93,30 @@
     <small>Each triage owner links to a buglist of all open [% terms.bugs %], since 2016-06-01, without a pending needinfo, where the priority is '--'.</small>
   </p>
   [% current_product = "" %]
-  <table border="0" cellspacing="0" id="report" width="100%">
-    </tr>
+  <table id="report">
     [% FOREACH r = results %]
       [% count = loop.count() %]
       [% IF current_product != r.product %]
         [% current_product = r.product %]
-        <tr class="product_header">
-          <th colspan="3">[% r.product FILTER html %]</th>
-        </tr>
+        <thead>
+          <tr>
+            <th>[% r.product FILTER html %]</th>
+            <th>Owner</th>
+            [% FOREACH c IN r.bug_counts %]
+              <th class="count">
+                [% IF c.key == "total"%]
+                  Total
+                [% ELSE %]
+                  <span class="bug-type-label iconic" title="[% c.key FILTER html %]"
+                        aria-label="[% c.key FILTER html %]" data-type="[% c.key FILTER html %]">
+                    <span class="icon" aria-hidden="true"></span>
+                  </span>
+                [% END %]
+              </th>
+            [% END %]
+          </tr>
+        </thead>
+        <tbody>
       [% END %]
       <tr class="bz_bugitem [% count % 2 == 1 ? "bz_row_odd" : "bz_row_even" %]">
         <td>
@@ -114,17 +129,23 @@
             <em>None</em>
           [% END %]
         </td>
-        <td>
-          [% IF r.buglist_url %]
-            <a href="[% basepath FILTER none %]buglist.cgi?product=[% r.product FILTER uri %]&component=[% r.component FILTER uri %]&[% r.buglist_url FILTER none %]">
-              [% r.bug_count FILTER html +%] [%+ terms.bugs %] found.
-            </a>
-          [% ELSE %]
-            None
-          [% END %]
-        </td>
+        [% FOREACH c IN r.bug_counts %]
+          <td class="count">
+            [% IF c.value %]
+              <a href="[% basepath FILTER none %]buglist.cgi?product=
+              [%~ r.product FILTER uri %]&amp;component=[% r.component FILTER uri %]
+              [%~ IF c.key != "total" %]&amp;bug_type=[% c.key FILTER html; END %]&amp;
+              [%~ r.buglist_url FILTER html %]">
+            [% END %]
+              [%~ c.value FILTER html ~%]
+            [% IF c.value %]
+              </a>
+            [% END %]
+          </td>
+        [% END %]
       </tr>
     [% END %]
+    </tbody>
   </table>
   <p>
     Found [% results.size %] component[% 's' IF results.size != 1 %]:

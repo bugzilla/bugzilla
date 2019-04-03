@@ -771,11 +771,17 @@ sub create {
         1
       ],
 
-      bug_list_link => sub {
-        my ($buglist, $options) = @_;
-        return
-          join(", ", map(get_bug_link($_, $_, $options), split(/ *, */, $buglist)));
-      },
+      bug_list_link => [
+        sub {
+          my ($context, $options) = @_;
+          return sub {
+            my $buglist = shift;
+            return join(", ",
+              map { get_bug_link($_, $_, $options) } split(/\s*,\s*/, $buglist));
+          };
+        },
+        1
+      ],
 
       # In CSV, quotes are doubled, and any value containing a quote or a
       # comma is enclosed in quotes.

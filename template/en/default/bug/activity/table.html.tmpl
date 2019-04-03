@@ -104,7 +104,16 @@
                change.fieldname == 'dependson' ||
                change.fieldname == 'regresses' ||
                change.fieldname == 'regressed_by' %]
-        [% change_type FILTER bug_list_link FILTER none %]
+        [% change_type FILTER bug_list_link(use_alias => 1) FILTER none %]
+      [% ELSIF change.fieldname == 'see_also' %]
+        [% FOREACH url IN change_type.split(', ') %]
+          [% IF (matches = url.match("^${urlbase}show_bug\\.cgi\\?id=(\\d+)$")) %]
+            [% matches.0 FILTER bug_link(matches.0, use_alias => 1) FILTER none %]
+          [% ELSE %]
+            [% display_value(change.fieldname, url) FILTER html %]
+          [% END %]
+          [% ', ' UNLESS loop.last %]
+        [% END %]
       [% ELSIF change.fieldname == 'assigned_to' ||
                change.fieldname == 'reporter' ||
                change.fieldname == 'qa_contact' ||

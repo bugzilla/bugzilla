@@ -401,7 +401,7 @@
       CASE 'see_also';
         FOREACH see_also IN value;
           IF see_also.bug_id;
-            "$terms.bug $see_also.bug_id" FILTER bug_link(see_also.bug_id);
+            see_also.bug_id FILTER bug_link(see_also.bug_id, use_alias => 1);
           ELSE;
             %]
             <a href="[% see_also.url FILTER html %]" target="_blank" rel="noreferrer">[% see_also.url FILTER html %]</a>
@@ -433,7 +433,7 @@
           INCLUDE bug_modal/rel_time.html.tmpl ts=value;
 
         ELSIF change.buglist;
-          value FILTER bug_list_link;
+          value FILTER bug_list_link(use_alias => 1);
 
         ELSIF change.fieldname.match('^cf_(status|tracking)_') && value != '---';
           %]

@@ -318,8 +318,9 @@ sub comments {
       {function => 'Bug.comments', params => ['ids', 'comment_ids']});
   }
 
-  my $bug_ids     = $params->{ids}         || [];
-  my $comment_ids = $params->{comment_ids} || [];
+  my $bug_ids      = $params->{ids}         || [];
+  my $comment_ids  = $params->{comment_ids} || [];
+  my $skip_private = $params->{skip_private} ? 1 : 0;
 
   my $dbh  = Bugzilla->switch_to_shadow_db();
   my $user = Bugzilla->user;
@@ -328,9 +329,23 @@ sub comments {
     Bugzilla->check_rate_limit("get_comments", remote_ip());
   }
 
+  if ($skip_private) {
+    # Cache permissions for bugs. This highly reduces the number of calls to the DB.
+    # visible_bugs() is only able to handle bug IDs, so we have to skip aliases.
+    my @int = grep { $_ =~ /^\d+$/ } @$bug_ids;
+    $user->visible_bugs(\@int);
+  }
+
   my %bugs;
   foreach my $bug_id (@$bug_ids) {
-    my $bug = Bugzilla::Bug->check($bug_id);
+    my $bug;
+
+    if ($skip_private) {
+      $bug = Bugzilla::Bug->new({id => $bug_id, cache => 1});
+      next if $bug->error || !$user->can_see_bug($bug->id);
+    } else {
+      $bug = Bugzilla::Bug->check($bug_id);
+    }
 
     # We want the API to always return comments in the same order.
 
@@ -482,10 +497,28 @@ sub history {
   my $ids = $params->{ids};
   defined $ids || ThrowCodeError('param_required', {param => 'ids'});
 
+  my $user         = Bugzilla->user;
+  my $skip_private = $params->{skip_private} ? 1 : 0;
+
+  if ($skip_private) {
+    # Cache permissions for bugs. This highly reduces the number of calls to the DB.
+    # visible_bugs() is only able to handle bug IDs, so we have to skip aliases.
+    my @int = grep { $_ =~ /^\d+$/ } @$ids;
+    $user->visible_bugs(\@int);
+  }
+
   my @return;
   foreach my $bug_id (@$ids) {
     my %item;
-    my $bug = Bugzilla::Bug->check($bug_id);
+    my $bug;
+
+    if ($skip_private) {
+      $bug = Bugzilla::Bug->new({id => $bug_id, cache => 1});
+      next if $bug->error || !$user->can_see_bug($bug->id);
+    } else {
+      $bug = Bugzilla::Bug->check($bug_id);
+    }
+
     $bug_id = $bug->id;
     $item{id} = $self->type('int', $bug_id);
 
@@ -2505,6 +2538,13 @@ than this time. This only affects comments returned from the C<ids>
 argument. You will always be returned all comments you request in the
 C<comment_ids> argument, even if they are older than this date.
 
+=item C<skip_private> B<EXPERIMENTAL>
+
+C<boolean> Normally, if you request any inaccessible or invalid bug ids, this
+method will throw an error. If this parameter is C<True>, these bugs will just
+be skipped. In the future, error objects will be returned instead, just like
+C<Bug.get> with the C<permissive> parameter provided.
+
 =back
 
 =item B<Returns>
@@ -3198,6 +3238,13 @@ than this time.
 Note that it's possible for aliases to be disabled in Bugzilla, in which
 case you will be told that you have specified an invalid bug_id if you
 try to specify an alias. (It will be error 100.)
+
+=item C<skip_private> B<EXPERIMENTAL>
+
+C<boolean> Normally, if you request any inaccessible or invalid bug ids, this
+method will throw an error. If this parameter is C<True>, these bugs will just
+be skipped. In the future, error objects will be returned instead, just like
+C<Bug.get> with the C<permissive> parameter provided.
 
 =back
 

@@ -284,7 +284,7 @@ Bugzilla.FlagTypeComment = class FlagTypeComment {
 
     // Collect bug flags from checkboxes
     const bug_flags = [...this.$fieldset_wrapper.querySelectorAll('input[data-bug-flag]:checked')]
-      .map($input => ({ name: $input.getAttribute('data-bug-flag'), status: '?' }));
+      .map($input => ({ name: $input.getAttribute('data-bug-flag'), status: '+' }));
 
     // Update bug flags if needed
     if (bug_flags.length) {

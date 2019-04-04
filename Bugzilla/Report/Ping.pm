@@ -68,7 +68,7 @@ around '_build_resultset' => sub {
   return $rs;
 };
 
-has 'namespace' => (is => 'lazy', init_arg => undef, isa => Str);
+has 'namespace' => (is => 'lazy', isa => Str);
 
 sub _build_namespace {
   return 'bugzilla';

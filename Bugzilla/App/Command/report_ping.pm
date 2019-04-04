@@ -23,17 +23,17 @@ sub run {
   my $json
     = JSON::MaybeXS->new(convert_blessed => 1, canonical => 1, pretty => 1);
   my $report_type = 'Simple';
-  my ($page, $rows, $base_url, $test, $dump_schema);
-
+  my ($namespace, $page, $rows, $base_url, $test, $dump_schema);
 
   Bugzilla->usage_mode(USAGE_MODE_CMDLINE);
   getopt \@args,
-    'base-url|u=s'  => \$base_url,
-    'page|p=i'      => \$page,
-    'rows|r=i'      => \$rows,
-    'dump-schema'   => \$dump_schema,
-    'report-type=s' => \$report_type,
-    'test'          => \$test;
+    'base-url|u=s'   => \$base_url,
+    'page|p=i'       => \$page,
+    'rows|r=i'       => \$rows,
+    'dump-schema'    => \$dump_schema,
+    'report-type=s'  => \$report_type,
+    'namespace|ns=s' => \$namespace,
+    'test'           => \$test;
 
   $base_url = 'http://localhost' if $dump_schema || $test;
   die $self->usage unless $base_url;
@@ -41,10 +41,11 @@ sub run {
   my $report_class = "Bugzilla::Report::Ping::$report_type";
   require_module($report_class);
   my $report = $report_class->new(
-    model      => Bugzilla->dbh->model,
-    base_url   => $base_url,
-    maybe rows => $rows,
-    maybe page => $page,
+    model           => Bugzilla->dbh->model,
+    base_url        => $base_url,
+    maybe rows      => $rows,
+    maybe page      => $page,
+    maybe namespace => $namespace,
   );
 
   if ($dump_schema) {

@@ -10,6 +10,7 @@ use Mojo::Base 'Mojolicious::Command';
 
 use Bugzilla::Constants;
 use JSON::MaybeXS;
+use Cwd qw(cwd);
 use Mojo::File 'path';
 use Mojo::Util 'getopt';
 use PerlX::Maybe 'maybe';
@@ -23,7 +24,8 @@ sub run {
   my $json
     = JSON::MaybeXS->new(convert_blessed => 1, canonical => 1, pretty => 1);
   my $report_type = 'Simple';
-  my ($namespace, $page, $rows, $base_url, $test, $dump_schema);
+  my $working_dir = cwd();
+  my ($namespace, $page, $rows, $base_url, $test, $dump_schema, $dump_documents);
 
   Bugzilla->usage_mode(USAGE_MODE_CMDLINE);
   getopt \@args,
@@ -31,11 +33,13 @@ sub run {
     'page|p=i'       => \$page,
     'rows|r=i'       => \$rows,
     'dump-schema'    => \$dump_schema,
+    'dump-documents' => \$dump_documents,
     'report-type=s'  => \$report_type,
     'namespace|ns=s' => \$namespace,
+    'workdir|C=s'    => \$working_dir,
     'test'           => \$test;
 
-  $base_url = 'http://localhost' if $dump_schema || $test;
+  $base_url = 'http://localhost' if $dump_schema || $dump_documents || $test;
   die $self->usage unless $base_url;
 
   my $report_class = "Bugzilla::Report::Ping::$report_type";
@@ -55,28 +59,51 @@ sub run {
     exit;
   }
 
-  my $rs = $report->resultset;
   if ($test) {
-    foreach my $p ($report->page .. $report->pager->last_page) {
-      # get the next page, except for page 1.
-      $rs = $rs->page($p);
-      say "Testing page $p of ", $report->pager->last_page;
-      foreach my $result ($rs->all) {
-        my @error = $report->test($result);
-        if (@error) {
-          my (undef, $doc) = $report->prepare($result);
-          die $json->encode({errors => \@error, result => $doc});
+    $self->foreach_page(
+      $report,
+      'Testing',
+      sub {
+        foreach my $result (@_) {
+          my @error = $report->test($result);
+          if (@error) {
+            my (undef, $doc) = $report->prepare($result);
+            die $json->encode({errors => \@error, result => $doc});
+          }
         }
       }
-    }
+    );
+  }
+  elsif ($dump_documents) {
+    $self->foreach_page(
+      $report,
+      'Dumping',
+      sub {
+        foreach my $result (@_) {
+          my ($id, $doc) = $report->prepare($result);
+          path($working_dir, "$id.json")->spurt($json->encode($doc));
+        }
+      }
+    );
   }
   else {
-    foreach my $p ($report->page .. $report->pager->last_page) {
-      # get the next page, except for page 1.
-      $rs = $rs->page($p);
-      say "Sending page $p of ", $report->pager->last_page;
-      Mojo::Promise->all(map { $report->send($_) } $rs->all)->wait;
-    }
+    $self->foreach_page(
+      $report,
+      'Sending',
+      sub {
+        Mojo::Promise->all(map { $report->send($_) } @_)->wait;
+      }
+    );
+  }
+}
+
+sub foreach_page {
+  my ($self, $report, $label, $cb) = @_;
+  my $rs = $report->resultset;
+  foreach my $p ($report->page .. $report->pager->last_page) {
+    $rs = $rs->page($p);
+    say "$label page $p of ", $report->pager->last_page;
+    $cb->( $rs->all );
   }
 }
 

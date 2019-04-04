@@ -48,7 +48,9 @@ sub run {
   );
 
   if ($dump_schema) {
-    print $json->encode( $report->validator->schema->data );
+    my $schema =  $report->validator->schema->data ;
+    $schema->{'$schema'} = "http://json-schema.org/draft-04/schema#";
+    print $json->encode($schema);
     exit;
   }
 

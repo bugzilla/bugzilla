@@ -86,7 +86,13 @@ sub prepare {
     flags            => [map { $self->_prepare_flag($_) } $bug->flags->all],
   };
 
-  return ($bug->id, $doc);
+  return ($self->_prepare_doc_id($bug), $doc);
+}
+
+sub _prepare_doc_id {
+  my ($self, $bug) = @_;
+
+  return sprintf("%d-%d", $bug->id, $bug->delta_ts->epoch);
 }
 
 sub _prepare_flag {

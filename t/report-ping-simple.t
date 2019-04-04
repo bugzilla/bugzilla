@@ -12,12 +12,16 @@ use lib qw( . lib local/lib/perl5 );
 BEGIN {
   unlink('data/db/report_ping_simple') if -f 'data/db/report_ping_simple';
   $ENV{test_db_name} = 'report_ping_simple';
+  # Our code will store dates in localtime with sqlite.
+  # So for these tests to pass, everything should be UTC.
+  $ENV{TZ} = 'UTC';
 }
 
 use Bugzilla::Test::MockDB;
 use Bugzilla::Test::MockParams (password_complexity => 'no_constraints');
 use Bugzilla::Test::Util qw(create_bug create_user);
 use Bugzilla;
+use Bugzilla::Util qw(datetime_from);
 use Bugzilla::Constants;
 use Bugzilla::Hook;
 BEGIN { Bugzilla->extensions }
@@ -30,14 +34,27 @@ use ok 'Bugzilla::Report::Ping::Simple';
 Bugzilla->dbh->model->resultset('Keyword')
   ->create({name => 'regression', description => 'the regression keyword'});
 
+# Our code will store dates in localtime with sqlite.
+# So for these tests to pass, everything should be UTC.
+my $UTC = DateTime::TimeZone->new(name => 'UTC');
+Bugzilla->local_timezone($UTC);
+my $User = mock 'Bugzilla::User' => (
+  override => [ timezone => sub { $UTC } ]
+);
+
 my $user = create_user('reportuser@invalid.tld', '*');
 Bugzilla->set_user($user);
-create_bug(
-  short_desc  => "test bug $_",
-  comment     => "Hello, world: $_",
-  provided $_ % 3 == 0, keywords => ['regression'],
-  assigned_to => 'reportuser@invalid.tld'
-) for (1..250);
+
+my %time;
+for (1..250) {
+  my $bug = create_bug(
+    short_desc  => "test bug $_",
+    comment     => "Hello, world: $_",
+    provided $_ % 3 == 0, keywords => ['regression'],
+    assigned_to => 'reportuser@invalid.tld'
+  );
+  $time{ $bug->id } = datetime_from($bug->delta_ts)->epoch;
+}
 
 my $report = Bugzilla::Report::Ping::Simple->new(
   base_url => 'http://localhost',
@@ -54,7 +71,8 @@ is($rs->first->id, 1, "first bug of page 1 is 1");
 my ($first, $second, $third, @rest) = $rs->all;
 {
   my ($id, $doc) = $report->prepare( $first );
-  is($id, 1, "doc id is 1");
+
+  is($id, "1-$time{1}", "doc id is correct");
   is($doc->{product}, 'Firefox');
   is($doc->{keywords}, []);
   is([map { "$_" } $report->validate($doc)], [], "No errors for first doc");
@@ -62,7 +80,7 @@ my ($first, $second, $third, @rest) = $rs->all;
 
 {
   my ($id, $doc) = $report->prepare( $third );
-  is($id, 3, "doc id is 3");
+  is($id, "3-$time{3}", "doc id is correct");
   is($doc->{product}, 'Firefox');
   is($doc->{keywords}, ['regression']);
 }

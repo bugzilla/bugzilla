@@ -100,19 +100,6 @@ my %requires = (
 );
 
 my %build_requires = ('ExtUtils::MakeMaker' => '7.22',);
-my %test_requires = (
-  'Capture::Tiny'                   => 0,
-  'DBD::SQLite'                     => '1.29',
-  'Perl::Critic::Freenode'          => 0,
-  'Perl::Tidy'                      => '20180220',
-  'Pod::Coverage'                   => 0,
-  'Test::More'                      => 0,
-  'Test::Perl::Critic::Progressive' => 0,
-  'Test::Selenium::Firefox'         => 0,
-  'Selenium::Remote::Driver'        => 1.31,
-  'Test::WWW::Selenium'             => 0,
-  'Test2::V0'                       => 0,
-);
 my %recommends = (Safe => '2.30',);
 
 # Windows requires some additional modules.
@@ -248,11 +235,11 @@ my %optional_features = (
   },
   sqlite => {
     description => 'SQLite database support',
-    prereqs     => {runtime => {requires => {'DBD::SQLite' => '1.29'}}},
+    prereqs     => {runtime => {requires => {'DBD::SQLite' => '1.29', 'DateTime::Format::SQLite' => '0.11'}}},
   },
   mysql => {
     description => 'MySQL database support',
-    prereqs     => {runtime => {requires => {'DBD::mysql' => '4.037'}}}
+    prereqs     => {runtime => {requires => {'DBD::mysql' => '4.037', 'DateTime::Format::MySQL' => '0.06'}}}
   },
   jsonrpc => {
     description => 'JSON-RPC Interface',
@@ -370,6 +357,21 @@ for my $file (glob 'extensions/*/Config.pm') {
     }
   }
 }
+
+my %test_requires = (
+  %{ $optional_features{sqlite}{prereqs}{runtime}{requires} },
+  'Capture::Tiny'                   => 0,
+  'DBD::SQLite'                     => '1.29',
+  'Perl::Critic::Freenode'          => 0,
+  'Perl::Tidy'                      => '20180220',
+  'Pod::Coverage'                   => 0,
+  'Test::More'                      => 0,
+  'Test::Perl::Critic::Progressive' => 0,
+  'Test::Selenium::Firefox'         => 0,
+  'Selenium::Remote::Driver'        => 1.31,
+  'Test::WWW::Selenium'             => 0,
+  'Test2::V0'                       => 0,
+);
 
 # BMO Customization
 my @bmo_features = grep { is_bmo_feature($_) } keys %optional_features;

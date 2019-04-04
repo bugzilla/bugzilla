@@ -8,15 +8,16 @@
 package Bugzilla::Model::Result::Bug;
 use Mojo::Base 'DBIx::Class::Core';
 
-__PACKAGE__->load_components('Helper::Row::NumifyGet');
+__PACKAGE__->load_components(qw( Helper::Row::NumifyGet InflateColumn::DateTime ));
 
 __PACKAGE__->table(Bugzilla::Bug->DB_TABLE);
 __PACKAGE__->add_columns(Bugzilla::Bug->DB_COLUMN_NAMES);
 __PACKAGE__->add_columns(
-  '+bug_id'   => {is_numeric => 1},
-  '+reporter' => {is_numeric => 1},
-  '+qa_contact' => {is_numeric => 1},
+  '+bug_id'      => {is_numeric => 1},
+  '+reporter'    => {is_numeric => 1},
+  '+qa_contact'  => {is_numeric => 1},
   '+assigned_to' => {is_numeric => 1},
+  '+delta_ts'    => {data_type  => 'timestamp'},
 );
 __PACKAGE__->set_primary_key(Bugzilla::Bug->ID_FIELD);
 

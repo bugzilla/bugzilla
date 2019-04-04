@@ -560,7 +560,7 @@ Bugzilla.BugModal.Comments = class Comments {
   async show_attachment($att) {
     const id = Number($att.dataset.id);
     const link = $att.querySelector('.link').href;
-    const name = $att.querySelector('[itemprop="name"]').textContent;
+    const name = $att.querySelector('[itemprop="name"]').content;
     const type = $att.querySelector('[itemprop="encodingFormat"]').content;
     const size = Number($att.querySelector('[itemprop="contentSize"]').content);
     const max_size = 2000000;

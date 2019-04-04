@@ -262,6 +262,7 @@
          class="attachment[% " patch" IF att.ispatch; " obsolete" IF att.isobsolete; " deleted" IF !att.datasize %]"
          data-id="[% att.id FILTER none %]" itemscope itemtype="http://schema.org/MediaObject"
          [% IF comment.collapsed +%] style="display:none"[% END ~%]>
+      <meta itemprop="name" content="[% att.filename FILTER html %]">
       <meta itemprop="contentSize" content="[% att.datasize FILTER none %]">
       <meta itemprop="encodingFormat" content="[% att.mimetype FILTER html %]">
       <div class="label">
@@ -274,7 +275,7 @@
         [% ELSE %]
           <a class="link[% " lightbox" IF att.is_image %]" href="[% link FILTER html %]" itemprop="contentUrl">
         [% END %]
-        <span id="att-[% att.id FILTER none %]-description" itemprop="name">[% att.description FILTER html %]</span></a>
+        <span id="att-[% att.id FILTER none %]-description" itemprop="description">[% att.description FILTER html %]</span></a>
         [% " (obsolete)" IF att.isobsolete; " (deleted)" IF !att.datasize %]
         — <a href="[% link FILTER html %]&amp;action=edit" itemprop="url">Details</a>
         [% IF att.ispatch && Param('splinter_base') %]

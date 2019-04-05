@@ -1787,6 +1787,7 @@ use constant ABSTRACT_SCHEMA => {
       last_used    => {TYPE => 'DATETIME'},
       last_used_ip => {TYPE => 'varchar(40)'},
       app_id       => {TYPE => 'varchar(64)'},
+      sticky       => {TYPE => 'BOOLEAN', NOTNULL => 1, DEFAULT => 'FALSE'}
     ],
     INDEXES => [
       user_api_keys_api_key_idx        => {FIELDS => ['api_key'], TYPE => 'UNIQUE'},

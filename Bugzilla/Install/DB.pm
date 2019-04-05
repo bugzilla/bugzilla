@@ -726,6 +726,9 @@ sub update_table_definitions {
   $dbh->bz_add_index('user_api_keys', 'user_api_keys_user_id_app_id_idx',
     [qw(user_id app_id)]);
 
+  $dbh->bz_add_column('user_api_keys', 'sticky',
+    {TYPE => 'BOOLEAN', NOTNULL => 1, DEFAULT => 'FALSE'});
+
   _add_attach_size();
 
   _fix_disable_mail();

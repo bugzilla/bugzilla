@@ -2835,8 +2835,8 @@ pre.comment-text {
 /* Bug types */
 
 :root {
-  --bug-type-color-defect: #D62935;
-  --bug-type-color-enhancement: #2BC028;
+  --bug-type-color-defect: #EA3C3D;
+  --bug-type-color-enhancement: #2ABA27;
   --bug-type-color-task: #2886C9;
 }
 
@@ -2848,12 +2848,12 @@ pre.comment-text {
 }
 
 .bug-type-label[data-type="defect"] .icon::before {
-  content: '\E85F';
+  content: '\E3AC';
   color: var(--bug-type-color-defect);
 }
 
 .bug-type-label[data-type="enhancement"] .icon::before {
-  content: '\E862';
+  content: '\E146';
   color: var(--bug-type-color-enhancement);
 }
 
@@ -2867,27 +2867,6 @@ pre.comment-text {
   vertical-align: middle;
 }
 
-.bug-type-label.iconic-text {
-  border-radius: .2em;
-  padding: .2em .4em .2em .2em;
-  color: #FFF;
-  background-color: #666;
-  line-height: 16px;
-  font-weight: 600;
-}
-
-.bug-type-label.iconic-text[data-type="defect"] {
-  background-color: var(--bug-type-color-defect);
-}
-
-.bug-type-label.iconic-text[data-type="enhancement"] {
-  background-color: var(--bug-type-color-enhancement);
-}
-
-.bug-type-label.iconic-text[data-type="task"] {
-  background-color: var(--bug-type-color-task);
-}
-
 .bug-type-label.iconic-text .icon {
   margin-right: .2em;
   font-size: 16px;
@@ -2895,6 +2874,5 @@ pre.comment-text {
 }
 
 .bug-type-label.iconic-text .icon::before {
-  color: #FFF !important;
   vertical-align: bottom;
 }

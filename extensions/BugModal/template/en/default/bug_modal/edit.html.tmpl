@@ -225,12 +225,6 @@
         no_label = 1
         hide_on_edit = 1
     %]
-      [% IF bug.bug_type %]
-      <span class="bug-type-label iconic-text" data-type="[% bug.bug_type FILTER html %]">
-        <span class="icon" aria-hidden="true"></span>
-        [%~ bug.bug_type FILTER html ~%]
-      </span>
-      [% END %]
       <b class="bz_status_[% bug.bug_status FILTER html %]">
         [% bug.bug_status FILTER html %]
         [%+ bug.resolution FILTER html IF bug.resolution %]
@@ -472,10 +466,12 @@
     [% WRAPPER bug_modal/field.html.tmpl
         field      = bug_fields.bug_type
         field_type = constants.FIELD_TYPE_SINGLE_SELECT
-        hide_on_view = 1  # Because it's displayed on the header
         help       = "https://wiki.mozilla.org/BMO/UserGuide/BugFields#bug_type"
     %]
-      [% bug.bug_type FILTER html %]
+      <span class="bug-type-label iconic-text" data-type="[% bug.bug_type FILTER html %]">
+        <span class="icon" aria-hidden="true"></span>
+        [%~ bug.bug_type FILTER html ~%]
+      </span>
     [% END %]
 
     [%# importance %]

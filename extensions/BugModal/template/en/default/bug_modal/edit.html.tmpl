@@ -975,6 +975,7 @@
 
     [% IF bug.dependson.size + bug.blocked.size > 1 %]
       [% WRAPPER bug_modal/field.html.tmpl
+          name = "dependencytree"
           container = 1
           label = ""
           hide_on_edit = 1

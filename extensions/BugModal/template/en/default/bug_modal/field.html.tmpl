@@ -385,9 +385,22 @@ END;
 [%# bug lists, depencancies, blockers %]
 [% BLOCK bug_list %]
   [% IF NOT edit %]
-    [% FOREACH b IN values %]
-      [% INCLUDE bug/link.html.tmpl bug=b link_text=b.id use_alias=1  %]
-      [% ", " UNLESS loop.last %]
+    [% FOREACH type IN bug_fields.bug_type.legal_values.pluck('name') %]
+      [%
+        bugs = [];
+        FOREACH b IN values; bugs.push(b) IF b.bug_type == type; END;
+        NEXT UNLESS bugs.size > 0;
+      %]
+      <div class="bug-list">
+        <span class="bug-type-label iconic" title="[% type FILTER html %]"
+              aria-label="[% type FILTER html %]" data-type="[% type FILTER html %]">
+          <span class="icon" aria-hidden="true"></span>
+        </span>
+        [% FOREACH b IN bugs %]
+          [% INCLUDE bug/link.html.tmpl bug=b link_text=b.id use_alias=1  %]
+          [% ", " UNLESS loop.last %]
+        [% END %]
+      </div>
     [% END %]
   [% ELSE %]
     <input type="text" id="[% name FILTER html %]" name="[% name FILTER html %]"

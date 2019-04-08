@@ -369,6 +369,26 @@ input[type="number"] {
     text-decoration: underline;
 }
 
+.field .value .bug-list {
+  margin: -2px 0 6px;
+  padding-left: 20px;
+  line-height: 1.5;
+}
+
+.field .value .bug-list .bug-type-label {
+  float: left;
+  margin-left: -20px;
+}
+
+.field .value .bug-list .bug-type-label .icon {
+  font-size: 16px;
+}
+
+#field-value-dependencytree {
+  display: block;
+  margin: -2px 0 8px;
+}
+
 /* actions */
 
 #top-actions {

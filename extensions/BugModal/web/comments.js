@@ -523,9 +523,10 @@ Bugzilla.BugModal.Comments = class Comments {
    * @see https://developer.mozilla.org/en-US/docs/Web/API/Network_Information_API
    */
   prepare_inline_attachments() {
-    // Check the connectivity, API support, user setting and sensitive keywords
+    // Check the connectivity, API support, user setting, bug security and sensitive keywords
     if ((navigator.connection && navigator.connection.type === 'cellular') ||
         typeof IntersectionObserver !== 'function' || !BUGZILLA.user.settings.inline_attachments ||
+        BUGZILLA.bug_secure ||
         BUGZILLA.bug_keywords.split(', ').find(keyword => keyword.match(/^(hang|assertion|crash)$/))) {
       return;
     }

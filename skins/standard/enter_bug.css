@@ -55,6 +55,15 @@
     max-width: 35em;
 }
 
+/* Adjust style for fields using radio-button-like UI */
+#Create .field_label.for-buttons {
+    vertical-align: middle;
+}
+
+#Create .field_value.contains-buttons {
+    padding: .5em .25em;
+}
+
 /* Text inputs need to be a little shorter on enter_bug
  * than the 100% that they are on show_bug.
  */

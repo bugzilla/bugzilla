@@ -221,6 +221,14 @@ a.activity-ref {
     width: 170px;
 }
 
+.module .field.contains-buttons {
+    margin: 8px 0;
+}
+
+.module .field.contains-buttons .name {
+    vertical-align: middle;
+}
+
 .field-button {
     float: right;
     margin-left: 8px;

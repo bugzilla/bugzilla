@@ -49,7 +49,7 @@ logout($sel);
 
 log_in($sel, $config, 'QA_Selenium_TEST');
 file_bug_in_product($sel, 'TestProduct');
-$sel->select_ok("bug_type",     "label=defect");
+$sel->check_ok('//input[@name="bug_type" and @value="defect"]');
 $sel->select_ok("bug_severity", "label=critical");
 $sel->type_ok("short_desc", "Test bug editing");
 $sel->type_ok("comment",    "ploc");
@@ -377,7 +377,7 @@ logout($sel);
 
 log_in($sel, $config, 'QA_Selenium_TEST');
 file_bug_in_product($sel, 'TestProduct');
-$sel->select_ok("bug_type", "label=defect");
+$sel->check_ok('//input[@name="bug_type" and @value="defect"]');
 $sel->select_ok("bug_severity", "label=blocker");
 $sel->type_ok("short_desc", "New bug from me");
 

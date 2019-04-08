@@ -44,7 +44,7 @@
 
 [% IF NOT no_tds %]
   [% PROCESS "bug/field-label.html.tmpl" %]
-  <td class="field_value [% ' bz_hidden_field' IF hidden %]"
+  <td class="field_value [% ' bz_hidden_field' IF hidden; ' contains-buttons' IF use_buttons %]"
       id="field_container_[% field.name FILTER html %]"
       [% " colspan=\"$value_span\"" FILTER none IF value_span %]>
 [% END %]
@@ -101,6 +101,9 @@
     [% CASE [ constants.FIELD_TYPE_SINGLE_SELECT
               constants.FIELD_TYPE_MULTI_SELECT ] %]
         <input type="hidden" id="[% field.name FILTER html %]_dirty">
+        [% IF use_buttons %]
+        <div role="radiogroup" class="buttons toggle" id="[% field.name FILTER html %]">
+        [% ELSE %]
         <select id="[% field.name FILTER html %]"
                 name="[% field.name FILTER html %]"
                 [% IF field.type == constants.FIELD_TYPE_MULTI_SELECT %]
@@ -118,13 +121,19 @@
               [% dontchange FILTER html %]
             </option>
           [% END %]
+        [% END %]
           [% IF override_legal_values %]
             [% legal_values = override_legal_values %]
           [% ELSE %]
             [% legal_values = field.legal_values %]
           [% END %]
           [% FOREACH legal_value = legal_values %]
-            [% NEXT IF NOT legal_value.is_active AND NOT value.contains(legal_value.name).size %]
+            [%
+              selected = value.contains(legal_value.name).size;
+              NEXT IF NOT legal_value.is_active AND NOT selected;
+              option_id = "v" _ legal_value.id _ "_" _ field.name;
+              disabled = bug AND !legal_value.is_visible_on_bug(bug);
+            %]
 
             [%# Purpose: hide field values from those who can't change them %]
             [% IF field.name.match("^cf_blocking_") OR
@@ -133,7 +142,7 @@
                   field.name == "cf_cab_review" OR
                   field.name == "resolution" %]
               [% NEXT UNLESS bug.check_can_change_field(field.name, '---', legal_value.name) OR
-                             value.contains(legal_value.name).size %]
+                             selected %]
             [% END %]
 
             [% IF field.name == "resolution" &&
@@ -150,20 +159,35 @@
               [% NEXT IF r == "EXPIRED" %]
             [% END %]
 
-            <option value="[% legal_value.name FILTER html %]"
-                    id="v[% legal_value.id FILTER html %]_
-                        [%- field.name FILTER html %]"
-              [%# We always show selected values, even if they should be
-                # hidden %]
-              [% IF value.contains(legal_value.name).size %]
-                selected="selected"
-              [% ELSIF bug AND !legal_value.is_visible_on_bug(bug) %]
-                class="bz_hidden_option" disabled="disabled"
-              [% END %]>
+            [% IF use_buttons %]
+            <div class="item">
+              <input id="[% option_id FILTER html %]" type="radio"
+                     name="[% field.name FILTER html %]" value="[% legal_value.name FILTER html %]"
+                     [%# We always show selected values, even if they should be hidden %]
+                     [% IF selected %]checked[% ELSIF disabled %]disabled class="bz_hidden_option"[% END %]>
+              <label for="[% option_id FILTER html %]">
+                [% IF field.name == 'bug_type'%]
+                  <span class="bug-type-label iconic-text" data-type="[% legal_value.name FILTER html %]">
+                    <span class="icon" aria-hidden="true"></span>[% legal_value.name FILTER html %]
+                  </span>
+                [% ELSE %]
+                  [%- display_value(field.name, legal_value.name) FILTER html ~%]
+                [% END %]
+              </label>
+            </div>
+            [% ELSE %]
+            <option id="[% option_id FILTER html %]" value="[% legal_value.name FILTER html %]"
+                    [%# We always show selected values, even if they should be hidden %]
+                    [% IF selected %]selected[% ELSIF disabled %]disabled class="bz_hidden_option"[% END %]>
               [%- display_value(field.name, legal_value.name) FILTER html ~%]
             </option>
+            [% END %]
           [% END %]
+        [% IF use_buttons %]
+        </div>
+        [% ELSE %]
         </select>
+        [% END %]
         [%# When you pass an empty multi-select in the web interface,
           # it doesn't appear at all in the CGI object. Instead of
           # forcing all users of process_bug to always specify every

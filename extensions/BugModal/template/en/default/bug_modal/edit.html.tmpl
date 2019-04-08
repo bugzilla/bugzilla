@@ -466,6 +466,7 @@
     [% WRAPPER bug_modal/field.html.tmpl
         field      = bug_fields.bug_type
         field_type = constants.FIELD_TYPE_SINGLE_SELECT
+        use_buttons  = 1
         help       = "https://wiki.mozilla.org/BMO/UserGuide/BugFields#bug_type"
     %]
       <span class="bug-type-label iconic-text" data-type="[% bug.bug_type FILTER html %]">

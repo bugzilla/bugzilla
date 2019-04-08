@@ -538,17 +538,36 @@ $(function() {
                     $('#mode-btn').hide();
 
                     // populate select menus
-                    $.each(data.options, function(key, value) {
-                        var el = $('#' + key);
-                        if (!el) return;
-                        var selected = el.val();
-                        el.empty();
-                        $(value).each(function(i, v) {
-                            el.append($('<option>', { value: v.name, text: v.name }));
+                    Object.entries(data.options).forEach(([key, value]) => {
+                        const $select = document.querySelector(`#${key}`);
+                        if (!$select) return;
+                        // It can be radio-button-like UI
+                        const use_buttons = $select.matches('.buttons.toggle');
+                        const selected = use_buttons ? $select.querySelector('input').value : $select.value;
+                        $select.innerHTML = '';
+                        value.forEach(({ name }) => {
+                            if (use_buttons) {
+                                $select.insertAdjacentHTML('beforeend', `
+                                  <div class="item">
+                                    <input id="${$select.id}_${name}_radio" type="radio" name="${$select.id}"
+                                           value="${name}" ${name === selected ? 'checked' : ''}>
+                                    <label for="${$select.id}_${name}_radio">
+                                    ${$select.id === 'bug_type' ? `
+                                      <span class="bug-type-label iconic-text" data-type="${name}">
+                                        <span class="icon" aria-hidden="true"></span>${name}
+                                      </span>
+                                    ` : `${name}`}
+                                    </label>
+                                  </div>
+                                `);
+                            } else {
+                                $select.insertAdjacentHTML('beforeend', `
+                                  <option value="${name}" ${name === selected ? 'selected' : ''}>${name}</option>
+                                `);
+                            }
                         });
-                        el.val(selected);
-                        if (el.attr('multiple') && value.length < 5) {
-                            el.attr('size', value.length);
+                        if ($select.matches('[multiple]') && value.length < 5) {
+                            $select.size = value.length;
                         }
                     });
 

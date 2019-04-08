@@ -51,6 +51,10 @@ function init() {
   initCrashSignatureField();
   init_take_handler('[% user.login FILTER js %]');
   bz_attachment_form.update_requirements(false);
+
+  document.querySelector('#bug_type').addEventListener('change', () => {
+    bug_type_changed = true;
+  }, { once: true });
 }
 
 function initCrashSignatureField() {
@@ -67,6 +71,7 @@ function initCrashSignatureField() {
 var initialowners = new Array([% product.components.size %]);
 var last_initialowner;
 var default_bug_types = new Array([% product.components.size %]);
+let bug_type_changed = false;
 var initialccs = new Array([% product.components.size %]);
 var components = new Array([% product.components.size %]);
 var comp_desc = new Array([% product.components.size %]);
@@ -131,7 +136,10 @@ function set_assign_to() {
             last_initialowner = owner;
         }
 
-        form.bug_type.value = default_bug_types[index];
+        if (!bug_type_changed) {
+          form.bug_type.value = default_bug_types[index];
+        }
+
         document.getElementById('initial_cc').innerHTML = initialccs[index];
         document.getElementById('comp_desc').innerHTML = comp_desc[index];
 
@@ -318,7 +326,7 @@ TUI_hide_default('expert_fields');
     </td>
 
     [% INCLUDE bug/field.html.tmpl
-      bug = default, field = bug_fields.bug_type, editable = 1,
+      bug = default, field = bug_fields.bug_type, editable = 1, use_buttons = 1,
       value = default.bug_type %]
   </tr>
 

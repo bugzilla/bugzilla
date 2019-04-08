@@ -53,7 +53,7 @@ $(function() {
         bugQuery.plug(Y.Plugin.DataSourceJSONSchema, {
             schema: {
                 resultListLocator: "result.result.bugs",
-                resultFields: ["bug_id", "changeddate", "changeddate_fancy",
+                resultFields: ["bug_id", "bug_type", "changeddate", "changeddate_fancy",
                             "bug_status", "short_desc", "changeddate_api" ],
                 metaFields: {
                     description: "result.result.description",
@@ -170,6 +170,9 @@ $(function() {
         bugQueryTable = new Y.DataTable({
             columns: [
                 { key: Y.Plugin.DataTableRowExpansion.column_key, label: ' ', sortable: false },
+                { key: "bug_type", label: "T", allowHTML: true, sortable: true,
+                formatter: '<span class="bug-type-label iconic" title="{value}" aria-label="{value}" ' +
+                           'data-type="{value}"><span class="icon" aria-hidden="true"></span></span>' },
                 { key: "bug_id", label: "Bug", allowHTML: true, sortable: true,
                 formatter: `<a href="${BUGZILLA.config.basepath}show_bug.cgi?id={value}" target="_blank">{value}</a>` },
                 { key: "changeddate", label: "Updated", formatter: updatedFormatter,

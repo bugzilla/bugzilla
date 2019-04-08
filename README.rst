@@ -67,6 +67,12 @@ After that, you should be able to visit http://bmo-web.vm/ from your browser.
 You can login as vagrant@bmo-web.vm with the password "vagrant01!" (without
 quotes).
 
+The development server (morbo) can also serve the site via HTTPS.
+
+Run `vagrant ssh web`, that should put you in the `/vagrant` directory.
+While there run `openssl req -newkey rsa:2048 -sha256 -nodes -keyout bmo-web.vm-key.pem -x509 -days 365 -out bmo-web.vm.pem`.
+Restart morbo and you should now be able to visit https://bmo-web.vm.
+
 Making Changes and Seeing them
 ------------------------------
 

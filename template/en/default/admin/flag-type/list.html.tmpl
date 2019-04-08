@@ -131,7 +131,7 @@
     [% FOREACH type = types %]
 
       <tr class="[% IF type.is_active %]active[% ELSE %]inactive[% END %]">
-        <td><a href="[% basepath FILTER none %]editflagtypes.cgi?action=edit&amp;id=[% type.id %]">[% type.name FILTER html FILTER no_break %]</a></td>
+        <th><a href="[% basepath FILTER none %]editflagtypes.cgi?action=edit&amp;id=[% type.id %]">[% type.name FILTER html %]</a></th>
         <td>[% type.description FILTER html %]</td>
         <td align="right">[% type.sortkey FILTER html %]</td>
         <td>

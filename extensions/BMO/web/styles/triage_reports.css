@@ -60,3 +60,7 @@
   display: block;
   width: 100%;
 }
+
+#report td time {
+  white-space: nowrap;
+}

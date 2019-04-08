@@ -87,4 +87,5 @@
 #saved_searches_container li {
     margin: 5px;
     display: inline;
+    white-space: nowrap;
 }

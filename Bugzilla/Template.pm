@@ -702,14 +702,6 @@ sub create {
         return $var;
       },
 
-      # Prevents line break on hyphens and whitespaces.
-      no_break => sub {
-        my ($var) = @_;
-        $var =~ s/ /\&nbsp;/g;
-        $var =~ s/-/\&#8209;/g;
-        return $var;
-      },
-
       # Insert `<wbr>` HTML tags to camel and snake case words as well as
       # words containing dots in the given string so a long bug summary,
       # for example, will be wrapped in a preferred manner rather than

@@ -132,11 +132,11 @@
               <td>[% operation.who FILTER email FILTER html %]</td>
             [% END %]
             [% IF group == 'when' %]
-              <td>[% change.when FILTER time FILTER no_break %]</td>
+              <td><time datetime="[% change.when FILTER time('%Y-%m-%d %H:%M:%S') %]">[% change.when FILTER time %]</time></td>
               <td>[% operation.bug FILTER bug_link(operation.bug) FILTER none %]</td>
             [% ELSE %]
               <td>[% operation.bug FILTER bug_link(operation.bug) FILTER none %]</td>
-              <td>[% change.when FILTER time FILTER no_break %]</td>
+              <td><time datetime="[% change.when FILTER time('%Y-%m-%d %H:%M:%S') %]">[% change.when FILTER time %]</time></td>
             [% END %]
           [% ELSE %]
             [% IF who_count > 1 %]
@@ -146,7 +146,7 @@
             [% IF group == 'when' %]
               <td>&nbsp;</td>
             [% ELSE %]
-              <td>[% change.when FILTER time FILTER no_break %]</td>
+              <td><time datetime="[% change.when FILTER time('%Y-%m-%d %H:%M:%S') %]">[% change.when FILTER time %]</time></td>
             [% END %]
           [% END %]
           <td>

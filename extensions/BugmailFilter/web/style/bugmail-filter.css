@@ -42,3 +42,7 @@
     background-color: #eeeeee;
     color: #000000;
 }
+
+.flag-description {
+    white-space: nowrap;
+}

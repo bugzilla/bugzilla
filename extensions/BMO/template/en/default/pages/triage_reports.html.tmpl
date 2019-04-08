@@ -161,7 +161,7 @@ Show UNCONFIRMED [% terms.bugs %] with:
       <tr class="bz_bugitem [% count % 2 == 1 ? "bz_row_odd" : "bz_row_even" %]">
         <td>
           [% bug.id FILTER bug_link(bug.id) FILTER none %]<br>
-          [% bug.creation_ts.replace(' .*' '') FILTER html FILTER no_break %]
+          <time>[% bug.creation_ts.replace(' .*' '') FILTER html %]</time>
         </td>
         <td>
           [% bug.summary FILTER html %]
@@ -173,7 +173,7 @@ Show UNCONFIRMED [% terms.bugs %] with:
           [% END %]
         </td>
         <td>
-          [% bug.comment_ts FILTER html FILTER no_break %]
+          <time>[% bug.comment_ts FILTER html %]</time>
         </td>
         <td>
           [% bug.comment FILTER html %]

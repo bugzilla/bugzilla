@@ -1764,6 +1764,7 @@ button::-moz-focus-inner {
 
 #flags label {
     font-weight: normal;
+    white-space: nowrap;
 }
 
 /* tabs */

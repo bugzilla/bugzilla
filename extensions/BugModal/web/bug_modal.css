@@ -467,6 +467,7 @@ input[type="number"] {
 
 .flag-name {
     text-align: right;
+    white-space: nowrap;
 }
 
 td.flag-name, td.flag-requestee {

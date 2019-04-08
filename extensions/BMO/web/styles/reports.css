@@ -61,6 +61,10 @@
     border: 0px;
 }
 
+#report td time {
+    white-space: nowrap;
+}
+
 .disabled {
     color: #888888;
 }

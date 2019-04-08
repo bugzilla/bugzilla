@@ -226,7 +226,7 @@ var cpts = new Array();
         </span>
         <span id="all_flags" class="bz_default_hidden">
       [% END %]
-      [% flag.description FILTER html FILTER no_break %]
+      <span class="flag-description">[% flag.description FILTER html %]</span>
       [% ", " UNLESS loop.last %]
       [% IF loop.last && flag_count > 10 %]
         </span>

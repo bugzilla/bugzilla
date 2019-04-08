@@ -42,7 +42,7 @@
           [% FOREACH q = user.queries_subscribed %]
             <li role="none"><a role="option" href="[% basepath FILTER none %]buglist.cgi?cmdtype=dorem&amp;remaction=run&amp;namedcmd=
                 [% q.name FILTER uri %]&amp;sharer_id=[% q.user.id FILTER uri %]"
-                title="Shared by [% q.user.identity FILTER html %]">[% q.name FILTER html FILTER no_break %]</a></li>
+                title="Shared by [% q.user.identity FILTER html %]">[% q.name FILTER html %]</a></li>
           [% END %]
         </ul>
       </section>

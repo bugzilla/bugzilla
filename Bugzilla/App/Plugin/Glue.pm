@@ -186,6 +186,8 @@ sub register {
         $stash->{Bugzilla_csp} = Bugzilla::CGI::ContentSecurityPolicy->new(%params);
       }
 
+      # force the creation of the value, and thus the nonce (if it is used)
+      $stash->{Bugzilla_csp}->value;
       return $stash->{Bugzilla_csp};
     }
   );

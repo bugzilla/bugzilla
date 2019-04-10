@@ -437,7 +437,7 @@ my $format_params = {
 Bugzilla::Hook::process('show_bug_format', $format_params);
 if ($format_params->{format} eq 'modal') {
   my $bug_id = $vars->{bug} ? $vars->{bug}->id : undef;
-  $cgi->content_security_policy(Bugzilla::CGI::SHOW_BUG_MODAL_CSP($bug_id));
+  $C->content_security_policy(SHOW_BUG_MODAL_CSP($bug_id));
 }
 my $format = $template->get_format(
   "bug/show",

@@ -969,8 +969,8 @@ sub create {
       'current_language' => sub { return Bugzilla->current_language; },
 
       'script_nonce' => sub {
-        my $cgi = Bugzilla->cgi;
-        return $cgi->csp_nonce ? sprintf('nonce="%s"', $cgi->csp_nonce) : '';
+        my $C = $Bugzilla::App::CGI::C or return '';
+        return $C->csp_nonce ? sprintf('nonce="%s"', $C->csp_nonce) : '';
       },
 
       # If an sudo session is in progress, this is the user who

@@ -142,6 +142,61 @@ sub register {
       }
     }
   );
+  $app->helper(
+    'url_is_attachment_base' => sub {
+      my ($c, $id) = @_;
+      return 0 unless Bugzilla::Util::use_attachbase();
+      my $attach_base = Bugzilla->localconfig->{'attachment_base'};
+
+      # If we're passed an id, we only want one specific attachment base
+      # for a particular bug. If we're not passed an ID, we just want to
+      # know if our current URL matches the attachment_base *pattern*.
+      my $regex;
+      if ($id) {
+        $attach_base =~ s/\%bugid\%/$id/;
+        $regex = quotemeta($attach_base);
+      }
+      else {
+        # In this circumstance we run quotemeta first because we need to
+        # insert an active regex meta-character afterward.
+        $regex = quotemeta($attach_base);
+        $regex =~ s/\\\%bugid\\\%/\\d+/;
+      }
+      $regex = "^$regex";
+      return ($c->req->url->to_abs =~ $regex) ? 1 : 0;
+    }
+  );
+
+  $app->helper(
+    'content_security_policy' => sub {
+      my ($c, %add_params) = @_;
+      my $stash = $c->stash;
+      if (%add_params || !$stash->{Bugzilla_csp}) {
+        my %params = DEFAULT_CSP();
+        delete $params{report_only} if %add_params && !$add_params{report_only};
+        delete $params{report_only} if !$c->isa('Bugzilla::App::CGI');
+        foreach my $key (keys %add_params) {
+          if (defined $add_params{$key}) {
+            $params{$key} = $add_params{$key};
+          }
+          else {
+            delete $params{$key};
+          }
+        }
+        $stash->{Bugzilla_csp} = Bugzilla::CGI::ContentSecurityPolicy->new(%params);
+      }
+
+      return $stash->{Bugzilla_csp};
+    }
+  );
+  $app->helper(
+    'csp_nonce' => sub {
+      my ($c) = @_;
+
+      my $csp = $c->content_security_policy;
+      return $csp->has_nonce ? $csp->nonce : '';
+    }
+  );
 
   $app->helper(
     'bz_include' => sub {

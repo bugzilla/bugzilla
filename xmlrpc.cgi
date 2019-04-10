@@ -45,7 +45,6 @@ my $stdout = capture_stdout {
 # for setting SOAPAction, which isn't used by XML-RPC.
   $server->on_action(sub { $server->handle_login(WS_DISPATCH, @_) })->handle();
 };
-my $C = $Bugzilla::App::CGI::C;
 my ($header_str, $body) = split(/(?:\r\n\r\n|\n\n)/, $stdout, 2);
 my $headers = Mojo::Headers->new;
 $headers->parse("$header_str\r\n\r\n");

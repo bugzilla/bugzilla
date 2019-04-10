@@ -24,6 +24,9 @@ use Memoize;
   REMOTE_FILE
   LOCAL_FILE
 
+  DEFAULT_CSP
+  SHOW_BUG_MODAL_CSP
+
   bz_locations
 
   IS_NULL
@@ -726,6 +729,93 @@ sub _bz_locations {
     'confdir'       => $confdir,
   };
 }
+
+sub DEFAULT_CSP {
+  my %policy = (
+    default_src => ['self'],
+    script_src =>
+      ['self', 'nonce', 'unsafe-inline', 'https://www.google-analytics.com'],
+    frame_src   => [
+      # This is for extensions/BMO/web/js/firefox-crash-table.js
+      'https://crash-stop-addon.herokuapp.com',
+    ],
+    worker_src  => ['none',],
+    img_src     => ['self', 'blob:', 'https://secure.gravatar.com'],
+    style_src   => ['self', 'unsafe-inline'],
+    object_src  => ['none'],
+    connect_src => [
+      'self',
+
+      # This is for extensions/BMO/web/js/firefox-crash-table.js
+      'https://product-details.mozilla.org',
+
+      # This is for extensions/GoogleAnalytics using beacon or XHR
+      'https://www.google-analytics.com',
+
+      # This is from extensions/OrangeFactor/web/js/orange_factor.js
+      'https://treeherder.mozilla.org/api/failurecount/',
+    ],
+    form_action => [
+      'self',
+
+      # used in template/en/default/search/search-google.html.tmpl
+      'https://www.google.com/search'
+    ],
+    frame_ancestors => ['none'],
+    report_only     => 1,
+  );
+  if (Bugzilla->params->{github_client_id} && !Bugzilla->user->id) {
+    push @{$policy{form_action}}, 'https://github.com/login/oauth/authorize',
+      'https://github.com/login';
+  }
+
+  return %policy;
+}
+
+# Because show_bug code lives in many different .cgi files,
+# we needed a centralized place to define the policy.
+# normally the policy would just live in one .cgi file.
+# Additionally, Bugzilla->localconfig->{urlbase} cannot be called at compile time, so this can't be a constant.
+sub SHOW_BUG_MODAL_CSP {
+  my ($bug_id) = @_;
+  my %policy = (
+    script_src => [
+      'self',          'nonce',
+      'unsafe-inline', 'unsafe-eval',
+      'https://www.google-analytics.com'
+    ],
+    img_src     => ['self', 'https://secure.gravatar.com'],
+    media_src   => ['self'],
+    connect_src => [
+      'self',
+
+      # This is for extensions/BMO/web/js/firefox-crash-table.js
+      'https://product-details.mozilla.org',
+
+      # This is for extensions/GoogleAnalytics using beacon or XHR
+      'https://www.google-analytics.com',
+
+      # This is from extensions/OrangeFactor/web/js/orange_factor.js
+      'https://treeherder.mozilla.org/api/failurecount/',
+    ],
+    frame_src  => [
+      'self',
+
+      # This is for extensions/BMO/web/js/firefox-crash-table.js
+      'https://crash-stop-addon.herokuapp.com',
+    ],
+    worker_src => ['none',],
+  );
+  if (Bugzilla::Util::use_attachbase() && $bug_id) {
+    my $attach_base = Bugzilla->localconfig->{'attachment_base'};
+    $attach_base =~ s/\%bugid\%/$bug_id/g;
+    push @{$policy{img_src}}, $attach_base;
+    push @{$policy{media_src}}, $attach_base;
+  }
+
+  return %policy;
+}
+
 
 # This makes us not re-compute all the bz_locations data every time it's
 # called.

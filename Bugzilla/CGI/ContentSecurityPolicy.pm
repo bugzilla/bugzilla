@@ -59,22 +59,14 @@ sub _has_directive {
   return $self->$method;
 }
 
-sub header_names {
+sub header_name {
   my ($self) = @_;
-  my @names = ('Content-Security-Policy');
+  my $name = 'Content-Security-Policy';
   if ($self->report_only) {
-    return map { $_ . '-Report-Only' } @names;
+    return  $name . '-Report-Only';
   }
   else {
-    return @names;
-  }
-}
-
-sub add_cgi_headers {
-  my ($self, $headers) = @_;
-  return if $self->disable;
-  foreach my $name ($self->header_names) {
-    $headers->{"-$name"} = $self->value;
+    return $name;
   }
 }
 
@@ -164,7 +156,7 @@ Bugzilla::CGI::ContentSecurityPolicy - Object-oriented interface to generating C
 
 This class provides an object interface to constructing Content Security Policies.
 
-Rather than use this module, scripts should call $cgi->content_security_policy() which constructs the CSP headers
+Rather than use this module, scripts should call $C->content_security_policy() which constructs the CSP headers
 and registers them for the current request.
 
 See L<Bugzilla::CGI> for details.

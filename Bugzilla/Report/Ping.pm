@@ -74,7 +74,7 @@ sub _build_namespace {
   return 'bugzilla';
 }
 
-has 'doctype' => (is => 'lazy', init_arg => undef, isa => Str);
+has 'doctype' => (is => 'lazy', isa => Str);
 
 sub _build_doctype {
   my ($self) = @_;

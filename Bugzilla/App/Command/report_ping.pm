@@ -9,12 +9,13 @@ package Bugzilla::App::Command::report_ping;   ## no critic (Capitalization)
 use Mojo::Base 'Mojolicious::Command';
 
 use Bugzilla::Constants;
-use JSON::MaybeXS;
 use Cwd qw(cwd);
+use JSON::MaybeXS;
+use Module::Runtime 'require_module';
 use Mojo::File 'path';
 use Mojo::Util 'getopt';
 use PerlX::Maybe 'maybe';
-use Module::Runtime 'require_module';
+use Try::Tiny;
 
 has description => 'send a report ping to a url';
 has usage       => sub { shift->extract_usage };
@@ -23,9 +24,9 @@ sub run {
   my ($self, @args) = @_;
   my $json
     = JSON::MaybeXS->new(convert_blessed => 1, canonical => 1, pretty => 1);
-  my $report_type = 'Simple';
+  my $class       = 'Simple';
   my $working_dir = cwd();
-  my ($namespace, $page, $rows, $base_url, $test, $dump_schema, $dump_documents);
+  my ($namespace, $doctype, $page, $rows, $base_url, $test, $dump_schema, $dump_documents);
 
   Bugzilla->usage_mode(USAGE_MODE_CMDLINE);
   getopt \@args,
@@ -34,22 +35,35 @@ sub run {
     'rows|r=i'       => \$rows,
     'dump-schema'    => \$dump_schema,
     'dump-documents' => \$dump_documents,
-    'report-type=s'  => \$report_type,
-    'namespace|ns=s' => \$namespace,
+    'class|c=s'      => \$class,
+    'namespace|n=s'  => \$namespace,
+    'doctype|d=s'    => \$doctype,
     'workdir|C=s'    => \$working_dir,
     'test'           => \$test;
 
   $base_url = 'http://localhost' if $dump_schema || $dump_documents || $test;
   die $self->usage unless $base_url;
 
-  my $report_class = "Bugzilla::Report::Ping::$report_type";
-  require_module($report_class);
-  my $report = $report_class->new(
+  unless ($class =~ /::/) {
+    $class = "Bugzilla::Report::Ping::$class";
+  }
+  try {
+    require_module($class);
+  }
+  catch {
+    say "Failed to load $class.";
+    unless ($_ =~ /^Can't locate \S+ in \@INC/) {
+      say "Error: $_";
+    }
+    exit 1;
+  };
+  my $report = $class->new(
     model           => Bugzilla->dbh->model,
     base_url        => $base_url,
     maybe rows      => $rows,
     maybe page      => $page,
     maybe namespace => $namespace,
+    maybe doctype   => $doctype,
   );
 
   if ($dump_schema) {
@@ -126,7 +140,7 @@ Bugzilla::App::Command::report_ping - descriptionsend a report ping to a url';
     -u, --base-url           URL to send the json documents to.
     -r, --rows num           (Optional) Number of requests to send at once. Default: 10.
     -p, --page num           (Optional) Page to start on. Default: 1
-    --report-type word       (Optional) Report class to use. Default: Simple
+    --class word             (Optional) Report class to use. Default: Simple
     --test                   Validate the json documents against the json schema.
     --dump-schema            Print the json schema.
 

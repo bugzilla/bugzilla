@@ -53,7 +53,6 @@ sub _build_validator {
     schema => Mojo::JSON::Pointer->new($schema->compile));
 }
 
-
 sub _build_resultset {
   my ($self)  = @_;
   my $bugs    = $self->model->resultset('Bug');

@@ -45,6 +45,8 @@ sub _build_validator {
     duplicates       => joi->array->required->items(joi->integer),
     target_milestone => joi->string->required,
     version          => joi->string->required,
+    delta_ts         => joi->string->required,
+    creation_ts      => joi->string->required,
   });
 
   return JSON::Validator->new(
@@ -84,6 +86,8 @@ sub prepare {
     blocked_by       => [map { $_->dependson } $bug->map_blocked_by->all],
     depends_on       => [map { $_->blocked } $bug->map_depends_on->all],
     flags            => [map { $self->_prepare_flag($_) } $bug->flags->all],
+    delta_ts         => $bug->delta_ts . "",
+    creation_ts      => $bug->creation_ts . "",
   };
 
   return ($self->_prepare_doc_id($bug), $doc);

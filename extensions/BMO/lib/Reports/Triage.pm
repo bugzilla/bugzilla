@@ -57,11 +57,9 @@ sub unconfirmed {
         ? $input->{'component'}
         : [$input->{'component'}];
       foreach my $component_name (@$ra_components) {
-        my $component
-          = Bugzilla::Component->new({name => $component_name, product => $product})
-          || ThrowUserError('invalid_object',
-          {object => 'Component', value => $component_name});
-        push @component_ids, $component->id;
+        next unless my $component = Bugzilla::Component->new(
+          {name => $component_name, product => $product, cache => 1});
+        push(@component_ids, $component->id);
       }
     }
 
@@ -261,7 +259,8 @@ sub owners {
     my @product_names
       = $input->{product} ? ($input->{product}) : DEFAULT_OWNER_PRODUCTS;
     foreach my $name (@product_names) {
-      push(@products, Bugzilla::Product->check({name => $name}));
+      next unless my $product = Bugzilla::Product->new({name => $name, cache => 1});
+      push(@products, $product);
     }
   }
 
@@ -272,9 +271,9 @@ sub owners {
       ? $input->{'component'}
       : [$input->{'component'}];
     foreach my $component_name (@$ra_components) {
-      my $component = Bugzilla::Component->check(
-        {name => $component_name, product => $products[0]});
-      push @component_ids, $component->id;
+      next unless my $component = Bugzilla::Component->new(
+        {name => $component_name, product => $products[0], cache => 1});
+      push(@component_ids, $component->id);
     }
   }
 

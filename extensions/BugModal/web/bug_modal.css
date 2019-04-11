@@ -793,8 +793,14 @@ h3.change-name {
     color: grey;
 }
 
-.change-set .attachment .label [itemprop="name"] {
+.change-set .attachment .label [itemprop="description"] {
     font-weight: 600;
+}
+
+.change-set .attachment.deleted .label [itemprop="description"],
+.change-set .attachment.obsolete .label [itemprop="description"] {
+    text-decoration: line-through;
+    text-decoration-color: grey;
 }
 
 .change-set .attachment .outer {

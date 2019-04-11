@@ -113,7 +113,8 @@ my $dbh = Bugzilla->dbh;
 $dbh->bz_start_transaction;
 
 say 'Change the type of all bugs with the "enhancement" severity to "enhancement"';
-$dbh->do('UPDATE bugs SET bug_type = "enhancement" WHERE bug_severity = "enhancement"');
+$dbh->do('UPDATE bugs SET bug_type = "enhancement", bug_severity = "normal"
+  WHERE bug_severity = "enhancement"');
 
 say 'Disable the "enhancement" severity';
 $dbh->do('UPDATE bug_severity SET isactive = 0 WHERE value = "enhancement"');
@@ -139,7 +140,7 @@ foreach my $target (@MIGRATION_MAP) {
   say 'Select components';
   my $comp_ids = $dbh->selectcol_arrayref(
     'SELECT component.id FROM components as component
-      JOIN products AS product ON component.id = product.id
+      JOIN products AS product ON component.product_id = product.id
       WHERE product.name = ?' . ($component ? ' AND component.name = ?' : ''),
     undef, ($component ? ($product, $component) : ($product)));
 

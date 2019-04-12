@@ -243,7 +243,7 @@ sub _check_watch_user {
   if ($value eq '') {
     ThrowUserError('component_watch_missing_watch_user');
   }
-  if ($value !~ /\.bugs$/i) {
+  if ($value !~ /@(?!invalid).+\.bugs$/i) {
     ThrowUserError('component_watch_invalid_watch_user');
   }
   return Bugzilla::User->check($value)->id;

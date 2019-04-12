@@ -995,7 +995,7 @@ sub _bug_reporters_hw_os {
 sub _bug_is_unassigned {
   my ($self) = @_;
   my $assignee = $self->assigned_to->login;
-  return $assignee eq 'nobody@mozilla.org' || $assignee =~ /\.bugs$/;
+  return $assignee eq 'nobody@mozilla.org' || $assignee =~ /@(?!invalid).+\.bugs$/;
 }
 
 sub _bug_has_current_patch {
@@ -1176,7 +1176,7 @@ sub object_start_of_update {
   # and the assignee isn't a real person
   return
     unless $new_bug->assigned_to->login eq 'nobody@mozilla.org'
-    || $new_bug->assigned_to->login =~ /\.bugs$/;
+    || $new_bug->assigned_to->login =~ /@(?!invalid).+\.bugs$/;
 
   # and the user can set the status to NEW
   return

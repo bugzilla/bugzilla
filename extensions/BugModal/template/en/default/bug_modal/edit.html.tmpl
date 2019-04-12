@@ -20,7 +20,7 @@
   # these are used in a few places
   is_cced = bug.cc.contains(user.login);
   unassigned = (bug.assigned_to.login == "nobody@mozilla.org")
-               || (bug.assigned_to.login.search('\.bugs$'));
+               || (bug.assigned_to.login.search('@(?!invalid).+\.bugs$'));
 
   # custom fields that have custom rendering, or should not be rendered
   rendered_custom_fields = [

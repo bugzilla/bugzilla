@@ -198,12 +198,15 @@ Bugzilla.FlagTypeComment = class FlagTypeComment {
             (att.is_patch || this.extra_patch_types.includes(att.content_type)));
 
           if (others.length) {
-            $fieldset.querySelector('tbody').insertAdjacentHTML('beforeend',
-              '<tr class="other-patches"><th>Do you want to request approval of these patches as well?</th><td>' +
-              `${others.map(patch =>
-                `<div><label><input type="checkbox" checked data-id="${patch.id}"> ${patch.summary}</label></div>`
-              ).join('')}` +
-              '</td></tr>');
+            $fieldset.querySelector('tbody').insertAdjacentHTML('beforeend', `
+              <tr class="other-patches"><th>Do you want to request approval of these patches as well?</th><td>
+              ${others.map(patch => `
+                <div>
+                  <label><input type="checkbox" checked data-id="${patch.id}"> ${patch.summary.htmlEncode()}</label>
+                </div>
+              `).join('')}
+              </td></tr>
+            `);
           }
         });
       }

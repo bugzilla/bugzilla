@@ -569,7 +569,7 @@ Bugzilla.BugModal.Comments = class Comments {
     // Show image smaller than 2 MB
     if (type.match(/^image\/(?!vnd).+$/) && size < max_size) {
       $att.insertAdjacentHTML('beforeend', `
-        <a href="${link}" class="outer lightbox"><img src="${link}" alt="${name}" itemprop="image"></a>`);
+        <a href="${link}" class="outer lightbox"><img src="${link}" alt="${name.htmlEncode()}" itemprop="image"></a>`);
 
       // Add lightbox support
       $att.querySelector('.outer.lightbox').addEventListener('click', event => {
@@ -610,7 +610,7 @@ Bugzilla.BugModal.Comments = class Comments {
         const lang = is_patch ? 'diff' : type.match(/\w+$/)[0];
 
         $att.insertAdjacentHTML('beforeend', `
-          <button type="button" role="link" title="${name}" class="outer">
+          <button type="button" role="link" title="${name.htmlEncode()}" class="outer">
           <pre class="language-${lang}" role="img" itemprop="text">${text.htmlEncode()}</pre></button>`);
 
         // Make the button work as a link. It cannot be `<a>` because Prism Autolinker plugin may add links to `<pre>`

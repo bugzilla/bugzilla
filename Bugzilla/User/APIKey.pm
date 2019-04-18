@@ -14,7 +14,7 @@ use warnings;
 use base qw(Bugzilla::Object);
 
 use Bugzilla::User;
-use Bugzilla::Util qw(generate_random_password trim remote_ip);
+use Bugzilla::Util qw(generate_random_password trim);
 use Bugzilla::Error;
 
 #####################################################################
@@ -31,14 +31,16 @@ use constant DB_COLUMNS => qw(
   revoked
   last_used
   last_used_ip
+  sticky
 );
 
-use constant UPDATE_COLUMNS => qw(description revoked last_used last_used_ip);
+use constant UPDATE_COLUMNS => qw(description revoked last_used last_used_ip sticky);
 use constant VALIDATORS     => {
   api_key     => \&_check_api_key,
   app_id      => \&_check_app_id,
   description => \&_check_description,
   revoked     => \&Bugzilla::Object::check_boolean,
+  sticky      => \&Bugzilla::Object::check_boolean,
 };
 use constant LIST_ORDER => 'id';
 use constant NAME_FIELD => 'api_key';
@@ -60,6 +62,7 @@ sub description  { return $_[0]->{description} }
 sub revoked      { return $_[0]->{revoked} }
 sub last_used    { return $_[0]->{last_used} }
 sub last_used_ip { return $_[0]->{last_used_ip} }
+sub sticky       { return $_[0]->{sticky} }
 
 # Helpers
 sub user {
@@ -69,17 +72,17 @@ sub user {
 }
 
 sub update_last_used {
-  my $self = shift;
-  my $timestamp
-    = shift || Bugzilla->dbh->selectrow_array('SELECT LOCALTIMESTAMP(0)');
+  my ($self, $remote_ip) = @_;
+  my $timestamp = Bugzilla->dbh->selectrow_array('SELECT LOCALTIMESTAMP(0)');
   $self->set('last_used',    $timestamp);
-  $self->set('last_used_ip', remote_ip());
+  $self->set('last_used_ip', $remote_ip);
   $self->update;
 }
 
 # Setters
 sub set_description { $_[0]->set('description', $_[1]); }
 sub set_revoked     { $_[0]->set('revoked',     $_[1]); }
+sub set_sticky      { $_[0]->set('sticky',      $_[1]); }
 
 # Validators
 sub _check_api_key { return generate_random_password(40); }

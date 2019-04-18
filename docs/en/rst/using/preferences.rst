@@ -132,9 +132,14 @@ change your password everywhere.
 You can create more than one API key if required. Each API key has an optional
 description which can help you record what it is used for.
 
-On this page, you can unrevoke, revoke and change the description of existing
+On this page, you can unrevoke, revoke, make sticky, and change the description of existing
 API keys for your login. A revoked key means that it cannot be used. The
 description is optional and purely for your information.
+
+Sticky API keys may only be used from one IP address, which reduces the risk
+of the key being leaked. The IP address is the one the key was last used
+from. The expected workflow is that the sticky bit will be set once your application
+(or script) is setup. The sticky attribute may only be set, it can't ever be unset.
 
 You can also create a new API key by selecting the checkbox under the 'New
 API key' section of the page.

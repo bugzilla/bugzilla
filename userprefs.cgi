@@ -850,8 +850,12 @@ sub SaveApiKey {
   foreach my $api_key (@$api_keys) {
     my $description = $cgi->param('description_' . $api_key->id);
     my $revoked     = !!$cgi->param('revoked_' . $api_key->id);
+    my $sticky      = !!$cgi->param('sticky_' . $api_key->id);
 
-    if ($description ne $api_key->description || $revoked != $api_key->revoked) {
+    if ( $description ne $api_key->description
+      || $revoked != $api_key->revoked
+      || $sticky != $api_key->sticky)
+    {
       if ($user->mfa && !$revoked && $api_key->revoked) {
         push @mfa_events,
           {
@@ -862,7 +866,9 @@ sub SaveApiKey {
           };
       }
       else {
-        $api_key->set_all({description => $description, revoked => $revoked,});
+        $sticky = 1 if $api_key->sticky;
+        $api_key->set_all(
+          {description => $description, revoked => $revoked, sticky => $sticky});
         $api_key->update();
         if ($revoked) {
           Bugzilla->log_user_request(undef, undef, 'api-key-revoke');

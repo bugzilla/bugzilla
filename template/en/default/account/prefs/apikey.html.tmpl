@@ -14,8 +14,9 @@
 <p>
   API keys are used to authenticate WebService API calls. You can create more than
   one API key if required. Each API key has an optional description which can help
-  you record what each key is used for.<br>
-  <br>
+  you record what each key is used for.
+</p>
+<p>
   Documentation on how to log in is available
   <a href="https://bmo.readthedocs.io/en/latest/api/core/v1/general.html#authentication">
     here</a>.
@@ -24,13 +25,14 @@
 <h3>Existing API keys</h3>
 
 <p>You can update the description, and revoke or unrevoke existing API keys
-here.</p>
+here. Sticky keys may only be used from the last IP that used the API key, and cannot be unset.</p>
 
 <table id="email_prefs">
   <tr class="column_header">
     <th>API key</th>
     <th>Description (optional)</th>
     <th>Last used</th>
+    <th>Sticky</th>
     <th>Revoked</th>
   </tr>
 
@@ -51,6 +53,12 @@ here.</p>
       [% ELSE %]
         <td class="center"><i>never used</i></td>
       [% END %]
+      <td class="center">
+      <input type="checkbox" value="1"
+          name="sticky_[% api_key.id FILTER html %]"
+          id="sticky_[% api_key.id FILTER html %]"
+        [% IF api_key.sticky %] checked="checked" disabled="disabled" [% END %]>
+      </td>
       <td class="center">
         <input type="checkbox" value="1"
           name="revoked_[% api_key.id FILTER html %]"

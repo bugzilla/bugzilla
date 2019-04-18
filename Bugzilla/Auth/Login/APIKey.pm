@@ -47,18 +47,25 @@ sub get_login_info {
     return {failure => AUTH_NODATA};
   }
 
-  my $api_key = Bugzilla::User::APIKey->new({name => $api_key_text});
+  my $api_key   = Bugzilla::User::APIKey->new({name => $api_key_text});
+  my $remote_ip = remote_ip();
 
   if (!$api_key or $api_key->api_key ne $api_key_text) {
 
     # The second part checks the correct capitalisation. Silly MySQL
     ThrowUserError("api_key_not_valid");
   }
+  elsif ( $api_key->sticky
+    && $api_key->last_used_ip
+    && $api_key->last_used_ip ne $remote_ip)
+  {
+    ThrowUserError("api_key_not_valid");
+  }
   elsif ($api_key->revoked) {
     ThrowUserError('api_key_revoked');
   }
 
-  $api_key->update_last_used();
+  $api_key->update_last_used($remote_ip);
   $self->set_app_id($api_key->app_id);
 
   return {user_id => $api_key->user_id};

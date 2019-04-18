@@ -754,14 +754,18 @@ sub DEFAULT_CSP {
 
       # This is from extensions/OrangeFactor/web/js/orange_factor.js
       'https://treeherder.mozilla.org/api/failurecount/',
+
+      # socorro lens
+      'https://crash-stats.mozilla.com/api/SuperSearch/',
     ],
+    font_src => [ 'self', 'https://fonts.gstatic.com' ],
     form_action => [
       'self',
 
       # used in template/en/default/search/search-google.html.tmpl
       'https://www.google.com/search'
     ],
-    frame_ancestors => ['none'],
+    frame_ancestors => ['self'],
     report_only     => 1,
   );
   if (Bugzilla->params->{github_client_id} && !Bugzilla->user->id) {

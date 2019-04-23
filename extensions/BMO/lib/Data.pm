@@ -126,6 +126,7 @@ tie(
     "Rhino"                               => [],
     "SeaMonkey"                           => [],
     "Tamarin"                             => [],
+    "Taskcluster"                         => [],
     "Tech Evangelism"                     => [],
     "Testing"                             => [],
     "Thunderbird"                         => [],

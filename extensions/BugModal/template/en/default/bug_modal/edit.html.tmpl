@@ -1440,20 +1440,24 @@
           </li>
           <li role="separator"></li>
           <li role="presentation">
-            <a href="[% basepath FILTER none %]enter_bug.cgi?format=__default__&amp;product=[% bug.product FILTER uri %]&amp;blocked=[% bug.id FILTER uri %]"
+            <a href="[% basepath FILTER none %]enter_bug.cgi?format=__default__&amp;blocked=[% bug.id FILTER uri %]
+                     [%~%]&amp;product=[% bug.product FILTER uri %]&amp;component=[% bug.component FILTER uri %]"
                role="menuitem" tabindex="-1" target="_blank">&#8230; that blocks this [% terms.bug %]</a>
           </li>
           <li role="presentation">
-            <a href="[% basepath FILTER none %]enter_bug.cgi?format=__default__&amp;product=[% bug.product FILTER uri %]&amp;dependson=[% bug.id FILTER uri %]"
+            <a href="[% basepath FILTER none %]enter_bug.cgi?format=__default__&amp;dependson=[% bug.id FILTER uri %]
+                     [%~%]&amp;product=[% bug.product FILTER uri %]&amp;component=[% bug.component FILTER uri %]"
                role="menuitem" tabindex="-1" target="_blank">&#8230; that depends on this [% terms.bug %]</a>
           </li>
           <li role="presentation">
-            <a href="[% basepath FILTER none %]enter_bug.cgi?format=__default__&amp;product=[% bug.product FILTER uri %]&amp;regressed_by=[% bug.id FILTER uri %]"
+            <a href="[% basepath FILTER none %]enter_bug.cgi?format=__default__&amp;regressed_by=[% bug.id FILTER uri %]
+                     [%~%]&amp;product=[% bug.product FILTER uri %]&amp;component=[% bug.component FILTER uri %]"
                role="menuitem" tabindex="-1" target="_blank">&#8230; that is regressed by this [% terms.bug %]</a>
           </li>
           <li role="separator"></li>
           <li role="presentation">
-            <a href="[% basepath FILTER none %]enter_bug.cgi?format=__default__&amp;product=[% bug.product FILTER uri %]&amp;cloned_bug_id=[% bug.id FILTER uri %]"
+            <a href="[% basepath FILTER none %]enter_bug.cgi?format=__default__&amp;cloned_bug_id=[% bug.id FILTER uri %]
+                     [%~%]&amp;product=[% bug.product FILTER uri %]&amp;component=[% bug.component FILTER uri %]"
                role="menuitem" tabindex="-1" target="_blank">&#8230; as a clone of this [% terms.bug %]</a>
           </li>
           <li role="presentation">

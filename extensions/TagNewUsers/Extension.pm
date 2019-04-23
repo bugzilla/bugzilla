@@ -197,7 +197,7 @@ sub _is_new {
       $self->{is_new} = 0;
     }
     else {
-      $self->{is_new} = ($self->comment_count <= COMMENT_COUNT)
+      $self->{is_new} = (( $self->comment_count // 0) <= COMMENT_COUNT)
         || ($self->creation_age <= PROFILE_AGE);
     }
   }

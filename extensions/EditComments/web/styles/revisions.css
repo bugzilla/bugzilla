@@ -23,6 +23,7 @@
   flex: none;
 }
 
+.revision .empty-comment,
 .revision .hidden-comment {
   padding: 10px;
   font-style: italic;

@@ -179,14 +179,6 @@ sub _add_comments_to_stream {
       $comment->{collapsed_reason} = $comment->author->name;
     }
 
-    if ( $comment->type != CMT_ATTACHMENT_CREATED
-      && $comment->count == 0
-      && length($comment->body) == 0)
-    {
-      $comment->{collapsed}        = 1;
-      $comment->{collapsed_reason} = 'empty';
-    }
-
 # If comment type is resolved as duplicate, do not add '...marked as duplicate...' string to comment body
     if ($comment->type == CMT_DUPE_OF) {
       $comment->set_type(0);

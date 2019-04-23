@@ -40,6 +40,8 @@
     <div class="body">
       [% IF !user.is_insider && a.is_hidden %]
         <div class="hidden-comment">(Hidden by Administrator)</div>
+      [% ELSIF comment.count == 0 && !a.new %]
+        <div class="empty-comment">No description provided.</div>
       [% ELSE %]
         <pre class="bz_comment_text">[% a.new FILTER quoteUrls(bug) %]</pre>
       [% END %]

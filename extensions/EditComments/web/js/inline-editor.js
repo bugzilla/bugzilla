@@ -48,7 +48,8 @@ Bugzilla.InlineCommentEditor = class InlineCommentEditor {
 
     this.$edit_button.addEventListener('click', event => this.edit_button_onclick(event));
 
-    // Check if the comment is written in Markdown
+    // Check if the comment is empty or written in Markdown
+    this.is_empty = this.$body.matches('.empty');
     this.is_markdown = this.$body.matches('[data-ismarkdown="true"]');
   }
 
@@ -139,6 +140,12 @@ Bugzilla.InlineCommentEditor = class InlineCommentEditor {
 
     // Adjust the height of `<textarea>`
     this.$textarea.style.height = `${this.$textarea.scrollHeight}px`;
+
+    // Let the user edit Description (Comment 0) immediately if it's empty
+    if (this.is_empty) {
+      this.fetch_onload({ comments: { [this.comment_id]: '' } });
+      return;
+    }
 
     // Retrieve the raw comment text
     bugzilla_ajax({
@@ -284,11 +291,13 @@ Bugzilla.InlineCommentEditor = class InlineCommentEditor {
 
   /**
    * Enable or disable buttons on the comment actions toolbar (not the editor's own toolbar) while editing the comment
-   * to avoid any unexpected behaviour.
+   * to avoid any unexpected behaviour. The Reply button should always be disabled if the comment is empty.
    * @param {Boolean} disabled Whether the buttons should be disabled.
    */
   toggle_toolbar_buttons(disabled) {
-    this.$change_set.querySelectorAll('.comment-actions button').forEach($button => $button.disabled = disabled);
+    this.$change_set.querySelectorAll('.comment-actions button').forEach($button => {
+      $button.disabled = $button.matches('.reply-btn') && this.is_empty ? true : disabled;
+    });
   }
 
   /**
@@ -322,6 +331,13 @@ Bugzilla.InlineCommentEditor = class InlineCommentEditor {
    */
   save_onsuccess(data) {
     this.$body.innerHTML = data.html;
+
+    // Remove the empty state (new comment cannot be empty)
+    if (this.is_empty) {
+      this.is_empty = false;
+      this.$body.classList.remove('empty');
+    }
+
     this.finish();
 
     // Highlight code if possible

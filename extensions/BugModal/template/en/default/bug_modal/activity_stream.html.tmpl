@@ -142,7 +142,7 @@
               </button>
             [% END %]
             <button type="button" class="reply-btn minor iconic" title="Reply to this comment" aria-label="Reply"
-                    data-reply-id="[% comment.count FILTER none %]"
+                    [% 'disabled' IF !comment.body %] data-reply-id="[% comment.count FILTER none %]"
                     data-reply-name="[% comment.author.name || comment.author.nick FILTER html %]">
               <span class="icon" aria-hidden="true"></span>
             </button>
@@ -290,13 +290,19 @@
     [% comment_tag = 'pre' %]
   [% END %]
 
-  [% IF comment.body %]
+  [%# Description (Comment 0) can be empty %]
+  [% IF comment.body || comment.count == 0 %]
     <[% comment_tag FILTER none %]
-        class="comment-text [%= "markdown-body" IF comment.is_markdown %] [%= "bz_private" IF comment.is_private %]"
+        class="comment-text [%= "markdown-body" IF comment.is_markdown %] [%= "bz_private" IF comment.is_private %]
+               [% "empty" IF !comment.body %]"
         id="ct-[% comment.count FILTER none %]" data-comment-id="[% comment.id FILTER none %]"
         [% IF comment.is_markdown +%] data-ismarkdown="true" [% END ~%]
         [% IF comment.collapsed +%] style="display:none"[% END ~%]>
-      [%~ comment.body_full({ exclude_attachment => 1 }) FILTER renderMarkdown(bug, comment) ~%]
+      [%~ IF comment.body ~%]
+        [%~ comment.body_full({ exclude_attachment => 1 }) FILTER renderMarkdown(bug, comment) ~%]
+      [%~ ELSE ~%]
+        <em>No description provided.</em>
+      [%~ END ~%]
     </[% comment_tag FILTER none %]>
   [% END %]
 [% END %]

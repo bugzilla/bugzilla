@@ -7,7 +7,7 @@
   #%]
 
 [%
-  RETURN IF comment.body == '';
+  RETURN UNLESS comment.body || comment.count == 0;
   RETURN UNLESS user.is_insider
     || Param('edit_comments_group') && user.in_group(Param('edit_comments_group')) && comment.author.id == user.id;
   RETURN UNLESS

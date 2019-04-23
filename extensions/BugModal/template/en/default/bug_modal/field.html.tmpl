@@ -98,6 +98,7 @@ END;
             [%~ " indent" IF no_label && !no_indent %]
             [%~ " inline" IF inline %]
             [%~ " contains-buttons" IF use_buttons ~%]
+            [%~ " bug-list" IF field_type == constants.FIELD_TYPE_BUG_LIST ~%]
             [%~ " edit-hide" IF hide_on_edit %]
             [%~ " edit-show" IF hide_on_view && !hide_on_edit %]"
   [% IF name %] id="field-[% name FILTER html %]"[% END %]

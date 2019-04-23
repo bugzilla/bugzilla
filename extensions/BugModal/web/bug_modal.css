@@ -229,6 +229,12 @@ a.activity-ref {
     vertical-align: middle;
 }
 
+/* Show dependencies and regressions while editing */
+.module .field.bug-list .value[style="display: none;"],
+.module .field.bug-list .value[style="display: none;"] + .value.edit {
+    display: block !important;
+}
+
 .field-button {
     float: right;
     margin-left: 8px;

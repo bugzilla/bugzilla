@@ -53,7 +53,7 @@ function init() {
   bz_attachment_form.update_requirements(false);
 
   document.querySelector('#bug_type').addEventListener('change', () => {
-    bug_type_changed = true;
+    bug_type_specified = true;
   }, { once: true });
 }
 
@@ -68,10 +68,12 @@ function initCrashSignatureField() {
   [% END %]
 }
 
+const params = new URLSearchParams(location.search);
+let bug_type_specified = params.has('bug_type') || params.has('cloned_bug_id');
+
 var initialowners = new Array([% product.components.size %]);
 var last_initialowner;
 var default_bug_types = new Array([% product.components.size %]);
-let bug_type_changed = false;
 var initialccs = new Array([% product.components.size %]);
 var components = new Array([% product.components.size %]);
 var comp_desc = new Array([% product.components.size %]);
@@ -136,7 +138,7 @@ function set_assign_to() {
             last_initialowner = owner;
         }
 
-        if (!bug_type_changed) {
+        if (!bug_type_specified) {
           form.bug_type.value = default_bug_types[index];
         }
 

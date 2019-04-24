@@ -24,10 +24,7 @@
 [% PROCESS global/variables.none.tmpl %]
 [% IF bottom_navigator == 1 %]
   <ul class="related_actions">
-    <li><a href="[% basepath FILTER none %]show_bug.cgi?format=multiple&amp;id=
-                [% bug.bug_id FILTER uri %]">Format For Printing</a></li>
-    <li>&nbsp;-&nbsp;<a href="[% basepath FILTER none %]show_bug.cgi?ctype=xml&amp;id=
-                        [% bug.bug_id  FILTER uri %]">XML</a></li>
+    <li><a href="[% basepath FILTER none %]show_bug.cgi?ctype=xml&amp;id=[% bug.bug_id FILTER uri %]">XML</a></li>
     [% IF NOT bug.groups_in.size %]
       <li>&nbsp;-&nbsp;<a href="[% basepath FILTER none %]rest/bug/[% bug.bug_id  FILTER uri %]">JSON</a></li>
     [% END %]

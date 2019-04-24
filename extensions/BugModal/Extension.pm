@@ -49,7 +49,17 @@ sub _alternative_show_bug_format {
     return '' if $ctype ne 'html';
   }
   if (my $format = $cgi->param('format')) {
-    return ($format eq '__default__' || $format eq 'default') ? '' : $format;
+    my @ids = $cgi->param('id');
+    # Drop `format=default` as well as `format=multiple`, if a single bug ID is
+    # provided, by redirecting to the modal UI (301 Moved Permanently)
+    if ($format eq '__default__' || $format eq 'default'
+      || ($format eq 'multiple' && scalar(@ids) == 1))
+    {
+      $cgi->base_redirect('show_bug.cgi?id=' . $cgi->param('id'), 1);
+    }
+    # Otherwise, printable `format=multiple` is still available from bug lists
+    # as the Long Format option
+    return $format;
   }
   return $user->setting('ui_experiments') eq 'on' ? 'modal' : '';
 }

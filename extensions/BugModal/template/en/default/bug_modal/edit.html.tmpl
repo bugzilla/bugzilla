@@ -1406,13 +1406,7 @@
         aria-expanded="false" aria-controls="format-menu" class="dropdown-button minor">Format [% terms.Bug %] &#9652;</button>
       <ul class="dropdown-content left menu-up" id="format-menu" role="menu" style="display:none;">
         <li role="presentation">
-          <a href="[% basepath FILTER none %]show_bug.cgi?format=multiple&amp;id=[% bug.id FILTER uri %]" role="menuitem" tabindex="-1">For Printing</a>
-        </li>
-        <li role="presentation">
           <a href="[% basepath FILTER none %]show_bug.cgi?ctype=xml&amp;id=[% bug.id FILTER uri %]" role="menuitem" tabindex="-1">XML</a>
-        </li>
-        <li role="presentation">
-          <a href="[% basepath FILTER none %]show_bug.cgi?format=default&amp;id=[% bug.id FILTER uri %]" role="menuitem" tabindex="-1">Legacy</a>
         </li>
         [% IF bug.groups_in.size == 0 %]
           <li role="presentation">

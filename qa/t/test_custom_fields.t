@@ -225,12 +225,6 @@ edit_bug_and_return($sel, $bug1_id, $bug_summary);
 $sel->select_ok("bug_status", "IN_QA");
 edit_bug_and_return($sel, $bug1_id, $bug_summary);
 
-$sel->click_ok("link=Format For Printing");
-$sel->wait_for_page_to_load_ok(WAIT_TIME);
-$sel->title_is("Full Text Bug Listing");
-$sel->is_text_present_ok("Freetext$bug1_id: dumbo");
-$sel->is_text_present_ok("List$bug1_id: storage");
-$sel->is_text_present_ok("Status: IN_QA UPSTREAM");
 go_to_bug($sel, $bug2_id);
 $sel->select_ok("cf_qa_list_$bug1_id", "label=storage");
 edit_bug($sel, $bug2_id);

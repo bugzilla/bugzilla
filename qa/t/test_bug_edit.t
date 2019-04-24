@@ -320,7 +320,7 @@ $sel->is_text_present_ok(
   "You are not permitted to edit bugs in product TestProduct.");
 logout($sel);
 
-# Test searches and "format for printing".
+# Test searches.
 
 log_in($sel, $config, 'admin');
 open_advanced_search_page($sel);
@@ -359,17 +359,6 @@ check_page_load($sel, WAIT_TIME,
   q{http://HOSTNAME:8000/buglist.cgi?cmdtype=runnamed&namedcmd=My%20bugs%20from%20QA_Selenium&list_id=17}
 );
 $sel->title_is("Bug List: My bugs from QA_Selenium");
-$sel->click_ok("long_format");
-check_page_load($sel, WAIT_TIME, q{http://HOSTNAME:8000/show_bug.cgi});
-$sel->title_is("Full Text Bug Listing");
-$sel->is_text_present_ok("Bug $bug1_id");
-$sel->is_text_present_ok("Status: CONFIRMED");
-$sel->is_text_present_ok(
-  "Reporter: QA-Selenium-TEST <$config->{QA_Selenium_TEST_user_login}>");
-$sel->is_text_present_ok("Assignee: QA Admin <$config->{admin_user_login}>");
-$sel->is_text_present_ok("Severity: blocker");
-$sel->is_text_present_ok("Priority: Highest");
-$sel->is_text_present_ok("I have no privs, I can only comment");
 logout($sel);
 
 # Let's create a 2nd bug by this user so that we can test mass-change

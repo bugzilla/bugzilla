@@ -973,7 +973,7 @@
         help = "https://wiki.mozilla.org/BMO/UserGuide/BugFields#blocks"
     %]
 
-    [% IF bug.dependson.size + bug.blocked.size > 1 %]
+    [% IF bug.dependson.size + bug.blocked.size > 0 %]
       [% WRAPPER bug_modal/field.html.tmpl
           name = "dependencytree"
           container = 1

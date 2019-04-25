@@ -166,6 +166,7 @@ if ($action eq 'new') {
     create_series      => scalar $cgi->param('createseries'),
     allows_unconfirmed => scalar $cgi->param('allows_unconfirmed'),
     bug_description_template => scalar $cgi->param('bug_description_template'),
+    default_bug_type   => scalar $cgi->param('default_bug_type'),
   );
   my $product = Bugzilla::Product->create(\%create_params);
 
@@ -285,6 +286,7 @@ if ($action eq 'update') {
     allows_unconfirmed => scalar $cgi->param('allows_unconfirmed'),
     default_milestone  => scalar $cgi->param('defaultmilestone'),
     bug_description_template => scalar $cgi->param('bug_description_template'),
+    default_bug_type   => scalar $cgi->param('default_bug_type'),
   });
 
   my $changes = $product->update();

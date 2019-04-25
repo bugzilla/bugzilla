@@ -48,6 +48,16 @@
         [% product.bug_description_template FILTER html %]</textarea>
   </td>
 </tr>
+<tr>
+  <th align="right">Default [% terms.Bug %] Type:</th>
+  <td>
+    [% INCLUDE admin/default_select.html.tmpl
+        field_name   = 'default_bug_type'
+        field_value  = product.default_bug_type
+        field_values = bug_fields.bug_type.legal_values
+    %]
+  </td>
+</tr>
 
 [% IF Param('usetargetmilestone') -%]
   <tr>

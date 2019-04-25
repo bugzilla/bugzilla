@@ -101,11 +101,13 @@ type        string  The group of products to return. Valid values are
      "products": [
        {
          "id": 1,
+         "default_bug_type": "defect",
          "default_milestone": "---",
          "components": [
            {
              "is_active": true,
              "default_assigned_to": "admin@bugzilla.org",
+             "default_bug_type": "defect",
              "id": 1,
              "sort_key": 0,
              "name": "TestComponent",
@@ -182,6 +184,7 @@ name               string   The name of the product. This is a unique identifier
                             for the product.
 description        string   A description of the product, which may contain HTML.
 is_active          boolean  A boolean indicating if the product is active.
+default_bug_type   string   The default type for bugs filed under this product.
 default_milestone  string   The name of the default milestone for the product.
 has_unconfirmed    boolean  Indicates whether the UNCONFIRMED bug status is
                             available for this product.
@@ -213,6 +216,8 @@ description          string   A description of the component, which may contain
                               HTML.
 default_assigned_to  string   The login name of the user to whom new bugs
                               will be assigned by default.
+default_bug_type     string   The default type for bugs filed under this
+                              component.
 default_qa_contact   string   The login name of the user who will be set as
                               the QA Contact for new bugs by default. Empty
                               string if the QA contact is not defined.
@@ -300,6 +305,8 @@ has_unconfirmed    boolean  Allow the UNCONFIRMED status to be set on bugs in
                             this product. Default: true.
 classification     string   The name of the Classification which contains this
                             product.
+default_bug_type   string   The default type for bugs filed under this product.
+                            Each component can override this value.
 default_milestone  string   The default milestone for this product. Default
                             '---'.
 is_open            boolean  ``true`` if the product is currently allowing bugs
@@ -385,6 +392,8 @@ name               type     description
 name               string   A new name for this product. If you try to set this
                             while updating more than one product, an error will
                             occur, as product names must be unique.
+default_bug_type   string   The default type for bugs filed under this product.
+                            Each component can override this value.
 default_milestone  string   When a new bug is filed, what milestone does it
                             get by default if the user does not choose one? Must
                             represent a milestone that is valid for this product.

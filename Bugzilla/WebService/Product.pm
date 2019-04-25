@@ -154,6 +154,7 @@ sub create {
     name             => $params->{name},
     description      => $params->{description},
     version          => $params->{version},
+    default_bug_type => $params->{default_bug_type},
     defaultmilestone => $params->{default_milestone},
 
     # create_series has no default value.
@@ -182,6 +183,7 @@ sub _product_to_hash {
     default_milestone => $self->type('string',  $product->default_milestone),
     has_unconfirmed   => $self->type('boolean', $product->allows_unconfirmed),
     classification    => $self->type('string',  $product->classification->name),
+    default_bug_type  => $self->type('string',  $product->default_bug_type),
   };
   if (filter_wants($params, 'components')) {
     $field_data->{components}
@@ -221,6 +223,7 @@ sub _component_to_hash {
     sort_key =>    # sort_key is returned to match Bug.fields
       0,
     is_active => $self->type('boolean', $component->is_active),
+    default_bug_type => $self->type('string', $component->default_bug_type),
     },
     undef, 'components';
 
@@ -492,6 +495,10 @@ C<string> A description of the product, which may contain HTML.
 
 C<boolean> A boolean indicating if the product is active.
 
+=item C<default_bug_type>
+
+C<string> The default type for bugs filed under this product.
+
 =item C<default_milestone>
 
 C<string> The name of the default milestone for the product.
@@ -530,6 +537,10 @@ C<string> A description of the component, which may contain HTML.
 
 C<string> The login name of the user to whom new bugs will be assigned by
 default.
+
+=item C<default_bug_type>
+
+C<string> The default type for bugs filed under this component.
 
 =item C<default_qa_contact>
 
@@ -701,6 +712,11 @@ Default: true.
 =item C<classification>
 
 C<string> The name of the Classification which contains this product.
+
+=item C<default_bug_type>
+
+C<string> The default type for bugs filed under this product. Each component can
+override this value.
 
 =item C<default_milestone>
 

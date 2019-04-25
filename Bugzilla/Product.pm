@@ -45,6 +45,7 @@ use constant DB_COLUMNS => qw(
   classification_id
   description
   isactive
+  default_bug_type
   defaultmilestone
   allows_unconfirmed
 );
@@ -52,6 +53,7 @@ use constant DB_COLUMNS => qw(
 use constant UPDATE_COLUMNS => qw(
   name
   description
+  default_bug_type
   defaultmilestone
   isactive
   allows_unconfirmed
@@ -64,6 +66,7 @@ use constant VALIDATORS => {
   name               => \&_check_name,
   description        => \&_check_description,
   version            => \&_check_version,
+  default_bug_type   => \&_check_default_bug_type,
   defaultmilestone   => \&_check_default_milestone,
   isactive           => \&Bugzilla::Object::check_boolean,
   create_series      => \&Bugzilla::Object::check_boolean
@@ -417,6 +420,13 @@ sub _check_version {
   return $version;
 }
 
+sub _check_default_bug_type {
+  my ($invocant, $type) = @_;
+  return $type if Bugzilla::Config::Common::check_bug_type($type) eq '';
+  # Ignore silently just in case
+  return undef;
+}
+
 sub _check_default_milestone {
   my ($invocant, $milestone) = @_;
 
@@ -519,6 +529,7 @@ sub _create_series {
 
 sub set_name               { $_[0]->set('name',               $_[1]); }
 sub set_description        { $_[0]->set('description',        $_[1]); }
+sub set_default_bug_type   { $_[0]->set('default_bug_type',   $_[1]); }
 sub set_default_milestone  { $_[0]->set('defaultmilestone',   $_[1]); }
 sub set_is_active          { $_[0]->set('isactive',           $_[1]); }
 sub set_allows_unconfirmed { $_[0]->set('allows_unconfirmed', $_[1]); }
@@ -914,6 +925,10 @@ sub bug_description_template {
   return $self->{'bug_description_template'};
 }
 
+sub default_bug_type {
+  return $_[0]->{'default_bug_type'} ||= Bugzilla->params->{'default_bug_type'};
+}
+
 ###############################
 ####      Subroutines    ######
 ###############################
@@ -963,6 +978,7 @@ Bugzilla::Product - Bugzilla product class.
     my $name             = $product->name;
     my $description      = $product->description;
     my isactive          = $product->is_active;
+    my $default_bug_type = $product->default_bug_type;
     my $defaultmilestone = $product->default_milestone;
     my $classificationid = $product->classification_id;
     my $allows_unconfirmed = $product->allows_unconfirmed;
@@ -989,6 +1005,17 @@ below.
  Params:      none.
 
  Returns:     An array of Bugzilla::Component object.
+
+=item C<default_bug_type()>
+
+ Description: Returns the default type for bugs filed under this product.
+              Returns the installation's global default type if the
+              product-specific default type is not set. Each component can
+              override this value.
+
+ Params:      none.
+
+ Returns:     A string.
 
 =item C<group_controls()>
 

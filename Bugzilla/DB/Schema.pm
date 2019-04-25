@@ -1422,6 +1422,7 @@ use constant ABSTRACT_SCHEMA => {
       defaultmilestone   => {TYPE => 'varchar(20)', NOTNULL => 1, DEFAULT => "'---'"},
       allows_unconfirmed => {TYPE => 'BOOLEAN',     NOTNULL => 1, DEFAULT => 'TRUE'},
       bug_description_template => {TYPE => 'MEDIUMTEXT'},
+      default_bug_type  => {TYPE => 'varchar(20)'},
     ],
     INDEXES => [products_name_idx => {FIELDS => ['name'], TYPE => 'UNIQUE'},],
   },

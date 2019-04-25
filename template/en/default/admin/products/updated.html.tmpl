@@ -69,6 +69,13 @@
   </p>
 [% END %]
 
+[% IF changes.default_bug_type.defined %]
+  <p>
+  Updated default [% terms.bug %] type from '[% changes.default_bug_type.0 FILTER html %]' to
+  '[% product.default_bug_type FILTER html %]'.
+  </p>
+[% END %]
+
 [% IF changes.defaultmilestone.defined %]
   <p>
   Updated default milestone from '[% changes.defaultmilestone.0 FILTER html %]' to

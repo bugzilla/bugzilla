@@ -342,6 +342,8 @@ sub SPECIAL_PARSING {
     commenter               => \&_commenter_pronoun,
     qa_contact              => \&_contact_pronoun,
     reporter                => \&_contact_pronoun,
+    'requestees.login_name' => \&_contact_pronoun,
+    'setters.login_name'    => \&_contact_pronoun,
 
     # Date Fields that accept the 1d, 1w, 1m, 1y, etc. format.
     creation_ts => \&_datetime_translate,
@@ -2315,7 +2317,7 @@ sub SqlifyDate {
 
 sub pronoun {
   my ($noun, $user) = (@_);
-  if ($noun eq "%user%") {
+  if ($noun eq "%user%" || $noun eq "%self%") {
     if ($user->id) {
       return $user->id;
     }
@@ -2325,6 +2327,11 @@ sub pronoun {
   }
   if ($noun eq "%reporter%") {
     return "bugs.reporter";
+  }
+  if ($noun eq "%triageowner%") {
+    return "(SELECT COALESCE(userid, 0) FROM profiles
+      JOIN components ON components.triage_owner_id = profiles.userid
+      WHERE bugs.component_id = components.id)";
   }
   if ($noun eq "%assignee%") {
     return "bugs.assigned_to";
@@ -2468,7 +2475,7 @@ sub _triage_owner_pronoun {
   my ($self, $args) = @_;
   my $value = $args->{value};
   my $user  = $self->_user;
-  if ($value eq "%user%") {
+  if ($value eq "%user%" || $value eq "%self%") {
     if ($user->id) {
       $args->{value}       = $user->id;
       $args->{quoted}      = $args->{value};

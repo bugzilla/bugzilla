@@ -184,12 +184,13 @@ example, you may want to find all bugs that are assigned to the person
 who reported them.
 
 When the :guilabel:`Custom Search` operator is either :guilabel:`equals` or
-:guilabel:`notequals`, the value can be "%reporter%", "%assignee%",
-"%qacontact%", or "%user%". These are known as "pronouns". The user pronoun
-refers to the user who is executing the query or, in the case
-of whining reports, the user who will be the recipient
-of the report. The reporter, assignee, and qacontact
-pronouns refer to the corresponding fields in the bug.
+:guilabel:`notequals`, the value can be ``%reporter%``, ``%triageowner%``,
+``%assignee%``, ``%qacontact%``, ``%user%`` or ``%self%``. These are known as
+"pronouns". The ``%user%`` pronoun and its alias ``%self%`` refer to the user
+who is executing the query (that's you) or, in the case of whining reports, the
+user who will be the recipient of the report. The ``%reporter%``,
+``%triageowner%``, ``%assignee%`` and ``%qacontact%`` pronouns refer to the
+corresponding fields in the bug.
 
 This feature also lets you search by a user's group memberships. If the
 operator is either :guilabel:`equals`, :guilabel:`notequals` or

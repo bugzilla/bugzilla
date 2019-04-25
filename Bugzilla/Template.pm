@@ -775,6 +775,14 @@ sub create {
         1
       ],
 
+      # Create a short, readable label for the given URL.
+      # e.g. https://www.mozilla.org/firefox/ -> mozilla.org/firefox
+      pretty_url => sub {
+        my ($url) = @_;
+        $url =~ s/^\s*(?:https?:\/\/(?:www\.)?)?(.+?)\/?\s*$/$1/g;
+        return $url;
+      },
+
       # In CSV, quotes are doubled, and any value containing a quote or a
       # comma is enclosed in quotes.
       # If a field starts with either "=", "+", "-" or "@", it is preceded

@@ -359,20 +359,38 @@ END;
 
 [%# bug-urls, currently just see-also %]
 [% BLOCK bug_urls %]
-  [% FOREACH url IN values %]
-    <div>
-      [% IF url.isa('Bugzilla::BugUrl::Bugzilla::Local') %]
-        [% url.target_bug_id FILTER bug_link(url.target_bug_id, use_alias => 1) FILTER none %]
-      [% ELSE %]
-        <a href="[% url.name FILTER html %]"
-           title="[% url.name FILTER truncate(256) FILTER html %]"
-        >[% url.name FILTER truncate(40) FILTER html %]</a>
-      [% END %]
+  [%
+    # Process internal (bug) and external links separately
+    internal_links = [];
+    external_links = [];
+    FOREACH value IN values;
+      IF value.isa('Bugzilla::BugUrl::Bugzilla::Local');
+        internal_links.push(value);
+      ELSE;
+        external_links.push(value);
+      END;
+    END;
+  %]
+
+  [% IF edit %]
+    [% FOREACH link IN internal_links %]
+      <div class="link">
+        [% link.bug.id FILTER bug_link(link.bug.id, use_alias => 1) FILTER none %]
+        <label><input type="checkbox" name="remove_see_also" value="[% link.name FILTER html %]"> Remove</label>
+      </div>
+    [% END %]
+  [% ELSE %]
+    [%# Show bugs by type %]
+    [% INCLUDE bug_list values=internal_links.pluck('bug') edit=0 %]
+  [% END %]
+
+  [% FOREACH link IN external_links %]
+    <div class="link">
+      <a href="[% link.name FILTER html %]" title="[% link.name FILTER truncate(256) FILTER html %]">
+        [%~ link.name FILTER pretty_url FILTER truncate(40) FILTER html ~%]
+      </a>
       [% IF edit %]
-          <label>
-            <input type="checkbox" name="remove_see_also" value="[% url.name FILTER html %]">
-            Remove
-          </label>
+        <label><input type="checkbox" name="remove_see_also" value="[% link.name FILTER html %]"> Remove</label>
       [% END %]
     </div>
   [% END %]

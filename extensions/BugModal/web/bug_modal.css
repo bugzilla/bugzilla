@@ -137,6 +137,10 @@ a.activity-ref {
     transition: all .2s;
 }
 
+.module-subtitle .link {
+  display: inline;
+}
+
 .module-spinner[aria-expanded="true"] ~ .module-subtitle {
     opacity: 0;
 }
@@ -388,6 +392,11 @@ input[type="number"] {
 
 .field .value .bug-list .bug-type-label .icon {
   font-size: 16px;
+  vertical-align: text-bottom;
+}
+
+.field .value div.link {
+  line-height: 1.5;
 }
 
 #field-value-dependencytree {

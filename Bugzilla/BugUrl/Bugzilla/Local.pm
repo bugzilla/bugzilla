@@ -96,4 +96,9 @@ sub local_uri {
   return Bugzilla->localconfig->{urlbase} . "show_bug.cgi?id=$bug_id";
 }
 
+sub bug {
+  my ($self) = @_;
+  return Bugzilla::Bug->new({id => $self->target_bug_id, cache => 1});
+}
+
 1;

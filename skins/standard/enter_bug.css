@@ -39,7 +39,7 @@
  * pretty well on all browsers except IE 8.
  */
 #Create #field_container_component { width: 1px; }
-#Create #field_container_reporter  { width: 100%; }
+#Create #required_marker           { width: 100%; }
 
 #Create .comment {
     vertical-align: top;

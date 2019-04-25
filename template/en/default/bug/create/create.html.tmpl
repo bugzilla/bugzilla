@@ -234,19 +234,17 @@ TUI_hide_default('expert_fields');
                                    'bz_default_hidden');
       </script>
     </td>
-    <td colspan="2">
-      (<span class="required_star">*</span> =
-      <span class="required_explanation">Required Field</span>)
-   </td>
+    <td colspan="2">&nbsp;</td>
   </tr>
 
   <tr>
     [% INCLUDE bug/field.html.tmpl
       bug = default, field = bug_fields.product, editable = 0,
       value = product.name %]
-    [% INCLUDE bug/field.html.tmpl
-      bug = default, field = bug_fields.reporter, editable = 0,
-      value = user.login %]
+    <td colspan="2" id="required_marker">
+      (<span class="required_star">*</span> =
+      <span class="required_explanation">Required Field</span>)
+    </td>
   </tr>
 
   [%# We can't use the select block in these two cases for various reasons. %]
@@ -314,9 +312,9 @@ TUI_hide_default('expert_fields');
 
   <tr>
     [% INCLUDE "bug/field-label.html.tmpl"
-      field = bug_fields.version editable = 1 rowspan = 4
+      field = bug_fields.version editable = 1 rowspan = 3
     %]
-    <td rowspan="4">
+    <td rowspan="3">
       <select name="version" id="version" size="5">
         [%- FOREACH v = version %]
           [% NEXT IF NOT v.is_active %]
@@ -330,12 +328,6 @@ TUI_hide_default('expert_fields');
     [% INCLUDE bug/field.html.tmpl
       bug = default, field = bug_fields.bug_type, editable = 1, use_buttons = 1,
       value = default.bug_type %]
-  </tr>
-
-  <tr>
-    [% INCLUDE bug/field.html.tmpl
-      bug = default, field = bug_fields.bug_severity, editable = 1,
-      value = default.bug_severity %]
   </tr>
 
   [% needs_extra_tr = 1 %]
@@ -396,18 +388,15 @@ TUI_hide_default('expert_fields');
       <td colspan="2">&nbsp;</td>
     [% END %]
   </tr>
-</tbody>
-
-<tbody class="expert_fields">
-  <tr>
-    <td colspan="4">&nbsp;</td>
-  </tr>
 
   <tr>
     [% INCLUDE bug/field.html.tmpl
       bug = default, field = bug_fields.bug_status,
       editable = (bug_status.size > 1), value = default.bug_status
       override_legal_values = bug_status %]
+    [% INCLUDE bug/field.html.tmpl
+      bug = default, field = bug_fields.bug_severity, editable = 1,
+      value = default.bug_severity %]
   </tr>
 
   <tr>

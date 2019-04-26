@@ -19,28 +19,28 @@ use Bugzilla::BugMail;
 my $dbh = Bugzilla->dbh;
 
 my $list = $dbh->selectcol_arrayref(
-        'SELECT bug_id FROM bugs
+  'SELECT bug_id FROM bugs
           WHERE (lastdiffed IS NULL OR lastdiffed < delta_ts)
             AND delta_ts < '
-                . $dbh->sql_date_math('NOW()', '-', 30, 'MINUTE') .
-     ' ORDER BY bug_id');
+    . $dbh->sql_date_math('NOW()', '-', 30, 'MINUTE') . ' ORDER BY bug_id'
+);
 
 if (scalar(@$list) > 0) {
-    say "OK, now attempting to send unsent mail";
-    say scalar(@$list) . " bugs found with possibly unsent mail.\n";
-    foreach my $bugid (@$list) {
-        my $start_time = time;
-        say "Sending mail for bug $bugid...";
-        my $outputref = Bugzilla::BugMail::Send($bugid);
-        if ($ARGV[0] && $ARGV[0] eq "--report") {
-          say "Mail sent to:";
-          say $_ foreach (sort @{$outputref->{sent}});
-        }
-        else {
-            my $sent = scalar @{$outputref->{sent}};
-            say "$sent mails sent.";
-            say "Took " . (time - $start_time) . " seconds.\n";
-        }
+  say "OK, now attempting to send unsent mail";
+  say scalar(@$list) . " bugs found with possibly unsent mail.\n";
+  foreach my $bugid (@$list) {
+    my $start_time = time;
+    say "Sending mail for bug $bugid...";
+    my $outputref = Bugzilla::BugMail::Send($bugid);
+    if ($ARGV[0] && $ARGV[0] eq "--report") {
+      say "Mail sent to:";
+      say $_ foreach (sort @{$outputref->{sent}});
     }
-    say "Unsent mail has been sent.";
+    else {
+      my $sent = scalar @{$outputref->{sent}};
+      say "$sent mails sent.";
+      say "Took " . (time - $start_time) . " seconds.\n";
+    }
+  }
+  say "Unsent mail has been sent.";
 }

@@ -26,8 +26,8 @@ use Safe;
 
 use Bugzilla::Constants;
 use Bugzilla::Install::Requirements;
-use Bugzilla::Install::Util qw(install_string get_version_and_os 
-                               init_console success);
+use Bugzilla::Install::Util qw(install_string get_version_and_os
+  init_console success);
 
 ######################################################################
 # Live Code
@@ -42,24 +42,25 @@ init_console();
 
 my %switch;
 GetOptions(\%switch, 'help|h|?', 'check-modules', 'no-templates|t',
-                     'verbose|v|no-silent', 'make-admin=s', 
-                     'reset-password=s', 'version|V');
+  'verbose|v|no-silent', 'make-admin=s', 'reset-password=s', 'version|V');
 
 # Print the help message if that switch was selected.
 pod2usage({-verbose => 1, -exitval => 1}) if $switch{'help'};
 
-# Read in the "answers" file if it exists, for running in 
+# Read in the "answers" file if it exists, for running in
 # non-interactive mode.
 my $answers_file = $ARGV[0];
-my $silent = $answers_file && !$switch{'verbose'};
+my $silent       = $answers_file && !$switch{'verbose'};
 
 print(install_string('header', get_version_and_os()) . "\n") unless $silent;
 exit 0 if $switch{'version'};
+
 # Check required --MODULES--
 my $module_results = check_requirements(!$silent);
-Bugzilla::Install::Requirements::print_module_instructions(
-    $module_results, !$silent);
+Bugzilla::Install::Requirements::print_module_instructions($module_results,
+  !$silent);
 exit 1 if !$module_results->{pass};
+
 # Break out if checking the modules is all we have been asked to do.
 exit 0 if $switch{'check-modules'};
 
@@ -86,7 +87,7 @@ import Bugzilla::Install::Localconfig qw(update_localconfig);
 
 require Bugzilla::Install::Filesystem;
 import Bugzilla::Install::Filesystem qw(update_filesystem create_htaccess
-                                        fix_all_file_permissions);
+  fix_all_file_permissions);
 require Bugzilla::Install::DB;
 require Bugzilla::DB;
 require Bugzilla::Template;
@@ -100,8 +101,8 @@ Bugzilla->installation_answers($answers_file);
 # Check and update --LOCAL-- configuration
 ###########################################################################
 
-print "Reading " .  bz_locations()->{'localconfig'} . "...\n" unless $silent;
-update_localconfig({ output => !$silent });
+print "Reading " . bz_locations()->{'localconfig'} . "...\n" unless $silent;
+update_localconfig({output => !$silent});
 my $lc_hash = Bugzilla->localconfig;
 
 ###########################################################################
@@ -117,8 +118,10 @@ Bugzilla::DB::bz_create_database() if $lc_hash->{'db_check'};
 
 # now get a handle to the database:
 my $dbh = Bugzilla->dbh;
+
 # Create the tables, and do any database-specific schema changes.
 $dbh->bz_setup_database();
+
 # Populate the tables that hold the values for the <select> fields.
 $dbh->bz_populate_enum_tables();
 
@@ -126,7 +129,7 @@ $dbh->bz_populate_enum_tables();
 # Check --DATA-- directory
 ###########################################################################
 
-update_filesystem({ index_html => $lc_hash->{'index_html'} });
+update_filesystem({index_html => $lc_hash->{'index_html'}});
 create_htaccess() if $lc_hash->{'create_htaccess'};
 
 # Remove parameters from the params file that no longer exist in Bugzilla,
@@ -138,7 +141,7 @@ my %old_params = update_params();
 ###########################################################################
 
 Bugzilla::Template::precompile_templates(!$silent)
-    unless $switch{'no-templates'};
+  unless $switch{'no-templates'};
 
 ###########################################################################
 # Set proper rights (--CHMOD--)
@@ -195,7 +198,7 @@ Bugzilla::Install::make_admin($switch{'make-admin'}) if $switch{'make-admin'};
 Bugzilla::Install::create_admin();
 
 Bugzilla::Install::reset_password($switch{'reset-password'})
-    if $switch{'reset-password'};
+  if $switch{'reset-password'};
 
 ###########################################################################
 # Create default Product
@@ -203,7 +206,7 @@ Bugzilla::Install::reset_password($switch{'reset-password'})
 
 Bugzilla::Install::create_default_product();
 
-Bugzilla::Hook::process('install_before_final_checks', { silent => $silent });
+Bugzilla::Hook::process('install_before_final_checks', {silent => $silent});
 
 ###########################################################################
 # Final checks
@@ -213,13 +216,12 @@ Bugzilla::Hook::process('install_before_final_checks', { silent => $silent });
 Bugzilla->memcached->clear_all();
 
 # Check if the default parameter for urlbase is still set, and if so, give
-# notification that they should go and visit editparams.cgi 
+# notification that they should go and visit editparams.cgi
 if (Bugzilla->params->{'urlbase'} eq '') {
-    print "\n" . get_text('install_urlbase_default') . "\n"
-        unless $silent;
+  print "\n" . get_text('install_urlbase_default') . "\n" unless $silent;
 }
 if (!$silent) {
-    success(get_text('install_success'));
+  success(get_text('install_success'));
 }
 
 __END__

@@ -12,16 +12,17 @@ use strict;
 use warnings;
 
 use Bugzilla::WebService::Server;
-BEGIN {
-    our @ISA = qw(Bugzilla::WebService::Server);
 
-    if (eval { require JSON::RPC::Server::CGI }) {
-        unshift(@ISA, 'JSON::RPC::Server::CGI');
-    }
-    else {
-        require JSON::RPC::Legacy::Server::CGI;
-        unshift(@ISA, 'JSON::RPC::Legacy::Server::CGI');
-    }
+BEGIN {
+  our @ISA = qw(Bugzilla::WebService::Server);
+
+  if (eval { require JSON::RPC::Server::CGI }) {
+    unshift(@ISA, 'JSON::RPC::Server::CGI');
+  }
+  else {
+    require JSON::RPC::Legacy::Server::CGI;
+    unshift(@ISA, 'JSON::RPC::Legacy::Server::CGI');
+  }
 }
 
 use Bugzilla::Error;
@@ -38,79 +39,83 @@ use List::MoreUtils qw(none);
 #####################################
 
 sub new {
-    my $class = shift;
-    my $self = $class->SUPER::new(@_);
-    Bugzilla->_json_server($self);
-    $self->dispatch(WS_DISPATCH);
-    $self->return_die_message(1);
-    return $self;
+  my $class = shift;
+  my $self  = $class->SUPER::new(@_);
+  Bugzilla->_json_server($self);
+  $self->dispatch(WS_DISPATCH);
+  $self->return_die_message(1);
+  return $self;
 }
 
 sub create_json_coder {
-    my $self = shift;
-    my $json = $self->SUPER::create_json_coder(@_);
-    $json->allow_blessed(1);
-    $json->convert_blessed(1);
-    # This may seem a little backwards, but what this really means is
-    # "don't convert our utf8 into byte strings, just leave it as a
-    # utf8 string."
-    $json->utf8(0) if Bugzilla->params->{'utf8'};
-    return $json;
+  my $self = shift;
+  my $json = $self->SUPER::create_json_coder(@_);
+  $json->allow_blessed(1);
+  $json->convert_blessed(1);
+
+  # This may seem a little backwards, but what this really means is
+  # "don't convert our utf8 into byte strings, just leave it as a
+  # utf8 string."
+  $json->utf8(0) if Bugzilla->params->{'utf8'};
+  return $json;
 }
 
 # Override the JSON::RPC method to return our CGI object instead of theirs.
 sub cgi { return Bugzilla->cgi; }
 
 sub response_header {
-    my $self = shift;
-    # The HTTP body needs to be bytes (not a utf8 string) for recent
-    # versions of HTTP::Message, but JSON::RPC::Server doesn't handle this
-    # properly. $_[1] is the HTTP body content we're going to be sending.
-    if (utf8::is_utf8($_[1])) {
-        utf8::encode($_[1]);
-        # Since we're going to just be sending raw bytes, we need to
-        # set STDOUT to not expect utf8.
-        disable_utf8();
-    }
-    return $self->SUPER::response_header(@_);
+  my $self = shift;
+
+  # The HTTP body needs to be bytes (not a utf8 string) for recent
+  # versions of HTTP::Message, but JSON::RPC::Server doesn't handle this
+  # properly. $_[1] is the HTTP body content we're going to be sending.
+  if (utf8::is_utf8($_[1])) {
+    utf8::encode($_[1]);
+
+    # Since we're going to just be sending raw bytes, we need to
+    # set STDOUT to not expect utf8.
+    disable_utf8();
+  }
+  return $self->SUPER::response_header(@_);
 }
 
 sub response {
-    my ($self, $response) = @_;
-    my $cgi = $self->cgi;
+  my ($self, $response) = @_;
+  my $cgi = $self->cgi;
 
-    # Implement JSONP.
-    if (my $callback = $self->_bz_callback) {
-        my $content = $response->content;
-        # Prepend the JSONP response with /**/ in order to protect
-        # against possible encoding attacks (e.g., affecting Flash).
-        $response->content("/**/$callback($content)");
-    }
+  # Implement JSONP.
+  if (my $callback = $self->_bz_callback) {
+    my $content = $response->content;
 
-    # Use $cgi->header properly instead of just printing text directly.
-    # This fixes various problems, including sending Bugzilla's cookies
-    # properly.
-    my $headers = $response->headers;
-    my @header_args;
-    foreach my $name ($headers->header_field_names) {
-        my @values = $headers->header($name);
-        $name =~ s/-/_/g;
-        foreach my $value (@values) {
-            push(@header_args, "-$name", $value);
-        }
-    }
+    # Prepend the JSONP response with /**/ in order to protect
+    # against possible encoding attacks (e.g., affecting Flash).
+    $response->content("/**/$callback($content)");
+  }
 
-    # ETag support
-    my $etag = $self->bz_etag;
-    if ($etag && $cgi->check_etag($etag)) {
-        push(@header_args, "-ETag", $etag);
-        print $cgi->header(-status => '304 Not Modified', @header_args);
+  # Use $cgi->header properly instead of just printing text directly.
+  # This fixes various problems, including sending Bugzilla's cookies
+  # properly.
+  my $headers = $response->headers;
+  my @header_args;
+  foreach my $name ($headers->header_field_names) {
+    my @values = $headers->header($name);
+    $name =~ s/-/_/g;
+    foreach my $value (@values) {
+      push(@header_args, "-$name", $value);
     }
-    else {
-        push(@header_args, "-ETag", $etag) if $etag;
-        print $cgi->header(-status => $response->code, @header_args);
-        print $response->content;
-    }
+  }
+
+  # ETag support
+  my $etag = $self->bz_etag;
+  if ($etag && $cgi->check_etag($etag)) {
+    push(@header_args, "-ETag", $etag);
+    print $cgi->header(-status => '304 Not Modified', @header_args);
+  }
+  else {
+    push(@header_args, "-ETag", $etag) if $etag;
+    print $cgi->header(-status => $response->code, @header_args);
+    print $response->content;
+  }
 }
 
 # The JSON-RPC 1.1 GET specification is not so great--you can't specify
@@ -122,70 +127,69 @@ sub response {
 # Base64 encoded, because that is ridiculous and obnoxious for JavaScript
 # clients.
 sub retrieve_json_from_get {
-    my $self = shift;
-    my $cgi = $self->cgi;
+  my $self = shift;
+  my $cgi  = $self->cgi;
 
-    my %input;
+  my %input;
 
-    # Both version and id must be set before any errors are thrown.
-    if ($cgi->param('version')) {
-        $self->version(scalar $cgi->param('version'));
-        $input{version} = $cgi->param('version');
-    }
-    else {
-        $self->version('1.0');
-    }
+  # Both version and id must be set before any errors are thrown.
+  if ($cgi->param('version')) {
+    $self->version(scalar $cgi->param('version'));
+    $input{version} = $cgi->param('version');
+  }
+  else {
+    $self->version('1.0');
+  }
 
-    # The JSON-RPC 2.0 spec says that any request that omits an id doesn't
-    # want a response. However, in an HTTP GET situation, it's stupid to
-    # expect all clients to specify some id parameter just to get a response,
-    # so we don't require it.
-    my $id;
-    if (defined $cgi->param('id')) {
-        $id = $cgi->param('id');
-    }
-    # However, JSON::RPC does require that an id exist in most cases, in
-    # order to throw proper errors. We use the installation's urlbase as
-    # the id, in this case.
-    else {
-        $id = correct_urlbase();
-    }
-    # Setting _bz_request_id here is required in case we throw errors early,
-    # before _handle.
-    $self->{_bz_request_id} = $input{id} = $id;
+  # The JSON-RPC 2.0 spec says that any request that omits an id doesn't
+  # want a response. However, in an HTTP GET situation, it's stupid to
+  # expect all clients to specify some id parameter just to get a response,
+  # so we don't require it.
+  my $id;
+  if (defined $cgi->param('id')) {
+    $id = $cgi->param('id');
+  }
 
-    # _bz_callback can throw an error, so we have to set it here, after we're
-    # ready to throw errors.
-    $self->_bz_callback(scalar $cgi->param('callback'));
+  # However, JSON::RPC does require that an id exist in most cases, in
+  # order to throw proper errors. We use the installation's urlbase as
+  # the id, in this case.
+  else {
+    $id = correct_urlbase();
+  }
 
-    if (!$cgi->param('method')) {
-        ThrowUserError('json_rpc_get_method_required');
-    }
-    $input{method} = $cgi->param('method');
+  # Setting _bz_request_id here is required in case we throw errors early,
+  # before _handle.
+  $self->{_bz_request_id} = $input{id} = $id;
 
-    my $params;
-    if (defined $cgi->param('params')) {
-        local $@;
-        $params = eval { 
-            $self->json->decode(scalar $cgi->param('params')) 
-        };
-        if ($@) {
-            ThrowUserError('json_rpc_invalid_params',
-                           { params => scalar $cgi->param('params'),
-                             err_msg  => $@ });
-        }
-    }
-    elsif (!$self->version or $self->version ne '1.1') {
-        $params = [];
-    }
-    else {
-        $params = {};
-    }
+  # _bz_callback can throw an error, so we have to set it here, after we're
+  # ready to throw errors.
+  $self->_bz_callback(scalar $cgi->param('callback'));
 
-    $input{params} = $params;
+  if (!$cgi->param('method')) {
+    ThrowUserError('json_rpc_get_method_required');
+  }
+  $input{method} = $cgi->param('method');
 
-    my $json = $self->json->encode(\%input);
-    return $json;
+  my $params;
+  if (defined $cgi->param('params')) {
+    local $@;
+    $params = eval { $self->json->decode(scalar $cgi->param('params')) };
+    if ($@) {
+      ThrowUserError('json_rpc_invalid_params',
+        {params => scalar $cgi->param('params'), err_msg => $@});
+    }
+  }
+  elsif (!$self->version or $self->version ne '1.1') {
+    $params = [];
+  }
+  else {
+    $params = {};
+  }
+
+  $input{params} = $params;
+
+  my $json = $self->json->encode(\%input);
+  return $json;
 }
 
 #######################################
@@ -193,72 +197,76 @@ sub retrieve_json_from_get {
 #######################################
 
 sub type {
-    my ($self, $type, $value) = @_;
-    
-    # This is the only type that does something special with undef.
-    if ($type eq 'boolean') {
-        return $value ? JSON::true : JSON::false;
-    }
-    
-    return JSON::null if !defined $value;
+  my ($self, $type, $value) = @_;
 
-    my $retval = $value;
+  # This is the only type that does something special with undef.
+  if ($type eq 'boolean') {
+    return $value ? JSON::true : JSON::false;
+  }
 
-    if ($type eq 'int') {
-        $retval = int($value);
-    }
-    if ($type eq 'double') {
-        $retval = 0.0 + $value;
-    }
-    elsif ($type eq 'string') {
-        # Forces string context, so that JSON will make it a string.
-        $retval = "$value";
-    }
-    elsif ($type eq 'dateTime') {
-        # ISO-8601 "YYYYMMDDTHH:MM:SS" with a literal T
-        $retval = $self->datetime_format_outbound($value);
-    }
-    elsif ($type eq 'base64') {
-        utf8::encode($value) if utf8::is_utf8($value);
-        $retval = encode_base64($value, '');
-    }
-    elsif ($type eq 'email' && Bugzilla->params->{'webservice_email_filter'}) {
-        $retval = email_filter($value);
-    }
+  return JSON::null if !defined $value;
 
-    return $retval;
+  my $retval = $value;
+
+  if ($type eq 'int') {
+    $retval = int($value);
+  }
+  if ($type eq 'double') {
+    $retval = 0.0 + $value;
+  }
+  elsif ($type eq 'string') {
+
+    # Forces string context, so that JSON will make it a string.
+    $retval = "$value";
+  }
+  elsif ($type eq 'dateTime') {
+
+    # ISO-8601 "YYYYMMDDTHH:MM:SS" with a literal T
+    $retval = $self->datetime_format_outbound($value);
+  }
+  elsif ($type eq 'base64') {
+    utf8::encode($value) if utf8::is_utf8($value);
+    $retval = encode_base64($value, '');
+  }
+  elsif ($type eq 'email' && Bugzilla->params->{'webservice_email_filter'}) {
+    $retval = email_filter($value);
+  }
+
+  return $retval;
 }
 
 sub datetime_format_outbound {
-    my $self = shift;
-    # YUI expects ISO8601 in UTC time; including TZ specifier
-    return $self->SUPER::datetime_format_outbound(@_) . 'Z';
+  my $self = shift;
+
+  # YUI expects ISO8601 in UTC time; including TZ specifier
+  return $self->SUPER::datetime_format_outbound(@_) . 'Z';
 }
 
 sub handle_login {
-    my $self = shift;
+  my $self = shift;
 
-    # If we're being called using GET, we don't allow cookie-based or Env
-    # login, because GET requests can be done cross-domain, and we don't
-    # want private data showing up on another site unless the user
-    # explicitly gives that site their username and password. (This is
-    # particularly important for JSONP, which would allow a remote site
-    # to use private data without the user's knowledge, unless we had this
-    # protection in place.)
-    if ($self->request->method ne 'POST') {
-        # XXX There's no particularly good way for us to get a parameter
-        # to Bugzilla->login at this point, so we pass this information
-        # around using request_cache, which is a bit of a hack. The
-        # implementation of it is in Bugzilla::Auth::Login::Stack.
-        Bugzilla->request_cache->{auth_no_automatic_login} = 1;
-    }
+  # If we're being called using GET, we don't allow cookie-based or Env
+  # login, because GET requests can be done cross-domain, and we don't
+  # want private data showing up on another site unless the user
+  # explicitly gives that site their username and password. (This is
+  # particularly important for JSONP, which would allow a remote site
+  # to use private data without the user's knowledge, unless we had this
+  # protection in place.)
+  if ($self->request->method ne 'POST') {
 
-    my $path = $self->path_info;
-    my $class = $self->{dispatch_path}->{$path};
-    my $full_method = $self->_bz_method_name;
-    $full_method =~ /^\S+\.(\S+)/;
-    my $method = $1;
-    $self->SUPER::handle_login($class, $method, $full_method);
+    # XXX There's no particularly good way for us to get a parameter
+    # to Bugzilla->login at this point, so we pass this information
+    # around using request_cache, which is a bit of a hack. The
+    # implementation of it is in Bugzilla::Auth::Login::Stack.
+    Bugzilla->request_cache->{auth_no_automatic_login} = 1;
+  }
+
+  my $path        = $self->path_info;
+  my $class       = $self->{dispatch_path}->{$path};
+  my $full_method = $self->_bz_method_name;
+  $full_method =~ /^\S+\.(\S+)/;
+  my $method = $1;
+  $self->SUPER::handle_login($class, $method, $full_method);
 }
 
 ######################################
@@ -267,165 +275,165 @@ sub handle_login {
 
 # Store the ID of the current call, because Bugzilla::Error will need it.
 sub _handle {
-    my $self = shift;
-    my ($obj) = @_;
-    $self->{_bz_request_id} = $obj->{id};
+  my $self = shift;
+  my ($obj) = @_;
+  $self->{_bz_request_id} = $obj->{id};
 
-    my $result = $self->SUPER::_handle(@_);
+  my $result = $self->SUPER::_handle(@_);
 
-    # Set the ETag if not already set in the webservice methods.
-    my $etag = $self->bz_etag;
-    if (!$etag && ref $result) {
-        my $data = $self->json->decode($result)->{'result'};
-        $self->bz_etag($data);
-    }
+  # Set the ETag if not already set in the webservice methods.
+  my $etag = $self->bz_etag;
+  if (!$etag && ref $result) {
+    my $data = $self->json->decode($result)->{'result'};
+    $self->bz_etag($data);
+  }
 
-    return $result;
+  return $result;
 }
 
 # Make all error messages returned by JSON::RPC go into the 100000
 # range, and bring down all our errors into the normal range.
 sub _error {
-    my ($self, $id, $code) = (shift, shift, shift);
-    # All JSON::RPC errors are less than 1000.
-    if ($code < 1000) {
-        $code += 100000;
-    }
-    # Bugzilla::Error adds 100,000 to all *our* errors, so
-    # we know they came from us.
-    elsif ($code > 100000) {
-        $code -= 100000;
-    }
+  my ($self, $id, $code) = (shift, shift, shift);
 
-    # We can't just set $_[1] because it's not always settable,
-    # in JSON::RPC::Server.
-    unshift(@_, $id, $code);
-    my $json = $self->SUPER::_error(@_);
+  # All JSON::RPC errors are less than 1000.
+  if ($code < 1000) {
+    $code += 100000;
+  }
 
-    # We want to always send the JSON-RPC 1.1 error format, although
-    # If we're not in JSON-RPC 1.1, we don't need the silly "name" parameter.
-    if (!$self->version or $self->version ne '1.1') {
-        my $object = $self->json->decode($json);
-        my $message = $object->{error};
-        # Just assure that future versions of JSON::RPC don't change the
-        # JSON-RPC 1.0 error format.
-        if (!ref $message) {
-            $object->{error} = {
-                code    => $code,
-                message => $message,
-            };
-            $json = $self->json->encode($object);
-        }
+  # Bugzilla::Error adds 100,000 to all *our* errors, so
+  # we know they came from us.
+  elsif ($code > 100000) {
+    $code -= 100000;
+  }
+
+  # We can't just set $_[1] because it's not always settable,
+  # in JSON::RPC::Server.
+  unshift(@_, $id, $code);
+  my $json = $self->SUPER::_error(@_);
+
+  # We want to always send the JSON-RPC 1.1 error format, although
+  # If we're not in JSON-RPC 1.1, we don't need the silly "name" parameter.
+  if (!$self->version or $self->version ne '1.1') {
+    my $object  = $self->json->decode($json);
+    my $message = $object->{error};
+
+    # Just assure that future versions of JSON::RPC don't change the
+    # JSON-RPC 1.0 error format.
+    if (!ref $message) {
+      $object->{error} = {code => $code, message => $message,};
+      $json = $self->json->encode($object);
     }
-    return $json;
+  }
+  return $json;
 }
 
 # This handles dispatching our calls to the appropriate class based on
 # the name of the method.
 sub _find_procedure {
-    my $self = shift;
+  my $self = shift;
 
-    my $method = shift;
-    $self->{_bz_method_name} = $method;
+  my $method = shift;
+  $self->{_bz_method_name} = $method;
 
-    # This tricks SUPER::_find_procedure into finding the right class.
-    $method =~ /^(\S+)\.(\S+)$/;
-    $self->path_info($1);
-    unshift(@_, $2);
+  # This tricks SUPER::_find_procedure into finding the right class.
+  $method =~ /^(\S+)\.(\S+)$/;
+  $self->path_info($1);
+  unshift(@_, $2);
 
-    return $self->SUPER::_find_procedure(@_);
+  return $self->SUPER::_find_procedure(@_);
 }
 
 # This is a hacky way to do something right before methods are called.
 # This is the last thing that JSON::RPC::Server::_handle calls right before
 # the method is actually called.
 sub _argument_type_check {
-    my $self = shift;
-    my $params = $self->SUPER::_argument_type_check(@_);
+  my $self   = shift;
+  my $params = $self->SUPER::_argument_type_check(@_);
 
-    # JSON-RPC 1.0 requires all parameters to be passed as an array, so
-    # we just pull out the first item and assume it's an object.
-    my $params_is_array;
-    if (ref $params eq 'ARRAY') {
-        $params = $params->[0];
-        $params_is_array = 1;
+  # JSON-RPC 1.0 requires all parameters to be passed as an array, so
+  # we just pull out the first item and assume it's an object.
+  my $params_is_array;
+  if (ref $params eq 'ARRAY') {
+    $params          = $params->[0];
+    $params_is_array = 1;
+  }
+
+  taint_data($params);
+
+  # Now, convert dateTime fields on input.
+  $self->_bz_method_name =~ /^(\S+)\.(\S+)$/;
+  my ($class, $method) = ($1, $2);
+  my $pkg         = $self->{dispatch_path}->{$class};
+  my @date_fields = @{$pkg->DATE_FIELDS->{$method} || []};
+  foreach my $field (@date_fields) {
+    if (defined $params->{$field}) {
+      my $value = $params->{$field};
+      if (ref $value eq 'ARRAY') {
+        $params->{$field} = [map { $self->datetime_format_inbound($_) } @$value];
+      }
+      else {
+        $params->{$field} = $self->datetime_format_inbound($value);
+      }
     }
-
-    taint_data($params);
-
-    # Now, convert dateTime fields on input.
-    $self->_bz_method_name =~ /^(\S+)\.(\S+)$/;
-    my ($class, $method) = ($1, $2);
-    my $pkg = $self->{dispatch_path}->{$class};
-    my @date_fields = @{ $pkg->DATE_FIELDS->{$method} || [] };
-    foreach my $field (@date_fields) {
-        if (defined $params->{$field}) {
-            my $value = $params->{$field};
-            if (ref $value eq 'ARRAY') {
-                $params->{$field} = 
-                    [ map { $self->datetime_format_inbound($_) } @$value ];
-            }
-            else {
-                $params->{$field} = $self->datetime_format_inbound($value);
-            }
-        }
+  }
+  my @base64_fields = @{$pkg->BASE64_FIELDS->{$method} || []};
+  foreach my $field (@base64_fields) {
+    if (defined $params->{$field}) {
+      $params->{$field} = decode_base64($params->{$field});
     }
-    my @base64_fields = @{ $pkg->BASE64_FIELDS->{$method} || [] };
-    foreach my $field (@base64_fields) {
-        if (defined $params->{$field}) {
-            $params->{$field} = decode_base64($params->{$field});
-        }
+  }
+
+  # Update the params to allow for several convenience key/values
+  # use for authentication
+  fix_credentials($params);
+
+  Bugzilla->input_params($params);
+
+  if ($self->request->method eq 'POST') {
+
+    # CSRF is possible via XMLHttpRequest when the Content-Type header
+    # is not application/json (for example: text/plain or
+    # application/x-www-form-urlencoded).
+    # application/json is the single official MIME type, per RFC 4627.
+    my $content_type = $self->cgi->content_type;
+
+    # The charset can be appended to the content type, so we use a regexp.
+    if ($content_type !~ m{^application/json(-rpc)?(;.*)?$}i) {
+      ThrowUserError('json_rpc_illegal_content_type',
+        {content_type => $content_type});
     }
-
-    # Update the params to allow for several convenience key/values
-    # use for authentication
-    fix_credentials($params);
-
-    Bugzilla->input_params($params);
-
-    if ($self->request->method eq 'POST') {
-        # CSRF is possible via XMLHttpRequest when the Content-Type header
-        # is not application/json (for example: text/plain or
-        # application/x-www-form-urlencoded).
-        # application/json is the single official MIME type, per RFC 4627.
-        my $content_type = $self->cgi->content_type;
-        # The charset can be appended to the content type, so we use a regexp.
-        if ($content_type !~ m{^application/json(-rpc)?(;.*)?$}i) {
-            ThrowUserError('json_rpc_illegal_content_type',
-                            { content_type => $content_type });
-        }
+  }
+  else {
+    # When being called using GET, we don't allow calling
+    # methods that can change data. This protects us against cross-site
+    # request forgeries.
+    if (!grep($_ eq $method, $pkg->READ_ONLY)) {
+      ThrowUserError('json_rpc_post_only', {method => $self->_bz_method_name});
     }
-    else {
-        # When being called using GET, we don't allow calling
-        # methods that can change data. This protects us against cross-site
-        # request forgeries.
-        if (!grep($_ eq $method, $pkg->READ_ONLY)) {
-            ThrowUserError('json_rpc_post_only', 
-                           { method => $self->_bz_method_name });
-        }
-    }
+  }
 
-    # Only allowed methods to be used from our whitelist
-    if (none { $_ eq $method} $pkg->PUBLIC_METHODS) {
-        ThrowCodeError('unknown_method', { method => $self->_bz_method_name });
-    }
+  # Only allowed methods to be used from our whitelist
+  if (none { $_ eq $method } $pkg->PUBLIC_METHODS) {
+    ThrowCodeError('unknown_method', {method => $self->_bz_method_name});
+  }
 
-    # This is the best time to do login checks.
-    $self->handle_login();
+  # This is the best time to do login checks.
+  $self->handle_login();
 
-    # Bugzilla::WebService packages call internal methods like
-    # $self->_some_private_method. So we have to inherit from 
-    # that class as well as this Server class.
-    my $new_class = ref($self) . '::' . $pkg;
-    my $isa_string = 'our @ISA = qw(' . ref($self) . " $pkg)";
-    eval "package $new_class;$isa_string;";
-    bless $self, $new_class;
+  # Bugzilla::WebService packages call internal methods like
+  # $self->_some_private_method. So we have to inherit from
+  # that class as well as this Server class.
+  my $new_class  = ref($self) . '::' . $pkg;
+  my $isa_string = 'our @ISA = qw(' . ref($self) . " $pkg)";
+  eval "package $new_class;$isa_string;";
+  bless $self, $new_class;
 
-    if ($params_is_array) {
-        $params = [$params];
-    }
+  if ($params_is_array) {
+    $params = [$params];
+  }
 
-    return $params;
+  return $params;
 }
 
 ##########################
@@ -434,22 +442,24 @@ sub _argument_type_check {
 
 # _bz_method_name is stored by _find_procedure for later use.
 sub _bz_method_name {
-    return $_[0]->{_bz_method_name}; 
+  return $_[0]->{_bz_method_name};
 }
 
 sub _bz_callback {
-    my ($self, $value) = @_;
-    if (defined $value) {
-        $value = trim($value);
-        # We don't use \w because we don't want to allow Unicode here.
-        if ($value !~ /^[A-Za-z0-9_\.\[\]]+$/) {
-            ThrowUserError('json_rpc_invalid_callback', { callback => $value });
-        }
-        $self->{_bz_callback} = $value;
-        # JSONP needs to be parsed by a JS parser, not by a JSON parser.
-        $self->content_type('text/javascript');
+  my ($self, $value) = @_;
+  if (defined $value) {
+    $value = trim($value);
+
+    # We don't use \w because we don't want to allow Unicode here.
+    if ($value !~ /^[A-Za-z0-9_\.\[\]]+$/) {
+      ThrowUserError('json_rpc_invalid_callback', {callback => $value});
     }
-    return $self->{_bz_callback};
+    $self->{_bz_callback} = $value;
+
+    # JSONP needs to be parsed by a JS parser, not by a JSON parser.
+    $self->content_type('text/javascript');
+  }
+  return $self->{_bz_callback};
 }
 
 1;

@@ -16,10 +16,11 @@ use Bugzilla;
 use Bugzilla::Constants;
 use Bugzilla::Error;
 use Bugzilla::WebService::Constants;
+
 BEGIN {
-    if (!Bugzilla->feature('xmlrpc')) {
-        ThrowUserError('feature_disabled', { feature => 'xmlrpc' });
-    }
+  if (!Bugzilla->feature('xmlrpc')) {
+    ThrowUserError('feature_disabled', {feature => 'xmlrpc'});
+  }
 }
 use Bugzilla::WebService::Server::XMLRPC;
 
@@ -28,6 +29,7 @@ Bugzilla->usage_mode(USAGE_MODE_XMLRPC);
 # Fix the error code that SOAP::Lite uses for Perl errors.
 local $SOAP::Constants::FAULT_SERVER;
 $SOAP::Constants::FAULT_SERVER = ERROR_UNKNOWN_FATAL;
+
 # The line above is used, this one is ignored, but SOAP::Lite
 # might start using this constant (the correct one) for XML-RPC someday.
 local $XMLRPC::Constants::FAULT_SERVER;
@@ -35,8 +37,8 @@ $XMLRPC::Constants::FAULT_SERVER = ERROR_UNKNOWN_FATAL;
 
 local @INC = (bz_locations()->{extensionsdir}, @INC);
 my $server = new Bugzilla::WebService::Server::XMLRPC;
-# We use a sub for on_action because that gets us the info about what 
-# class is being called. Note that this is a hack--this is technically 
+
+# We use a sub for on_action because that gets us the info about what
+# class is being called. Note that this is a hack--this is technically
 # for setting SOAPAction, which isn't used by XML-RPC.
-$server->on_action(sub { $server->handle_login(WS_DISPATCH, @_) })
-       ->handle();
+$server->on_action(sub { $server->handle_login(WS_DISPATCH, @_) })->handle();

@@ -21,23 +21,25 @@ use Bugzilla::Mailer;
 use Getopt::Long;
 use Pod::Usage;
 
-my $verbose = 0; # Return all comments if true, else errors only.
+my $verbose = 0;    # Return all comments if true, else errors only.
 my $login = '';  # Login name of the user which is used to call sanitycheck.cgi.
-my $help = 0;    # Has user asked for help on this script?
+my $help  = 0;   # Has user asked for help on this script?
 
-my $result = GetOptions('verbose'  => \$verbose,
-                        'login=s'  => \$login,
-                        'help|h|?' => \$help);
+my $result = GetOptions(
+  'verbose'  => \$verbose,
+  'login=s'  => \$login,
+  'help|h|?' => \$help
+);
 
 pod2usage({-verbose => 1, -exitval => 1}) if $help;
 
 # Be sure a login name if given.
 $login || ThrowUserError('invalid_username');
 
-my $user = new Bugzilla::User({ name => $login })
-  || ThrowUserError('invalid_username', { name => $login });
+my $user = new Bugzilla::User({name => $login})
+  || ThrowUserError('invalid_username', {name => $login});
 
-my $cgi = Bugzilla->cgi;
+my $cgi      = Bugzilla->cgi;
 my $template = Bugzilla->template;
 
 # Authenticate using this user account.
@@ -50,16 +52,16 @@ require 'sanitycheck.cgi';
 
 # Now it's time to send an email to the user if there is something to notify.
 if ($cgi->param('output')) {
-    my $message;
-    my $vars = {};
-    $vars->{'addressee'} = $user->email;
-    $vars->{'output'} = $cgi->param('output');
-    $vars->{'error_found'} = $cgi->param('error_found') ? 1 : 0;
+  my $message;
+  my $vars = {};
+  $vars->{'addressee'}   = $user->email;
+  $vars->{'output'}      = $cgi->param('output');
+  $vars->{'error_found'} = $cgi->param('error_found') ? 1 : 0;
 
-    $template->process('email/sanitycheck.txt.tmpl', $vars, \$message)
-      || ThrowTemplateError($template->error());
+  $template->process('email/sanitycheck.txt.tmpl', $vars, \$message)
+    || ThrowTemplateError($template->error());
 
-    MessageToMTA($message);
+  MessageToMTA($message);
 }
 
 

@@ -48,28 +48,29 @@ use Pod::Simple::HTML::Bugzilla;
 ###############################################################################
 
 my $error_found = 0;
-sub MakeDocs {
-    my ($name, $cmdline) = @_;
 
-    say "Creating $name documentation ..." if defined $name;
-    system('make', $cmdline) == 0
-        or $error_found = 1;
-    print "\n";
+sub MakeDocs {
+  my ($name, $cmdline) = @_;
+
+  say "Creating $name documentation ..." if defined $name;
+  system('make', $cmdline) == 0 or $error_found = 1;
+  print "\n";
 }
 
 sub make_pod {
-    say "Creating API documentation...";
+  say "Creating API documentation...";
 
-    my $converter = Pod::Simple::HTMLBatch::Bugzilla->new;
-    # Don't output progress information.
-    $converter->verbose(0);
-    $converter->html_render_class('Pod::Simple::HTML::Bugzilla');
+  my $converter = Pod::Simple::HTMLBatch::Bugzilla->new;
 
-    my $doctype      = Pod::Simple::HTML::Bugzilla->DOCTYPE;
-    my $content_type = Pod::Simple::HTML::Bugzilla->META_CT;
-    my $bz_version   = BUGZILLA_VERSION;
+  # Don't output progress information.
+  $converter->verbose(0);
+  $converter->html_render_class('Pod::Simple::HTML::Bugzilla');
 
-    my $contents_start = <<END_HTML;
+  my $doctype      = Pod::Simple::HTML::Bugzilla->DOCTYPE;
+  my $content_type = Pod::Simple::HTML::Bugzilla->META_CT;
+  my $bz_version   = BUGZILLA_VERSION;
+
+  my $contents_start = <<END_HTML;
 $doctype
 <html>
   <head>
@@ -80,15 +81,15 @@ $doctype
     <h1>Bugzilla $bz_version API Documentation</h1>
 END_HTML
 
-    $converter->contents_page_start($contents_start);
-    $converter->contents_page_end("</body></html>");
-    $converter->add_css('./../../../../style.css');
-    $converter->javascript_flurry(0);
-    $converter->css_flurry(0);
-    make_path('html/integrating/api');
-    $converter->batch_convert(['../../'], 'html/integrating/api');
+  $converter->contents_page_start($contents_start);
+  $converter->contents_page_end("</body></html>");
+  $converter->add_css('./../../../../style.css');
+  $converter->javascript_flurry(0);
+  $converter->css_flurry(0);
+  make_path('html/integrating/api');
+  $converter->batch_convert(['../../'], 'html/integrating/api');
 
-    print "\n";
+  print "\n";
 }
 
 ###############################################################################
@@ -96,67 +97,68 @@ END_HTML
 ###############################################################################
 
 my @langs;
+
 # search for sub directories which have a 'rst' sub-directory
 opendir(LANGS, './');
 foreach my $dir (readdir(LANGS)) {
-    next if (($dir eq '.') || ($dir eq '..') || (! -d $dir));
-    if (-d "$dir/rst") {
-        push(@langs, $dir);
-    }
+  next if (($dir eq '.') || ($dir eq '..') || (!-d $dir));
+  if (-d "$dir/rst") {
+    push(@langs, $dir);
+  }
 }
 closedir(LANGS);
 
 my $docparent = getcwd();
 foreach my $lang (@langs) {
-    chdir "$docparent/$lang";
+  chdir "$docparent/$lang";
 
-    make_pod();
+  make_pod();
 
-    next if grep { $_ eq '--pod-only' } @ARGV;
+  next if grep { $_ eq '--pod-only' } @ARGV;
 
-    chdir $docparent;
+  chdir $docparent;
 
-    # Generate extension documentation, both normal and API
-    my $ext_dir = bz_locations()->{'extensionsdir'};
-    my @ext_paths = grep { $_ !~ /\/create\.pl$/ && ! -e "$_/disabled" }
-                    glob("$ext_dir/*");
-    my %extensions;
-    foreach my $item (@ext_paths) {
-        my $basename = basename($item);
-        if (-d "$item/docs/$lang/rst") {
-            $extensions{$basename} = "$item/docs/$lang/rst";
-        }
+  # Generate extension documentation, both normal and API
+  my $ext_dir = bz_locations()->{'extensionsdir'};
+  my @ext_paths
+    = grep { $_ !~ /\/create\.pl$/ && !-e "$_/disabled" } glob("$ext_dir/*");
+  my %extensions;
+  foreach my $item (@ext_paths) {
+    my $basename = basename($item);
+    if (-d "$item/docs/$lang/rst") {
+      $extensions{$basename} = "$item/docs/$lang/rst";
     }
+  }
 
-    # Collect up local extension documentation into the extensions/ dir.
-    rmtree("$lang/rst/extensions", 0, 1);
+  # Collect up local extension documentation into the extensions/ dir.
+  rmtree("$lang/rst/extensions", 0, 1);
 
-    foreach my $ext_name (keys %extensions) {
-        my $src = $extensions{$ext_name} . "/*";
-        my $dst = "$docparent/$lang/rst/extensions/$ext_name";
-        mkdir($dst) unless -d $dst;
-        rcopy($src, $dst);
+  foreach my $ext_name (keys %extensions) {
+    my $src = $extensions{$ext_name} . "/*";
+    my $dst = "$docparent/$lang/rst/extensions/$ext_name";
+    mkdir($dst) unless -d $dst;
+    rcopy($src, $dst);
+  }
+
+  chdir "$docparent/$lang";
+
+  MakeDocs('HTML', 'html');
+  MakeDocs('TXT',  'text');
+
+  if (grep { $_ eq '--with-pdf' } @ARGV) {
+    if (which('pdflatex')) {
+      MakeDocs('PDF', 'latexpdf');
     }
-
-    chdir "$docparent/$lang";
-
-    MakeDocs('HTML', 'html');
-    MakeDocs('TXT', 'text');
-
-    if (grep { $_ eq '--with-pdf' } @ARGV) {
-        if (which('pdflatex')) {
-            MakeDocs('PDF', 'latexpdf');
-        }
-        elsif (which('rst2pdf')) {
-            rmtree('pdf', 0, 1);
-            MakeDocs('PDF', 'pdf');
-        }
-        else {
-            say 'pdflatex or rst2pdf not found. Skipping PDF file creation';
-        }
+    elsif (which('rst2pdf')) {
+      rmtree('pdf', 0, 1);
+      MakeDocs('PDF', 'pdf');
     }
+    else {
+      say 'pdflatex or rst2pdf not found. Skipping PDF file creation';
+    }
+  }
 
-    rmtree('doctrees', 0, 1);
+  rmtree('doctrees', 0, 1);
 }
 
 die "Error occurred building the documentation\n" if $error_found;

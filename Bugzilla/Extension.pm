@@ -14,8 +14,8 @@ use warnings;
 use Bugzilla::Constants;
 use Bugzilla::Error;
 use Bugzilla::Install::Util qw(
-    extension_code_files extension_template_directory 
-    extension_package_directory extension_web_directory);
+  extension_code_files extension_template_directory
+  extension_package_directory extension_web_directory);
 
 use File::Basename;
 use File::Spec;
@@ -25,10 +25,10 @@ use File::Spec;
 ####################
 
 sub new {
-    my ($class, $params) = @_;
-    $params ||= {};
-    bless $params, $class;
-    return $params;
+  my ($class, $params) = @_;
+  $params ||= {};
+  bless $params, $class;
+  return $params;
 }
 
 #######################################
@@ -36,148 +36,151 @@ sub new {
 #######################################
 
 sub load {
-    my ($class, $extension_file, $config_file) = @_;
-    my $package;
+  my ($class, $extension_file, $config_file) = @_;
+  my $package;
 
-    # This is needed during checksetup.pl, because Extension packages can 
-    # only be loaded once (they return "1" the second time they're loaded,
-    # instead of their name). During checksetup.pl, extensions are loaded
-    # once by Bugzilla::Install::Requirements, and then later again via
-    # Bugzilla->extensions (because of hooks).
-    my $map = Bugzilla->request_cache->{extension_requirement_package_map};
+  # This is needed during checksetup.pl, because Extension packages can
+  # only be loaded once (they return "1" the second time they're loaded,
+  # instead of their name). During checksetup.pl, extensions are loaded
+  # once by Bugzilla::Install::Requirements, and then later again via
+  # Bugzilla->extensions (because of hooks).
+  my $map = Bugzilla->request_cache->{extension_requirement_package_map};
 
-    if ($config_file) {
-        if ($map and defined $map->{$config_file}) {
-            $package = $map->{$config_file};
-        }
-        else {
-            my $name = require $config_file;
-            if ($name =~ /^\d+$/) {
-                ThrowCodeError('extension_must_return_name',
-                               { extension => $config_file, 
-                                 returned  => $name });
-            }
-            $package = "${class}::$name";
-        }
-
-        __do_call($package, 'modify_inc', $config_file);
-    }
-
-    if ($map and defined $map->{$extension_file}) {
-        $package = $map->{$extension_file};
-        $package->modify_inc($extension_file) if !$config_file;
+  if ($config_file) {
+    if ($map and defined $map->{$config_file}) {
+      $package = $map->{$config_file};
     }
     else {
-        my $name = require $extension_file;
-        if ($name =~ /^\d+$/) {
-            ThrowCodeError('extension_must_return_name', 
-                           { extension => $extension_file, returned => $name });
-        }
-        $package = "${class}::$name";
-        $package->modify_inc($extension_file) if !$config_file;
+      my $name = require $config_file;
+      if ($name =~ /^\d+$/) {
+        ThrowCodeError('extension_must_return_name',
+          {extension => $config_file, returned => $name});
+      }
+      $package = "${class}::$name";
     }
 
-    $class->_validate_package($package, $extension_file);
-    return $package;
+    __do_call($package, 'modify_inc', $config_file);
+  }
+
+  if ($map and defined $map->{$extension_file}) {
+    $package = $map->{$extension_file};
+    $package->modify_inc($extension_file) if !$config_file;
+  }
+  else {
+    my $name = require $extension_file;
+    if ($name =~ /^\d+$/) {
+      ThrowCodeError('extension_must_return_name',
+        {extension => $extension_file, returned => $name});
+    }
+    $package = "${class}::$name";
+    $package->modify_inc($extension_file) if !$config_file;
+  }
+
+  $class->_validate_package($package, $extension_file);
+  return $package;
 }
 
 sub _validate_package {
-    my ($class, $package, $extension_file) = @_;
+  my ($class, $package, $extension_file) = @_;
 
-    # For extensions from data/extensions/additional, we don't have a file
-    # name, so we fake it.
-    if (!$extension_file) {
-        $extension_file = $package;
-        $extension_file =~ s/::/\//g;
-        $extension_file .= '.pm';
-    }
+  # For extensions from data/extensions/additional, we don't have a file
+  # name, so we fake it.
+  if (!$extension_file) {
+    $extension_file = $package;
+    $extension_file =~ s/::/\//g;
+    $extension_file .= '.pm';
+  }
 
-    if (!eval { $package->NAME }) {
-        ThrowCodeError('extension_no_name', 
-                       { filename => $extension_file, package => $package });
-    }
+  if (!eval { $package->NAME }) {
+    ThrowCodeError('extension_no_name',
+      {filename => $extension_file, package => $package});
+  }
 
-    if (!$package->isa($class)) {
-        ThrowCodeError('extension_must_be_subclass',
-                       { filename => $extension_file,
-                         package  => $package,
-                         class    => $class });
-    }
+  if (!$package->isa($class)) {
+    ThrowCodeError('extension_must_be_subclass',
+      {filename => $extension_file, package => $package, class => $class});
+  }
 }
 
 sub load_all {
-    my $class = shift;
-    my ($file_sets, $extra_packages) = extension_code_files();
-    my @packages;
-    foreach my $file_set (@$file_sets) {
-        my $package = $class->load(@$file_set);
-        push(@packages, $package);
-    }
+  my $class = shift;
+  my ($file_sets, $extra_packages) = extension_code_files();
+  my @packages;
+  foreach my $file_set (@$file_sets) {
+    my $package = $class->load(@$file_set);
+    push(@packages, $package);
+  }
 
-    # Extensions from data/extensions/additional
-    foreach my $package (@$extra_packages) {
-        # Don't load an "additional" extension if we already have an extension
-        # loaded with that name.
-        next if grep($_ eq $package, @packages);
-        # Untaint the package name
-        $package =~ /([\w:]+)/;
-        $package = $1;
-        eval("require $package") || die $@;
-        $package->_validate_package($package);
-        push(@packages, $package);
-    }
+  # Extensions from data/extensions/additional
+  foreach my $package (@$extra_packages) {
 
-    return \@packages;
+    # Don't load an "additional" extension if we already have an extension
+    # loaded with that name.
+    next if grep($_ eq $package, @packages);
+
+    # Untaint the package name
+    $package =~ /([\w:]+)/;
+    $package = $1;
+    eval("require $package") || die $@;
+    $package->_validate_package($package);
+    push(@packages, $package);
+  }
+
+  return \@packages;
 }
 
 # Modifies @INC so that extensions can use modules like
 # "use Bugzilla::Extension::Foo::Bar", when Bar.pm is in the lib/
 # directory of the extension.
 sub modify_inc {
-    my ($class, $file) = @_;
+  my ($class, $file) = @_;
 
-    # Note that this package_dir call is necessary to set things up
-    # for my_inc, even if we didn't take its return value.
-    my $package_dir = __do_call($class, 'package_dir', $file);
-    # Don't modify @INC for extensions that are just files in the extensions/
-    # directory. We don't want Bugzilla's base lib/CGI.pm being loaded as 
-    # Bugzilla::Extension::Foo::CGI or any other confusing thing like that.
-    return if $package_dir eq bz_locations->{'extensionsdir'};
-    unshift(@INC, sub { __do_call($class, 'my_inc', @_) });
+  # Note that this package_dir call is necessary to set things up
+  # for my_inc, even if we didn't take its return value.
+  my $package_dir = __do_call($class, 'package_dir', $file);
+
+  # Don't modify @INC for extensions that are just files in the extensions/
+  # directory. We don't want Bugzilla's base lib/CGI.pm being loaded as
+  # Bugzilla::Extension::Foo::CGI or any other confusing thing like that.
+  return if $package_dir eq bz_locations->{'extensionsdir'};
+  unshift(@INC, sub { __do_call($class, 'my_inc', @_) });
 }
 
 # This is what gets put into @INC by modify_inc.
 sub my_inc {
-    my ($class, undef, $file) = @_;
-    
-    # This avoids infinite recursion in case anything inside of this function
-    # does a "require". (I know for sure that File::Spec->case_tolerant does
-    # a "require" on Windows, for example.)
-    return if $file !~ /^Bugzilla/;
+  my ($class, undef, $file) = @_;
 
-    my $lib_dir = __do_call($class, 'lib_dir');
-    my @class_parts = split('::', $class);
-    my ($vol, $dir, $file_name) = File::Spec->splitpath($file);
-    my @dir_parts = File::Spec->splitdir($dir);
-    # File::Spec::Win32 (any maybe other OSes) add an empty directory at the
-    # end of @dir_parts.
-    @dir_parts = grep { $_ ne '' } @dir_parts;
-    # Validate that this is a sub-package of Bugzilla::Extension::Foo ($class).
-    for (my $i = 0; $i < scalar(@class_parts); $i++) {
-        return if !@dir_parts;
-        if (File::Spec->case_tolerant) {
-            return if lc($class_parts[$i]) ne lc($dir_parts[0]);
-        }
-        else {
-            return if $class_parts[$i] ne $dir_parts[0];
-        }
-        shift(@dir_parts);
+  # This avoids infinite recursion in case anything inside of this function
+  # does a "require". (I know for sure that File::Spec->case_tolerant does
+  # a "require" on Windows, for example.)
+  return if $file !~ /^Bugzilla/;
+
+  my $lib_dir     = __do_call($class, 'lib_dir');
+  my @class_parts = split('::', $class);
+  my ($vol, $dir, $file_name) = File::Spec->splitpath($file);
+  my @dir_parts = File::Spec->splitdir($dir);
+
+  # File::Spec::Win32 (any maybe other OSes) add an empty directory at the
+  # end of @dir_parts.
+  @dir_parts = grep { $_ ne '' } @dir_parts;
+
+  # Validate that this is a sub-package of Bugzilla::Extension::Foo ($class).
+  for (my $i = 0; $i < scalar(@class_parts); $i++) {
+    return if !@dir_parts;
+    if (File::Spec->case_tolerant) {
+      return if lc($class_parts[$i]) ne lc($dir_parts[0]);
     }
-    # For Bugzilla::Extension::Foo::Bar, this would look something like
-    # extensions/Example/lib/Bar.pm
-    my $resolved_path = File::Spec->catfile($lib_dir, @dir_parts, $file_name);
-    open(my $fh, '<', $resolved_path);
-    return $fh;
+    else {
+      return if $class_parts[$i] ne $dir_parts[0];
+    }
+    shift(@dir_parts);
+  }
+
+  # For Bugzilla::Extension::Foo::Bar, this would look something like
+  # extensions/Example/lib/Bar.pm
+  my $resolved_path = File::Spec->catfile($lib_dir, @dir_parts, $file_name);
+  open(my $fh, '<', $resolved_path);
+  return $fh;
 }
 
 ####################
@@ -187,23 +190,24 @@ sub my_inc {
 use constant enabled => 1;
 
 sub lib_dir {
-    my $invocant = shift;
-    my $package_dir = __do_call($invocant, 'package_dir');
-    # For extensions that are just files in the extensions/ directory,
-    # use the base lib/ dir as our "lib_dir". Note that Bugzilla never
-    # uses lib_dir in this case, though, because modify_inc is prevented
-    # from modifying @INC when we're just a file in the extensions/ directory.
-    # So this particular code block exists just to make lib_dir return
-    # something right in case an extension needs it for some odd reason.
-    if ($package_dir eq bz_locations()->{'extensionsdir'}) {
-        return bz_locations->{'ext_libpath'};
-    }
-    return File::Spec->catdir($package_dir, 'lib');
+  my $invocant    = shift;
+  my $package_dir = __do_call($invocant, 'package_dir');
+
+  # For extensions that are just files in the extensions/ directory,
+  # use the base lib/ dir as our "lib_dir". Note that Bugzilla never
+  # uses lib_dir in this case, though, because modify_inc is prevented
+  # from modifying @INC when we're just a file in the extensions/ directory.
+  # So this particular code block exists just to make lib_dir return
+  # something right in case an extension needs it for some odd reason.
+  if ($package_dir eq bz_locations()->{'extensionsdir'}) {
+    return bz_locations->{'ext_libpath'};
+  }
+  return File::Spec->catdir($package_dir, 'lib');
 }
 
 sub template_dir { return extension_template_directory(@_); }
-sub package_dir  { return extension_package_directory(@_);  }
-sub web_dir      { return extension_web_directory(@_);      }
+sub package_dir  { return extension_package_directory(@_); }
+sub web_dir      { return extension_web_directory(@_); }
 
 ######################
 # Helper Subroutines #
@@ -217,13 +221,13 @@ sub web_dir      { return extension_web_directory(@_);      }
 # the method. This is necessary because Config.pm is not a subclass of
 # Bugzilla::Extension.
 sub __do_call {
-    my ($class, $method, @args) = @_;
-    if ($class->can($method)) {
-        return $class->$method(@args);
-    }
-    my $function_ref;
-    { no strict 'refs'; $function_ref = \&{$method}; }
-    return $function_ref->($class, @args);
+  my ($class, $method, @args) = @_;
+  if ($class->can($method)) {
+    return $class->$method(@args);
+  }
+  my $function_ref;
+  { no strict 'refs'; $function_ref = \&{$method}; }
+  return $function_ref->($class, @args);
 }
 
 1;

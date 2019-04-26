@@ -21,90 +21,92 @@ BEGIN { *esc = \&Pod::Simple::HTML::esc }
 # Note that if you leave out a category here, it will not be indexed
 # in the contents file, even though its HTML POD will still exist.
 use constant FILE_TRANSLATION => {
-    Files      => ['importxml', 'contrib', 'checksetup', 'email_in', 
-                   'install-module', 'sanitycheck', 'jobqueue', 'migrate',
-                   'collectstats'],
-    Modules    => ['bugzilla'],
-    Extensions => ['extensions'],
+  Files => [
+    'importxml',      'contrib',     'checksetup', 'email_in',
+    'install-module', 'sanitycheck', 'jobqueue',   'migrate',
+    'collectstats'
+  ],
+  Modules    => ['bugzilla'],
+  Extensions => ['extensions'],
 };
 
 # This is basically copied from Pod::Simple::HTMLBatch, and overridden
 # so that we can format things more nicely.
 sub _write_contents_middle {
-    my ($self, $Contents, $outfile, $toplevel2submodules) = @_;
+  my ($self, $Contents, $outfile, $toplevel2submodules) = @_;
 
-    my $file_trans = FILE_TRANSLATION;
+  my $file_trans = FILE_TRANSLATION;
 
-    # For every top-level category...
-    foreach my $category (sort keys %$file_trans) {
-        # Get all of the HTMLBatch categories that should be in this
-        # category.
-        my @category_data;
-        foreach my $b_category (@{$file_trans->{$category}}) {
-            my $data = $toplevel2submodules->{$b_category};
-            push(@category_data, @$data) if $data;
-        }
-        next unless @category_data;
+  # For every top-level category...
+  foreach my $category (sort keys %$file_trans) {
 
-        my @downlines = sort {$a->[-1] cmp $b->[-1]} @category_data;
+    # Get all of the HTMLBatch categories that should be in this
+    # category.
+    my @category_data;
+    foreach my $b_category (@{$file_trans->{$category}}) {
+      my $data = $toplevel2submodules->{$b_category};
+      push(@category_data, @$data) if $data;
+    }
+    next unless @category_data;
 
-        # And finally, actually print out the table for this category. 
-        printf $Contents qq[<dt><a name="%s">%s</a></dt>\n<dd>\n],
-                esc($category), esc($category);
-        print $Contents '<table class="pod_desc_table">' . "\n";
+    my @downlines = sort { $a->[-1] cmp $b->[-1] } @category_data;
 
-        # For every POD...
-        my $row_count = 0;
-        foreach my $e (@downlines) {
-            $row_count++;
-            my $even_or_odd = $row_count % 2 ? 'even' : 'odd';
-            my $name = esc($e->[0]);
-            my $path = join( "/", '.', esc(@{$e->[3]}) )
-               . $Pod::Simple::HTML::HTML_EXTENSION;
-            my $description = $self->{bugzilla_desc}->{$name} || '';
-            $description = esc($description);
-            my $html = <<END_HTML;
+    # And finally, actually print out the table for this category.
+    printf $Contents qq[<dt><a name="%s">%s</a></dt>\n<dd>\n], esc($category),
+      esc($category);
+    print $Contents '<table class="pod_desc_table">' . "\n";
+
+    # For every POD...
+    my $row_count = 0;
+    foreach my $e (@downlines) {
+      $row_count++;
+      my $even_or_odd = $row_count % 2 ? 'even' : 'odd';
+      my $name        = esc($e->[0]);
+      my $path = join("/", '.', esc(@{$e->[3]})) . $Pod::Simple::HTML::HTML_EXTENSION;
+      my $description = $self->{bugzilla_desc}->{$name} || '';
+      $description = esc($description);
+      my $html = <<END_HTML;
 <tr class="$even_or_odd">
   <th><a href="$path">$name</a></th>
   <td>$description</td>
 </tr>
 END_HTML
-      
-            print $Contents $html;
-        }
-        print $Contents "</table></dd>\n\n";
-    }
 
-    return 1;
+      print $Contents $html;
+    }
+    print $Contents "</table></dd>\n\n";
+  }
+
+  return 1;
 }
 
 # This stores the name and description for each file, so that
 # we can get that information out later.
 sub note_for_contents_file {
-    my $self = shift;
-    my $retval = $self->SUPER::note_for_contents_file(@_);
+  my $self   = shift;
+  my $retval = $self->SUPER::note_for_contents_file(@_);
 
-    my ($namelets, $infile) = @_;
-    my $parser   = $self->html_render_class->new;
-    $parser->set_source($infile);
-    my $full_title = $parser->get_title;
-    $full_title =~ /^\S+\s+-+\s+(.+)/;
-    my $description = $1;
-    
-    $self->{bugzilla_desc} ||= {};
-    $self->{bugzilla_desc}->{join('::', @$namelets)} = $description;
+  my ($namelets, $infile) = @_;
+  my $parser = $self->html_render_class->new;
+  $parser->set_source($infile);
+  my $full_title = $parser->get_title;
+  $full_title =~ /^\S+\s+-+\s+(.+)/;
+  my $description = $1;
 
-    return $retval;
+  $self->{bugzilla_desc} ||= {};
+  $self->{bugzilla_desc}->{join('::', @$namelets)} = $description;
+
+  return $retval;
 }
 
 # Exclude modules being in lib/.
 sub find_all_pods {
-    my($self, $dirs) = @_;
-    my $mod2path = $self->SUPER::find_all_pods($dirs);
-    foreach my $mod (keys %$mod2path) {
-        delete $mod2path->{$mod} if $mod =~ /^lib::/;
-    }
-    return $mod2path;
+  my ($self, $dirs) = @_;
+  my $mod2path = $self->SUPER::find_all_pods($dirs);
+  foreach my $mod (keys %$mod2path) {
+    delete $mod2path->{$mod} if $mod =~ /^lib::/;
+  }
+  return $mod2path;
 }
 
 1;

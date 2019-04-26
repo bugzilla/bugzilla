@@ -16,23 +16,11 @@ use Bugzilla::Config::Common;
 our $sortkey = 700;
 
 use constant get_param_list => (
-  {
-   name => 'move-to-url',
-   type => 't',
-   default => ''
-  },
+  {name => 'move-to-url', type => 't', default => ''},
 
-  {
-   name => 'move-to-address',
-   type => 't',
-   default => 'bugzilla-import'
-  },
+  {name => 'move-to-address', type => 't', default => 'bugzilla-import'},
 
-  {
-   name => 'movers',
-   type => 't',
-   default => ''
-  },
+  {name => 'movers', type => 't', default => ''},
 );
 
 1;

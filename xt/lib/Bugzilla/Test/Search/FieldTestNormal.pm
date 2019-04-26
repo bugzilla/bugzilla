@@ -15,9 +15,9 @@ use parent qw(Bugzilla::Test::Search::FieldTest);
 use Scalar::Util qw(blessed);
 
 use constant CH_OPERATOR => {
-    changedafter  => 'chfieldfrom',
-    changedbefore => 'chfieldto',
-    changedto     => 'chfieldvalue',
+  changedafter  => 'chfieldfrom',
+  changedbefore => 'chfieldto',
+  changedto     => 'chfieldvalue',
 };
 
 use constant EMAIL_FIELDS => qw(assigned_to qa_contact cc reporter commenter);
@@ -27,78 +27,79 @@ use constant EMAIL_FIELDS => qw(assigned_to qa_contact cc reporter commenter);
 # sometimes (like in Bugzilla::Test::Search's direct code) we just want
 # to create a FieldTestNormal.
 sub new {
-    my $class = shift;
-    my ($first_arg) = @_;
-    if (blessed $first_arg
-        and $first_arg->isa('Bugzilla::Test::Search::FieldTest'))
-    {
-        my $self = { %$first_arg };
-        return bless $self, $class;
-    }
-    return $class->SUPER::new(@_);
+  my $class = shift;
+  my ($first_arg) = @_;
+  if (blessed $first_arg and $first_arg->isa('Bugzilla::Test::Search::FieldTest'))
+  {
+    my $self = {%$first_arg};
+    return bless $self, $class;
+  }
+  return $class->SUPER::new(@_);
 }
 
 sub name {
-    my $self = shift;
-    my $name = $self->SUPER::name(@_);
-    return "$name (Normal Params)";
+  my $self = shift;
+  my $name = $self->SUPER::name(@_);
+  return "$name (Normal Params)";
 }
 
 sub search_columns {
-    my $self = shift;
-    my $field = $self->field;
-    # For the assigned_to, qa_contact, and reporter fields, have the
-    # "Normal Params" test check that the _realname columns work
-    # all by themselves.
-    if (grep($_ eq $field, EMAIL_FIELDS) && $self->field_object->buglist) {
-        return ['bug_id', "${field}_realname"]
-    }
-    return $self->SUPER::search_columns(@_);
+  my $self  = shift;
+  my $field = $self->field;
+
+  # For the assigned_to, qa_contact, and reporter fields, have the
+  # "Normal Params" test check that the _realname columns work
+  # all by themselves.
+  if (grep($_ eq $field, EMAIL_FIELDS) && $self->field_object->buglist) {
+    return ['bug_id', "${field}_realname"];
+  }
+  return $self->SUPER::search_columns(@_);
 }
 
 sub search_params {
-    my ($self) = @_;
-    my $field = $self->field;
-    my $operator = $self->operator;
-    my $value = $self->translated_value;
-    if ($operator eq 'anyexact') {
-        $value = [split ',', $value];
-    }
-    
-    if (my $ch_param = CH_OPERATOR->{$operator}) {
-        if ($field eq 'creation_ts') {
-            $field = '[Bug creation]';
-        }
-        return { chfield => $field, $ch_param => $value };
-    }
-    
-    if ($field eq 'delta_ts' and $operator eq 'greaterthaneq') {
-        return { chfieldfrom => $value };
-    }
-    if ($field eq 'delta_ts' and $operator eq 'lessthaneq') {
-        return { chfieldto => $value };
-    }
-    
-    if ($field eq 'deadline' and $operator eq 'greaterthaneq') {
-        return { deadlinefrom => $value };
-    }
-    if ($field eq 'deadline' and $operator eq 'lessthaneq') {
-        return { deadlineto => $value };
-    }
-    
-    if (grep { $_ eq $field } EMAIL_FIELDS) {
-        $field = 'longdesc' if $field eq 'commenter';
-        return {
-            email1           => $value,
-            "email${field}1" => 1,
-            emailtype1       => $operator,
-            # Used to do extra tests on special sorts of email* combinations.
-            %{ $self->test->{extra_params} || {} },
-        };
-    }
+  my ($self)   = @_;
+  my $field    = $self->field;
+  my $operator = $self->operator;
+  my $value    = $self->translated_value;
+  if ($operator eq 'anyexact') {
+    $value = [split ',', $value];
+  }
 
-    $field =~ s/\./_/g;
-    return { $field => $value, "${field}_type" => $operator };
+  if (my $ch_param = CH_OPERATOR->{$operator}) {
+    if ($field eq 'creation_ts') {
+      $field = '[Bug creation]';
+    }
+    return {chfield => $field, $ch_param => $value};
+  }
+
+  if ($field eq 'delta_ts' and $operator eq 'greaterthaneq') {
+    return {chfieldfrom => $value};
+  }
+  if ($field eq 'delta_ts' and $operator eq 'lessthaneq') {
+    return {chfieldto => $value};
+  }
+
+  if ($field eq 'deadline' and $operator eq 'greaterthaneq') {
+    return {deadlinefrom => $value};
+  }
+  if ($field eq 'deadline' and $operator eq 'lessthaneq') {
+    return {deadlineto => $value};
+  }
+
+  if (grep { $_ eq $field } EMAIL_FIELDS) {
+    $field = 'longdesc' if $field eq 'commenter';
+    return {
+      email1           => $value,
+      "email${field}1" => 1,
+      emailtype1       => $operator,
+
+      # Used to do extra tests on special sorts of email* combinations.
+      %{$self->test->{extra_params} || {}},
+    };
+  }
+
+  $field =~ s/\./_/g;
+  return {$field => $value, "${field}_type" => $operator};
 }
 
 1;

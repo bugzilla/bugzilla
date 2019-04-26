@@ -20,158 +20,155 @@ use Bugzilla::Util qw(trick_taint);
 use DateTime;
 
 # Basic info that is needed before logins
-use constant LOGIN_EXEMPT => {
-    parameters => 1,
-    timezone => 1,
-    version => 1,
-};
+use constant LOGIN_EXEMPT => {parameters => 1, timezone => 1, version => 1,};
 
 use constant READ_ONLY => qw(
-    extensions
-    parameters
-    timezone
-    time
-    version
+  extensions
+  parameters
+  timezone
+  time
+  version
 );
 
 use constant PUBLIC_METHODS => qw(
-    extensions
-    last_audit_time
-    parameters
-    time
-    timezone
-    version
+  extensions
+  last_audit_time
+  parameters
+  time
+  timezone
+  version
 );
 
 # Logged-out users do not need to know more than that.
 use constant PARAMETERS_LOGGED_OUT => qw(
-    maintainer
-    requirelogin
+  maintainer
+  requirelogin
 );
 
 # These parameters are guessable from the web UI when the user
 # is logged in. So it's safe to access them.
 use constant PARAMETERS_LOGGED_IN => qw(
-    allowemailchange
-    attachment_base
-    commentonchange_resolution
-    commentonduplicate
-    cookiepath
-    defaultopsys
-    defaultplatform
-    defaultpriority
-    defaultseverity
-    duplicate_or_move_bug_status
-    emailregexpdesc
-    emailsuffix
-    letsubmitterchoosemilestone
-    letsubmitterchoosepriority
-    mailfrom
-    maintainer
-    maxattachmentsize
-    maxlocalattachment
-    musthavemilestoneonaccept
-    noresolveonopenblockers
-    password_complexity
-    rememberlogin
-    requirelogin
-    search_allow_no_criteria
-    urlbase
-    use_see_also
-    useclassification
-    usemenuforusers
-    useqacontact
-    usestatuswhiteboard
-    usetargetmilestone
+  allowemailchange
+  attachment_base
+  commentonchange_resolution
+  commentonduplicate
+  cookiepath
+  defaultopsys
+  defaultplatform
+  defaultpriority
+  defaultseverity
+  duplicate_or_move_bug_status
+  emailregexpdesc
+  emailsuffix
+  letsubmitterchoosemilestone
+  letsubmitterchoosepriority
+  mailfrom
+  maintainer
+  maxattachmentsize
+  maxlocalattachment
+  musthavemilestoneonaccept
+  noresolveonopenblockers
+  password_complexity
+  rememberlogin
+  requirelogin
+  search_allow_no_criteria
+  urlbase
+  use_see_also
+  useclassification
+  usemenuforusers
+  useqacontact
+  usestatuswhiteboard
+  usetargetmilestone
 );
 
 sub version {
-    my $self = shift;
-    return { version => $self->type('string', BUGZILLA_VERSION) };
+  my $self = shift;
+  return {version => $self->type('string', BUGZILLA_VERSION)};
 }
 
 sub extensions {
-    my $self = shift;
+  my $self = shift;
 
-    my %retval;
-    foreach my $extension (@{ Bugzilla->extensions }) {
-        my $version = $extension->VERSION || 0;
-        my $name    = $extension->NAME;
-        $retval{$name}->{version} = $self->type('string', $version);
-    }
-    return { extensions => \%retval };
+  my %retval;
+  foreach my $extension (@{Bugzilla->extensions}) {
+    my $version = $extension->VERSION || 0;
+    my $name    = $extension->NAME;
+    $retval{$name}->{version} = $self->type('string', $version);
+  }
+  return {extensions => \%retval};
 }
 
 sub timezone {
-    my $self = shift;
-    # All Webservices return times in UTC; Use UTC here for backwards compat.
-    return { timezone => $self->type('string', "+0000") };
+  my $self = shift;
+
+  # All Webservices return times in UTC; Use UTC here for backwards compat.
+  return {timezone => $self->type('string', "+0000")};
 }
 
 sub time {
-    my ($self) = @_;
-    # All Webservices return times in UTC; Use UTC here for backwards compat.
-    # Hardcode values where appropriate
-    my $dbh = Bugzilla->dbh;
+  my ($self) = @_;
 
-    my $db_time = $dbh->selectrow_array('SELECT LOCALTIMESTAMP(0)');
-    $db_time = datetime_from($db_time, 'UTC');
-    my $now_utc = DateTime->now();
+  # All Webservices return times in UTC; Use UTC here for backwards compat.
+  # Hardcode values where appropriate
+  my $dbh = Bugzilla->dbh;
 
-    return {
-        db_time       => $self->type('dateTime', $db_time),
-        web_time      => $self->type('dateTime', $now_utc),
-        web_time_utc  => $self->type('dateTime', $now_utc),
-        tz_name       => $self->type('string', 'UTC'),
-        tz_offset     => $self->type('string', '+0000'),
-        tz_short_name => $self->type('string', 'UTC'),
-    };
+  my $db_time = $dbh->selectrow_array('SELECT LOCALTIMESTAMP(0)');
+  $db_time = datetime_from($db_time, 'UTC');
+  my $now_utc = DateTime->now();
+
+  return {
+    db_time       => $self->type('dateTime', $db_time),
+    web_time      => $self->type('dateTime', $now_utc),
+    web_time_utc  => $self->type('dateTime', $now_utc),
+    tz_name       => $self->type('string',   'UTC'),
+    tz_offset     => $self->type('string',   '+0000'),
+    tz_short_name => $self->type('string',   'UTC'),
+  };
 }
 
 sub last_audit_time {
-    my ($self, $params) = validate(@_, 'class');
-    my $dbh = Bugzilla->dbh;
+  my ($self, $params) = validate(@_, 'class');
+  my $dbh = Bugzilla->dbh;
 
-    my $sql_statement = "SELECT MAX(at_time) FROM audit_log";
-    my $class_values =  $params->{class};
-    my @class_values_quoted;
-    foreach my $class_value (@$class_values) {
-        push (@class_values_quoted, $dbh->quote($class_value))
-            if $class_value =~ /^Bugzilla(::[a-zA-Z0-9_]+)*$/;
-    }
+  my $sql_statement = "SELECT MAX(at_time) FROM audit_log";
+  my $class_values  = $params->{class};
+  my @class_values_quoted;
+  foreach my $class_value (@$class_values) {
+    push(@class_values_quoted, $dbh->quote($class_value))
+      if $class_value =~ /^Bugzilla(::[a-zA-Z0-9_]+)*$/;
+  }
 
-    if (@class_values_quoted) {
-        $sql_statement .= " WHERE " . $dbh->sql_in('class', \@class_values_quoted);
-    }
+  if (@class_values_quoted) {
+    $sql_statement .= " WHERE " . $dbh->sql_in('class', \@class_values_quoted);
+  }
 
-    my $last_audit_time = $dbh->selectrow_array("$sql_statement");
+  my $last_audit_time = $dbh->selectrow_array("$sql_statement");
 
-    # All Webservices return times in UTC; Use UTC here for backwards compat.
-    # Hardcode values where appropriate
-    $last_audit_time = datetime_from($last_audit_time, 'UTC');
+  # All Webservices return times in UTC; Use UTC here for backwards compat.
+  # Hardcode values where appropriate
+  $last_audit_time = datetime_from($last_audit_time, 'UTC');
 
-    return {
-        last_audit_time => $self->type('dateTime', $last_audit_time)
-    };
+  return {last_audit_time => $self->type('dateTime', $last_audit_time)};
 }
 
 sub parameters {
-    my ($self, $args) = @_;
-    my $user = Bugzilla->login(LOGIN_OPTIONAL);
-    my $params = Bugzilla->params;
-    $args ||= {};
+  my ($self, $args) = @_;
+  my $user   = Bugzilla->login(LOGIN_OPTIONAL);
+  my $params = Bugzilla->params;
+  $args ||= {};
 
-    my @params_list = $user->in_group('tweakparams')
-                      ? keys(%$params)
-                      : $user->id ? PARAMETERS_LOGGED_IN : PARAMETERS_LOGGED_OUT;
+  my @params_list
+    = $user->in_group('tweakparams') ? keys(%$params)
+    : $user->id                      ? PARAMETERS_LOGGED_IN
+    :                                  PARAMETERS_LOGGED_OUT;
 
-    my %parameters;
-    foreach my $param (@params_list) {
-        next unless filter_wants($args, $param);
-        $parameters{$param} = $self->type('string', $params->{$param});
-    }
+  my %parameters;
+  foreach my $param (@params_list) {
+    next unless filter_wants($args, $param);
+    $parameters{$param} = $self->type('string', $params->{$param});
+  }
 
-    return { parameters => \%parameters };
+  return {parameters => \%parameters};
 }
 
 1;

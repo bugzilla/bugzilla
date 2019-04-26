@@ -22,7 +22,8 @@ use Test::More;
 
 my %switches;
 GetOptions(\%switches, 'operators=s', 'top-operators=s', 'long',
-                       'add-custom-fields', 'help|h') || die $@;
+  'add-custom-fields', 'help|h')
+  || die $@;
 
 pod2usage(verbose => 1) if $switches{'help'};
 

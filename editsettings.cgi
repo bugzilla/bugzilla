@@ -20,48 +20,47 @@ use Bugzilla::User::Setting;
 use Bugzilla::Token;
 
 my $template = Bugzilla->template;
-my $user = Bugzilla->login(LOGIN_REQUIRED);
-my $cgi = Bugzilla->cgi;
-my $vars = {};
+my $user     = Bugzilla->login(LOGIN_REQUIRED);
+my $cgi      = Bugzilla->cgi;
+my $vars     = {};
 
 print $cgi->header;
 
 $user->in_group('tweakparams')
-  || ThrowUserError("auth_failure", {group  => "tweakparams",
-                                     action => "modify",
-                                     object => "settings"});
+  || ThrowUserError("auth_failure",
+  {group => "tweakparams", action => "modify", object => "settings"});
 
 my $action = trim($cgi->param('action') || '');
-my $token = $cgi->param('token');
+my $token  = $cgi->param('token');
 
 if ($action eq 'update') {
-    check_token_data($token, 'edit_settings');
-    my $settings = Bugzilla::User::Setting::get_defaults();
-    my $changed = 0;
+  check_token_data($token, 'edit_settings');
+  my $settings = Bugzilla::User::Setting::get_defaults();
+  my $changed  = 0;
 
-    foreach my $name (keys %$settings) {
-        my $old_enabled = $settings->{$name}->{'is_enabled'};
-        my $old_value = $settings->{$name}->{'default_value'};
-        my $enabled = defined $cgi->param("${name}-enabled") || 0;
-        my $value = $cgi->param("${name}");
-        my $setting = new Bugzilla::User::Setting($name);
+  foreach my $name (keys %$settings) {
+    my $old_enabled = $settings->{$name}->{'is_enabled'};
+    my $old_value   = $settings->{$name}->{'default_value'};
+    my $enabled     = defined $cgi->param("${name}-enabled") || 0;
+    my $value       = $cgi->param("${name}");
+    my $setting     = new Bugzilla::User::Setting($name);
 
-        $setting->validate_value($value);
+    $setting->validate_value($value);
 
-        if ($old_enabled != $enabled || $old_value ne $value) {
-            Bugzilla::User::Setting::set_default($name, $value, $enabled);
-            $changed = 1;
-        }
+    if ($old_enabled != $enabled || $old_value ne $value) {
+      Bugzilla::User::Setting::set_default($name, $value, $enabled);
+      $changed = 1;
     }
-    $vars->{'message'} = 'default_settings_updated';
-    $vars->{'changes_saved'} = $changed;
-    Bugzilla->memcached->clear_config();
-    delete_token($token);
+  }
+  $vars->{'message'}       = 'default_settings_updated';
+  $vars->{'changes_saved'} = $changed;
+  Bugzilla->memcached->clear_config();
+  delete_token($token);
 }
 
 # Don't use $settings as defaults may have changed.
 $vars->{'settings'} = Bugzilla::User::Setting::get_defaults();
-$vars->{'token'} = issue_session_token('edit_settings');
+$vars->{'token'}    = issue_session_token('edit_settings');
 
 $template->process("admin/settings/edit.html.tmpl", $vars)
   || ThrowTemplateError($template->error());

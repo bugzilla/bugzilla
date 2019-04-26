@@ -20,52 +20,54 @@ use Bugzilla::Util qw(generate_random_password trim);
 # Overriden Constants that are used as methods
 #####################################################################
 
-use constant DB_TABLE       => 'user_api_keys';
-use constant DB_COLUMNS     => qw(
-    id
-    user_id
-    api_key
-    description
-    revoked
-    last_used
+use constant DB_TABLE   => 'user_api_keys';
+use constant DB_COLUMNS => qw(
+  id
+  user_id
+  api_key
+  description
+  revoked
+  last_used
 );
 
 use constant UPDATE_COLUMNS => qw(description revoked last_used);
 use constant VALIDATORS     => {
-    api_key     => \&_check_api_key,
-    description => \&_check_description,
-    revoked     => \&Bugzilla::Object::check_boolean,
+  api_key     => \&_check_api_key,
+  description => \&_check_description,
+  revoked     => \&Bugzilla::Object::check_boolean,
 };
-use constant LIST_ORDER     => 'id';
-use constant NAME_FIELD     => 'api_key';
+use constant LIST_ORDER => 'id';
+use constant NAME_FIELD => 'api_key';
 
 # turn off auditing and exclude these objects from memcached
-use constant { AUDIT_CREATES => 0,
-               AUDIT_UPDATES => 0,
-               AUDIT_REMOVES => 0,
-               USE_MEMCACHED => 0 };
+use constant {
+  AUDIT_CREATES => 0,
+  AUDIT_UPDATES => 0,
+  AUDIT_REMOVES => 0,
+  USE_MEMCACHED => 0
+};
 
 # Accessors
-sub id            { return $_[0]->{id}          }
-sub user_id       { return $_[0]->{user_id}     }
-sub api_key       { return $_[0]->{api_key}     }
-sub description   { return $_[0]->{description} }
-sub revoked       { return $_[0]->{revoked}     }
-sub last_used     { return $_[0]->{last_used}   }
+sub id          { return $_[0]->{id} }
+sub user_id     { return $_[0]->{user_id} }
+sub api_key     { return $_[0]->{api_key} }
+sub description { return $_[0]->{description} }
+sub revoked     { return $_[0]->{revoked} }
+sub last_used   { return $_[0]->{last_used} }
 
 # Helpers
 sub user {
-    my $self = shift;
-    $self->{user} //= Bugzilla::User->new({name => $self->user_id, cache => 1});
-    return $self->{user};
+  my $self = shift;
+  $self->{user} //= Bugzilla::User->new({name => $self->user_id, cache => 1});
+  return $self->{user};
 }
 
 sub update_last_used {
-    my $self = shift;
-    my $timestamp = shift
-        || Bugzilla->dbh->selectrow_array('SELECT LOCALTIMESTAMP(0)');
-    $self->set('last_used', $timestamp);
-    $self->update;
+  my $self = shift;
+  my $timestamp
+    = shift || Bugzilla->dbh->selectrow_array('SELECT LOCALTIMESTAMP(0)');
+  $self->set('last_used', $timestamp);
+  $self->update;
 }
 
 # Setters
@@ -73,8 +75,8 @@ sub set_description { $_[0]->set('description', $_[1]); }
 sub set_revoked     { $_[0]->set('revoked',     $_[1]); }
 
 # Validators
-sub _check_api_key     { return generate_random_password(40); }
-sub _check_description { return trim($_[1]) || '';   }
+sub _check_api_key { return generate_random_password(40); }
+sub _check_description { return trim($_[1]) || ''; }
 1;
 
 __END__

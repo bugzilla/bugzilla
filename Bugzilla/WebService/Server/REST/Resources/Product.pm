@@ -17,53 +17,41 @@ use Bugzilla::WebService::Product;
 use Bugzilla::Error;
 
 BEGIN {
-    *Bugzilla::WebService::Product::rest_resources = \&_rest_resources;
-};
+  *Bugzilla::WebService::Product::rest_resources = \&_rest_resources;
+}
 
 sub _rest_resources {
-    my $rest_resources = [
-        qr{^/product_accessible$}, {
-            GET => {
-                method => 'get_accessible_products'
-            }
-        },
-        qr{^/product_enterable$}, {
-            GET => {
-                method => 'get_enterable_products'
-            }
-        },
-        qr{^/product_selectable$}, {
-            GET => {
-                method => 'get_selectable_products'
-            }
-        },
-        qr{^/product$}, {
-            GET  => {
-                method => 'get'
-            },
-            POST => {
-                method => 'create',
-                success_code => STATUS_CREATED
-            }
-        },
-        qr{^/product/([^/]+)$}, {
-            GET => {
-                method => 'get',
-                params => sub {
-                    my $param = $_[0] =~ /^\d+$/ ? 'ids' : 'names';
-                    return { $param => [ $_[0] ] };
-                }
-            },
-            PUT => {
-                method => 'update',
-                params => sub {
-                    my $param = $_[0] =~ /^\d+$/ ? 'ids' : 'names';
-                    return { $param => [ $_[0] ] };
-                }
-            }
-        },
-    ];
-    return $rest_resources;
+  my $rest_resources = [
+    qr{^/product_accessible$},
+    {GET => {method => 'get_accessible_products'}},
+    qr{^/product_enterable$},
+    {GET => {method => 'get_enterable_products'}},
+    qr{^/product_selectable$},
+    {GET => {method => 'get_selectable_products'}},
+    qr{^/product$},
+    {
+      GET  => {method => 'get'},
+      POST => {method => 'create', success_code => STATUS_CREATED}
+    },
+    qr{^/product/([^/]+)$},
+    {
+      GET => {
+        method => 'get',
+        params => sub {
+          my $param = $_[0] =~ /^\d+$/ ? 'ids' : 'names';
+          return {$param => [$_[0]]};
+        }
+      },
+      PUT => {
+        method => 'update',
+        params => sub {
+          my $param = $_[0] =~ /^\d+$/ ? 'ids' : 'names';
+          return {$param => [$_[0]]};
+        }
+      }
+    },
+  ];
+  return $rest_resources;
 }
 
 1;

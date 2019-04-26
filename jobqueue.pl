@@ -12,10 +12,11 @@ use warnings;
 
 use Cwd qw(abs_path);
 use File::Basename;
+
 BEGIN {
-    # Untaint the abs_path.
-    my ($a) = abs_path($0) =~ /^(.*)$/;
-    chdir dirname($a);
+  # Untaint the abs_path.
+  my ($a) = abs_path($0) =~ /^(.*)$/;
+  chdir dirname($a);
 }
 
 use lib qw(. lib);

@@ -33,47 +33,48 @@ use constant AUDIT_CREATES => 0;
 use constant AUDIT_UPDATES => 0;
 
 use constant DB_COLUMNS => qw(
-    comment_id
-    bug_id
-    who
-    bug_when
-    work_time
-    thetext
-    isprivate
-    already_wrapped
-    type
-    extra_data
+  comment_id
+  bug_id
+  who
+  bug_when
+  work_time
+  thetext
+  isprivate
+  already_wrapped
+  type
+  extra_data
 );
 
 use constant UPDATE_COLUMNS => qw(
-    isprivate
-    type
-    extra_data
+  isprivate
+  type
+  extra_data
 );
 
 use constant DB_TABLE => 'longdescs';
 use constant ID_FIELD => 'comment_id';
+
 # In some rare cases, two comments can have identical timestamps. If
 # this happens, we want to be sure that the comment added later shows up
 # later in the sequence.
 use constant LIST_ORDER => 'bug_when, comment_id';
 
 use constant VALIDATORS => {
-    bug_id      => \&_check_bug_id,
-    who         => \&_check_who,
-    bug_when    => \&_check_bug_when,
-    work_time   => \&_check_work_time,
-    thetext     => \&_check_thetext,
-    isprivate   => \&_check_isprivate,
-    extra_data  => \&_check_extra_data,
-    type        => \&_check_type,
+  bug_id     => \&_check_bug_id,
+  who        => \&_check_who,
+  bug_when   => \&_check_bug_when,
+  work_time  => \&_check_work_time,
+  thetext    => \&_check_thetext,
+  isprivate  => \&_check_isprivate,
+  extra_data => \&_check_extra_data,
+  type       => \&_check_type,
 };
 
 use constant VALIDATOR_DEPENDENCIES => {
-    extra_data => ['type'],
-    bug_id     => ['who'],
-    work_time  => ['who', 'bug_id'],
-    isprivate  => ['who'],
+  extra_data => ['type'],
+  bug_id     => ['who'],
+  work_time  => ['who', 'bug_id'],
+  isprivate  => ['who'],
 };
 
 #########################
@@ -81,95 +82,100 @@ use constant VALIDATOR_DEPENDENCIES => {
 #########################
 
 sub update {
-    my $self = shift;
-    my ($changes, $old_comment) = $self->SUPER::update(@_);
+  my $self = shift;
+  my ($changes, $old_comment) = $self->SUPER::update(@_);
 
-    if (exists $changes->{'thetext'} || exists $changes->{'isprivate'}) {
-        $self->bug->_sync_fulltext( update_comments => 1);
-    }
+  if (exists $changes->{'thetext'} || exists $changes->{'isprivate'}) {
+    $self->bug->_sync_fulltext(update_comments => 1);
+  }
 
-    my @old_tags = @{ $old_comment->tags };
-    my @new_tags = @{ $self->tags };
-    my ($removed_tags, $added_tags) = diff_arrays(\@old_tags, \@new_tags);
+  my @old_tags = @{$old_comment->tags};
+  my @new_tags = @{$self->tags};
+  my ($removed_tags, $added_tags) = diff_arrays(\@old_tags, \@new_tags);
 
-    if (@$removed_tags || @$added_tags) {
-        my $dbh = Bugzilla->dbh;
-        my $when = $dbh->selectrow_array("SELECT LOCALTIMESTAMP(0)");
-        my $sth_delete = $dbh->prepare(
-            "DELETE FROM longdescs_tags WHERE comment_id = ? AND tag = ?"
-        );
-        my $sth_insert = $dbh->prepare(
-            "INSERT INTO longdescs_tags(comment_id, tag) VALUES (?, ?)"
-        );
-        my $sth_activity = $dbh->prepare(
-            "INSERT INTO longdescs_tags_activity
+  if (@$removed_tags || @$added_tags) {
+    my $dbh        = Bugzilla->dbh;
+    my $when       = $dbh->selectrow_array("SELECT LOCALTIMESTAMP(0)");
+    my $sth_delete = $dbh->prepare(
+      "DELETE FROM longdescs_tags WHERE comment_id = ? AND tag = ?");
+    my $sth_insert
+      = $dbh->prepare("INSERT INTO longdescs_tags(comment_id, tag) VALUES (?, ?)");
+    my $sth_activity = $dbh->prepare(
+      "INSERT INTO longdescs_tags_activity
             (bug_id, comment_id, who, bug_when, added, removed)
             VALUES (?, ?, ?, ?, ?, ?)"
-        );
+    );
 
-        foreach my $tag (@$removed_tags) {
-            my $weighted = Bugzilla::Comment::TagWeights->new({ name => $tag });
-            if ($weighted) {
-                if ($weighted->weight == 1) {
-                    $weighted->remove_from_db();
-                } else {
-                    $weighted->set_weight($weighted->weight - 1);
-                    $weighted->update();
-                }
-            }
-            trick_taint($tag);
-            $sth_delete->execute($self->id, $tag);
-            $sth_activity->execute(
-                $self->bug_id, $self->id, Bugzilla->user->id, $when, '', $tag);
+    foreach my $tag (@$removed_tags) {
+      my $weighted = Bugzilla::Comment::TagWeights->new({name => $tag});
+      if ($weighted) {
+        if ($weighted->weight == 1) {
+          $weighted->remove_from_db();
         }
-
-        foreach my $tag (@$added_tags) {
-            my $weighted = Bugzilla::Comment::TagWeights->new({ name => $tag });
-            if ($weighted) {
-                $weighted->set_weight($weighted->weight + 1);
-                $weighted->update();
-            } else {
-                Bugzilla::Comment::TagWeights->create({ tag => $tag, weight => 1 });
-            }
-            trick_taint($tag);
-            $sth_insert->execute($self->id, $tag);
-            $sth_activity->execute(
-                $self->bug_id, $self->id, Bugzilla->user->id, $when, $tag, '');
+        else {
+          $weighted->set_weight($weighted->weight - 1);
+          $weighted->update();
         }
+      }
+      trick_taint($tag);
+      $sth_delete->execute($self->id, $tag);
+      $sth_activity->execute($self->bug_id, $self->id, Bugzilla->user->id, $when, '',
+        $tag);
     }
 
-    return $changes;
+    foreach my $tag (@$added_tags) {
+      my $weighted = Bugzilla::Comment::TagWeights->new({name => $tag});
+      if ($weighted) {
+        $weighted->set_weight($weighted->weight + 1);
+        $weighted->update();
+      }
+      else {
+        Bugzilla::Comment::TagWeights->create({tag => $tag, weight => 1});
+      }
+      trick_taint($tag);
+      $sth_insert->execute($self->id, $tag);
+      $sth_activity->execute($self->bug_id, $self->id, Bugzilla->user->id, $when,
+        $tag, '');
+    }
+  }
+
+  return $changes;
 }
 
 # Speeds up displays of comment lists by loading all author objects and tags at
 # once for a whole list.
 sub preload {
-    my ($class, $comments) = @_;
-    # Author
-    my %user_ids = map { $_->{who} => 1 } @$comments;
-    my $users = Bugzilla::User->new_from_list([keys %user_ids]);
-    my %user_map = map { $_->id => $_ } @$users;
-    foreach my $comment (@$comments) {
-        $comment->{author} = $user_map{$comment->{who}};
-    }
-    # Tags
-    if (Bugzilla->params->{'comment_taggers_group'}) {
-        my $dbh = Bugzilla->dbh;
-        my @comment_ids = map { $_->id } @$comments;
-        my %comment_map = map { $_->id => $_ } @$comments;
-        my $rows = $dbh->selectall_arrayref(
-            "SELECT comment_id, " . $dbh->sql_group_concat('tag', "','") . "
+  my ($class, $comments) = @_;
+
+  # Author
+  my %user_ids = map { $_->{who} => 1 } @$comments;
+  my $users    = Bugzilla::User->new_from_list([keys %user_ids]);
+  my %user_map = map { $_->id => $_ } @$users;
+  foreach my $comment (@$comments) {
+    $comment->{author} = $user_map{$comment->{who}};
+  }
+
+  # Tags
+  if (Bugzilla->params->{'comment_taggers_group'}) {
+    my $dbh         = Bugzilla->dbh;
+    my @comment_ids = map { $_->id } @$comments;
+    my %comment_map = map { $_->id => $_ } @$comments;
+    my $rows        = $dbh->selectall_arrayref(
+      "SELECT comment_id, " . $dbh->sql_group_concat('tag', "','") . "
                FROM longdescs_tags
-              WHERE " . $dbh->sql_in('comment_id', \@comment_ids) . ' ' .
-              $dbh->sql_group_by('comment_id'));
-        foreach my $row (@$rows) {
-            $comment_map{$row->[0]}->{tags} = [ split(/,/, $row->[1]) ];
-        }
-        # Also sets the 'tags' attribute for comments which have no entry
-        # in the longdescs_tags table, else calling $comment->tags will
-        # trigger another SQL query again.
-        $comment_map{$_}->{tags} ||= [] foreach @comment_ids;
+              WHERE "
+        . $dbh->sql_in('comment_id', \@comment_ids) . ' '
+        . $dbh->sql_group_by('comment_id')
+    );
+    foreach my $row (@$rows) {
+      $comment_map{$row->[0]}->{tags} = [split(/,/, $row->[1])];
     }
+
+    # Also sets the 'tags' attribute for comments which have no entry
+    # in the longdescs_tags table, else calling $comment->tags will
+    # trigger another SQL query again.
+    $comment_map{$_}->{tags} ||= [] foreach @comment_ids;
+  }
 }
 
 ###############################
@@ -177,130 +183,132 @@ sub preload {
 ###############################
 
 sub already_wrapped { return $_[0]->{'already_wrapped'}; }
-sub body        { return $_[0]->{'thetext'};   }
-sub bug_id      { return $_[0]->{'bug_id'};    }
-sub creation_ts { return $_[0]->{'bug_when'};  }
-sub is_private  { return $_[0]->{'isprivate'}; }
-sub work_time   {
-    # Work time is returned as a string (see bug 607909)
-    return 0 if $_[0]->{'work_time'} + 0 == 0;
-    return $_[0]->{'work_time'};
+sub body            { return $_[0]->{'thetext'}; }
+sub bug_id          { return $_[0]->{'bug_id'}; }
+sub creation_ts     { return $_[0]->{'bug_when'}; }
+sub is_private      { return $_[0]->{'isprivate'}; }
+
+sub work_time {
+
+  # Work time is returned as a string (see bug 607909)
+  return 0 if $_[0]->{'work_time'} + 0 == 0;
+  return $_[0]->{'work_time'};
 }
-sub type        { return $_[0]->{'type'};      }
-sub extra_data  { return $_[0]->{'extra_data'} }
+sub type       { return $_[0]->{'type'}; }
+sub extra_data { return $_[0]->{'extra_data'} }
 
 sub tags {
-    my ($self) = @_;
-    state $comment_taggers_group = Bugzilla->params->{'comment_taggers_group'};
-    return [] unless $comment_taggers_group;
-    $self->{'tags'} ||= Bugzilla->dbh->selectcol_arrayref(
-        "SELECT tag
+  my ($self) = @_;
+  state $comment_taggers_group = Bugzilla->params->{'comment_taggers_group'};
+  return [] unless $comment_taggers_group;
+  $self->{'tags'} ||= Bugzilla->dbh->selectcol_arrayref(
+    "SELECT tag
            FROM longdescs_tags
           WHERE comment_id = ?
-          ORDER BY tag",
-        undef, $self->id);
-    return $self->{'tags'};
+          ORDER BY tag", undef, $self->id
+  );
+  return $self->{'tags'};
 }
 
 sub collapsed {
-    my ($self) = @_;
-    state $comment_taggers_group = Bugzilla->params->{'comment_taggers_group'};
-    return 0 unless $comment_taggers_group;
-    return $self->{collapsed} if exists $self->{collapsed};
+  my ($self) = @_;
+  state $comment_taggers_group = Bugzilla->params->{'comment_taggers_group'};
+  return 0 unless $comment_taggers_group;
+  return $self->{collapsed} if exists $self->{collapsed};
 
-    state $collapsed_comment_tags = Bugzilla->params->{'collapsed_comment_tags'};
-    $self->{collapsed} = 0;
-    Bugzilla->request_cache->{comment_tags_collapsed}
-            ||= [ split(/\s*,\s*/, $collapsed_comment_tags) ];
-    my @collapsed_tags = @{ Bugzilla->request_cache->{comment_tags_collapsed} };
-    foreach my $my_tag (@{ $self->tags }) {
-        $my_tag = lc($my_tag);
-        foreach my $collapsed_tag (@collapsed_tags) {
-            if ($my_tag eq lc($collapsed_tag)) {
-                $self->{collapsed} = 1;
-                last;
-            }
-        }
-        last if $self->{collapsed};
+  state $collapsed_comment_tags = Bugzilla->params->{'collapsed_comment_tags'};
+  $self->{collapsed} = 0;
+  Bugzilla->request_cache->{comment_tags_collapsed}
+    ||= [split(/\s*,\s*/, $collapsed_comment_tags)];
+  my @collapsed_tags = @{Bugzilla->request_cache->{comment_tags_collapsed}};
+  foreach my $my_tag (@{$self->tags}) {
+    $my_tag = lc($my_tag);
+    foreach my $collapsed_tag (@collapsed_tags) {
+      if ($my_tag eq lc($collapsed_tag)) {
+        $self->{collapsed} = 1;
+        last;
+      }
     }
-    return $self->{collapsed};
+    last if $self->{collapsed};
+  }
+  return $self->{collapsed};
 }
 
 sub bug {
-    my $self = shift;
-    require Bugzilla::Bug;
-    $self->{bug} ||= new Bugzilla::Bug($self->bug_id);
-    return $self->{bug};
+  my $self = shift;
+  require Bugzilla::Bug;
+  $self->{bug} ||= new Bugzilla::Bug($self->bug_id);
+  return $self->{bug};
 }
 
 sub is_about_attachment {
-    my ($self) = @_;
-    return 1 if ($self->type == CMT_ATTACHMENT_CREATED
-                 or $self->type == CMT_ATTACHMENT_UPDATED);
-    return 0;
+  my ($self) = @_;
+  return 1
+    if ($self->type == CMT_ATTACHMENT_CREATED
+    or $self->type == CMT_ATTACHMENT_UPDATED);
+  return 0;
 }
 
 sub attachment {
-    my ($self) = @_;
-    return undef if not $self->is_about_attachment;
-    $self->{attachment} ||=
-        new Bugzilla::Attachment({ id => $self->extra_data, cache => 1 });
-    return $self->{attachment};
+  my ($self) = @_;
+  return undef if not $self->is_about_attachment;
+  $self->{attachment}
+    ||= new Bugzilla::Attachment({id => $self->extra_data, cache => 1});
+  return $self->{attachment};
 }
 
-sub author { 
-    my $self = shift;
-    $self->{'author'}
-      ||= new Bugzilla::User({ id => $self->{'who'}, cache => 1 });
-    return $self->{'author'};
+sub author {
+  my $self = shift;
+  $self->{'author'} ||= new Bugzilla::User({id => $self->{'who'}, cache => 1});
+  return $self->{'author'};
 }
 
 sub body_full {
-    my ($self, $params) = @_;
-    $params ||= {};
-    my $template = Bugzilla->template_inner;
-    my $body;
-    if ($self->type) {
-        $template->process("bug/format_comment.txt.tmpl", 
-                           { comment => $self, %$params }, \$body)
-            || ThrowTemplateError($template->error());
-        $body =~ s/^X//;
-    }
-    else {
-        $body = $self->body;
-    }
-    if ($params->{wrap} and !$self->already_wrapped) {
-        $body = wrap_comment($body);
-    }
-    return $body;
+  my ($self, $params) = @_;
+  $params ||= {};
+  my $template = Bugzilla->template_inner;
+  my $body;
+  if ($self->type) {
+    $template->process("bug/format_comment.txt.tmpl", {comment => $self, %$params},
+      \$body)
+      || ThrowTemplateError($template->error());
+    $body =~ s/^X//;
+  }
+  else {
+    $body = $self->body;
+  }
+  if ($params->{wrap} and !$self->already_wrapped) {
+    $body = wrap_comment($body);
+  }
+  return $body;
 }
 
 ############
 # Mutators #
 ############
 
-sub set_is_private  { $_[0]->set('isprivate',  $_[1]); }
-sub set_type        { $_[0]->set('type',       $_[1]); }
-sub set_extra_data  { $_[0]->set('extra_data', $_[1]); }
+sub set_is_private { $_[0]->set('isprivate',  $_[1]); }
+sub set_type       { $_[0]->set('type',       $_[1]); }
+sub set_extra_data { $_[0]->set('extra_data', $_[1]); }
 
 sub add_tag {
-    my ($self, $tag) = @_;
-    $tag = $self->_check_tag($tag);
+  my ($self, $tag) = @_;
+  $tag = $self->_check_tag($tag);
 
-    my $tags = $self->tags;
-    return if grep { lc($tag) eq lc($_) } @$tags;
-    push @$tags, $tag;
-    $self->{'tags'} = [ sort @$tags ];
+  my $tags = $self->tags;
+  return if grep { lc($tag) eq lc($_) } @$tags;
+  push @$tags, $tag;
+  $self->{'tags'} = [sort @$tags];
 }
 
 sub remove_tag {
-    my ($self, $tag) = @_;
-    $tag = $self->_check_tag($tag);
+  my ($self, $tag) = @_;
+  $tag = $self->_check_tag($tag);
 
-    my $tags = $self->tags;
-    my $index = first { lc($tags->[$_]) eq lc($tag) } 0..scalar(@$tags) - 1;
-    return unless defined $index;
-    splice(@$tags, $index, 1);
+  my $tags  = $self->tags;
+  my $index = first { lc($tags->[$_]) eq lc($tag) } 0 .. scalar(@$tags) - 1;
+  return unless defined $index;
+  splice(@$tags, $index, 1);
 }
 
 ##############
@@ -308,180 +316,180 @@ sub remove_tag {
 ##############
 
 sub run_create_validators {
-    my $self = shift;
-    my $params = $self->SUPER::run_create_validators(@_);
-    # Sometimes this run_create_validators is called with parameters that
-    # skip bug_id validation, so it might not exist in the resulting hash.
-    if (defined $params->{bug_id}) {
-        $params->{bug_id} = $params->{bug_id}->id;
-    }
-    return $params;
+  my $self   = shift;
+  my $params = $self->SUPER::run_create_validators(@_);
+
+  # Sometimes this run_create_validators is called with parameters that
+  # skip bug_id validation, so it might not exist in the resulting hash.
+  if (defined $params->{bug_id}) {
+    $params->{bug_id} = $params->{bug_id}->id;
+  }
+  return $params;
 }
 
 sub _check_extra_data {
-    my ($invocant, $extra_data, undef, $params) = @_;
-    my $type = blessed($invocant) ? $invocant->type : $params->{type};
+  my ($invocant, $extra_data, undef, $params) = @_;
+  my $type = blessed($invocant) ? $invocant->type : $params->{type};
 
-    if ($type == CMT_NORMAL) {
-        if (defined $extra_data) {
-            ThrowCodeError('comment_extra_data_not_allowed',
-                           { type => $type, extra_data => $extra_data });
-        }
+  if ($type == CMT_NORMAL) {
+    if (defined $extra_data) {
+      ThrowCodeError('comment_extra_data_not_allowed',
+        {type => $type, extra_data => $extra_data});
+    }
+  }
+  else {
+    if (!defined $extra_data) {
+      ThrowCodeError('comment_extra_data_required', {type => $type});
+    }
+    elsif ($type == CMT_ATTACHMENT_CREATED or $type == CMT_ATTACHMENT_UPDATED) {
+      my $attachment = Bugzilla::Attachment->check({id => $extra_data});
+      $extra_data = $attachment->id;
     }
     else {
-        if (!defined $extra_data) {
-            ThrowCodeError('comment_extra_data_required', { type => $type });
-        }
-        elsif ($type == CMT_ATTACHMENT_CREATED 
-               or $type == CMT_ATTACHMENT_UPDATED) 
-        {
-             my $attachment = Bugzilla::Attachment->check({ 
-                 id => $extra_data });
-             $extra_data = $attachment->id;
-        }
-        else {
-            my $original = $extra_data;
-            detaint_natural($extra_data) 
-              or ThrowCodeError('comment_extra_data_not_numeric',
-                                { type => $type, extra_data => $original });
-        }
+      my $original = $extra_data;
+      detaint_natural($extra_data)
+        or ThrowCodeError('comment_extra_data_not_numeric',
+        {type => $type, extra_data => $original});
     }
+  }
 
-    return $extra_data;
+  return $extra_data;
 }
 
 sub _check_type {
-    my ($invocant, $type) = @_;
-    $type ||= CMT_NORMAL;
-    my $original = $type;
-    detaint_natural($type)
-        or ThrowCodeError('comment_type_invalid', { type => $original });
-    return $type;
+  my ($invocant, $type) = @_;
+  $type ||= CMT_NORMAL;
+  my $original = $type;
+  detaint_natural($type)
+    or ThrowCodeError('comment_type_invalid', {type => $original});
+  return $type;
 }
 
 sub _check_bug_id {
-    my ($invocant, $bug_id) = @_;
+  my ($invocant, $bug_id) = @_;
 
-    ThrowCodeError('param_required', {function => 'Bugzilla::Comment->create',
-                                      param => 'bug_id'}) unless $bug_id;
+  ThrowCodeError('param_required',
+    {function => 'Bugzilla::Comment->create', param => 'bug_id'})
+    unless $bug_id;
 
-    my $bug;
-    if (blessed $bug_id) {
-        # We got a bug object passed in, use it
-        $bug = $bug_id;
-        $bug->check_is_visible;
-    }
-    else {
-        # We got a bug id passed in, check it and get the bug object
-        $bug = Bugzilla::Bug->check({ id => $bug_id });
-    }
+  my $bug;
+  if (blessed $bug_id) {
 
-    # Make sure the user can edit the product
-    Bugzilla->user->can_edit_product($bug->{product_id});
+    # We got a bug object passed in, use it
+    $bug = $bug_id;
+    $bug->check_is_visible;
+  }
+  else {
+    # We got a bug id passed in, check it and get the bug object
+    $bug = Bugzilla::Bug->check({id => $bug_id});
+  }
 
-    # Make sure the user can comment
-    my $privs;
-    $bug->check_can_change_field('longdesc', 0, 1, \$privs)
-        || ThrowUserError('illegal_change', 
-                          { field => 'longdesc', privs => $privs });
-    return $bug;
+  # Make sure the user can edit the product
+  Bugzilla->user->can_edit_product($bug->{product_id});
+
+  # Make sure the user can comment
+  my $privs;
+  $bug->check_can_change_field('longdesc', 0, 1, \$privs)
+    || ThrowUserError('illegal_change', {field => 'longdesc', privs => $privs});
+  return $bug;
 }
 
 sub _check_who {
-    my ($invocant, $who) = @_;
-    Bugzilla->login(LOGIN_REQUIRED);
-    return Bugzilla->user->id;
+  my ($invocant, $who) = @_;
+  Bugzilla->login(LOGIN_REQUIRED);
+  return Bugzilla->user->id;
 }
 
 sub _check_bug_when {
-    my ($invocant, $when) = @_;
+  my ($invocant, $when) = @_;
 
-    # Make sure the timestamp is defined, default to a timestamp from the db
-    if (!defined $when) {
-        $when = Bugzilla->dbh->selectrow_array('SELECT LOCALTIMESTAMP(0)');
-    }
+  # Make sure the timestamp is defined, default to a timestamp from the db
+  if (!defined $when) {
+    $when = Bugzilla->dbh->selectrow_array('SELECT LOCALTIMESTAMP(0)');
+  }
 
-    # Make sure the timestamp parses
-    if (!datetime_from($when)) {
-        ThrowCodeError('invalid_timestamp', { timestamp => $when });
-    }
+  # Make sure the timestamp parses
+  if (!datetime_from($when)) {
+    ThrowCodeError('invalid_timestamp', {timestamp => $when});
+  }
 
-    return $when;
+  return $when;
 }
 
 sub _check_work_time {
-    my ($invocant, $value_in, $field, $params) = @_;
+  my ($invocant, $value_in, $field, $params) = @_;
 
-    # Call down to Bugzilla::Object, letting it know negative
-    # values are ok
-    my $time = $invocant->check_time($value_in, $field, $params, 1);
-    my $privs;
-    $params->{bug_id}->check_can_change_field('work_time', 0, $time, \$privs)
-        || ThrowUserError('illegal_change',
-                          { field => 'work_time', privs => $privs });
-    return $time;
+  # Call down to Bugzilla::Object, letting it know negative
+  # values are ok
+  my $time = $invocant->check_time($value_in, $field, $params, 1);
+  my $privs;
+  $params->{bug_id}->check_can_change_field('work_time', 0, $time, \$privs)
+    || ThrowUserError('illegal_change', {field => 'work_time', privs => $privs});
+  return $time;
 }
 
 sub _check_thetext {
-    my ($invocant, $thetext) = @_;
+  my ($invocant, $thetext) = @_;
 
-    ThrowCodeError('param_required',{function => 'Bugzilla::Comment->create',
-                                     param => 'thetext'}) unless defined $thetext;
+  ThrowCodeError('param_required',
+    {function => 'Bugzilla::Comment->create', param => 'thetext'})
+    unless defined $thetext;
 
-    # Remove any trailing whitespace. Leading whitespace could be
-    # a valid part of the comment.
-    $thetext =~ s/\s*$//s;
-    $thetext =~ s/\r\n?/\n/g; # Get rid of \r.
+  # Remove any trailing whitespace. Leading whitespace could be
+  # a valid part of the comment.
+  $thetext =~ s/\s*$//s;
+  $thetext =~ s/\r\n?/\n/g;    # Get rid of \r.
 
-    # Characters above U+FFFF cannot be stored by MySQL older than 5.5.3 as they
-    # require the new utf8mb4 character set. Other DB servers are handling them
-    # without any problem. So we need to replace these characters if we use MySQL,
-    # else the comment is truncated.
-    # XXX - Once we use utf8mb4 for comments, this hack for MySQL can go away.
-    state $is_mysql = Bugzilla->dbh->isa('Bugzilla::DB::Mysql') ? 1 : 0;
-    if ($is_mysql) {
-        # Perl 5.13.8 and older complain about non-characters.
-        no warnings 'utf8';
-        $thetext =~ s/([\x{10000}-\x{10FFFF}])/"\x{FDD0}[" . uc(sprintf('U+%04x', ord($1))) . "]\x{FDD1}"/eg;
-    }
+  # Characters above U+FFFF cannot be stored by MySQL older than 5.5.3 as they
+  # require the new utf8mb4 character set. Other DB servers are handling them
+  # without any problem. So we need to replace these characters if we use MySQL,
+  # else the comment is truncated.
+  # XXX - Once we use utf8mb4 for comments, this hack for MySQL can go away.
+  state $is_mysql = Bugzilla->dbh->isa('Bugzilla::DB::Mysql') ? 1 : 0;
+  if ($is_mysql) {
 
-    ThrowUserError('comment_too_long') if length($thetext) > MAX_COMMENT_LENGTH;
-    return $thetext;
+    # Perl 5.13.8 and older complain about non-characters.
+    no warnings 'utf8';
+    $thetext
+      =~ s/([\x{10000}-\x{10FFFF}])/"\x{FDD0}[" . uc(sprintf('U+%04x', ord($1))) . "]\x{FDD1}"/eg;
+  }
+
+  ThrowUserError('comment_too_long') if length($thetext) > MAX_COMMENT_LENGTH;
+  return $thetext;
 }
 
 sub _check_isprivate {
-    my ($invocant, $isprivate) = @_;
-    if ($isprivate && !Bugzilla->user->is_insider) {
-        ThrowUserError('user_not_insider');
-    }
-    return $isprivate ? 1 : 0;
+  my ($invocant, $isprivate) = @_;
+  if ($isprivate && !Bugzilla->user->is_insider) {
+    ThrowUserError('user_not_insider');
+  }
+  return $isprivate ? 1 : 0;
 }
 
 sub _check_tag {
-    my ($invocant, $tag) = @_;
-    length($tag) < MIN_COMMENT_TAG_LENGTH
-        and ThrowUserError('comment_tag_too_short', { tag => $tag });
-    length($tag) > MAX_COMMENT_TAG_LENGTH
-        and ThrowUserError('comment_tag_too_long', { tag => $tag });
-    $tag =~ /^[\w\d\._-]+$/
-        or ThrowUserError('comment_tag_invalid', { tag => $tag });
-    return $tag;
+  my ($invocant, $tag) = @_;
+  length($tag) < MIN_COMMENT_TAG_LENGTH
+    and ThrowUserError('comment_tag_too_short', {tag => $tag});
+  length($tag) > MAX_COMMENT_TAG_LENGTH
+    and ThrowUserError('comment_tag_too_long', {tag => $tag});
+  $tag =~ /^[\w\d\._-]+$/ or ThrowUserError('comment_tag_invalid', {tag => $tag});
+  return $tag;
 }
 
 sub count {
-    my ($self) = @_;
+  my ($self) = @_;
 
-    return $self->{'count'} if defined $self->{'count'};
+  return $self->{'count'} if defined $self->{'count'};
 
-    my $dbh = Bugzilla->dbh;
-    ($self->{'count'}) = $dbh->selectrow_array(
-        "SELECT COUNT(*)
+  my $dbh = Bugzilla->dbh;
+  ($self->{'count'}) = $dbh->selectrow_array(
+    "SELECT COUNT(*)
            FROM longdescs 
           WHERE bug_id = ? 
-                AND bug_when <= ?",
-        undef, $self->bug_id, $self->creation_ts);
+                AND bug_when <= ?", undef, $self->bug_id, $self->creation_ts
+  );
 
-    return --$self->{'count'};
+  return --$self->{'count'};
 }
 
 1;

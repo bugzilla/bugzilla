@@ -17,40 +17,40 @@ use File::Find;
 our @additional_files = ();
 
 our @files = glob('*');
-find(sub { push(@files, $File::Find::name) if $_ =~ /\.pm$/;}, qw(Bugzilla docs));
+find(sub { push(@files, $File::Find::name) if $_ =~ /\.pm$/; },
+  qw(Bugzilla docs));
 push(@files, 'extensions/create.pl', 'docs/makedocs.pl');
 
-our @extensions =
-    grep { $_ ne 'extensions/create.pl' && ! -e "$_/disabled" }
-    glob('extensions/*');
+our @extensions = grep { $_ ne 'extensions/create.pl' && !-e "$_/disabled" }
+  glob('extensions/*');
 
 foreach my $extension (@extensions) {
-    find(sub { push(@files, $File::Find::name) if $_ =~ /\.pm$/;}, $extension);
+  find(sub { push(@files, $File::Find::name) if $_ =~ /\.pm$/; }, $extension);
 }
 
 our @test_files = glob('t/*.t');
 
 sub isTestingFile {
-    my ($file) = @_;
-    my $exclude;
+  my ($file) = @_;
+  my $exclude;
 
-    if ($file =~ /\.cgi$|\.pl$|\.pm$/) {
-        return 1;
-    }
-    my $additional;
-    foreach $additional (@additional_files) {
-        if ($file eq $additional) { return 1; }
-    }
-    return undef;
+  if ($file =~ /\.cgi$|\.pl$|\.pm$/) {
+    return 1;
+  }
+  my $additional;
+  foreach $additional (@additional_files) {
+    if ($file eq $additional) { return 1; }
+  }
+  return undef;
 }
 
 our (@testitems, @module_files);
 
 foreach my $currentfile (@files) {
-    if (isTestingFile($currentfile)) {
-        push(@testitems, $currentfile);
-    }
-    push(@module_files, $currentfile) if $currentfile =~ /\.pm$/;
+  if (isTestingFile($currentfile)) {
+    push(@testitems, $currentfile);
+  }
+  push(@module_files, $currentfile) if $currentfile =~ /\.pm$/;
 }
 
 

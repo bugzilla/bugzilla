@@ -19,10 +19,11 @@ use Bugzilla::Error;
 use Bugzilla::Milestone;
 use Bugzilla::Token;
 
-my $cgi = Bugzilla->cgi;
-my $dbh = Bugzilla->dbh;
+my $cgi      = Bugzilla->cgi;
+my $dbh      = Bugzilla->dbh;
 my $template = Bugzilla->template;
-my $vars = {};
+my $vars     = {};
+
 # There is only one section about milestones in the documentation,
 # so all actions point to the same page.
 $vars->{'doc_section'} = 'administering/categorization.html#milestones';
@@ -37,18 +38,17 @@ print $cgi->header();
 
 $user->in_group('editcomponents')
   || scalar(@{$user->get_products_by_permission('editcomponents')})
-  || ThrowUserError("auth_failure", {group  => "editcomponents",
-                                     action => "edit",
-                                     object => "milestones"});
+  || ThrowUserError("auth_failure",
+  {group => "editcomponents", action => "edit", object => "milestones"});
 
 #
 # often used variables
 #
-my $product_name   = trim($cgi->param('product')     || '');
-my $milestone_name = trim($cgi->param('milestone')   || '');
-my $sortkey        = trim($cgi->param('sortkey')     || 0);
-my $action         = trim($cgi->param('action')      || '');
-my $showbugcounts = (defined $cgi->param('showbugcounts'));
+my $product_name   = trim($cgi->param('product')   || '');
+my $milestone_name = trim($cgi->param('milestone') || '');
+my $sortkey        = trim($cgi->param('sortkey')   || 0);
+my $action         = trim($cgi->param('action')    || '');
+my $showbugcounts  = (defined $cgi->param('showbugcounts'));
 my $token          = $cgi->param('token');
 my $isactive       = $cgi->param('isactive');
 
@@ -57,18 +57,19 @@ my $isactive       = $cgi->param('isactive');
 #
 
 unless ($product_name) {
-    my $selectable_products = $user->get_selectable_products;
-    # If the user has editcomponents privs for some products only,
-    # we have to restrict the list of products to display.
-    unless ($user->in_group('editcomponents')) {
-        $selectable_products = $user->get_products_by_permission('editcomponents');
-    }
-    $vars->{'products'} = $selectable_products;
-    $vars->{'showbugcounts'} = $showbugcounts;
+  my $selectable_products = $user->get_selectable_products;
 
-    $template->process("admin/milestones/select-product.html.tmpl", $vars)
-      || ThrowTemplateError($template->error());
-    exit;
+  # If the user has editcomponents privs for some products only,
+  # we have to restrict the list of products to display.
+  unless ($user->in_group('editcomponents')) {
+    $selectable_products = $user->get_products_by_permission('editcomponents');
+  }
+  $vars->{'products'}      = $selectable_products;
+  $vars->{'showbugcounts'} = $showbugcounts;
+
+  $template->process("admin/milestones/select-product.html.tmpl", $vars)
+    || ThrowTemplateError($template->error());
+  exit;
 }
 
 my $product = $user->check_can_admin_product($product_name);
@@ -79,11 +80,11 @@ my $product = $user->check_can_admin_product($product_name);
 
 unless ($action) {
 
-    $vars->{'showbugcounts'} = $showbugcounts;
-    $vars->{'product'} = $product;
-    $template->process("admin/milestones/list.html.tmpl", $vars)
-      || ThrowTemplateError($template->error());
-    exit;
+  $vars->{'showbugcounts'} = $showbugcounts;
+  $vars->{'product'}       = $product;
+  $template->process("admin/milestones/list.html.tmpl", $vars)
+    || ThrowTemplateError($template->error());
+  exit;
 }
 
 #
@@ -93,11 +94,11 @@ unless ($action) {
 #
 
 if ($action eq 'add') {
-    $vars->{'token'} = issue_session_token('add_milestone');
-    $vars->{'product'} = $product;
-    $template->process("admin/milestones/create.html.tmpl", $vars)
-      || ThrowTemplateError($template->error());
-    exit;
+  $vars->{'token'}   = issue_session_token('add_milestone');
+  $vars->{'product'} = $product;
+  $template->process("admin/milestones/create.html.tmpl", $vars)
+    || ThrowTemplateError($template->error());
+  exit;
 }
 
 #
@@ -105,20 +106,21 @@ if ($action eq 'add') {
 #
 
 if ($action eq 'new') {
-    check_token_data($token, 'add_milestone');
+  check_token_data($token, 'add_milestone');
 
-    my $milestone = Bugzilla::Milestone->create({ value    => $milestone_name,
-                                                  product  => $product,
-                                                  sortkey  => $sortkey });
+  my $milestone
+    = Bugzilla::Milestone->create({
+    value => $milestone_name, product => $product, sortkey => $sortkey
+    });
 
-    delete_token($token);
+  delete_token($token);
 
-    $vars->{'message'} = 'milestone_created';
-    $vars->{'milestone'} = $milestone;
-    $vars->{'product'} = $product;
-    $template->process("admin/milestones/list.html.tmpl", $vars)
-      || ThrowTemplateError($template->error());
-    exit;
+  $vars->{'message'}   = 'milestone_created';
+  $vars->{'milestone'} = $milestone;
+  $vars->{'product'}   = $product;
+  $template->process("admin/milestones/list.html.tmpl", $vars)
+    || ThrowTemplateError($template->error());
+  exit;
 }
 
 #
@@ -128,21 +130,21 @@ if ($action eq 'new') {
 #
 
 if ($action eq 'del') {
-    my $milestone = Bugzilla::Milestone->check({ product => $product,
-                                                 name    => $milestone_name });
-    
-    $vars->{'milestone'} = $milestone;
-    $vars->{'product'} = $product;
+  my $milestone
+    = Bugzilla::Milestone->check({product => $product, name => $milestone_name});
 
-    # The default milestone cannot be deleted.
-    if ($product->default_milestone eq $milestone->name) {
-        ThrowUserError("milestone_is_default", { milestone => $milestone });
-    }
-    $vars->{'token'} = issue_session_token('delete_milestone');
+  $vars->{'milestone'} = $milestone;
+  $vars->{'product'}   = $product;
 
-    $template->process("admin/milestones/confirm-delete.html.tmpl", $vars)
-      || ThrowTemplateError($template->error());
-    exit;
+  # The default milestone cannot be deleted.
+  if ($product->default_milestone eq $milestone->name) {
+    ThrowUserError("milestone_is_default", {milestone => $milestone});
+  }
+  $vars->{'token'} = issue_session_token('delete_milestone');
+
+  $template->process("admin/milestones/confirm-delete.html.tmpl", $vars)
+    || ThrowTemplateError($template->error());
+  exit;
 }
 
 #
@@ -150,20 +152,20 @@ if ($action eq 'del') {
 #
 
 if ($action eq 'delete') {
-    check_token_data($token, 'delete_milestone');
-    my $milestone = Bugzilla::Milestone->check({ product => $product,
-                                                 name    => $milestone_name });
-    $milestone->remove_from_db;
-    delete_token($token);
+  check_token_data($token, 'delete_milestone');
+  my $milestone
+    = Bugzilla::Milestone->check({product => $product, name => $milestone_name});
+  $milestone->remove_from_db;
+  delete_token($token);
 
-    $vars->{'message'} = 'milestone_deleted';
-    $vars->{'milestone'} = $milestone;
-    $vars->{'product'} = $product;
-    $vars->{'no_edit_milestone_link'} = 1;
+  $vars->{'message'}                = 'milestone_deleted';
+  $vars->{'milestone'}              = $milestone;
+  $vars->{'product'}                = $product;
+  $vars->{'no_edit_milestone_link'} = 1;
 
-    $template->process("admin/milestones/list.html.tmpl", $vars)
-      || ThrowTemplateError($template->error());
-    exit;
+  $template->process("admin/milestones/list.html.tmpl", $vars)
+    || ThrowTemplateError($template->error());
+  exit;
 }
 
 #
@@ -174,16 +176,16 @@ if ($action eq 'delete') {
 
 if ($action eq 'edit') {
 
-    my $milestone = Bugzilla::Milestone->check({ product => $product,
-                                                 name    => $milestone_name });
+  my $milestone
+    = Bugzilla::Milestone->check({product => $product, name => $milestone_name});
 
-    $vars->{'milestone'} = $milestone;
-    $vars->{'product'} = $product;
-    $vars->{'token'} = issue_session_token('edit_milestone');
+  $vars->{'milestone'} = $milestone;
+  $vars->{'product'}   = $product;
+  $vars->{'token'}     = issue_session_token('edit_milestone');
 
-    $template->process("admin/milestones/edit.html.tmpl", $vars)
-      || ThrowTemplateError($template->error());
-    exit;
+  $template->process("admin/milestones/edit.html.tmpl", $vars)
+    || ThrowTemplateError($template->error());
+  exit;
 }
 
 #
@@ -191,28 +193,29 @@ if ($action eq 'edit') {
 #
 
 if ($action eq 'update') {
-    check_token_data($token, 'edit_milestone');
-    my $milestone_old_name = trim($cgi->param('milestoneold') || '');
-    my $milestone = Bugzilla::Milestone->check({ product => $product,
-                                                 name    => $milestone_old_name });
+  check_token_data($token, 'edit_milestone');
+  my $milestone_old_name = trim($cgi->param('milestoneold') || '');
+  my $milestone          = Bugzilla::Milestone->check(
+    {product => $product, name => $milestone_old_name});
 
-    $milestone->set_name($milestone_name);
-    $milestone->set_sortkey($sortkey);
-    $milestone->set_is_active($isactive);
-    my $changes = $milestone->update();
-    # Reloading the product since the default milestone name
-    # could have been changed.
-    $product = new Bugzilla::Product({ name => $product_name });
+  $milestone->set_name($milestone_name);
+  $milestone->set_sortkey($sortkey);
+  $milestone->set_is_active($isactive);
+  my $changes = $milestone->update();
 
-    delete_token($token);
+  # Reloading the product since the default milestone name
+  # could have been changed.
+  $product = new Bugzilla::Product({name => $product_name});
 
-    $vars->{'message'} = 'milestone_updated';
-    $vars->{'milestone'} = $milestone;
-    $vars->{'product'} = $product;
-    $vars->{'changes'} = $changes;
-    $template->process("admin/milestones/list.html.tmpl", $vars)
-      || ThrowTemplateError($template->error());
-    exit;
+  delete_token($token);
+
+  $vars->{'message'}   = 'milestone_updated';
+  $vars->{'milestone'} = $milestone;
+  $vars->{'product'}   = $product;
+  $vars->{'changes'}   = $changes;
+  $template->process("admin/milestones/list.html.tmpl", $vars)
+    || ThrowTemplateError($template->error());
+  exit;
 }
 
 # No valid action found

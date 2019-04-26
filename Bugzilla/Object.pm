@@ -24,16 +24,17 @@ use constant NAME_FIELD => 'name';
 use constant ID_FIELD   => 'id';
 use constant LIST_ORDER => NAME_FIELD;
 
-use constant UPDATE_VALIDATORS => {};
-use constant NUMERIC_COLUMNS   => ();
-use constant DATE_COLUMNS      => ();
+use constant UPDATE_VALIDATORS      => {};
+use constant NUMERIC_COLUMNS        => ();
+use constant DATE_COLUMNS           => ();
 use constant VALIDATOR_DEPENDENCIES => {};
+
 # XXX At some point, this will be joined with FIELD_MAP.
-use constant REQUIRED_FIELD_MAP  => {};
+use constant REQUIRED_FIELD_MAP    => {};
 use constant EXTRA_REQUIRED_FIELDS => ();
-use constant AUDIT_CREATES => 1;
-use constant AUDIT_UPDATES => 1;
-use constant AUDIT_REMOVES => 1;
+use constant AUDIT_CREATES         => 1;
+use constant AUDIT_UPDATES         => 1;
+use constant AUDIT_REMOVES         => 1;
 
 # When USE_MEMCACHED is true, the class is suitable for serialisation to
 # Memcached.  See documentation in Bugzilla::Memcached for more information.
@@ -47,54 +48,52 @@ use constant IS_CONFIG => 0;
 # This allows the JSON-RPC interface to return Bugzilla::Object instances
 # as though they were hashes. In the future, this may be modified to return
 # less information.
-sub TO_JSON { return { %{ $_[0] } }; }
+sub TO_JSON { return {%{$_[0]}}; }
 
 ###############################
 ####    Initialization     ####
 ###############################
 
 sub new {
-    my $invocant = shift;
-    my $class    = ref($invocant) || $invocant;
-    my $param    = shift;
+  my $invocant = shift;
+  my $class    = ref($invocant) || $invocant;
+  my $param    = shift;
 
-    my $object = $class->_object_cache_get($param);
-    return $object if $object;
+  my $object = $class->_object_cache_get($param);
+  return $object if $object;
 
-    my ($data, $set_memcached);
-    if (Bugzilla->memcached->enabled
-        && $class->USE_MEMCACHED
-        && ref($param) eq 'HASH' && $param->{cache})
-    {
-        if (defined $param->{id}) {
-            $data = Bugzilla->memcached->get({
-                table => $class->DB_TABLE,
-                id    => $param->{id},
-            });
-        }
-        elsif (defined $param->{name}) {
-            $data = Bugzilla->memcached->get({
-                table => $class->DB_TABLE,
-                name  => $param->{name},
-            });
-        }
-        $set_memcached = $data ? 0 : 1;
+  my ($data, $set_memcached);
+  if ( Bugzilla->memcached->enabled
+    && $class->USE_MEMCACHED
+    && ref($param) eq 'HASH'
+    && $param->{cache})
+  {
+    if (defined $param->{id}) {
+      $data
+        = Bugzilla->memcached->get({table => $class->DB_TABLE, id => $param->{id},});
     }
-    $data ||= $class->_load_from_db($param);
-
-    if ($data && $set_memcached) {
-        Bugzilla->memcached->set({
-            table => $class->DB_TABLE,
-            id    => $data->{$class->ID_FIELD},
-            name  => $data->{$class->NAME_FIELD},
-            data  => $data,
+    elsif (defined $param->{name}) {
+      $data
+        = Bugzilla->memcached->get({table => $class->DB_TABLE, name => $param->{name},
         });
     }
+    $set_memcached = $data ? 0 : 1;
+  }
+  $data ||= $class->_load_from_db($param);
 
-    $object = $class->new_from_hash($data);
-    $class->_object_cache_set($param, $object);
+  if ($data && $set_memcached) {
+    Bugzilla->memcached->set({
+      table => $class->DB_TABLE,
+      id    => $data->{$class->ID_FIELD},
+      name  => $data->{$class->NAME_FIELD},
+      data  => $data,
+    });
+  }
 
-    return $object;
+  $object = $class->new_from_hash($data);
+  $class->_object_cache_set($param, $object);
+
+  return $object;
 }
 
 # Note: Because this uses sql_istrcmp, if you make a new object use
@@ -102,326 +101,324 @@ sub new {
 # in Bugzilla::DB::Pg appropriately, to add the right LOWER
 # index. You can see examples already there.
 sub _load_from_db {
-    my $class = shift;
-    my ($param) = @_;
-    my $dbh = Bugzilla->dbh;
-    my $columns = join(',', $class->_get_db_columns);
-    my $table   = $class->DB_TABLE;
-    my $name_field = $class->NAME_FIELD;
-    my $id_field   = $class->ID_FIELD;
+  my $class      = shift;
+  my ($param)    = @_;
+  my $dbh        = Bugzilla->dbh;
+  my $columns    = join(',', $class->_get_db_columns);
+  my $table      = $class->DB_TABLE;
+  my $name_field = $class->NAME_FIELD;
+  my $id_field   = $class->ID_FIELD;
 
-    my $id = $param;
-    if (ref $param eq 'HASH') {
-        $id = $param->{id};
-    }
+  my $id = $param;
+  if (ref $param eq 'HASH') {
+    $id = $param->{id};
+  }
 
-    my $object_data;
-    if (defined $id) {
-        # We special-case if somebody specifies an ID, so that we can
-        # validate it as numeric.
-        detaint_natural($id)
-          || ThrowCodeError('param_must_be_numeric',
-                            {function => $class . '::_load_from_db'});
+  my $object_data;
+  if (defined $id) {
 
-        # Too large integers make PostgreSQL crash.
-        return if $id > MAX_INT_32;
+    # We special-case if somebody specifies an ID, so that we can
+    # validate it as numeric.
+    detaint_natural($id)
+      || ThrowCodeError('param_must_be_numeric',
+      {function => $class . '::_load_from_db'});
 
-        $object_data = $dbh->selectrow_hashref(qq{
+    # Too large integers make PostgreSQL crash.
+    return if $id > MAX_INT_32;
+
+    $object_data = $dbh->selectrow_hashref(
+      qq{
             SELECT $columns FROM $table
-             WHERE $id_field = ?}, undef, $id);
-    } else {
-        unless (defined $param->{name} || (defined $param->{'condition'} 
-                                           && defined $param->{'values'}))
-        {
-            ThrowCodeError('bad_arg', { argument => 'param',
-                                        function => $class . '::new' });
-        }
-
-        my ($condition, @values);
-        if (defined $param->{name}) {
-            $condition = $dbh->sql_istrcmp($name_field, '?');
-            push(@values, $param->{name});
-        }
-        elsif (defined $param->{'condition'} && defined $param->{'values'}) {
-            caller->isa('Bugzilla::Object')
-                || ThrowCodeError('protection_violation',
-                       { caller    => caller, 
-                         function  => $class . '::new',
-                         argument  => 'condition/values' });
-            $condition = $param->{'condition'};
-            push(@values, @{$param->{'values'}});
-        }
-
-        map { trick_taint($_) } @values;
-        $object_data = $dbh->selectrow_hashref(
-            "SELECT $columns FROM $table WHERE $condition", undef, @values);
+             WHERE $id_field = ?}, undef, $id
+    );
+  }
+  else {
+    unless (defined $param->{name}
+      || (defined $param->{'condition'} && defined $param->{'values'}))
+    {
+      ThrowCodeError('bad_arg', {argument => 'param', function => $class . '::new'});
     }
-    return $object_data;
+
+    my ($condition, @values);
+    if (defined $param->{name}) {
+      $condition = $dbh->sql_istrcmp($name_field, '?');
+      push(@values, $param->{name});
+    }
+    elsif (defined $param->{'condition'} && defined $param->{'values'}) {
+      caller->isa('Bugzilla::Object') || ThrowCodeError(
+        'protection_violation',
+        {
+          caller   => caller,
+          function => $class . '::new',
+          argument => 'condition/values'
+        }
+      );
+      $condition = $param->{'condition'};
+      push(@values, @{$param->{'values'}});
+    }
+
+    map { trick_taint($_) } @values;
+    $object_data
+      = $dbh->selectrow_hashref("SELECT $columns FROM $table WHERE $condition",
+      undef, @values);
+  }
+  return $object_data;
 }
 
 sub new_from_list {
-    my $invocant = shift;
-    my $class = ref($invocant) || $invocant;
-    my ($id_list) = @_;
-    my $id_field = $class->ID_FIELD;
+  my $invocant  = shift;
+  my $class     = ref($invocant) || $invocant;
+  my ($id_list) = @_;
+  my $id_field  = $class->ID_FIELD;
 
-    my @detainted_ids;
-    foreach my $id (@$id_list) {
-        detaint_natural($id) ||
-            ThrowCodeError('param_must_be_numeric',
-                          {function => $class . '::new_from_list'});
-        # Too large integers make PostgreSQL crash.
-        next if $id > MAX_INT_32;
-        push(@detainted_ids, $id);
-    }
+  my @detainted_ids;
+  foreach my $id (@$id_list) {
+    detaint_natural($id)
+      || ThrowCodeError('param_must_be_numeric',
+      {function => $class . '::new_from_list'});
 
-    # We don't do $invocant->match because some classes have
-    # their own implementation of match which is not compatible
-    # with this one. However, match() still needs to have the right $invocant
-    # in order to do $class->DB_TABLE and so on.
-    return match($invocant, { $id_field => \@detainted_ids });
+    # Too large integers make PostgreSQL crash.
+    next if $id > MAX_INT_32;
+    push(@detainted_ids, $id);
+  }
+
+  # We don't do $invocant->match because some classes have
+  # their own implementation of match which is not compatible
+  # with this one. However, match() still needs to have the right $invocant
+  # in order to do $class->DB_TABLE and so on.
+  return match($invocant, {$id_field => \@detainted_ids});
 }
 
 sub new_from_hash {
-    my $invocant = shift;
-    my $class = ref($invocant) || $invocant;
-    my $object_data = shift || return;
-    $class->_serialisation_keys($object_data);
-    bless($object_data, $class);
-    $object_data->initialize();
-    return $object_data;
+  my $invocant    = shift;
+  my $class       = ref($invocant) || $invocant;
+  my $object_data = shift || return;
+  $class->_serialisation_keys($object_data);
+  bless($object_data, $class);
+  $object_data->initialize();
+  return $object_data;
 }
 
 sub initialize {
-    # abstract
+
+  # abstract
 }
 
 # Provides a mechanism for objects to be cached in the request_cache
 
 sub object_cache_get {
-    my ($class, $id) = @_;
-    return $class->_object_cache_get(
-        { id => $id, cache => 1},
-        $class
-    );
+  my ($class, $id) = @_;
+  return $class->_object_cache_get({id => $id, cache => 1}, $class);
 }
 
 sub object_cache_set {
-    my $self = shift;
-    return $self->_object_cache_set(
-        { id => $self->id, cache => 1 },
-        $self
-    );
+  my $self = shift;
+  return $self->_object_cache_set({id => $self->id, cache => 1}, $self);
 }
 
 sub _object_cache_get {
-    my $class = shift;
-    my ($param) = @_;
-    my $cache_key = $class->object_cache_key($param)
-      || return;
-    return Bugzilla->request_cache->{$cache_key};
+  my $class     = shift;
+  my ($param)   = @_;
+  my $cache_key = $class->object_cache_key($param) || return;
+  return Bugzilla->request_cache->{$cache_key};
 }
 
 sub _object_cache_set {
-    my $class = shift;
-    my ($param, $object) = @_;
-    my $cache_key = $class->object_cache_key($param)
-      || return;
-    Bugzilla->request_cache->{$cache_key} = $object;
+  my $class = shift;
+  my ($param, $object) = @_;
+  my $cache_key = $class->object_cache_key($param) || return;
+  Bugzilla->request_cache->{$cache_key} = $object;
 }
 
 sub _object_cache_remove {
-    my $class = shift;
-    my ($param) = @_;
-    $param->{cache} = 1;
-    my $cache_key = $class->object_cache_key($param)
-      || return;
-    delete Bugzilla->request_cache->{$cache_key};
+  my $class = shift;
+  my ($param) = @_;
+  $param->{cache} = 1;
+  my $cache_key = $class->object_cache_key($param) || return;
+  delete Bugzilla->request_cache->{$cache_key};
 }
 
 sub object_cache_key {
-    my $class = shift;
-    my ($param) = @_;
-    if (ref($param) && $param->{cache} && ($param->{id} || $param->{name})) {
-        $class = blessed($class) if blessed($class);
-        return $class  . ',' . ($param->{id} || $param->{name});
-    } else {
-        return;
-    }
+  my $class = shift;
+  my ($param) = @_;
+  if (ref($param) && $param->{cache} && ($param->{id} || $param->{name})) {
+    $class = blessed($class) if blessed($class);
+    return $class . ',' . ($param->{id} || $param->{name});
+  }
+  else {
+    return;
+  }
 }
 
 # To support serialisation, we need to capture the keys in an object's default
 # hashref.
 sub _serialisation_keys {
-    my ($class, $object) = @_;
-    my $cache = Bugzilla->request_cache->{serialisation_keys} ||= {};
-    $cache->{$class} = [ keys %$object ] if $object && !exists $cache->{$class};
-    return @{ $cache->{$class} };
+  my ($class, $object) = @_;
+  my $cache = Bugzilla->request_cache->{serialisation_keys} ||= {};
+  $cache->{$class} = [keys %$object] if $object && !exists $cache->{$class};
+  return @{$cache->{$class}};
 }
 
 sub check {
-    my ($invocant, $param) = @_;
-    my $class = ref($invocant) || $invocant;
-    # If we were just passed a name, then just use the name.
-    if (!ref $param) {
-        $param = { name => $param };
-    }
+  my ($invocant, $param) = @_;
+  my $class = ref($invocant) || $invocant;
 
-    # Don't allow empty names or ids.
-    my $check_param = exists $param->{id} ? 'id' : 'name';
-    $param->{$check_param} = trim($param->{$check_param});
-    # If somebody passes us "0", we want to throw an error like
-    # "there is no X with the name 0". This is true even for ids. So here,
-    # we only check if the parameter is undefined or empty.
-    if (!defined $param->{$check_param} or $param->{$check_param} eq '') {
-        ThrowUserError('object_not_specified', { class => $class });
-    }
+  # If we were just passed a name, then just use the name.
+  if (!ref $param) {
+    $param = {name => $param};
+  }
 
-    my $obj = $class->new($param);
-    if (!$obj) {
-        # We don't want to override the normal template "user" object if
-        # "user" is one of the params.
-        delete $param->{user};
-        if (my $error = delete $param->{_error}) {
-            ThrowUserError($error, { %$param, class => $class });
-        }
-        else {
-            ThrowUserError('object_does_not_exist', { %$param, class => $class });
-        }
+  # Don't allow empty names or ids.
+  my $check_param = exists $param->{id} ? 'id' : 'name';
+  $param->{$check_param} = trim($param->{$check_param});
+
+  # If somebody passes us "0", we want to throw an error like
+  # "there is no X with the name 0". This is true even for ids. So here,
+  # we only check if the parameter is undefined or empty.
+  if (!defined $param->{$check_param} or $param->{$check_param} eq '') {
+    ThrowUserError('object_not_specified', {class => $class});
+  }
+
+  my $obj = $class->new($param);
+  if (!$obj) {
+
+    # We don't want to override the normal template "user" object if
+    # "user" is one of the params.
+    delete $param->{user};
+    if (my $error = delete $param->{_error}) {
+      ThrowUserError($error, {%$param, class => $class});
     }
-    return $obj;
+    else {
+      ThrowUserError('object_does_not_exist', {%$param, class => $class});
+    }
+  }
+  return $obj;
 }
 
 # Note: Future extensions to this could be:
 #  * Add a MATCH_JOIN constant so that we can join against
 #    certain other tables for the WHERE criteria.
 sub match {
-    my ($invocant, $criteria) = @_;
-    my $class = ref($invocant) || $invocant;
-    my $dbh   = Bugzilla->dbh;
+  my ($invocant, $criteria) = @_;
+  my $class = ref($invocant) || $invocant;
+  my $dbh   = Bugzilla->dbh;
 
-    return [$class->get_all] if !$criteria;
+  return [$class->get_all] if !$criteria;
 
-    my (@terms, @values, $postamble);
-    foreach my $field (keys %$criteria) {
-        my $value = $criteria->{$field};
-        
-        # allow for LIMIT and OFFSET expressions via the criteria.
-        next if $field eq 'OFFSET';
-        if ( $field eq 'LIMIT' ) {
-            next unless defined $value;
-            detaint_natural($value)
-              or ThrowCodeError('param_must_be_numeric', 
-                                { param    => 'LIMIT', 
-                                  function => "${class}::match" });
-            my $offset;
-            if (defined $criteria->{OFFSET}) {
-                $offset = $criteria->{OFFSET};
-                detaint_signed($offset)
-                  or ThrowCodeError('param_must_be_numeric', 
-                                    { param    => 'OFFSET',
-                                      function => "${class}::match" });
-            }
-            $postamble = $dbh->sql_limit($value, $offset);
-            next;
-        }
-        elsif ( $field eq 'WHERE' ) {
-            # the WHERE value is a hashref where the keys are
-            # "column_name operator ?" and values are the placeholder's
-            # value (either a scalar or an array of values).
-            foreach my $k (keys %$value) {
-                push(@terms, $k);
-                my @this_value = ref($value->{$k}) ? @{ $value->{$k} } 
-                                                   : ($value->{$k});
-                push(@values, @this_value);
-            }            
-            next;
-        }
+  my (@terms, @values, $postamble);
+  foreach my $field (keys %$criteria) {
+    my $value = $criteria->{$field};
 
-        # It's always safe to use the field defined by classes as being
-        # their ID field. In particular, this means that new_from_list()
-        # is exempted from this check.
-        $class->_check_field($field, 'match') unless $field eq $class->ID_FIELD;
+    # allow for LIMIT and OFFSET expressions via the criteria.
+    next if $field eq 'OFFSET';
+    if ($field eq 'LIMIT') {
+      next unless defined $value;
+      detaint_natural($value)
+        or ThrowCodeError('param_must_be_numeric',
+        {param => 'LIMIT', function => "${class}::match"});
+      my $offset;
+      if (defined $criteria->{OFFSET}) {
+        $offset = $criteria->{OFFSET};
+        detaint_signed($offset)
+          or ThrowCodeError('param_must_be_numeric',
+          {param => 'OFFSET', function => "${class}::match"});
+      }
+      $postamble = $dbh->sql_limit($value, $offset);
+      next;
+    }
+    elsif ($field eq 'WHERE') {
 
-        if (ref $value eq 'ARRAY') {
-            # IN () is invalid SQL, and if we have an empty list
-            # to match against, we're just returning an empty
-            # array anyhow.
-            return [] if !scalar @$value;
-
-            my @qmarks = ("?") x @$value;
-            push(@terms, $dbh->sql_in($field, \@qmarks));
-            push(@values, @$value);
-        }
-        elsif ($value eq NOT_NULL) {
-            push(@terms, "$field IS NOT NULL");
-        }
-        elsif ($value eq IS_NULL) {
-            push(@terms, "$field IS NULL");
-        }
-        else {
-            push(@terms, "$field = ?");
-            push(@values, $value);
-        }
+      # the WHERE value is a hashref where the keys are
+      # "column_name operator ?" and values are the placeholder's
+      # value (either a scalar or an array of values).
+      foreach my $k (keys %$value) {
+        push(@terms, $k);
+        my @this_value = ref($value->{$k}) ? @{$value->{$k}} : ($value->{$k});
+        push(@values, @this_value);
+      }
+      next;
     }
 
-    my $where = join(' AND ', @terms) if scalar @terms;
-    return $class->_do_list_select($where, \@values, $postamble);
+    # It's always safe to use the field defined by classes as being
+    # their ID field. In particular, this means that new_from_list()
+    # is exempted from this check.
+    $class->_check_field($field, 'match') unless $field eq $class->ID_FIELD;
+
+    if (ref $value eq 'ARRAY') {
+
+      # IN () is invalid SQL, and if we have an empty list
+      # to match against, we're just returning an empty
+      # array anyhow.
+      return [] if !scalar @$value;
+
+      my @qmarks = ("?") x @$value;
+      push(@terms, $dbh->sql_in($field, \@qmarks));
+      push(@values, @$value);
+    }
+    elsif ($value eq NOT_NULL) {
+      push(@terms, "$field IS NOT NULL");
+    }
+    elsif ($value eq IS_NULL) {
+      push(@terms, "$field IS NULL");
+    }
+    else {
+      push(@terms,  "$field = ?");
+      push(@values, $value);
+    }
+  }
+
+  my $where = join(' AND ', @terms) if scalar @terms;
+  return $class->_do_list_select($where, \@values, $postamble);
 }
 
 sub _do_list_select {
-    my ($class, $where, $values, $postamble) = @_;
-    my $table = $class->DB_TABLE;
-    my $cols  = join(',', $class->_get_db_columns);
-    my $order = $class->LIST_ORDER;
+  my ($class, $where, $values, $postamble) = @_;
+  my $table = $class->DB_TABLE;
+  my $cols  = join(',', $class->_get_db_columns);
+  my $order = $class->LIST_ORDER;
 
-    # Unconditional requests for configuration data are cacheable.
-    my ($objects, $set_memcached, $memcached_key);
-    if (!defined $where
-        && Bugzilla->memcached->enabled
-        && $class->IS_CONFIG)
-    {
-        $memcached_key = "$class:get_all";
-        $objects = Bugzilla->memcached->get_config({ key => $memcached_key });
-        $set_memcached = $objects ? 0 : 1;
+  # Unconditional requests for configuration data are cacheable.
+  my ($objects, $set_memcached, $memcached_key);
+  if (!defined $where && Bugzilla->memcached->enabled && $class->IS_CONFIG) {
+    $memcached_key = "$class:get_all";
+    $objects       = Bugzilla->memcached->get_config({key => $memcached_key});
+    $set_memcached = $objects ? 0 : 1;
+  }
+
+  if (!$objects) {
+    my $sql = "SELECT $cols FROM $table";
+    if (defined $where) {
+      $sql .= " WHERE $where ";
     }
+    $sql .= " ORDER BY $order";
+    $sql .= " $postamble" if $postamble;
 
-    if (!$objects) {
-        my $sql = "SELECT $cols FROM $table";
-        if (defined $where) {
-            $sql .= " WHERE $where ";
-        }
-        $sql .= " ORDER BY $order";
-        $sql .= " $postamble" if $postamble;
+    my $dbh = Bugzilla->dbh;
 
-        my $dbh = Bugzilla->dbh;
-        # Sometimes the values are tainted, but we don't want to untaint them
-        # for the caller. So we copy the array. It's safe to untaint because
-        # they're only used in placeholders here.
-        my @untainted = @{ $values || [] };
-        trick_taint($_) foreach @untainted;
-        $objects = $dbh->selectall_arrayref($sql, {Slice=>{}}, @untainted);
-        $class->_serialisation_keys($objects->[0]) if @$objects;
-    }
+    # Sometimes the values are tainted, but we don't want to untaint them
+    # for the caller. So we copy the array. It's safe to untaint because
+    # they're only used in placeholders here.
+    my @untainted = @{$values || []};
+    trick_taint($_) foreach @untainted;
+    $objects = $dbh->selectall_arrayref($sql, {Slice => {}}, @untainted);
+    $class->_serialisation_keys($objects->[0]) if @$objects;
+  }
 
-    if ($objects && $set_memcached) {
-        Bugzilla->memcached->set_config({
-            key  => $memcached_key,
-            data => $objects
-        });
-    }
+  if ($objects && $set_memcached) {
+    Bugzilla->memcached->set_config({key => $memcached_key, data => $objects});
+  }
 
-    foreach my $object (@$objects) {
-        $object = $class->new_from_hash($object);
-    }
-    return $objects;
+  foreach my $object (@$objects) {
+    $object = $class->new_from_hash($object);
+  }
+  return $objects;
 }
 
 ###############################
 ####      Accessors      ######
 ###############################
 
-sub id   { return $_[0]->{$_[0]->ID_FIELD};   }
+sub id   { return $_[0]->{$_[0]->ID_FIELD}; }
 sub name { return $_[0]->{$_[0]->NAME_FIELD}; }
 
 ###############################
@@ -429,204 +426,214 @@ sub name { return $_[0]->{$_[0]->NAME_FIELD}; }
 ###############################
 
 sub set {
-    my ($self, $field, $value) = @_;
+  my ($self, $field, $value) = @_;
 
-    # This method is protected. It's used to help implement set_ functions.
-    my $caller = caller;
-    $caller->isa('Bugzilla::Object') || $caller->isa('Bugzilla::Extension')
-        || ThrowCodeError('protection_violation', 
-                          { caller     => caller,
-                            superclass => __PACKAGE__,
-                            function   => 'Bugzilla::Object->set' });
-
-    Bugzilla::Hook::process('object_before_set',
-                            { object => $self, field => $field,
-                              value => $value });
-
-    my %validators = (%{$self->_get_validators}, %{$self->UPDATE_VALIDATORS});
-    if (exists $validators{$field}) {
-        my $validator = $validators{$field};
-        $value = $self->$validator($value, $field);
-        trick_taint($value) if (defined $value && !ref($value));
-
-        if ($self->can('_set_global_validator')) {
-            $self->_set_global_validator($value, $field);
-        }
+  # This method is protected. It's used to help implement set_ functions.
+  my $caller = caller;
+  $caller->isa('Bugzilla::Object')
+    || $caller->isa('Bugzilla::Extension')
+    || ThrowCodeError(
+    'protection_violation',
+    {
+      caller     => caller,
+      superclass => __PACKAGE__,
+      function   => 'Bugzilla::Object->set'
     }
+    );
 
-    $self->{$field} = $value;
+  Bugzilla::Hook::process('object_before_set',
+    {object => $self, field => $field, value => $value});
 
-    Bugzilla::Hook::process('object_end_of_set',
-                            { object => $self, field => $field });
+  my %validators = (%{$self->_get_validators}, %{$self->UPDATE_VALIDATORS});
+  if (exists $validators{$field}) {
+    my $validator = $validators{$field};
+    $value = $self->$validator($value, $field);
+    trick_taint($value) if (defined $value && !ref($value));
+
+    if ($self->can('_set_global_validator')) {
+      $self->_set_global_validator($value, $field);
+    }
+  }
+
+  $self->{$field} = $value;
+
+  Bugzilla::Hook::process('object_end_of_set',
+    {object => $self, field => $field});
 }
 
 sub set_all {
-    my ($self, $params) = @_;
+  my ($self, $params) = @_;
 
-    # Don't let setters modify the values in $params for the caller.
-    my %field_values = %$params;
+  # Don't let setters modify the values in $params for the caller.
+  my %field_values = %$params;
 
-    my @sorted_names = $self->_sort_by_dep(keys %field_values);
+  my @sorted_names = $self->_sort_by_dep(keys %field_values);
 
-    foreach my $key (@sorted_names) {
-        # It's possible for one set_ method to delete a key from $params
-        # for another set method, so if that's happened, we don't call the
-        # other set method.
-        next if !exists $field_values{$key};
-        my $method = "set_$key";
-        if (!$self->can($method)) {
-            my $class = ref($self) || $self;
-            ThrowCodeError("unknown_method", { method => "${class}::${method}" });
-        }
-        $self->$method($field_values{$key}, \%field_values);
+  foreach my $key (@sorted_names) {
+
+    # It's possible for one set_ method to delete a key from $params
+    # for another set method, so if that's happened, we don't call the
+    # other set method.
+    next if !exists $field_values{$key};
+    my $method = "set_$key";
+    if (!$self->can($method)) {
+      my $class = ref($self) || $self;
+      ThrowCodeError("unknown_method", {method => "${class}::${method}"});
     }
-    Bugzilla::Hook::process('object_end_of_set_all', 
-                            { object => $self, params => \%field_values });
+    $self->$method($field_values{$key}, \%field_values);
+  }
+  Bugzilla::Hook::process('object_end_of_set_all',
+    {object => $self, params => \%field_values});
 }
 
 sub update {
-    my $self = shift;
+  my $self = shift;
 
-    my $dbh      = Bugzilla->dbh;
-    my $table    = $self->DB_TABLE;
-    my $id_field = $self->ID_FIELD;
+  my $dbh      = Bugzilla->dbh;
+  my $table    = $self->DB_TABLE;
+  my $id_field = $self->ID_FIELD;
 
-    $dbh->bz_start_transaction();
+  $dbh->bz_start_transaction();
 
-    my $old_self = $self->new($self->id);
-   
-    my @all_columns = $self->UPDATE_COLUMNS;
-    my @hook_columns;
-    Bugzilla::Hook::process('object_update_columns',
-                            { object => $self, columns => \@hook_columns });
-    push(@all_columns, @hook_columns);
+  my $old_self = $self->new($self->id);
 
-    my %numeric = map { $_ => 1 } $self->NUMERIC_COLUMNS;
-    my %date    = map { $_ => 1 } $self->DATE_COLUMNS;
-    my (@update_columns, @values, %changes);
-    foreach my $column (@all_columns) {
-        my ($old, $new) = ($old_self->{$column}, $self->{$column});
-        # This has to be written this way in order to allow us to set a field
-        # from undef or to undef, and avoid warnings about comparing an undef
-        # with the "eq" operator.
-        if (!defined $new || !defined $old) {
-            next if !defined $new && !defined $old;
-        }
-        elsif ( ($numeric{$column} && $old == $new) 
-                || ($date{$column} && str2time($old) == str2time($new))
-                || $old eq $new ) {
-            next;
-        }
+  my @all_columns = $self->UPDATE_COLUMNS;
+  my @hook_columns;
+  Bugzilla::Hook::process('object_update_columns',
+    {object => $self, columns => \@hook_columns});
+  push(@all_columns, @hook_columns);
 
-        trick_taint($new) if defined $new;
-        push(@values, $new);
-        push(@update_columns, $column);
-        # We don't use $new because we don't want to detaint this for
-        # the caller.
-        $changes{$column} = [$old, $self->{$column}];
+  my %numeric = map { $_ => 1 } $self->NUMERIC_COLUMNS;
+  my %date    = map { $_ => 1 } $self->DATE_COLUMNS;
+  my (@update_columns, @values, %changes);
+  foreach my $column (@all_columns) {
+    my ($old, $new) = ($old_self->{$column}, $self->{$column});
+
+    # This has to be written this way in order to allow us to set a field
+    # from undef or to undef, and avoid warnings about comparing an undef
+    # with the "eq" operator.
+    if (!defined $new || !defined $old) {
+      next if !defined $new && !defined $old;
+    }
+    elsif (($numeric{$column} && $old == $new)
+      || ($date{$column} && str2time($old) == str2time($new))
+      || $old eq $new)
+    {
+      next;
     }
 
-    my $columns = join(', ', map {"$_ = ?"} @update_columns);
+    trick_taint($new) if defined $new;
+    push(@values,         $new);
+    push(@update_columns, $column);
 
-    $dbh->do("UPDATE $table SET $columns WHERE $id_field = ?", undef, 
-             @values, $self->id) if @values;
+    # We don't use $new because we don't want to detaint this for
+    # the caller.
+    $changes{$column} = [$old, $self->{$column}];
+  }
 
-    Bugzilla::Hook::process('object_end_of_update',
-                            { object => $self, old_object => $old_self,
-                              changes => \%changes });
+  my $columns = join(', ', map {"$_ = ?"} @update_columns);
 
-    $self->audit_log(\%changes) if $self->AUDIT_UPDATES;
+  $dbh->do("UPDATE $table SET $columns WHERE $id_field = ?",
+    undef, @values, $self->id)
+    if @values;
 
-    $dbh->bz_commit_transaction();
-    if ($self->USE_MEMCACHED && @values) {
-        Bugzilla->memcached->clear({ table => $table, id => $self->id });
-        Bugzilla->memcached->clear_config()
-            if $self->IS_CONFIG;
-    }
-    $self->_object_cache_remove({ id => $self->id });
-    $self->_object_cache_remove({ name => $self->name }) if $self->name;
+  Bugzilla::Hook::process('object_end_of_update',
+    {object => $self, old_object => $old_self, changes => \%changes});
 
-    if (wantarray) {
-        return (\%changes, $old_self);
-    }
+  $self->audit_log(\%changes) if $self->AUDIT_UPDATES;
 
-    return \%changes;
+  $dbh->bz_commit_transaction();
+  if ($self->USE_MEMCACHED && @values) {
+    Bugzilla->memcached->clear({table => $table, id => $self->id});
+    Bugzilla->memcached->clear_config() if $self->IS_CONFIG;
+  }
+  $self->_object_cache_remove({id   => $self->id});
+  $self->_object_cache_remove({name => $self->name}) if $self->name;
+
+  if (wantarray) {
+    return (\%changes, $old_self);
+  }
+
+  return \%changes;
 }
 
 sub remove_from_db {
-    my $self = shift;
-    Bugzilla::Hook::process('object_before_delete', { object => $self });
-    my $table = $self->DB_TABLE;
-    my $id_field = $self->ID_FIELD;
-    my $dbh = Bugzilla->dbh;
-    $dbh->bz_start_transaction();
-    $self->audit_log(AUDIT_REMOVE) if $self->AUDIT_REMOVES;
-    $dbh->do("DELETE FROM $table WHERE $id_field = ?", undef, $self->id);
-    $dbh->bz_commit_transaction();
-    if ($self->USE_MEMCACHED) {
-        Bugzilla->memcached->clear({ table => $table, id => $self->id });
-        Bugzilla->memcached->clear_config()
-            if $self->IS_CONFIG;
-    }
-    $self->_object_cache_remove({ id => $self->id });
-    $self->_object_cache_remove({ name => $self->name }) if $self->name;
-    undef $self;
+  my $self = shift;
+  Bugzilla::Hook::process('object_before_delete', {object => $self});
+  my $table    = $self->DB_TABLE;
+  my $id_field = $self->ID_FIELD;
+  my $dbh      = Bugzilla->dbh;
+  $dbh->bz_start_transaction();
+  $self->audit_log(AUDIT_REMOVE) if $self->AUDIT_REMOVES;
+  $dbh->do("DELETE FROM $table WHERE $id_field = ?", undef, $self->id);
+  $dbh->bz_commit_transaction();
+
+  if ($self->USE_MEMCACHED) {
+    Bugzilla->memcached->clear({table => $table, id => $self->id});
+    Bugzilla->memcached->clear_config() if $self->IS_CONFIG;
+  }
+  $self->_object_cache_remove({id   => $self->id});
+  $self->_object_cache_remove({name => $self->name}) if $self->name;
+  undef $self;
 }
 
 sub audit_log {
-    my ($self, $changes) = @_;
-    my $class = ref $self;
-    my $dbh = Bugzilla->dbh;
-    my $user_id = Bugzilla->user->id || undef;
-    my $sth = $dbh->prepare(
-        'INSERT INTO audit_log (user_id, class, object_id, field,
+  my ($self, $changes) = @_;
+  my $class   = ref $self;
+  my $dbh     = Bugzilla->dbh;
+  my $user_id = Bugzilla->user->id || undef;
+  my $sth     = $dbh->prepare(
+    'INSERT INTO audit_log (user_id, class, object_id, field,
                                 removed, added, at_time) 
-              VALUES (?,?,?,?,?,?,LOCALTIMESTAMP(0))');
-    # During creation or removal, $changes is actually just a string
-    # indicating whether we're creating or removing the object.
-    if ($changes eq AUDIT_CREATE or $changes eq AUDIT_REMOVE) {
-        # We put the object's name in the "added" or "removed" field.
-        # We do this thing with NAME_FIELD because $self->name returns
-        # the wrong thing for Bugzilla::User.
-        my $name = $self->{$self->NAME_FIELD};
-        my @added_removed = $changes eq AUDIT_CREATE ? (undef, $name) 
-                                                     : ($name, undef);
-        $sth->execute($user_id, $class, $self->id, $changes, @added_removed);
-        return;
-    }
+              VALUES (?,?,?,?,?,?,LOCALTIMESTAMP(0))'
+  );
 
-    # During update, it's the actual %changes hash produced by update().
-    foreach my $field (keys %$changes) {
-        # Skip private changes.
-        next if $field =~ /^_/;
-        my ($from, $to) = $self->_sanitize_audit_log($field, $changes->{$field});
-        $sth->execute($user_id, $class, $self->id, $field, $from, $to);
-    }
+  # During creation or removal, $changes is actually just a string
+  # indicating whether we're creating or removing the object.
+  if ($changes eq AUDIT_CREATE or $changes eq AUDIT_REMOVE) {
+
+    # We put the object's name in the "added" or "removed" field.
+    # We do this thing with NAME_FIELD because $self->name returns
+    # the wrong thing for Bugzilla::User.
+    my $name          = $self->{$self->NAME_FIELD};
+    my @added_removed = $changes eq AUDIT_CREATE ? (undef, $name) : ($name, undef);
+    $sth->execute($user_id, $class, $self->id, $changes, @added_removed);
+    return;
+  }
+
+  # During update, it's the actual %changes hash produced by update().
+  foreach my $field (keys %$changes) {
+
+    # Skip private changes.
+    next if $field =~ /^_/;
+    my ($from, $to) = $self->_sanitize_audit_log($field, $changes->{$field});
+    $sth->execute($user_id, $class, $self->id, $field, $from, $to);
+  }
 }
 
 sub _sanitize_audit_log {
-    my ($self, $field, $changes) = @_;
-    my $class = ref($self) || $self;
+  my ($self, $field, $changes) = @_;
+  my $class = ref($self) || $self;
 
-    # Do not store hashed passwords. Only record the algorithm used to encode them.
-    if ($class eq 'Bugzilla::User' && $field eq 'cryptpassword') {
-        foreach my $passwd (@$changes) {
-            next unless $passwd;
-            my $algorithm = 'unknown_algorithm';
-            if ($passwd =~ /{([^}]+)}$/) {
-                $algorithm = $1;
-            }
-            $passwd = "hashed_with_$algorithm";
-        }
+  # Do not store hashed passwords. Only record the algorithm used to encode them.
+  if ($class eq 'Bugzilla::User' && $field eq 'cryptpassword') {
+    foreach my $passwd (@$changes) {
+      next unless $passwd;
+      my $algorithm = 'unknown_algorithm';
+      if ($passwd =~ /{([^}]+)}$/) {
+        $algorithm = $1;
+      }
+      $passwd = "hashed_with_$algorithm";
     }
-    return @$changes;
+  }
+  return @$changes;
 }
 
 sub flatten_to_hash {
-    my $self = shift;
-    my $class = blessed($self);
-    my %hash = map { $_ => $self->{$_} } $class->_serialisation_keys;
-    return \%hash;
+  my $self  = shift;
+  my $class = blessed($self);
+  my %hash  = map { $_ => $self->{$_} } $class->_serialisation_keys;
+  return \%hash;
 }
 
 ###############################
@@ -634,127 +641,125 @@ sub flatten_to_hash {
 ###############################
 
 sub any_exist {
-    my $class = shift;
-    my $table = $class->DB_TABLE;
-    my $dbh = Bugzilla->dbh;
-    my $any_exist = $dbh->selectrow_array(
-        "SELECT 1 FROM $table " . $dbh->sql_limit(1));
-    return $any_exist ? 1 : 0;
+  my $class = shift;
+  my $table = $class->DB_TABLE;
+  my $dbh   = Bugzilla->dbh;
+  my $any_exist
+    = $dbh->selectrow_array("SELECT 1 FROM $table " . $dbh->sql_limit(1));
+  return $any_exist ? 1 : 0;
 }
 
 sub create {
-    my ($class, $params) = @_;
-    my $dbh = Bugzilla->dbh;
+  my ($class, $params) = @_;
+  my $dbh = Bugzilla->dbh;
 
-    $dbh->bz_start_transaction();
-    $class->check_required_create_fields($params);
-    my $field_values = $class->run_create_validators($params);
-    my $object = $class->insert_create_data($field_values);
-    $dbh->bz_commit_transaction();
+  $dbh->bz_start_transaction();
+  $class->check_required_create_fields($params);
+  my $field_values = $class->run_create_validators($params);
+  my $object       = $class->insert_create_data($field_values);
+  $dbh->bz_commit_transaction();
 
-    if (Bugzilla->memcached->enabled
-        && $class->USE_MEMCACHED
-        && $class->IS_CONFIG)
-    {
-        Bugzilla->memcached->clear_config();
-    }
+  if (Bugzilla->memcached->enabled && $class->USE_MEMCACHED && $class->IS_CONFIG)
+  {
+    Bugzilla->memcached->clear_config();
+  }
 
-    return $object;
+  return $object;
 }
 
 # Used to validate that a field name is in fact a valid column in the
 # current table before inserting it into SQL.
 sub _check_field {
-    my ($invocant, $field, $function) = @_;
-    my $class = ref($invocant) || $invocant;
-    if (!Bugzilla->dbh->bz_column_info($class->DB_TABLE, $field)) {
-        ThrowCodeError('param_invalid', { param    => $field,
-                                          function => "${class}::$function" });
-    }
+  my ($invocant, $field, $function) = @_;
+  my $class = ref($invocant) || $invocant;
+  if (!Bugzilla->dbh->bz_column_info($class->DB_TABLE, $field)) {
+    ThrowCodeError('param_invalid',
+      {param => $field, function => "${class}::$function"});
+  }
 }
 
 sub check_required_create_fields {
-    my ($class, $params) = @_;
+  my ($class, $params) = @_;
 
-    # This hook happens here so that even subclasses that don't call
-    # SUPER::create are still affected by the hook.
-    Bugzilla::Hook::process('object_before_create', { class => $class,
-                                                      params => $params });
+  # This hook happens here so that even subclasses that don't call
+  # SUPER::create are still affected by the hook.
+  Bugzilla::Hook::process('object_before_create',
+    {class => $class, params => $params});
 
-    my @check_fields = $class->_required_create_fields();
-    foreach my $field (@check_fields) {
-        $params->{$field} = undef if !exists $params->{$field};
-    }
+  my @check_fields = $class->_required_create_fields();
+  foreach my $field (@check_fields) {
+    $params->{$field} = undef if !exists $params->{$field};
+  }
 }
 
 sub run_create_validators {
-    my ($class, $params, $options) = @_;
+  my ($class, $params, $options) = @_;
 
-    my $validators = $class->_get_validators;
-    my %field_values = %$params;
+  my $validators   = $class->_get_validators;
+  my %field_values = %$params;
 
-    # Make a hash skiplist for easier searching later
-    my %skip_list = map { $_ => 1 } @{ $options->{skip} || [] };
+  # Make a hash skiplist for easier searching later
+  my %skip_list = map { $_ => 1 } @{$options->{skip} || []};
 
-    # Get the sorted field names
-    my @sorted_names = $class->_sort_by_dep(keys %field_values);
+  # Get the sorted field names
+  my @sorted_names = $class->_sort_by_dep(keys %field_values);
 
-    # Remove the skipped names
-    my @unskipped = grep { !$skip_list{$_} } @sorted_names;
+  # Remove the skipped names
+  my @unskipped = grep { !$skip_list{$_} } @sorted_names;
 
-    foreach my $field (@unskipped) {
-        my $value;
-        if (exists $validators->{$field}) {
-            my $validator = $validators->{$field};
-            $value = $class->$validator($field_values{$field}, $field,
-                                        \%field_values);
-        }
-        else {
-            $value = $field_values{$field};
-        }
-
-        # We want people to be able to explicitly set fields to NULL,
-        # and that means they can be set to undef.
-        trick_taint($value) if defined $value && !ref($value);
-        $field_values{$field} = $value;
+  foreach my $field (@unskipped) {
+    my $value;
+    if (exists $validators->{$field}) {
+      my $validator = $validators->{$field};
+      $value = $class->$validator($field_values{$field}, $field, \%field_values);
+    }
+    else {
+      $value = $field_values{$field};
     }
 
-    Bugzilla::Hook::process('object_end_of_create_validators',
-                            { class => $class, params => \%field_values });
+    # We want people to be able to explicitly set fields to NULL,
+    # and that means they can be set to undef.
+    trick_taint($value) if defined $value && !ref($value);
+    $field_values{$field} = $value;
+  }
 
-    return \%field_values;
+  Bugzilla::Hook::process('object_end_of_create_validators',
+    {class => $class, params => \%field_values});
+
+  return \%field_values;
 }
 
 sub insert_create_data {
-    my ($class, $field_values) = @_;
-    my $dbh = Bugzilla->dbh;
+  my ($class, $field_values) = @_;
+  my $dbh = Bugzilla->dbh;
 
-    my (@field_names, @values);
-    while (my ($field, $value) = each %$field_values) {
-        $class->_check_field($field, 'create');
-        push(@field_names, $field);
-        push(@values, $value);
-    }
+  my (@field_names, @values);
+  while (my ($field, $value) = each %$field_values) {
+    $class->_check_field($field, 'create');
+    push(@field_names, $field);
+    push(@values,      $value);
+  }
 
-    my $qmarks = '?,' x @field_names;
-    chop($qmarks);
-    my $table = $class->DB_TABLE;
-    $dbh->do("INSERT INTO $table (" . join(', ', @field_names)
-             . ") VALUES ($qmarks)", undef, @values);
-    my $id = $dbh->bz_last_key($table, $class->ID_FIELD);
+  my $qmarks = '?,' x @field_names;
+  chop($qmarks);
+  my $table = $class->DB_TABLE;
+  $dbh->do(
+    "INSERT INTO $table (" . join(', ', @field_names) . ") VALUES ($qmarks)",
+    undef, @values);
+  my $id = $dbh->bz_last_key($table, $class->ID_FIELD);
 
-    my $object = $class->new($id);
+  my $object = $class->new($id);
 
-    Bugzilla::Hook::process('object_end_of_create', { class => $class,
-                                                      object => $object });
-    $object->audit_log(AUDIT_CREATE) if $object->AUDIT_CREATES;
+  Bugzilla::Hook::process('object_end_of_create',
+    {class => $class, object => $object});
+  $object->audit_log(AUDIT_CREATE) if $object->AUDIT_CREATES;
 
-    return $object;
+  return $object;
 }
 
 sub get_all {
-    my $class = shift;
-    return @{ $class->_do_list_select() };
+  my $class = shift;
+  return @{$class->_do_list_select()};
 }
 
 ###############################
@@ -764,20 +769,19 @@ sub get_all {
 sub check_boolean { return $_[1] ? 1 : 0 }
 
 sub check_time {
-    my ($invocant, $value, $field, $params, $allow_negative) = @_;
+  my ($invocant, $value, $field, $params, $allow_negative) = @_;
 
-    # If we don't have a current value default to zero
-    my $current = blessed($invocant) ? $invocant->{$field}
-                                     : 0;
-    $current ||= 0;
+  # If we don't have a current value default to zero
+  my $current = blessed($invocant) ? $invocant->{$field} : 0;
+  $current ||= 0;
 
-    # Get the new value or zero if it isn't defined
-    $value = trim($value) || 0;
+  # Get the new value or zero if it isn't defined
+  $value = trim($value) || 0;
 
-    # Make sure the new value is well formed
-    _validate_time($value, $field, $allow_negative);
+  # Make sure the new value is well formed
+  _validate_time($value, $field, $allow_negative);
 
-    return $value;
+  return $value;
 }
 
 
@@ -786,26 +790,25 @@ sub check_time {
 ###################
 
 sub _validate_time {
-    my ($time, $field, $allow_negative) = @_;
+  my ($time, $field, $allow_negative) = @_;
 
-    # regexp verifies one or more digits, optionally followed by a period and
-    # zero or more digits, OR we have a period followed by one or more digits
-    # (allow negatives, though, so people can back out errors in time reporting)
-    if ($time !~ /^-?(?:\d+(?:\.\d*)?|\.\d+)$/) {
-        ThrowUserError("number_not_numeric",
-                       {field => $field, num => "$time"});
-    }
+  # regexp verifies one or more digits, optionally followed by a period and
+  # zero or more digits, OR we have a period followed by one or more digits
+  # (allow negatives, though, so people can back out errors in time reporting)
+  if ($time !~ /^-?(?:\d+(?:\.\d*)?|\.\d+)$/) {
+    ThrowUserError("number_not_numeric", {field => $field, num => "$time"});
+  }
 
-    # Callers can optionally allow negative times
-    if ( ($time < 0) && !$allow_negative ) {
-        ThrowUserError("number_too_small",
-                       {field => $field, num => "$time", min_num => "0"});
-    }
+  # Callers can optionally allow negative times
+  if (($time < 0) && !$allow_negative) {
+    ThrowUserError("number_too_small",
+      {field => $field, num => "$time", min_num => "0"});
+  }
 
-    if ($time > 99999.99) {
-        ThrowUserError("number_too_large",
-                       {field => $field, num => "$time", max_num => "99999.99"});
-    }
+  if ($time > 99999.99) {
+    ThrowUserError("number_too_large",
+      {field => $field, num => "$time", max_num => "99999.99"});
+  }
 }
 
 # Sorts fields according to VALIDATOR_DEPENDENCIES. This is not a
@@ -813,54 +816,55 @@ sub _validate_time {
 # *have* to be in the list--it just has to be earlier than its dependent
 # if it *is* in the list.
 sub _sort_by_dep {
-    my ($invocant, @fields) = @_;
+  my ($invocant, @fields) = @_;
 
-    my $dependencies = $invocant->VALIDATOR_DEPENDENCIES;
-    my ($has_deps, $no_deps) = part { $dependencies->{$_} ? 0 : 1 } @fields;
+  my $dependencies = $invocant->VALIDATOR_DEPENDENCIES;
+  my ($has_deps, $no_deps) = part { $dependencies->{$_} ? 0 : 1 } @fields;
 
-    # For fields with no dependencies, we sort them alphabetically,
-    # so that validation always happens in a consistent order.
-    # Fields with no dependencies come at the start of the list.
-    my @result = sort @{ $no_deps || [] };
+  # For fields with no dependencies, we sort them alphabetically,
+  # so that validation always happens in a consistent order.
+  # Fields with no dependencies come at the start of the list.
+  my @result = sort @{$no_deps || []};
 
-    # Fields with dependencies all go at the end of the list, and if
-    # they have dependencies on *each other*, then they have to be
-    # sorted properly. We go through $has_deps in sorted order to be
-    # sure that fields always validate in a consistent order.
-    foreach my $field (sort @{ $has_deps || [] }) {
-        if (!grep { $_ eq $field } @result) {
-            _insert_dep_field($field, $has_deps, $dependencies, \@result);
-        }
+  # Fields with dependencies all go at the end of the list, and if
+  # they have dependencies on *each other*, then they have to be
+  # sorted properly. We go through $has_deps in sorted order to be
+  # sure that fields always validate in a consistent order.
+  foreach my $field (sort @{$has_deps || []}) {
+    if (!grep { $_ eq $field } @result) {
+      _insert_dep_field($field, $has_deps, $dependencies, \@result);
     }
-    return @result;
+  }
+  return @result;
 }
 
 sub _insert_dep_field {
-    my ($field, $insert_me, $dependencies, $result, $loop_tracking) = @_;
+  my ($field, $insert_me, $dependencies, $result, $loop_tracking) = @_;
 
-    if ($loop_tracking->{$field}) {
-        ThrowCodeError('object_dep_sort_loop', 
-                       { field => $field, 
-                         considered => [keys %$loop_tracking] });
-    }
-    $loop_tracking->{$field} = 1;
+  if ($loop_tracking->{$field}) {
+    ThrowCodeError('object_dep_sort_loop',
+      {field => $field, considered => [keys %$loop_tracking]});
+  }
+  $loop_tracking->{$field} = 1;
 
-    my $required_fields = $dependencies->{$field};
-    # Imagine Field A requires field B...
-    foreach my $required_field (@$required_fields) {
-        # If our dependency is already satisfied, we're good.
-        next if grep { $_ eq $required_field } @$result;
+  my $required_fields = $dependencies->{$field};
 
-        # If our dependency is not in the remaining fields to insert,
-        # then we're also OK.
-        next if !grep { $_ eq $required_field } @$insert_me;
+  # Imagine Field A requires field B...
+  foreach my $required_field (@$required_fields) {
 
-        # So, at this point, we know that Field B is in $insert_me.
-        # So let's put the required field into the result.
-        _insert_dep_field($required_field, $insert_me, $dependencies,
-                          $result, $loop_tracking);
-    }
-    push(@$result, $field);
+    # If our dependency is already satisfied, we're good.
+    next if grep { $_ eq $required_field } @$result;
+
+    # If our dependency is not in the remaining fields to insert,
+    # then we're also OK.
+    next if !grep { $_ eq $required_field } @$insert_me;
+
+    # So, at this point, we know that Field B is in $insert_me.
+    # So let's put the required field into the result.
+    _insert_dep_field($required_field, $insert_me, $dependencies, $result,
+      $loop_tracking);
+  }
+  push(@$result, $field);
 }
 
 ####################
@@ -873,61 +877,67 @@ sub _insert_dep_field {
 # page.
 
 sub _get_db_columns {
-    my $invocant = shift;
-    my $class = ref($invocant) || $invocant;
-    my $cache = Bugzilla->request_cache;
-    my $cache_key = "object_${class}_db_columns";
-    return @{ $cache->{$cache_key} } if $cache->{$cache_key};
-    # Currently you can only add new columns using object_columns, not
-    # remove or modify existing columns, because removing columns would
-    # almost certainly cause Bugzilla to function improperly.
-    my @add_columns;
-    Bugzilla::Hook::process('object_columns',
-                            { class => $class, columns => \@add_columns });
-    my @columns = ($invocant->DB_COLUMNS, @add_columns);
-    $cache->{$cache_key} = \@columns;
-    return @{ $cache->{$cache_key} };
+  my $invocant  = shift;
+  my $class     = ref($invocant) || $invocant;
+  my $cache     = Bugzilla->request_cache;
+  my $cache_key = "object_${class}_db_columns";
+  return @{$cache->{$cache_key}} if $cache->{$cache_key};
+
+  # Currently you can only add new columns using object_columns, not
+  # remove or modify existing columns, because removing columns would
+  # almost certainly cause Bugzilla to function improperly.
+  my @add_columns;
+  Bugzilla::Hook::process('object_columns',
+    {class => $class, columns => \@add_columns});
+  my @columns = ($invocant->DB_COLUMNS, @add_columns);
+  $cache->{$cache_key} = \@columns;
+  return @{$cache->{$cache_key}};
 }
 
 # This method is private and should only be called by Bugzilla::Object.
 sub _get_validators {
-    my $invocant = shift;
-    my $class = ref($invocant) || $invocant;
-    my $cache = Bugzilla->request_cache;
-    my $cache_key = "object_${class}_validators";
-    return $cache->{$cache_key} if $cache->{$cache_key};
-    # We copy this into a hash so that the hook doesn't modify the constant.
-    # (That could be bad in mod_perl.)
-    my %validators = %{ $invocant->VALIDATORS };
-    Bugzilla::Hook::process('object_validators', 
-                            { class => $class, validators => \%validators });
-    $cache->{$cache_key} = \%validators;
-    return $cache->{$cache_key};
+  my $invocant  = shift;
+  my $class     = ref($invocant) || $invocant;
+  my $cache     = Bugzilla->request_cache;
+  my $cache_key = "object_${class}_validators";
+  return $cache->{$cache_key} if $cache->{$cache_key};
+
+  # We copy this into a hash so that the hook doesn't modify the constant.
+  # (That could be bad in mod_perl.)
+  my %validators = %{$invocant->VALIDATORS};
+  Bugzilla::Hook::process('object_validators',
+    {class => $class, validators => \%validators});
+  $cache->{$cache_key} = \%validators;
+  return $cache->{$cache_key};
 }
 
 # These are all the fields that need to be checked, always, when
 # calling create(), because they have no DEFAULT and they are marked
 # NOT NULL.
 sub _required_create_fields {
-    my $class = shift;
-    my $dbh = Bugzilla->dbh;
-    my $table = $class->DB_TABLE;
+  my $class = shift;
+  my $dbh   = Bugzilla->dbh;
+  my $table = $class->DB_TABLE;
 
-    my @columns = $dbh->bz_table_columns($table);
-    my @required;
-    foreach my $column (@columns) {
-        my $def = $dbh->bz_column_info($table, $column);
-        if ($def->{NOTNULL} and !defined $def->{DEFAULT}
-            # SERIAL fields effectively have a DEFAULT, but they're not
-            # listed as having a DEFAULT in DB::Schema.
-            and $def->{TYPE} !~ /serial/i) 
-        {
-            my $field = $class->REQUIRED_FIELD_MAP->{$column} || $column;
-            push(@required, $field);
-        }
+  my @columns = $dbh->bz_table_columns($table);
+  my @required;
+  foreach my $column (@columns) {
+    my $def = $dbh->bz_column_info($table, $column);
+    if (
+      $def->{NOTNULL}
+      and !defined $def->{DEFAULT}
+
+      # SERIAL fields effectively have a DEFAULT, but they're not
+      # listed as having a DEFAULT in DB::Schema.
+      and $def->{TYPE} !~ /serial/i
+      )
+    {
+      my $field = $class->REQUIRED_FIELD_MAP->{$column} || $column;
+      push(@required, $field);
     }
-    push(@required, $class->EXTRA_REQUIRED_FIELDS);
-    return @required;
+  }
+  push(@required, $class->EXTRA_REQUIRED_FIELDS);
+  return @required;
 }
 
 1;

@@ -12,9 +12,9 @@ use strict;
 use warnings;
 
 use fields qw(
-    _info_getter
-    _verifier
-    _persister
+  _info_getter
+  _verifier
+  _persister
 );
 
 use Bugzilla::Constants;
@@ -28,218 +28,223 @@ use Bugzilla::Auth::Persist::Cookie;
 use Socket;
 
 sub new {
-    my ($class, $params) = @_;
-    my $self = fields::new($class);
+  my ($class, $params) = @_;
+  my $self = fields::new($class);
 
-    $params            ||= {};
-    $params->{Login}   ||= Bugzilla->params->{'user_info_class'} . ',Cookie,APIKey';
-    $params->{Verify}  ||= Bugzilla->params->{'user_verify_class'};
+  $params           ||= {};
+  $params->{Login}  ||= Bugzilla->params->{'user_info_class'} . ',Cookie,APIKey';
+  $params->{Verify} ||= Bugzilla->params->{'user_verify_class'};
 
-    $self->{_info_getter} = new Bugzilla::Auth::Login::Stack($params->{Login});
-    $self->{_verifier} = new Bugzilla::Auth::Verify::Stack($params->{Verify});
-    # If we ever have any other login persistence methods besides cookies,
-    # this could become more configurable.
-    $self->{_persister} = new Bugzilla::Auth::Persist::Cookie();
+  $self->{_info_getter} = new Bugzilla::Auth::Login::Stack($params->{Login});
+  $self->{_verifier}    = new Bugzilla::Auth::Verify::Stack($params->{Verify});
 
-    return $self;
+  # If we ever have any other login persistence methods besides cookies,
+  # this could become more configurable.
+  $self->{_persister} = new Bugzilla::Auth::Persist::Cookie();
+
+  return $self;
 }
 
 sub login {
-    my ($self, $type) = @_;
+  my ($self, $type) = @_;
 
-    # Get login info from the cookie, form, environment variables, etc.
-    my $login_info = $self->{_info_getter}->get_login_info();
+  # Get login info from the cookie, form, environment variables, etc.
+  my $login_info = $self->{_info_getter}->get_login_info();
 
-    if ($login_info->{failure}) {
-        return $self->_handle_login_result($login_info, $type);
-    }
-
-    # Now verify their username and password against the DB, LDAP, etc.
-    if ($self->{_info_getter}->{successful}->requires_verification) {
-        $login_info = $self->{_verifier}->check_credentials($login_info);
-        if ($login_info->{failure}) {
-            return $self->_handle_login_result($login_info, $type);
-        }
-        $login_info =
-          $self->{_verifier}->{successful}->create_or_update_user($login_info);
-    }
-    else {
-        $login_info = $self->{_verifier}->create_or_update_user($login_info);
-    }
-
-    if ($login_info->{failure}) {
-        return $self->_handle_login_result($login_info, $type);
-    }
-
-    # Make sure the user isn't disabled.
-    my $user = $login_info->{user};
-    if (!$user->is_enabled) {
-        return $self->_handle_login_result({ failure => AUTH_DISABLED,
-                                              user    => $user }, $type);
-    }
-    $user->set_authorizer($self);
-
+  if ($login_info->{failure}) {
     return $self->_handle_login_result($login_info, $type);
+  }
+
+  # Now verify their username and password against the DB, LDAP, etc.
+  if ($self->{_info_getter}->{successful}->requires_verification) {
+    $login_info = $self->{_verifier}->check_credentials($login_info);
+    if ($login_info->{failure}) {
+      return $self->_handle_login_result($login_info, $type);
+    }
+    $login_info
+      = $self->{_verifier}->{successful}->create_or_update_user($login_info);
+  }
+  else {
+    $login_info = $self->{_verifier}->create_or_update_user($login_info);
+  }
+
+  if ($login_info->{failure}) {
+    return $self->_handle_login_result($login_info, $type);
+  }
+
+  # Make sure the user isn't disabled.
+  my $user = $login_info->{user};
+  if (!$user->is_enabled) {
+    return $self->_handle_login_result({failure => AUTH_DISABLED, user => $user},
+      $type);
+  }
+  $user->set_authorizer($self);
+
+  return $self->_handle_login_result($login_info, $type);
 }
 
 sub can_change_password {
-    my ($self) = @_;
-    my $verifier = $self->{_verifier}->{successful};
-    $verifier  ||= $self->{_verifier};
-    my $getter   = $self->{_info_getter}->{successful};
-    $getter      = $self->{_info_getter} 
-        if (!$getter || $getter->isa('Bugzilla::Auth::Login::Cookie'));
-    return $verifier->can_change_password &&
-           $getter->user_can_create_account;
+  my ($self) = @_;
+  my $verifier = $self->{_verifier}->{successful};
+  $verifier ||= $self->{_verifier};
+  my $getter = $self->{_info_getter}->{successful};
+  $getter = $self->{_info_getter}
+    if (!$getter || $getter->isa('Bugzilla::Auth::Login::Cookie'));
+  return $verifier->can_change_password && $getter->user_can_create_account;
 }
 
 sub can_login {
-    my ($self) = @_;
-    my $getter = $self->{_info_getter}->{successful};
-    $getter    = $self->{_info_getter}
-        if (!$getter || $getter->isa('Bugzilla::Auth::Login::Cookie'));
-    return $getter->can_login;
+  my ($self) = @_;
+  my $getter = $self->{_info_getter}->{successful};
+  $getter = $self->{_info_getter}
+    if (!$getter || $getter->isa('Bugzilla::Auth::Login::Cookie'));
+  return $getter->can_login;
 }
 
 sub can_logout {
-    my ($self) = @_;
-    my $getter = $self->{_info_getter}->{successful};
-    # If there's no successful getter, we're not logged in, so of
-    # course we can't log out!
-    return 0 unless $getter;
-    return $getter->can_logout;
+  my ($self) = @_;
+  my $getter = $self->{_info_getter}->{successful};
+
+  # If there's no successful getter, we're not logged in, so of
+  # course we can't log out!
+  return 0 unless $getter;
+  return $getter->can_logout;
 }
 
 sub login_token {
-    my ($self) = @_;
-    my $getter = $self->{_info_getter}->{successful};
-    if ($getter && $getter->isa('Bugzilla::Auth::Login::Cookie')) {
-        return $getter->login_token;
-    }
-    return undef;
+  my ($self) = @_;
+  my $getter = $self->{_info_getter}->{successful};
+  if ($getter && $getter->isa('Bugzilla::Auth::Login::Cookie')) {
+    return $getter->login_token;
+  }
+  return undef;
 }
 
 sub user_can_create_account {
-    my ($self) = @_;
-    my $verifier = $self->{_verifier}->{successful};
-    $verifier  ||= $self->{_verifier};
-    my $getter   = $self->{_info_getter}->{successful};
-    $getter      = $self->{_info_getter}
-        if (!$getter || $getter->isa('Bugzilla::Auth::Login::Cookie'));
-    return $verifier->user_can_create_account
-           && $getter->user_can_create_account;
+  my ($self) = @_;
+  my $verifier = $self->{_verifier}->{successful};
+  $verifier ||= $self->{_verifier};
+  my $getter = $self->{_info_getter}->{successful};
+  $getter = $self->{_info_getter}
+    if (!$getter || $getter->isa('Bugzilla::Auth::Login::Cookie'));
+  return $verifier->user_can_create_account && $getter->user_can_create_account;
 }
 
 sub extern_id_used {
-    my ($self) = @_;
-    return $self->{_info_getter}->extern_id_used
-           ||  $self->{_verifier}->extern_id_used;
+  my ($self) = @_;
+  return $self->{_info_getter}->extern_id_used
+    || $self->{_verifier}->extern_id_used;
 }
 
 sub can_change_email {
-    return $_[0]->user_can_create_account;
+  return $_[0]->user_can_create_account;
 }
 
 sub _handle_login_result {
-    my ($self, $result, $login_type) = @_;
-    my $dbh = Bugzilla->dbh;
+  my ($self, $result, $login_type) = @_;
+  my $dbh = Bugzilla->dbh;
 
-    my $user      = $result->{user};
-    my $fail_code = $result->{failure};
+  my $user      = $result->{user};
+  my $fail_code = $result->{failure};
 
-    if (!$fail_code) {
-        # We don't persist logins over GET requests in the WebService,
-        # because the persistance information can't be re-used again.
-        # (See Bugzilla::WebService::Server::JSONRPC for more info.)
-        if ($self->{_info_getter}->{successful}->requires_persistence
-            and !Bugzilla->request_cache->{auth_no_automatic_login}) 
-        {
-            $user->{_login_token} = $self->{_persister}->persist_login($user);
-        }
-    }
-    elsif ($fail_code == AUTH_ERROR) {
-        if ($result->{user_error}) {
-            ThrowUserError($result->{user_error}, $result->{details});
-        }
-        else {
-            ThrowCodeError($result->{error}, $result->{details});
-        }
-    }
-    elsif ($fail_code == AUTH_NODATA) {
-        $self->{_info_getter}->fail_nodata($self) 
-            if $login_type == LOGIN_REQUIRED;
+  if (!$fail_code) {
 
-        # If we're not LOGIN_REQUIRED, we just return the default user.
-        $user = Bugzilla->user;
+    # We don't persist logins over GET requests in the WebService,
+    # because the persistance information can't be re-used again.
+    # (See Bugzilla::WebService::Server::JSONRPC for more info.)
+    if ($self->{_info_getter}->{successful}->requires_persistence
+      and !Bugzilla->request_cache->{auth_no_automatic_login})
+    {
+      $user->{_login_token} = $self->{_persister}->persist_login($user);
     }
-    # The username/password may be wrong
-    # Don't let the user know whether the username exists or whether
-    # the password was just wrong. (This makes it harder for a cracker
-    # to find account names by brute force)
-    elsif ($fail_code == AUTH_LOGINFAILED or $fail_code == AUTH_NO_SUCH_USER) {
-        my $remaining_attempts = MAX_LOGIN_ATTEMPTS 
-                                 - ($result->{failure_count} || 0);
-        ThrowUserError("invalid_login_or_password", 
-                       { remaining => $remaining_attempts });
+  }
+  elsif ($fail_code == AUTH_ERROR) {
+    if ($result->{user_error}) {
+      ThrowUserError($result->{user_error}, $result->{details});
     }
-    # The account may be disabled
-    elsif ($fail_code == AUTH_DISABLED) {
-        $self->{_persister}->logout();
-        # XXX This is NOT a good way to do this, architecturally.
-        $self->{_persister}->clear_browser_cookies();
-        # and throw a user error
-        ThrowUserError("account_disabled",
-            {'disabled_reason' => $result->{user}->disabledtext});
-    }
-    elsif ($fail_code == AUTH_LOCKOUT) {
-        my $attempts = $user->account_ip_login_failures;
-
-        # We want to know when the account will be unlocked. This is 
-        # determined by the 5th-from-last login failure (or more/less than
-        # 5th, if MAX_LOGIN_ATTEMPTS is not 5).
-        my $determiner = $attempts->[scalar(@$attempts) - MAX_LOGIN_ATTEMPTS];
-        my $unlock_at = datetime_from($determiner->{login_time}, 
-                                      Bugzilla->local_timezone);
-        $unlock_at->add(minutes => LOGIN_LOCKOUT_INTERVAL);
-
-        # If we were *just* locked out, notify the maintainer about the
-        # lockout.
-        if ($result->{just_locked_out}) {
-            # We're sending to the maintainer, who may be not a Bugzilla 
-            # account, but just an email address. So we use the
-            # installation's default language for sending the email.
-            my $default_settings = Bugzilla::User::Setting::get_defaults();
-            my $template = Bugzilla->template_inner(
-                               $default_settings->{lang}->{default_value});
-            my $address = $attempts->[0]->{ip_addr};
-            # Note: inet_aton will only resolve IPv4 addresses.
-            # For IPv6 we'll need to use inet_pton which requires Perl 5.12.
-            my $n = inet_aton($address);
-            if ($n) {
-                $address = gethostbyaddr($n, AF_INET) . " ($address)"
-            }
-            my $vars = {
-                locked_user => $user,
-                attempts    => $attempts,
-                unlock_at   => $unlock_at,
-                address     => $address,
-            };
-            my $message;
-            $template->process('email/lockout.txt.tmpl', $vars, \$message)
-                || ThrowTemplateError($template->error);
-            MessageToMTA($message);
-        }
-
-        $unlock_at->set_time_zone($user->timezone);
-        ThrowUserError('account_locked', 
-            { ip_addr => $determiner->{ip_addr}, unlock_at => $unlock_at });
-    }
-    # If we get here, then we've run out of options, which shouldn't happen.
     else {
-        ThrowCodeError("authres_unhandled", { value => $fail_code });
+      ThrowCodeError($result->{error}, $result->{details});
+    }
+  }
+  elsif ($fail_code == AUTH_NODATA) {
+    $self->{_info_getter}->fail_nodata($self) if $login_type == LOGIN_REQUIRED;
+
+    # If we're not LOGIN_REQUIRED, we just return the default user.
+    $user = Bugzilla->user;
+  }
+
+  # The username/password may be wrong
+  # Don't let the user know whether the username exists or whether
+  # the password was just wrong. (This makes it harder for a cracker
+  # to find account names by brute force)
+  elsif ($fail_code == AUTH_LOGINFAILED or $fail_code == AUTH_NO_SUCH_USER) {
+    my $remaining_attempts = MAX_LOGIN_ATTEMPTS - ($result->{failure_count} || 0);
+    ThrowUserError("invalid_login_or_password", {remaining => $remaining_attempts});
+  }
+
+  # The account may be disabled
+  elsif ($fail_code == AUTH_DISABLED) {
+    $self->{_persister}->logout();
+
+    # XXX This is NOT a good way to do this, architecturally.
+    $self->{_persister}->clear_browser_cookies();
+
+    # and throw a user error
+    ThrowUserError("account_disabled",
+      {'disabled_reason' => $result->{user}->disabledtext});
+  }
+  elsif ($fail_code == AUTH_LOCKOUT) {
+    my $attempts = $user->account_ip_login_failures;
+
+    # We want to know when the account will be unlocked. This is
+    # determined by the 5th-from-last login failure (or more/less than
+    # 5th, if MAX_LOGIN_ATTEMPTS is not 5).
+    my $determiner = $attempts->[scalar(@$attempts) - MAX_LOGIN_ATTEMPTS];
+    my $unlock_at
+      = datetime_from($determiner->{login_time}, Bugzilla->local_timezone);
+    $unlock_at->add(minutes => LOGIN_LOCKOUT_INTERVAL);
+
+    # If we were *just* locked out, notify the maintainer about the
+    # lockout.
+    if ($result->{just_locked_out}) {
+
+      # We're sending to the maintainer, who may be not a Bugzilla
+      # account, but just an email address. So we use the
+      # installation's default language for sending the email.
+      my $default_settings = Bugzilla::User::Setting::get_defaults();
+      my $template
+        = Bugzilla->template_inner($default_settings->{lang}->{default_value});
+      my $address = $attempts->[0]->{ip_addr};
+
+      # Note: inet_aton will only resolve IPv4 addresses.
+      # For IPv6 we'll need to use inet_pton which requires Perl 5.12.
+      my $n = inet_aton($address);
+      if ($n) {
+        $address = gethostbyaddr($n, AF_INET) . " ($address)";
+      }
+      my $vars = {
+        locked_user => $user,
+        attempts    => $attempts,
+        unlock_at   => $unlock_at,
+        address     => $address,
+      };
+      my $message;
+      $template->process('email/lockout.txt.tmpl', $vars, \$message)
+        || ThrowTemplateError($template->error);
+      MessageToMTA($message);
     }
 
-    return $user;
+    $unlock_at->set_time_zone($user->timezone);
+    ThrowUserError('account_locked',
+      {ip_addr => $determiner->{ip_addr}, unlock_at => $unlock_at});
+  }
+
+  # If we get here, then we've run out of options, which shouldn't happen.
+  else {
+    ThrowCodeError("authres_unhandled", {value => $fail_code});
+  }
+
+  return $user;
 }
 
 1;

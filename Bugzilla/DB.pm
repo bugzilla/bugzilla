@@ -33,7 +33,7 @@ use Storable qw(dclone);
 # Constants
 #####################################################################
 
-use constant BLOB_TYPE => DBI::SQL_BLOB;
+use constant BLOB_TYPE       => DBI::SQL_BLOB;
 use constant ISOLATION_LEVEL => 'REPEATABLE READ';
 
 # Set default values for what used to be the enum types.  These values
@@ -46,14 +46,14 @@ use constant ISOLATION_LEVEL => 'REPEATABLE READ';
 # Bugzilla with enums. After that, they are either controlled through
 # the Bugzilla UI or through the DB.
 use constant ENUM_DEFAULTS => {
-    bug_severity  => ['blocker', 'critical', 'major', 'normal',
-                      'minor', 'trivial', 'enhancement'],
-    priority     => ["Highest", "High", "Normal", "Low", "Lowest", "---"],
-    op_sys       => ["All","Windows","Mac OS","Linux","Other"],
-    rep_platform => ["All","PC","Macintosh","Other"],
-    bug_status   => ["UNCONFIRMED","CONFIRMED","IN_PROGRESS","RESOLVED",
-                     "VERIFIED"],
-    resolution   => ["","FIXED","INVALID","WONTFIX", "DUPLICATE","WORKSFORME"],
+  bug_severity =>
+    ['blocker', 'critical', 'major', 'normal', 'minor', 'trivial', 'enhancement'],
+  priority     => ["Highest", "High",    "Normal",    "Low",   "Lowest", "---"],
+  op_sys       => ["All",     "Windows", "Mac OS",    "Linux", "Other"],
+  rep_platform => ["All",     "PC",      "Macintosh", "Other"],
+  bug_status =>
+    ["UNCONFIRMED", "CONFIRMED", "IN_PROGRESS", "RESOLVED", "VERIFIED"],
+  resolution => ["", "FIXED", "INVALID", "WONTFIX", "DUPLICATE", "WORKSFORME"],
 };
 
 # The character that means "OR" in a boolean fulltext search. If empty,
@@ -83,14 +83,14 @@ use constant WORD_END   => '($|[^[:alnum:]])';
 use constant INDEX_DROPS_REQUIRE_FK_DROPS => 1;
 
 #####################################################################
-# Overridden Superclass Methods 
+# Overridden Superclass Methods
 #####################################################################
 
 sub quote {
-    my $self = shift;
-    my $retval = $self->SUPER::quote(@_);
-    trick_taint($retval) if defined $retval;
-    return $retval;
+  my $self   = shift;
+  my $retval = $self->SUPER::quote(@_);
+  trick_taint($retval) if defined $retval;
+  return $retval;
 }
 
 #####################################################################
@@ -98,95 +98,94 @@ sub quote {
 #####################################################################
 
 sub connect_shadow {
-    my $params = Bugzilla->params;
-    die "Tried to connect to non-existent shadowdb" 
-        unless $params->{'shadowdb'};
+  my $params = Bugzilla->params;
+  die "Tried to connect to non-existent shadowdb" unless $params->{'shadowdb'};
 
-    # Instead of just passing in a new hashref, we locally modify the
-    # values of "localconfig", because some drivers access it while
-    # connecting.
-    my %connect_params = %{ Bugzilla->localconfig };
-    $connect_params{db_host} = $params->{'shadowdbhost'};
-    $connect_params{db_name} = $params->{'shadowdb'};
-    $connect_params{db_port} = $params->{'shadowdbport'};
-    $connect_params{db_sock} = $params->{'shadowdbsock'};
+  # Instead of just passing in a new hashref, we locally modify the
+  # values of "localconfig", because some drivers access it while
+  # connecting.
+  my %connect_params = %{Bugzilla->localconfig};
+  $connect_params{db_host} = $params->{'shadowdbhost'};
+  $connect_params{db_name} = $params->{'shadowdb'};
+  $connect_params{db_port} = $params->{'shadowdbport'};
+  $connect_params{db_sock} = $params->{'shadowdbsock'};
 
-    return _connect(\%connect_params);
+  return _connect(\%connect_params);
 }
 
 sub connect_main {
-    my $lc = Bugzilla->localconfig;
-    return _connect(Bugzilla->localconfig); 
+  my $lc = Bugzilla->localconfig;
+  return _connect(Bugzilla->localconfig);
 }
 
 sub _connect {
-    my ($params) = @_;
+  my ($params) = @_;
 
-    my $driver = $params->{db_driver};
-    my $pkg_module = DB_MODULE->{lc($driver)}->{db};
+  my $driver     = $params->{db_driver};
+  my $pkg_module = DB_MODULE->{lc($driver)}->{db};
 
-    # do the actual import
-    eval ("require $pkg_module")
-        || die ("'$driver' is not a valid choice for \$db_driver in "
-                . " localconfig: " . $@);
+  # do the actual import
+  eval("require $pkg_module")
+    || die(
+    "'$driver' is not a valid choice for \$db_driver in " . " localconfig: " . $@);
 
-    # instantiate the correct DB specific module
-    my $dbh = $pkg_module->new($params);
+  # instantiate the correct DB specific module
+  my $dbh = $pkg_module->new($params);
 
-    return $dbh;
+  return $dbh;
 }
 
 sub _handle_error {
-    require Carp;
+  require Carp;
 
-    # Cut down the error string to a reasonable size
-    $_[0] = substr($_[0], 0, 2000) . ' ... ' . substr($_[0], -2000)
-        if length($_[0]) > 4000;
-    $_[0] = Carp::longmess($_[0]);
-    return 0; # Now let DBI handle raising the error
+  # Cut down the error string to a reasonable size
+  $_[0] = substr($_[0], 0, 2000) . ' ... ' . substr($_[0], -2000)
+    if length($_[0]) > 4000;
+  $_[0] = Carp::longmess($_[0]);
+  return 0;    # Now let DBI handle raising the error
 }
 
 sub bz_check_requirements {
-    my ($output) = @_;
+  my ($output) = @_;
 
-    my $lc = Bugzilla->localconfig;
-    my $db = DB_MODULE->{lc($lc->{db_driver})};
+  my $lc = Bugzilla->localconfig;
+  my $db = DB_MODULE->{lc($lc->{db_driver})};
 
-    # Only certain values are allowed for $db_driver.
-    if (!defined $db) {
-        die "$lc->{db_driver} is not a valid choice for \$db_driver in"
-            . bz_locations()->{'localconfig'};
-    }
+  # Only certain values are allowed for $db_driver.
+  if (!defined $db) {
+    die "$lc->{db_driver} is not a valid choice for \$db_driver in"
+      . bz_locations()->{'localconfig'};
+  }
 
-    # Check the existence and version of the DBD that we need.
-    my $dbd = $db->{dbd};
-    _bz_check_dbd($db, $output);
+  # Check the existence and version of the DBD that we need.
+  my $dbd = $db->{dbd};
+  _bz_check_dbd($db, $output);
 
-    # We don't try to connect to the actual database if $db_check is
-    # disabled.
-    unless ($lc->{db_check}) {
-        print "\n" if $output;
-        return;
-    }
-
-    # And now check the version of the database server itself.
-    my $dbh = _get_no_db_connection();
-    $dbh->bz_check_server_version($db, $output);
-
+  # We don't try to connect to the actual database if $db_check is
+  # disabled.
+  unless ($lc->{db_check}) {
     print "\n" if $output;
+    return;
+  }
+
+  # And now check the version of the database server itself.
+  my $dbh = _get_no_db_connection();
+  $dbh->bz_check_server_version($db, $output);
+
+  print "\n" if $output;
 }
 
 sub _bz_check_dbd {
-    my ($db, $output) = @_;
+  my ($db, $output) = @_;
 
-    my $dbd = $db->{dbd};
-    unless (have_vers($dbd, $output)) {
-        my $sql_server = $db->{name};
-        my $command = install_command($dbd);
-        my $root    = ROOT_USER;
-        my $dbd_mod = $dbd->{module};
-        my $dbd_ver = $dbd->{version};
-        die <<EOT;
+  my $dbd = $db->{dbd};
+  unless (have_vers($dbd, $output)) {
+    my $sql_server = $db->{name};
+    my $command    = install_command($dbd);
+    my $root       = ROOT_USER;
+    my $dbd_mod    = $dbd->{module};
+    my $dbd_ver    = $dbd->{version};
+    die <<EOT;
 
 For $sql_server, Bugzilla requires that perl's $dbd_mod $dbd_ver or later be
 installed. To install this module, run the following command (as $root):
@@ -194,103 +193,107 @@ installed. To install this module, run the following command (as $root):
     $command
 
 EOT
-    }
+  }
 }
 
 sub bz_check_server_version {
-    my ($self, $db, $output) = @_;
+  my ($self, $db, $output) = @_;
 
-    my $sql_vers = $self->bz_server_version;
-    $self->disconnect;
+  my $sql_vers = $self->bz_server_version;
+  $self->disconnect;
 
-    my $sql_want = $db->{db_version};
-    my $version_ok = vers_cmp($sql_vers, $sql_want) > -1 ? 1 : 0;
+  my $sql_want   = $db->{db_version};
+  my $version_ok = vers_cmp($sql_vers, $sql_want) > -1 ? 1 : 0;
 
-    my $sql_server = $db->{name};
-    if ($output) {
-        Bugzilla::Install::Requirements::_checking_for({
-            package => $sql_server, wanted => $sql_want,
-            found   => $sql_vers, ok => $version_ok });
-    }
+  my $sql_server = $db->{name};
+  if ($output) {
+    Bugzilla::Install::Requirements::_checking_for({
+      package => $sql_server,
+      wanted  => $sql_want,
+      found   => $sql_vers,
+      ok      => $version_ok
+    });
+  }
 
-    # Check what version of the database server is installed and let
-    # the user know if the version is too old to be used with Bugzilla.
-    if (!$version_ok) {
-        die <<EOT;
+  # Check what version of the database server is installed and let
+  # the user know if the version is too old to be used with Bugzilla.
+  if (!$version_ok) {
+    die <<EOT;
 
 Your $sql_server v$sql_vers is too old. Bugzilla requires version
 $sql_want or later of $sql_server. Please download and install a
 newer version.
 
 EOT
-    }
+  }
 
-    # This is used by subclasses.
-    return $sql_vers;
+  # This is used by subclasses.
+  return $sql_vers;
 }
 
 # Note that this function requires that localconfig exist and
 # be valid.
 sub bz_create_database {
-    my $dbh;
-    # See if we can connect to the actual Bugzilla database.
-    my $conn_success = eval { $dbh = connect_main() };
-    my $db_name = Bugzilla->localconfig->{db_name};
+  my $dbh;
 
-    if (!$conn_success) {
-        $dbh = _get_no_db_connection();
-        say "Creating database $db_name...";
+  # See if we can connect to the actual Bugzilla database.
+  my $conn_success = eval { $dbh = connect_main() };
+  my $db_name      = Bugzilla->localconfig->{db_name};
 
-        # Try to create the DB, and if we fail print a friendly error.
-        my $success  = eval {
-            my @sql = $dbh->_bz_schema->get_create_database_sql($db_name);
-            # This ends with 1 because this particular do doesn't always
-            # return something.
-            $dbh->do($_) foreach @sql; 1;
-        };
-        if (!$success) {
-            my $error = $dbh->errstr || $@;
-            chomp($error);
-            die "The '$db_name' database could not be created.",
-                " The error returned was:\n\n    $error\n\n",
-                _bz_connect_error_reasons();
-        }
+  if (!$conn_success) {
+    $dbh = _get_no_db_connection();
+    say "Creating database $db_name...";
+
+    # Try to create the DB, and if we fail print a friendly error.
+    my $success = eval {
+      my @sql = $dbh->_bz_schema->get_create_database_sql($db_name);
+
+      # This ends with 1 because this particular do doesn't always
+      # return something.
+      $dbh->do($_) foreach @sql;
+      1;
+    };
+    if (!$success) {
+      my $error = $dbh->errstr || $@;
+      chomp($error);
+      die "The '$db_name' database could not be created.",
+        " The error returned was:\n\n    $error\n\n", _bz_connect_error_reasons();
     }
+  }
 
-    $dbh->disconnect;
+  $dbh->disconnect;
 }
 
 # A helper for bz_create_database and bz_check_requirements.
 sub _get_no_db_connection {
-    my ($sql_server) = @_;
-    my $dbh;
-    my %connect_params = %{ Bugzilla->localconfig };
-    $connect_params{db_name} = '';
-    my $conn_success = eval {
-        $dbh = _connect(\%connect_params);
-    };
-    if (!$conn_success) {
-        my $driver = $connect_params{db_driver};
-        my $sql_server = DB_MODULE->{lc($driver)}->{name};
-        # Can't use $dbh->errstr because $dbh is undef.
-        my $error = $DBI::errstr || $@;
-        chomp($error);
-        die "There was an error connecting to $sql_server:\n\n",
-            "    $error\n\n", _bz_connect_error_reasons(), "\n";
-    }
-    return $dbh;    
+  my ($sql_server) = @_;
+  my $dbh;
+  my %connect_params = %{Bugzilla->localconfig};
+  $connect_params{db_name} = '';
+  my $conn_success = eval { $dbh = _connect(\%connect_params); };
+  if (!$conn_success) {
+    my $driver     = $connect_params{db_driver};
+    my $sql_server = DB_MODULE->{lc($driver)}->{name};
+
+    # Can't use $dbh->errstr because $dbh is undef.
+    my $error = $DBI::errstr || $@;
+    chomp($error);
+    die "There was an error connecting to $sql_server:\n\n", "    $error\n\n",
+      _bz_connect_error_reasons(), "\n";
+  }
+  return $dbh;
 }
 
 # Just a helper because we have to re-use this text.
 # We don't use this in db_new because it gives away the database
 # username, and db_new errors can show up on CGIs.
 sub _bz_connect_error_reasons {
-    my $lc_file = bz_locations()->{'localconfig'};
-    my $lc      = Bugzilla->localconfig;
-    my $db      = DB_MODULE->{lc($lc->{db_driver})};
-    my $server  = $db->{name};
+  my $lc_file = bz_locations()->{'localconfig'};
+  my $lc      = Bugzilla->localconfig;
+  my $db      = DB_MODULE->{lc($lc->{db_driver})};
+  my $server  = $db->{name};
 
-return <<EOT;
+  return <<EOT;
 This might have several reasons:
 
 * $server is not running.
@@ -309,154 +312,157 @@ EOT
 
 # List of abstract methods we are checking the derived class implements
 our @_abstract_methods = qw(new sql_regexp sql_not_regexp sql_limit sql_to_days
-                            sql_date_format sql_date_math bz_explain
-                            sql_group_concat);
+  sql_date_format sql_date_math bz_explain
+  sql_group_concat);
 
 # This overridden import method will check implementation of inherited classes
 # for missing implementation of abstract methods
 # See http://perlmonks.thepen.com/44265.html
 sub import {
-    my $pkg = shift;
+  my $pkg = shift;
 
-    # do not check this module
-    if ($pkg ne __PACKAGE__) {
-        # make sure all abstract methods are implemented
-        foreach my $meth (@_abstract_methods) {
-            $pkg->can($meth)
-                or die("Class $pkg does not define method $meth");
-        }
+  # do not check this module
+  if ($pkg ne __PACKAGE__) {
+
+    # make sure all abstract methods are implemented
+    foreach my $meth (@_abstract_methods) {
+      $pkg->can($meth) or die("Class $pkg does not define method $meth");
     }
+  }
 
-    # Now we want to call our superclass implementation.
-    # If our superclass is Exporter, which is using caller() to find
-    # a namespace to populate, we need to adjust for this extra call.
-    # All this can go when we stop using deprecated functions.
-    my $is_exporter = $pkg->isa('Exporter');
-    $Exporter::ExportLevel++ if $is_exporter;
-    $pkg->SUPER::import(@_);
-    $Exporter::ExportLevel-- if $is_exporter;
+  # Now we want to call our superclass implementation.
+  # If our superclass is Exporter, which is using caller() to find
+  # a namespace to populate, we need to adjust for this extra call.
+  # All this can go when we stop using deprecated functions.
+  my $is_exporter = $pkg->isa('Exporter');
+  $Exporter::ExportLevel++ if $is_exporter;
+  $pkg->SUPER::import(@_);
+  $Exporter::ExportLevel-- if $is_exporter;
 }
 
 sub sql_istrcmp {
-    my ($self, $left, $right, $op) = @_;
-    $op ||= "=";
+  my ($self, $left, $right, $op) = @_;
+  $op ||= "=";
 
-    return $self->sql_istring($left) . " $op " . $self->sql_istring($right);
+  return $self->sql_istring($left) . " $op " . $self->sql_istring($right);
 }
 
 sub sql_istring {
-    my ($self, $string) = @_;
+  my ($self, $string) = @_;
 
-    return "LOWER($string)";
+  return "LOWER($string)";
 }
 
 sub sql_iposition {
-    my ($self, $fragment, $text) = @_;
-    $fragment = $self->sql_istring($fragment);
-    $text = $self->sql_istring($text);
-    return $self->sql_position($fragment, $text);
+  my ($self, $fragment, $text) = @_;
+  $fragment = $self->sql_istring($fragment);
+  $text     = $self->sql_istring($text);
+  return $self->sql_position($fragment, $text);
 }
 
 sub sql_position {
-    my ($self, $fragment, $text) = @_;
+  my ($self, $fragment, $text) = @_;
 
-    return "POSITION($fragment IN $text)";
+  return "POSITION($fragment IN $text)";
 }
 
 sub sql_like {
-    my ($self, $fragment, $column) = @_;
+  my ($self, $fragment, $column) = @_;
 
-    my $quoted = $self->quote($fragment);
+  my $quoted = $self->quote($fragment);
 
-    return $self->sql_position($quoted, $column) . " > 0";
+  return $self->sql_position($quoted, $column) . " > 0";
 }
 
 sub sql_ilike {
-    my ($self, $fragment, $column) = @_;
+  my ($self, $fragment, $column) = @_;
 
-    my $quoted = $self->quote($fragment);
+  my $quoted = $self->quote($fragment);
 
-    return $self->sql_iposition($quoted, $column) . " > 0";
+  return $self->sql_iposition($quoted, $column) . " > 0";
 }
 
 sub sql_not_ilike {
-    my ($self, $fragment, $column) = @_;
+  my ($self, $fragment, $column) = @_;
 
-    my $quoted = $self->quote($fragment);
+  my $quoted = $self->quote($fragment);
 
-    return $self->sql_iposition($quoted, $column) . " = 0";
+  return $self->sql_iposition($quoted, $column) . " = 0";
 }
 
 
 sub sql_group_by {
-    my ($self, $needed_columns, $optional_columns) = @_;
+  my ($self, $needed_columns, $optional_columns) = @_;
 
-    my $expression = "GROUP BY $needed_columns";
-    $expression .= ", " . $optional_columns if $optional_columns;
-    
-    return $expression;
+  my $expression = "GROUP BY $needed_columns";
+  $expression .= ", " . $optional_columns if $optional_columns;
+
+  return $expression;
 }
 
 sub sql_string_concat {
-    my ($self, @params) = @_;
-    
-    return '(' . join(' || ', @params) . ')';
+  my ($self, @params) = @_;
+
+  return '(' . join(' || ', @params) . ')';
 }
 
 sub sql_string_until {
-    my ($self, $string, $substring) = @_;
+  my ($self, $string, $substring) = @_;
 
-    my $position = $self->sql_position($substring, $string);
-    return "CASE WHEN $position != 0"
-             . " THEN SUBSTR($string, 1, $position - 1)"
-             . " ELSE $string END";
+  my $position = $self->sql_position($substring, $string);
+  return
+      "CASE WHEN $position != 0"
+    . " THEN SUBSTR($string, 1, $position - 1)"
+    . " ELSE $string END";
 }
 
 sub sql_in {
-    my ($self, $column_name, $in_list_ref, $negate) = @_;
-    return " $column_name "
-             . ($negate ? "NOT " : "")
-             . "IN (" . join(',', @$in_list_ref) . ") ";
+  my ($self, $column_name, $in_list_ref, $negate) = @_;
+  return
+      " $column_name "
+    . ($negate ? "NOT " : "") . "IN ("
+    . join(',', @$in_list_ref) . ") ";
 }
 
 sub sql_fulltext_search {
-    my ($self, $column, $text) = @_;
+  my ($self, $column, $text) = @_;
 
-    # This is as close as we can get to doing full text search using
-    # standard ANSI SQL, without real full text search support. DB specific
-    # modules should override this, as this will be always much slower.
+  # This is as close as we can get to doing full text search using
+  # standard ANSI SQL, without real full text search support. DB specific
+  # modules should override this, as this will be always much slower.
 
-    # make the string lowercase to do case insensitive search
-    my $lower_text = lc($text);
+  # make the string lowercase to do case insensitive search
+  my $lower_text = lc($text);
 
-    # split the text we're searching for into separate words. As a hack
-    # to allow quicksearch to work, if the field starts and ends with
-    # a double-quote, then we don't split it into words. We can't use
-    # Text::ParseWords here because it gets very confused by unbalanced
-    # quotes, which breaks searches like "don't try this" (because of the
-    # unbalanced single-quote in "don't").
-    my @words;
-    if ($lower_text =~ /^"/ and $lower_text =~ /"$/) {
-        $lower_text =~ s/^"//;
-        $lower_text =~ s/"$//;
-        @words = ($lower_text);
-    }
-    else {
-        @words = split(/\s+/, $lower_text);
-    }
+  # split the text we're searching for into separate words. As a hack
+  # to allow quicksearch to work, if the field starts and ends with
+  # a double-quote, then we don't split it into words. We can't use
+  # Text::ParseWords here because it gets very confused by unbalanced
+  # quotes, which breaks searches like "don't try this" (because of the
+  # unbalanced single-quote in "don't").
+  my @words;
+  if ($lower_text =~ /^"/ and $lower_text =~ /"$/) {
+    $lower_text =~ s/^"//;
+    $lower_text =~ s/"$//;
+    @words = ($lower_text);
+  }
+  else {
+    @words = split(/\s+/, $lower_text);
+  }
 
-    # surround the words with wildcards and SQL quotes so we can use them
-    # in LIKE search clauses
-    @words = map($self->quote("\%$_\%"), @words);
+  # surround the words with wildcards and SQL quotes so we can use them
+  # in LIKE search clauses
+  @words = map($self->quote("\%$_\%"), @words);
 
-    # untaint words, since they are safe to use now that we've quoted them
-    trick_taint($_) foreach @words;
+  # untaint words, since they are safe to use now that we've quoted them
+  trick_taint($_) foreach @words;
 
-    # turn the words into a set of LIKE search clauses
-    @words = map("LOWER($column) LIKE $_", @words);
+  # turn the words into a set of LIKE search clauses
+  @words = map("LOWER($column) LIKE $_", @words);
 
-    # search for occurrences of all specified words in the column
-    return join (" AND ", @words), "CASE WHEN (" . join(" AND ", @words) . ") THEN 1 ELSE 0 END";
+  # search for occurrences of all specified words in the column
+  return join(" AND ", @words),
+    "CASE WHEN (" . join(" AND ", @words) . ") THEN 1 ELSE 0 END";
 }
 
 #####################################################################
@@ -465,24 +471,27 @@ sub sql_fulltext_search {
 
 # XXX - Needs to be documented.
 sub bz_server_version {
-    my ($self) = @_;
-    return $self->get_info(18); # SQL_DBMS_VER
+  my ($self) = @_;
+  return $self->get_info(18);    # SQL_DBMS_VER
 }
 
 sub bz_last_key {
-    my ($self, $table, $column) = @_;
+  my ($self, $table, $column) = @_;
 
-    return $self->last_insert_id(Bugzilla->localconfig->{db_name}, undef, 
-                                 $table, $column);
+  return $self->last_insert_id(Bugzilla->localconfig->{db_name},
+    undef, $table, $column);
 }
 
 sub bz_check_regexp {
-    my ($self, $pattern) = @_;
+  my ($self, $pattern) = @_;
 
-    eval { $self->do("SELECT " . $self->sql_regexp($self->quote("a"), $pattern, 1)) };
+  eval {
+    $self->do("SELECT " . $self->sql_regexp($self->quote("a"), $pattern, 1));
+  };
 
-    $@ && ThrowUserError('illegal_regexp', 
-        { value => $pattern, dberror => $self->errstr }); 
+  $@
+    && ThrowUserError('illegal_regexp',
+    {value => $pattern, dberror => $self->errstr});
 }
 
 #####################################################################
@@ -490,99 +499,100 @@ sub bz_check_regexp {
 #####################################################################
 
 sub bz_setup_database {
-    my ($self) = @_;
+  my ($self) = @_;
 
-    # If we haven't ever stored a serialized schema,
-    # set up the bz_schema table and store it.
-    $self->_bz_init_schema_storage();
-   
-    # We don't use bz_table_list here, because that uses _bz_real_schema.
-    # We actually want the table list from the ABSTRACT_SCHEMA in
-    # Bugzilla::DB::Schema.
-    my @desired_tables = $self->_bz_schema->get_table_list();
-    my $bugs_exists = $self->bz_table_info('bugs');
-    if (!$bugs_exists) {
-        say install_string('db_table_setup');
-    }
+  # If we haven't ever stored a serialized schema,
+  # set up the bz_schema table and store it.
+  $self->_bz_init_schema_storage();
 
-    foreach my $table_name (@desired_tables) {
-        $self->bz_add_table($table_name, { silently => !$bugs_exists });
-    }
+  # We don't use bz_table_list here, because that uses _bz_real_schema.
+  # We actually want the table list from the ABSTRACT_SCHEMA in
+  # Bugzilla::DB::Schema.
+  my @desired_tables = $self->_bz_schema->get_table_list();
+  my $bugs_exists    = $self->bz_table_info('bugs');
+  if (!$bugs_exists) {
+    say install_string('db_table_setup');
+  }
+
+  foreach my $table_name (@desired_tables) {
+    $self->bz_add_table($table_name, {silently => !$bugs_exists});
+  }
 }
 
 # This really just exists to get overridden in Bugzilla::DB::Mysql.
 sub bz_enum_initial_values {
-    return ENUM_DEFAULTS;
+  return ENUM_DEFAULTS;
 }
 
 sub bz_populate_enum_tables {
-    my ($self) = @_; 
+  my ($self) = @_;
 
-    my $any_severities = $self->selectrow_array(
-        'SELECT 1 FROM bug_severity ' . $self->sql_limit(1));
-    print install_string('db_enum_setup'), "\n  " if !$any_severities;
+  my $any_severities
+    = $self->selectrow_array('SELECT 1 FROM bug_severity ' . $self->sql_limit(1));
+  print install_string('db_enum_setup'), "\n  " if !$any_severities;
 
-    my $enum_values = $self->bz_enum_initial_values();
-    while (my ($table, $values) = each %$enum_values) {
-        $self->_bz_populate_enum_table($table, $values);
-    }
+  my $enum_values = $self->bz_enum_initial_values();
+  while (my ($table, $values) = each %$enum_values) {
+    $self->_bz_populate_enum_table($table, $values);
+  }
 
-    print "\n" if !$any_severities;
+  print "\n" if !$any_severities;
 }
 
 sub bz_setup_foreign_keys {
-    my ($self) = @_;
+  my ($self) = @_;
 
-    # profiles_activity was the first table to get foreign keys,
-    # so if it doesn't have them, then we're setting up FKs
-    # for the first time, and should be quieter about it.
-    my $activity_fk = $self->bz_fk_info('profiles_activity', 'userid');
-    my $any_fks = $activity_fk && $activity_fk->{created};
-    if (!$any_fks) {
-        say get_text('install_fk_setup');
-    }
+  # profiles_activity was the first table to get foreign keys,
+  # so if it doesn't have them, then we're setting up FKs
+  # for the first time, and should be quieter about it.
+  my $activity_fk = $self->bz_fk_info('profiles_activity', 'userid');
+  my $any_fks = $activity_fk && $activity_fk->{created};
+  if (!$any_fks) {
+    say get_text('install_fk_setup');
+  }
 
-    my @tables = $self->bz_table_list();
-    foreach my $table (@tables) {
-        my @columns = $self->bz_table_columns($table);
-        my %add_fks;
-        foreach my $column (@columns) {
-            # First we check for any FKs that have created => 0,
-            # in the _bz_real_schema. This also picks up FKs with
-            # created => 1, but bz_add_fks will ignore those.
-            my $fk = $self->bz_fk_info($table, $column);
-            # Then we check the abstract schema to see if there
-            # should be an FK on this column, but one wasn't set in the
-            # _bz_real_schema for some reason. We do this to handle
-            # various problems caused by upgrading from versions
-            # prior to 4.2, and also to handle problems caused
-            # by enabling an extension pre-4.2, disabling it for
-            # the 4.2 upgrade, and then re-enabling it later.
-            unless ($fk && $fk->{created}) {
-                my $standard_def = 
-                    $self->_bz_schema->get_column_abstract($table, $column);
-                if (exists $standard_def->{REFERENCES}) {
-                    $fk = dclone($standard_def->{REFERENCES});
-                }
-            }
+  my @tables = $self->bz_table_list();
+  foreach my $table (@tables) {
+    my @columns = $self->bz_table_columns($table);
+    my %add_fks;
+    foreach my $column (@columns) {
 
-            $add_fks{$column} = $fk if $fk;
+      # First we check for any FKs that have created => 0,
+      # in the _bz_real_schema. This also picks up FKs with
+      # created => 1, but bz_add_fks will ignore those.
+      my $fk = $self->bz_fk_info($table, $column);
+
+      # Then we check the abstract schema to see if there
+      # should be an FK on this column, but one wasn't set in the
+      # _bz_real_schema for some reason. We do this to handle
+      # various problems caused by upgrading from versions
+      # prior to 4.2, and also to handle problems caused
+      # by enabling an extension pre-4.2, disabling it for
+      # the 4.2 upgrade, and then re-enabling it later.
+      unless ($fk && $fk->{created}) {
+        my $standard_def = $self->_bz_schema->get_column_abstract($table, $column);
+        if (exists $standard_def->{REFERENCES}) {
+          $fk = dclone($standard_def->{REFERENCES});
         }
-        $self->bz_add_fks($table, \%add_fks, { silently => !$any_fks });
+      }
+
+      $add_fks{$column} = $fk if $fk;
     }
+    $self->bz_add_fks($table, \%add_fks, {silently => !$any_fks});
+  }
 }
 
 # This is used by contrib/bzdbcopy.pl, mostly.
 sub bz_drop_foreign_keys {
-    my ($self) = @_;
+  my ($self) = @_;
 
-    my @tables = $self->bz_table_list();
-    foreach my $table (@tables) {
-        my @columns = $self->bz_table_columns($table);
-        foreach my $column (@columns) {
-            $self->bz_drop_fk($table, $column);
-        }
+  my @tables = $self->bz_table_list();
+  foreach my $table (@tables) {
+    my @columns = $self->bz_table_columns($table);
+    foreach my $column (@columns) {
+      $self->bz_drop_fk($table, $column);
     }
+  }
 }
 
 #####################################################################
@@ -590,119 +600,121 @@ sub bz_drop_foreign_keys {
 #####################################################################
 
 sub bz_add_column {
-    my ($self, $table, $name, $new_def, $init_value) = @_;
+  my ($self, $table, $name, $new_def, $init_value) = @_;
 
-    # You can't add a NOT NULL column to a table with
-    # no DEFAULT statement, unless you have an init_value.
-    # SERIAL types are an exception, though, because they can
-    # auto-populate.
-    if ( $new_def->{NOTNULL} && !exists $new_def->{DEFAULT} 
-         && !defined $init_value && $new_def->{TYPE} !~ /SERIAL/)
-    {
-        ThrowCodeError('column_not_null_without_default',
-                       { name => "$table.$name" });
+  # You can't add a NOT NULL column to a table with
+  # no DEFAULT statement, unless you have an init_value.
+  # SERIAL types are an exception, though, because they can
+  # auto-populate.
+  if ( $new_def->{NOTNULL}
+    && !exists $new_def->{DEFAULT}
+    && !defined $init_value
+    && $new_def->{TYPE} !~ /SERIAL/)
+  {
+    ThrowCodeError('column_not_null_without_default', {name => "$table.$name"});
+  }
+
+  my $current_def = $self->bz_column_info($table, $name);
+
+  if (!$current_def) {
+
+    # REFERENCES need to happen later and not be created right away
+    my $trimmed_def = dclone($new_def);
+    delete $trimmed_def->{REFERENCES};
+    my @statements
+      = $self->_bz_real_schema->get_add_column_ddl($table, $name, $trimmed_def,
+      defined $init_value ? $self->quote($init_value) : undef);
+    print get_text('install_column_add', {column => $name, table => $table}) . "\n"
+      if Bugzilla->usage_mode == USAGE_MODE_CMDLINE;
+    foreach my $sql (@statements) {
+      $self->do($sql);
     }
 
-    my $current_def = $self->bz_column_info($table, $name);
-
-    if (!$current_def) {
-        # REFERENCES need to happen later and not be created right away
-        my $trimmed_def = dclone($new_def);
-        delete $trimmed_def->{REFERENCES};
-        my @statements = $self->_bz_real_schema->get_add_column_ddl(
-            $table, $name, $trimmed_def,
-            defined $init_value ? $self->quote($init_value) : undef);
-        print get_text('install_column_add',
-                       { column => $name, table => $table }) . "\n"
-            if Bugzilla->usage_mode == USAGE_MODE_CMDLINE;
-        foreach my $sql (@statements) {
-            $self->do($sql);
-        }
-
-        # To make things easier for callers, if they don't specify
-        # a REFERENCES item, we pull it from the _bz_schema if the
-        # column exists there and has a REFERENCES item.
-        # bz_setup_foreign_keys will then add this FK at the end of
-        # Install::DB.
-        my $col_abstract =
-            $self->_bz_schema->get_column_abstract($table, $name);
-        if (exists $col_abstract->{REFERENCES}) {
-            my $new_fk = dclone($col_abstract->{REFERENCES});
-            $new_fk->{created} = 0;
-            $new_def->{REFERENCES} = $new_fk;
-        }
-
-        $self->_bz_real_schema->set_column($table, $name, $new_def);
-        $self->_bz_store_real_schema;
+    # To make things easier for callers, if they don't specify
+    # a REFERENCES item, we pull it from the _bz_schema if the
+    # column exists there and has a REFERENCES item.
+    # bz_setup_foreign_keys will then add this FK at the end of
+    # Install::DB.
+    my $col_abstract = $self->_bz_schema->get_column_abstract($table, $name);
+    if (exists $col_abstract->{REFERENCES}) {
+      my $new_fk = dclone($col_abstract->{REFERENCES});
+      $new_fk->{created}     = 0;
+      $new_def->{REFERENCES} = $new_fk;
     }
+
+    $self->_bz_real_schema->set_column($table, $name, $new_def);
+    $self->_bz_store_real_schema;
+  }
 }
 
 sub bz_add_fk {
-    my ($self, $table, $column, $def) = @_;
-    $self->bz_add_fks($table, { $column => $def });
+  my ($self, $table, $column, $def) = @_;
+  $self->bz_add_fks($table, {$column => $def});
 }
 
 sub bz_add_fks {
-    my ($self, $table, $column_fks, $options) = @_;
+  my ($self, $table, $column_fks, $options) = @_;
 
-    my %add_these;
-    foreach my $column (keys %$column_fks) {
-        my $current_fk = $self->bz_fk_info($table, $column);
-        next if ($current_fk and $current_fk->{created});
-        my $new_fk = $column_fks->{$column};
-        $self->_check_references($table, $column, $new_fk);
-        $add_these{$column} = $new_fk;
-        if (Bugzilla->usage_mode == USAGE_MODE_CMDLINE 
-            and !$options->{silently}) 
-        {
-            print get_text('install_fk_add',
-                           { table => $table, column => $column, 
-                             fk    => $new_fk }), "\n";
-        }
+  my %add_these;
+  foreach my $column (keys %$column_fks) {
+    my $current_fk = $self->bz_fk_info($table, $column);
+    next if ($current_fk and $current_fk->{created});
+    my $new_fk = $column_fks->{$column};
+    $self->_check_references($table, $column, $new_fk);
+    $add_these{$column} = $new_fk;
+    if (Bugzilla->usage_mode == USAGE_MODE_CMDLINE and !$options->{silently}) {
+      print get_text(
+        'install_fk_add', {table => $table, column => $column, fk => $new_fk}
+        ),
+        "\n";
     }
+  }
 
-    return if !scalar(keys %add_these);
+  return if !scalar(keys %add_these);
 
-    my @sql = $self->_bz_real_schema->get_add_fks_sql($table, \%add_these);
-    $self->do($_) foreach @sql;
+  my @sql = $self->_bz_real_schema->get_add_fks_sql($table, \%add_these);
+  $self->do($_) foreach @sql;
 
-    foreach my $column (keys %add_these) {
-        my $fk_def = $add_these{$column};
-        $fk_def->{created} = 1;
-        $self->_bz_real_schema->set_fk($table, $column, $fk_def);
-    }
+  foreach my $column (keys %add_these) {
+    my $fk_def = $add_these{$column};
+    $fk_def->{created} = 1;
+    $self->_bz_real_schema->set_fk($table, $column, $fk_def);
+  }
 
-    $self->_bz_store_real_schema();
+  $self->_bz_store_real_schema();
 }
 
 sub bz_alter_column {
-    my ($self, $table, $name, $new_def, $set_nulls_to) = @_;
+  my ($self, $table, $name, $new_def, $set_nulls_to) = @_;
 
-    my $current_def = $self->bz_column_info($table, $name);
+  my $current_def = $self->bz_column_info($table, $name);
 
-    if (!$self->_bz_schema->columns_equal($current_def, $new_def)) {
-        # You can't change a column to be NOT NULL if you have no DEFAULT
-        # and no value for $set_nulls_to, if there are any NULL values 
-        # in that column.
-        if ($new_def->{NOTNULL} && 
-            !exists $new_def->{DEFAULT} && !defined $set_nulls_to)
-        {
-            # Check for NULLs
-            my $any_nulls = $self->selectrow_array(
-                "SELECT 1 FROM $table WHERE $name IS NULL");
-            ThrowCodeError('column_not_null_no_default_alter', 
-                           { name => "$table.$name" }) if ($any_nulls);
-        }
-        # Preserve foreign key definitions in the Schema object when altering
-        # types.
-        if (my $fk = $self->bz_fk_info($table, $name)) {
-            $new_def->{REFERENCES} = $fk;
-        }
-        $self->bz_alter_column_raw($table, $name, $new_def, $current_def,
-                                   $set_nulls_to);
-        $self->_bz_real_schema->set_column($table, $name, $new_def);
-        $self->_bz_store_real_schema;
+  if (!$self->_bz_schema->columns_equal($current_def, $new_def)) {
+
+    # You can't change a column to be NOT NULL if you have no DEFAULT
+    # and no value for $set_nulls_to, if there are any NULL values
+    # in that column.
+    if ( $new_def->{NOTNULL}
+      && !exists $new_def->{DEFAULT}
+      && !defined $set_nulls_to)
+    {
+      # Check for NULLs
+      my $any_nulls
+        = $self->selectrow_array("SELECT 1 FROM $table WHERE $name IS NULL");
+      ThrowCodeError('column_not_null_no_default_alter', {name => "$table.$name"})
+        if ($any_nulls);
     }
+
+    # Preserve foreign key definitions in the Schema object when altering
+    # types.
+    if (my $fk = $self->bz_fk_info($table, $name)) {
+      $new_def->{REFERENCES} = $fk;
+    }
+    $self->bz_alter_column_raw($table, $name, $new_def, $current_def,
+      $set_nulls_to);
+    $self->_bz_real_schema->set_column($table, $name, $new_def);
+    $self->_bz_store_real_schema;
+  }
 }
 
 
@@ -728,39 +740,40 @@ sub bz_alter_column {
 # Returns:     nothing
 #
 sub bz_alter_column_raw {
-    my ($self, $table, $name, $new_def, $current_def, $set_nulls_to) = @_;
-    my @statements = $self->_bz_real_schema->get_alter_column_ddl(
-        $table, $name, $new_def,
-        defined $set_nulls_to ? $self->quote($set_nulls_to) : undef);
-    my $new_ddl = $self->_bz_schema->get_type_ddl($new_def);
-    say "Updating column $name in table $table ...";
-    if (defined $current_def) {
-        my $old_ddl = $self->_bz_schema->get_type_ddl($current_def);
-        say "Old: $old_ddl";
-    }
-    say "New: $new_ddl";
-    $self->do($_) foreach (@statements);
+  my ($self, $table, $name, $new_def, $current_def, $set_nulls_to) = @_;
+  my @statements
+    = $self->_bz_real_schema->get_alter_column_ddl($table, $name, $new_def,
+    defined $set_nulls_to ? $self->quote($set_nulls_to) : undef);
+  my $new_ddl = $self->_bz_schema->get_type_ddl($new_def);
+  say "Updating column $name in table $table ...";
+  if (defined $current_def) {
+    my $old_ddl = $self->_bz_schema->get_type_ddl($current_def);
+    say "Old: $old_ddl";
+  }
+  say "New: $new_ddl";
+  $self->do($_) foreach (@statements);
 }
 
 sub bz_alter_fk {
-    my ($self, $table, $column, $fk_def) = @_;
-    my $current_fk = $self->bz_fk_info($table, $column);
-    ThrowCodeError('column_alter_nonexistent_fk',
-                   { table => $table, column => $column }) if !$current_fk;
-    $self->bz_drop_fk($table, $column);
-    $self->bz_add_fk($table, $column, $fk_def);
+  my ($self, $table, $column, $fk_def) = @_;
+  my $current_fk = $self->bz_fk_info($table, $column);
+  ThrowCodeError('column_alter_nonexistent_fk',
+    {table => $table, column => $column})
+    if !$current_fk;
+  $self->bz_drop_fk($table, $column);
+  $self->bz_add_fk($table, $column, $fk_def);
 }
 
 sub bz_add_index {
-    my ($self, $table, $name, $definition) = @_;
+  my ($self, $table, $name, $definition) = @_;
 
-    my $index_exists = $self->bz_index_info($table, $name);
+  my $index_exists = $self->bz_index_info($table, $name);
 
-    if (!$index_exists) {
-        $self->bz_add_index_raw($table, $name, $definition);
-        $self->_bz_real_schema->set_index($table, $name, $definition);
-        $self->_bz_store_real_schema;
-    }
+  if (!$index_exists) {
+    $self->bz_add_index_raw($table, $name, $definition);
+    $self->_bz_real_schema->set_index($table, $name, $definition);
+    $self->_bz_store_real_schema;
+  }
 }
 
 # bz_add_index_raw($table, $name, $silent)
@@ -780,36 +793,36 @@ sub bz_add_index {
 # Returns:     nothing
 #
 sub bz_add_index_raw {
-    my ($self, $table, $name, $definition, $silent) = @_;
-    my @statements = $self->_bz_schema->get_add_index_ddl(
-        $table, $name, $definition);
-    print "Adding new index '$name' to the $table table ...\n" unless $silent;
-    $self->do($_) foreach (@statements);
+  my ($self, $table, $name, $definition, $silent) = @_;
+  my @statements
+    = $self->_bz_schema->get_add_index_ddl($table, $name, $definition);
+  print "Adding new index '$name' to the $table table ...\n" unless $silent;
+  $self->do($_) foreach (@statements);
 }
 
 sub bz_add_table {
-    my ($self, $name, $options) = @_;
+  my ($self, $name, $options) = @_;
 
-    my $table_exists = $self->bz_table_info($name);
+  my $table_exists = $self->bz_table_info($name);
 
-    if (!$table_exists) {
-        $self->_bz_add_table_raw($name, $options);
-        my $table_def = dclone($self->_bz_schema->get_table_abstract($name));
+  if (!$table_exists) {
+    $self->_bz_add_table_raw($name, $options);
+    my $table_def = dclone($self->_bz_schema->get_table_abstract($name));
 
-        my %fields = @{$table_def->{FIELDS}};
-        foreach my $col (keys %fields) {
-            # Foreign Key references have to be added by Install::DB after
-            # initial table creation, because column names have changed
-            # over history and it's impossible to keep track of that info
-            # in ABSTRACT_SCHEMA.
-            next unless exists $fields{$col}->{REFERENCES};
-            $fields{$col}->{REFERENCES}->{created} =
-                $self->_bz_real_schema->FK_ON_CREATE;
-        }
-        
-        $self->_bz_real_schema->add_table($name, $table_def);
-        $self->_bz_store_real_schema;
+    my %fields = @{$table_def->{FIELDS}};
+    foreach my $col (keys %fields) {
+
+      # Foreign Key references have to be added by Install::DB after
+      # initial table creation, because column names have changed
+      # over history and it's impossible to keep track of that info
+      # in ABSTRACT_SCHEMA.
+      next unless exists $fields{$col}->{REFERENCES};
+      $fields{$col}->{REFERENCES}->{created} = $self->_bz_real_schema->FK_ON_CREATE;
     }
+
+    $self->_bz_real_schema->add_table($name, $table_def);
+    $self->_bz_store_real_schema;
+  }
 }
 
 # _bz_add_table_raw($name) - Private
@@ -821,164 +834,174 @@ sub bz_add_table {
 #              _bz_init_schema_storage. Used when you don't
 #              yet have a Schema object but you need to
 #              add a table, for some reason.
-# Params:      $name - The name of the table you're creating. 
-#                  The definition for the table is pulled from 
+# Params:      $name - The name of the table you're creating.
+#                  The definition for the table is pulled from
 #                  _bz_schema.
 # Returns:     nothing
 #
 sub _bz_add_table_raw {
-    my ($self, $name, $options) = @_;
-    my @statements = $self->_bz_schema->get_table_ddl($name);
-    if (Bugzilla->usage_mode == USAGE_MODE_CMDLINE
-        and !$options->{silently})
-    {
-        say install_string('db_table_new', { table => $name });
-    }
-    $self->do($_) foreach (@statements);
+  my ($self, $name, $options) = @_;
+  my @statements = $self->_bz_schema->get_table_ddl($name);
+  if (Bugzilla->usage_mode == USAGE_MODE_CMDLINE and !$options->{silently}) {
+    say install_string('db_table_new', {table => $name});
+  }
+  $self->do($_) foreach (@statements);
 }
 
 sub _bz_add_field_table {
-    my ($self, $name, $schema_ref) = @_;
-    # We do nothing if the table already exists.
-    return if $self->bz_table_info($name);
+  my ($self, $name, $schema_ref) = @_;
 
-    # Copy this so that we're not modifying the passed reference.
-    # (This avoids modifying a constant in Bugzilla::DB::Schema.)
-    my %table_schema = %$schema_ref;
-    my %indexes = @{ $table_schema{INDEXES} };
-    my %fixed_indexes;
-    foreach my $key (keys %indexes) {
-        $fixed_indexes{$name . "_" . $key} = $indexes{$key};
-    }
-    # INDEXES is supposed to be an arrayref, so we have to convert back.
-    my @indexes_array = %fixed_indexes;
-    $table_schema{INDEXES} = \@indexes_array;
-    # We add this to the abstract schema so that bz_add_table can find it.
-    $self->_bz_schema->add_table($name, \%table_schema);
-    $self->bz_add_table($name);
+  # We do nothing if the table already exists.
+  return if $self->bz_table_info($name);
+
+  # Copy this so that we're not modifying the passed reference.
+  # (This avoids modifying a constant in Bugzilla::DB::Schema.)
+  my %table_schema = %$schema_ref;
+  my %indexes      = @{$table_schema{INDEXES}};
+  my %fixed_indexes;
+  foreach my $key (keys %indexes) {
+    $fixed_indexes{$name . "_" . $key} = $indexes{$key};
+  }
+
+  # INDEXES is supposed to be an arrayref, so we have to convert back.
+  my @indexes_array = %fixed_indexes;
+  $table_schema{INDEXES} = \@indexes_array;
+
+  # We add this to the abstract schema so that bz_add_table can find it.
+  $self->_bz_schema->add_table($name, \%table_schema);
+  $self->bz_add_table($name);
 }
 
 sub bz_add_field_tables {
-    my ($self, $field) = @_;
-    
-    $self->_bz_add_field_table($field->name,
-                               $self->_bz_schema->FIELD_TABLE_SCHEMA, $field->type);
-    if ($field->type == FIELD_TYPE_MULTI_SELECT) {
-        my $ms_table = "bug_" . $field->name;
-        $self->_bz_add_field_table($ms_table,
-            $self->_bz_schema->MULTI_SELECT_VALUE_TABLE);
+  my ($self, $field) = @_;
 
-        $self->bz_add_fks($ms_table, 
-            { bug_id => {TABLE => 'bugs', COLUMN => 'bug_id',
-                         DELETE => 'CASCADE'},
+  $self->_bz_add_field_table($field->name, $self->_bz_schema->FIELD_TABLE_SCHEMA,
+    $field->type);
+  if ($field->type == FIELD_TYPE_MULTI_SELECT) {
+    my $ms_table = "bug_" . $field->name;
+    $self->_bz_add_field_table($ms_table,
+      $self->_bz_schema->MULTI_SELECT_VALUE_TABLE);
 
-              value  => {TABLE  => $field->name, COLUMN => 'value'} });
-    }
+    $self->bz_add_fks(
+      $ms_table,
+      {
+        bug_id => {TABLE => 'bugs', COLUMN => 'bug_id', DELETE => 'CASCADE'},
+
+        value => {TABLE => $field->name, COLUMN => 'value'}
+      }
+    );
+  }
 }
 
 sub bz_drop_field_tables {
-    my ($self, $field) = @_;
-    if ($field->type == FIELD_TYPE_MULTI_SELECT) {
-        $self->bz_drop_table('bug_' . $field->name);
-    }
-    $self->bz_drop_table($field->name);
+  my ($self, $field) = @_;
+  if ($field->type == FIELD_TYPE_MULTI_SELECT) {
+    $self->bz_drop_table('bug_' . $field->name);
+  }
+  $self->bz_drop_table($field->name);
 }
 
 sub bz_drop_column {
-    my ($self, $table, $column) = @_;
+  my ($self, $table, $column) = @_;
 
-    my $current_def = $self->bz_column_info($table, $column);
+  my $current_def = $self->bz_column_info($table, $column);
 
-    if ($current_def) {
-        my @statements = $self->_bz_real_schema->get_drop_column_ddl(
-            $table, $column);
-        print get_text('install_column_drop', 
-                       { table => $table, column => $column }) . "\n"
-            if Bugzilla->usage_mode == USAGE_MODE_CMDLINE;
-        foreach my $sql (@statements) {
-            # Because this is a deletion, we don't want to die hard if
-            # we fail because of some local customization. If something
-            # is already gone, that's fine with us!
-            eval { $self->do($sql); } or warn "Failed SQL: [$sql] Error: $@";
-        }
-        $self->_bz_real_schema->delete_column($table, $column);
-        $self->_bz_store_real_schema;
+  if ($current_def) {
+    my @statements = $self->_bz_real_schema->get_drop_column_ddl($table, $column);
+    print get_text('install_column_drop', {table => $table, column => $column})
+      . "\n"
+      if Bugzilla->usage_mode == USAGE_MODE_CMDLINE;
+    foreach my $sql (@statements) {
+
+      # Because this is a deletion, we don't want to die hard if
+      # we fail because of some local customization. If something
+      # is already gone, that's fine with us!
+      eval { $self->do($sql); } or warn "Failed SQL: [$sql] Error: $@";
     }
+    $self->_bz_real_schema->delete_column($table, $column);
+    $self->_bz_store_real_schema;
+  }
 }
 
 sub bz_drop_fk {
-    my ($self, $table, $column) = @_;
+  my ($self, $table, $column) = @_;
 
-    my $fk_def = $self->bz_fk_info($table, $column);
-    if ($fk_def and $fk_def->{created}) {
-        print get_text('install_fk_drop',
-                       { table => $table, column => $column, fk => $fk_def })
-            . "\n" if Bugzilla->usage_mode == USAGE_MODE_CMDLINE;
-        my @statements = 
-            $self->_bz_real_schema->get_drop_fk_sql($table, $column, $fk_def);
-        foreach my $sql (@statements) {
-            # Because this is a deletion, we don't want to die hard if
-            # we fail because of some local customization. If something
-            # is already gone, that's fine with us!
-            eval { $self->do($sql); } or warn "Failed SQL: [$sql] Error: $@";
-        }
-        # Under normal circumstances, we don't permanently drop the fk--
-        # we want checksetup to re-create it again later. The only
-        # time that FKs get permanently dropped is if the column gets
-        # dropped.
-        $fk_def->{created} = 0;
-        $self->_bz_real_schema->set_fk($table, $column, $fk_def);
-        $self->_bz_store_real_schema;
+  my $fk_def = $self->bz_fk_info($table, $column);
+  if ($fk_def and $fk_def->{created}) {
+    print get_text('install_fk_drop',
+      {table => $table, column => $column, fk => $fk_def})
+      . "\n"
+      if Bugzilla->usage_mode == USAGE_MODE_CMDLINE;
+    my @statements
+      = $self->_bz_real_schema->get_drop_fk_sql($table, $column, $fk_def);
+    foreach my $sql (@statements) {
+
+      # Because this is a deletion, we don't want to die hard if
+      # we fail because of some local customization. If something
+      # is already gone, that's fine with us!
+      eval { $self->do($sql); } or warn "Failed SQL: [$sql] Error: $@";
     }
+
+    # Under normal circumstances, we don't permanently drop the fk--
+    # we want checksetup to re-create it again later. The only
+    # time that FKs get permanently dropped is if the column gets
+    # dropped.
+    $fk_def->{created} = 0;
+    $self->_bz_real_schema->set_fk($table, $column, $fk_def);
+    $self->_bz_store_real_schema;
+  }
 
 }
 
 sub bz_get_related_fks {
-    my ($self, $table, $column) = @_;
-    my @tables = $self->_bz_real_schema->get_table_list();
-    my @related;
-    foreach my $check_table (@tables) {
-        my @columns = $self->bz_table_columns($check_table);
-        foreach my $check_column (@columns) {
-            my $fk = $self->bz_fk_info($check_table, $check_column);
-            if ($fk 
-                and (($fk->{TABLE} eq $table and $fk->{COLUMN} eq $column)
-                     or ($check_column eq $column and $check_table eq $table)))
-            {
-                push(@related, [$check_table, $check_column, $fk]);
-            }
-        } # foreach $column
-    } # foreach $table
+  my ($self, $table, $column) = @_;
+  my @tables = $self->_bz_real_schema->get_table_list();
+  my @related;
+  foreach my $check_table (@tables) {
+    my @columns = $self->bz_table_columns($check_table);
+    foreach my $check_column (@columns) {
+      my $fk = $self->bz_fk_info($check_table, $check_column);
+      if (
+        $fk
+        and (($fk->{TABLE} eq $table and $fk->{COLUMN} eq $column)
+          or ($check_column eq $column and $check_table eq $table))
+        )
+      {
+        push(@related, [$check_table, $check_column, $fk]);
+      }
+    }    # foreach $column
+  }    # foreach $table
 
-    return \@related;
+  return \@related;
 }
 
 sub bz_drop_related_fks {
-    my $self = shift;
-    my $related = $self->bz_get_related_fks(@_);
-    foreach my $item (@$related) {
-        my ($table, $column) = @$item;
-        $self->bz_drop_fk($table, $column);
-    }
-    return $related;
+  my $self    = shift;
+  my $related = $self->bz_get_related_fks(@_);
+  foreach my $item (@$related) {
+    my ($table, $column) = @$item;
+    $self->bz_drop_fk($table, $column);
+  }
+  return $related;
 }
 
 sub bz_drop_index {
-    my ($self, $table, $name) = @_;
+  my ($self, $table, $name) = @_;
 
-    my $index_exists = $self->bz_index_info($table, $name);
+  my $index_exists = $self->bz_index_info($table, $name);
 
-    if ($index_exists) {
-        if ($self->INDEX_DROPS_REQUIRE_FK_DROPS) {
-            # We cannot delete an index used by a FK.
-            foreach my $column (@{$index_exists->{FIELDS}}) {
-                $self->bz_drop_related_fks($table, $column);
-            }
-        }
-        $self->bz_drop_index_raw($table, $name);
-        $self->_bz_real_schema->delete_index($table, $name);
-        $self->_bz_store_real_schema;        
+  if ($index_exists) {
+    if ($self->INDEX_DROPS_REQUIRE_FK_DROPS) {
+
+      # We cannot delete an index used by a FK.
+      foreach my $column (@{$index_exists->{FIELDS}}) {
+        $self->bz_drop_related_fks($table, $column);
+      }
     }
+    $self->bz_drop_index_raw($table, $name);
+    $self->_bz_real_schema->delete_index($table, $name);
+    $self->_bz_store_real_schema;
+  }
 }
 
 # bz_drop_index_raw($table, $name, $silent)
@@ -987,7 +1010,7 @@ sub bz_drop_index {
 #              Drops an index from the database
 #              without updating any Schema object. Generally
 #              should only be called by bz_drop_index.
-#              Used when either: (1) You don't yet have a Schema 
+#              Used when either: (1) You don't yet have a Schema
 #              object but you need to drop an index, for some reason.
 #              (2) You need to drop an index that somehow got into the
 #              database but doesn't exist in Schema.
@@ -998,108 +1021,111 @@ sub bz_drop_index {
 # Returns:     nothing
 #
 sub bz_drop_index_raw {
-    my ($self, $table, $name, $silent) = @_;
-    my @statements = $self->_bz_schema->get_drop_index_ddl(
-        $table, $name);
-    print "Removing index '$name' from the $table table...\n" unless $silent;
-    foreach my $sql (@statements) {
-        # Because this is a deletion, we don't want to die hard if
-        # we fail because of some local customization. If something
-        # is already gone, that's fine with us!
-        eval { $self->do($sql) } or warn "Failed SQL: [$sql] Error: $@";
-    }
+  my ($self, $table, $name, $silent) = @_;
+  my @statements = $self->_bz_schema->get_drop_index_ddl($table, $name);
+  print "Removing index '$name' from the $table table...\n" unless $silent;
+  foreach my $sql (@statements) {
+
+    # Because this is a deletion, we don't want to die hard if
+    # we fail because of some local customization. If something
+    # is already gone, that's fine with us!
+    eval { $self->do($sql) } or warn "Failed SQL: [$sql] Error: $@";
+  }
 }
 
 sub bz_drop_table {
-    my ($self, $name) = @_;
+  my ($self, $name) = @_;
 
-    my $table_exists = $self->bz_table_info($name);
+  my $table_exists = $self->bz_table_info($name);
 
-    if ($table_exists) {
-        my @statements = $self->_bz_schema->get_drop_table_ddl($name);
-        print get_text('install_table_drop', { name => $name }) . "\n"
-            if Bugzilla->usage_mode == USAGE_MODE_CMDLINE;
-        foreach my $sql (@statements) {
-            # Because this is a deletion, we don't want to die hard if
-            # we fail because of some local customization. If something
-            # is already gone, that's fine with us!
-            eval { $self->do($sql); } or warn "Failed SQL: [$sql] Error: $@";
-        }
-        $self->_bz_real_schema->delete_table($name);
-        $self->_bz_store_real_schema;
+  if ($table_exists) {
+    my @statements = $self->_bz_schema->get_drop_table_ddl($name);
+    print get_text('install_table_drop', {name => $name}) . "\n"
+      if Bugzilla->usage_mode == USAGE_MODE_CMDLINE;
+    foreach my $sql (@statements) {
+
+      # Because this is a deletion, we don't want to die hard if
+      # we fail because of some local customization. If something
+      # is already gone, that's fine with us!
+      eval { $self->do($sql); } or warn "Failed SQL: [$sql] Error: $@";
     }
+    $self->_bz_real_schema->delete_table($name);
+    $self->_bz_store_real_schema;
+  }
 }
 
 sub bz_fk_info {
-    my ($self, $table, $column) = @_;
-    my $col_info = $self->bz_column_info($table, $column);
-    return undef if !$col_info;
-    my $fk = $col_info->{REFERENCES};
-    return $fk;
+  my ($self, $table, $column) = @_;
+  my $col_info = $self->bz_column_info($table, $column);
+  return undef if !$col_info;
+  my $fk = $col_info->{REFERENCES};
+  return $fk;
 }
 
 sub bz_rename_column {
-    my ($self, $table, $old_name, $new_name) = @_;
+  my ($self, $table, $old_name, $new_name) = @_;
 
-    my $old_col_exists  = $self->bz_column_info($table, $old_name);
+  my $old_col_exists = $self->bz_column_info($table, $old_name);
 
-    if ($old_col_exists) {
-        my $already_renamed = $self->bz_column_info($table, $new_name);
-            ThrowCodeError('db_rename_conflict',
-                           { old => "$table.$old_name", 
-                             new => "$table.$new_name" }) if $already_renamed;
-        my @statements = $self->_bz_real_schema->get_rename_column_ddl(
-            $table, $old_name, $new_name);
+  if ($old_col_exists) {
+    my $already_renamed = $self->bz_column_info($table, $new_name);
+    ThrowCodeError('db_rename_conflict',
+      {old => "$table.$old_name", new => "$table.$new_name"})
+      if $already_renamed;
+    my @statements
+      = $self->_bz_real_schema->get_rename_column_ddl($table, $old_name, $new_name);
 
-        print get_text('install_column_rename', 
-                       { old => "$table.$old_name", new => "$table.$new_name" })
-               . "\n" if Bugzilla->usage_mode == USAGE_MODE_CMDLINE;
+    print get_text('install_column_rename',
+      {old => "$table.$old_name", new => "$table.$new_name"})
+      . "\n"
+      if Bugzilla->usage_mode == USAGE_MODE_CMDLINE;
 
-        foreach my $sql (@statements) {
-            $self->do($sql);
-        }
-        $self->_bz_real_schema->rename_column($table, $old_name, $new_name);
-        $self->_bz_store_real_schema;
+    foreach my $sql (@statements) {
+      $self->do($sql);
     }
+    $self->_bz_real_schema->rename_column($table, $old_name, $new_name);
+    $self->_bz_store_real_schema;
+  }
 }
 
 sub bz_rename_table {
-    my ($self, $old_name, $new_name) = @_;
-    my $old_table = $self->bz_table_info($old_name);
-    return if !$old_table;
+  my ($self, $old_name, $new_name) = @_;
+  my $old_table = $self->bz_table_info($old_name);
+  return if !$old_table;
 
-    my $new = $self->bz_table_info($new_name);
-    ThrowCodeError('db_rename_conflict', { old => $old_name,
-                                           new => $new_name }) if $new;
+  my $new = $self->bz_table_info($new_name);
+  ThrowCodeError('db_rename_conflict', {old => $old_name, new => $new_name})
+    if $new;
 
-    # FKs will all have the wrong names unless we drop and then let them
-    # be re-created later. Under normal circumstances, checksetup.pl will
-    # automatically re-create these dropped FKs at the end of its DB upgrade
-    # run, so we don't need to re-create them in this method.
-    my @columns = $self->bz_table_columns($old_name);
-    foreach my $column (@columns) {
-        # these just return silently if there's no FK to drop
-        $self->bz_drop_fk($old_name, $column);
-        $self->bz_drop_related_fks($old_name, $column);
-    }
+  # FKs will all have the wrong names unless we drop and then let them
+  # be re-created later. Under normal circumstances, checksetup.pl will
+  # automatically re-create these dropped FKs at the end of its DB upgrade
+  # run, so we don't need to re-create them in this method.
+  my @columns = $self->bz_table_columns($old_name);
+  foreach my $column (@columns) {
 
-    my @sql = $self->_bz_real_schema->get_rename_table_sql($old_name, $new_name);
-    print get_text('install_table_rename', 
-                   { old => $old_name, new => $new_name }) . "\n"
-        if Bugzilla->usage_mode == USAGE_MODE_CMDLINE;
-    $self->do($_) foreach @sql;
-    $self->_bz_real_schema->rename_table($old_name, $new_name);
-    $self->_bz_store_real_schema;
+    # these just return silently if there's no FK to drop
+    $self->bz_drop_fk($old_name, $column);
+    $self->bz_drop_related_fks($old_name, $column);
+  }
+
+  my @sql = $self->_bz_real_schema->get_rename_table_sql($old_name, $new_name);
+  print get_text('install_table_rename', {old => $old_name, new => $new_name})
+    . "\n"
+    if Bugzilla->usage_mode == USAGE_MODE_CMDLINE;
+  $self->do($_) foreach @sql;
+  $self->_bz_real_schema->rename_table($old_name, $new_name);
+  $self->_bz_store_real_schema;
 }
 
 sub bz_set_next_serial_value {
-    my ($self, $table, $column, $value) = @_;
-    if (!$value) {
-        $value = $self->selectrow_array("SELECT MAX($column) FROM $table") || 0;
-        $value++;
-    }
-    my @sql = $self->_bz_real_schema->get_set_serial_sql($table, $column, $value);
-    $self->do($_) foreach @sql;
+  my ($self, $table, $column, $value) = @_;
+  if (!$value) {
+    $value = $self->selectrow_array("SELECT MAX($column) FROM $table") || 0;
+    $value++;
+  }
+  my @sql = $self->_bz_real_schema->get_set_serial_sql($table, $column, $value);
+  $self->do($_) foreach @sql;
 }
 
 #####################################################################
@@ -1107,12 +1133,12 @@ sub bz_set_next_serial_value {
 #####################################################################
 
 sub _bz_schema {
-    my ($self) = @_;
-    return $self->{private_bz_schema} if exists $self->{private_bz_schema};
-    my @module_parts = split('::', ref $self);
-    my $module_name  = pop @module_parts;
-    $self->{private_bz_schema} = Bugzilla::DB::Schema->new($module_name);
-    return $self->{private_bz_schema};
+  my ($self) = @_;
+  return $self->{private_bz_schema} if exists $self->{private_bz_schema};
+  my @module_parts = split('::', ref $self);
+  my $module_name  = pop @module_parts;
+  $self->{private_bz_schema} = Bugzilla::DB::Schema->new($module_name);
+  return $self->{private_bz_schema};
 }
 
 # _bz_get_initial_schema()
@@ -1126,53 +1152,54 @@ sub _bz_schema {
 # Returns:     A Schema object that can be serialized and written to disk
 #              for _bz_init_schema_storage.
 sub _bz_get_initial_schema {
-    my ($self) = @_;
-    return $self->_bz_schema->get_empty_schema();
+  my ($self) = @_;
+  return $self->_bz_schema->get_empty_schema();
 }
 
 sub bz_column_info {
-    my ($self, $table, $column) = @_;
-    my $def = $self->_bz_real_schema->get_column_abstract($table, $column);
-    # We dclone it so callers can't modify the Schema.
-    $def = dclone($def) if defined $def;
-    return $def;
+  my ($self, $table, $column) = @_;
+  my $def = $self->_bz_real_schema->get_column_abstract($table, $column);
+
+  # We dclone it so callers can't modify the Schema.
+  $def = dclone($def) if defined $def;
+  return $def;
 }
 
 sub bz_index_info {
-    my ($self, $table, $index) = @_;
-    my $index_def =
-        $self->_bz_real_schema->get_index_abstract($table, $index);
-    if (ref($index_def) eq 'ARRAY') {
-        $index_def = {FIELDS => $index_def, TYPE => ''};
-    }
-    return $index_def;
+  my ($self, $table, $index) = @_;
+  my $index_def = $self->_bz_real_schema->get_index_abstract($table, $index);
+  if (ref($index_def) eq 'ARRAY') {
+    $index_def = {FIELDS => $index_def, TYPE => ''};
+  }
+  return $index_def;
 }
 
 sub bz_table_info {
-    my ($self, $table) = @_;
-    return $self->_bz_real_schema->get_table_abstract($table);
+  my ($self, $table) = @_;
+  return $self->_bz_real_schema->get_table_abstract($table);
 }
 
 
 sub bz_table_columns {
-    my ($self, $table) = @_;
-    return $self->_bz_real_schema->get_table_columns($table);
+  my ($self, $table) = @_;
+  return $self->_bz_real_schema->get_table_columns($table);
 }
 
 sub bz_table_indexes {
-    my ($self, $table) = @_;
-    my $indexes = $self->_bz_real_schema->get_table_indexes_abstract($table);
-    my %return_indexes;
-    # We do this so that they're always hashes.
-    foreach my $name (keys %$indexes) {
-        $return_indexes{$name} = $self->bz_index_info($table, $name);
-    }
-    return \%return_indexes;
+  my ($self, $table) = @_;
+  my $indexes = $self->_bz_real_schema->get_table_indexes_abstract($table);
+  my %return_indexes;
+
+  # We do this so that they're always hashes.
+  foreach my $name (keys %$indexes) {
+    $return_indexes{$name} = $self->bz_index_info($table, $name);
+  }
+  return \%return_indexes;
 }
 
 sub bz_table_list {
-    my ($self) = @_;
-    return $self->_bz_real_schema->get_table_list();
+  my ($self) = @_;
+  return $self->_bz_real_schema->get_table_list();
 }
 
 #####################################################################
@@ -1191,9 +1218,9 @@ sub bz_table_list {
 # Returns:     An array of column names.
 #
 sub bz_table_columns_real {
-    my ($self, $table) = @_;
-    my $sth = $self->column_info(undef, undef, $table, '%');
-    return @{ $self->selectcol_arrayref($sth, {Columns => [4]}) };
+  my ($self, $table) = @_;
+  my $sth = $self->column_info(undef, undef, $table, '%');
+  return @{$self->selectcol_arrayref($sth, {Columns => [4]})};
 }
 
 # bz_table_list_real()
@@ -1203,9 +1230,9 @@ sub bz_table_columns_real {
 # Params:      none
 # Returns:     An array containing table names.
 sub bz_table_list_real {
-    my ($self) = @_;
-    my $table_sth = $self->table_info(undef, undef, undef, "TABLE");
-    return @{$self->selectcol_arrayref($table_sth, { Columns => [3] })};
+  my ($self) = @_;
+  my $table_sth = $self->table_info(undef, undef, undef, "TABLE");
+  return @{$self->selectcol_arrayref($table_sth, {Columns => [3]})};
 }
 
 #####################################################################
@@ -1213,55 +1240,59 @@ sub bz_table_list_real {
 #####################################################################
 
 sub bz_in_transaction {
-    return $_[0]->{private_bz_transaction_count} ? 1 : 0;
+  return $_[0]->{private_bz_transaction_count} ? 1 : 0;
 }
 
 sub bz_start_transaction {
-    my ($self) = @_;
+  my ($self) = @_;
 
-    if ($self->bz_in_transaction) {
-        $self->{private_bz_transaction_count}++;
-    } else {
-        # Turn AutoCommit off and start a new transaction
-        $self->begin_work();
-        # REPEATABLE READ means "We work on a snapshot of the DB that
-        # is created when we execute our first SQL statement." It's
-        # what we need in Bugzilla to be safe, for what we do.
-        # Different DBs have different defaults for their isolation
-        # level, so we just set it here manually.
-        if ($self->ISOLATION_LEVEL) {
-            $self->do('SET TRANSACTION ISOLATION LEVEL ' 
-                      . $self->ISOLATION_LEVEL);
-        }
-        $self->{private_bz_transaction_count} = 1;
+  if ($self->bz_in_transaction) {
+    $self->{private_bz_transaction_count}++;
+  }
+  else {
+    # Turn AutoCommit off and start a new transaction
+    $self->begin_work();
+
+    # REPEATABLE READ means "We work on a snapshot of the DB that
+    # is created when we execute our first SQL statement." It's
+    # what we need in Bugzilla to be safe, for what we do.
+    # Different DBs have different defaults for their isolation
+    # level, so we just set it here manually.
+    if ($self->ISOLATION_LEVEL) {
+      $self->do('SET TRANSACTION ISOLATION LEVEL ' . $self->ISOLATION_LEVEL);
     }
+    $self->{private_bz_transaction_count} = 1;
+  }
 }
 
 sub bz_commit_transaction {
-    my ($self) = @_;
+  my ($self) = @_;
 
-    if ($self->{private_bz_transaction_count} > 1) {
-        $self->{private_bz_transaction_count}--;
-    } elsif ($self->bz_in_transaction) {
-        $self->commit();
-        $self->{private_bz_transaction_count} = 0;
-        Bugzilla::Mailer->send_staged_mail();
-    } else {
-       ThrowCodeError('not_in_transaction');
-    }
+  if ($self->{private_bz_transaction_count} > 1) {
+    $self->{private_bz_transaction_count}--;
+  }
+  elsif ($self->bz_in_transaction) {
+    $self->commit();
+    $self->{private_bz_transaction_count} = 0;
+    Bugzilla::Mailer->send_staged_mail();
+  }
+  else {
+    ThrowCodeError('not_in_transaction');
+  }
 }
 
 sub bz_rollback_transaction {
-    my ($self) = @_;
+  my ($self) = @_;
 
-    # Unlike start and commit, if we rollback at any point it happens
-    # instantly, even if we're in a nested transaction.
-    if (!$self->bz_in_transaction) {
-        ThrowCodeError("not_in_transaction");
-    } else {
-        $self->rollback();
-        $self->{private_bz_transaction_count} = 0;
-    }
+  # Unlike start and commit, if we rollback at any point it happens
+  # instantly, even if we're in a nested transaction.
+  if (!$self->bz_in_transaction) {
+    ThrowCodeError("not_in_transaction");
+  }
+  else {
+    $self->rollback();
+    $self->{private_bz_transaction_count} = 0;
+  }
 }
 
 #####################################################################
@@ -1269,42 +1300,43 @@ sub bz_rollback_transaction {
 #####################################################################
 
 sub db_new {
-    my ($class, $params) = @_;
-    my ($dsn, $user, $pass, $override_attrs) = 
-        @$params{qw(dsn user pass attrs)};
+  my ($class, $params) = @_;
+  my ($dsn, $user, $pass, $override_attrs) = @$params{qw(dsn user pass attrs)};
 
-    # set up default attributes used to connect to the database
-    # (may be overridden by DB driver implementations)
-    my $attributes = { RaiseError => 0,
-                       AutoCommit => 1,
-                       PrintError => 0,
-                       ShowErrorStatement => 1,
-                       HandleError => \&_handle_error,
-                       TaintIn => 1,
-                       # See https://rt.perl.org/rt3/Public/Bug/Display.html?id=30933
-                       # for the reason to use NAME instead of NAME_lc (bug 253696).
-                       FetchHashKeyName => 'NAME',
-                     };
+  # set up default attributes used to connect to the database
+  # (may be overridden by DB driver implementations)
+  my $attributes = {
+    RaiseError         => 0,
+    AutoCommit         => 1,
+    PrintError         => 0,
+    ShowErrorStatement => 1,
+    HandleError        => \&_handle_error,
+    TaintIn            => 1,
 
-    if ($override_attrs) {
-        foreach my $key (keys %$override_attrs) {
-            $attributes->{$key} = $override_attrs->{$key};
-        }
+    # See https://rt.perl.org/rt3/Public/Bug/Display.html?id=30933
+    # for the reason to use NAME instead of NAME_lc (bug 253696).
+    FetchHashKeyName => 'NAME',
+  };
+
+  if ($override_attrs) {
+    foreach my $key (keys %$override_attrs) {
+      $attributes->{$key} = $override_attrs->{$key};
     }
+  }
 
-    # connect using our known info to the specified db
-    my $self = DBI->connect($dsn, $user, $pass, $attributes)
-        or die "\nCan't connect to the database.\nError: $DBI::errstr\n"
-        . "  Is your database installed and up and running?\n  Do you have"
-        . " the correct username and password selected in localconfig?\n\n";
+  # connect using our known info to the specified db
+  my $self = DBI->connect($dsn, $user, $pass, $attributes)
+    or die "\nCan't connect to the database.\nError: $DBI::errstr\n"
+    . "  Is your database installed and up and running?\n  Do you have"
+    . " the correct username and password selected in localconfig?\n\n";
 
-    # RaiseError was only set to 0 so that we could catch the 
-    # above "die" condition.
-    $self->{RaiseError} = 1;
+  # RaiseError was only set to 0 so that we could catch the
+  # above "die" condition.
+  $self->{RaiseError} = 1;
 
-    bless ($self, $class);
+  bless($self, $class);
 
-    return $self;
+  return $self;
 }
 
 #####################################################################
@@ -1328,55 +1360,54 @@ These methods really are private. Do not override them in subclasses.
 =cut
 
 sub _bz_init_schema_storage {
-    my ($self) = @_;
+  my ($self) = @_;
 
-    my $table_size;
-    eval {
-        $table_size = 
-            $self->selectrow_array("SELECT COUNT(*) FROM bz_schema");
-    };
+  my $table_size;
+  eval { $table_size = $self->selectrow_array("SELECT COUNT(*) FROM bz_schema"); };
 
-    if (!$table_size) {
-        my $init_schema = $self->_bz_get_initial_schema;
-        my $store_me = $init_schema->serialize_abstract();
-        my $schema_version = $init_schema->SCHEMA_VERSION;
+  if (!$table_size) {
+    my $init_schema    = $self->_bz_get_initial_schema;
+    my $store_me       = $init_schema->serialize_abstract();
+    my $schema_version = $init_schema->SCHEMA_VERSION;
 
-        # If table_size is not defined, then we hit an error reading the
-        # bz_schema table, which means it probably doesn't exist yet. So,
-        # we have to create it. If we failed above for some other reason,
-        # we'll see the failure here.
-        # However, we must create the table after we do get_initial_schema,
-        # because some versions of get_initial_schema read that the table
-        # exists and then add it to the Schema, where other versions don't.
-        if (!defined $table_size) {
-            $self->_bz_add_table_raw('bz_schema');
-        }
-
-        say install_string('db_schema_init');
-        my $sth = $self->prepare("INSERT INTO bz_schema "
-                                 ." (schema_data, version) VALUES (?,?)");
-        $sth->bind_param(1, $store_me, $self->BLOB_TYPE);
-        $sth->bind_param(2, $schema_version);
-        $sth->execute();
-
-        # And now we have to update the on-disk schema to hold the bz_schema
-        # table, if the bz_schema table didn't exist when we were called.
-        if (!defined $table_size) {
-            $self->_bz_real_schema->add_table('bz_schema',
-                $self->_bz_schema->get_table_abstract('bz_schema'));
-            $self->_bz_store_real_schema;
-        }
-    } 
-    # Sanity check
-    elsif ($table_size > 1) {
-        # We tell them to delete the newer one. Better to have checksetup
-        # run migration code too many times than to have it not run the
-        # correct migration code at all.
-        die "Attempted to initialize the schema but there are already "
-            . " $table_size copies of it stored.\nThis should never happen.\n"
-            . " Compare the rows of the bz_schema table and delete the "
-            . "newer one(s).";
+    # If table_size is not defined, then we hit an error reading the
+    # bz_schema table, which means it probably doesn't exist yet. So,
+    # we have to create it. If we failed above for some other reason,
+    # we'll see the failure here.
+    # However, we must create the table after we do get_initial_schema,
+    # because some versions of get_initial_schema read that the table
+    # exists and then add it to the Schema, where other versions don't.
+    if (!defined $table_size) {
+      $self->_bz_add_table_raw('bz_schema');
     }
+
+    say install_string('db_schema_init');
+    my $sth = $self->prepare(
+      "INSERT INTO bz_schema " . " (schema_data, version) VALUES (?,?)");
+    $sth->bind_param(1, $store_me, $self->BLOB_TYPE);
+    $sth->bind_param(2, $schema_version);
+    $sth->execute();
+
+    # And now we have to update the on-disk schema to hold the bz_schema
+    # table, if the bz_schema table didn't exist when we were called.
+    if (!defined $table_size) {
+      $self->_bz_real_schema->add_table('bz_schema',
+        $self->_bz_schema->get_table_abstract('bz_schema'));
+      $self->_bz_store_real_schema;
+    }
+  }
+
+  # Sanity check
+  elsif ($table_size > 1) {
+
+    # We tell them to delete the newer one. Better to have checksetup
+    # run migration code too many times than to have it not run the
+    # correct migration code at all.
+    die "Attempted to initialize the schema but there are already "
+      . " $table_size copies of it stored.\nThis should never happen.\n"
+      . " Compare the rows of the bz_schema table and delete the "
+      . "newer one(s).";
+  }
 }
 
 =item C<_bz_real_schema()>
@@ -1390,24 +1421,23 @@ sub _bz_init_schema_storage {
 =cut
 
 sub _bz_real_schema {
-    my ($self) = @_;
-    return $self->{private_real_schema} if exists $self->{private_real_schema};
+  my ($self) = @_;
+  return $self->{private_real_schema} if exists $self->{private_real_schema};
 
-    my $bz_schema;
-    unless ($bz_schema = Bugzilla->memcached->get({ key => 'bz_schema' })) {
-        $bz_schema = $self->selectrow_arrayref(
-            "SELECT schema_data, version FROM bz_schema"
-        );
-        Bugzilla->memcached->set({ key => 'bz_schema', value => $bz_schema });
-    }
+  my $bz_schema;
+  unless ($bz_schema = Bugzilla->memcached->get({key => 'bz_schema'})) {
+    $bz_schema
+      = $self->selectrow_arrayref("SELECT schema_data, version FROM bz_schema");
+    Bugzilla->memcached->set({key => 'bz_schema', value => $bz_schema});
+  }
 
-    (die "_bz_real_schema tried to read the bz_schema table but it's empty!")
-        if !$bz_schema;
+  (die "_bz_real_schema tried to read the bz_schema table but it's empty!")
+    if !$bz_schema;
 
-    $self->{private_real_schema} =
-        $self->_bz_schema->deserialize_abstract($bz_schema->[0], $bz_schema->[1]);
+  $self->{private_real_schema}
+    = $self->_bz_schema->deserialize_abstract($bz_schema->[0], $bz_schema->[1]);
 
-    return $self->{private_real_schema};
+  return $self->{private_real_schema};
 }
 
 =item C<_bz_store_real_schema()>
@@ -1427,106 +1457,135 @@ sub _bz_real_schema {
 =cut
 
 sub _bz_store_real_schema {
-    my ($self) = @_;
+  my ($self) = @_;
 
-    # Make sure that there's a schema to update
-    my $table_size = $self->selectrow_array("SELECT COUNT(*) FROM bz_schema");
+  # Make sure that there's a schema to update
+  my $table_size = $self->selectrow_array("SELECT COUNT(*) FROM bz_schema");
 
-    die "Attempted to update the bz_schema table but there's nothing "
-        . "there to update. Run checksetup." unless $table_size;
+  die "Attempted to update the bz_schema table but there's nothing "
+    . "there to update. Run checksetup."
+    unless $table_size;
 
-    # We want to store the current object, not one
-    # that we read from the database. So we use the actual hash
-    # member instead of the subroutine call. If the hash
-    # member is not defined, we will (and should) fail.
-    my $update_schema = $self->{private_real_schema};
-    my $store_me = $update_schema->serialize_abstract();
-    my $schema_version = $update_schema->SCHEMA_VERSION;
-    my $sth = $self->prepare("UPDATE bz_schema 
-                                 SET schema_data = ?, version = ?");
-    $sth->bind_param(1, $store_me, $self->BLOB_TYPE);
-    $sth->bind_param(2, $schema_version);
-    $sth->execute();
+  # We want to store the current object, not one
+  # that we read from the database. So we use the actual hash
+  # member instead of the subroutine call. If the hash
+  # member is not defined, we will (and should) fail.
+  my $update_schema  = $self->{private_real_schema};
+  my $store_me       = $update_schema->serialize_abstract();
+  my $schema_version = $update_schema->SCHEMA_VERSION;
+  my $sth            = $self->prepare(
+    "UPDATE bz_schema 
+                                 SET schema_data = ?, version = ?"
+  );
+  $sth->bind_param(1, $store_me, $self->BLOB_TYPE);
+  $sth->bind_param(2, $schema_version);
+  $sth->execute();
 
-    Bugzilla->memcached->clear({ key => 'bz_schema' });
+  Bugzilla->memcached->clear({key => 'bz_schema'});
 }
 
 # For bz_populate_enum_tables
 sub _bz_populate_enum_table {
-    my ($self, $table, $valuelist) = @_;
+  my ($self, $table, $valuelist) = @_;
 
-    my $sql_table = $self->quote_identifier($table);
+  my $sql_table = $self->quote_identifier($table);
 
-    # Check if there are any table entries
-    my $table_size = $self->selectrow_array("SELECT COUNT(*) FROM $sql_table");
+  # Check if there are any table entries
+  my $table_size = $self->selectrow_array("SELECT COUNT(*) FROM $sql_table");
 
-    # If the table is empty...
-    if (!$table_size) {
-        print " $table";
-        my $insert = $self->prepare(
-            "INSERT INTO $sql_table (value,sortkey) VALUES (?,?)");
-        my $sortorder = 0;
-        my $maxlen    = max(map(length($_), @$valuelist)) + 2;
-        foreach my $value (@$valuelist) {
-            $sortorder += 100;
-            $insert->execute($value, $sortorder);
-        }
+  # If the table is empty...
+  if (!$table_size) {
+    print " $table";
+    my $insert
+      = $self->prepare("INSERT INTO $sql_table (value,sortkey) VALUES (?,?)");
+    my $sortorder = 0;
+    my $maxlen    = max(map(length($_), @$valuelist)) + 2;
+    foreach my $value (@$valuelist) {
+      $sortorder += 100;
+      $insert->execute($value, $sortorder);
     }
+  }
 }
 
 # This is used before adding a foreign key to a column, to make sure
 # that the database won't fail adding the key.
 sub _check_references {
-    my ($self, $table, $column, $fk) = @_;
-    my $foreign_table = $fk->{TABLE};
-    my $foreign_column = $fk->{COLUMN};
+  my ($self, $table, $column, $fk) = @_;
+  my $foreign_table  = $fk->{TABLE};
+  my $foreign_column = $fk->{COLUMN};
 
-    # We use table aliases because sometimes we join a table to itself,
-    # and we can't use the same table name on both sides of the join.
-    # We also can't use the words "table" or "foreign" because those are
-    # reserved words.
-    my $bad_values = $self->selectcol_arrayref(
-        "SELECT DISTINCT tabl.$column 
+  # We use table aliases because sometimes we join a table to itself,
+  # and we can't use the same table name on both sides of the join.
+  # We also can't use the words "table" or "foreign" because those are
+  # reserved words.
+  my $bad_values = $self->selectcol_arrayref(
+    "SELECT DISTINCT tabl.$column 
            FROM $table AS tabl LEFT JOIN $foreign_table AS forn
                 ON tabl.$column = forn.$foreign_column
           WHERE forn.$foreign_column IS NULL
-                AND tabl.$column IS NOT NULL");
+                AND tabl.$column IS NOT NULL"
+  );
 
-    if (@$bad_values) {
-        my $delete_action = $fk->{DELETE} || '';
-        if ($delete_action eq 'CASCADE') {
-            $self->do("DELETE FROM $table WHERE $column IN (" 
-                      . join(',', ('?') x @$bad_values)  . ")",
-                      undef, @$bad_values);
-            if (Bugzilla->usage_mode == USAGE_MODE_CMDLINE) {
-                print "\n", get_text('install_fk_invalid_fixed',
-                    { table => $table, column => $column,
-                      foreign_table => $foreign_table,
-                      foreign_column => $foreign_column,
-                      'values' => $bad_values, action => 'delete' }), "\n";
-            }
-        }
-        elsif ($delete_action eq 'SET NULL') {
-            $self->do("UPDATE $table SET $column = NULL
-                        WHERE $column IN ("
-                      . join(',', ('?') x @$bad_values)  . ")",
-                      undef, @$bad_values);
-            if (Bugzilla->usage_mode == USAGE_MODE_CMDLINE) {
-                print "\n", get_text('install_fk_invalid_fixed',
-                    { table => $table, column => $column,
-                      foreign_table => $foreign_table, 
-                      foreign_column => $foreign_column,
-                      'values' => $bad_values, action => 'null' }), "\n";
-            }
-        }
-        else {
-            die "\n", get_text('install_fk_invalid',
-                { table => $table, column => $column,
-                  foreign_table => $foreign_table,
-                  foreign_column => $foreign_column,
-                 'values' => $bad_values }), "\n";
-        }
+  if (@$bad_values) {
+    my $delete_action = $fk->{DELETE} || '';
+    if ($delete_action eq 'CASCADE') {
+      $self->do(
+        "DELETE FROM $table WHERE $column IN (" . join(',', ('?') x @$bad_values) . ")",
+        undef, @$bad_values
+      );
+      if (Bugzilla->usage_mode == USAGE_MODE_CMDLINE) {
+        print "\n",
+          get_text(
+          'install_fk_invalid_fixed',
+          {
+            table          => $table,
+            column         => $column,
+            foreign_table  => $foreign_table,
+            foreign_column => $foreign_column,
+            'values'       => $bad_values,
+            action         => 'delete'
+          }
+          ),
+          "\n";
+      }
     }
+    elsif ($delete_action eq 'SET NULL') {
+      $self->do(
+        "UPDATE $table SET $column = NULL
+                        WHERE $column IN ("
+          . join(',', ('?') x @$bad_values) . ")", undef, @$bad_values
+      );
+      if (Bugzilla->usage_mode == USAGE_MODE_CMDLINE) {
+        print "\n",
+          get_text(
+          'install_fk_invalid_fixed',
+          {
+            table          => $table,
+            column         => $column,
+            foreign_table  => $foreign_table,
+            foreign_column => $foreign_column,
+            'values'       => $bad_values,
+            action         => 'null'
+          }
+          ),
+          "\n";
+      }
+    }
+    else {
+      die "\n",
+        get_text(
+        'install_fk_invalid',
+        {
+          table          => $table,
+          column         => $column,
+          foreign_table  => $foreign_table,
+          foreign_column => $foreign_column,
+          'values'       => $bad_values
+        }
+        ),
+        "\n";
+    }
+  }
 }
 
 1;

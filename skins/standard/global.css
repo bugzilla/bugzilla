@@ -2755,6 +2755,7 @@ pre.comment-text {
 }
 
 .markdown-body pre {
+  max-height: 600px;
   word-wrap: normal;
 }
 

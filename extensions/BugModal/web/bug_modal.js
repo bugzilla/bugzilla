@@ -901,7 +901,7 @@ $(function() {
                     },
                     (data) => {
                         const quoted = data['comments'][uid]['text'].replace(/\n/g, "\n> ");
-                        reply_text = `${prefix}\n> ${quoted}`;
+                        reply_text = `${prefix}> ${quoted}\n\n`;
                         populateNewComment();
                     }
                 );

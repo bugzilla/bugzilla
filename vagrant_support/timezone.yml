@@ -13,6 +13,6 @@
 - name: set timezone to same as production
   file:
     path: /etc/localtime
-    src: /usr/share/zoneinfo/America/Los_Angeles
+    src: /usr/share/zoneinfo/UTC
     force: true
     state: link

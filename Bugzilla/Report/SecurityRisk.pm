@@ -280,7 +280,7 @@ sub _build_events {
   my ($self) = @_;
   return [] if !(@{$self->initial_bug_ids});
   my $bug_ids    = join ', ', @{$self->initial_bug_ids};
-  my $start_date = $self->start_date->ymd('-');
+  my $start_date = $self->start_date->strftime('%Y-%m-%d %H:%M:%S');
   my $query      = qq{
         SELECT
             bug_id,
@@ -295,7 +295,7 @@ sub _build_events {
         WHERE
             bug_id IN ($bug_ids)
             AND field.name IN ('keywords' , 'bug_status')
-            AND bug_when >= '$start_date 00:00:00'
+            AND bug_when >= '$start_date'
         GROUP BY bug_id , bug_when , field.name
     };
   # Don't use selectall_hashref as it only gets the latest event each bug.

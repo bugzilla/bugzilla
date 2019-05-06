@@ -545,10 +545,8 @@ Bugzilla.BugModal.Comments = class Comments {
       const $comment = $set.querySelector('.comment:not([data-tags~="hide-attachment"])');
       // Skip if the attachment is obsolete or deleted
       const $attachment = $set.querySelector('.attachment:not(.obsolete):not(.deleted)');
-      // Skip if the attachment is SVG image
-      const is_svg = !!$set.querySelector('.attachment [itemprop="encodingFormat"][content="image/svg+xml"]');
 
-      if ($comment && $attachment && !is_svg) {
+      if ($comment && $attachment) {
         observer.observe($attachment);
       }
     });
@@ -566,8 +564,13 @@ Bugzilla.BugModal.Comments = class Comments {
     const size = Number($att.querySelector('[itemprop="contentSize"]').content);
     const max_size = 2000000;
 
-    // Show image smaller than 2 MB
-    if (type.match(/^image\/(?!vnd).+$/) && size < max_size) {
+    // Skip if the attachment is marked as binary
+    if (type.match(/^application\/(?:octet-stream|binary)$/)) {
+      return;
+    }
+
+    // Show image smaller than 2 MB, excluding SVG and non-standard formats
+    if (type.match(/^image\/(?!vnd|svg).+$/) && size < max_size) {
       $att.insertAdjacentHTML('beforeend', `
         <a href="${link}" class="outer lightbox"><img src="${link}" alt="${name.htmlEncode()}" itemprop="image"></a>`);
 

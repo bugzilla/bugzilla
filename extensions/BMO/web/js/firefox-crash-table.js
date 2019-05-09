@@ -111,7 +111,7 @@ window.addEventListener('DOMContentLoaded', () => {
   if (container) {
     const signatures = [];
     const selector = oldWay ? "cf_crash_signature_edit_container" : "field-value-cf_crash_signature";
-    const baseCrashUrl = "https://crash-stats.mozilla.com/signature/?signature=";
+    const baseCrashUrl = "https://crash-stats.mozilla.org/signature/?signature=";
     document.querySelectorAll("#" + selector + " a").forEach(a => {
       if (a.href.startsWith(baseCrashUrl)) {
         const encodedSignature = a.href.replace(baseCrashUrl, "")
@@ -125,7 +125,7 @@ window.addEventListener('DOMContentLoaded', () => {
       });
 
       const extraSocorroArgs = []
-      const baseUrl = "https://crash-stats.mozilla.com/search/";
+      const baseUrl = "https://crash-stats.mozilla.org/search/";
       const sayNo = new Set(["_columns", "_facets", "_facets_size", "_sort", "_results_number", "date", "channel", "product", "version", "build_id"]);
       const urlSelector = oldWay ? "bz_url_edit_container" : "field-value-bug_file_loc";
       document.querySelectorAll("#" + urlSelector + " a").forEach(a => {

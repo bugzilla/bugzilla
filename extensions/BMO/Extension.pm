@@ -688,7 +688,7 @@ sub bug_format_comment {
         my $args  = shift;
         my $match = html_quote($args->{matches}->[0]);
         return
-          qq{<a href="https://crash-stats.mozilla.com/report/index/$match">bp-$match</a>};
+          qq{<a href="https://crash-stats.mozilla.org/report/index/$match">bp-$match</a>};
       }
     }
   );

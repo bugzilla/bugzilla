@@ -756,7 +756,7 @@ sub DEFAULT_CSP {
       'https://treeherder.mozilla.org/api/failurecount/',
 
       # socorro lens
-      'https://crash-stats.mozilla.com/api/SuperSearch/',
+      'https://crash-stats.mozilla.org/api/SuperSearch/',
     ],
     font_src => [ 'self', 'https://fonts.gstatic.com' ],
     form_action => [

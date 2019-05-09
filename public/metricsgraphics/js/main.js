@@ -197,7 +197,7 @@ var items = [];
 var end_date = convertDate(new Date((new Date()).valueOf() - 1000 * 60 * 60 * 24 * 1));
 var start_date = convertDate(new Date((new Date()).valueOf() - 1000 * 60 * 60 * 24 * 180));
 var globals = {
-  "url_base": "https://crash-stats.mozilla.com/search/?",
+  "url_base": "https://crash-stats.mozilla.org/search/?",
   "url": [],
   "mouseover": function (d) {
     var next = new Date(d.date.valueOf() + 1 * 24 * 60 * 60 * 1000);
@@ -326,7 +326,7 @@ function loadGraph(search, match = 'exact') {
       if (!globals.url[i]) globals.url[i] = "";
       globals.url[i] = globals.url_base + signatures[i];
       // Iterate through the Socorro data and create the chart data object
-      var url = "https://crash-stats.mozilla.com/api/SuperSearch/?" + signatures[i] + "&date=%3E%3D" + start_date + "&date=%3C%3D" + end_date + "&_histogram.date=release_channel&_histogram_interval=1d&_results_number=0";
+      var url = "https://crash-stats.mozilla.org/api/SuperSearch/?" + signatures[i] + "&date=%3E%3D" + start_date + "&date=%3C%3D" + end_date + "&_histogram.date=release_channel&_histogram_interval=1d&_results_number=0";
       url = url.replace("/?&signature", "/?signature");
       d3.json(url, function (data) {
         if (data.total > 0) {

@@ -32,7 +32,7 @@ $sel->title_like(qr/\d+ \S $bug_summary/, "crash report added");
 $sel->click_ok("link=bug $bug_id");
 $sel->wait_for_page_to_load_ok(WAIT_TIME);
 $sel->attribute_is('link=bp-63f096f7-253b-4ee2-ae3d-8bb782090824@href',
-  'https://crash-stats.mozilla.com/report/index/63f096f7-253b-4ee2-ae3d-8bb782090824'
+  'https://crash-stats.mozilla.org/report/index/63f096f7-253b-4ee2-ae3d-8bb782090824'
 );
 
 $sel->type_ok("comment", "CVE-2010-2884");

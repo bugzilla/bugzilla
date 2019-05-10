@@ -758,6 +758,10 @@ sub update_table_definitions {
     {TYPE => 'varchar(8)',, DEFAULT => "''"});
 
   $dbh->bz_add_column('profiles', 'mfa_required_date', {TYPE => 'DATETIME'});
+
+  # 2019-05-08 imadueme@mozilla.com - Bug 1550145
+  $dbh->bz_add_column('profiles', 'forget_after_date', {TYPE => 'DATETIME'});
+
   _migrate_group_owners();
 
   $dbh->bz_add_column('groups', 'idle_member_removal',

@@ -946,6 +946,7 @@ use constant ABSTRACT_SCHEMA => {
       password_change_reason => {TYPE => 'varchar(64)'},
       mfa                    => {TYPE => 'varchar(8)', DEFAULT => "''"},
       mfa_required_date      => {TYPE => 'DATETIME'},
+      forget_after_date      => {TYPE => 'DATETIME'},
     ],
     INDEXES => [
       profiles_login_name_idx  => {FIELDS => ['login_name'], TYPE => 'UNIQUE'},

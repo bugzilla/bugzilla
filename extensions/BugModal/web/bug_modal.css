@@ -103,6 +103,9 @@ a.activity-ref {
 .module-latch {
     padding: 2px 10px;
     cursor: pointer;
+    -moz-user-select: none;
+    -webkit-user-select: none;
+    user-select: none;
 }
 
 .module-spinner {

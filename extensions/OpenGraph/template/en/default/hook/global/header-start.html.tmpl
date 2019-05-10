@@ -13,6 +13,10 @@
 <meta property="og:url" content="[% Bugzilla.localconfig.canonical_urlbase FILTER none %]show_bug.cgi?id=[% bug.bug_id FILTER uri %]">
 <meta property="og:description"
       content="[% bug.bug_status FILTER html %] ([% bug.assigned_to.login FILTER email FILTER html %]) in [% bug.product FILTER html %] - [% bug.component FILTER html %]. Last updated [% bug.delta_ts FILTER time('%Y-%m-%d') %].">
+<meta name="twitter:label1" value="Type">
+<meta name="twitter:data1" value="[% bug.bug_type FILTER html %]">
+<meta name="twitter:label2" value="Priority">
+<meta name="twitter:data2" value="[% bug.priority FILTER html %]">
 [% ELSIF error_message %]
 <meta property="og:description" content="[% error_message FILTER txt FILTER html %]">
 [% END %]

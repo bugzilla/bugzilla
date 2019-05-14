@@ -50,7 +50,7 @@ sub render_html {
   local $Bugzilla::Template::COLOR_QUOTES = 0;
 
   if ($markdown =~ /^\s*$MARKDOWN_OFF\n/s) {
-    my $text = $self->bugzilla_shorthand->( trim($markdown) );
+    my $text = $self->bugzilla_shorthand->(trim($markdown), $bug);
     my $dom = Mojo::DOM->new($text);
     $dom->find('*')->each(sub {
       my ($e) = @_;
@@ -88,7 +88,7 @@ sub render_html {
         && any { $child->parent->tag eq $_ } @valid_text_parent_tags)
       {
         my $text = $child->content;
-        $child->replace(Mojo::DOM->new($bugzilla_shorthand->($text)));
+        $child->replace(Mojo::DOM->new($bugzilla_shorthand->($text, $bug)));
       }
       return $child;
     });

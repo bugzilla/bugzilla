@@ -111,9 +111,7 @@ $(function () {
         };
 
         var requesteeFormatter = function(o) {
-            return o.value
-                ? o.value.htmlEncode()
-                : '<i>anyone</i>';
+            return o.value.htmlEncode();
         };
 
         var flagNameFormatter = function(o) {

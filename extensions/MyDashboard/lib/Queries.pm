@@ -14,6 +14,7 @@ use warnings;
 use Bugzilla;
 use Bugzilla::Bug;
 use Bugzilla::CGI;
+use Bugzilla::Constants;
 use Bugzilla::Search;
 use Bugzilla::Flag;
 use Bugzilla::Status qw(is_open_state);
@@ -258,6 +259,8 @@ sub query_flags {
   }
   else {
     $match_params->{'setter_id'} = $user->id;
+    # Exclude flags without a requestee, such as `in-testsuite?`
+    $match_params->{'requestee_id'} = NOT_NULL;
   }
 
   my $matched = Bugzilla::Flag->match($match_params);

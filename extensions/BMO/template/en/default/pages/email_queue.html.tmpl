@@ -15,8 +15,9 @@
 
   <p><i>[% jobs.size FILTER none %] email(s) in the queue.</i></p>
 
-  <table id="report" class="hover" cellspacing="0" border="0" width="100%">
-  <tr id="report-header">
+  <table id="report" class="standard">
+  <thead>
+  <tr>
     <th>Insert Time</th>
     <th>Run Time</th>
     <th>Age</th>
@@ -24,6 +25,8 @@
     <th>Last Error</th>
     <th>Error Message</th>
   </tr>
+  </thead>
+  <tbody>
   [% FOREACH job IN jobs %]
     <tr class="report item [% loop.count % 2 == 1 ? "report_row_odd" : "report_row_even" %]">
       <td nowrap>[% time2str("%Y-%m-%d %H:%M:%S %Z", job.insert_time) FILTER html %]</td>
@@ -56,6 +59,7 @@
       </tr>
     [% END %]
   [% END %]
+  </tbody>
   </table>
 
 [% ELSE %]

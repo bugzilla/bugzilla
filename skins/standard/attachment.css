@@ -1,57 +1,45 @@
- /* The contents of this file are subject to the Mozilla Public
-  * License Version 1.1 (the "License"); you may not use this file
-  * except in compliance with the License. You may obtain a copy of
-  * the License at http://www.mozilla.org/MPL/
-  *
-  * Software distributed under the License is distributed on an "AS
-  * IS" basis, WITHOUT WARRANTY OF ANY KIND, either express or
-  * implied. See the License for the specific language governing
-  * rights and limitations under the License.
-  *
-  * The Original Code is the Bugzilla Bug Tracking System.
-  *
-  * Contributor(s): Myk Melez <myk@mozilla.org>
-  *                 Joel Peshkin <bugreport@peshkin.net>
-  *                 Erik Stambaugh <erik@dasbistro.com>
-  *                 Marc Schumann <wurblzap@gmail.com>
-  *                 Guy Pyrzak <guy.pyrzak@gmail.com>
-  *                 Kohei Yoshino <kohei.yoshino@gmail.com>
-  */
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this file,
+ * You can obtain one at http://mozilla.org/MPL/2.0/.
+ *
+ * This Source Code Form is "Incompatible With Secondary Licenses", as
+ * defined by the Mozilla Public License, v. 2.0. */
 
 table.attachment_entry th {
-    text-align: right;
-    vertical-align: top;
-    white-space: nowrap;
+  text-align: right;
+  vertical-align: top;
+  white-space: nowrap;
 }
 
 table.attachment_entry td {
-    text-align: left;
-    vertical-align: baseline;
-    padding-bottom: 5px;
+  text-align: left;
+  vertical-align: baseline;
+  padding-bottom: 5px;
 }
 
 table#flags th,
 table#flags td,
 table#attachment_flags th,
 table#attachment_flags td {
-    text-align: left;
-    vertical-align: baseline;
-    font-size: small;
+  text-align: left;
+  vertical-align: baseline;
+  font-size: var(--font-size-small);
 }
 
-/* Rules used to view patches in diff mode. */
+/**
+ * Rules used to view patches in diff mode
+ */
 
 .file_head {
   font-weight: bold;
-  font-size: 1em;
-  background-color: #c3c3c3;
-  border: 1px solid black;
+  font-size: var(--font-size-x-large);
+  background-color: var(--grid-header-background-color);
+  border: 1px solid var(--grid-border-color);
 }
 
 .file_head a {
   text-decoration: none;
   font-family: monospace;
-  font-size: 1.1em;
 }
 
 .file_collapse {
@@ -59,8 +47,9 @@ table#attachment_flags td {
 }
 
 .section_head {
-  background-color: #f0f0f0;
-  border: 1px solid black;
+  padding: 2px 4px;
+  border: 1px solid var(--grid-border-color);
+  background-color: var(--grid-header-background-color);
   text-align: left;
 }
 
@@ -68,135 +57,155 @@ table.file_table {
   table-layout: fixed;
   width: 100%;
   empty-cells: show;
-  border-spacing: 0px;
+  border-spacing: 0;
   border-collapse: collapse;
-  /* draw border below last open context section in listing */
-  border-bottom: 1px solid black;
+  border: 1px solid var(--grid-border-color);
+  border-top: 0;
+  background-color: var(--grid-background-color);
+}
+
+table.file_table td {
+  padding: 2px 4px;
+}
+
+table.file_table thead tr:first-child td {
+  padding: 0; /* Hide the extra line */
 }
 
 tbody.file pre {
   display: inline;
-  font-size: 0.9em;
 }
 
 tbody.file pre:empty {
   display: block;
 }
 
-.changed {
-  background-color: lightblue;
+.removed.num {
+  color: var(--secondary-label-color);
+  background-color: rgba(var(--accent-color-pink-1), .8);
 }
 
-.added {
-  background-color: lightgreen;
+.removed.code {
+  background-color: rgba(var(--accent-color-pink-1), .5);
 }
 
-.removed {
-  background-color: #FFCC99;
+.added.num {
+  color: var(--secondary-label-color);
+  background-color: rgba(var(--accent-color-lightgreen-1), .8);
+}
+
+.added.code {
+  background-color: rgba(var(--accent-color-lightgreen-1), .5);
 }
 
 .num {
-  background-color: #ffe9ae;
-  text-align:right;
   padding: 0 0.3em;
   width: 3em;
+  color: var(--tertiary-label-color);
+  border-right: 1px solid var(--secondary-control-border-color);
+  font-size: var(--font-size-monospace);
+  font-family: var(--font-family-monospace);
+  text-align: right;
+}
+
+.num:not(:first-child) {
+  border-left: 1px solid var(--grid-border-color);
 }
 
 table.attachment_info th {
-    text-align: right;
-    vertical-align: top;
+  text-align: right;
+  vertical-align: top;
 }
 
 table.attachment_info td {
-    text-align: left;
-    vertical-align: top;
+  text-align: left;
+  vertical-align: top;
 }
 
 /* Text displayed when the attachment is not viewable by the web browser */
 #noview {
-    text-align: left;
-    vertical-align: middle;
+  text-align: left;
+  vertical-align: middle;
 }
 
-#attachment_attributes div {
-    padding-bottom: 0.4em;
+#attachment_attributes > div {
+  margin: 16px 0;
 }
 
 #attachment_attributes label,
 #attachment_attributes span.label,
-#attachment_actions span.label
-{
-    font-weight: bold;
+#attachment_actions span.label {
+  font-weight: bold;
 }
 
 #attachment_attributes .block {
-    display: block;
+  display: block;
 }
 
 #attachment_actions {
-    clear: both;
-    margin-bottom: 1ex;
+  clear: both;
+  margin-bottom: 1ex;
 }
 
 #attachment_comments_and_flags {
-    display: flex;
-    overflow: hidden;
-    clear: both;
-    margin: 16px 0;
+  display: flex;
+  overflow: hidden;
+  clear: both;
+  margin: 16px 0;
 }
 
 #attachment_comments_and_flags #attachment_flags {
-    display: flex;
+  display: flex;
 }
 
 #attachment_comments_and_flags > *,
 #attachment_comments_and_flags #attachment_flags > * {
-    flex: auto;
+  flex: auto;
 }
 
 #attachment_information_read_only .title {
-    font-weight: bold;
-    font-size: 1.5em;
-    padding: 0;
-    margin: 0;
+  margin: 0;
+  padding: 0;
+  font-size: var(--font-size-h3);
+  font-weight: bold;
 }
 
 #attachment_information_read_only .title #bz_edit {
-    font-size: 0.7em;
+  font-size: var(--font-size-small);
 }
 
 #attachment_information_read_only .details {
-    font-size: 90%;
+  font-size: var(--font-size-small);
 }
 
 #attachment_info.read #attachment_information_edit {
-    display: none;
+  display: none;
 }
 
 #attachment_info.edit #attachment_information_read_only {
-    display: none;
+  display: none;
 }
 
 #attachment_info.edit #attachment_view_window {
-    float: left;
-    width: 80%;
+  float: left;
+  width: 80%;
 }
 
 #attachment_info.edit #attachment_information_edit {
-    width: 20%;
+  width: 20%;
 }
 
 #attachment_info.edit #attachment_information_edit input.text,
 #attachment_info.edit #attachment_information_edit textarea {
-    width: 90%;
+  width: 90%;
 }
 
 #attachment_isobsolete {
-    padding-right: 1em;
+  padding-right: 1em;
 }
 
 #attachment_information_edit {
-    float: left;
+  float: left;
 }
 
 #smallCommentFrame {
@@ -205,60 +214,75 @@ table.attachment_info td {
 
 #smallCommentFrame #comment,
 #smallCommentFrame #comment_preview {
-    display: block;
-    box-sizing: border-box;
-    width: 100% !important;
+  display: block;
+  box-sizing: border-box;
+  width: 100% !important;
 }
 
 textarea.bz_private {
-    border: 1px solid #F8C8BA;
+  border: 1px solid var(--accent-color-pink-1);
 }
 
 #update {
-    clear: both;
-    display: block;
+  clear: both;
+  display: block;
 }
 
 div#update_container {
-    clear: both;
-    padding: 1.5em 0;
+  clear: both;
+  padding: 1.5em 0;
 }
 
 #attachment_flags p {
-    padding-bottom: 0;
-    margin-bottom: 0;
+  padding-bottom: 0;
+  margin-bottom: 0;
 }
 
-#editFrame, #viewDiffFrame, #viewFrame {
-    height: 400px;
-    width: 95%;
-    margin-left: 2%;
-    overflow: auto;
+#viewDiffFrame,
+#viewFrame {
+  margin-bottom: 10px;
+  border: 4px solid var(--primary-region-border-color);
+  background-color: rgb(255, 255, 255); /* Because the text color in <iframe> cannot be changed */
+}
+
+#flags label {
+  font-weight: normal;
+  white-space: nowrap;
+}
+
+#editFrame,
+#viewDiffFrame,
+#viewFrame {
+  height: 400px;
+  width: 95%;
+  margin-left: 2%;
+  overflow: auto;
 }
 
 .viewall_frame {
-    width: 75%;
-    height: 350px;
+  width: 75%;
+  height: 350px;
 }
 
-.details span.bz_private{
-  border-left: 1px solid darkred;
+.details span.bz_private {
+  border-left: 1px solid var(--accent-color-red-1);
   padding-left: 0.5em;
 }
 
-.no_javascript .bz_hide, .no_javascript .bz_edit {
-    display: none;
+.no_javascript .bz_hide,
+.no_javascript .bz_edit {
+  display: none;
 }
 
 #hidden_obsolete_message {
-   text-align: left;
-   width: 75%;
-   margin: 0  auto;
-   font-weight: bold
+  text-align: left;
+  width: 75%;
+  margin: 0 auto;
+  font-weight: bold
 }
 
 /**
- * AttachmentForm
+ * Attachment Form
  */
 
 #att-selector [hidden] {
@@ -266,8 +290,8 @@ div#update_container {
 }
 
 #att-selector label[role="button"] {
-  border-bottom: 1px solid #277AC1;
-  color: #277AC1;
+  border-bottom: 1px solid var(--link-text-color);
+  color: var(--link-text-color);
   cursor: pointer;
   pointer-events: auto;
 }
@@ -280,11 +304,11 @@ div#update_container {
 
 #att-dropbox {
   box-sizing: border-box;
-  border: 1px solid #999;
+  border: 1px solid var(--control-border-color);
   border-radius: 4px;
   margin: 4px;
   width: 560px;
-  background-color: #FFF;
+  background-color: var(--control-background-color);
   -moz-user-select: none;
   -webkit-user-select: none;
   user-select: none;
@@ -292,15 +316,15 @@ div#update_container {
 }
 
 #att-dropbox.invalid {
-  border-color: #F33;
-  background-color: #FEE;
-  box-shadow: 0 0 4px #F33;
+  border-color: var(--invalid-control-border-color);
+  background-color: rgb(var(--accent-color-red-1), .1);
+  box-shadow: 0 0 4px var(--invalid-control-border-color);
 }
 
 #att-dropbox.dragover {
-  border-color: #277AC1;
-  background-color: #DCE9F5;
-  box-shadow: 0 0 4px #277AC1;
+  border-color: var(--focused-control-border-color);
+  background-color: rgba(var(--accent-color-blue-1), .1);
+  box-shadow: 0 0 4px var(--focused-control-border-color);
 }
 
 #att-dropbox.invalid header,
@@ -314,12 +338,11 @@ div#update_container {
   display: flex;
   align-items: center;
   justify-content: center;
-  border-bottom: 1px solid #C0C0C0;
+  border-bottom: 1px solid var(--secondary-control-border-color);
   border-radius: 4px 4px 0 0;
   padding: 8px;
-  font-size: 14px;
+  background-color: var(--primary-region-background-color);
   font-style: italic;
-  background-color: #F3F3F3;
   pointer-events: none;
   transition: all .2s;
 }
@@ -327,16 +350,16 @@ div#update_container {
 #att-dropbox header .icon {
   display: inline-block;
   margin: 2px 8px 0 0;
-  color: #999;
+  color: var(--tertiary-label-color);
   transition: all .2s;
 }
 
 #att-dropbox.invalid header .icon {
-  color: #F33;
+  color: var(--error-message-foreground-color);
 }
 
 #att-dropbox.dragover header .icon {
-  color: #277AC1;
+  color: var(--focused-control-border-color);
 }
 
 #att-dropbox header .icon::before {
@@ -376,9 +399,7 @@ div#update_container {
   width: 100%;
   height: 160px;
   min-height: 160px;
-  font: 13px/1.2 "Droid Sans Mono", Menlo, Monaco, "Courier New", Courier, monospace;
   white-space: pre;
-  resize: vertical;
   transition: all .2s;
 }
 
@@ -407,7 +428,7 @@ div#update_container {
   margin: 0;
   width: 100%;
   height: 100%;
-  background-color: #EEE;
+  background-color: var(--primary-region-background-color);
 }
 
 #att-preview [itemprop="name"] {
@@ -422,11 +443,11 @@ div#update_container {
   padding: 40px;
   width: 100%;
   height: 100%;
-  font-size: 14px;
+  font-size: var(--font-size-x-large);
   text-align: center;
-  text-shadow: 0 0 4px #000;
-  color: #FFF;
-  background-image: linear-gradient(to bottom, transparent, rgba(0, 0, 0, .4));
+  text-shadow: var(--text-shadow-light);
+  color: var(--inverted-label-color);
+  background-image: linear-gradient(to bottom, transparent 50%, var(--secondary-control-border-color));
 }
 
 #att-preview [itemprop="text"] {
@@ -439,8 +460,8 @@ div#update_container {
   padding: 8px;
   width: 100%;
   height: 100%;
-  font: 13px/1.2 "Droid Sans Mono", Menlo, Monaco, "Courier New", Courier, monospace;
-  color: #333;
+  font-size: var(--font-size-monospace);
+  font-family: var(--font-family-monospace);
 }
 
 #att-preview [itemprop="image"] {
@@ -456,7 +477,7 @@ div#update_container {
 
 #att-preview [itemprop="image"] ~ .icon::before {
   font-size: 100px;
-  color: #999;
+  color: var(--tertiary-label-color);
   content: "\E24D";
 }
 
@@ -473,7 +494,7 @@ div#update_container {
 
 #att-remove-button .icon::before {
   font-size: 16px;
-  color: #666;
+  color: var(--secondary-label-color);
   content: "\E5C9";
 }
 
@@ -491,6 +512,7 @@ div#update_container {
 }
 
 @media screen and (max-width: 1023px) {
+
   #attachment_comments_and_flags,
   #attachment_comments_and_flags #attachment_flags {
     display: block;

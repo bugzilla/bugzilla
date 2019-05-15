@@ -65,13 +65,8 @@
   );
   style_urls.push(
     "extensions/BugModal/web/bug_modal.css",
-    "skins/standard/bug_groups.css",
     "js/jquery/plugins/contextMenu/contextMenu.css"
   );
-
-  IF user.in_group('canconfirm');
-    style_urls.push('extensions/TagNewUsers/web/style.css');
-  END;
 %]
 
 [% javascript = BLOCK %]

@@ -44,5 +44,5 @@
 }
 
 .required:before, .required_star {
-  color: red;
+  color: var(--required-label-color);
 }

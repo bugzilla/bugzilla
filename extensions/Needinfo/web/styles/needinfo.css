@@ -6,14 +6,14 @@
  * defined by the Mozilla Public License, v. 2.0. */
 
 #needinfo_container label {
-    font-weight: normal !important;
+  font-weight: normal !important;
 }
 
 .needinfo-cb-td {
-    text-align: center;
-    vertical-align: baseline;
+  text-align: center;
+  vertical-align: baseline;
 }
 
 #needinfo_role_identity {
-    margin-left: 1em;
+  margin-left: 1em;
 }

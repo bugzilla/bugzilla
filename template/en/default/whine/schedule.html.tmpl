@@ -93,7 +93,7 @@
     <td align="right" colspan="2">
       <input type="submit" value="Remove Event"
              name="remove_event_[% event.key %]"
-             id="remove_event_[% event.key %]">
+             id="remove_event_[% event.key %]" class="secondary">
     </td>
   </tr>
 
@@ -144,7 +144,7 @@
         Not scheduled to run<br>
         <input type="submit" value="Add a new schedule"
                name="add_schedule_[% event.key %]"
-               id="add_schedule_[% event.key %]">
+               id="add_schedule_[% event.key %]" class="secondary">
       </td>
     </tr>
 
@@ -204,7 +204,7 @@
               <td align="left">
                 <input type="submit" value="Remove"
                        name="remove_schedule_[% schedule.id %]"
-                       id="remove_schedule_[% schedule.id %]">
+                       id="remove_schedule_[% schedule.id %]" class="secondary">
               </td>
             </tr>
           [% END %]
@@ -213,7 +213,7 @@
             <td colspan="3">
               <input type="submit" value="Add a new schedule"
                      name="add_schedule_[% event.key %]"
-                     id="add_schedule_[% event.key %]">
+                     id="add_schedule_[% event.key %]" class="secondary">
             </td>
           </tr>
         </table>
@@ -233,7 +233,7 @@
         No searches <br>
         <input type="submit" value="Add a new query"
                name="add_query_[% event.key %]"
-               id="add_query_[% event.key %]">
+               id="add_query_[% event.key %]" class="secondary">
       </td>
       <td align="right" valign="bottom">
         <input type="submit" value="Update / Commit" name="commit" id="update">
@@ -289,7 +289,7 @@
               <td align="right">
                 <input type="submit" value="Remove"
                        name="remove_query_[% query.id %]"
-                       id="remove_query_[% query.id %]">
+                       id="remove_query_[% query.id %]" class="secondary">
               </td>
             </tr>
 
@@ -299,7 +299,7 @@
             <td colspan="3">
               <input type="submit" value="Add a new query"
                      name="add_query_[% event.key %]"
-                     id="add_query_[% event.key %]">
+                     id="add_query_[% event.key %]" class="secondary">
             </td>
             <td align="right" colspan="2">
               <input type="submit" value="Update / Commit" name="commit" id="update">

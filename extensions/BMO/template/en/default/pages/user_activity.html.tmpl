@@ -106,8 +106,9 @@
 
 [% IF operations.size > 0 %]
   <br>
-  <table border="1" cellpadding="4" cellspacing="0" id="report" class="hover">
-    <tr id="report-header">
+  <table id="report" class="standard">
+  <thead>
+    <tr>
       [% IF who_count > 1 %]
         <th>Who</th>
       [% END %]
@@ -122,7 +123,8 @@
       <th>Removed</th>
       <th>Added</th>
     </tr>
-
+  </thead>
+  <tbody>
     [% FOREACH operation = operations %]
       [% tr_class = loop.count % 2 ? 'report_row_even' : 'report_row_odd' %]
       [% FOREACH change = operation.changes %]
@@ -173,6 +175,7 @@
         </tr>
       [% END %]
     [% END %]
+  </tbody>
   </table>
   <p>
     <a href="[% basepath FILTER none %]buglist.cgi?bug_id=[% bug_ids.join(',') FILTER uri %]">

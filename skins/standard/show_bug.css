@@ -1,45 +1,181 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/.
+ *
+ * This Source Code Form is "Incompatible With Secondary Licenses", as
+ * defined by the Mozilla Public License, v. 2.0.
+ */
+
+.navigation {
+  padding: 5px 10px;
+  background: var(--primary-region-background-color);
+}
+
 .bz_alias_short_desc_container {
-    margin: 8px 0;
-    padding: 0.3em;
-    background-color: rgb(208, 208, 208);
-    border-radius: 0.5em;
-    font-size: 125%;
-    font-weight: bold;
+  margin: 8px 0 0;
+  padding: 0.3em;
+  background-color: var(--primary-region-header-background-color);
+  font-size: var(--font-size-h4);
+  font-weight: bold;
+}
+
+.bz_alias_short_desc_container b,
+.bz_alias_short_desc_container .editme {
+    font-weight: normal;
+}
+
+#field_container_see_also br {
+  margin-bottom: 10px;
+}
+
+table.edit_form {
+  position: relative;
+  margin-bottom: 20px;
+  padding: 10px 10px 80px;
+  background-color: var(--primary-region-background-color);
+  box-shadow: var(--primary-region-box-shadow);
+}
+
+table.edit_form tbody {
+  width: 100%;
+}
+
+table.edit_form hr {
+  display: none;
+}
+
+.field_label {
+  padding-right: 10px;
+  vertical-align: baseline;
+  white-space: nowrap;
+  font-weight: normal;
+}
+
+.field_label a,
+.field_label b {
+  color: var(--secondary-label-color);
+}
+
+.field_value .text_input {
+  min-width: 0;
+}
+
+#product,
+#component {
+  width: 235px;
+}
+
+#bz_show_bug_column_1 tr:last-child span {
+  display: block;
+  margin: 8px;
+}
+
+#commit_top {
+  position: absolute;
+  bottom: 20px;
+  right: 10px;
+}
+
+.cc_list_display {
+  float: none;
+  margin-top: 3px;
+  padding: 5px;
+  max-width: none;
+  background: var(--control-background-color);
+  font-size: var(--font-size-small);
+}
+
+#project-flags,
+#custom-flags {
+  border-collapse: collapse;
+}
+
+#project-flags label,
+#custom-flags label {
+  margin-right: 10px;
+}
+
+#cf_crash_signature {
+  width: 100%;
+}
+
+#bz_ctag_error {
+  border: none;
+  padding: 2px 6px;
+  color: var(--error-message-foreground-color);
+  background-color: var(--error-message-background-color);
+}
+
+#bz_ctag_error a {
+  color: var(--link-text-color);
+}
+
+.bz_collapse_expand_comments li {
+  white-space: nowrap;
+}
+
+#add_comment {
+  margin-bottom: 20px;
+  border-top: 1px solid var(--primary-region-border-color);
+  padding: 10px 0;
+}
+
+#add_comment > table {
+  border-collapse: collapse;
+  width: 661px;
+}
+
+.notransition {
+  transition: none !important;
+}
+
+.calendar_button,
+.calendar_button:hover {
+  box-shadow: none;
+  padding: 0;
+}
+
+.related_actions {
+  line-height: 19px;
+  padding: 5px 10px;
 }
 
 .bz_bug .edit_form {
   width: 100%;
 }
+
 .bz_bug .edit_form table {
   width: 100%;
 }
+
 .bz_bug #alias {
-    min-width: 0;
-    width: 10em;
+  min-width: 0;
+  width: 10em;
 }
 
 .flags_label {
-    text-align: left;
+  text-align: left;
 }
+
 table#flags {
-    width: auto;
+  width: auto;
 }
 
 .bz_column_spacer {
-    width: 0.5em;
+  width: 0.5em;
 }
 
 .related_actions {
-    font-size: 0.85em;
-    float: right;
-    list-style-type: none;
-    white-space: nowrap;
-    margin: 0;
-    padding: 0;
+  float: right;
+  margin: 0;
+  padding: 0;
+  white-space: nowrap;
+  font-size: var(--font-size-small);
+  list-style-type: none;
 }
 
 .related_actions li {
-    display: inline;
+  display: inline;
 }
 
 .bz_show_bug_column {
@@ -47,200 +183,213 @@ table#flags {
 }
 
 .bz_section_spacer {
-    height: 1em;
+  height: 1em;
 }
 
 #duplicate_settings {
-    white-space: nowrap;
+  white-space: nowrap;
 }
 
 #bz_big_form_parts td {
-    vertical-align: top;
+  vertical-align: top;
 }
 
 .bz_group_visibility_section {
-    margin-left: 1em;
+  margin-left: 1em;
 }
 
 .bz_group_visibility_section .instructions {
-    font-style: italic;
+  font-style: italic;
 }
 
 #bz_restrict_group_visibility_help .instructions {
-    margin-top: 0;
+  margin-top: 0;
 }
 
 #bz_enable_role_visibility_help {
-    margin-top: 1em;
+  margin-top: 1em;
 }
 
 .bz_time_tracking_table {
-    border-collapse: collapse;
+  border-collapse: collapse;
 }
 
 .bz_time_tracking_table th {
-    text-align: center;
+  text-align: center;
 }
 
 .bz_time_tracking_table td {
-    text-align: center;
+  text-align: center;
 }
 
 .bz_time_tracking_table th,
 .bz_time_tracking_table td {
-    padding: 4px;
+  padding: 4px;
 }
 
 .bz_time_tracking_table .bz_summarize_time {
-    text-align: right;
+  text-align: right;
 }
+
 .bz_time_tracking_table #deadline {
-    width: 7em;
+  width: 7em;
 }
 
 #summary tr td {
-    vertical-align:top;
+  vertical-align: top;
 }
 
 #status {
-    margin-bottom: 3ex;
+  margin-bottom: 3ex;
 }
 
 .knob-buttons {
-    float: right;
+  float: right;
 }
 
-.text_input, .bz_userfield, #keyword_container {
-    width: 100%;
+.text_input,
+.bz_userfield,
+#keyword_container {
+  width: 100%;
 }
+
 .bz_bug .bz_alias_short_desc_container {
-    width: inherit;
+  width: inherit;
 }
 
 .bz_comment_tags {
-    margin-top: 3px;
+  margin-top: 3px;
 }
 
 .bz_comment_tag {
-    border: 1px solid #c8c8ba;
-    padding: 1px 3px;
-    margin-right: 2px;
-    border-radius: 0.5em;
-    background-color: #eee;
-    color: #000;
+  border: 1px solid var(--secondary-button-border-color);
+  padding: 1px 3px;
+  margin-right: 2px;
+  border-radius: 0.5em;
+  background-color: var(--secondary-button-background-color);
 }
 
 #bz_ctag_div {
-    display: inline-block;
+  display: inline-block;
 }
 
 #bz_ctag_error {
-    border: 1px solid #ff6666;
-    padding: 0px 2px;
-    border-radius: 0.5em;
-    margin: 2px;
-    display: inline-block;
+  display: inline-block;
+  margin: 2px;
+  padding: 0 2px;
+  border: 1px solid var(--error-message-foreground-color);
+  border-radius: 0.5em;
 }
 
 #comment_tags_collapse_expand_container {
-    padding-top: 1em;
+  padding-top: 1em;
 }
 
 #comment_tags_collapse_expand {
-    list-style-type: none;
-    padding-left: 1em;
+  padding-left: 1em;
+  list-style-type: none;
 }
 
 #comment_tags_collapse_expand li {
-    margin-bottom: 0px;
+  margin-bottom: 0;
 }
 
 #bugzilla-etiquette {
-    float: right;
+  float: right;
 }
 
-
 .last_comment_link {
-    float: right;
-    font-size: 80%;
-    font-weight: normal;
-    margin-left: 1em;
+  float: right;
+  margin-left: 1em;
+  font-size: var(--font-size-small);
+  font-weight: normal;
+}
+
+.last_comment_link b {
+  text-decoration: underline;
+  font-weight: normal;
 }
 
 #legal_disclaimer {
-    width: 40em;
-    padding: 1em;
-    margin: 0 1em 1em 1em;
-    font-weight: bold;
-    border: 1px red solid;
-    background-color: lightyellow;
+  box-sizing: border-box;
+  margin: 16px 0;
+  border: 1px solid var(--warning-message-border-color);
+  border-radius: 4px;
+  padding: 16px;
+  width: 65em;
+  background-color: var(--warning-message-background-color);
+  font-weight: bold;
 }
 
 .bz_patch {
-    background: #ffffcc;
+  background: var(--accent-color-lightyellow-1);
 }
 
 .cc_list_display {
-    list-style: none;
-    margin:0px;
-    padding:5px;
-    padding-right:20px;
-    overflow:auto;
-    float:left;
-    max-width:465px;
-    max-height:100px;
-    border:1px solid #CCC;
+  float: left;
+  overflow: auto;
+  margin: 0;
+  border: 1px solid var(--control-border-color);
+  padding: 5px;
+  padding-right: 20px;
+  max-width: 465px;
+  max-height: 100px;
+  list-style: none;
 }
 
 .cc_list_display li {
-    margin:0px;
-    padding:0px;
-    white-space:nowrap;
+  margin: 0;
+  padding: 0;
+  white-space: nowrap;
 }
 
 #wave_wand {
-    margin-top: 0px;
+  margin-top: 0;
 }
 
 /* put the width on the TD rather than the PRE to stop the col resizing
    when comments are hidden */
 .bz_comment {
-    width: 55em;
+  width: 55em;
 }
+
 .bz_comment_text {
-    width: auto;
+  width: auto;
 }
 
 .bz_comment_number {
-    float: right;
+  float: right;
 }
 
 /* style all field labels the same */
 
-.field_label, .field_label a {
-    color: #000;
-    font-weight: bold;
+.field_label,
+.field_label a {
+  color: var(--secondary-label-color);
+  font-weight: normal;
 }
 
 .field_label a {
-    cursor: help;
+  cursor: help;
 }
 
 .edit_form table th:first-child {
-    width: 0px;
+  width: 0;
 }
 
-#bz_show_bug_column_1, #bz_show_bug_column_2 {
-    width: 50%;
+#bz_show_bug_column_1,
+#bz_show_bug_column_2 {
+  padding: 16px;
+  width: 50%;
 }
 
 /* fix flag table's vertical alignment */
 
 table#flags {
-    border-collapse: collapse;
-    border-spacing: 0px;
+  border-collapse: collapse;
+  border-spacing: 0;
 }
 
 div[class="bz_comment"]:target {
-    border: 2px solid #0095DD;
+  border: 2px solid var(--focused-control-border-color);
 }

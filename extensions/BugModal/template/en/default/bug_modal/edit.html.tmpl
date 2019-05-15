@@ -291,8 +291,8 @@
   <div id="mode-container">
     <div>
       [% IF user.id %]
-        <button type="button" id="cancel-btn" class="minor" style="display:none">Cancel</button>
-        <button type="button" id="mode-btn" class="major">
+        <button type="button" id="cancel-btn" class="secondary" style="display:none">Cancel</button>
+        <button type="button" id="mode-btn" class="primary">
           <span id="mode-btn-readonly" title="Enable editing fields for [% terms.bug %] metadata">Edit [% terms.Bug %]</span>
           <span id="mode-btn-loading">
             <img id="edit-throbber" src="[% basepath FILTER none %]extensions/BugModal/web/throbber.gif" width="16" height="11">
@@ -304,12 +304,12 @@
     </div>
     <div class="button-row">
       [% IF bug.assigned_to.id == user.id || user.in_group("editbugs") %]
-        <button type="button" id="copy-summary" class="minor"
+        <button type="button" id="copy-summary" class="secondary"
           title="Copy [% terms.bug %] number and summary to your clipboard">Copy Summary</button>
         <div id="clip-container" style="display:none"><input type="text" id="clip"></div>
       [% END %]
       [% IF user.id %]
-        <button type="button" class="minor" id="cc-btn" data-is-cced="[% is_cced ? 1 : 0 %]">
+        <button type="button" class="secondary" id="cc-btn" data-is-cced="[% is_cced ? 1 : 0 %]">
           [% is_cced ? "Stop Following" : "Follow" %]
         </button>
       [% END %]
@@ -394,7 +394,7 @@
                     target="_blank" role="menuitem" tabindex="-1">See Open [% terms.Bugs %] in This Product</a></div>
             <div><a href="[% basepath FILTER none %]enter_bug.cgi?product=[% bug.product FILTER uri %]"
                     target="_blank" role="menuitem" tabindex="-1">File New [% terms.Bug %] in This Product</a></div>
-            <div><button disabled type="button" class="minor component-watching" role="menuitem" tabindex="-1"
+            <div><button disabled type="button" class="secondary component-watching" role="menuitem" tabindex="-1"
                          data-product="[% bug.product FILTER html %]"
                          data-label-watch="Watch This Product" data-label-unwatch="Unwatch This Product"
                          data-source="BugModal">Watch This Product</button></div>
@@ -417,8 +417,8 @@
             hidden        = 1
             throbber      = "product-throbber"
         %]
-        <button id="product-search" type="button" class="minor">Search</button>
-        <button id="product-search-cancel" type="button" class="minor" style="display:none">X</button>
+        <button id="product-search" type="button" class="secondary">Search</button>
+        <button id="product-search-cancel" type="button" class="secondary" style="display:none">X</button>
         <img id="product-throbber" src="[% basepath FILTER none %]extensions/BugModal/web/throbber.gif"
           width="16" height="11" style="display:none">
         <img id="product-search-error" class="tt" src="[% basepath FILTER none %]extensions/BugModal/web/error.png"
@@ -453,7 +453,7 @@
             <div><a href="[% basepath FILTER none %]enter_bug.cgi?product=[% bug.product FILTER uri %]&amp;
                           [%~ %]component=[% bug.component FILTER uri %]"
                     target="_blank" role="menuitem" tabindex="-1">File New [% terms.Bug %] in This Component</a></div>
-            <div><button disabled type="button" class="minor component-watching" role="menuitem" tabindex="-1"
+            <div><button disabled type="button" class="secondary component-watching" role="menuitem" tabindex="-1"
                          data-product="[% bug.product FILTER html %]" data-component="[% bug.component FILTER html %]"
                          data-label-watch="Watch This Component" data-label-unwatch="Unwatch This Component"
                          data-source="BugModal">Watch This Component</button></div>
@@ -586,7 +586,7 @@
   %]
   [% UNLESS prefix %]
     <div id="assigned-container" style="display:none">
-      <button type="button" class="minor" id="mark-as-assigned-btn">
+      <button type="button" class="secondary" id="mark-as-assigned-btn">
         Mark as Assigned
       </button>
     </div>
@@ -598,7 +598,7 @@
         size="6" value="[% bug.dup_id FILTER html %]">
     </div>
     <div id="[% prefix FILTER none %]duplicate-actions">
-      <button type="button" class="minor" id="[% prefix FILTER none %]mark-as-dup-btn">
+      <button type="button" class="secondary" id="[% prefix FILTER none %]mark-as-dup-btn">
         Mark as Duplicate
       </button>
     </div>
@@ -746,7 +746,7 @@
           hide_on_view = 1
           help = "https://wiki.mozilla.org/BMO/UserGuide/BugFields#needinfo"
       %]
-        <button type="button" id="needinfo-scroll" class="minor">Update</button>
+        <button type="button" id="needinfo-scroll" class="secondary">Update</button>
       [% END %]
     [% END %]
 
@@ -791,7 +791,7 @@
       [% END %]
 
       [% IF user.id %]
-        <button type="button" id="add-cc-btn" class="minor">Add</button>
+        <button type="button" id="add-cc-btn" class="secondary">Add</button>
       [% END %]
 
       [% IF bug.cc && bug.cc.size %]
@@ -933,7 +933,7 @@
         %]
           <span id="cab-review-gate">
             <a href="https://mozilla.service-now.com/change_request.do?sysparm_stack=change_request_list.do&amp;sys_id=-1&amp;sysparm_query=active=true" target="_blank" rel="noopener noreferrer">ServiceNow Change Request</a>
-            <button id="cab-review-gate-close" type="button" class="minor">Use Flag</button>
+            <button id="cab-review-gate-close" type="button" class="secondary">Use Flag</button>
           </span>
           <span id="cab-review-edit" style="display:none">
             [% INCLUDE bug_modal/field.html.tmpl
@@ -1137,7 +1137,7 @@
         [% bug.votes FILTER html %]
         vote[% "s" IF bug.votes != 1 %]
         [% IF user.id %]
-          <button type="button" class="minor" id="vote-btn">
+          <button type="button" class="secondary" id="vote-btn">
             [% bug.user_votes ? "Remove vote" : "Vote" %]
           </button>
         [% END %]
@@ -1231,10 +1231,10 @@
     [% IF user.id %]
       <div id="user-story-actions">
         [% IF bug.check_can_change_field('cf_user_story', 0, 1) %]
-          <button type="button" class="minor" id="user-story-edit-btn">Edit</button>
+          <button type="button" class="secondary" id="user-story-edit-btn">Edit</button>
         [% END %]
         [% IF bug.cf_user_story != "" && bug.check_can_change_field('longdesc', 0, 1) %]
-          <button type="button" class="minor" id="user-story-reply-btn">Reply</button>
+          <button type="button" class="secondary" id="user-story-reply-btn">Reply</button>
         [% END %]
       </div>
     [% END %]
@@ -1400,7 +1400,7 @@
 
 <div id="bottom-actions">
   <div id="bottom-right-actions">
-    <button type="button" id="top-btn" class="minor">Top &uarr;</button>
+    <button type="button" id="top-btn" class="secondary">Top &uarr;</button>
     <div class="dropdown">
       <button type="button" id="format-btn" aria-haspopup="true" aria-label="Format [% terms.Bug %] Menu"
         aria-expanded="false" aria-controls="format-menu" class="dropdown-button minor">Format [% terms.Bug %] &#9652;</button>
@@ -1502,14 +1502,14 @@
                 seen_header = 1;
                 " Resolve as ";
               END;
-              %] <button type="button" class="minor resolution-btn">[% resolution FILTER html %]</button> [%
+              %] <button type="button" class="secondary resolution-btn">[% resolution FILTER html %]</button> [%
             END;
           ELSE;
             IF bug.choices.bug_status.only("name", "VERIFIED").size && bug.bug_status != "VERIFIED";
-              %] <button type="button" class="minor status-btn" data-status="VERIFIED">VERIFY</button> [%
+              %] <button type="button" class="secondary status-btn" data-status="VERIFIED">VERIFY</button> [%
             END;
             IF bug.choices.bug_status.only("name", "REOPENED").size;
-              %] <button type="button" class="minor status-btn" data-status="REOPENED">REOPEN</button> [%
+              %] <button type="button" class="secondary status-btn" data-status="REOPENED">REOPEN</button> [%
             END;
           END;
         %]

@@ -5,280 +5,262 @@
  * This Source Code Form is "Incompatible With Secondary Licenses", as
  * defined by the Mozilla Public License, v. 2.0. */
 
-/* global */
-
-#page_title {
-}
+/**
+ * global
+ */
 
 #page_title h2 {
-    margin-bottom: 0px;
+  margin-bottom: 0;
 }
 
 #page_title h3 {
-    margin-top: 0px;
+  margin-top: 0;
 }
 
 .hidden {
-    display: none;
+  display: none;
 }
 
 #yui-history-iframe {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 1px;
-    height: 1px;
-    visibility: hidden;
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 1px;
+  height: 1px;
+  visibility: hidden;
 }
 
 #steps {
-    max-width: 1200px;
-    margin-left: auto;
-    margin-right: auto;
+  margin-left: auto;
+  margin-right: auto;
+  max-width: 1200px;
 }
 
 .product-icon {
-    float: left;
-    margin: 8px 15px 8px 0px;
-    height: 64px;
-    width: 64px;
+  float: left;
+  margin: 8px 15px 8px 0;
+  width: 64px;
+  height: 64px;
 }
 
 #product_step {
-    max-width: 1200px;
-    margin-left: auto;
-    margin-right: auto;
+  margin-left: auto;
+  margin-right: auto;
+  max-width: 1200px;
 }
 
 ul.product-list {
-    list-style: outside none none;
-    margin: 0px -10px 20px;
-    padding: 0px;
+  margin: 0 -10px 20px;
+  padding: 0;
+  list-style: outside none none;
 }
 
 ul.product-list > li {
-    cursor: pointer;
-    height: 168px;
-    min-height: 166px;
-
-    background-color: #FFF;
-    background-image: linear-gradient(0deg, #F6F4EC, #FFF);
-    border-radius: 6px;
-    background-clip: padding-box;
-    box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.1);
-    display: inline-block;
-    margin: 5px 5px 5px;
-    padding: 1px;
-    position: relative;
-    vertical-align: top;
-    width: 300px;
-    word-wrap: break-word;
-    z-index: 1;
+  display: inline-block;
+  position: relative;
+  z-index: 1;
+  margin: 4px;
+  border: 1px solid var(--primary-region-border-color);
+  border-radius: var(--primary-region-border-radius);
+  padding: 1px;
+  width: 300px;
+  min-height: 166px;
+  height: 168px;
+  background-color: var(--primary-region-background-color);
+  background-clip: padding-box;
+  box-shadow: var(--primary-region-box-shadow);
+  vertical-align: top;
+  word-wrap: break-word;
+  cursor: pointer;
 }
 
 ul.product-list > li > .product-item {
-    display: block;
-    padding: 10px;
+  display: block;
+  padding: 10px;
 }
 
 #steps a img {
-    border: none;
+  border: none;
 }
 
 #advanced {
-    margin-top: 50px;
-    text-align: right;
-    margin-left: auto;
+  margin-top: 50px;
+  text-align: right;
+  margin-left: auto;
 }
 
 #advanced img {
-    vertical-align: middle;
+  vertical-align: middle;
 }
 
 #advanced a {
-    cursor: pointer;
+  cursor: pointer;
 }
 
-/* remove the shaded background from data_table header
-   it looks out of place */
-.yui-skin-sam .yui-dt th {
-    background: #f0f0f0;
-}
-
-/* products and other_products step */
+/**
+ * products and other_products step
+ */
 
 .exits {
-    width: 600px;
-    margin-bottom: 10px;
-    border: 1px solid #aaa;
-    border-radius: 5px;
+  margin-bottom: 10px;
+  border: 1px solid var(--secondary-region-border-color);
+  width: 600px;
+  background-color: var(--secondary-region-background-color);
 }
 
 .exits td {
-    padding: 5px;
+  padding: 5px;
 }
 
 .exits h2 {
-    margin: 0px;
-    font-size: 90%;
+  margin: 0;
+  font-size: var(--font-size-small);
 }
 
 .exit_img {
-    width: 64px;
-    text-align: right;
+  width: 64px;
+  text-align: right;
 }
 
-.exit_text, .exit_text_last {
-    width: 100%;
+.exit_text,
+.exit_text_last {
+  width: 100%;
 }
 
 .exit_text {
-    border-bottom: 1px dotted silver;
+  border-bottom: 1px solid var(--secondary-region-border-color);
 }
 
 #prod_comp_search_main {
-    width: 400px;
+  width: 400px;
 }
 
 #prod_comp_search_label {
-    margin-bottom: 1px;
-}
-
-#prod_comp_search_main li.yui-ac-highlight a {
-    text-decoration: none;
-    color: #FFFFFF;
-    display: block;
+  margin-bottom: 1px;
 }
 
 #products {
-    width: 600px;
+  width: 600px;
 }
 
 #products td {
-    padding: 5px;
-    padding-bottom: 10px;
+  padding: 5px;
+  padding-bottom: 10px;
 }
 
 #products h2 {
-    margin-bottom: 0px;
+  margin-bottom: 0;
 }
 
 #products p {
-    margin-top: 0px;
+  margin-top: 0;
 }
 
 .product_img {
-    width: 64px;
+  width: 64px;
 }
 
 #other_products .classification {
-    font-weight: bold;
+  font-weight: bold;
 }
 
 #other_products .classification th {
-    font-size: large;
+  font-size: var(--font-size-x-large);
 }
 
-/* duplicates step */
+/**
+ * duplicates step
+ */
 
 #dupes_summary {
-    width: 500px;
+  width: 500px;
 }
 
 #dupes_list {
-    margin-top: 1em;
-    margin-bottom: 1em;
+  margin-top: 1em;
+  margin-bottom: 1em;
 }
 
 #product_support {
-    border: 1px solid #dddddd;
+  border: 1px solid var(--primary-region-border-color);
 }
 
-/* bug form step */
+/**
+ * bug form step
+ */
 
 #bugForm {
-    width: 600px;
-    border: 4px solid #e0e0e0;
-    -moz-border-radius: 5px;
-    border-radius: 5px;
+  border: 1px solid var(--primary-region-border-color);
+  border-radius: var(--primary-region-border-radius);
+  width: 600px;
+  background-color: var(--primary-region-background-color);
+  box-shadow: var(--primary-region-box-shadow);
 }
 
-#bugForm th, #bugForm td {
-    padding: 5px;
-}
-
-#bugForm tr {
-    background: #e0e0e0;
+#bugForm th,
+#bugForm td {
+  padding: 8px 16px;
 }
 
 #bugForm .label {
-    text-align: left;
-    font-weight: bold;
-    white-space: nowrap
+  text-align: left;
+  font-weight: bold;
+  white-space: nowrap;
 }
 
 #bugzilla-body #bugForm th {
-    vertical-align: middle;
+  vertical-align: middle;
 }
 
 #bugForm .textInput {
-    width: 450px;
+  width: 450px;
 }
 
 #bugForm textarea {
-    font-family: Verdana, sans-serif;
-    font-size: small;
-    width: 590px;
+  width: 590px;
 }
 
 #bugForm .mandatory_mark {
-    color: red;
-    font-size: 80%;
-}
-
-#bugForm .mandatory {
-}
-
-#bugForm .textInput[disabled] {
-    background: transparent;
-    border: 1px solid #dddddd;
+  color: var(--required-label-color);
+  font-size: var(--font-size-small);
 }
 
 #versionTD {
-    text-align: right;
-    white-space: nowrap
+  text-align: right;
+  white-space: nowrap;
 }
 
 #component_select {
-    width: 450px;
+  width: 450px;
 }
 
 #component_description {
-    padding: 5px;
+  padding: 5px;
 }
 
 #bugForm .missing {
-    border: 1px solid red;
-    box-shadow: 0px 0px 4px #ff0000;
-    -webkit-box-shadow: 0px 0px 4px #ff0000;
-    -moz-box-shadow: 0px 0px 4px #ff0000;
+  border: 1px solid var(--error-message-foreground-color);
+  box-shadow: 0 0 4px var(--error-message-foreground-color);
 }
 
 #submitTD {
-    text-align: right;
+  text-align: right;
 }
 
 .help {
-    position: absolute;
-    background: #ffffff;
-    padding: 2px;
-    cursor: default;
+  position: absolute;
+  border: 1px solid var(--menu-border-color);
+  border-radius: var(--menu-border-radius);
+  padding: 8px;
+  background: var(--menu-background-color);
+  box-shadow: var(--menu-box-shadow);
+  cursor: default;
 }
 
 .help-bad {
-    color: #990000;
+  color: var(--error-message-foreground-color);
 }
 
 .help-good {
-    color: #009900;
+  color: var(--positive-message-foreground-color);
 }

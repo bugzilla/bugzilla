@@ -14,7 +14,7 @@
 }
 #data_comp_form .required:after {
   content: " *";
-  color: red;
+  color: var(--required-label-color);
 }
 #data_comp_form .field_label {
   text-align: left;
@@ -25,7 +25,7 @@
   word-wrap: normal;
 }
 #data_comp_form .head_desc {
-  font-size: 1.25em;
+  font-size: var(--font-size-x-large);
   padding-bottom: .5em;
 }
 #data_comp_form .form_section {
@@ -70,7 +70,7 @@
                        'extensions/BMO/web/js/form_validate.js' ]
 %]
 
-<h2>Data Compliance Form</h2>
+<h1>Data Compliance Form</h1>
 
 <form method="post" action="[% basepath FILTER none %]post_bug.cgi" id="data_comp_form"
       class="enter_bug_form" enctype="multipart/form-data"

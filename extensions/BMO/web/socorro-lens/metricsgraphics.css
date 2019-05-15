@@ -1,7 +1,7 @@
 .mg-active-datapoint {
     fill: black;
     font-size: 0.9rem;
-    font-weight: 400;
+    font-weight: normal;
     opacity: 0.8;
 }
 
@@ -167,13 +167,13 @@ tspan.hist-symbol {
 }
 
 .mg-least-squares-line {
-    stroke: red;
+    stroke: rgb(var(--accent-color-red-1));
     stroke-width: 1px;
 }
 
 .mg-lowess-line {
     fill: none;
-    stroke: red;
+    stroke: rgb(var(--accent-color-red-1));
 }
 
 .mg-line1-color {
@@ -356,7 +356,7 @@ tspan.mg-points-mono {
 .mg-axis .label {
     font-size: 0.8rem;
     text-transform: uppercase;
-    font-weight: 400;
+    font-weight: normal;
 }
 
 .mg-x-axis-small text,

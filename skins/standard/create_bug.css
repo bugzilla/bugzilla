@@ -5,67 +5,63 @@
  * This Source Code Form is "Incompatible With Secondary Licenses", as
  * defined by the Mozilla Public License, v. 2.0. */
 
-
 .tracking_flags .field_label a {
-    font-weight: normal !important;
-    color: #000;
+  color: inherit;
+  font-weight: normal !important;
 }
 
 #guided {
-    margin-top: 30px;
+  margin-top: 30px;
 }
 
 #component {
-    width: 25em;
+  width: 25em;
 }
 
 .hidden_text {
-    opacity: 0;
-    filter: alpha(opacity=0);
+  opacity: 0;
 }
 
 #bug_create_warning {
-    border: 1px solid #dddddd;
-    background: #fff9db;
-    color: #666458;
-    padding: 5px;
+  border: 1px solid var(--warning-message-border-color);
+  padding: 8px;
+  background: var(--warning-message-background-color);
 }
 
 #bug_create_warning_image {
-    float: left;
-    padding: 5px;
+  float: left;
+  padding: 5px;
 }
 
 #bug_create_warning_text {
-    margin-left: 42px;
+  margin-left: 42px;
 }
 
 #keyword_container,
 #bug_mentors_autocomplete,
 #container_see_also {
-    width: 25em
+  width: 25em
 }
 
 #custom_form_list {
-    font-weight: bold;
-    border: 1px solid #dddddd;
-    background: #fff9db;
-    color: #666458;
-    padding: 5px 5px 10px 5px;
-    min-height: 48px;
-    border-radius: 5px;
+  border-radius: 5px;
+  border: 1px solid var(--primary-region-border-color);
+  padding: 8px;
+  min-height: 48px;
+  background: var(--informative-message-background-color);
+  font-weight: bold;
 }
 
 #custom_form_list_image {
-    float: left;
+  float: left;
 }
 
 #custom_form_list_text {
-    margin-left: 55px;
+  margin-left: 55px;
 }
 
 #custom_form_list ul {
-    margin-top: 0.5em;
-    margin-bottom: 0;
-    padding-left: 20px;
+  margin-top: 0.5em;
+  margin-bottom: 0;
+  padding-left: 20px;
 }

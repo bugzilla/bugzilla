@@ -6,21 +6,22 @@
  * defined by the Mozilla Public License, v. 2.0. */
 
 #legal_disclaimer {
-    background: #fff;
-    color: #000;
-    padding: 10px;
-    border: 1px solid #ddd;
-    border-radius: 4px;
+  margin: 16px 0;
+  border: 1px solid var(--warning-message-border-color);
+  border-radius: 4px;
+  padding: 16px;
+  background-color: var(--warning-message-background-color);
+  font-weight: bold;
 }
 
 .attachment-warning {
-    padding-left: 4px;
+  padding-left: 4px;
 }
 
 .attachment-warning img {
-    vertical-align: sub;
+  vertical-align: sub;
 }
 
 #sec-approval-warning a {
-    color: #b70000;
+  color: var(--error-message-foreground-color);
 }

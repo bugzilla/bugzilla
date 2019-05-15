@@ -129,7 +129,7 @@
 
 <form method="post" action="[% basepath FILTER none %]buglist.cgi" data-no-csrf>
   <input type="hidden" name="bug_id" value="[% bug_ids_string FILTER html %]">
-  Or just give this to me as a <input type="submit" id="list"
+  Or just give this to me as a <input type="submit" id="list" class="secondary"
                                       value="[% terms.bug %] list">.
   (Note: the order may not be the same.)
 </form>

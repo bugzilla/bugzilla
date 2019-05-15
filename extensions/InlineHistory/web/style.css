@@ -5,31 +5,46 @@
  * This Source Code Form is "Incompatible With Secondary Licenses", as
  * defined by the Mozilla Public License, v. 2.0. */
 
-.ih_history {
-    background: none !important;
-    color: #444;
-}
-
 .ih_inlinehistory {
-    font-weight: normal;
-    font-size: small;
-    color: #444;
-    border-top: 1px dotted #C8C8BA;
-    padding-top: 5px;
+  padding: 10px;
+  color: var(--secondary-label-color);
+  background-color: var(--primary-region-header-background-color);
+  font-weight: normal;
 }
 
 .bz_comment.ih_history {
-    padding: 5px 5px 0px 5px
+  padding: 5px 5px 0 5px;
 }
 
 .ih_history_item {
-    margin-bottom: 5px;
+  margin-bottom: 5px;
+  color: var(--secondary-label-color);
 }
 
 .ih_hidden {
-    display: none;
+  display: none;
 }
 
 .ih_deleted {
-    text-decoration: line-through;
+  text-decoration: line-through;
+}
+
+.ih_history {
+  padding: 0 !important;
+}
+
+.ih_history .bz_comment_head {
+  padding-bottom: 3px;
+}
+
+.ih_history_item:not(.ih_hidden) ~ .ih_history_item:not(.ih_hidden) {
+  margin-top: 20px;
+}
+
+.ih_history_change {
+  background: var(--primary-region-background-color);
+  border-top: 1px solid var(--primary-region-border-color);
+  border-bottom: 1px solid var(--primary-region-border-color);
+  padding: 10px;
+  position: relative;
 }

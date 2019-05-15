@@ -93,7 +93,7 @@
     <small>Each triage owner links to a buglist of all open [% terms.bugs %], since 2016-06-01, without a pending needinfo, where the priority is '--'.</small>
   </p>
   [% current_product = "" %]
-  <table id="report">
+  <table id="report" class="standard">
     [% FOREACH r = results %]
       [% count = loop.count() %]
       [% IF current_product != r.product %]

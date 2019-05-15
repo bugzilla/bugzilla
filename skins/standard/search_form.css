@@ -1,35 +1,22 @@
-/* The contents of this file are subject to the Mozilla Public
-  * License Version 1.1 (the "License"); you may not use this file
-  * except in compliance with the License. You may obtain a copy of
-  * the License at http://www.mozilla.org/MPL/
-  *
-  * Software distributed under the License is distributed on an "AS
-  * IS" basis, WITHOUT WARRANTY OF ANY KIND, either express or
-  * implied. See the License for the specific language governing
-  * rights and limitations under the License.
-  *
-  * The Original Code is the Bugzilla Bug Tracking System.
-  *
-  * The Initial Developer of the Original Code is Guy Pyrzak
-  * Portions created by the Initial Developer are Copyright (C) 2010 the
-  * Initial Developer. All Rights Reserved.
-  *
-  * Contributor(s):
-  *           Guy Pyrzak <guy.pyrzak@gmail.com>
-  */
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/.
+ *
+ * This Source Code Form is "Incompatible With Secondary Licenses", as
+ * defined by the Mozilla Public License, v. 2.0.
+ */
 
 #summary_field {
   padding: 1em;
   margin: 1em;
-  border: 1px solid black;
-  background-color: #eee;
+  background-color: var(--secondary-region-background-color);
   white-space: nowrap;
 }
 
 #bug_id_container {
   display: inline-block;
-  vertical-align: middle;
   padding-bottom: 1ex;
+  vertical-align: top;
 }
 
 #bug_id_container input {
@@ -38,9 +25,10 @@
 
 .container_date_from,
 .container_date_to {
-  width: 14em;
   padding-bottom: 1ex;
+  width: 14em;
 }
+
 .container_date_from input,
 .container_date_to input {
   width: 8em;
@@ -50,8 +38,9 @@
   width: 9em;
 }
 
-#bug_id_type{
+#bug_id_type {
   width: inherit;
+  vertical-align: middle;
 }
 
 .search_field_grid {
@@ -60,19 +49,18 @@
 }
 
 .search_field_grid .field_help_link,
-.history_query .field_help_link
-{
+.history_query .field_help_link {
   display: block;
   text-align: left;
 }
 
 #chart .section_help {
-  font-size: 0.8em;
-  font-weight: normal
+  font-size: var(--font-size-small);
+  font-weight: normal;
 }
 
 #bug_id_container .field_help {
-  font-size: 0.75em
+  font-size: var(--font-size-x-small);
 }
 
 .search_field_row {
@@ -80,7 +68,8 @@
   margin-bottom: 0.5em;
 }
 
-.search_field_row .container_date_from, .search_field_row .container_date_to {
+.search_field_row .container_date_from,
+.search_field_row .container_date_to {
   display: inline;
 }
 
@@ -89,22 +78,21 @@
 }
 
 #summary_field.search_field_row input,
-#summary_field.search_field_row select
-{
+#summary_field.search_field_row select {
   display: inline;
-  padding-bottom: 0;
   vertical-align: middle;
 }
 
-.search_field_row .field_label, #field_label_short_desc  {
+.search_field_row .field_label,
+#field_label_short_desc {
   width: 14em;
   display: inline-block;
-  line-height: 2em;
   margin-right: 0.8em;
 }
 
 #field_label_short_desc {
   text-align: right;
+  vertical-align: middle;
 }
 
 #summary_field.search_field_row {
@@ -115,9 +103,7 @@
   padding-bottom: 0;
 }
 
-.search_field_grid .field_label,
-.search_field_grid .field_label
- {
+.search_field_grid .field_label {
   display: block;
   padding-bottom: 1ex;
 }
@@ -127,7 +113,8 @@
   height: 15ex;
 }
 
-.search_field_grid, .search_field_row {
+.search_field_grid,
+.search_field_row {
   padding-left: 1.5em;
 }
 
@@ -144,9 +131,9 @@ ul.bug_changes {
 
 ul.bug_changes li {
   display: inline-block;
+  padding-left: 1.5em;
   width: 14.5em;
   vertical-align: top;
-  padding-left: 1.5em;
 }
 
 ul.bug_changes select {
@@ -154,29 +141,28 @@ ul.bug_changes select {
 }
 
 ul.bug_changes li label {
-   display: block;
+  display: block;
 }
 
 div.bz_section_title {
   display: block;
   margin-top: 2em;
-  font-size: 1.2em;
+  font-size: var(--font-size-h3);
 }
 
 div.bz_section_title a {
+  color: inherit;
   font-weight: bold;
 }
 
 div.bz_section_title span {
-  font-size: 0.75em;
   margin-left: 1em;
+  font-size: var(--font-size-medium);
+  font-style: italic;
 }
 
-#summary_field label {
-  font-weight: bold;
-}
-
-#queryform, #reportform {
+#queryform,
+#reportform {
   margin-bottom: 2em;
 }
 
@@ -186,18 +172,16 @@ div.bz_section_title span {
 
 .hide_people_filter #people_filter_section,
 .hide_history_filter #history_filter_section,
-.hide_detailed_information #detailed_information_section
-{
+.hide_detailed_information #detailed_information_section {
   display: none;
 }
 
 .arrow {
   display: inline;
-  width: 16px;
-  height: 16px;
 }
 
-.bz_search_section, ul.bz_search_section {
+.bz_search_section,
+ul.bz_search_section {
   margin-top: 1em;
 }
 
@@ -207,6 +191,5 @@ div.bz_section_title span {
 
 /* let the browser choose the select height from the "size" param */
 .search_field_grid select {
-    height: auto;
+  height: auto;
 }
-

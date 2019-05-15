@@ -1,79 +1,52 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this file,
+ * You can obtain one at http://mozilla.org/MPL/2.0/.
+ *
+ * This Source Code Form is "Incompatible With Secondary Licenses", as
+ * defined by the Mozilla Public License, v. 2.0. */
+
 .hidden {
   display: none;
 }
 
-#product, #component {
-    width: 20em;
+#product,
+#component {
+  width: 20em;
 }
 
 #parameters th {
-    text-align: left;
-    vertical-align: middle !important;
-}
-
-#report tr.bugitem:hover {
-  background: #ccccff;
-}
-
-#report td, #report th {
-  padding: 3px 10px 3px 3px;
+  text-align: left;
+  vertical-align: middle !important;
 }
 
 #report th {
-    text-align: left;
+  text-align: left;
 }
 
 #report th.right {
-    text-align: right;
+  text-align: right;
 }
 
 #report th.sorted {
-    text-decoration: underline;
+  text-decoration: underline;
 }
 
 #report-header {
-    background-color: #cccccc;
+  background-color: var(--grid-header-background-color);
 }
 
 .report_subheader {
-    background-color: #dddddd;
-}
-
-.report_row_odd {
-    background-color: #eeeeee;
-    color: #000000;
-}
-
-.report_row_even {
-    background-color: #ffffff;
-    color: #000000;
-}
-
-#report.hover tr:hover {
-    background-color: #ccccff;
-}
-
-#report {
-    border: 1px solid #888888;
-}
-
-#report th, #report td {
-    border: 0px;
+  background-color: var(--grid-subheader-background-color);
 }
 
 #report td time {
-    white-space: nowrap;
+  white-space: nowrap;
 }
 
 .disabled {
-    color: #888888;
-}
-
-.hoverrow tr:hover {
-    background-color: #ccccff;
+  opacity: .5;
 }
 
 .problem {
-    color: #aa2222;
+  color: var(--accent-color-red-1);
 }
-

@@ -16,9 +16,11 @@
 section.approval-request {
   overflow: hidden;
   margin: 0 0 8px;
+  border: 1px solid var(--primary-region-border-color);
+  border-radius: var(--primary-region-border-radius);
   padding: 0 8px 8px;
-  border: 1px solid #999;
-  border-radius: 3px;
+  background-color: var(--primary-region-background-color);
+  box-shadow: var(--primary-region-box-shadow);
 }
 
 section.approval-request:last-child {
@@ -29,16 +31,16 @@ section.approval-request > header {
   display: flex;
   align-items: center;
   margin: 0 -8px 8px;
-  border-bottom: 1px solid #999;
-  background-color: #CCC;
+  border-bottom: 1px solid var(--primary-region-border-color);
+  padding: 4px;
+  background-color: var(--primary-region-header-background-color);
 }
 
 section.approval-request h3 {
   flex: auto;
   margin: 0;
   padding: 4px 8px;
-  font-size: 14px;
-  font-weight: 600;
+  font-size: var(--font-size-x-large);
 }
 
 section.approval-request button.dismiss {
@@ -46,12 +48,8 @@ section.approval-request button.dismiss {
   border: 0;
   border-radius: 0;
   padding: 4px;
-  color: #666;
+  color: var(--control-foreground-color);
   background: none transparent;
-  box-shadow: none;
-  font-weight: normal;
-  text-shadow: none;
-  cursor: default;
 }
 
 section.approval-request button.dismiss .icon {
@@ -71,9 +69,8 @@ section.approval-request table {
 }
 
 section.approval-request th {
-  padding: .4em;
+  padding: 12px 4px;
   width: 20em;
-  line-height: 1.25;
   font-weight: normal;
   text-align: right;
   vertical-align: top;
@@ -81,6 +78,7 @@ section.approval-request th {
 }
 
 section.approval-request td {
+  padding: 4px;
   vertical-align: middle;
 }
 
@@ -98,11 +96,7 @@ section.approval-request input.long[type="text"] {
 
 section.approval-request textarea {
   width: 100%;
-  min-height: 5em;
-  font-size: inherit;
-  line-height: inherit;
-  font-family: inherit;
-  resize: vertical;
+  min-height: 6em;
 }
 
 section.approval-request div {

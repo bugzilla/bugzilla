@@ -46,11 +46,11 @@
 <table>
   <tr>
     <th colspan="2">&nbsp;</th>
-    <th colspan="[% statuses.size FILTER html %]" class="title">To</th>
+    <th colspan="[% statuses.size FILTER html %]">To</th>
   </tr>
 
   <tr>
-    <th rowspan="[% statuses.size + 2 FILTER html %]" class="title">From</th>
+    <th rowspan="[% statuses.size + 2 FILTER html %]">From</th>
     <th>&nbsp;</th>
     [% FOREACH status = statuses %]
       <th class="col-header[% status.is_open ? " open-status" : " closed-status" %]">

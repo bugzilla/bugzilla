@@ -10,69 +10,67 @@
   font-style: normal;
   font-weight: normal;
   src: url(../fonts/FontAwesome-DifferentialStatus.woff2?v=4.7) format('woff2'),
-       url(../fonts/FontAwesome-DifferentialStatus.woff?v=4.7) format('woff');
+    url(../fonts/FontAwesome-DifferentialStatus.woff?v=4.7) format('woff');
 }
 
 .phabricator-table {
-    background: #fff;
-    border: none;
-    border-collapse: collapse;
-    border-bottom: 1px solid rgba(0, 0, 0, 0.2);
-    box-shadow: 0 1px 1px rgba(0, 0, 0, 0.1);
+  border: none;
+  border-collapse: collapse;
+  border-bottom: 1px solid var(--primary-region-border-color);
+  background: var(--grid-background-color);
+  box-shadow: 0 1px 1px var(--primary-region-box-shadow);
 }
 
 .phabricator-table th {
-    text-align: left;
-    padding: 4px;
+  padding: 4px;
+  text-align: left;
 }
 
 .phabricator-table td {
-    vertical-align: middle !important;
-    padding: 4px !important;
+  padding: 4px !important;
+  vertical-align: middle !important;
 }
 
-.phabricator-table thead, .phabricator-table tfoot {
-    background-color: #eee;
-    color: #404040;
+.phabricator-table thead,
+.phabricator-table tfoot {
+  background-color: var(--grid-header-background-color);
 }
 
 .phabricator-revisions {
-    background: #fff;
-    border: none;
-    border-collapse: collapse;
+  border: none;
+  border-collapse: collapse;
 }
 
 .phabricator-revisions th {
-    padding: 2px;
+  padding: 2px;
 }
 
 .phabricator-revisions td {
-    padding: 2px;
-    vertical-align: top;
+  padding: 2px;
+  vertical-align: top;
 }
 
 .phabricator-revisions .phabricator-reviewers td {
-    padding: 1px;
+  padding: 1px;
 }
 
 span[class^="revision-status-box-"] {
-    border: none;
-    font-weight: normal;
-    padding: 3px 9px;
-    border-radius: 3px;
-    white-space: nowrap;
-    font-size: 14px;
-    margin-bottom: 5px;
+  margin-bottom: 5px;
+  border: none;
+  border-radius: 3px;
+  padding: 3px 9px;
+  font-size: var(--font-size-x-large);
+  font-weight: normal;
+  white-space: nowrap;
 }
 
 span[class^="revision-status-icon-"]::before,
-span[class^="review-status-icon-"]::before
-{
-    display: inline-block;
-    font-variant: normal;
-    text-rendering: auto;
-    margin: -2px 4px -2px 0;
-    font-family: FontAwesome-DifferentialStatus;
+span[class^="review-status-icon-"]::before {
+  display: inline-block;
+  margin: -2px 4px -2px 0;
+  font-family: FontAwesome-DifferentialStatus;
+  font-variant: normal;
+  text-rendering: auto;
 }
 
 .revision-status-icon-needs-review::before {
@@ -104,78 +102,80 @@ span[class^="review-status-icon-"]::before
 }
 
 .revision-status-box-needs-review {
-    background: rgba(71,87,120,0.1);
-    color: inherit;
+  color: inherit;
+  background: rgba(71, 87, 120, 0.1);
 }
 
 .revision-status-box-accepted {
-    background: #ddefdd;
-    color: #326d34;
+  background: #ddefdd;
+  color: #326d34;
 }
 
 .revision-status-box-changes-planned,
 .revision-status-box-needs-revision {
-    background: #f7e6e6;
-    color: #a53737;
+  background: #f7e6e6;
+  color: #a53737;
 }
 
 .revision-status-box-abandoned {
-    background: #eae6f7;
-    color: #6e5cb6;
+  background: #eae6f7;
+  color: #6e5cb6;
 }
 
 .review-status-icon-accepted::before {
-    color: green;
-    content: "\f058";
+  color: green;
+  content: "\f058";
 }
 
 .review-status-icon-accepted-prior::before {
-    color: grey;
-    content: "\f058";
+  color: grey;
+  content: "\f058";
 }
 
 .review-status-icon-added::before {
-    color: grey;
-    content: "\f10c";
+  color: grey;
+  content: "\f10c";
 }
 
 .review-status-icon-blocking::before {
-    color: red;
-    content: "\f056";
+  color: red;
+  content: "\f056";
 }
 
 .review-status-icon-rejected::before {
-    color: red;
-    content: "\f05c";
+  color: red;
+  content: "\f05c";
 }
 
 .review-status-icon-resigned::before {
-    color: rgba(55,55,55,0.3);
-    content: "\f024";
+  color: rgba(55, 55, 55, 0.3);
+  content: "\f024";
 }
 
-/* bug-modal specific */
+/**
+ * bug-modal specific
+ */
 
 #module-phabricator-revisions .module-content {
-    padding: 0;
+  padding: 0;
 }
 
 .bug_modal .phabricator-table {
-    width: 100%;
+  width: 100%;
 }
 
 .bug_modal .phabricator-revision td {
-    padding: 8px;
-    vertical-align: top;
-    border-bottom: 1px dotted silver;
+  padding: 8px;
+  border-bottom: 1px solid var(--secondary-region-border-color);
+  vertical-align: top;
 }
 
 .bug_modal .phabricator-revisions th {
-    text-align: left;
-    padding-left: 8px;
+  padding-left: 8px;
+  text-align: left;
 }
 
 .bug_modal .phabricator-revision .phabricator-reviewers td {
-    padding: 1px;
-    border: 0px;
+  border: 0;
+  padding: 1px;
 }

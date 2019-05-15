@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <link href="[% 'skins/standard/global.css' FILTER version %]" rel="stylesheet" type="text/css">
+    <link href="[% 'extensions/BMO/web/socorro-lens/metricsgraphics.css' FILTER version %]" rel="stylesheet" type="text/css">
+    <link href="[% 'extensions/BMO/web/socorro-lens/custom.css' FILTER version %]" rel="stylesheet" type="text/css">
+    <script [% script_nonce FILTER none %] src="[% 'js/jquery/jquery-min.js"' FILTER version %]"></script>
+    <script [% script_nonce FILTER none %] src="[% 'extensions/BMO/web/socorro-lens/d3.min.js' FILTER version %]" charset="utf-8"></script>
+    <script [% script_nonce FILTER none %] src="[% 'extensions/BMO/web/socorro-lens/metricsgraphics.min.js' FILTER version %]"></script>
+    <script [% script_nonce FILTER none %] src="[% 'extensions/BMO/web/socorro-lens/main.js' FILTER version %]"></script>
+  </head>
+  <body>
+    <div style="width:300px; height:150px;" id="chart" class="chart"></div>
+    <div style="width:300px; height:35px; margin-top:-35px; text-align:center;" id="channel_div">
+      <button type="button" name="zoom" id="zoom" class="secondary" title="Zoom In">+</button>
+      <select name="channel" id="channel" title="Select which Firefox product channel">
+        <option value="all" title="Show crashes for all channels">all</option>
+        <option value="release" title="Show crashes on Release only">release</option>
+        <option value="beta" title="Show crashes on Beta only">beta</option>
+        <option value="nightly" title="Show crashes on Nightly only">nightly</option>
+        <option value="esr" title="Show crashes on ESR only">esr</option>
+      </select>
+      <select name="match" id="match" title="Select whether to match signatures exactly or similarly">
+        <option value="exact" title="Match signatures exactly" selected>Exact Match</option>
+        <option value="like" title="Match signatures similarly">Like Match</option>
+      </select>
+    </div>
+    <div style="width:300px; height:75px; color:red; text-align:center; visibility:hidden;" id="warn"></div>
+  </body>
+</html>

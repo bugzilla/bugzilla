@@ -48,15 +48,15 @@
     generate_api_token = 1;
 %]
 
-<div id="choose_product">
-
-<hr>
-<p>
+[% IF NOT is_describe %]
+<p id="top-help">
   Looking for technical support or help getting your site to work with Mozilla?
   <a href="https://support.mozilla.org/">Visit the mozilla.org support page</a>
   before filing [% terms.bugs %].
 </p>
-<hr>
+[% END %]
+
+<section id="choose_product">
 
 <h2>[% h2 FILTER html %]</h2>
 
@@ -201,7 +201,7 @@
 [% END %]
 
 </section>
-</div>
+</section>
 
 [% IF NOT is_describe %]
 <div id="guided">

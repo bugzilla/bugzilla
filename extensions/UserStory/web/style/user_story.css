@@ -6,36 +6,18 @@
  * defined by the Mozilla Public License, v. 2.0. */
 
 .user_story {
-    width: 50em;
-}
-
-.skin-Mozilla .user_story {
-    width: 65em;
+  width: 65em;
 }
 
 textarea#user_story {
-    width: 100%;
+  width: 100%;
 }
 
 #user_story_comment {
-    float: right;
+  float: right;
 }
 
-#user_story_readonly {
-    border: 1px solid black;
-    border-radius: 4px;
-}
-
-.skin-standard #user_story_readonly {
-    padding: 2px;
-}
-
-.skin-Mozilla #user_story_readonly {
-    border: none;
-    border-radius: 0px;
-}
-
-.skin-Mozilla #user_story_readonly .bz_comment_text {
-    border: 1px solid darkgrey;
-    border-radius: 4px;
+#user_story_readonly .bz_comment_text {
+  border: 1px solid var(--control-border-color);
+  border-radius: var(--control-border-radius);
 }

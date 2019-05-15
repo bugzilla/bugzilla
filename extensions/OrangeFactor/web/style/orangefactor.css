@@ -6,12 +6,13 @@
  * defined by the Mozilla Public License, v. 2.0. */
 
 #orange-graph {
-    display: block;
-    width: 180px;
-    height: 38px;
-    margin: 0 .5em .5em 0;
+  display: block;
+  margin: 0 .5em .5em 0;
+  width: 180px;
+  height: 38px;
 }
 
-#orange-count, #orange-link {
-    color: #666;
+#orange-count,
+#orange-link {
+  color: var(--secondary-label-color);
 }

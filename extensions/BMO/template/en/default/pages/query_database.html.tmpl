@@ -25,12 +25,15 @@
   [% IF sql_error %]
     <b>[% sql_error FILTER html %]</b>
   [% ELSIF rows.size %]
-    <table border="0" cellspacing="0" id="report">
+    <table id="report" class="standard">
+    <thead>
       <tr>
         [% FOREACH column = columns %]
           <th>[% column FILTER html %]</th>
         [% END %]
       </tr>
+    </thead>
+    <tbody>
       [% FOREACH row = rows %]
         [% tr_class = loop.count % 2 ? 'report_row_even' : 'report_row_odd' %]
         <tr class="[% tr_class FILTER html %]">
@@ -39,6 +42,7 @@
           [% END %]
         </tr>
       [% END %]
+    </tbody>
     </table>
   [% ELSE %]
     <i>no results</i>

@@ -22,22 +22,15 @@
 [% PROCESS global/variables.none.tmpl %]
 
 [% inline_style = BLOCK %]
-#heading {
-  text-align:  center;
-  width:       98%;
-  font-size:   2em;
-  font-weight: bold;
-  margin:      10px;
-}
 p {
    max-width: 40%;
 }
 label.required:before {
   content: "* ";
-  color: red;
+  color: var(--required-label-color);
 }
 .required_star {
-  color: red;
+  color: var(--required-label-color);
 }
 [% END %]
 
@@ -69,7 +62,7 @@ function jobDescToggle(what) {
 [% IF user.in_group("mozilla-employee-confidential")
    OR user.in_group("mozilla-messaging-confidential")
    OR user.in_group("mozilla-foundation-confidential") %]
-  <div id="heading">Recruiting</div>
+  <h1>Recruiting</h1>
 
   <p>
     Recruiting [% terms.Bugs %] are visible only to the Reporter, members of the People

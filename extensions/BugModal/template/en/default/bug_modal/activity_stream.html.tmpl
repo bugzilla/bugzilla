@@ -8,9 +8,9 @@
 
 <div id="comment-actions">
   [% IF user.id && user.settings.comment_box_position.value == 'after_comments' %]
-    <button type="button" id="add-comment-btn" class="minor">Add Comment &darr;</button>
+    <button type="button" id="add-comment-btn" class="secondary">Add Comment &darr;</button>
   [% ELSE %]
-    <button type="button" id="bottom-btn" class="minor">Bottom &darr;</button>
+    <button type="button" id="bottom-btn" class="secondary">Bottom &darr;</button>
   [% END %]
   <div class="dropdown">
     <button type="button" id="comment-tags-btn" arai-haspopup="true" aria-label="Tags Menu"
@@ -113,7 +113,7 @@
               u = comment.author
           %]
           [% IF extra_class %]
-            <span class="user-role">([% extra_class.ucfirst FILTER none %])</span>
+            <span class="user-role">[% extra_class.ucfirst FILTER none %]</span>
           [% END %]
           [% Hook.process('user', 'bug/comments.html.tmpl') %]
         </td>
@@ -227,7 +227,7 @@
               u = action.who
           %]
           [% IF extra_class %]
-            <span class="user-role">([% extra_class.ucfirst FILTER none %])</span>
+            <span class="user-role">[% extra_class.ucfirst FILTER none %]</span>
           [% END %]
           [% Hook.process('user', 'bug/changes.html.tmpl') %]
         </td>

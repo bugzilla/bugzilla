@@ -159,7 +159,7 @@ function onSubmit() {
     </td>
     </tr>
     <tr>
-    <td>
+    <td colspan="2">
       <input type="hidden" id="token" name="token" value="[% issue_hash_token(['create_account']) FILTER html %]">
       <input type="submit" value="Create Account">
     </td>
@@ -184,7 +184,7 @@ function onSubmit() {
     border="0" width="64" height="64"></a>
   </td>
   <td valign="top">
-    <h2><a href="[% url FILTER none %]">[% name FILTER html %]</a></h2>
+    <h3><a href="[% url FILTER none %]">[% name FILTER html %]</a></h3>
     <div>[% desc FILTER html %]</div>
   </td>
   </tr>

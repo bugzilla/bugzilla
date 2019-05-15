@@ -1,181 +1,151 @@
- /* The contents of this file are subject to the Mozilla Public
-  * License Version 1.1 (the "License"); you may not use this file
-  * except in compliance with the License. You may obtain a copy of
-  * the License at http://www.mozilla.org/MPL/
-  *
-  * Software distributed under the License is distributed on an "AS
-  * IS" basis, WITHOUT WARRANTY OF ANY KIND, either express or
-  * implied. See the License for the specific language governing
-  * rights and limitations under the License.
-  *
-  * The Original Code is the Bugzilla Bug Tracking System.
-  *
-  * Contributor(s): Vitaly Harisov <vitaly@rathedg.com>
-  *                 Guy Pyrzak <guy.pyrzak@gmail.com>
-  */
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/.
+ *
+ * This Source Code Form is "Incompatible With Secondary Licenses", as
+ * defined by the Mozilla Public License, v. 2.0.
+ */
 
-/* index page (begin) */
+ /* index page (begin) */
 
-    #page-index
-    {
-        margin: 50px 0;
-        padding: 0.2em 0.2em 0.15em 0.2em;
-        max-width: none;
-    }
+ #page-index {
+   margin: 50px 0;
+   padding: 0.2em 0.2em 0.15em 0.2em;
+   max-width: none;
+ }
 
-    /* By default these contain nothing, but these CSS rules make things
-       easier on customizers. */
-    .intro, .outro {
-        text-align: center;
-    }
+ /* By default these contain nothing, but these CSS rules make things
+    easier on customizers. */
+ .intro,
+ .outro {
+   text-align: center;
+ }
 
-    /* Hide from NN4 */
+ #new_release {
+   margin: 1em;
+   border: 2px solid rgb(var(--accent-color-red-1));
+   padding: 0.5em 1em;
+   font-weight: bold;
+ }
 
-    #new_release
-    {
-        border: 2px solid red;
-        padding: 0.5em 1em;
-        margin: 1em;
-        font-weight: bold;
-    }
+ #new_release .notice {
+   font-size: var(--font-size-small);
+   font-weight: normal;
+ }
 
-    #new_release .notice
-    {
-        font-size: 80%;
-        font-weight: normal;
-    }
+ #welcome-admin a {
+   font-weight: bold;
+ }
 
-    #welcome-admin a
-    {
-        font-weight: bold;
-    }
+ #quicksearchForm {
+   clear: both;
+   text-align: center;
+   margin-bottom: 2em;
+ }
 
-    #quicksearchForm
-    {
-        clear: both;
-        text-align: center;
-        margin-bottom: 2em;
-    }
+ #quicksearchForm #quicksearch_main {
+   width: 27em;
+ }
 
-    #quicksearchForm #quicksearch_main
-    {
-        width: 27em;
-    }
+ #quicksearchForm {
+   margin: 20px 0 0;
+   padding: 0;
+ }
 
-    #quicksearchForm
-    {
-        margin: 0;
-        padding: 0;
-    }
+ #page-index table {
+   border-collapse: collapse;
+   margin: auto;
+ }
 
-    #page-index table{
-        border-collapse: collapse;
-        margin: auto;
-    }
+ #welcome {
+   text-align: center;
+   margin: 0 0 0.8em 0;
+   padding: 0;
+ }
 
-    #welcome
-    {
-        font-size: x-large;
-        font-weight: bold;
-        text-align: center;
-        margin: 0 0 0.8em 0;
-        padding: 0;
-    }
+ #tiles {
+   display: flex;
+   margin: 32px 0;
+   padding: 0;
+   list-style-type: none;
+ }
 
-    #tiles {
-      display: flex;
-      margin: 32px 0;
-      padding: 0;
-      list-style-type: none;
-    }
+ #tiles li {
+   flex: none;
+   margin: 0;
+   padding: 0;
+ }
 
-    #tiles li {
-      flex: none;
-      margin: 0;
-      padding: 0;
-    }
+ #tiles a {
+   display: flex;
+   flex-direction: column;
+   align-items: center;
+   justify-content: center;
+   border-radius: 8px;
+   width: 160px;
+   height: 160px;
+   color: var(--secondary-label-color);
+ }
 
-    #tiles a {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      border-radius: 8px;
-      width: 160px;
-      height: 160px;
-    }
+ #tiles a:hover,
+ #tiles a:focus,
+ #tiles a:active {
+   color: var(--link-text-hover-color);
+   text-decoration: none;
+ }
 
-    #tiles a:hover,
-    #tiles a:focus,
-    #tiles a:active {
-      background-color: rgba(0, 0, 0, .05);
-      text-decoration: none;
-    }
+ #tiles span {
+   display: block;
+ }
 
-    #tiles span {
-      display: block;
-    }
+ #tiles .icon {
+   width: 120px;
+   height: 120px;
+   font-size: 120px;
+   line-height: 120px;
+   font-family: "Material Icons";
+   color: inherit;
+ }
 
-    #tiles .icon {
-      width: 120px;
-      height: 120px;
-      font-size: 120px;
-      line-height: 120px;
-      font-family: "Material Icons";
-      color: #777;
-    }
+ #tile-docs .icon::before {
+   content: "\E887";
+ }
 
-    #tile-docs .icon::before {
-      content: "\E887";
-    }
+ #tile-search .icon::before {
+   content: "\E8A0";
+ }
 
-    #tile-search .icon::before {
-      content: "\E8A0";
-    }
+ #tile-new-bug .icon::before {
+   content: "\E89C";
+ }
 
-    #tile-new-bug .icon::before {
-      content: "\E89C";
-    }
+ #tile-prefs .icon::before {
+   content: "\E8B8";
+ }
 
-    #tile-prefs .icon::before {
-      content: "\E8B8";
-    }
+ #tile-new-account .icon::before,
+ #tile-login .icon::before {
+   content: "\E853";
+ }
 
-    #tile-new-account .icon::before,
-    #tile-login .icon::before {
-      content: "\E853";
-    }
+ #tiles .label {
+   margin-top: 4px;
+ }
 
-    #tiles .label {
-      margin-top: 4px;
-      font-size: 14px;
-      color: #555;
-    }
+ ul.additional_links {
+   list-style: none;
+   margin: 0;
+   padding: 0;
+ }
 
-    ul.additional_links
-    {
-        list-style: none;
-        margin: 0;
-        padding: 0;
-    }
+ ul#quicksearch_links {
+   margin: 1em 0;
+ }
 
-    ul#quicksearch_links{
-        margin-bottom: 1em;
-    }
+ ul.additional_links li {
+   display: inline;
+ }
 
-    ul.additional_links li
-    {
-        display: inline;
-    }
-
-    ul.additional_links li.bz_default_hidden
-    {
-        display: none;
-    }
-
-    input.quicksearch_help_text
-    {
-        color: #ccc;
-    }
-
-/* index page (end) */
+ ul.additional_links li.bz_default_hidden {
+   display: none;
+ }

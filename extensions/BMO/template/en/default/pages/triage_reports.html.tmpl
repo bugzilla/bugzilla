@@ -147,15 +147,17 @@ Show UNCONFIRMED [% terms.bugs %] with:
   <p>
     Found [% bugs.size %] [%+ terms.bug %][% 's' IF bugs.size != 1 %]:
   </p>
-  <table border="0" cellspacing="0" id="report" width="100%">
-    <tr id="report-header">
+  <table id="report" class="standard">
+  <thead>
+    <tr>
       <th>[% terms.Bug %] / Date</th>
       <th>Summary</th>
       <th>Reporter / Commenter</th>
       <th>Comment Date</th>
       <th>Last Comment</th>
     </tr>
-
+  </thead>
+  <tbody>
     [% FOREACH bug = bugs %]
       [% count = loop.count() %]
       <tr class="bz_bugitem [% count % 2 == 1 ? "bz_row_odd" : "bz_row_even" %]">
@@ -180,6 +182,7 @@ Show UNCONFIRMED [% terms.bugs %] with:
         </td>
       </tr>
     [% END %]
+  </tbody>
   </table>
 
   <p>

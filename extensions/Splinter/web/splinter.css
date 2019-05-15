@@ -226,6 +226,11 @@ div.review-patch-comment-text {
    margin-bottom: 0.5em;
 }
 
+#splinter-files .new-line,
+#splinter-files .old-line {
+  font-size: var(--font-size-small);
+}
+
 .file-label {
     margin-top: 1em;
     margin-bottom: 0.5em;
@@ -279,6 +284,7 @@ div.review-patch-comment-text {
     width: 100%;
     border-collapse: collapse;
     table-layout: fixed;
+    background: #ffffff;
 }
 
 .line-number {

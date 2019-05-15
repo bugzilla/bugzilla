@@ -11,7 +11,7 @@
 [% inline_style = BLOCK %]
 #fsa_form .required:after {
   content: " *";
-  color: red;
+  color: var(--required-label-color);
 }
 #fsa_form .field_label {
   text-align: left;
@@ -22,7 +22,7 @@
   word-wrap: normal;
 }
 #fsa_form .head_desc {
-  font-size: 1.5em;
+  font-size: var(--font-size-x-large);
   padding-bottom: .5em;
 }
 #fsa_form .form_section {

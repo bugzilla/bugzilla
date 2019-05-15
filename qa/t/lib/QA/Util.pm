@@ -392,14 +392,14 @@ sub set_parameters {
   go_to_admin($sel);
   $sel->click_ok("link=Parameters", undef, "Go to the Config Parameters page");
   $sel->wait_for_page_to_load(WAIT_TIME);
-  $sel->title_is("Configuration: General");
+  $sel->title_is("Parameters: General");
   my $last_section = "General";
 
   foreach my $section (keys %$params) {
     if ($section ne $last_section) {
       $sel->click_ok("link=$section");
       $sel->wait_for_page_to_load_ok(WAIT_TIME);
-      $sel->title_is("Configuration: $section");
+      $sel->title_is("Parameters: $section");
       $last_section = $section;
     }
     my $param_list = $params->{$section};

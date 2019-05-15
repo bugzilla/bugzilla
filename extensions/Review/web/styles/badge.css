@@ -6,40 +6,40 @@
  * defined by the Mozilla Public License, v. 2.0. */
 
 #header-requests {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    margin: 0 4px !important;
-    width: 32px;
-    height: 32px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin: 0 4px !important;
+  width: 32px;
+  height: 32px;
 }
 
 #header-requests-menu-button .icon {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 24px;
-    height: 24px;
-    background: #BBB;
-    color: #FFF;
-    border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  width: 24px;
+  height: 24px;
+  color: var(--application-header-background-color);
+  background: var(--application-header-foreground-color);
 }
 
 #header-requests-menu-button .icon::before {
-    font-size: 16px;
-    content: '\E7F4';
+  font-size: 16px;
+  content: '\E7F4';
 }
 
 #header-requests-menu-button .badge {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    border-radius: 16px;
-    padding: 4px;
-    min-width: 16px;
-    height: 16px;
-    font-size: 14px;
-    font-weight: bold;
-    color: #FFF !important;
-    background-color: #C00;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 16px;
+  padding: 4px;
+  min-width: 16px;
+  height: 16px;
+  color: rgb(255, 255, 255) !important;
+  background-color: rgb(var(--accent-color-red-1));
+  font-size: 14px;
+  font-weight: bold;
 }

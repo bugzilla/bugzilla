@@ -5,6 +5,20 @@
  * This Source Code Form is "Incompatible With Secondary Licenses", as
  * defined by the Mozilla Public License, v. 2.0. */
 
+#top-help {
+  margin: 16px 0;
+  text-align: center;
+}
+
+#choose_product {
+  margin: 16px 0;
+  border: 1px solid var(--primary-region-border-color);
+  border-radius: var(--primary-region-border-radius);
+  padding: 16px;
+  background-color: var(--primary-region-background-color);
+  box-shadow: var(--primary-region-box-shadow);
+}
+
 #choose_product h2,
 #choose_product p,
 #guided {
@@ -23,6 +37,7 @@
   margin: 8px auto;
   padding: 0;
   list-style-type: none;
+  font-size: var(--font-size-large);
   white-space: nowrap;
 }
 
@@ -33,7 +48,7 @@
 }
 
 #product-list {
-  margin: 32px 0;
+  margin: 32px 0 0;
 }
 
 #product-list .tile {
@@ -52,7 +67,6 @@
 
 #product-list .tile .product h3 {
   margin: 0;
-  font-size: 150%;
 }
 
 #product-list .tile .product img {
@@ -62,8 +76,15 @@
 
 #product-list .tile .product p {
   margin: 4px 0 0;
-  line-height: 1.5;
+  font-size: var(--font-size-large);
+  line-height: var(--line-height-comfortable);
   text-align: left;
+}
+
+#product-list th,
+#product-list td {
+  padding: 4px;
+  line-height: var(--line-height-comfortable);
 }
 
 #guided img {

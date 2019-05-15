@@ -23,18 +23,12 @@
 [% PROCESS global/variables.none.tmpl %]
 
 [% inline_style = BLOCK %]
-#heading {
-  width:       98%;
-  font-size:   2em;
-  font-weight: bold;
-  margin:      12px;
-}
 .required:before {
   content: "* ";
-  color: red;
+  color: var(--required-label-color);
 }
 .required_star {
-  color: red;
+  color: var(--required-label-color);
 }
 p {
   max-width: 40%;
@@ -77,7 +71,7 @@ $(document).ready(function() {
    jquery             = [ "datetimepicker" ]
 %]
 
-<div id="heading">CRM/Email Marketing Requests</div>
+<h1>CRM/Email Marketing Requests</h1>
 <div>
   <p>Mozilla continues to build our core, grow our influence, and prototype the
     future. Making connections and cultivating relationships is critical to helping

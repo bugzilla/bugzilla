@@ -48,14 +48,16 @@ page, and the Default Value will automatically apply to everyone.
 
 [% IF settings.size %]
     <form name="adminsettingform" method="post" action="[% basepath FILTER none %]editsettings.cgi">
-      <table border="1" cellpadding="4">
+      <table class="standard">
+      <thead>
       <tr>
         <th>Preference Text</th>
         <th>Category</th>
         <th>Default Value</th>
         <th>Enabled</th>
       </tr>
-
+      </thead>
+      <tbody>
       [% FOREACH name = settings.keys %]
           [% checkbox_name = name _ '-enabled' %]
           <tr>
@@ -84,6 +86,7 @@ page, and the Default Value will automatically apply to everyone.
             </td>
           </tr>
       [% END %]
+      </tbody>
       </table>
 
     <input type="hidden" name="action" value="update">

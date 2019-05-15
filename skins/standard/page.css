@@ -1,29 +1,24 @@
-/* The contents of this file are subject to the Mozilla Public
-  * License Version 1.1 (the "License"); you may not use this file
-  * except in compliance with the License. You may obtain a copy of
-  * the License at http://www.mozilla.org/MPL/
-  *
-  * Software distributed under the License is distributed on an "AS
-  * IS" basis, WITHOUT WARRANTY OF ANY KIND, either express or
-  * implied. See the License for the specific language governing
-  * rights and limitations under the License.
-  *
-  * The Initial Developer of the Original Code is Everything Solved.
-  * Portions created by Everything Solved are Copyright (C) 2006
-  * Everything Solved. All Rights Reserved.
-  *
-  * The Original Code is the Bugzilla Bug Tracking System.
-  *
-  * Contributor(s): Max Kanat-Alexander <mkanat@bugzilla.org>
-  */
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/.
+ *
+ * This Source Code Form is "Incompatible With Secondary Licenses", as
+ * defined by the Mozilla Public License, v. 2.0.
+ */
 
 /* This CSS is used by various informational pages in the
    template/en/default/pages/ directory. */
 
 #main-inner {
-    margin: 15px auto;
-    /* People have an easier time reading narrower columns of text. */
-    max-width: 45em;
+  margin: 15px auto;
+  /* People have an easier time reading narrower columns of text. */
+  max-width: 50em;
+}
+
+#main-inner p,
+#main-inner ul {
+  font-size: var(--font-size-large);
+  line-height: var(--line-height-comfortable);
 }
 
 /*****************/
@@ -31,16 +26,17 @@
 /*****************/
 
 .req_new {
-    color: red;
+  color: rgb(var(--accent-color-red-1));
 }
 
 .req_table {
-    border-collapse: collapse;
+  border-collapse: collapse;
 }
 
-.req_table td, .req_table th {
-    border: 1px solid black;
-    padding: .25em;
+.req_table td,
+.req_table th {
+  border: 1px solid var(--grid-border-color);
+  padding: .25em;
 }
 
 /********************/
@@ -48,21 +44,25 @@
 /********************/
 
 .qs_help li {
-   margin-top: 1ex;
+  margin-top: 1ex;
 }
 
 .qs_fields th {
-    padding: 0 .25em;
+  padding: 0 .25em;
 }
+
 .qs_fields th.field_nickname {
-    text-align: left;
+  text-align: left;
 }
+
 .qs_fields td {
-    padding: .25em;
-    border-top: 1px solid gray;
+  padding: .25em;
+  border-top: 1px solid var(--grid-border-color);
+  line-height: var(--line-height-comfortable);
 }
+
 .qs_fields .field_name {
-    width: 10em;
+  white-space: nowrap;
 }
 
 /***************/
@@ -80,21 +80,20 @@ table.field_value_explanation {
 
 .field_value_explanation .header_row td {
   text-align: center;
-  font-size: 120%;
+  font-size: var(--font-size-x-large);
   font-weight: bold;
 }
 
 .field_value_explanation tbody td {
-  border: 1px solid black;
+  border: 1px solid var(--grid-border-color);
   padding: 1em;
 }
 
 .field_value_explanation dt,
-.field_descriptions dt
-{
+.field_descriptions dt {
   margin-top: 1em;
 }
 
 .field_descriptions dt {
-  font-size: 120%;
+  font-size: var(--font-size-x-large);
 }

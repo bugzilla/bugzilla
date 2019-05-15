@@ -82,8 +82,9 @@
 
 [%###################  TABLE HEADER   ######################%]
 
-<table id="admin_table" border="1" cellpadding="4" cellspacing="0">
-  <tr bgcolor="#6666FF">
+<table class="standard">
+  <thead>
+  <tr>
     [% FOREACH col = columns %]
       [%# Default to align left for headers %]
       <th align="[% (col.align || 'left') FILTER html %]">
@@ -91,10 +92,12 @@
       </th>
     [% END %]
   </tr>
+  </thead>
 
 
 [%###################  TABLE CONTENT  ######################%]
 
+  <tbody>
 [% FOREACH row = data %]
 
   <tr>
@@ -187,6 +190,7 @@
 [% IF data.size == 0 %]
   <tr><td colspan="[% columns.size %]" align="center"><i>&lt;none&gt;</i></td></tr>
 [% END %]
+  </tbody>
 
 
 [%###################  TABLE FOOTER   ######################%]

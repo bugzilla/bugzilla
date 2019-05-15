@@ -244,14 +244,14 @@ window.addEventListener('DOMContentLoaded', () => {
       iframe.setAttribute("src", crashStopLink);
       iframe.setAttribute("id", "crash-stop-iframe");
       iframe.setAttribute("tabindex", "0");
-      iframe.setAttribute("style", "display:block;width:100%;height:100%;border:0px;");
+      iframe.setAttribute("style", "display:block;width:100%;height:100%;margin-top:8px;border:0px;");
       const titleDiv = document.createElement("div");
       titleDiv.setAttribute("title", "Hide crash-stop");
-      titleDiv.setAttribute("style", "display:inline;cursor:pointer;color:black;font-size:13px");
+      titleDiv.setAttribute("style", "display:inline;cursor:pointer;font-size:13px");
       const spinner = document.createElement("span");
       spinner.setAttribute("role", "button");
       spinner.setAttribute("tabindex", "0");
-      spinner.setAttribute("style", "padding-right:5px;cursor:pointer;color:#999;");
+      spinner.setAttribute("style", "padding-right:5px;cursor:pointer;");
 
       function hide() {
         spinner.innerText = "▸";

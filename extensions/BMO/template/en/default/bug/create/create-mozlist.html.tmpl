@@ -13,7 +13,7 @@
    generate_api_token = 1
    javascript_urls = [ 'extensions/BMO/web/js/form_validate.js',
                        'js/field.js' ]
-   style = ".mandatory{color:red;font-size:80%;}"
+   style = ".mandatory{color:var(--required-label-color);font-size:var(--font-size-small);}"
 %]
 
 <script [% script_nonce FILTER none %]>

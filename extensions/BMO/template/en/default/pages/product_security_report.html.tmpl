@@ -11,14 +11,16 @@
   style_urls = [ "extensions/BMO/web/styles/reports.css" ]
 %]
 
-<table border="0" cellspacing="0" id="report" class="nohover" width="100%">
-  <tr id="report-header">
+<table id="report" class="standard">
+<thead>
+  <tr>
     <th>Product</th>
     <th>Default Security Group</th>
     <th>Default Group Visibility</th>
     <th>mozilla-employee-confidential Enabled</th>
   </tr>
-
+</thead>
+<tbody>
   [% count = 0 %]
   [% FOREACH product = products %]
     [% count = count + 1 %]
@@ -55,6 +57,7 @@
       </td>
     </tr>
   [% END %]
+</tbody>
 </table>
 
 [% INCLUDE global/footer.html.tmpl %]

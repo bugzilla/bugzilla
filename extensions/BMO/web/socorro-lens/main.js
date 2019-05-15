@@ -221,8 +221,7 @@ function convertDate(d) {
 }
 
 function getSignaturesFromURL(search, match) {
-  var index = search.indexOf("?s=");
-  search = search.substring(index + 3).replace(/\+/g, '%20');
+  search = (new URLSearchParams(search)).get('s').replace(/\s/g, '%20');
   var signatures = [];
   if (search.indexOf("\\") !== -1) {
     signatures = search.split("\\");

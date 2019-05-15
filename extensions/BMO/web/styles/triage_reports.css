@@ -10,11 +10,12 @@
 }
 
 #triage_form th {
-    text-align: left;
+  text-align: left;
 }
 
-#product, #component {
-    width: 20em;
+#product,
+#component {
+  width: 20em;
 }
 
 #triage_owners_form th {
@@ -25,23 +26,16 @@
 #report {
   position: relative;
   width: 100%;
-  border-collapse: collapse;
 }
 
 #report thead {
   position: sticky;
   top: 0;
   left: 0;
-  background: #dddddd;
-}
-
-#report tr.bugitem:hover {
-  background: #ccccff;
 }
 
 #report th,
 #report td {
-  padding: 4px 8px;
   text-align: left;
 }
 
@@ -53,7 +47,7 @@
 }
 
 #report td.count {
-  color: #CCC;
+  color: var(--tertiary-label-color);
 }
 
 #report td.count a {

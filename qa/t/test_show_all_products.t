@@ -56,7 +56,7 @@ $sel->wait_for_page_to_load_ok(WAIT_TIME);
 # $sel->is_text_present_ok("QA-Selenium-TEST");
 # $sel->click_ok("link=QA-Selenium-TEST");
 $sel->click_ok(
-  '//div[@id="choose_product"]//a[contains(@href, "QA-Selenium-TEST")]');
+  '//section[@id="choose_product"]//a[contains(@href, "QA-Selenium-TEST")]');
 $sel->wait_for_page_to_load_ok(WAIT_TIME);
 $sel->is_text_present_ok("Product: QA-Selenium-TEST");
 logout($sel);

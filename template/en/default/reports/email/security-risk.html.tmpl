@@ -46,7 +46,7 @@
           [% END %]
         </td>
       <td style="padding: 0px 15px 10px 0px; text-align: right;
-                [% IF deltas.by_team.$team.closed.size %] background-color: #e6ffe6 [% END %]">
+                [% IF deltas.by_team.$team.closed.size %] background-color: var(--positive-message-background-color) [% END %]">
         [% IF deltas.by_team.$team.closed.size %]
           <a style="text-decoration: none;"
              href="[% build_bugs_link(deltas.by_team.$team.closed) FILTER html %]">
@@ -57,7 +57,7 @@
         [% END %]
       </td>
       <td style="padding: 0px 15px 10px 0px; text-align: right;  border-right: 1px solid grey;
-                [% IF deltas.by_team.$team.added.size %] background-color: #ffe6e6 [% END %]">
+                [% IF deltas.by_team.$team.added.size %] background-color: var(--error-message-background-color) [% END %]">
         [% IF deltas.by_team.$team.added.size %]
           <a style="text-decoration: none;" href="[% build_bugs_link(deltas.by_team.$team.added) FILTER html %]">
             +[% deltas.by_team.$team.added.size FILTER html %]
@@ -117,7 +117,7 @@
           [% END %]
         </td>
       <td style="padding: 0px 15px 10px 0px; text-align: right;
-                [% IF deltas.by_sec_keyword.$keyword.closed.size %] background-color: #e6ffe6 [% END %]">
+                [% IF deltas.by_sec_keyword.$keyword.closed.size %] background-color: var(--positive-message-background-color) [% END %]">
         [% IF deltas.by_sec_keyword.$keyword.closed.size %]
           <a style="text-decoration: none;" href="[% build_bugs_link(deltas.by_sec_keyword.$keyword.closed) FILTER html %]">
             -[% deltas.by_sec_keyword.$keyword.closed.size FILTER html %]
@@ -127,7 +127,7 @@
         [% END %]
       </td>
       <td style="padding: 0px 15px 10px 0px; text-align: right;
-                 [% IF deltas.by_sec_keyword.$keyword.added.size %] background-color: #ffe6e6 [% END %]">
+                 [% IF deltas.by_sec_keyword.$keyword.added.size %] background-color: var(--error-message-background-color) [% END %]">
         [% IF deltas.by_sec_keyword.$keyword.added.size %]
           <a style="text-decoration: none;" href="[% build_bugs_link(deltas.by_sec_keyword.$keyword.added) FILTER html %]">
             +[% deltas.by_sec_keyword.$keyword.added.size FILTER html %]

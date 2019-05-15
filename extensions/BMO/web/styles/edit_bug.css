@@ -5,49 +5,44 @@
  * This Source Code Form is "Incompatible With Secondary Licenses", as
  * defined by the Mozilla Public License, v. 2.0. */
 
-
 #project-flags,
 #custom-flags {
-    width: auto;
+  width: auto;
 }
 
 .bz_hidden {
-    display: none;
-}
-
-.bz_collapse_comment {
-    font-family: monospace;
+  display: none;
 }
 
 #prod_desc_container,
 #comp_desc_container {
-    overflow: auto;
-    color: green;
-    padding: 2px;
+  overflow: auto;
+  padding: 2px;
+  color: var(--positive-message-foreground-color);
 }
 
 #toggle_prod_desc,
 #toggle_comp_desc {
-    white-space: nowrap;
+  white-space: nowrap;
 }
 
 #rank_label {
-    padding-right: 0;
+  padding-right: 0;
 }
 
 input#cf_rank {
-    text-align: right;
-    width: 3em;
+  width: 3em;
+  text-align: right;
 }
 
 .attachment-warning {
-    font-weight: normal;
+  font-weight: normal;
 }
 
 .attachment-warning img {
-    vertical-align: sub;
+  vertical-align: sub;
 }
 
 #sec-approval-warning a {
-    color: #b70000;
+  color: var(--error-message-foreground-color);
 }

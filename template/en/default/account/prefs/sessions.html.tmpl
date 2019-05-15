@@ -31,13 +31,15 @@
   <input type="submit" name="session_logout_all" value="Log out all other sessions">
 </p>
 
-<table id="email_prefs">
-  <tr class="column_header">
+<table class="standard">
+<thead>
+  <tr>
     <th>Last used</th>
     <th>IP Address</th>
     <th>Logout</th>
   </tr>
-
+</thead>
+<tbody>
   [% FOREACH session IN sessions %]
     <tr>
       <td>[% session.lastused FILTER time %]</td>
@@ -51,4 +53,5 @@
         [% END %]
     </tr>
   [% END %]
+</tbody>
 </table>

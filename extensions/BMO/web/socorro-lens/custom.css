@@ -1,0 +1,36 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this file,
+ * You can obtain one at http://mozilla.org/MPL/2.0/.
+ *
+ * This Source Code Form is "Incompatible With Secondary Licenses", as
+ * defined by the Mozilla Public License, v. 2.0. */
+
+body {
+  background-color: var(--primary-region-background-color);
+}
+
+div.chart svg {
+  margin-left: -20px;
+  margin-top: -40px;
+}
+
+.mg-x-axis line,
+.mg-y-axis line {
+  stroke: var(--control-border-color);
+}
+
+.mg-x-axis text,
+.mg-y-axis text,
+.mg-histogram .axis text,
+.mg-active-datapoint {
+  fill: var(--primary-label-color);
+  font-size: var(--font-size-x-small);
+}
+
+.mg-area1-color {
+  fill: rgb(var(--accent-color-blue-1));
+}
+
+.mg-line1-color {
+  stroke: rgb(var(--accent-color-blue-1));
+}

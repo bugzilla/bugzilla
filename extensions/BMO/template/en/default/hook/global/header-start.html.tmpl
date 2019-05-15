@@ -26,8 +26,6 @@
 [% IF template.name == 'attachment/edit.html.tmpl'
       || template.name == 'attachment/create.html.tmpl'
       || template.name == 'attachment/diff-header.html.tmpl' %]
-  [% style_urls.push("skins/standard/bug_groups.css") %]
-
   [% IF template.name == 'attachment/edit.html.tmpl'
         || template.name == 'attachment/diff-header.html.tmpl' %]
     [% IF bodyclasses == 'no_javascript' %]

@@ -106,21 +106,21 @@ incremental_restore()
           [% WHILE currentloop < 500 && (i < group.plus.size || i < group.minus.size) %]
             <tr>
             [% IF i < group.minus.size %]
-              <td class="num">[% current_line_old + i %]</td>
-              <td class="changed"><pre>[% group.minus.$i FILTER html %]</pre></td>
+              <td class="removed num">[% current_line_old + i %]</td>
+              <td class="removed code"><pre>[% group.minus.$i FILTER html %]</pre></td>
             [% ELSIF i == group.minus.size %]
               [% rowspan = group.plus.size - group.minus.size %]
-              <td class="num"[% IF rowspan > 1 %] rowspan="[% rowspan FILTER none %]"[% END %]></td>
-              <td class="changed"[% IF rowspan > 1 %] rowspan="[% rowspan FILTER none %]"[% END %]></td>
+              <td class="removed num"[% IF rowspan > 1 %] rowspan="[% rowspan FILTER none %]"[% END %]></td>
+              <td class="removed code"[% IF rowspan > 1 %] rowspan="[% rowspan FILTER none %]"[% END %]></td>
             [% END %]
 
             [% IF i < group.plus.size %]
-              <td class="num">[% current_line_new + i %]</td>
-              <td class="changed"><pre>[% group.plus.$i FILTER html %]</pre></td>
+              <td class="added num">[% current_line_new + i %]</td>
+              <td class="added code"><pre>[% group.plus.$i FILTER html %]</pre></td>
             [% ELSIF i == group.plus.size %]
               [% rowspan = group.minus.size - group.plus.size %]
-              <td class="num"[% IF rowspan > 1 %] rowspan="[% rowspan FILTER none %]"[% END %]></td>
-              <td class="changed"[% IF rowspan > 1 %] rowspan="[% rowspan FILTER none %]"[% END %]></td>
+              <td class="added num"[% IF rowspan > 1 %] rowspan="[% rowspan FILTER none %]"[% END %]></td>
+              <td class="added code"[% IF rowspan > 1 %] rowspan="[% rowspan FILTER none %]"[% END %]></td>
             [% END %]
             </tr>
             [% currentloop = currentloop + 1 %]
@@ -133,8 +133,8 @@ incremental_restore()
         [% FOREACH line = group.plus %]
           [% IF file.is_add %]
             <tr>
-              <td class="num">[% current_line_new %]</td>
-              <td class="added" colspan="3"><pre>[% line FILTER html %]</pre></td>
+              <td class="added num">[% current_line_new %]</td>
+              <td class="added code" colspan="3"><pre>[% line FILTER html %]</pre></td>
             </tr>
           [% ELSE %]
             <tr>
@@ -142,8 +142,8 @@ incremental_restore()
               <td class="num"[% IF group.plus.size > 1 %] rowspan="[% group.plus.size %]"[% END %]></td>
               <td[% IF group.plus.size > 1 %] rowspan="[% group.plus.size %]"[% END %]></td>
             [% END %]
-              <td class="num">[% current_line_new %]</td>
-              <td class="added"><pre>[% line FILTER html %]</pre></td>
+              <td class="added num">[% current_line_new %]</td>
+              <td class="added code"><pre>[% line FILTER html %]</pre></td>
             </tr>
           [% END %]
           [% current_line_new = current_line_new + 1 %]
@@ -154,13 +154,13 @@ incremental_restore()
         [% FOREACH line = group.minus %]
           [% IF file.is_remove %]
             <tr>
-              <td class="num">[% current_line_old %]</td>
-              <td class="removed" colspan="3"><pre>[% line FILTER html %]</pre></td>
+              <td class="removed num">[% current_line_old %]</td>
+              <td class="removed code" colspan="3"><pre>[% line FILTER html %]</pre></td>
             </tr>
           [% ELSE %]
             <tr>
-              <td class="num">[% current_line_old %]</td>
-              <td class="removed"><pre>[% line FILTER html %]</pre></td>
+              <td class="removed num">[% current_line_old %]</td>
+              <td class="removed code"><pre>[% line FILTER html %]</pre></td>
             [% IF loop.first %]
               <td class="num"[% IF group.minus.size > 1 %] rowspan="[% group.minus.size %]"[% END %]></td>
               <td[% IF group.minus.size > 1 %] rowspan="[% group.minus.size %]"[% END %]></td>

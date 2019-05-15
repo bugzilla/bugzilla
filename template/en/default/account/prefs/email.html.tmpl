@@ -171,7 +171,8 @@ document.write('<input type="button" value="Disable All Bugmail" onclick="SetChe
 
 [% num_columns = relationships.size %]
 
-<table class="bz_emailprefs" border="1">
+<table class="standard">
+<thead>
   <tr>
     <td colspan="[% num_columns FILTER html %]" align="center" width="50%">
       <b>When my relationship to this [% terms.bug %] is:</b>
@@ -188,7 +189,8 @@ document.write('<input type="button" value="Disable All Bugmail" onclick="SetChe
       </th>
     [% END %]
   </tr>
-
+</thead>
+<tbody>
   [% FOREACH event = events %]
     [% count = loop.count() %]
     <tr class="bz_row_[% count % 2 == 1 ? "odd" : "even" %]">
@@ -212,7 +214,8 @@ document.write('<input type="button" value="Disable All Bugmail" onclick="SetChe
       </td>
     </tr>
   [% END %]
-
+</tbody>
+<thead>
   <tr>
     <td colspan="[% num_columns FILTER html %]"
         align="center" width="50%">
@@ -222,7 +225,8 @@ document.write('<input type="button" value="Disable All Bugmail" onclick="SetChe
       <b>but not when (overrides above):</b>
     </td>
   </tr>
-
+</thead>
+<tbody>
   [% FOREACH event = neg_events %]
     [% count = loop.count() %]
     <tr class="bz_row_[% count % 2 == 1 ? "odd" : "even" %]">
@@ -239,7 +243,7 @@ document.write('<input type="button" value="Disable All Bugmail" onclick="SetChe
       </td>
     </tr>
   [% END %]
-
+</tbody>
 </table>
 
 <hr>

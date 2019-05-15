@@ -31,9 +31,9 @@
 <input type="button" id="check_all" name="check_all" value="Check All">
 <hr>
 
-<p style="font-size:smaller">
+<p style="font-size: var(--font-size-small);">
  To change multiple [% terms.bugs %]:</p>
-<ol style="font-size:smaller">
+<ol style="font-size: var(--font-size-small);">
   <li>Check the [% terms.bugs %] you want to change above.</li>
   <li>Make your changes in the form fields below.  If the change
    you are making requires an explanation, include it in
@@ -405,7 +405,7 @@
   </table>
 
   [% IF foundinactive %]
-    <p style="font-size:smaller">(Note: [% terms.Bugs %] may not be added to [% FILTER inactive %]inactive
+    <p style="font-size: var(--font-size-small);">(Note: [% terms.Bugs %] may not be added to [% FILTER inactive %]inactive
     groups[% END %], only removed.)</p>
   [% END %]
 

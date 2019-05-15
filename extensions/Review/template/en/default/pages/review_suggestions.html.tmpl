@@ -25,13 +25,14 @@ Products:
 
 <a href="[% basepath FILTER none %]enter_bug.cgi?product=bugzilla.mozilla.org&amp;component=Administration&amp;format=__default__">Request a change</a>
 
-<table id="report" class="hover" cellspacing="0">
-
-<tr id="report-header">
+<table id="report" class="standard">
+<thead>
+<tr>
   <th>Product/Component</th>
   <th>Suggested Reviewers</th>
 </tr>
-
+</thead>
+<tbody>
 [% FOREACH product = products %]
   <tr class="report_subheader">
     <td class="product_name">
@@ -70,7 +71,7 @@ Products:
     [% row_class = row_class == "report_row_even" ? "report_row_odd" : "report_row_even" %]
   [% END %]
 [% END %]
-
+</tbody>
 </table>
 
 [% INCLUDE global/footer.html.tmpl %]

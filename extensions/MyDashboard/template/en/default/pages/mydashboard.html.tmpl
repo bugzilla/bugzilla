@@ -103,7 +103,7 @@
       </div>
 
       <div id="query_container">
-        <div class="query_heading"></div>
+        <h2 class="query_heading"></h2>
         <div class="query_description"></div>
         <span id="query_loading" class="items_found">Loading...</span>
         <span id="query_count_refresh" class="bz_default_hidden">
@@ -128,14 +128,14 @@
       </div>
 
       [% IF Param('phabricator_enabled') %]
-        <div class="query_heading requests">
+        <h2 class="query_heading requests">
           <a href="[% Param('phabricator_base_uri') %]/differential">Phabricator Review Requests</a>
-        </div>
+        </h2>
       [% END %]
 
       [% BLOCK requests_table %]
         <div id="[% name FILTER html %]_container" class="requests">
-          <div class="query_heading">[% title FILTER html_light %]</div>
+          <h2 class="query_heading">[% title FILTER html_light %]</h2>
           <span id="[% name FILTER html %]_loading" class="items_found">Loading...</span>
           <span id="[% name FILTER html %]_count_refresh" class="bz_default_hidden">
           <span class="items_found" id="[% name FILTER html %]_flags_found">0 reviews found</span>

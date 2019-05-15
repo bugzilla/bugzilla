@@ -8,19 +8,17 @@
 
 [% RETURN UNLESS user.in_group('canconfirm') %]
 [% IF comment.author.is_new %]
-<span class="new_user" title="
+<span class="user-role new_user" title="
 [%- comment.author.comment_count FILTER html %] comment[% "s" IF comment.author.comment_count != 1 -%]
 , created [%
 IF comment.author.creation_age == 0 %]today[%
 ELSIF comment.author.creation_age > 365 %]more than a year ago[%
 ELSE %][% comment.author.creation_age FILTER html %] day[% "s" IF comment.author.creation_age != 1 %] ago[% END %]."
-  >
-(New to [% terms.Bugzilla %])
-</span>
+>New to [% terms.Bugzilla %]</span>
 [% END %]
 [% IF comment.is_about_attachment
       && comment.author.first_patch_bug_id == bug.id
       && comment.attachment.ispatch
 %]
-<span class="new_user">(First Patch)</span>
+<span class="user-role new_user">First Patch</span>
 [% END %]

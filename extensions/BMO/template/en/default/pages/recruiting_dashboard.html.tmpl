@@ -16,8 +16,9 @@
 <h1>Recruiting Dashboard</h1>
 
 [% IF bugs.size %]
-  <table border="0" cellspacing="0" id="report" class="hover" width="100%">
-    <tr id="report-header">
+  <table id="report" class="standard">
+  <thead>
+    <tr>
       <th>[% terms.Bug %]</th>
       <th>Summary</th>
       <th>Hiring Manager</th>
@@ -25,7 +26,8 @@
       <th>Part of Strategic Plan</th>
       <th>Why is this critical for success</th>
     </tr>
-
+  </thead>
+  <tbody>
     [% FOREACH bug = bugs %]
       <tr class="report_item [% loop.count % 2 == 1 ? "report_row_odd" : "report_row_even" %]">
         <td>[% bug.id FILTER bug_link(bug) FILTER none %]</td>
@@ -36,6 +38,7 @@
         <td>[% bug.why_critical FILTER html FILTER html_line_break %]</td>
       </tr>
     [% END %]
+  </tbody>
   </table>
 [% ELSE %]
   <p>

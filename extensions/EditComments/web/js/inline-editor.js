@@ -109,9 +109,9 @@ Bugzilla.InlineCommentEditor = class InlineCommentEditor {
           <span role="status"></span>
           ${BUGZILLA.user.is_insider && BUGZILLA.user.id !== this.commenter_id ? `<label>
             <input type="checkbox" value="on" checked data-action="hide"> ${this.str.hide_revision}</label>` : ''}
-          <button type="button" class="minor" data-action="cancel" title="${this.str.cancel_tooltip} (Esc)"
+          <button type="button" class="secondary" data-action="cancel" title="${this.str.cancel_tooltip} (Esc)"
                   aria-keyshortcuts="Escape">${this.str.cancel}</button>
-          <button type="button" class="major" disabled data-action="save"
+          <button type="button" class="primary" disabled data-action="save"
                   title="${this.str.save_tooltip} (${this.on_mac ? '&#x2318;Return' : 'Ctrl+Enter'})"
                   aria-keyshortcuts="${this.on_mac ? 'Meta+Enter' : 'Ctrl+Enter'}">${this.str.save}</button>
         </div>

@@ -44,9 +44,9 @@
 
 [% title = BLOCK %]
   [% IF curpanel == -1 %]
-    Parameters: Index
+    Parameter Index
   [% ELSE %]
-    Configuration:
+    Parameters:
     [%+ current_panel.title FILTER html %]
   [% END %]
 [% END %]
@@ -61,11 +61,11 @@
 
 <table border="0" width="100%">
   <tr>
-    <td>
+    <td id="panel-side">
       [%# NAVIGATION BAR %]
       <table id="menu">
         <tr>
-          <td class="index">
+          <td class="index [% 'selected_section' IF curpanel == -1 %]">
             <a href="[% basepath FILTER none %]editparams.cgi?section=index" title="Show all parameters">Index</a>
           </td>
         </tr>
@@ -85,20 +85,19 @@
           </tr>
         [% END %]
       </table>
+      <div class="contribute"><strong>Note:</strong>
+        B[% %]ugzilla is developed entirely by volunteers. The best way to give back to the B[% %]ugzilla project is to
+        <a href="https://www.bugzilla.org/contribute/">contribute</a> yourself! You don’t have to be a programmer to
+        contribute, there are lots of things that we need.
+      </div>
     </td>
-    <td>
+    <td id="panel-content">
       [% IF curpanel == -1 %]
+        <h2>Parameter Index</h2>
         [% PROCESS admin/params/index.html.tmpl panels = panels %]
       [% ELSE %]
 
-        <div class="contribute"><strong>Note:</strong>
-          B[% %]ugzilla is developed entirely by volunteers.
-          The best way to give back to the B[% %]ugzilla project is to
-          <a href="https://www.bugzilla.org/contribute/">contribute</a>
-          yourself!
-          You don't have to be a programmer to contribute, there are lots of
-          things that we need.
-        </div>
+        <h2>[% current_panel.title FILTER html %]</h2>
 
         <p>
           This lets you edit the basic operating parameters of [% terms.Bugzilla %].

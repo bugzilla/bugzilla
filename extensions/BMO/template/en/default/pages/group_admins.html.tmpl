@@ -24,13 +24,15 @@
 %]
 
 [% IF groups.size > 0 %]
-  <table border="0" cellspacing="0" id="report" class="hover" width="100%">
-    <tr id="report-header">
+  <table id="report" class="standard">
+  <thead>
+    <tr>
       <th align="left">Name</th>
       <th align="left">Owner</th>
       <th align="left">Admins</th>
     </tr>
-
+  </thead>
+  <tbody>
     [% FOREACH group = groups %]
       [% count = loop.count() %]
       <tr class="report_item [% count % 2 == 1 ? "report_row_odd" : "report_row_even" %]">
@@ -52,6 +54,7 @@
         </td>
       </tr>
     [% END %]
+  </tbody>
   </table>
 [% ELSE %]
   <p>

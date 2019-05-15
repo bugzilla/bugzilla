@@ -43,7 +43,8 @@
 <p>Your saved searches are as follows:</p>
 
 <blockquote>
-  <table border="1" cellpadding="3">
+  <table class="standard">
+  <thead>
     <tr>
       <th>
         Search
@@ -69,6 +70,8 @@
       [% END %]
       [% Hook.process('saved-header') %]
     </tr>
+  </thead>
+  <tbody>
     <tr>
       <td>My [% terms.Bugs %]</td>
       <td>
@@ -149,6 +152,7 @@
         [% Hook.process('saved-row') %]
       </tr>
     [% END %]
+  </tbody>
   </table>
 [% IF user.can_bless %]
   <p>Note that for every search that has the "Add to Search Bar" selected, a
@@ -160,7 +164,8 @@
 [% IF user.queries_available.size %]
   <p>You may use these searches saved and shared by others:</p>
 
-  <table border="1" cellpadding="3">
+  <table class="standard">
+  <thead>
     <tr>
       <th>
         Search
@@ -182,6 +187,8 @@
         Search Bar
       </th>
     </tr>
+  </thead>
+  <tbody>
     [% FOREACH q = user.queries_available %]
       <tr>
         <td>[% q.name FILTER html %]</td>
@@ -205,6 +212,7 @@
         </td>
       </tr>
     [% END %]
+  </tbody>
   </table>
 [% ELSE %]
   <p>No searches are shared with you by other users.</p>

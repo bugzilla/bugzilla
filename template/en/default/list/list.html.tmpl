@@ -189,7 +189,7 @@
             <input type="hidden" name="id" value="[% id FILTER html %]">
           [% END %]
           <input type="hidden" name="format" value="multiple">
-          <input type="submit" id="long_format" value="Long Format">
+          <input type="submit" id="long_format" class="secondary" value="Long Format">
         </form>
         <form method="post" action="[% basepath FILTER none %]show_bug.cgi" data-no-csrf>
             <input type="hidden" name="ctype" value="xml">
@@ -197,13 +197,13 @@
             <input type="hidden" name="id" value="[% id FILTER html %]">
           [% END %]
             <input type="hidden" name="excludefield" value="attachmentdata">
-            <input type="submit" value="XML" id="xml">
+            <input type="submit" value="XML" id="xml" class="secondary">
         </form>
 
         [% IF user.is_timetracker %]
           <form method="post" action="[% basepath FILTER none %]summarize_time.cgi" data-no-csrf>
             <input type="hidden" name="id" value="[% buglist_joined FILTER html %]">
-            <input type="submit" id="timesummary" value="Time Summary">
+            <input type="submit" id="timesummary" class="secondary" value="Time Summary">
           </form>
           [% IF time_summary_limited %]
             <small>
@@ -263,7 +263,7 @@
 
       <td valign="middle" class="bz_query_remember">
         <form method="get" action="[% basepath FILTER none %]buglist.cgi">
-          <input type="submit" id="remember" value="Remember search"> as
+          <input type="submit" id="remember" class="secondary" value="Remember search"> as
           <input type="hidden" name="newquery"
                  value="[% urlquerypart FILTER html %][% "&order=$qorder" FILTER html IF order %]">
           <input type="hidden" name="cmdtype" value="doit">
@@ -314,7 +314,7 @@
 [% BLOCK num_results %]
   <span class="bz_result_count">
     [% IF bugs.size == 0 %]
-      <span class="zero_results">[% terms.zeroSearchResults %].</span>
+      <h2>[% terms.zeroSearchResults %].</h2>
     [% ELSIF default_limited AND bugs.size >= Param('default_search_limit') %]
       This result was limited to [% Param('default_search_limit') FILTER html %]
       [%+ terms.bugs %].

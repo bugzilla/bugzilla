@@ -48,7 +48,8 @@
 
 [% IF users.size %]
 
-  <table border="0" cellspacing="0" id="report" class="hover" width="100%">
+  <table id="report" class="standard">
+  <tbody>
   [% FOREACH u = users %]
     <tr>
       <th colspan="3">[% u.user.identity FILTER html %]</th>
@@ -68,6 +69,7 @@
     </tr>
     [% END %]
   [% END %]
+  </tbody>
   </table>
 
 [% END %]

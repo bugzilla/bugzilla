@@ -6,52 +6,45 @@
  * defined by the Mozilla Public License, v. 2.0. */
 
 #login_autocomplete {
-    float: left;
+  float: left;
 }
 
 #user_profile_table th {
-    text-align: right;
-    padding-right: 1em;
-    vertical-align: middle;
-    white-space: nowrap;
+  text-align: right;
+  padding-right: 1em;
+  vertical-align: middle;
+  white-space: nowrap;
 }
 
 #user_profile_table .vcard {
   display: inline-block;
-  font-weight: bold;
-}
-
-#user_profile_table .vcard a.disabled {
-  color: #888;
 }
 
 #user_profile_table .numeric {
-    text-align: right;
+  text-align: right;
 }
 
 #user_profile_table .product_span {
-    white-space: nowrap;
+  white-space: nowrap;
 }
 
 #updated {
-    font-style: italic;
-    font-size: x-small;
+  font-size: var(--font-size-small);
+  font-style: italic;
 }
 
 #gravatar-container {
-    text-align: center;
-    font-size: x-small;
-    vertical-align: top;
-    padding-right: 15px;
+  padding-right: 15px;
+  text-align: center;
+  font-size: var(--font-size-small);
+  vertical-align: top;
 }
 
 #gravatar {
-    -moz-box-shadow: 2px 2px 5px #888;
-    -webkit-box-shadow: 2px 2px 5px #888;
-    box-shadow: 2px 2px 5px #888;
-    margin-bottom: 5px;
+  margin-bottom: 5px;
+  border-radius: 4px;
 }
 
 #what {
-    margin-top: 1em;
+  margin-top: 1em;
 }

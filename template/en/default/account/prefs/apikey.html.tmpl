@@ -27,15 +27,17 @@
 <p>You can update the description, and revoke or unrevoke existing API keys
 here. Sticky keys may only be used from the last IP that used the API key, and cannot be unset.</p>
 
-<table id="email_prefs">
-  <tr class="column_header">
+<table class="standard">
+<thead>
+  <tr>
     <th>API key</th>
     <th>Description (optional)</th>
     <th>Last used</th>
     <th>Sticky</th>
     <th>Revoked</th>
   </tr>
-
+</thead>
+<tbody>
   [% FOREACH api_key IN api_keys %]
     <tr[% IF api_key.revoked %] class="apikey_revoked bz_tui_hidden" style="display:none"[% END %]>
       <td>
@@ -73,6 +75,7 @@ here. Sticky keys may only be used from the last IP that used the API key, and c
   [% UNLESS api_keys.size %]
     <tr><td colspan="4">You don't have any API keys.</td></tr>
   [% END %]
+</tbody>
 </table>
 
 [% IF any_revoked %]

@@ -1,346 +1,326 @@
-/* The contents of this file are subject to the Mozilla Public
-  * License Version 1.1 (the "License"); you may not use this file
-  * except in compliance with the License. You may obtain a copy of
-  * the License at http://www.mozilla.org/MPL/
-  *
-  * Software distributed under the License is distributed on an "AS
-  * IS" basis, WITHOUT WARRANTY OF ANY KIND, either express or
-  * implied. See the License for the specific language governing
-  * rights and limitations under the License.
-  *
-  * The Original Code is the Bugzilla Bug Tracking System.
-  *
-  * Contributor(s): Marc Schumann <wurblzap@gmail.com>
-  */
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this file,
+ * You can obtain one at http://mozilla.org/MPL/2.0/.
+ *
+ * This Source Code Form is "Incompatible With Secondary Licenses", as
+ * defined by the Mozilla Public License, v. 2.0. */
 
-.warningmessages, .criticalmessages {
-    background-color: white;
-    border-style: solid;
-    border-width: 1px;
-    padding: 1ex 1ex 1ex 4ex;
-    margin: 1ex;
+.warningmessages,
+.criticalmessages {
+  margin: 1ex;
+  border-style: solid;
+  border-width: 1px;
+  padding: 1ex 1ex 1ex 4ex;
+  background-color: var(--warning-message-background-color);
 }
 
 .warningmessages {
-    border-color: yellow;
+  border-color: var(--warning-message-border-color);
 }
 
 .criticalmessages {
-    border-color: red;
+  border-color: var(--error-message-foreground-color);
 }
 
 .alert {
-    color: red;
-    background-color: inherit;
+  color: var(--error-message-foreground-color);
+  background-color: inherit;
 }
 
 p.areyoureallyreallysure {
-    color: red;
-    font-size: 120%;
-    font-weight: bold;
+  color: var(--error-message-foreground-color);
+  font-size: var(--font-size-x-large);
+  font-weight: bold;
 }
 
 tr.param_disabled {
-    background-color: lightgrey;
+  background-color: var(--disabled-control-foreground-color);
 }
 
 td.admin_links {
-    width: 50%;
-    padding: 1em;
-    vertical-align: top;
+  width: 50%;
+  padding: 1em;
+  vertical-align: top;
 }
 
 td.admin_links dt {
-    margin-top: 1em;
+  margin: 16px 0 4px;
+  font-size: var(--font-size-h3);
 }
 
-td.admin_links dt.forbidden, td.admin_links dd.forbidden {
-    font-size: smaller;
-    font-style: italic;
-    color: #aaa;
+td.admin_links dd {
+  margin: 4px 0 16px;
+  line-height: var(--line-height-comfortable);
 }
 
-td.admin_links dt.forbidden a, td.admin_links dd.forbidden a {
-    text-decoration: none;
-    color: inherit;
-    cursor: default;
+td.admin_links .forbidden {
+  opacity: .4;
+}
+
+td.admin_links .forbidden a {
+  text-decoration: none;
+  color: inherit;
+  cursor: default;
 }
 
 .col-header {
-    width: 8em;
+  width: 8em;
 }
 
 .checkbox-cell {
-    border: 1px black solid;
+  border: 1px solid var(--grid-border-color);
 }
 
-/* Grey-green color */
+#workflow_form table {
+  background-color: var(--grid-background-color);
+}
+
+#workflow_form th,
+#workflow_form td {
+  border: 1px solid var(--grid-border-color);
+  padding: 4px 8px;
+}
+
+#workflow_form th {
+  background-color: var(--grid-header-background-color);
+}
+
 .open-status {
-    color: #286;
+  color: var(--bug-status-color-open);
 }
 
-/* Brown-red color */
 .closed-status {
-    color: #a63;
+  color: var(--bug-status-color-closed);
 }
 
-/* Dark green color */
-.checked {
-    background-color: #5b4;
-}
-
-/* Dark red color */
 td.forbidden {
-    background-color: #811;
-}
-
-/* Light green color */
-td.set {
-    background-color: #efe;
-}
-
-/* Light red color */
-td.unset {
-    background-color: #fee;
-}
-
-tr.highlight:hover {
-    background-color: yellow;
+  background-color: var(--error-message-background-color);
 }
 
 th.title {
-    font-size: larger;
-    text-align: center;
-    vertical-align: middle;
+  font-size: var(--font-size-h3);
+  text-align: center;
+  vertical-align: middle;
 }
 
 #edit_custom_field tr {
-    vertical-align: top;
+  vertical-align: top;
 }
 
 #edit_custom_field th {
-    text-align: right;
+  text-align: right;
 }
 
 #edit_custom_field th.narrow_label {
-    white-space: normal;
-}
-
-#report {
-    border: 1px solid #888888;
-}
-
-#report td, #report th {
-    padding: 3px 10px 3px 3px;
-    border: 0px;
+  white-space: normal;
 }
 
 #report th {
-    text-align: left;
+  text-align: left;
 }
 
 #report-header {
-    background-color: #cccccc;
-}
-
-.report_row_odd {
-    background-color: #eeeeee;
-    color: #000000;
-}
-
-.report_row_even {
-    background-color: #ffffff;
-    color: #000000;
-}
-
-#report.hover tr:hover {
-    background-color: #ccccff;
+  background-color: var(--grid-header-background-color);
 }
 
 .report_information {
-    font-style: italic;
+  font-style: italic;
 }
 
-#account-disable-button {
-    background-color: #a91300;
-    background-image: linear-gradient(#da5132, #a91300);
-    color: #fff;
-}
-
-#account-disable-button:hover {
-    color: #fff;
-    -webkit-box-shadow: 0 1px 0 0 rgba(0,0,0,0.2),inset 0 -1px 0 0 rgba(0,0,0,0.3),inset 0 12px 24px 2px #e64926;
-    -moz-box-shadow: 0 1px 0 0 rgba(0,0,0,0.2),inset 0 -1px 0 0 rgba(0,0,0,0.3),inset 0 12px 24px 2px #e64926;
-    box-shadow: 0 1px 0 0 rgba(0,0,0,0.2),inset 0 -1px 0 0 rgba(0,0,0,0.3),inset 0 12px 24px 2px #e64926;
-}
-
-#account-disable-button[disabled] {
-    opacity: 0.2;
-    cursor: default;
-}
-
-input[disabled] {
-    background-color: transparent !important;
-}
-
-/* User Preferences Page */
+/**
+ * User Preferences Page
+ */
 
 #prefmain {
-    margin: 1em 0;
+  margin: 1em 0;
 }
 
 #prefnav {
-    width: 15em;
-    float: left;
+  width: 15em;
+  float: left;
 }
 
 #prefcontent {
-    margin-left: 16em;
-    padding: .2em 1.5em 1.5em 1.5em;
-    box-shadow: 1px 1px 5px rgba(0, 0, 0, 0.1);
-    background: #FFF none repeat scroll 0% 0%;
-    min-height: 30em;
+  margin-left: 16em;
+  border-radius: var(--primary-region-border-radius);
+  padding: 32px;
+  min-height: 30em;
+  background-color: var(--primary-region-background-color);
+  box-shadow: var(--primary-region-box-shadow);
 }
 
-#prefnav, #prefcontent {
-    box-shadow: 1px 1px 5px rgba(0, 0, 0, 0.1);
+#prefcontent #message {
+  margin-bottom: 16px;
+}
+
+#prefcontent h2 {
+  margin: 0 0 16px;
 }
 
 #prefnav ul {
-    margin: 0;
-    padding: 0;
-    list-style: none;
+  margin: 0;
+  padding: 0;
+  list-style: none;
 }
 
 #prefnav li {
-    padding: .6em 1em;
-    background: rgba(255, 255, 255, 0.5);
+  padding: 8px 0 8px 8px;
+  border-left: 4px solid transparent;
 }
 
 #prefnav li a {
-    display: block;
-    text-decoration: none;
-}
-
-#prefnav li a:hover {
-    text-decoration: underline;
+  display: block;
+  color: inherit;
+  text-decoration: none;
 }
 
 #prefnav li.selected {
-    font-weight: bold;
-    background: #fff;
+  border-color: var(--selected-tab-border-color);
+  color: var(--selected-tab-foreground-color);
+  font-weight: 500;
 }
 
 .category_header {
-    text-align: left;
-    font-weight: bold;
-    font-size: larger;
+  text-align: left;
+  font-weight: bold;
+  font-size: var(--font-size-h3);
 }
 
 .setting_label {
-    text-align: right;
+  text-align: right;
 }
 
-/* mfa */
+#public_key {
+  font-size: var(--font-size-monospace);
+  font-family: var(--font-family-monospace);
+}
+
+/**
+ * Two-Factor Authentication
+ */
 
 #mfa {
-    margin-bottom: 1em;
+  margin-bottom: 1em;
 }
 
 #mfa-confirm {
-    margin-top: 2em;
+  margin-top: 2em;
 }
 
 #mfa-container {
-    margin-bottom: 2em;
+  margin-bottom: 2em;
 }
 
 #mfa-totp-throbber {
-    width: 300px;
-    height: 280px;
+  width: 300px;
+  height: 280px;
 }
 
 .mfa-totp-popup {
-    background: #fff;
-    padding: 10px 30px;
-    box-shadow: 1px 1px 5px rgba(0, 0, 0, 0.1);
+  border-radius: var(--primary-region-border-radius);
+  padding: 16px;
+  background: var(--primary-region-background-color);
+  box-shadow: var(--primary-region-box-shadow);
 }
 
 .mfa-totp-popup ul {
-    padding: 0 0 0 2em;
+  padding: 0 0 0 2em;
 }
 
 .mfa-totp-popup-close {
-    float: right;
+  float: right;
 }
 
 #mfa-enable-totp-frame {
-    border: none;
-    width: 300px;
-    height: 220px;
+  border: none;
+  width: 300px;
+  height: 220px;
 }
 
-#mfa-enroll-embedded, #mfa-recovery-embedded {
-    background: none;
-    padding: 0;
+#mfa-enroll-embedded,
+#mfa-recovery-embedded {
+  background: none;
+  padding: 0;
 }
 
 .mfa-buttons button {
-    margin-top: 4px;
+  margin-top: 4px;
 }
 
 .mfa-buttons blockquote {
-    margin-top: 4px;
-    font-style: italic;
+  margin-top: 4px;
+  font-style: italic;
 }
 
 #mfa-recovery-frame {
-    display: block;
-    margin-top: 8px;
-    margin-left: 2em;
-    border: none;
-    width: 300px;
-    height: 200px;
+  display: block;
+  margin-top: 8px;
+  margin-left: 2em;
+  border: none;
+  width: 300px;
+  height: 200px;
 }
 
 #mfa-container label {
-    display: inline-block;
-    width: 155px;
-    text-align: right;
-    font-weight: bold;
+  display: inline-block;
+  width: 155px;
+  text-align: right;
+  font-weight: bold;
 }
 
 #mfa-container #duo-logo {
-    float: left;
-    margin-right: 1em;
+  float: left;
+  margin-right: 1em;
 }
 
 #mfa-duo-user-label {
-    cursor: help;
+  cursor: help;
 }
 
 .mfa-api-blurb,
 .mfa-disable-blurb {
-    width: 70%;
+  width: 70%;
+}
+
+.mfa-protected {
+  margin: 0 4px;
+  vertical-align: middle;
 }
 
 body.mfa-warning #mfa-select button {
-    outline: none;
-    border-color: #FF5300;
-    border-width: 1px;
-    box-shadow: 2px 2px 15px #FF5300;
+  outline: none;
+  border-color: #FF5300;
+  border-width: 1px;
 }
 
 .flex {
-    display: flex;
-    flex-flow: row;
+  display: flex;
+  flex-flow: row;
 }
 
 .flex-left {
-    flex: 1;
-    min-width: 500px;
+  flex: 1;
+  min-width: 500px;
 }
 
 .flex-right {
-    flex: 2;
+  flex: 2;
+}
+
+/**
+ * Print media
+ */
+
+@media print {
+
+  #prefnav,
+  #prefcontent #update,
+  #prefcontent #message {
+    display: none;
+  }
+
+  #prefcontent {
+    margin-left: 0 !important;
+    box-shadow: none !important;
+  }
 }

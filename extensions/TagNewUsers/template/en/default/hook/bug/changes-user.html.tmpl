@@ -8,13 +8,11 @@
 
 [% RETURN UNLESS user.in_group('canconfirm') %]
 [% IF action.who.is_new %]
-<span class="new_user" title="
+<span class="user-role new_user" title="
 [%- action.who.comment_count FILTER html %] comment[% "s" IF action.who.comment_count != 1 -%]
 , created [%
 IF action.who.creation_age == 0 %]today[%
 ELSIF action.who.creation_age > 365 %]more than a year ago[%
 ELSE %][% action.who.creation_age FILTER html %] day[% "s" IF action.who.creation_age != 1 %] ago[% END %]."
-  >
-(New to [% terms.Bugzilla %])
-</span>
+>New to [% terms.Bugzilla %]</span>
 [% END %]

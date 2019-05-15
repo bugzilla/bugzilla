@@ -6,57 +6,59 @@
  * defined by the Mozilla Public License, v. 2.0.
  */
 
-@media
-only screen and (max-device-width : 720px) {
-    #header {
-        display: none;
-    }
-    .cookie-notify {
-        display: none;
-    }
+@media only screen and (max-device-width: 720px) {
+  #header {
+    display: none;
+  }
 
-    #login .field-login label, #login .field-password label {
-        display: block;
-    }
+  .cookie-notify {
+    display: none;
+  }
 
-    #login .field-login, #login .field-password {
-        line-height: auto;
-        padding-top: 0px;
-        padding-bottom: 0px;
-    }
+  #login .field-login label,
+  #login .field-password label {
+    display: block;
+  }
 
-    #login .field-remember {
-        margin-left: 0px;
-    }
-    #login .field-submit {
-        padding-top: 4px;
-    }
+  #login .field-login,
+  #login .field-password {
+    padding-top: 0;
+    padding-bottom: 0;
+    line-height: auto;
+  }
 
-    h1 {
-        font-size: 1.5em;
-    }
+  #login .field-remember {
+    margin-left: 0;
+  }
 
-    .verify-totp input[type="text"] {
-        font-size: 28px;
-    }
+  #login .field-submit {
+    padding-top: 4px;
+  }
 
-    .verify-totp input[type="submit"] {
-        font-size: 1em;
-    }
+  h1 {
+    font-size: var(--line-height-comfortable);
+  }
+
+  .verify-totp input[type="text"] {
+    font-size: var(--font-size-h2);
+  }
+
+  .verify-totp input[type="submit"] {
+    font-size: inherit;
+  }
 }
 
-@media
-only screen and (-webkit-min-device-pixel-ratio: 2),
+@media only screen and (-webkit-min-device-pixel-ratio: 2),
 only screen and (min--moz-device-pixel-ratio: 2),
 only screen and (-o-min-device-pixel-ratio: 2/1),
 only screen and (min-device-pixel-ratio: 2),
 only screen and (min-resolution: 192dpi),
 only screen and (min-resolution: 2dppx) {
-    body {
-        font-size: medium;
-    }
+  body {
+    font-size: medium;
+  }
 
-    label.checkbox-note {
-        font-size: small;
-    }
+  label.checkbox-note {
+    font-size: small;
+  }
 }

@@ -13,18 +13,21 @@
 %]
 [% logs = push.log %]
 
-<table id="report" cellspacing="0">
+<table class="standard">
 
 [% IF logs.count %]
-  <tr class="report-subheader">
+  <thead>
+  <tr>
     <th nowrap>Connector</th>
     <th nowrap>Event Timestamp</th>
     <th nowrap>Processed Timestamp</th>
     <th nowrap>Status</th>
     <th nowrap>Message</th>
   </tr>
+  </thead>
 [% END %]
 
+<tbody>
 [% FOREACH log = logs.list %]
   <tr class="row [% loop.count % 2 == 1 ? "report_row_odd" : "report_row_even" %]">
     <td nowrap>[% log.connector FILTER html %]</td>
@@ -34,6 +37,7 @@
     <td>[% log.data FILTER html %]</td>
   </tr>
 [% END %]
+</tbody>
 
 <tr>
   <td colspan="5">&nbsp;</td>

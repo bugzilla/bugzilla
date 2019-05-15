@@ -23,10 +23,6 @@
 [% PROCESS global/variables.none.tmpl %]
 
 [% inline_style = BLOCK %]
-#heading {
-  font-size:   2em;
-  font-weight: bold;
-}
 .row {
   padding-bottom: 10px;
 }
@@ -58,7 +54,7 @@ $(function() {
    javascript         = inline_javascript
 %]
 
-<div id="heading">NDA Request Form</div>
+<h1>NDA Request Form</h1>
 
 <p><b>Note:</b> Do NOT add non-employees to this [% terms.bug %]. To maintain attorney-client
   privilege and confidentiality, legal [% terms.bugs %] are only visible to the reporter,

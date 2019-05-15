@@ -13,7 +13,7 @@
 }
 #bounty_form .required:after {
   content: " *";
-  color: red;
+  color: var(--required-label-color);
 }
 #bounty_form .field_label {
   font-weight: bold;
@@ -22,25 +22,11 @@
 }
 #bounty_form .field_desc {
   padding-bottom: 3px;
-}
-#bounty_form .field_desc,
-#bounty_form .head_desc {
   width: 600px;
   word-wrap: normal;
 }
-#bounty_form .head_desc {
-  padding-top: 5px;
-  padding-bottom: 12px;
-}
 #bounty_form .form_section {
   margin-bottom: 10px;
-}
-#bounty_form textarea {
-  font-family: inherit;
-  font-size: inherit;
-}
-#bounty_form em {
-  font-size: 1em;
 }
 .yui-calcontainer {
   z-index: 2;
@@ -137,9 +123,7 @@ function validateAndSubmit() {
   <input type="hidden" name="token" value="[% form.token FILTER html %]">
   <input type="hidden" name="submit" value="1">
 
-  <div class="head_desc">
-    Bounty Attachment for [% "$terms.Bug $bug.id" FILTER bug_link(bug.id) FILTER none %]
-  </div>
+  <h1>Bounty Attachment for [% "$terms.Bug $bug.id" FILTER bug_link(bug.id) FILTER none %]</h1>
 
   <div class="form_section">
     <label for="reporter_email" class="field_label required">Reporter's Email</label>

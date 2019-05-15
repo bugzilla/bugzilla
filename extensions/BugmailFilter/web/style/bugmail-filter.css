@@ -6,43 +6,36 @@
  * defined by the Mozilla Public License, v. 2.0. */
 
 #add_filter_table th {
-    text-align: right;
+  text-align: right;
 }
 
 .example_filter_table {
-    margin-left: 2em;
+  margin-left: 2em;
 }
 
 .example_filter_table th {
-    text-align: right;
-    font-weight: normal;
+  text-align: right;
+  font-weight: normal;
 }
 
 .example_filter_table td {
-    padding-left: 1em;
+  padding-left: 1em;
 }
 
 #add_filter_table .blurb {
-    font-style: italic;
-    padding-left: 2em;
+  padding-left: 2em;
+  font-style: italic;
 }
 
 #filters_table {
-    margin-bottom: 1em;
-    border-spacing: 0;
+  margin-bottom: 1em;
 }
 
-#filters_table th, #filters_table td {
-    text-align: left;
-    padding-right: 1em;
-    padding: 2px;
-}
-
-#filters_table .row_odd {
-    background-color: #eeeeee;
-    color: #000000;
+#filters_table th,
+#filters_table td {
+  text-align: left;
 }
 
 .flag-description {
-    white-space: nowrap;
+  white-space: nowrap;
 }

@@ -23,19 +23,15 @@
 [% PROCESS global/variables.none.tmpl %]
 
 [% inline_style = BLOCK %]
-#heading {
-  font-size:   2em;
-  font-weight: bold;
-}
 .row {
   padding-bottom: 10px;
 }
 label.required:before {
   content: "* ";
-  color: red;
+  color: var(--required-label-color);
 }
 .required_star {
-  color: red;
+  color: var(--required-label-color);
 }
 [% END %]
 
@@ -67,7 +63,7 @@ $(function() {
    javascript         = inline_javascript
 %]
 
-<div id="heading">Name Clearance</div>
+<h1>Name Clearance</h1>
 
 <p><b>Note:</b> Do NOT add non-employees to this [% terms.bug %]. To maintain attorney-client privilege
   and confidentiality, legal [% terms.bugs %] are only visible to the reporter, the legal team, and the

@@ -14,11 +14,11 @@ var cpts = new Array();
 [% n = 1 %]
 [% FOREACH p = user.get_selectable_products %]
   cpts['[% n FILTER js %]'] = [
-    [%- FOREACH c = p.components %]'[% c.name FILTER js %]'[% ", " UNLESS loop.last %] [%- END -%] ];
+    [%- FOREACH comp = p.components %]'[% comp.name FILTER js %]'[% ", " UNLESS loop.last %] [%- END -%] ];
   [% n = n+1 %]
 [% END %]
 var selected_components = [
-  [%- FOREACH c = input.component %]'[% c FILTER js %]'
+  [%- FOREACH comp = input.component %]'[% comp FILTER js %]'
   [%- ',' UNLESS loop.last %] [%- END ~%] ];
 [% END %]
 

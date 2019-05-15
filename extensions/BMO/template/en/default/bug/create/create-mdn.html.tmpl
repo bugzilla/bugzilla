@@ -231,13 +231,13 @@ strong.required:before {
     <p>
       <strong class="required">Component</strong><br>
       <select name="component" id="component" size="7" aria-required="true" class="required">
-        [% FOREACH c = product.components %]
-          [% NEXT IF NOT c.is_active %]
-          <option value="[% c.name FILTER html %]" title="[% c.description FILTER html %]"
-            [%- IF c.name == default.component_ %]
+        [% FOREACH comp = product.components %]
+          [% NEXT IF NOT comp.is_active %]
+          <option value="[% comp.name FILTER html %]" title="[% comp.description FILTER html %]"
+            [%- IF comp.name == default.component_ %]
               selected="selected"
             [% END %]>
-            [% c.name FILTER html -%]
+            [% comp.name FILTER html -%]
           </option>
         [%- END %]
       </select>

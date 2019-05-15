@@ -98,12 +98,12 @@ label.required:before {
     <td>
       <select id="component" name="component" required="required">
         <option value="">Select One</option>
-        [%- FOREACH c = product.components %]
-          [% NEXT IF NOT c.is_active %]
-          [% NEXT IF hide_components.contains(c.name) %]
-          <option value="[% c.name FILTER html %]"
-            [% ' selected="selected"' IF c.name == "General" %]>
-            [% c.name FILTER html -%]
+        [%- FOREACH comp = product.components %]
+          [% NEXT IF NOT comp.is_active %]
+          [% NEXT IF hide_components.contains(comp.name) %]
+          <option value="[% comp.name FILTER html %]"
+            [% ' selected="selected"' IF comp.name == "General" %]>
+            [% comp.name FILTER html -%]
           </option>
         [%- END %]
       </select>

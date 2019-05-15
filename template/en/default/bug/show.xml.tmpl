@@ -67,19 +67,19 @@
       [% PROCESS section_flags obj => bug %]
 
       [% IF displayfields.long_desc %]
-        [% FOREACH c = bug.comments %]
-          [% NEXT IF c.is_private && !user.is_insider %]
-          <long_desc isprivate="[% c.is_private FILTER xml %]">
-            <commentid>[% c.id FILTER xml %]</commentid>
-            [% IF c.is_about_attachment %]
-              <attachid>[% c.extra_data FILTER xml %]</attachid>
+        [% FOREACH comment = bug.comments %]
+          [% NEXT IF comment.is_private && !user.is_insider %]
+          <long_desc isprivate="[% comment.is_private FILTER xml %]">
+            <commentid>[% comment.id FILTER xml %]</commentid>
+            [% IF comment.is_about_attachment %]
+              <attachid>[% comment.extra_data FILTER xml %]</attachid>
             [% END %]
-            <who name="[% c.author.name FILTER xml %]">[% c.author.email FILTER email FILTER xml %]</who>
-            <bug_when>[% c.creation_ts FILTER time("%Y-%m-%d %T %z") FILTER xml %]</bug_when>
-            [% IF user.is_timetracker && (c.work_time - 0 != 0) %]
-              <work_time>[% PROCESS formattimeunit time_unit = c.work_time FILTER xml %]</work_time>
+            <who name="[% comment.author.name FILTER xml %]">[% comment.author.email FILTER email FILTER xml %]</who>
+            <bug_when>[% comment.creation_ts FILTER time("%Y-%m-%d %T %z") FILTER xml %]</bug_when>
+            [% IF user.is_timetracker && (comment.work_time - 0 != 0) %]
+              <work_time>[% PROCESS formattimeunit time_unit = comment.work_time FILTER xml %]</work_time>
             [% END %]
-            <thetext>[% c.body_full FILTER xml %]</thetext>
+            <thetext>[% comment.body_full FILTER xml %]</thetext>
           </long_desc>
         [% END %]
       [% END %]

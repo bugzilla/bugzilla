@@ -84,9 +84,9 @@ to some group are shown by default.
         <select name="product" onchange="selectProduct(this, this.form.component, null, null, 'Any');">
           <option value="">Any</option>
           [% IF Param('useclassification') %]
-            [% FOREACH c = user.get_selectable_classifications %]
-              <optgroup label="[% c.name FILTER html %]">
-                [% FOREACH p = user.get_selectable_products(c.id) %]
+            [% FOREACH cls = user.get_selectable_classifications %]
+              <optgroup label="[% cls.name FILTER html %]">
+                [% FOREACH p = user.get_selectable_products(cls.id) %]
                   <option value="[% p.name FILTER html %]"
                     [% " selected" IF cgi.param('product') == p.name %]>
                     [% p.name FILTER html %]

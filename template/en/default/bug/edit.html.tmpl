@@ -904,8 +904,8 @@
           [% IF user.id && bug.cc.size %]
             <br>
             <ul class="cc_list_display">
-              [% FOREACH c = bug.cc %]
-                <li>[% c FILTER email FILTER html %]</li>
+              [% FOREACH cc_addr = bug.cc %]
+                <li>[% cc_addr FILTER email FILTER html %]</li>
               [% END %]
             </ul>
           [% END %]
@@ -928,9 +928,9 @@
           [% IF bug.cc %]
             <select id="cc" multiple="multiple" size="5"
               [% IF bug.user.canedit %]name="cc"[% END %]>
-              [% FOREACH c = bug.cc %]
-                <option value="[% c FILTER email FILTER html %]">
-                  [% c FILTER email FILTER html %]</option>
+              [% FOREACH cc_addr = bug.cc %]
+                <option value="[% cc_addr FILTER email FILTER html %]">
+                  [% cc_addr FILTER email FILTER html %]</option>
               [% END %]
             </select>
             [% IF user.id && !bug.user.canedit %]

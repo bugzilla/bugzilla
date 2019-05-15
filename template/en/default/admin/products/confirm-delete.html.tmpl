@@ -115,13 +115,13 @@
     <td>
       [% IF product.components.size > 0 %]
         <table>
-          [% FOREACH c = product.components %]
+          [% FOREACH comp = product.components %]
             <tr>
-              <th align="right">[% c.name FILTER html %]:</th>
+              <th align="right">[% comp.name FILTER html %]:</th>
               [%# descriptions are intentionally not filtered to allow html content %]
               <td>
-                [% IF c.description %]
-                  [% c.description FILTER html_light %]
+                [% IF comp.description %]
+                  [% comp.description FILTER html_light %]
                 [% ELSE %]
                   <span style="color: red">missing</span>
                 [% END %]

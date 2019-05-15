@@ -102,13 +102,13 @@
           <tr>
             <th>[% r.product FILTER html %]</th>
             <th>Owner</th>
-            [% FOREACH c IN r.bug_counts %]
+            [% FOREACH count IN r.bug_counts %]
               <th class="count">
-                [% IF c.key == "total"%]
+                [% IF count.key == "total"%]
                   Total
                 [% ELSE %]
-                  <span class="bug-type-label iconic" title="[% c.key FILTER html %]"
-                        aria-label="[% c.key FILTER html %]" data-type="[% c.key FILTER html %]">
+                  <span class="bug-type-label iconic" title="[% count.key FILTER html %]"
+                        aria-label="[% count.key FILTER html %]" data-type="[% count.key FILTER html %]">
                     <span class="icon" aria-hidden="true"></span>
                   </span>
                 [% END %]
@@ -129,16 +129,16 @@
             <em>None</em>
           [% END %]
         </td>
-        [% FOREACH c IN r.bug_counts %]
+        [% FOREACH count IN r.bug_counts %]
           <td class="count">
-            [% IF c.value %]
+            [% IF count.value %]
               <a href="[% basepath FILTER none %]buglist.cgi?product=
               [%~ r.product FILTER uri %]&amp;component=[% r.component FILTER uri %]
-              [%~ IF c.key != "total" %]&amp;bug_type=[% c.key FILTER html; END %]&amp;
+              [%~ IF count.key != "total" %]&amp;bug_type=[% count.key FILTER html; END %]&amp;
               [%~ r.buglist_url FILTER html %]">
             [% END %]
-              [%~ c.value FILTER html ~%]
-            [% IF c.value %]
+              [%~ count.value FILTER html ~%]
+            [% IF count.value %]
               </a>
             [% END %]
           </td>

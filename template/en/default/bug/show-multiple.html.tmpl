@@ -361,8 +361,8 @@
     [% IF name == "cc" %]
       <th class="rightcell">[% field_descs.cc FILTER html %]:</th>
       <td>
-        [% FOREACH c = bug.cc %]
-          [% c FILTER email FILTER html %][% ", " IF not loop.last() %]
+        [% FOREACH cc_addr = bug.cc %]
+          [% cc_addr FILTER email FILTER html %][% ", " IF not loop.last() %]
         [% END %]
     [% ELSIF name == "reporter" || name == "assigned_to"
              || name == "qa_contact" %]

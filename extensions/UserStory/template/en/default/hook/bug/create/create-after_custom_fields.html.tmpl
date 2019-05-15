@@ -34,8 +34,8 @@
       </div>
       <script [% script_nonce FILTER none %]>
         var user_story_exclude_components = [];
-        [% FOREACH c = default.user_story_visible.1 %]
-          user_story_exclude_components.push('[% c FILTER js %]');
+        [% FOREACH comp = default.user_story_visible.1 %]
+          user_story_exclude_components.push('[% comp FILTER js %]');
         [% END %]
         function toggleUserStory() {
           if (YAHOO.util.Dom.get('user_story').value != '') {

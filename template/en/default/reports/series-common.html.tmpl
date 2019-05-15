@@ -32,14 +32,14 @@
 <script [% script_nonce FILTER none %]>
 [%# This structure holds details of the series the user can select from. %]
 var series = {
-[% FOREACH c = category.keys.sort %]
-  "[%+ c FILTER js %]" : {
-    [% FOREACH s = category.$c.keys.sort %]
+[% FOREACH cat = category.keys.sort %]
+  "[%+ cat FILTER js %]" : {
+    [% FOREACH s = category.$cat.keys.sort %]
       "[%+ s FILTER js %]" : {
         [% IF donames %]
-          [% FOREACH n = category.$c.$s.keys.sort %]
+          [% FOREACH n = category.$cat.$s.keys.sort %]
             "[% n FILTER js %]":
-             [% category.$c.$s.$n FILTER js %][% ", " UNLESS loop.last %]
+             [% category.$cat.$s.$n FILTER js %][% ", " UNLESS loop.last %]
           [% END %]
         [% END %]
       }[% ", " UNLESS loop.last %]

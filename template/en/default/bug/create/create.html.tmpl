@@ -83,26 +83,26 @@ var flags = new Array([% product.components.size %]);
     var last_initialqacontact;
 [% END %]
 [% count = 0 %]
-[%- FOREACH c = product.components %]
-    [% NEXT IF NOT c.is_active %]
-    components[[% count %]] = "[% c.name FILTER js %]";
-    comp_desc[[% count %]] = "[% c.description FILTER html_light FILTER js %]";
-    initialowners[[% count %]] = "[% c.default_assignee.login FILTER js %]";
-    default_bug_types[[% count %]] = "[% c.default_bug_type FILTER js %]";
+[%- FOREACH comp = product.components %]
+    [% NEXT IF NOT comp.is_active %]
+    components[[% count %]] = "[% comp.name FILTER js %]";
+    comp_desc[[% count %]] = "[% comp.description FILTER html_light FILTER js %]";
+    initialowners[[% count %]] = "[% comp.default_assignee.login FILTER js %]";
+    default_bug_types[[% count %]] = "[% comp.default_bug_type FILTER js %]";
     [% flag_list = [] %]
-    [% FOREACH f = c.flag_types.bug %]
+    [% FOREACH f = comp.flag_types.bug %]
       [% flag_list.push(f.id) %]
     [% END %]
-    [% FOREACH f = c.flag_types.attachment %]
+    [% FOREACH f = comp.flag_types.attachment %]
       [% flag_list.push(f.id) %]
     [% END %]
     flags[[% count %]] = [[% flag_list.join(",") FILTER js %]];
     [% IF Param("useqacontact") %]
-        initialqacontacts[[% count %]] = "[% c.default_qa_contact.login FILTER js %]";
+        initialqacontacts[[% count %]] = "[% comp.default_qa_contact.login FILTER js %]";
     [% END %]
 
     [% SET initial_cc_list = [] %]
-    [% FOREACH cc_user = c.initial_cc %]
+    [% FOREACH cc_user = comp.initial_cc %]
       [% initial_cc_list.push(cc_user.login) %]
     [% END %]
     initialccs[[% count %]] = "[% initial_cc_list.join(', ') FILTER js %]";
@@ -265,22 +265,22 @@ TUI_hide_default('expert_fields');
           [% qa_contacts_list = user.get_userlist.clone %]
         [% END %]
 
-        [%- FOREACH c = product.components %]
-          [% NEXT IF NOT c.is_active %]
-          <option value="[% c.name FILTER html %]"
-                  id="v[% c.id FILTER html %]_component"
-            [% IF c.name == default.component_ %]
+        [%- FOREACH comp = product.components %]
+          [% NEXT IF NOT comp.is_active %]
+          <option value="[% comp.name FILTER html %]"
+                  id="v[% comp.id FILTER html %]_component"
+            [% IF comp.name == default.component_ %]
               [%# This is for bug/field.html.tmpl, for visibility-related
                 # controls. %]
-              [% default.component_id = c.id %]
+              [% default.component_id = comp.id %]
               selected="selected"
             [% END %]>
-            [% c.name FILTER html -%]
+            [% comp.name FILTER html -%]
           </option>
           [% IF Param("usemenuforusers") %]
-            [% INCLUDE build_userlist default_user = c.default_assignee,
+            [% INCLUDE build_userlist default_user = comp.default_assignee,
                                       userlist = assignees_list %]
-            [% INCLUDE build_userlist default_user = c.default_qa_contact,
+            [% INCLUDE build_userlist default_user = comp.default_qa_contact,
                                       userlist = qa_contacts_list %]
           [% END %]
         [%- END %]

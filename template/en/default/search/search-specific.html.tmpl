@@ -70,9 +70,9 @@ for "crash secure SSL flash".
       <select name="product" id="product">
         <option value="">All</option>
         [% IF Param('useclassification') %]
-          [% FOREACH c = classification %]
-            <optgroup label="[% c.name FILTER html %]">
-            [% FOREACH p = user.get_selectable_products(c.id) %]
+          [% FOREACH cls = classification %]
+            <optgroup label="[% cls.name FILTER html %]">
+            [% FOREACH p = user.get_selectable_products(cls.id) %]
               [% IF p.components.size %]
                 <option value="[% p.name FILTER html %]"
                   [% " selected" IF default.product.contains(p.name) %]>

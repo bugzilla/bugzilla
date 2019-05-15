@@ -64,10 +64,10 @@
       ],
     [% ELSE %]
       [%# all components (create bug) %]
-      [% FOREACH c = product_obj.components %]
-        [% NEXT UNLESS c.reviewers %]
-        '[% c.name FILTER js %]': [
-          [% FOREACH u = c.reviewers_objs %]
+      [% FOREACH comp = product_obj.components %]
+        [% NEXT UNLESS comp.reviewers %]
+        '[% comp.name FILTER js %]': [
+          [% FOREACH u = comp.reviewers_objs %]
             [% NEXT IF u.id == user.id %]
             [% PROCESS reviewer %][% "," UNLESS loop.last %]
           [% END %]

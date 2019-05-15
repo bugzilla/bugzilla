@@ -84,10 +84,10 @@
 
 <table id="admin_table" border="1" cellpadding="4" cellspacing="0">
   <tr bgcolor="#6666FF">
-    [% FOREACH c = columns %]
+    [% FOREACH col = columns %]
       [%# Default to align left for headers %]
-      <th align="[% (c.align || 'left') FILTER html %]">
-        [% c.heading FILTER html %]
+      <th align="[% (col.align || 'left') FILTER html %]">
+        [% col.heading FILTER html %]
       </th>
     [% END %]
   </tr>
@@ -98,20 +98,20 @@
 [% FOREACH row = data %]
 
   <tr>
-    [% FOREACH c = columns %]
+    [% FOREACH col = columns %]
 
       [%# Copy to local variables, as we may update these %]
-      [% contentlink = c.contentlink
-         content = c.content
-         content_use_field = c.content_use_field
-         align = c.align
-         class = c.class
-         allow_html_content = c.allow_html_content
-         yesno_field = c.yesno_field
+      [% contentlink = col.contentlink
+         content = col.content
+         content_use_field = col.content_use_field
+         align = col.align
+         class = col.class
+         allow_html_content = col.allow_html_content
+         yesno_field = col.yesno_field
        %]
 
-      [%# Get any specific "important" overrides for this c.name and row.name ? %]
-      [% SET important = overrides.${c.name}.name.${row.name} %]
+      [%# Get any specific "important" overrides for this col.name and row.name ? %]
+      [% SET important = overrides.${col.name}.name.${row.name} %]
 
       [% IF important %]
 
@@ -122,9 +122,9 @@
       [% ELSE %]
 
           [%# Are there any specific overrides for this column? %]
-          [% FOREACH match_field = overrides.${c.name}.keys %]
+          [% FOREACH match_field = overrides.${col.name}.keys %]
 
-              [% override = overrides.${c.name}.${match_field}.${row.$match_field} %]
+              [% override = overrides.${col.name}.${match_field}.${row.$match_field} %]
               [% NEXT UNLESS override %]
 
               [% FOREACH key IN override.keys %]
@@ -154,23 +154,23 @@
           <a href="[% basepath FILTER none %][% link_uri %]">
         [% END %]
 
-        [% IF content_use_field && field_descs.exists(row.${c.name}) %]
-           [% colname = row.${c.name} %]
+        [% IF content_use_field && field_descs.exists(row.${col.name}) %]
+           [% colname = row.${col.name} %]
            [% field_descs.${colname} FILTER html %]
         [% ELSIF content %]
             [% content FILTER html_light %]
         [% ELSE %]
           [% IF yesno_field %]
-            [% IF row.${c.name} %]
+            [% IF row.${col.name} %]
               Yes
             [% ELSE %]
               No
             [% END %]
           [% ELSE %]
             [% IF allow_html_content %]
-              [% row.${c.name} FILTER html_light %]
+              [% row.${col.name} FILTER html_light %]
             [% ELSE %]
-              [% row.${c.name} FILTER html %]
+              [% row.${col.name} FILTER html %]
             [% END %]
           [% END %]
         [% END %]

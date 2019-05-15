@@ -44,15 +44,15 @@
 
 <table>
 
-[% FOREACH c = classifications %]
-  [% IF c.object %]
+[% FOREACH cls = classifications %]
+  [% IF cls.object %]
     <tr>
-      <th colspan="2" align="left">[% c.object.name FILTER html %]:
-      [%+ c.object.description FILTER html_light %]</th>
+      <th colspan="2" align="left">[% cls.object.name FILTER html %]:
+      [%+ cls.object.description FILTER html_light %]</th>
     </tr>
   [% END %]
 
-  [% FOREACH p = c.products %]
+  [% FOREACH p = cls.products %]
     <tr>
       <th align="right" valign="top">
         <a href="[% target %]?product=[% p.name FILTER uri -%]

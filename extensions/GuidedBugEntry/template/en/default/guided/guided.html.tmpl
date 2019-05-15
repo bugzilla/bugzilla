@@ -154,8 +154,8 @@ Other Mozilla products which aren't listed here
     [% caption = name %]
   [% END %]
   [% IF !desc %]
-    [% FOREACH c = classifications %]
-      [% FOREACH p = c.products %]
+    [% FOREACH cls = classifications %]
+      [% FOREACH p = cls.products %]
         [% IF p.name == name %]
           [% desc = p.description %]
           [% LAST %]
@@ -197,18 +197,18 @@ Other Mozilla products which aren't listed here
 %]
 
 <table id="other_products">
-[% FOREACH c = classifications %]
-  [% IF c.object %]
+[% FOREACH cls = classifications %]
+  [% IF cls.object %]
     <tr class="classification">
       <th align="right" valign="top">
-        [% c.object.name FILTER html %]:&nbsp;
+        [% cls.object.name FILTER html %]:&nbsp;
       </th>
       <td>
-        [% c.object.description FILTER html_light %]
+        [% cls.object.description FILTER html_light %]
       </td>
     </tr>
   [% END %]
-  [% FOREACH p = c.products %]
+  [% FOREACH p = cls.products %]
     <tr>
       <th align="right" valign="top">
         <a href="javascript:void(0)" onclick="product.select('[% p.name FILTER js %]')">

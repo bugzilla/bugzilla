@@ -21,7 +21,7 @@
   <tr>
     <th style="padding: 0px 15px 10px 0px;">Team</th>
     <th style="padding: 0px 15px 10px 0px; text-align: right;">
-        Open<br>[% results.reverse.0.date FILTER time('%m/%d') %]
+        Open<br>[% results.reverse.0.date.strftime('%m/%d') FILTER html %]
     </th>
     <th style="padding: 0px 15px 10px 0px; text-align: right;">Closed<br />Last Week</th>
     <th style="padding: 0px 15px 10px 0px; text-align: right; border-right: 1px solid grey;">Added<br />Last Week</th>
@@ -29,7 +29,7 @@
       [% NEXT IF loop.count < 2 %]
       [% LAST IF loop.count > 4 %]
       <th style="padding: 0px 15px 10px [% IF loop.count == 2 %] 10px [% ELSE %] 0px [% END %]; text-align: right; [% IF loop.count == 1 %] border-right: 1px solid grey; [% END %]">
-        Open<br>[% result.date FILTER time('%m/%d') %]
+        Open<br>[% result.date.strftime('%m/%d') FILTER html %]
       </th>
     [% END %]
   </tr>
@@ -89,7 +89,7 @@
   <tr>
     <th style="padding: 0px 15px 10px 0px;">Category</th>
     <th style="padding: 0px 15px 10px 0px; text-align: right;">
-        Open<br>[% results.reverse.0.date FILTER time('%m/%d') %]
+        Open<br>[% results.reverse.0.date.strftime('%m/%d') FILTER html %]
     </th>
     <th style="padding: 0px 15px 10px 0px; text-align: right;">Closed<br />Last Week</th>
     <th style="padding: 0px 15px 10px 0px; text-align: right;">Added<br />Last Week</th>
@@ -100,7 +100,7 @@
       [% NEXT IF loop.count < 2 %]
       [% LAST IF loop.count > 4 %]
       <th style="padding: 0px 15px 10px [% IF loop.count == 2 %] 10px [% ELSE %] 0px [% END %]; text-align: right;  [% IF loop.count == 1 %] border-right: 1px solid grey; [% END %]">
-        Open<br>[% result.date FILTER time('%m/%d') %]
+        Open<br>[% result.date.strftime('%m/%d') FILTER html %]
       </th>
     [% END %]
   </tr>

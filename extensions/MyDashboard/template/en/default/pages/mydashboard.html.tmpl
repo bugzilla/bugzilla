@@ -138,7 +138,7 @@
           <h2 class="query_heading">[% title FILTER html_light %]</h2>
           <span id="[% name FILTER html %]_loading" class="items_found">Loading...</span>
           <span id="[% name FILTER html %]_count_refresh" class="bz_default_hidden">
-          <span class="items_found" id="[% name FILTER html %]_flags_found">0 reviews found</span>
+          <span class="items_found" id="[% name FILTER html %]_flags_found">0 requests found</span>
           | <a class="refresh" href="javascript:void(0);" id="[% name FILTER html %]_refresh">Refresh</a>
           | <a class="buglist" href="javascript:void(0);" id="[% name FILTER html %]_buglist">Buglist</a>
           </span>
@@ -146,8 +146,8 @@
         </div>
       [% END %]
 
-      [% PROCESS requests_table name='requestee' title='Flags Requested of You' %]
-      [% PROCESS requests_table name='requester' title='Flags You Have Requested' %]
+      [% PROCESS requests_table name='requestee' title='Requests for You' %]
+      [% PROCESS requests_table name='requester' title='Requests from You' %]
     </div>
 
     <div style="clear:both;"></div>

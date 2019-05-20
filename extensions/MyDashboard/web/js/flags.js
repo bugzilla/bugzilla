@@ -145,7 +145,7 @@ $(function () {
         dataTable.requestee = new Y.DataTable({
             columns: [
                 { key: "requester", label: "Requester", sortable: true },
-                { key: "type", label: "Flag", sortable: true,
+                { key: "type", label: "Type", sortable: true,
                 formatter: flagNameFormatter, allowHTML: true },
                 { key: "bug_id", label: "Bug", sortable: true,
                 formatter: bugLinkFormatter, allowHTML: true },
@@ -153,7 +153,7 @@ $(function () {
                 formatter: updatedFormatter, allowHTML: true }
             ],
             strings: {
-                emptyMessage: 'No flags requested of you.',
+                emptyMessage: 'No requests found.',
             }
         });
 
@@ -195,7 +195,7 @@ $(function () {
             columns: [
                 { key:"requestee", label:"Requestee", sortable:true,
                 formatter: requesteeFormatter, allowHTML: true },
-                { key:"type", label:"Flag", sortable:true,
+                { key:"type", label:"Type", sortable:true,
                 formatter: flagNameFormatter, allowHTML: true },
                 { key:"bug_id", label:"Bug", sortable:true,
                 formatter: bugLinkFormatter, allowHTML: true },
@@ -203,7 +203,7 @@ $(function () {
                 formatter: updatedFormatter, allowHTML: true }
             ],
             strings: {
-                emptyMessage: 'No requested flags found.',
+                emptyMessage: 'No requests found.',
             }
         });
 

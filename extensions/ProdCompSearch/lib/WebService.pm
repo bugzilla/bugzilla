@@ -26,13 +26,19 @@ use constant PUBLIC_METHODS => qw(
 
 sub rest_resources {
   return [
-    qr{^/prod_comp_search/(.*)$},
+    qr{^/prod_comp_search/find/(.*)$},
     {
       GET => {
         method => 'prod_comp_search',
         params => sub {
           return {search => $_[0]};
         }
+      }
+    },
+    qr{^/prod_comp_search/frequent},
+    {
+      GET => {
+        method => 'list_frequent_components',
       }
     }
   ];
@@ -146,6 +152,40 @@ sub prod_comp_search {
     push @$products, $component;
   }
   return {products => $products};
+}
+
+# Get a list of components the user has frequently reported in the past 2 years
+sub list_frequent_components {
+  my ($self) = @_;
+  my $user = Bugzilla->user;
+
+  # Nothing to show if the user is signed out
+  return {results => []} unless $user->id;
+
+  # Select the date of 2 years ago today
+  my ($day, $month, $year) = (localtime(time))[3, 4, 5];
+  my $date = sprintf('%4d-%02d-%02d', $year + 1900 - 2, $month + 1, $day);
+
+  my $dbh  = Bugzilla->switch_to_shadow_db();
+  my $sth = $dbh->prepare('
+    SELECT products.name, components.name FROM bugs
+    INNER JOIN products ON bugs.product_id = products.id
+    INNER JOIN components ON bugs.component_id = components.id
+    WHERE bugs.reporter = ? AND bugs.creation_ts > ?
+      AND products.isactive = 1 AND components.isactive = 1
+    GROUP BY components.id ORDER BY count(bugs.bug_id) DESC LIMIT 10;
+  ');
+  $sth->execute($user->id, $date);
+
+  my $results = [];
+  while (my ($product, $component) = $sth->fetchrow_array) {
+    push @$results, {
+      product   => $self->type('string', $product),
+      component => $self->type('string', $component),
+    };
+  };
+
+  return {results => $results};
 }
 
 ###################

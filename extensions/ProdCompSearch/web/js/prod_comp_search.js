@@ -69,7 +69,7 @@ $(function() {
                 appendTo: $('#main-inner'),
                 forceFixPosition: true,
                 serviceUrl: function(query) {
-                    return `${BUGZILLA.config.basepath}rest/prod_comp_search/${encodeURIComponent(query)}`;
+                    return `${BUGZILLA.config.basepath}rest/prod_comp_search/find/${encodeURIComponent(query)}`;
                 },
                 params: params,
                 deferRequestBy: 250,
@@ -149,3 +149,86 @@ $(function() {
         })
         .data('counter', 0);
 });
+
+/**
+ * Reference or define the Bugzilla app namespace.
+ * @namespace
+ */
+var Bugzilla = Bugzilla || {}; // eslint-disable-line no-var
+
+/**
+ * Show the current user's most-used components on the New Bug page.
+ */
+Bugzilla.FrequentComponents = class FrequentComponents {
+  /**
+   * Initialize a new FrequentComponents instance.
+   */
+  constructor() {
+    this.$container = document.querySelector('#frequent-components');
+
+    if (this.$container && BUGZILLA.user.login) {
+      this.init();
+    }
+  }
+
+  /**
+   * Initialize the UI.
+   */
+  async init() {
+    this.$results = this.$container.querySelector('.results');
+    this.$message = this.$results.appendChild(document.createElement('p'));
+    this.$message.textContent = 'Loading...';
+    this.$results.setAttribute('aria-busy', 'true');
+    this.$container.hidden = false;
+
+    // Get the current params that may contain `cloned_bug_id` and `format`
+    const current_params = new URLSearchParams(location.search);
+
+    try {
+      const links = (await this.fetch()).map(({ product, component }) => {
+        const params = new URLSearchParams(current_params);
+
+        params.append('product', product);
+        params.append('component', component);
+
+        return {
+          href: `${BUGZILLA.config.basepath}enter_bug.cgi?${params.toString()}`,
+          text: `${product} :: ${component}`,
+        };
+      });
+
+      this.$message.remove();
+      this.$results.insertAdjacentHTML('beforeend',
+        `<ul>${links.map(({ href, text }) =>
+          `<li><a href="${href.htmlEncode()}">${text.htmlEncode()}</a></li>`
+        ).join('')}</ul>`
+      );
+    } catch (error) {
+      this.$message.textContent = error.message || 'Your frequent components could not be retrieved.';
+    }
+
+    this.$results.removeAttribute('aria-busy');
+  }
+
+  /**
+   * Retrieve frequently used components.
+   * @returns {Promise} Results or error.
+   */
+  async fetch() {
+    return new Promise((resolve, reject) => bugzilla_ajax({
+      url: `${BUGZILLA.config.basepath}rest/prod_comp_search/frequent`
+    }, ({ results }) => {
+      if (!results) {
+        reject(new Error('Your frequent components could not be retrieved.'));
+      } else if (!results.length) {
+        reject(new Error(('Your frequent components could not be found.')));
+      } else {
+        resolve(results);
+      }
+    }, () => {
+      reject(new Error('Your frequent components could not be retrieved.'));
+    }));
+  }
+};
+
+window.addEventListener('DOMContentLoaded', () => new Bugzilla.FrequentComponents(), { once: true });

@@ -22,7 +22,8 @@
   white-space: nowrap;
 }
 
-.yui3-datatable-col-short_desc {
+.yui3-datatable-col-short_desc a {
+  color: inherit !important;
   font-size: var(--font-size-large) !important;
 }
 

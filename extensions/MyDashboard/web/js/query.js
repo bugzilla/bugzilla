@@ -147,6 +147,9 @@ $(function() {
                 o.data.changeddate_fancy.htmlEncode() + '</span>';
         };
 
+        const link_formatter = ({ data, value }) =>
+          `<a href="${BUGZILLA.config.basepath}show_bug.cgi?id=${data.bug_id}" target="_blank">
+          ${String(value).htmlEncode()}</a>`;
 
         lastChangesQuery = new Y.DataSource.IO({ source: `${BUGZILLA.config.basepath}jsonrpc.cgi` });
 
@@ -173,12 +176,11 @@ $(function() {
                 { key: "bug_type", label: "T", allowHTML: true, sortable: true,
                 formatter: '<span class="bug-type-label iconic" title="{value}" aria-label="{value}" ' +
                            'data-type="{value}"><span class="icon" aria-hidden="true"></span></span>' },
-                { key: "bug_id", label: "Bug", allowHTML: true, sortable: true,
-                formatter: `<a href="${BUGZILLA.config.basepath}show_bug.cgi?id={value}" target="_blank">{value}</a>` },
+                { key: "bug_id", label: "Bug", sortable: true, allowHTML: true, formatter: link_formatter },
                 { key: "changeddate", label: "Updated", formatter: updatedFormatter,
                 allowHTML: true, sortable: true },
                 { key: "bug_status", label: "Status", sortable: true },
-                { key: "short_desc", label: "Summary", sortable: true },
+                { key: "short_desc", label: "Summary", sortable: true, allowHTML: true, formatter: link_formatter },
             ],
             strings: {
                 emptyMessage: 'Zarro Boogs found'

@@ -30,6 +30,7 @@ use English qw($EGID);
 use List::Util qw(first);
 use Tie::Hash::NamedCapture;
 use Safe;
+use Package::Stash;
 use Term::ANSIColor;
 use Sys::Hostname qw(hostname);
 
@@ -38,7 +39,6 @@ use parent qw(Exporter);
 our @EXPORT_OK = qw(
   read_localconfig
   update_localconfig
-  ENV_KEYS
 );
 
 # might want to change this for upstream
@@ -107,12 +107,6 @@ use constant LOCALCONFIG_VARS => (
   {name => 'datadog_port',        default => 8125,},
 );
 
-
-use constant ENV_KEYS => (
-  (map { ENV_PREFIX . $_->{name} } LOCALCONFIG_VARS),
-  (map { ENV_PREFIX . $_ } PARAM_OVERRIDE),
-);
-
 sub _read_localconfig_from_env {
   my %localconfig;
 
@@ -143,7 +137,8 @@ sub _read_localconfig_from_file {
 
   my %localconfig;
   if (-e $filename) {
-    my $s = new Safe;
+    my $s = Safe->new;
+    my $stash = Package::Stash->new($s->root);
 
     # Some people like to store their database password in another file.
     $s->permit('dofile');
@@ -159,45 +154,30 @@ sub _read_localconfig_from_file {
 
     my @read_symbols;
     if ($include_deprecated) {
-
-      # First we have to get the whole symbol table
-      my $safe_root = $s->root;
-      my %safe_package;
-      { no strict 'refs'; %safe_package = %{$safe_root . "::"}; }
-
       # And now we read the contents of every var in the symbol table.
       # However:
       # * We only include symbols that start with an alphanumeric
       #   character. This excludes symbols like "_<./localconfig"
       #   that show up in some perls.
       # * We ignore the INC symbol, which exists in every package.
-      # * Perl 5.10 imports a lot of random symbols that all
+      # * Perl 5.10 includes default symbol tables which
       #   contain "::", and we want to ignore those.
       @read_symbols
-        = grep { /^[A-Za-z0-1]/ and !/^INC$/ and !/::/ } (keys %safe_package);
+        = grep { /^[A-Za-z0-1]/ and !/^INC$/ and !/::/ } $stash->list_all_symbols();
     }
     else {
       @read_symbols = map($_->{name}, LOCALCONFIG_VARS);
     }
     foreach my $var (@read_symbols) {
-      my $glob = $s->varglob($var);
+      # We don't know the type of any setting.
+      # So we figure out its type by trying first a scalar, then an array, then a hash.
 
-      # We can't get the type of a variable out of a Safe automatically.
-      # We can only get the glob itself. So we figure out its type this
-      # way, by trying first a scalar, then an array, then a hash.
-      #
-      # The interesting thing is that this converts all deprecated
-      # array or hash vars into hashrefs or arrayrefs, but that's
-      # fine since as I write this all modern localconfig vars are
-      # actually scalars.
-      if (defined $$glob) {
-        $localconfig{$var} = $$glob;
-      }
-      elsif (@$glob) {
-        $localconfig{$var} = \@$glob;
-      }
-      elsif (%$glob) {
-        $localconfig{$var} = \%$glob;
+      foreach my $sigil (qw( $ @ % )) {
+        my $symbol = $sigil . $var;
+        if ($stash->has_symbol($symbol)) {
+          my $val = $stash->get_symbol($symbol);
+          $localconfig{$var} = ref($val) eq 'SCALAR' ? $$val : $val;
+        }
       }
     }
   }

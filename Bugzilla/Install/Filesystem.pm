@@ -21,7 +21,7 @@ use warnings;
 
 use Bugzilla::Constants;
 use Bugzilla::Error;
-use Bugzilla::Install::Localconfig qw(ENV_KEYS);
+use Bugzilla::Install::Localconfig;
 
 use Bugzilla::Install::Util qw(install_string);
 use Bugzilla::Util;

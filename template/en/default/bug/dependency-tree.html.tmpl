@@ -28,7 +28,7 @@
    title           = "Dependency tree for $terms.Bug $bugid"
    header          = "Dependency tree for
                       <a href=\"${basepath}show_bug.cgi?id=$bugid\">$terms.Bug $bugid</a>"
-   javascript_urls = ["js/expanding-tree.js"]
+   javascript_urls = ["js/dependency-tree.js"]
    style_urls      = ["skins/standard/dependency-tree.css"]
    subheader      = filtered_desc
    doc_section = "hintsandtips.html#dependencytree"
@@ -102,7 +102,7 @@
       [% END %]
     [% END %]
 
-    <ul class="tree">
+    <ul role="tree">
       [% INCLUDE display_tree tree=$tree_name %]
     </ul>
   [% END %]
@@ -115,22 +115,28 @@
     #   - tree: a hash of bug objects and of bug dependencies
     #%]
   [% bug = tree.$bugid %]
-  <li>
-    [%- INCLUDE bullet bugid=bugid tree=tree -%]
-    <span class="summ[% "_deep" IF tree.dependencies.$bugid.size %]"
-          id="[% bugid FILTER html %]"
-          [% IF global.seen.$bugid %]
-            onMouseover="duplicatedover('[% bugid FILTER html %]')"
-            onMouseout="duplicatedout('[% bugid FILTER html %]')"
-          [% END %]>
+  <li role="treeitem" data-id="[% bugid FILTER html %]"
+      [% IF tree.dependencies.$bugid.size && !global.seen.$bugid %] aria-expanded="true"[% END %]>
+    [% IF tree.dependencies.$bugid.size && ! global.seen.$bugid %]
+      <button type="button" role="button" class="iconic expander"
+              title="Click to expand or collapse this portion of the tree. Hold down the Ctrl or Command key while clicking to expand or collapse all subtrees.">
+        <span class="icon" aria-hidden="true"></span>
+      </button>
+    [% END %]
+    <span class="bug-type-label iconic" title="[% bug.bug_type FILTER html %]"
+          aria-label="[% bug.bug_type FILTER html %]" data-type="[% bug.bug_type FILTER html %]">
+      <span class="icon" aria-hidden="true"></span>
+    </span>
+    <span class="summary[% ' deep' IF tree.dependencies.$bugid.size %][% ' duplicated' IF global.seen.$bugid %]">
       [%- INCLUDE buglink bug=bug bugid=bugid %]
     </span>
     [% IF global.seen.$bugid %]
-      <b><a title="Already displayed above; click to locate"
-            onclick="duplicated('[% bugid FILTER html %]')"
-            href="#b[% bugid %]">(*)</a></b>
+      <button type="button" role="button" class="iconic duplicate-highlighter"
+              title="Already displayed above; click to locate" aria-pressed="false">
+        <span class="icon" aria-hidden="true"></span>
+      </button>
     [% ELSIF tree.dependencies.$bugid.size %]
-      <ul>
+      <ul role="group">
         [% FOREACH depid = tree.dependencies.$bugid %]
           [% INCLUDE display_tree bugid=depid %]
         [% END %]
@@ -140,32 +146,17 @@
   [% global.seen.$bugid = 1 %]
 [% END %]
 
-[% BLOCK bullet %]
-  [% IF tree.dependencies.$bugid.size && ! global.seen.$bugid %]
-    [% extra_class = " b_open" %]
-    [% extra_args = 'onclick="return doToggle(this, event)"' %]
-  [% END %]
-  <a id="b[% bugid %]"
-     class="b [%+ extra_class FILTER none %]"
-     title="Click to expand or contract this portion of the tree. Hold down the Ctrl key while clicking to expand or contract all subtrees."
-     [% extra_args FILTER none %]>&nbsp;&nbsp;</a>
-[% END %]
-
 [% BLOCK buglink %]
-  [% isclosed = !bug.isopened %]
-  [% FILTER closed(isclosed) -%]
-    <a title="[% INCLUDE buginfo bug=bug %]"
-       href="[% basepath FILTER none %]show_bug.cgi?id=[% bugid %]">
-      <b>[%- bugid %]:</b>
-      <span class="summ_text">[%+ bug.short_desc FILTER html %]</span>
-      <span class="summ_info">[[% INCLUDE buginfo %]]</span>
-    </a>
-    <a href="[% basepath FILTER none %]showdependencytree.cgi?id=[% bugid FILTER uri %]"
-       class="tree_link">
-      <img src="[% basepath FILTER none %]skins/standard/dependency-tree/tree.png"
-           title="See dependency tree for [% terms.bug %] [%+ bugid FILTER html %]">
-    </a>
-  [% END %]
+  <a class="bug-link[% ' bz_closed' UNLESS bug.isopened %]"
+     href="[% basepath FILTER none %]show_bug.cgi?id=[% bugid %]" title="[% INCLUDE buginfo bug=bug %]">
+    <strong>[%- bugid %]:</strong>
+    <span class="summ_text">[%+ bug.short_desc FILTER html %]</span>
+    <span class="summ_info">[[% INCLUDE buginfo %]]</span>
+  </a>
+  <a class="tree-link iconic" href="[% basepath FILTER none %]showdependencytree.cgi?id=[% bugid FILTER uri %]"
+      title="See dependency tree for [% terms.Bug %] [%+ bugid FILTER html %]">
+    <span class="icon" aria-hidden="true"></span>
+  </a>
 [% END %]
 
 [% BLOCK buginfo %]
@@ -179,7 +170,7 @@
 [%###########################################################################%]
 
 [% BLOCK depthControlToolbar %]
- <table cellpadding="3" border="0" cellspacing="0" bgcolor="#e0e0e0">
+ <table cellpadding="3" border="0" cellspacing="0">
    <tr>
    [%# Hide/show resolved button
        Swaps text depending on the state of hide_resolved %]
@@ -210,7 +201,7 @@
      [%# set to one form %]
      <input type="submit" id="change_maxdepth"
        value="&nbsp;1&nbsp;"
-       [% "disabled" IF realdepth < 2 || maxdepth == 1 %]>
+       [% " disabled" IF realdepth < 2 || maxdepth == 1 %]>
      <input name="id" type="hidden" value="[% bugid %]">
      <input name="maxdepth" type="hidden" value="1">
      <input name="hide_resolved" type="hidden" value="[% hide_resolved %]">
@@ -229,7 +220,7 @@
      %]">
      <input name="hide_resolved" type="hidden" value="[% hide_resolved %]">
      <input type="submit" id="decrease_depth" value="&nbsp;&lt;&nbsp;"
-       [% "disabled" IF realdepth < 2 || ( maxdepth && maxdepth < 2 ) %]>
+       [% " disabled" IF realdepth < 2 || ( maxdepth && maxdepth < 2 ) %]>
    </form>
    </td>
 
@@ -245,7 +236,7 @@
      <input name="hide_resolved" type="hidden" value="[% hide_resolved %]">
      <noscript>
        <input type="submit" id="change_depth" value="Change"
-              [% "disabled" IF realdepth < 2 %]>
+              [% " disabled" IF realdepth < 2 %]>
      </noscript>
    </form>
    </td>
@@ -261,7 +252,7 @@
      [% END %]
      <input name="hide_resolved" type="hidden" value="[% hide_resolved %]">
      <input type="submit" id="increase_depth" value="&nbsp;&gt;&nbsp;"
-        [% "disabled" IF realdepth < 2 || !maxdepth || maxdepth >= realdepth %]>
+        [% " disabled" IF realdepth < 2 || !maxdepth || maxdepth >= realdepth %]>
    </form>
    </td>
 
@@ -273,7 +264,7 @@
      <input name="hide_resolved" type="hidden" value="[% hide_resolved %]">
      <input type="submit" id="remove_limit"
        value="&nbsp;Unlimited&nbsp;"
-       [% "disabled" IF maxdepth == 0 || maxdepth == realdepth %]>
+       [% " disabled" IF maxdepth == 0 || maxdepth == realdepth %]>
    </form>
    </td>
  </tr>

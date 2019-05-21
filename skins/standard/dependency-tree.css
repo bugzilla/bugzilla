@@ -5,62 +5,95 @@
  * This Source Code Form is "Incompatible With Secondary Licenses", as
  * defined by the Mozilla Public License, v. 2.0. */
 
-ul.tree {
-  display: block;
-  margin-left: 1em;
-  padding-left: 0em;
-}
-
-ul.tree ul {
-  display: block;
-  padding-top: 3px;
-}
-
-ul.tree li {
-  /* see http://www.kryogenix.org/code/browser/aqlists/ for idea */
-  padding-top: 3px;
-  text-indent: -1.2em;
-  padding-left: 0.5em;
-  padding-bottom: 3px;
-  list-style-type: none;
-  background: url('dependency-tree/bug-item.png') no-repeat;
-}
-
-ul.tree li a.b {
-  padding-left: 30px;
-  margin-right: -14px;
-  text-decoration: none;
-}
-
-ul.tree li a.b_open {
-  background: url('dependency-tree/tree-open.png') center no-repeat;
-  cursor: pointer;
-}
-
-ul.tree li a.b_closed {
-  background: url('dependency-tree/tree-closed.png') center no-repeat;
-  cursor: pointer;
-}
-
-ul.tree a.tree_link img {
+[role="button"] {
+  outline: 0;
   border: 0;
+  padding: 0;
+  color: inherit;
+  background: none transparent !important;
+  box-shadow: none !important;
+  font-size: inherit;
+  font-weight: normal;
+  transition: none;
+}
+
+[role="button"] * {
+  pointer-events: none;
+}
+
+[role="tree"] {
+  display: block;
+  margin: 16px 0;
+  padding: 0;
+}
+
+[role="tree"] ul {
+  display: block;
+  margin: 0;
+  padding: 0 0 0 22px;
+}
+
+[role="tree"] li {
+  display: block;
+  margin: 8px 0;
+  padding: 0;
+  list-style-type: none;
+}
+
+[role="tree"] .icon::before {
+  font-family: 'Material Icons';
+  font-size: 18px;
+  line-height: 100%;
+  vertical-align: top;
+}
+
+[role="treeitem"][aria-expanded="true"] > .expander .icon {
+  transform: rotate(90deg);
+}
+
+[role="treeitem"][aria-expanded="false"] > .expander .icon {
+  transform: rotate(0);
+}
+
+[role="treeitem"][aria-expanded="false"] [role="group"] {
+  display: none;
+}
+
+.expander {
+  width: 18px;
+  height: 18px;
+}
+
+.expander .icon {
+  display: inline-block;
+  width: 18px;
+  height: 18px;
+  transform-origin: center;
+  transition: transform .2s;
+}
+
+.expander .icon::before {
+  content: '\E037';
+}
+
+.tree-link .icon::before {
+  content: '\E0B8';
+}
+
+.duplicate-highlighter[aria-pressed="true"] {
+  color: rgb(var(--accent-color-red-1));
+}
+
+.duplicate-highlighter .icon::before {
+  content: '\E417';
+}
+
+.summary.highlight .bug-link {
+  background-color: var(--selected-control-background-color) !important;
+  font-weight: 500 !important;
 }
 
 .summ_info {
-  /* change to inline if you would like to see the full bug details
-   * displayed in the list */
-  display: none;
-  font-size: var(--font-size-small);
-}
-
-.hint {
-  margin: 0.2em;
-  padding: 0.1em;
-  font-size: var(--font-size-small);
-}
-
-.hint h3,
-.hint ul {
-  margin-top: 0.1em;
-  margin-bottom: 0.1em;
+  display: none; /* change to inline if you would like to see the full bug details displayed in the list */
+  font-size: 75%;
 }

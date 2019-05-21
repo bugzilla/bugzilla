@@ -4554,8 +4554,10 @@ sub GetBugActivity {
     $suppwhere = "AND COALESCE(attachments.isprivate, 0) = 0";
   }
 
+  # Use DISTINCT and value comparison to suppress duplicated changes weirdly
+  # made at the same time by the same user
   my $query
-    = "SELECT fielddefs.name, bugs_activity.attach_id, "
+    = "SELECT DISTINCT fielddefs.name, bugs_activity.attach_id, "
     . $dbh->sql_date_format('bugs_activity.bug_when', '%Y.%m.%d %H:%i:%s')
     . " AS bug_when, bugs_activity.removed, bugs_activity.added, profiles.login_name,
                bugs_activity.comment_id
@@ -4566,6 +4568,7 @@ sub GetBugActivity {
     INNER JOIN profiles
             ON profiles.userid = bugs_activity.who
          WHERE bugs_activity.bug_id = ?
+           AND bugs_activity.removed != bugs_activity.added
                $datepart
                $attachpart
                $suppwhere ";
@@ -4619,6 +4622,17 @@ sub GetBugActivity {
       = @$entry;
     my %change;
     my $activity_visible = 1;
+    my $last_change = @$changes[-1] || {};
+
+    # Suppress any mid-air collision
+    if ( $when eq $operation->{'when'}
+      && $fieldname eq $last_change->{'fieldname'}
+      && $removed eq $last_change->{'removed'}
+      && $added eq $last_change->{'added'}
+      && $attachid eq $last_change->{'attachid'})
+    {
+      next;
+    }
 
     # check if the user should see this field's activity
     if ( $fieldname eq 'remaining_time'

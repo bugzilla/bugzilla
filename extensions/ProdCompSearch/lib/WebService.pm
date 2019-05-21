@@ -15,6 +15,7 @@ use base qw(Bugzilla::WebService);
 
 use Bugzilla::Error;
 use Bugzilla::Util qw(detaint_natural trim);
+use Time::localtime;
 
 #############
 # Constants #
@@ -36,11 +37,7 @@ sub rest_resources {
       }
     },
     qr{^/prod_comp_search/frequent},
-    {
-      GET => {
-        method => 'list_frequent_components',
-      }
-    }
+    {GET => {method => 'list_frequent_components',}}
   ];
 }
 
@@ -163,27 +160,19 @@ sub list_frequent_components {
   return {results => []} unless $user->id;
 
   # Select the date of 2 years ago today
-  my ($day, $month, $year) = (localtime(time))[3, 4, 5];
-  my $date = sprintf('%4d-%02d-%02d', $year + 1900 - 2, $month + 1, $day);
+  my $now = localtime;
+  my $date = sprintf('%4d-%02d-%02d', $now->year + 1900 - 2, $now->mon + 1, $now->mday);
 
-  my $dbh  = Bugzilla->switch_to_shadow_db();
-  my $sth = $dbh->prepare('
-    SELECT products.name, components.name FROM bugs
+  my $dbh = Bugzilla->switch_to_shadow_db();
+  my $sql = q{
+    SELECT products.name AS product, components.name AS component FROM bugs
     INNER JOIN products ON bugs.product_id = products.id
     INNER JOIN components ON bugs.component_id = components.id
     WHERE bugs.reporter = ? AND bugs.creation_ts > ?
       AND products.isactive = 1 AND components.isactive = 1
     GROUP BY components.id ORDER BY count(bugs.bug_id) DESC LIMIT 10;
-  ');
-  $sth->execute($user->id, $date);
-
-  my $results = [];
-  while (my ($product, $component) = $sth->fetchrow_array) {
-    push @$results, {
-      product   => $self->type('string', $product),
-      component => $self->type('string', $component),
-    };
   };
+  my $results = $dbh->selectall_arrayref($sql, {Slice => {}}, $user->id, $date);
 
   return {results => $results};
 }

@@ -172,7 +172,7 @@ if ($csv_file) {
 }
 
 say 'Change the type of all other bugs to "defect"';
-$dbh->do('UPDATE bugs SET bug_type = "defect" WHERE bug_type = NULL');
+$dbh->do('UPDATE bugs SET bug_type = "defect" WHERE bug_type IS NULL');
 
 $dbh->bz_commit_transaction;
 

@@ -46,4 +46,9 @@
   You cannot set this [% terms.bug %]'s status to ASSIGNED because the
   [%+ terms.bug %] is not assigned to a person.
 
+[% ELSIF error == "product_versions_unavailable" %]
+  [% title = "Product Version Info Unavailable" %]
+  The pronouns for Status and Tracking Flags cannot be used at this time.
+  Please try again later or use actual version numbers instead.
+
 [% END %]

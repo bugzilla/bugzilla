@@ -176,6 +176,45 @@ sub clear_params {
   $self->_inc_prefix("params");
 }
 
+sub set_data {
+  my ($self, $args) = @_;
+  return unless $self->{memcached};
+
+  if (exists $args->{key}) {
+    my $key        = $self->_resource_prefix . '.' . $args->{key};
+    my $expires_in = $args->{expires_in};
+
+    return $self->_set($key, {
+      value   => $args->{value},
+      expires => $expires_in ? time() + $expires_in : 0,
+    });
+  }
+  else {
+    ThrowCodeError('params_required',
+      {function => "Bugzilla::Memcached::set_data", params => ['key']});
+  }
+}
+
+sub get_data {
+  my ($self, $args) = @_;
+  return unless $self->{memcached};
+
+  if (exists $args->{key}) {
+    my $key   = $self->_resource_prefix . '.' . $args->{key};
+    my $cache = $self->_get($key);
+
+    return undef unless $cache;
+    return $cache->{value} if $cache->{expires} == 0 || $cache->{expires} > time();
+
+    $self->_delete($key);
+    return undef;
+  }
+  else {
+    ThrowCodeError('params_required',
+      {function => "Bugzilla::Memcached::get_data", params => ['key']});
+  }
+}
+
 sub set_bloomfilter {
   my ($self, $args) = @_;
   return unless $self->{memcached};
@@ -339,6 +378,10 @@ sub _params_prefix {
   return $_[0]->_prefix("params");
 }
 
+sub _resource_prefix {
+  return $_[0]->_prefix("resource");
+}
+
 sub _bloomfilter_prefix {
   return $_[0]->_prefix("bloomfilter");
 }
@@ -467,6 +510,13 @@ Bugzilla's configuration (such as fields, products, components, groups, etc).
 Values set with C<set_config> are automatically cleared when changes are made
 to Bugzilla's configuration.
 
+=item C<set_data({ key =E<gt> $key, value =E<gt> $value, expires_in =E<gt> $expires_in })>
+
+Adds the C<value> using the C<key> while identifying the generic data such as
+decoded JSON retrieved from a remote API endpoint. Optionally, data retention
+period can be specified with C<expires_in> in seconds. If it's not set, the
+stored data never expires.
+
 =back
 
 =head2 Getting
@@ -492,6 +542,11 @@ Return C<value> with the specified C<table> and C<name>.
 
 Return C<value> with the specified C<key> from the configuration cache.  See
 C<set_config> for more information.
+
+=item C<get_data({ key =E<gt> $key })>
+
+Return C<value> with the specified C<key> from the generic data cache.  See
+C<set_data> for more information.
 
 =back
 

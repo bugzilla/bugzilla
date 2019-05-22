@@ -1763,6 +1763,9 @@ sub _charts {
 sub _params_to_data_structure {
   my ($self) = @_;
 
+  # Allow to modify params before being processed
+  Bugzilla::Hook::process('search_params_to_data_structure', {search => $self});
+
   # First we get the "special" charts, representing all the normal
   # fields on the search page. This may modify _params, so it needs to
   # happen first.

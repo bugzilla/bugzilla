@@ -542,6 +542,21 @@ table should be joined with the C<bugs> table. If omitted, LEFT is used.
 
 =back
 
+=head2 search_params_to_data_structure
+
+This happens in L<Bugzilla::Search/_params_to_data_structure> and allows you to
+modify the search params in any way, before the all the params are processed as
+a data structure. It's useful especially when you want to accept synonyms for
+param names and/or values.
+
+Params:
+
+=over
+
+=item C<search> - The L<Bugzilla::Search> object.
+
+=back
+
 =head2 search_operator_field_override
 
 This allows you to modify L<Bugzilla::Search/OPERATOR_FIELD_OVERRIDE>,

@@ -90,7 +90,7 @@
  #tiles a:hover,
  #tiles a:focus,
  #tiles a:active {
-   color: var(--link-text-hover-color);
+   color: var(--hovered-link-text-color);
    text-decoration: none;
  }
 

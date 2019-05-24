@@ -12,6 +12,7 @@
 #user_profile_table th {
   text-align: right;
   padding-right: 1em;
+  color: var(--secondary-label-color);
   vertical-align: middle;
   white-space: nowrap;
 }

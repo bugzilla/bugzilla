@@ -1,9 +1,7 @@
-/* PrismJS 1.15.0
-https://prismjs.com/download.html#themes=prism&languages=markup+css+clike+javascript+c+cpp+diff+http+json+markdown+perl+python+rust+yaml&plugins=autolinker */
 /**
- * prism.js default theme for JavaScript, CSS and HTML
- * Based on dabblet (http://dabblet.com)
- * @author Lea Verou
+ * Based on PrismJS themes
+ * https://github.com/PrismJS/prism/blob/master/themes/prism.css
+ * https://github.com/PrismJS/prism/blob/master/themes/prism-dark.css
  */
 
 code[class*="language-"],
@@ -50,10 +48,7 @@ pre[class*="language-"] {
   color: slategray;
 }
 
-.token.punctuation {
-  color: #999;
-}
-
+.token.punctuation,
 .namespace {
   opacity: .7;
 }
@@ -117,4 +112,57 @@ pre[class*="language-"] {
 
 .token a {
   color: inherit;
+}
+
+@media screen and (prefers-color-scheme: dark) {
+  .token.comment,
+  .token.prolog,
+  .token.doctype,
+  .token.cdata {
+    color: hsl(30, 20%, 50%);
+  }
+
+  .token.property,
+  .token.tag,
+  .token.boolean,
+  .token.number,
+  .token.constant,
+  .token.symbol,
+  .token.deleted {
+    color: hsl(350, 40%, 70%);
+  }
+
+  .token.selector,
+  .token.attr-name,
+  .token.string,
+  .token.char,
+  .token.builtin,
+  .token.inserted {
+    color: hsl(75, 70%, 60%);
+  }
+
+  .token.operator,
+  .token.entity,
+  .token.url,
+  .language-css .token.string,
+  .style .token.string,
+  .token.variable {
+    color: hsl(40, 90%, 60%);
+  }
+
+  .token.atrule,
+  .token.attr-value,
+  .token.keyword {
+    color: hsl(350, 40%, 70%);
+  }
+
+  .token.function,
+  .token.class-name {
+    color: inherit;
+  }
+
+  .token.regex,
+  .token.important {
+    color: #e90;
+  }
 }

@@ -178,14 +178,7 @@
         view_only = 1
     %]
       <div id="field-value-bug_id">
-        [% this_bug_href = basepath _ "show_bug.cgi?id=$bug.id" %]
-        [% IF cgi.param("format") %]
-          [% format_uri = cgi.param("format") FILTER uri %]
-          [% this_bug_href = this_bug_href _ "&format=" _ format_uri %]
-        [% END %]
-        <a id="this-bug" href="[% this_bug_href FILTER html %]">
-          [%~ terms.Bug _ " " _ bug.id FILTER none ~%]
-        </a>
+        [% terms.Bug _ " " _ bug.id FILTER none %]
         [% IF bug.alias %]
           <span class="edit-hide">
             ([% bug.alias FILTER html %])

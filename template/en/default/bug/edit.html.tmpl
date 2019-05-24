@@ -1236,8 +1236,8 @@
       <table><tr><td>
         [% IF bug.check_can_change_field('longdesc', 0, 1) %]
           [% INCLUDE bug/comment.html.tmpl
-                     minrows   = 10
-                     maxrows   = 25
+                     minrows   = 5
+                     maxrows   = 15
                      cols      = constants.COMMENT_COLS
           %]
           [% Hook.process("after_comment_textarea", 'bug/edit.html.tmpl') %]

@@ -544,8 +544,8 @@ TUI_hide_default('expert_fields');
         [% comment FILTER none %]
       [%- END %]
       [% INCLUDE bug/comment.html.tmpl
-         minrows        = 10
-         maxrows        = 25
+         minrows        = 5
+         maxrows        = 15
          cols           = constants.COMMENT_COLS
          defaultcontent = defaultcontent
        %]

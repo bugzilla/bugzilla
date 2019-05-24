@@ -43,7 +43,6 @@
 
 .spin-toggle {
   display: inline;
-  cursor: pointer;
 }
 
 .spin-toggle:hover {
@@ -182,22 +181,16 @@ a.activity-ref {
 
 .module .field .value {
   display: table-cell;
+  padding-right: 10px;
 }
 
 .module .field .value.wide {
   display: block;
 }
 
-.module .field .value.edit {
+.module .field .value input[type="text"],
+.module .field .value input:not([type]) {
   width: 100%;
-}
-
-.module .field .value input {
-  width: 100%;
-}
-
-.module .field .value input[type="checkbox"] {
-  width: auto;
 }
 
 .module .field .value.short input {
@@ -308,6 +301,10 @@ input[type="number"] {
   margin-left: 5px;
 }
 
+#module-security-content {
+  padding: 8px;
+}
+
 #module-user-story-content {
   overflow: hidden;
 }
@@ -332,15 +329,15 @@ input[type="number"] {
   color: var(--secondary-label-color);
 }
 
-#cc-latch {
-  cursor: pointer;
-}
-
 #cc-list {
   overflow-y: auto;
   clear: both;
   max-height: 150px;
   white-space: nowrap;
+}
+
+#cc-list .cc-user {
+  margin: 4px 0;
 }
 
 #cc-list .vcard {
@@ -369,10 +366,6 @@ input[type="number"] {
 
 #add-cc {
   width: 100%;
-}
-
-.cc-loadable {
-  cursor: pointer;
 }
 
 .cc-loadable:hover {
@@ -575,7 +568,6 @@ td.flag-requestee {
   opacity: 1;
   font-size: var(--font-size-small);
   text-align: center;
-  cursor: pointer;
   transition: all .2s 2s;
   will-change: transform; /* for performance */
 }
@@ -822,7 +814,6 @@ h3.change-name a {
 .change-set .attachment.deleted .label [itemprop="description"],
 .change-set .attachment.obsolete .label [itemprop="description"] {
   text-decoration: line-through;
-  text-decoration-color: var(--secondary-label-color);
 }
 
 .change-set .attachment .outer {
@@ -945,7 +936,6 @@ h3.change-name a {
   outline: 0;
   border-bottom: 4px solid transparent;
   padding: 4px 8px;
-  cursor: pointer;
 }
 
 #comment-tabs li[aria-selected="true"] {
@@ -997,6 +987,7 @@ h3.change-name a {
 #mode-container {
   display: table-cell;
   margin: 5px;
+  border-left: 5px solid transparent;
   padding: 5px;
   text-align: right;
   white-space: nowrap;
@@ -1083,7 +1074,6 @@ a.lightbox-icon.markdown {
   max-width: 90%;
   background-color: var(--secondary-region-background-color);
   box-shadow: var(--primary-region-box-shadow);
-  cursor: pointer;
 }
 
 #lb_overlay {

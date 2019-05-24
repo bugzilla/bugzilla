@@ -19,7 +19,7 @@ table.realitems {
 
 tr.section_total {
   color: var(--inverted-label-color);
-  background: var(--pressed-button-background-color);
+  background: var(--selected-button-background-color);
 }
 
 td.subtotal {

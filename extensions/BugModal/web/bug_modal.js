@@ -948,7 +948,7 @@ $(function() {
     } else if (BUGZILLA.user.settings.zoom_textareas) {
         // add comment --> enlarge on focus
         $('#comment').focus(function(event) {
-            $(event.target).attr('rows', 25);
+            $(event.target).attr('rows', 15);
         });
     }
 

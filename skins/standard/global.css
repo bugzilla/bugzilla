@@ -64,21 +64,12 @@
 }
 
 @font-face {
-  font-family: 'Fira Mono';
+  font-family: 'Noto Mono';
   font-style: normal;
   font-weight: normal;
-  src: local('Fira Mono'),
-    url('fonts/FiraMono-Regular.woff2?v=3.202') format('woff2'),
-    url('fonts/FiraMono-Regular.woff?v=3.202') format('woff');
-}
-
-@font-face {
-  font-family: 'Fira Mono';
-  font-style: normal;
-  font-weight: bold;
-  src: local('Fira Mono Bold'),
-    url('fonts/FiraMono-Bold.woff2?v=3.202') format('woff2'),
-    url('fonts/FiraMono-Bold.woff?v=3.202') format('woff');
+  src: local('Noto Mono'),
+    url('fonts/NotoMono-Regular.woff2?v=1.00') format('woff2'),
+    url('fonts/NotoMono-Regular.woff?v=1.00') format('woff');
 }
 
 @font-face {
@@ -109,11 +100,10 @@
     --font-size-medium: 13px;
     --font-size-small: 12px;
     --font-size-x-small: 11px;
-    --font-size-monospace: 90%;
     --line-height-default: 1.25;
     --line-height-comfortable: 1.5;
     --font-family-sans-serif: 'FiraGO', sans-serif;
-    --font-family-monospace: 'Menlo', 'Consolas', 'Droid Sans Mono', 'Fira Mono', monospace;
+    --font-family-monospace: 'Menlo', 'Noto Mono', monospace;
 
     /** Region */
     --primary-region-border-radius: 4px;
@@ -123,7 +113,7 @@
 
     /** Control */
     --control-border-radius: 4px;
-    --control-padding: 6px 8px;
+    --control-padding: 6px;
 
     /** Button */
     --button-border-radius: 4px;
@@ -140,17 +130,21 @@
     /** Accent Colors */
     --accent-color-red-1: 220, 40, 30;
     --accent-color-red-2: 194, 35, 27;
-    --accent-color-green-1: 70, 140, 70;
-    --accent-color-blue-1: 0, 125, 210;
-    --accent-color-blue-2: 0, 103, 171;
+    --accent-color-green-1: 40, 120, 40;
+    --accent-color-blue-1: 0, 108, 191;
+    --accent-color-blue-2: 0, 94, 166;
+    --accent-color-blue-3: 0, 122, 204; /* B 80% */
+    --accent-color-blue-4: 0, 107, 179; /* B 70% */
+    --accent-color-blue-5: 0, 92, 153; /* B 60% */
     --accent-color-yellow-1: 210, 210, 60;
     --accent-color-lightyellow-1: 250, 250, 190;
     --accent-color-pink-1: 250, 195, 195;
     --accent-color-lightgreen-1: 195, 250, 195;
     --accent-color-wine-1: 217, 207, 238;
+    --accent-color-purple-1: 146, 72, 200;
 
     /** App */
-    --application-foreground-color: rgb(60, 61, 62);
+    --application-foreground-color: rgb(40, 41, 42);
     --application-background-color: rgb(235, 236, 237);
     --application-header-foreground-color: rgb(200, 201, 202);
     --application-header-foreground-hover-color: rgb(240, 241, 242);
@@ -169,27 +163,28 @@
 
     /** Label */
     --primary-label-color: var(--application-foreground-color);
-    --secondary-label-color: rgb(100, 101, 102);
-    --tertiary-label-color: rgb(140, 141, 142);
+    --secondary-label-color: rgb(80, 81, 82);
+    --tertiary-label-color: rgb(120, 121, 122);
     --inverted-label-color: rgb(240, 241, 242);
-    --required-label-color: rgb(var(--accent-color-red-1));
+    --required-label-color: rgb(var(--accent-color-red-2));
 
     /** Text */
     --primary-text-color: var(--application-foreground-color);
     --primary-text-background-color: var(--primary-region-background-color);
-    --secondary-text-color: rgb(120, 121, 122);
+    --secondary-text-color: rgb(100, 101, 102);
     --secondary-text-border-color: rgb(220, 221, 222);
     --placeholder-text-color: var(--secondary-text-color);
     --secondary-text-background-color: var(--primary-region-header-background-color);
     --selected-text-background-color: rgba(var(--accent-color-blue-1), .3);
     --link-text-color: rgb(var(--accent-color-blue-1));
-    --link-text-hover-color: rgb(var(--accent-color-blue-2));
+    --hovered-link-text-color: rgb(var(--accent-color-blue-2));
+    --visited-link-text-color: rgb(var(--accent-color-purple-1));
     --text-shadow-light: 0 0 4px rgb(40, 41, 42);
 
     /** Message */
     --warning-message-background-color: rgb(var(--accent-color-lightyellow-1));
     --warning-message-border-color: rgb(var(--accent-color-yellow-1));
-    --error-message-foreground-color: rgb(var(--accent-color-red-1));
+    --error-message-foreground-color: rgb(var(--accent-color-red-2));
     --error-message-background-color: rgb(var(--accent-color-pink-1));
     --positive-message-foreground-color: rgb(var(--accent-color-green-1));
     --positive-message-background-color: rgb(var(--accent-color-lightgreen-1));
@@ -209,19 +204,32 @@
     --selected-control-background-color: rgb(230, 231, 232);
     --invalid-control-border-color: rgb(var(--accent-color-red-1));
     --disabled-control-foreground-color: rgb(160, 161, 162);
+    --scrollbar-color: rgb(190, 191, 192) var(--application-background-color);
 
     /** Button */
     --primary-button-foreground-color: rgb(255, 255, 255);
-    --primary-button-background-color: rgb(var(--accent-color-blue-1));
-    --primary-button-border-color: rgb(var(--accent-color-blue-1));
+    --primary-button-background-color: rgb(var(--accent-color-blue-3));
+    --primary-button-border-color: var(--primary-button-background-color);
+    --hovered-primary-button-foreground-color: var(--primary-button-foreground-color);
+    --hovered-primary-button-background-color: rgb(var(--accent-color-blue-4));
+    --hovered-primary-button-border-color: var(--hovered-primary-button-background-color);
+    --pressed-primary-button-foreground-color: var(--primary-button-foreground-color);
+    --pressed-primary-button-background-color: rgb(var(--accent-color-blue-5));
+    --pressed-primary-button-border-color: var(--pressed-primary-button-background-color);
     --secondary-button-foreground-color: var(--primary-label-color);
     --secondary-button-background-color: rgb(230, 231, 232);
     --secondary-button-border-color: rgb(210, 211, 212);
+    --hovered-secondary-button-foreground-color: var(--secondary-button-foreground-color);
+    --hovered-secondary-button-background-color: rgb(220, 221, 222);
+    --hovered-secondary-button-border-color: var(--secondary-button-border-color);
+    --pressed-secondary-button-foreground-color: var(--secondary-button-foreground-color);
+    --pressed-secondary-button-background-color: rgb(200, 201, 202);
+    --pressed-secondary-button-border-color: var(--secondary-button-border-color);
     --danger-button-foreground-color: var(--primary-button-foreground-color);
     --danger-button-background-color: rgb(var(--accent-color-red-1));
     --danger-button-border-color: rgb(var(--accent-color-red-1));
-    --pressed-button-foreground-color: var(--primary-button-foreground-color);
-    --pressed-button-background-color: rgb(100, 101, 102);
+    --selected-button-foreground-color: var(--primary-button-foreground-color);
+    --selected-button-background-color: rgb(100, 101, 102);
     --disabled-button-foreground-color: var(--disabled-control-foreground-color);
     --disabled-button-background-color: var(--secondary-button-background-color);
 
@@ -254,6 +262,11 @@
   select:not([multiple]):not([size]) {
     background-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="rgb(160, 161, 162)" viewBox="0 0 24 24"><path d="M7.41 8.59L12 13.17l4.59-4.58L18 10l-6 6-6-6 1.41-1.41z"/><path fill="none" d="M0 0h24v24H0V0z"/></svg>');
   }
+
+  #private-bug-banner {
+    --confidential-bug-background-color: #b595f5;
+    --security-bug-background-color: #ffaf1a;
+  }
 }
 
 /**
@@ -263,17 +276,22 @@
 @media screen and (prefers-color-scheme: dark) {
   :root {
     /** Accent Colors */
-    --accent-color-red-1: 255, 47, 36;
-    --accent-color-red-2: 220, 40, 30;
-    --accent-color-green-1: 17, 166, 17;
-    --accent-color-blue-3: 0, 148, 247;
+    --accent-color-red-1: 220, 40, 30;
+    --accent-color-red-2: 255, 80, 80;
+    --accent-color-green-1: 42, 186, 39;
+    --accent-color-blue-1: 26, 168, 245;
+    --accent-color-blue-2: 24, 151, 219;
+    --accent-color-blue-3: 0, 122, 204; /* B 80% */
+    --accent-color-blue-4: 0, 107, 179; /* B 70% */
+    --accent-color-blue-5: 0, 77, 128; /* B 50% */
     --accent-color-lightyellow-1: 51, 37, 3;
     --accent-color-pink-1: 128, 64, 64;
     --accent-color-lightgreen-1: 64, 128, 64;
     --accent-color-wine-1: 50, 45, 64;
+    --accent-color-purple-1: 200, 118, 255;
 
     /** App */
-    --application-foreground-color: rgb(200, 201, 202);
+    --application-foreground-color: rgb(210, 211, 212);
     --application-background-color: rgb(30, 31, 32);
 
     /** Region */
@@ -285,27 +303,28 @@
     --overlay-background-color: rgba(10, 11, 12, .7);
 
     /** Label */
-    --secondary-label-color: rgb(160, 161, 162);
-    --tertiary-label-color: rgb(120, 121, 122);
+    --secondary-label-color: rgb(170, 171, 172);
+    --tertiary-label-color: rgb(130, 131, 132);
     --inverted-label-color: rgb(60, 61, 62);
 
     /** Text */
-    --secondary-text-color: rgb(140, 141, 142);
+    --secondary-text-color: rgb(150, 151, 152);
     --secondary-text-border-color: rgb(60, 61, 62);
-    --link-text-color: rgb(var(--accent-color-blue-3));
-    --link-text-hover-color: rgb(var(--accent-color-blue-1));
 
     /** Control */
     --control-background-color: rgb(35, 36, 37);
     --control-border-color: rgb(60, 61, 62);
-    --selected-control-background-color: rgb(50, 51, 52);
+    --selected-control-background-color: rgb(60, 61, 62);
     --disabled-control-foreground-color: rgb(90, 91, 92);
+    --scrollbar-color: rgb(70, 71, 72) var(--application-background-color);
 
     /** Button */
-    --secondary-button-background-color: rgb(60, 61, 62);
-    --secondary-button-border-color: rgb(50, 51, 52);
-    --pressed-button-foreground-color: rgb(60, 61, 62);
-    --pressed-button-background-color: rgb(180, 181, 182);
+    --secondary-button-background-color: rgb(70, 71, 72);
+    --secondary-button-border-color: rgb(70, 71, 72);
+    --hovered-secondary-button-background-color: rgb(60, 61, 62);
+    --pressed-secondary-button-background-color: rgb(40, 41, 42);
+    --selected-button-foreground-color: rgb(60, 61, 62);
+    --selected-button-background-color: rgb(180, 181, 182);
 
     /** Menu */
     --menu-box-shadow: 0 1px 12px rgba(10, 11, 12, .5);
@@ -313,6 +332,14 @@
     /** Grid */
     --grid-header-background-color: rgb(50, 51, 52);
     --grid-subheader-background-color: rgb(70, 71, 72);
+  }
+
+  input[type="checkbox"]:checked {
+    background-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path d="M0 0h24v24H0z" fill="none"/><path fill="rgb(35, 36, 37)" d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>');
+  }
+
+  input[type="checkbox"]:indeterminate {
+    background-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path fill="rgb(35, 36, 37)" d="M19 13H5v-2h14v2z"/><path d="M0 0h24v24H0z" fill="none"/></svg>');
   }
 
   select:not([multiple]):not([size]) {
@@ -328,13 +355,13 @@ body {
   font-size: var(--font-size-medium);
   line-height: var(--line-height-default);
   font-family: var(--font-family-sans-serif);
-  scrollbar-color: var(--control-border-color) var(--secondary-control-border-color);
+  scrollbar-color: var(--scrollbar-color);
 }
 
 pre,
 code,
 kbd {
-  font-size: var(--font-size-monospace);
+  font-size-adjust: .5;
   font-family: var(--font-family-monospace);
 }
 
@@ -386,9 +413,15 @@ a {
   text-decoration: none;
 }
 
-a:hover {
-  color: var(--link-text-hover-color);
+a:hover,
+a:focus,
+a:active {
+  color: var(--hovered-link-text-color);
   text-decoration: underline;
+}
+
+a:visited {
+  color: var(--visited-link-text-color);
 }
 
 table {
@@ -436,6 +469,9 @@ select:not([multiple]):not([size]) {
 
 @supports (-moz-appearance: none) {
   /* Remove extra padding in Firefox */
+  button,
+  input[type="button"],
+  input[type="submit"],
   select:not([multiple]):not([size]) {
     padding-top: 5px !important;
     padding-bottom: 5px !important;
@@ -512,6 +548,7 @@ textarea {
   padding: var(--control-padding);
 }
 
+input[type="checkbox"]:focus,
 input[type="date"]:focus,
 input[type="email"]:focus,
 input[type="number"]:focus,
@@ -578,10 +615,26 @@ input[type="submit"] {
   box-shadow: none;
 }
 
+button:hover,
+input[type="submit"]:hover,
+input[type="button"]:hover {
+  border-color: var(--hovered-secondary-button-border-color);
+  color: var(--hovered-secondary-button-foreground-color);
+  background-color: var(--hovered-secondary-button-background-color);
+}
+
 button:focus,
 input[type="submit"]:focus,
 input[type="button"]:focus {
   border-color: var(--focused-control-border-color);
+}
+
+button:active,
+input[type="submit"]:active,
+input[type="button"]:active {
+  border-color: var(--pressed-secondary-button-border-color);
+  color: var(--pressed-secondary-button-foreground-color);
+  background-color: var(--pressed-secondary-button-background-color);
 }
 
 button.primary,
@@ -593,6 +646,24 @@ input[type="submit"]:not(.secondary) {
   color: var(--primary-button-foreground-color);
   background-color: var(--primary-button-background-color);
   font-weight: 500;
+}
+
+button.primary:hover,
+button:not([type]):hover,
+button[type="submit"]:not(.secondary):hover,
+input[type="submit"]:not(.secondary):hover {
+  border-color: var(--hovered-primary-button-border-color);
+  color: var(--hovered-primary-button-foreground-color);
+  background-color: var(--hovered-primary-button-background-color);
+}
+
+button.primary:active,
+button:not([type]):active,
+button[type="submit"]:not(.secondary):active,
+input[type="submit"]:not(.secondary):active {
+  border-color: var(--pressed-primary-button-border-color);
+  color: var(--pressed-primary-button-foreground-color);
+  background-color: var(--pressed-primary-button-background-color);
 }
 
 button.danger {
@@ -635,7 +706,7 @@ input[type="checkbox"]:checked {
   background-color: var(--checked-control-background-color);
   background-position: center;
   background-repeat: no-repeat;
-  background-size: 16px 16px;
+  background-size: 18px 18px;
 }
 
 input[type="radio"] {
@@ -704,8 +775,8 @@ input[type="radio"]:checked {
 .buttons.toggle[role="radiogroup"] input[type="radio"]:checked + label {
   z-index: 2;
   border-color: var(--secondary-button-border-color);
-  color: var(--pressed-button-foreground-color);
-  background-color: var(--pressed-button-background-color);
+  color: var(--selected-button-foreground-color);
+  background-color: var(--selected-button-background-color);
 }
 
 .buttons.toggle[role="radiogroup"] input[type="radio"]:focus + label {
@@ -776,6 +847,15 @@ input[type="radio"]:checked {
 .yui-skin-sam .yui-dt table tr,
 .yui3-skin-sam .yui3-datatable-table tr {
   border-bottom: 1px solid var(--grid-border-color) !important;
+  background-color: transparent !important;
+}
+
+.yui-skin-sam .yui-dt-col-summary {
+  font-size: var(--font-size-large) !important;
+}
+
+.yui-skin-sam .yui-dt-message {
+  background-color: transparent !important;
 }
 
 .yui-skin-sam .yui-dt table .yui-skin-sam td,
@@ -807,6 +887,15 @@ input[type="radio"]:checked {
 
 .yui-skin-sam .yui-ac {
   display: inline-block;
+}
+
+.yui-skin-sam .yui-button {
+  border: 0 !important;
+  background: transparent !important;
+}
+
+.yui-skin-sam .yui-button .first-child {
+  border: 0 !important;
 }
 
 #bugzilla-body .yui-ac-content {
@@ -868,10 +957,6 @@ input[type="radio"]:checked {
     height: 100%;
     color: var(--application-foreground-color);
     background-color: var(--application-background-color);
-  }
-
-  body[class*="bz_group_"] {
-    background-color: rgb(var(--accent-color-wine-1)); /* Colorize private bugs */
   }
 
   #wrapper {
@@ -1273,6 +1358,41 @@ input[type="radio"]:checked {
 }
 
 /**
+ * Private group banner for confidential and security bugs
+ */
+
+#private-bug-banner {
+  padding: 4px;
+  color: #111;
+  background-color: var(--confidential-bug-background-color);
+  text-align: center;
+  -moz-user-select: none;
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+#private-bug-banner .icon {
+  font-family: 'Material Icons';
+  vertical-align: text-bottom;
+}
+
+#private-bug-banner .icon::before {
+  content: '\E897';
+}
+
+#private-bug-banner.security {
+  background-color: var(--security-bug-background-color);
+}
+
+#private-bug-banner strong {
+  text-transform: uppercase;
+}
+
+#private-bug-banner .groups {
+  font-size: var(--font-size-small);
+}
+
+/**
  * Narrower global header
  */
 
@@ -1669,7 +1789,7 @@ input.validation_error_field {
   color: var(--control-foreground-color);
   background-color: var(--menu-background-color);
   box-shadow: var(--menu-box-shadow);
-  cursor: pointer;
+  cursor: default;
   width: auto !important;
 }
 
@@ -1813,10 +1933,6 @@ table.tabs .clickable_area {
   display: inline-block;
 }
 
-.dropdown-button {
-  cursor: pointer;
-}
-
 .dropdown-button * {
   pointer-events: none;
 }
@@ -1919,7 +2035,7 @@ table.tabs .clickable_area {
 .dropdown-content [role="option"] {
   outline: 0;
   text-decoration: none;
-  cursor: pointer;
+  cursor: default;
 }
 
 .dropdown-content [role^="menuitem"]:hover,
@@ -2011,19 +2127,19 @@ table.tabs .clickable_area {
 .dropdown-panel .notifications img {
   float: left;
   border-radius: 4px;
-  width: 40px;
-  height: 40px;
+  width: 32px;
+  height: 32px;
 }
 
 .dropdown-panel .notifications img ~ * {
   display: block;
-  margin-left: 52px;
+  margin-left: 44px;
 }
 
 .dropdown-panel .notifications label {
   display: -webkit-box;
   overflow: hidden;
-  max-height: 40px;
+  max-height: calc(2em * var(--line-height-default));
   white-space: normal;
   text-overflow: ellipsis;
   -webkit-line-clamp: 2;
@@ -2223,6 +2339,7 @@ div.bz_comment_text pre {
 #comment_preview {
   display: block;
   clear: both;
+  overflow: auto;
   border: 1px solid var(--control-border-color);
   padding: 12px;
   color: var(--primary-text-color);
@@ -2274,7 +2391,7 @@ pre.comment-text {
 }
 
 .comment-text.empty {
-  color: var(--tertiary-label-color) !important;
+  color: var(--secondary-label-color) !important;
 }
 
 /**
@@ -2590,6 +2707,7 @@ pre.comment-text {
   line-height: 1.45;
   background-color: var(--secondary-text-background-color);
   border-radius: 3px;
+  padding: 1em;
 }
 
 .markdown-body pre code {

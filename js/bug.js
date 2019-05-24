@@ -94,7 +94,7 @@ YAHOO.bugzilla.dupTable = {
                   `id=${oRecord.getData('id')}&addselfcc=1&token=${escape(oData)}`;
         var button = document.createElement('a');
         button.setAttribute('href',  url);
-        button.innerHTML = YAHOO.bugzilla.dupTable.addCcMessage;
+        button.innerHTML = `<input type="button" value="${YAHOO.bugzilla.dupTable.addCcMessage.htmlEncode()}">`;
         el.appendChild(button);
         new YAHOO.widget.Button(button);
     },

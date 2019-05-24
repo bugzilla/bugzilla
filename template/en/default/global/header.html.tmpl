@@ -413,6 +413,19 @@
   </div>
 </header> [%# header %]
 
+[%
+  IF bug && bug.groups_in.size;
+    is_security_bug = 0;
+    FOREACH group IN bug.groups_in;
+      IF group.name.match('^(.*security|\w+sec)$'); is_security_bug = 1; END;
+    END;
+%]
+  <div id="private-bug-banner" class="[% IF is_security_bug %]security[% ELSE %]confidential[% END %]">
+    <span class="icon" aria-hidden="true"></span>
+    <strong>[% IF is_security_bug %]Security Issue[% ELSE %]Confidential[% END %]</strong>
+  </div>
+[% END %]
+
 <main id="bugzilla-body" tabindex="-1">
 <div id="main-inner">
 

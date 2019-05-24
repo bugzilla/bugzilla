@@ -262,7 +262,7 @@ END;
                  [%+ aria_labelledby_html FILTER none +%] [% " required" IF required %]>
         [% CASE constants.FIELD_TYPE_USER %]
           [% IF action && !action.hidden %]
-            <button class="field-button minor [%= action.class FILTER html IF action.class %]"
+            <button type="button" class="field-button minor [%= action.class FILTER html IF action.class %]"
               data-field="[% name FILTER html %]"
               [% IF action.id %]id="[% action.id FILTER html %]"[% END %]>
               [% action.caption FILTER html %]

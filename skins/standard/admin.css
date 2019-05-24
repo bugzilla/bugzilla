@@ -191,7 +191,7 @@ th.title {
 }
 
 #public_key {
-  font-size: var(--font-size-monospace);
+  font-size-adjust: .5;
   font-family: var(--font-family-monospace);
 }
 

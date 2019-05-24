@@ -15,7 +15,7 @@
 
 .bz_query_timestamp {
   font-weight: bold;
-  color: var(--tertiary-label-color);
+  color: var(--secondary-label-color);
 }
 
 .bz_query_buttons form {
@@ -100,13 +100,13 @@
 /* Style bug rows according to severity. */
 .bz_blocker,
 .bz_blocker .bz_short_desc_column {
-  color: rgb(var(--accent-color-red-1)) !important;
+  color: rgb(var(--accent-color-red-2)) !important;
   font-weight: bold;
 }
 
 .bz_critical,
 .bz_critical .bz_short_desc_column {
-  color: rgb(var(--accent-color-red-1)) !important;
+  color: rgb(var(--accent-color-red-2)) !important;
 }
 
 /* Align columns in the "change multiple bugs" form to the right. */

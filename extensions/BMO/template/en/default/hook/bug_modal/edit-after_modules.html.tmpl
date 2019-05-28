@@ -7,3 +7,7 @@
   #%]
 
 [% INCLUDE bug/legal_disclaimer.html.tmpl %]
+
+[% IF firefox_versions %]
+  <meta name="firefox-versions" content="[% json_encode(firefox_versions) FILTER html %]">
+[% END %]

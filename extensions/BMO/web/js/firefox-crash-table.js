@@ -12,6 +12,12 @@ window.addEventListener('DOMContentLoaded', () => {
   const VERSION = "0.4.0";
 
   async function fetchProductDetails() {
+    const $meta = document.querySelector('meta[name="firefox-versions"]');
+
+    if ($meta) {
+      return JSON.parse($meta.content);
+    }
+
     const url = "https://product-details.mozilla.org/1.0/firefox_versions.json";
     const response = await fetch(url);
     return await response.json();

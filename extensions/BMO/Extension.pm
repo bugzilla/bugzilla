@@ -174,6 +174,7 @@ sub template_before_process {
     }
   }
   elsif ($file eq 'bug/edit.html.tmpl' || $file eq 'bug_modal/edit.html.tmpl') {
+    $vars->{firefox_versions} = _fetch_product_version_file('firefox', 1);
     $vars->{split_cf_crash_signature} = $self->_split_crash_signature($vars);
   }
 
@@ -2664,11 +2665,13 @@ sub enter_bug_entrydefaultvars {
   }
 }
 
-sub _get_product_version {
-  my ($product, $channel, $detail) = @_;
+sub _fetch_product_version_file {
+  my ($product, $cache_only) = @_;
   my $key      = "${product}_versions";
   my $versions = Bugzilla->request_cache->{$key}
     || Bugzilla->memcached->get_data({key => $key});
+
+  return $versions if $cache_only;
 
   unless ($versions) {
     my $ua = Mojo::UserAgent->new;
@@ -2687,6 +2690,12 @@ sub _get_product_version {
     });
   }
 
+  return $versions;
+}
+
+sub _get_product_version {
+  my ($product, $channel, $detail) = @_;
+  my $versions = _fetch_product_version_file($product);
   my $version = $versions->{PRODUCT_CHANNELS->{$product}->{$channel}->{json_key}};
   return $version if $detail;
 

@@ -44,7 +44,7 @@ has subscriber_count => (is => 'ro',   isa => Int);
 has bug              => (is => 'lazy', isa => Object);
 has author           => (is => 'lazy', isa => Object);
 has reviews =>
-  (is => 'lazy', isa => ArrayRef [Dict [user => PhabUser, status => Str]]);
+  (is => 'lazy', isa => ArrayRef [Dict [user => PhabUser | PhabProject, status => Str]]);
 has subscribers => (is => 'lazy', isa => ArrayRef [PhabUser]);
 has projects    => (is => 'lazy', isa => ArrayRef [Project]);
 has reviewers_raw => (
@@ -285,14 +285,23 @@ sub _build_reviews {
   my ($self) = @_;
 
   my %by_phid = map { $_->{reviewerPHID} => $_ } @{$self->reviewers_raw};
-  my $users
-    = Bugzilla::Extension::PhabBugz::User->match({phids => [keys %by_phid]});
+  my @users;
+  foreach my $phid (keys %by_phid) {
+    if ($phid =~ /^PHID-PROJ/) {
+      push(@users,
+        Bugzilla::Extension::PhabBugz::Project->new_from_query({phids => [$phid]}));
+    }
+    else {
+      push(@users,
+        Bugzilla::Extension::PhabBugz::User->new_from_query({phids => [$phid]}));
+    }
+  }
 
   my @reviewers;
-  foreach my $user (@{$users}) {
+  foreach my $user (@users) {
     my $reviewer_data = {user => $user, status => $by_phid{$user->phid}{status}};
 
-# Set to accepted-prior if the diffs reviewer are different and the reviewer status is accepted
+    # Set to accepted-prior if the diffs reviewer are different and the reviewer status is accepted
     foreach my $reviewer_extra (@{$self->reviewers_extra_raw}) {
       if ($reviewer_extra->{reviewerPHID} eq $user->phid) {
         if ($reviewer_extra->{diffPHID}) {

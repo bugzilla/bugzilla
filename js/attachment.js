@@ -631,7 +631,6 @@ Bugzilla.AttachmentForm = class AttachmentForm {
     this.update_validation();
     this.$type_input.value = is_ghpr ? 'text/x-github-pull-request' : '';
     this.update_ispatch(is_patch);
-    this.$type_outer.querySelectorAll('[name]').forEach($input => $input.disabled = has_text);
   }
 
   /**

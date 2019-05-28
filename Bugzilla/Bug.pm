@@ -43,7 +43,6 @@ use base qw(Bugzilla::Object Exporter);
 @Bugzilla::Bug::EXPORT = qw(
   bug_alias_to_id
   LogActivityEntry
-  editable_bug_fields
 );
 
 my %CLEANUP;
@@ -4445,36 +4444,6 @@ sub bug_alias_to_id {
 #####################################################################
 # Subroutines
 #####################################################################
-
-# Returns a list of currently active and editable bug fields,
-# including multi-select fields.
-sub editable_bug_fields {
-  my @fields = Bugzilla->dbh->bz_table_columns('bugs');
-
-  # Add multi-select fields
-  push(@fields,
-    map { $_->name }
-      @{Bugzilla->fields({obsolete => 0, type => FIELD_TYPE_MULTI_SELECT})});
-
-  # Obsolete custom fields are not editable.
-  my @obsolete_fields = @{Bugzilla->fields({obsolete => 1, custom => 1})};
-  @obsolete_fields = map { $_->name } @obsolete_fields;
-  foreach
-    my $remove ("bug_id", "reporter", "creation_ts", "delta_ts", "lastdiffed",
-    @obsolete_fields)
-  {
-    my $location = firstidx { $_ eq $remove } @fields;
-
-    # Ensure field exists before attempting to remove it.
-    splice(@fields, $location, 1) if ($location > -1);
-  }
-
-  Bugzilla::Hook::process('bug_editable_bug_fields', {fields => \@fields});
-
-  # Sorted because the old @::log_columns variable, which this replaces,
-  # was sorted.
-  return sort(@fields);
-}
 
 # Emit a list of dependencies or regressions. Join with bug_status and bugs
 # tables to show bugs with open statuses first, and then the others

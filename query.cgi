@@ -162,12 +162,22 @@ if (Bugzilla->params->{'usetargetmilestone'}) {
 }
 
 my @chfields;
+my $search_fields = Bugzilla::Search::search_fields({obsolete => 0});
+my $uneditable_fields_re = join('|', qw(
+  attachments\.submitter
+  bug_id
+  commenter
+  creation_ts
+  delta_ts
+  lastdiffed
+  reporter
+));
 
 push @chfields, "[Bug creation]";
 
 # This is what happens when you have variables whose definition depends
 # on the DB schema, and then the underlying schema changes...
-foreach my $val (editable_bug_fields()) {
+foreach my $val (keys %$search_fields) {
   if ($val eq 'classification_id') {
     $val = 'classification';
   }
@@ -176,6 +186,9 @@ foreach my $val (editable_bug_fields()) {
   }
   elsif ($val eq 'component_id') {
     $val = 'component';
+  }
+  elsif ($val =~ /^(?:$uneditable_fields_re)$/) {
+    next;
   }
   push @chfields, $val;
 }
@@ -204,7 +217,7 @@ $vars->{'resolution'}
 
 # Boolean charts
 my @fields = sort { lc($a->description) cmp lc($b->description) }
-  values %{Bugzilla::Search::search_fields({obsolete => 0})};
+  values %$search_fields;
 unshift(@fields, {name => "noop", description => "---"});
 $vars->{'fields'} = \@fields;
 

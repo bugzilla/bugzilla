@@ -411,15 +411,6 @@ sub bug_create_cf_accessors {
   }
 }
 
-sub bug_editable_bug_fields {
-  my ($self, $args) = @_;
-  my $fields         = $args->{'fields'};
-  my @tracking_flags = Bugzilla::Extension::TrackingFlags::Flag->get_all;
-  foreach my $flag (@tracking_flags) {
-    push(@$fields, $flag->name);
-  }
-}
-
 sub search_operator_field_override {
   my ($self, $args) = @_;
   my $operators      = $args->{'operators'};

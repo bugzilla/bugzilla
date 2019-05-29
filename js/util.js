@@ -355,16 +355,16 @@ function timeAgo(param) {
         dd = Math.round(hh / 24),
         mo = Math.round(dd / 30),
         yy = Math.round(mo / 12);
-    if (ss < 10) return 'just now';
+    if (ss < 10) return 'Just now';
     if (ss < 45) return ss + ' seconds ago';
-    if (ss < 90) return 'a minute ago';
+    if (ss < 90) return '1 minute ago';
     if (mm < 45) return mm + ' minutes ago';
-    if (mm < 90) return 'an hour ago';
+    if (mm < 90) return 'Last hour';
     if (hh < 24) return hh + ' hours ago';
-    if (hh < 36) return 'a day ago';
+    if (hh < 36) return 'Yesterday';
     if (dd < 30) return dd + ' days ago';
-    if (dd < 45) return 'a month ago';
+    if (dd < 45) return 'Last month';
     if (mo < 12) return mo + ' months ago';
-    if (mo < 18) return 'a year ago';
+    if (mo < 18) return 'Last year';
     return yy + ' years ago';
 }

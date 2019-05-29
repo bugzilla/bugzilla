@@ -1,434 +1,435 @@
-textarea:focus {
-    background: #f7f2d0;
-}
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this file,
+ * You can obtain one at http://mozilla.org/MPL/2.0/.
+ *
+ * This Source Code Form is "Incompatible With Secondary Licenses", as
+ * defined by the Mozilla Public License, v. 2.0. */
 
 #note {
-    background: #ffee88;
-    padding: 0.5em;
+  padding: .5em;
+  background-color: var(--informative-message-background-color);
 }
 
 #error {
-    border: 1px solid black;
-    padding: 0.5em;
-    color: #bb0000;
+  border: 1px solid var(--secondary-control-border-color);
+  padding: .5em;
+  color: var(--error-message-foreground-color);
 }
 
 #chooseReview {
-    margin-top: 1em;
+  margin-top: 1em;
 }
 
-.review-draft .review-desc, .review-draft .review-attachment {
-    font-weight: bold;
+.review-draft .review-desc,
+.review-draft .review-attachment {
+  font-weight: bold;
 }
 
-#bugInfo, #attachInfo {
-    margin-top: 0.5em;
-    margin-bottom: 1em;
+#bugInfo,
+#attachInfo {
+  margin-top: .5em;
+  margin-bottom: 1em;
 }
 
 #helpful-links {
-    float:right;
+  float: right;
 }
 
 #chooseAttachment table {
-    margin-bottom: 1em;
+  margin-bottom: 1em;
 }
 
 #attachWarning {
-    font-weight: bold;
-    color: #c00000;
+  color: var(--error-message-foreground-color);
+  font-weight: bold;
 }
 
-.attachment-draft .attachment-id, .attachment-draft .attachment-desc {
-    font-weight: bold;
+.attachment-draft .attachment-id,
+.attachment-draft .attachment-desc {
+  font-weight: bold;
 }
 
 .attachment-obsolete .attachment-desc {
-    text-decoration: line-through ;
+  text-decoration: line-through;
 }
 
 #navigation {
-    color: #888888;
+  color: var(--secondary-label-color);
 }
 
 .navigation-link {
-    text-decoration: none;
-    white-space: nowrap;
+  text-decoration: none;
+  white-space: nowrap;
 }
 
 .navigation-link-selected {
-    color: black;
+  color: inherit !important;
+  text-decoration: none !important;
+  cursor: default;
 }
 
 #haveDraftNotice {
-    float: right;
-    color: #bb0000;
-    font-weight: bold;
+  float: right;
+  color: var(--error-message-foreground-color);
+  font-weight: bold;
 }
 
 #overview {
-    margin-top: 0.5em;
-    margin-bottom: 0.5em;
+  margin-top: .5em;
+  margin-bottom: .5em;
 }
 
 #patchIntro {
-    border: 1px solid #888888;
-    font-size: 90%;
-    margin-bottom: 1em;
-    padding: 0.5em;
-}
-
-.reviewer-box {
-    padding: 0.5em;
-}
-
-.reviewer-0 .reviewer-box {
-    border-left: 10px solid green;
-}
-
-.reviewer-1 .reviewer-box {
-    border-left: 10px solid blue;
-}
-
-.reviewer-2 .reviewer-box {
-    border-left: 10px solid red;
-}
-
-.reviewer-3 .reviewer-box {
-    border-left: 10px solid yellow;
-}
-
-.reviewer-4 .reviewer-box {
-    border-left: 10px solid purple;
-}
-
-.reviewer-5 .reviewer-box {
-    border-left: 10px solid orange;
-}
-
-.reviewer {
-    float: left;
-}
-
-.review-date {
-    float: right;
-}
-
-.review-info-bottom {
-    clear: both;
-}
-
-.review {
-    border: 1px solid black;
-    font-size: 90%;
-    margin-top: 0.25em;
-    margin-bottom: 1em;
-}
-
-.review-intro {
-    margin-top: 0.5em;
-}
-
-.review-patch-file {
-    margin-top: 0.5em;
-    font-weight: bold;
-}
-
-.review-patch-comment {
-    border: 1px solid white;
-    padding: 1px;
-    margin-top: 0.5em;
-    margin-bottom: 0.5em;
-    cursor: pointer;
-}
-
-.review-patch-comment:hover {
-    border: 1px solid #8888ff;
-}
-
-.review-patch-comment .file-table {
-    width: 50%;
-}
-
-.review-patch-comment .file-table-changed {
-    width: 100%;
-}
-
-.review-patch-comment-separator {
-    margin: 0.5em;
-    border-bottom: 1px solid #888888;
-}
-
-div.review-patch-comment-text {
-    margin-left: 2em;
-}
-
-.review-patch-comment .reviewer-box {
-    border-left-width: 4px;
-}
-
-#restored {
-    color: #bb0000;
-    margin-bottom: 0.5em;
-}
-
-#myCommentFrame {
-    margin-top: 0.25em;
-    position: relative;
-    border: 1px solid black;
-    padding-right: 8px; /* compensate for child's padding */
-}
-
-#myComment {
-    border: 0px solid black;
-    padding: 4px;
-    margin: 0px;
-    width: 100%;
-    height: 10em;
-}
-
-#emptyCommentNotice {
-    position: absolute;
-    top: 4px;
-    left: 4px;
-    color: #888888;
-}
-
-#myPatchComments {
-    border: 1px solid black;
-    border-top-width: 0px;
-    padding: 0.5em;
-    font-size: 90%;
-}
-
-#buttonBox {
-    margin-top: 0.5em;
-    float: right;
-}
-
-.clear {
-    clear: both;
-}
-
-/* Used for IE <= 7, overridden for modern browsers */
-.pre-wrap {
-    white-space: pre;
-    word-wrap: break-word;
-}
-
-.pre-wrap {
-    white-space: pre-wrap;
-}
-
-#splinter-files {
-   position: relative;
-   margin-top: 0.5em;
-   margin-bottom: 0.5em;
-}
-
-#splinter-files .new-line,
-#splinter-files .old-line {
+  margin-bottom: 1em;
+  border: 1px solid #888888;
+  padding: .5em;
   font-size: var(--font-size-small);
 }
 
+.reviewer-0 .reviewer-box {
+  border-left: 10px solid green;
+}
+
+.reviewer-1 .reviewer-box {
+  border-left: 10px solid blue;
+}
+
+.reviewer-2 .reviewer-box {
+  border-left: 10px solid red;
+}
+
+.reviewer-3 .reviewer-box {
+  border-left: 10px solid yellow;
+}
+
+.reviewer-4 .reviewer-box {
+  border-left: 10px solid purple;
+}
+
+.reviewer-5 .reviewer-box {
+  border-left: 10px solid orange;
+}
+
+.reviewer {
+  float: left;
+}
+
+.review-date {
+  float: right;
+}
+
+.review-info-bottom {
+  clear: both;
+}
+
+.review {
+  margin-top: .25em;
+  margin-bottom: 1em;
+  border: 1px solid var(--secondary-control-border-color);
+  font-size: var(--font-size-small);
+}
+
+.review-intro {
+  margin-top: .5em;
+}
+
+.review-patch-file {
+  margin-top: .5em;
+  font-weight: bold;
+}
+
+.review-patch-comment {
+  margin-top: .5em;
+  margin-bottom: .5em;
+  border: 1px solid var(--secondary-region-border-color);
+  padding: 1px;
+  background-color: var(--secondary-region-background-color);
+  cursor: pointer;
+}
+
+.review-patch-comment:hover {
+  border: 1px solid var(--hovered-primary-button-border-color);
+}
+
+.review-patch-comment .file-table {
+  width: 50%;
+}
+
+.review-patch-comment .file-table-changed {
+  width: 100%;
+}
+
+.review-patch-comment-separator {
+  margin: .5em;
+}
+
+div.review-patch-comment-text {
+  margin-left: 2em;
+}
+
+.review-patch-comment .reviewer-box {
+  border-left-width: 4px;
+}
+
+#restored {
+  margin-bottom: .5em;
+  color: var(--error-message-foreground-color);
+}
+
+#myCommentFrame {
+  position: relative;
+  margin-top: .25em;
+  border: 1px solid var(--secondary-control-border-color);
+  padding-right: 8px;
+  /* compensate for child's padding */
+}
+
+#myComment {
+  margin: 0;
+  width: 100%;
+  height: 10em;
+}
+
+#emptyCommentNotice {
+  position: absolute;
+  top: 8px;
+  left: 8px;
+  color: var(--placeholder-text-color);
+}
+
+#myPatchComments {
+  border: 1px solid var(--secondary-control-border-color);
+  border-top-width: 0;
+  padding: .5em;
+}
+
+#buttonBox {
+  float: right;
+  margin-top: .5em;
+}
+
+.clear {
+  clear: both;
+}
+
+.pre-wrap {
+  white-space: pre-wrap;
+}
+
+#splinter-files {
+  position: relative;
+  margin-top: .5em;
+  margin-bottom: .5em;
+}
+
 .file-label {
-    margin-top: 1em;
-    margin-bottom: 0.5em;
+  margin-top: 1em;
+  margin-bottom: .5em;
 }
 
 .file-label-name {
-    font-weight: bold;
+  font-weight: bold;
 }
 
 .file-label-extra {
-    font-size: 90%;
-    font-style: italic;
+  font-size: var(--font-size-small);
+  font-style: italic;
 }
 
 .hunk-header {
-    border: 1px solid #aaaaaa;
+  border: 1px solid var(--grid-border-color);
 }
 
 .hunk-header td {
-    background: #ddccbb;
-    font-size: 80%;
-    font-weight: bold;
+  background-color: var(--grid-header-background-color);
+  font-weight: bold;
 }
 
 .hunk-cell {
-    padding: 2px;
+  padding: 2px;
 }
 
-.old-line, .new-line {
-    font-family: "DejaVu Sans Mono", monospace;
-    font-size: 80%;
-    white-space: pre-wrap;      /* CSS 3 & 2.1 */
-    white-space: -moz-pre-wrap; /* Gecko */
-    white-space: -pre-wrap;     /* Opera 4-6 */
-    white-space: -o-pre-wrap;   /* Opera 7 */
+.old-line,
+.new-line {
+  font-family: var(--font-family-monospace);
+  font-size-adjust: .5;
+  white-space: pre-wrap;
 }
 
-.removed-line {
-    background: #ffccaa;;
+.old-line.removed-line,
+.old-line.changed-line {
+  background-color: rgba(var(--accent-color-pink-1), .5);
 }
 
-.added-line {
-    background: #bbffbb;
-}
-
-.changed-line {
-    background: #aaccff;
+.new-line.added-line,
+.new-line.changed-line {
+  background-color: rgba(var(--accent-color-lightgreen-1), .5);
 }
 
 .file-table {
-    width: 100%;
-    border-collapse: collapse;
-    table-layout: fixed;
-    background: #ffffff;
+  table-layout: fixed;
+  border: 1px solid var(--grid-border-color);
+  width: 100%;
+  background-color: var(--grid-background-color);
+}
+
+.file-table td {
+  padding: 2px 4px;
+}
+
+.line-middle {
+  border-left: 1px solid var(--grid-border-color);
+  padding: 0 !important;
+  width: 0;
 }
 
 .line-number {
-    font-size: 80%;
-    text-align: right;
-    padding-right: 0.25em;
-    color: #888888;
-    -moz-user-select: none;
+  color: var(--tertiary-label-color);
+  font-size: var(--font-size-small);
+  font-size-adjust: .5;
+  font-family: var(--font-family-monospace);
+  text-align: right;
+  -moz-user-select: none;
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+.line-number.old.removed-line,
+.line-number.old.changed-line {
+  color: var(--secondary-label-color);
+  background-color: rgba(var(--accent-color-pink-1), .8);
+}
+
+.line-number.new.added-line,
+.line-number.new.changed-line {
+  color: var(--secondary-label-color);
+  background-color: rgba(var(--accent-color-lightgreen-1), .8);
 }
 
 .line-number-column {
-    width: 2em;
+  width: 2em;
 }
 
 .file-table-wide-numbers .line-number-column {
-    width: 3em;
+  width: 3em;
 }
 
 .middle-column {
-    width: 3px;
+  width: 3px;
 }
 
 .file-table-changed .comment-removed {
-    width: 50%;
-    float: left;
+  float: left;
+  width: 50%;
 }
 
 .file-table-changed .comment-changed {
-    margin-left: 25%;
-    margin-right: 25%;
-    clear: both;
+  clear: both;
+  margin-left: 25%;
+  margin-right: 25%;
 }
 
 .file-table-changed .comment-added {
-    width: 50%;
-    float: right;
+  float: right;
+  width: 50%;
 }
 
 .comment-frame {
-    border: 1px solid black;
-    margin-top: 5px;
-    margin-bottom: 5px;
-    margin-left: 2em;
+  border: 1px solid var(--secondary-control-border-color);
+  margin-top: 4px;
+  margin-bottom: 4px;
+  margin-left: 2em;
 }
 
 .file-table-wide-numbers .comment-frame {
-    margin-left: 3em;
+  margin-left: 3em;
 }
 
 .comment .review-info {
-    margin-top: 0.5em;
-    font-size: 80%;
+  margin-top: .5em;
+  font-size: var(--font-size-small);
 }
 
 #commentTextFrame {
-    border: 1px solid #ffeeaa;
-    margin-bottom: 5px;
-}
-
-#commentEditor.focused #commentTextFrame {
-    border: 1px solid #8888bb;
+  margin-bottom: 4px;
 }
 
 #commentEditorInner {
-    background: #ffeeaa;
-    padding: 0.5em;
-    margin-left: 2em;
+  margin-left: 2em;
+  padding: 4px;
 }
 
 .file-table-wide-numbers #commentEditorInner {
-    margin-left: 3em;
+  margin-left: 3em;
 }
 
 #commentEditor textarea {
-    width: 100%;
-    height: 10em;
-    border: 0px;
-}
-
-#commentEditor textarea:focus {
-    background: white;
+  width: 100%;
+  height: 10em;
 }
 
 #commentEditorLeftButtons {
-    float: left;
+  float: left;
 }
 
 #commentEditorLeftButtons input {
-    margin-right: 0.5em;
+  margin-right: .5em;
 }
 
 #commentEditorRightButtons {
-    float: right;
+  float: right;
 }
 
 .comment-separator-removed {
-    clear: left;
+  clear: left;
 }
 
 .comment-separator-added {
-    clear: right;
+  clear: right;
 }
 
 #saveDraftNotice {
-    border: 1px solid black;
-    padding: 0.5em;
-    background: #ffccaa;
-    position: fixed;
-    bottom: 0px;
-    right: 0px;
+  position: fixed;
+  bottom: 0;
+  right: 0;
+  border: 1px solid var(--secondary-control-border-color);
+  padding: .5em;
+  background-color: var(--informative-message-background-color);
 }
 
 #credits {
-    font-size: 80%;
-    color: #888888;
-    padding: 10px;
-    text-align: center;
+  padding: 10px;
+  color: var(--secondary-label-color);
+  font-size: var(--font-size-small);
+  text-align: center;
 }
 
-#quickHelpShow a, #quickHelpContent a {
-    text-decoration: none;
+#quickHelpShow a,
+#quickHelpContent a {
+  text-decoration: none;
 }
 
 #quickHelpContent {
-    border: 1px solid #000;
-    -moz-border-radius: 10px;
-    border-radius: 10px;
-    padding-left: 0.5em;
-    margin-bottom: 10px;
+  margin-bottom: 10px;
+  border: 1px solid var(--secondary-region-border-color);
+  border-radius: 4px;
+  padding-left: .5em;
+  background-color: var(--secondary-region-background-color);
 }
 
 .file-label-collapse {
-    padding-right: 5px;
-    font-family: monospace;
+  padding-right: 4px;
+  font-family: var(--font-family-monospace);
 }
 
 .file-review-label {
-    font-size: 80%;
+  font-size: var(--font-size-small);
 }
 
 .file-reviewed-nav {
-    text-decoration: line-through;
+  text-decoration: line-through;
 }
 
 .trailing-whitespace {
-    background: #ffaaaa;
+  background: rgb(var(--accent-color-pink-1));
 }

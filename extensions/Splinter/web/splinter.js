@@ -1951,7 +1951,7 @@ Splinter.appendPatchHunk = function (file, hunk, tableType, includeComments, cli
 
         if (tableType != Splinter.Patch.ADDED) {
             if (oldText != null) {
-                tr.appendChild(Splinter.EL("td", "line-number", oldLine.toString(), title));
+                tr.appendChild(Splinter.EL("td", "line-number old " + oldStyle, oldLine.toString(), title));
                 tr.appendChild(Splinter.textTD("old-line " + oldStyle, oldText, title));
                 oldLine++;
             } else {
@@ -1966,7 +1966,7 @@ Splinter.appendPatchHunk = function (file, hunk, tableType, includeComments, cli
 
         if (tableType != Splinter.Patch.REMOVED) {
             if (newText != null) {
-                tr.appendChild(Splinter.EL("td", "line-number", newLine.toString(), title));
+                tr.appendChild(Splinter.EL("td", "line-number new " + newStyle, newLine.toString(), title));
                 tr.appendChild(Splinter.textTD("new-line " + newStyle, newText, title));
                 newLine++;
             } else if (tableType == Splinter.Patch.CHANGED) {

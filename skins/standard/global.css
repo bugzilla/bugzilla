@@ -2367,13 +2367,13 @@ pre#comment_preview_text {
   padding: 12px;
   color: var(--primary-text-color);
   background: var(--primary-text-background-color);
+  font-size: var(--font-size-x-large);
   line-height: var(--line-height-comfortable);
 }
 
 pre.comment-text {
   margin: 0;
   white-space: pre-wrap;
-  font-size: calc(var(--font-size-x-large) * 90%);
 }
 
 .comment-text span.quote,
@@ -2401,7 +2401,6 @@ pre.comment-text {
 .markdown-body {
   -ms-text-size-adjust: 100%;
   -webkit-text-size-adjust: 100%;
-  font-size: var(--font-size-x-large);
   word-wrap: break-word;
 }
 

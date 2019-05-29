@@ -50,6 +50,10 @@ table#attachment_flags td {
   padding: 2px 4px;
   border: 1px solid var(--grid-border-color);
   background-color: var(--grid-header-background-color);
+}
+
+.section_head th {
+  font-weight: bold;
   text-align: left;
 }
 
@@ -102,7 +106,7 @@ tbody.file pre:empty {
   padding: 0 0.3em;
   width: 3em;
   color: var(--tertiary-label-color);
-  border-right: 1px solid var(--secondary-control-border-color);
+  font-size: var(--font-size-small);
   font-size-adjust: .5;
   font-family: var(--font-family-monospace);
   text-align: right;

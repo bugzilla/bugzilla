@@ -2957,6 +2957,13 @@ sub app_startup {
       [REWRITE_client_bounty => qr{form[\.:]client[\.:]bounty}])
     ->to(
     'CGI#enter_bug_cgi' => {'product' => 'Firefox', 'format' => 'client-bounty'});
+
+  # Redirects to external forms
+  $r->any( '/:REWRITE_dev_engagement_event' =>
+    [ REWRITE_dev_engagement_event => qr{form[\.:]dev[\.\-:]engagement[\.\-\:]event} ]
+    => sub { my $c = shift; $c->redirect_to('https://mzl.la/devevents'); });
+  $r->any( '/:REWRITE_ipc' => [ REWRITE_ipc => qr{form[\.:](?:ipc|IPC)} ]
+    => sub { my $c = shift; $c->redirect_to('https://mzl.la/snippet-submit-form'); });
 }
 
 __PACKAGE__->NAME;

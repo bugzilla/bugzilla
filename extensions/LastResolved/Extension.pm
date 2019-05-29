@@ -27,7 +27,7 @@ sub install_update_db {
   if (!$last_resolved) {
     Bugzilla::Field->create({
       name        => 'cf_last_resolved',
-      description => 'Last Resolved',
+      description => 'Closed',
       type        => FIELD_TYPE_DATETIME,
       mailhead    => 0,
       enter_bug   => 0,
@@ -109,7 +109,7 @@ sub buglist_columns {
   my ($self, $args) = @_;
   my $columns = $args->{columns};
   $columns->{'cf_last_resolved'}
-    = {name => 'bugs.cf_last_resolved', title => 'Last Resolved',};
+    = {name => 'bugs.cf_last_resolved', title => 'Closed',};
 }
 
 __PACKAGE__->NAME;

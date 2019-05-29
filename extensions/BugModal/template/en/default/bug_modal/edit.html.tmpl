@@ -524,7 +524,7 @@
     [%# creation time %]
     [% WRAPPER bug_modal/field.html.tmpl
         field = bug_fields.creation_ts
-        label = "Reported"
+        label = "Opened"
         view_only = 1
         help = "https://wiki.mozilla.org/BMO/UserGuide/BugFields#creation_ts"
     %]
@@ -534,7 +534,7 @@
     [%# last modified %]
     [% WRAPPER bug_modal/field.html.tmpl
         field = bug_fields.delta_ts
-        label = "Modified"
+        label = "Updated"
         view_only = 1
         help = "https://wiki.mozilla.org/BMO/UserGuide/BugFields#delta_ts"
     %]

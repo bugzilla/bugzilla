@@ -90,10 +90,10 @@ installation of Bugzilla.
    each non-terminal bug on the tree view, using the [-]/[+] buttons that
    appear before the summary.
 
-*Reported:*
+*Opened:*
    The person who filed the bug, and the date and time they did it.
 
-*Modified:*
+*Updated:*
    The date and time the bug was last changed.
 
 *CC List:*

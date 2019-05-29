@@ -843,7 +843,7 @@
 [% BLOCK section_dates %]
   <tr>
     <th class="field_label">
-      Reported:
+      Opened:
     </th>
     <td>
      [% bug.creation_ts FILTER time("%Y-%m-%d %H:%M %Z") %] by [% INCLUDE global/user.html.tmpl who = bug.reporter %]
@@ -852,7 +852,7 @@
 
   <tr>
     <th class="field_label">
-      Modified:
+      Updated:
     </th>
     <td>
       [% bug.delta_ts FILTER time("%Y-%m-%d %H:%M %Z") %]

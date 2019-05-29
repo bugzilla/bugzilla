@@ -657,7 +657,7 @@ sub search {
       "Bug Number" => ["bug_id"],
       "Importance" => ["priority", "bug_severity"],
       "Assignee"   => ["assigned_to", "bug_status", "priority", "bug_id"],
-      "Last Changed" =>
+      "Last Updated" =>
         ["changeddate", "bug_status", "priority", "assigned_to", "bug_id"],
     );
     if ($order_types{$match_params->{order}}) {

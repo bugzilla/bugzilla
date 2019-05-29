@@ -9,12 +9,13 @@ package Bugzilla::Report::Ping;
 use 5.10.1;
 use Moo::Role;
 
-use Type::Utils qw(class_type);
 use Bugzilla::Types qw(URL);
-use Types::Standard qw(Str Num Int);
-use Scalar::Util qw(blessed);
 use JSON::Validator;
 use Mojo::Promise;
+use Scalar::Util qw(blessed);
+use Type::Utils qw(class_type);
+use Types::Standard qw(Str Num Int);
+use UUID::Tiny qw(:std);
 
 has 'model' =>
   (is => 'ro', required => 1, isa => class_type({class => 'Bugzilla::Model'}));
@@ -89,19 +90,37 @@ sub _build_docversion {
   return $self->VERSION;
 }
 
-requires 'prepare';
+has 'uuid_namespace' => (is => 'lazy', init_arg => undef, isa => Str);
 
-sub send {
-  my ($self, $row) = @_;
-  my ($id, $doc) = $self->prepare($row);
-  my $url = $self->base_url;
-  push @{$url->path}, $self->namespace, $self->doctype, $self->docversion, $id;
-  return $self->user_agent->put_p($url, json => $doc);
+sub _build_uuid_namespace {
+  my ($self) = @_;
+
+  my $name = $self->namespace . '/' . $self->doctype . ':' . $self->docversion;
+  return create_uuid(UUID_SHA1, UUID_NIL, $name);
 }
 
-sub test {
+requires 'extract_id', 'extract_content';
+
+around 'extract_id' => sub {
+  my ($method, $self, $row) = @_;
+
+  return create_uuid_as_string(UUID_SHA1, $self->uuid_namespace, $self->$method($row));
+};
+
+sub send_row {
   my ($self, $row) = @_;
-  my ($id, $doc) = $self->prepare($row);
+  my $url     = $self->base_url;
+  my $id      = $self->extract_id($row);
+  my $content = $self->extract_content($row);
+  push @{$url->path}, $self->namespace, $self->doctype, $self->docversion, $id;
+  return $self->user_agent->put_p($url, json => $content);
+}
+
+sub test_row {
+  my ($self, $row) = @_;
+  my $id  = $self->extract_id($row);
+  my $doc = $self->extract_content($row);
+  die 'id is not a uuid string' unless is_uuid_string($id);
 
   return $self->validate($doc);
 }

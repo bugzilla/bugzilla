@@ -63,9 +63,9 @@ sub _build_resultset {
   return $bugs->search($query, $options);
 }
 
-sub prepare {
+sub extract_content {
   my ($self, $bug) = @_;
-  my $doc = {
+  return {
     reporter         => $bug->reporter->id,
     assigned_to      => $bug->assigned_to->id,
     qa_contact       => $bug->qa_contact ? $bug->qa_contact->id : undef,
@@ -84,21 +84,19 @@ sub prepare {
     duplicates       => [map { $_->id } $bug->duplicates->all],
     blocked_by       => [map { $_->dependson } $bug->map_blocked_by->all],
     depends_on       => [map { $_->blocked } $bug->map_depends_on->all],
-    flags            => [map { $self->_prepare_flag($_) } $bug->flags->all],
-    delta_ts         => $bug->delta_ts . "",
-    creation_ts      => $bug->creation_ts . "",
+    flags            => [map { $self->_extract_flag($_) } $bug->flags->all],
+    delta_ts         => $bug->delta_ts . '',
+    creation_ts      => $bug->creation_ts . '',
   };
-
-  return ($self->_prepare_doc_id($bug), $doc);
 }
 
-sub _prepare_doc_id {
+sub extract_id {
   my ($self, $bug) = @_;
 
-  return sprintf("%d-%d", $bug->id, $bug->delta_ts->epoch);
+  return sprintf('%d-%d', $bug->id, $bug->delta_ts->epoch);
 }
 
-sub _prepare_flag {
+sub _extract_flag {
   my ($self, $flag) = @_;
 
   return {

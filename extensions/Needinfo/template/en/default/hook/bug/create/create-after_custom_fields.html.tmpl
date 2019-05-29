@@ -1,0 +1,24 @@
+[%# This Source Code Form is subject to the terms of the Mozilla Public
+  # License, v. 2.0. If a copy of the MPL was not distributed with this
+  # file, You can obtain one at http://mozilla.org/MPL/2.0/.
+  #
+  # This Source Code Form is "Incompatible With Secondary Licenses", as
+  # defined by the Mozilla Public License, v. 2.0.
+  #%]
+
+<tr>
+  <th>Request information from:</th>
+  <td colspan="3">
+    <span id="needinfo_from_container">
+      [% INCLUDE global/userselect.html.tmpl
+          id          => "needinfo_from"
+          name        => "needinfo_from"
+          value       => ""
+          size        => 30
+          multiple    => 5
+          field_title => "Enter one or more comma separated users to request more information from"
+          request_type => "needinfo"
+      %]
+    </span>
+  </td>
+</tr>

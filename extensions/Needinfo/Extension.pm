@@ -69,6 +69,20 @@ sub install_before_final_checks {
   });
 }
 
+sub bug_end_of_create {
+  my ($self, $args) = @_;
+  my $params = Bugzilla->input_params;
+
+  return unless $params->{needinfo_from};
+
+  # Add extra params
+  $params->{needinfo} = 1;
+  $params->{needinfo_role} = 'other';
+
+  # Do the rest
+  $self->bug_start_of_update($args);
+}
+
 # Clear the needinfo? flag if comment is being given by
 # requestee or someone used the override flag.
 sub bug_start_of_update {

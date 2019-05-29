@@ -88,7 +88,7 @@ name              type   description
          "creation_time": "2000-07-25T13:50:04Z",
          "assigned_to": "user@bugzilla.org",
          "flags": [],
-         "alias": [],
+         "alias": null,
          "cf_large_text": "",
          "groups": [],
          "op_sys": "All",
@@ -142,8 +142,8 @@ actual_time            double    The total number of hours that this bug has
                                  taken so far. If you are not in the time-tracking
                                  group, this field will not be included in the
                                  return value.
-alias                  array     The unique aliases of this bug. An empty array
-                                 will be returned if this bug has no aliases.
+alias                  string    The unique alias of this bug. A ``null`` value
+                                 will be returned if this bug has no alias.
 assigned_to            string    The login name of the user to whom the bug is
                                  assigned.
 assigned_to_detail     object    An object containing detailed user information
@@ -354,7 +354,7 @@ new_since  datetime  A datetime timestamp to only show history since.
    {
      "bugs": [
        {
-         "alias": [],
+         "alias": null,
          "history": [
            {
              "when": "2014-09-23T19:12:17Z",
@@ -391,14 +391,14 @@ new_since  datetime  A datetime timestamp to only show history since.
 
 ``bugs`` (array) Bug objects each containing the following items:
 
-=======  =====  =================================================================
-name     type   description
-=======  =====  =================================================================
-id       int    The numeric ID of the bug.
-alias    array  The unique aliases of this bug. An empty array will be returned
-                if this bug has no aliases.
-history  array  An array of History objects.
-=======  =====  =================================================================
+=======  ======  ================================================================
+name     type    description
+=======  ======  ================================================================
+id       int     The numeric ID of the bug.
+alias    string  The unique alias of this bug. A ``null`` value will be returned
+                 if this bug has no alias.
+history  array   An array of History objects.
+=======  ======  ================================================================
 
 History object:
 
@@ -481,8 +481,8 @@ as your query for the REST call.
 ================  ========  =====================================================
 name              type      description
 ================  ========  =====================================================
-alias             array     The unique aliases of this bug. An empty array will
-                            be returned if this bug has no aliases.
+alias             string    The unique alias of this bug. A ``null`` value will
+                            be returned if this bug has no alias.
 assigned_to       string    The login name of a user that a bug is assigned to.
 component         string    The name of the Component that the bug is in. Note
                             that if there are multiple Components with the same
@@ -649,9 +649,9 @@ priority            string   (defaulted) What order the bug will be fixed in by
                              bugs.
 severity            string   (defaulted) How severe the bug is.
 type                string   (defaulted) The basic category of the bug.
-alias               array    One or more brief aliases for the bug that can be
-                             used instead of a bug number when accessing this bug.
-                             Must be unique in all of this Bugzilla.
+alias               string   The alias for the bug that can be used instead of a
+                             bug number when accessing this bug. Must be unique
+                             in all of this Bugzilla.
 assigned_to         string   A user to assign this bug to, if you don't want it
                              to be assigned to the component owner.
 cc                  array    An array of usernames to CC on this bug.
@@ -805,29 +805,9 @@ updating.
 =====================  =======  =================================================
 name                   type     description
 =====================  =======  =================================================
-alias                  object   These specify the aliases of a bug that can be
-                                used instead of a bug number when acessing this
-                                bug. To set these, you should pass an object as
-                                the value. The object may contain the following
-                                items:
-
-                                * ``add`` (array) Aliases to add to this field.
-                                * ``remove`` (array) Aliases to remove from this
-                                  field. If the aliases are not already in the
-                                  field, they will be ignored.
-                                * ``set`` (array) An exact set of aliases to set
-                                  this field to, overriding the current value.
-                                  If you specify ``set``, then ``add`` and
-                                  ``remove`` will be ignored.
-
-                                You can only set this if you are modifying a
-                                single bug. If there is more than one bug
-                                specified in ``ids``, passing in a value for
-                                ``alias`` will cause an error to be thrown.
-
-                                For backwards compatibility, you can also
-                                specify a single string. This will be treated as
-                                if you specified the set key above.
+alias                  string   The alias for the bug that can be used instead of
+                                a bug number when accessing this bug. Must be
+                                unique in all of this Bugzilla.
 assigned_to            string   The full login name of the user this bug is
                                 assigned to.
 blocks                 object   (Same as ``regressed_by`` below)
@@ -1050,7 +1030,7 @@ new         boolean  Set to true if you specifically want a new flag to be
    {
      "bugs" : [
        {
-         "alias" : [],
+         "alias" : null,
          "changes" : {
            "keywords" : {
              "added" : "funny, stupid",
@@ -1073,7 +1053,7 @@ new         boolean  Set to true if you specifically want a new flag to be
 name              type      description
 ================  ========  =====================================================
 id                int       The ID of the bug that was updated.
-alias             array     The aliases of the bug that was updated, if this bug
+alias             string    The alias of the bug that was updated, if this bug
                             has any alias.
 last_change_time  datetime  The exact time that this update was done at, for
                             this bug. If no update was done (that is, no fields
@@ -1170,7 +1150,7 @@ limit    int     Limit the number of results returned. If the value is unset,
    {
      "bugs": [
        {
-         "alias": [],
+         "alias": null,
          "history": [
            {
              "when": "2014-09-23T19:12:17Z",
@@ -1208,14 +1188,14 @@ limit    int     Limit the number of results returned. If the value is unset,
 ``bugs`` (array) Bug objects each containing the following items. If a bug id was
 used to query this endpoint, that bug will not be in the list returned.
 
-=======  =====  =================================================================
-name     type   description
-=======  =====  =================================================================
-id       int    The numeric ID of the bug.
-alias    array  The unique aliases of this bug. An empty array will be returned
-                if this bug has no aliases.
-history  array  An array of History objects.
-=======  =====  =================================================================
+=======  ======  ================================================================
+name     type    description
+=======  ======  ================================================================
+id       int     The numeric ID of the bug.
+alias    string  The unique alias of this bug. A ``null`` value will be returned
+                 if this bug has no alias.
+history  array   An array of History objects.
+=======  ======  ================================================================
 
 History object:
 

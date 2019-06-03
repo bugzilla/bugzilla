@@ -254,6 +254,11 @@ div#update_container {
   white-space: nowrap;
 }
 
+#editFrame {
+  font-size-adjust: .5;
+  font-family: var(--font-family-monospace);
+}
+
 #editFrame,
 #viewDiffFrame,
 #viewFrame {

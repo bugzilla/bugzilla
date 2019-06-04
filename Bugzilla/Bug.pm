@@ -4535,7 +4535,6 @@ sub GetBugActivity {
     INNER JOIN profiles
             ON profiles.userid = bugs_activity.who
          WHERE bugs_activity.bug_id = ?
-           AND bugs_activity.removed != bugs_activity.added
                $datepart
                $attachpart
                $suppwhere ";
@@ -4591,12 +4590,13 @@ sub GetBugActivity {
     my $activity_visible = 1;
     my $last_change = @$changes[-1] || {};
 
-    # Suppress any mid-air collision
-    if ( $when eq $operation->{'when'}
+    # Suppress any mid-air collision or duplicated change
+    if (( $when eq $operation->{'when'}
       && $fieldname eq $last_change->{'fieldname'}
       && $removed eq $last_change->{'removed'}
       && $added eq $last_change->{'added'}
       && $attachid eq $last_change->{'attachid'})
+      || $removed eq $added )
     {
       next;
     }

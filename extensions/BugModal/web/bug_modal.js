@@ -761,7 +761,7 @@ $(function() {
     $('#cancel-btn')
         .click(function(event) {
             event.preventDefault();
-            window.location.replace($('#this-bug').attr('href'));
+            window.location.replace(`${BUGZILLA.config.basepath}show_bug.cgi?id=${BUGZILLA.bug_id}`);
         });
 
     // Open help page

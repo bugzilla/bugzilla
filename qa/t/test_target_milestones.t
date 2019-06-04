@@ -40,9 +40,9 @@ $sel->title_is("Milestone Created");
 # Edit the milestone of test_bug_1.
 
 go_to_bug($sel, $test_bug_1);
-$sel->is_text_present_ok("Target Milestone:");
+$sel->is_text_present_ok("Target:");
 $sel->select_ok("target_milestone", "label=TM1");
-$sel->click_ok("commit");
+$sel->click_ok("bottom-save-btn");
 $sel->wait_for_page_to_load(WAIT_TIME);
 $sel->is_text_present_ok("Changes submitted for bug $test_bug_1");
 
@@ -51,8 +51,8 @@ $sel->is_text_present_ok("Changes submitted for bug $test_bug_1");
 open_advanced_search_page($sel);
 $sel->is_text_present_ok("Target Milestone:");
 $sel->remove_all_selections_ok("product");
-$sel->add_selection_ok("product",          "label=TestProduct");
-$sel->add_selection_ok("target_milestone", "label=TM1");
+$sel->select_ok("product",          "label=TestProduct");
+$sel->select_ok("target_milestone", "label=TM1");
 $sel->click_ok("Search");
 $sel->wait_for_page_to_load_ok(WAIT_TIME);
 $sel->title_is("Bug List");
@@ -71,9 +71,8 @@ ok(
 
 set_parameters($sel, {"Bug Fields" => {"usetargetmilestone-off" => undef}});
 
-$sel->click_ok('//*[@class="link-search"]//a');
-$sel->wait_for_page_to_load_ok(WAIT_TIME);
-$sel->title_is("Search for bugs");
+open_advanced_search_page($sel);
+
 ok(
   !$sel->is_text_present("Target Milestone:"),
   "The target milestone field is no longer displayed"
@@ -84,11 +83,12 @@ ok(!$sel->is_element_present('//label[@for="target_milestone"]'));
 
 # The existing query must still work despite milestones are off now.
 
-$sel->click_ok("link=selenium_m0");
+$sel->click_ok('quicksearch_top');
+$sel->click_ok('//a[normalize-space(text())="selenium_m0" and @role="option"]');
 $sel->wait_for_page_to_load_ok(WAIT_TIME);
 $sel->title_is("Bug List: selenium_m0");
 $sel->is_text_present_ok("One bug found");
-$sel->click_ok("link=Forget Search 'selenium_m0'");
+$sel->click_ok('forget-search');
 $sel->wait_for_page_to_load_ok(WAIT_TIME);
 $sel->title_is("Search is gone");
 $text = trim($sel->get_text("message"));

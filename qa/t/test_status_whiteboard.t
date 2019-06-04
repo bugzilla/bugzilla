@@ -25,17 +25,15 @@ set_parameters($sel, {'Bug Fields' => {'usestatuswhiteboard-on' => undef}});
 
 # Make sure the status whiteboard is displayed and add stuff to it.
 
-$sel->open_ok("/show_bug.cgi?id=$test_bug_1");
-$sel->title_like(qr/^$test_bug_1\b/);
+go_to_bug($sel, $test_bug_1);
 $sel->is_text_present_ok("Whiteboard:");
 $sel->type_ok("status_whiteboard", "[msg from test_status_whiteboard.t: x77v]");
-$sel->click_ok("commit");
+$sel->click_ok('bottom-save-btn', 'Save changes');
 $sel->wait_for_page_to_load_ok(WAIT_TIME);
 $sel->is_text_present_ok("Changes submitted for bug $test_bug_1");
-$sel->open_ok("/show_bug.cgi?id=$test_bug_2");
-$sel->title_like(qr/^$test_bug_2\b/);
+go_to_bug($sel, $test_bug_2);
 $sel->type_ok("status_whiteboard", "[msg from test_status_whiteboard.t: x77v]");
-$sel->click_ok("commit");
+$sel->click_ok('bottom-save-btn', 'Save changes');
 $sel->wait_for_page_to_load_ok(WAIT_TIME);
 $sel->is_text_present_ok("Changes submitted for bug $test_bug_2");
 
@@ -60,7 +58,8 @@ ok($text =~ /you have a new search named sw-x77v/,
 
 # Make sure the saved query works.
 
-$sel->click_ok("link=sw-x77v");
+$sel->click_ok(
+  '//a[normalize-space(text())="sw-x77v" and not(@role="option")]');
 $sel->wait_for_page_to_load_ok(WAIT_TIME);
 $sel->title_is("Bug List: sw-x77v");
 $sel->is_text_present_ok("2 bugs found");
@@ -72,25 +71,21 @@ $sel->is_text_present_ok("2 bugs found");
 set_parameters($sel, {'Bug Fields' => {'usestatuswhiteboard-off' => undef}});
 
 # Show detailed bug information panel on advanced search
-ok($sel->create_cookie('TUI=information_query=1'),
-  'Show detailed bug information');
-$sel->click_ok('//*[@class="link-search"]//a');
-$sel->wait_for_page_to_load_ok(WAIT_TIME);
-$sel->title_is("Search for bugs");
+open_advanced_search_page($sel);
 ok(!$sel->is_text_present("Whiteboard:"),
   "Whiteboard label no longer displayed");
-$sel->open_ok("/show_bug.cgi?id=$test_bug_1");
-$sel->title_like(qr/^$test_bug_1\b/);
+go_to_bug($sel, $test_bug_1);
 ok(!$sel->is_element_present('//label[@for="status_whiteboard"]'));
 
 # Queries based on the status whiteboard should still work when
 # the parameter is off.
 
-$sel->click_ok("link=sw-x77v");
+$sel->click_ok('quicksearch_top');
+$sel->click_ok('//a[normalize-space(text())="sw-x77v" and @role="option"]');
 $sel->wait_for_page_to_load_ok(WAIT_TIME);
 $sel->title_is("Bug List: sw-x77v");
 $sel->is_text_present_ok("2 bugs found");
-$sel->click_ok("link=Forget Search 'sw-x77v'");
+$sel->click_ok('forget-search');
 $sel->wait_for_page_to_load_ok(WAIT_TIME);
 $sel->title_is("Search is gone");
 $sel->is_text_present_ok("OK, the sw-x77v search is gone.");

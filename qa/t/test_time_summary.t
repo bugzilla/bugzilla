@@ -34,7 +34,7 @@ set_parameters(
 go_to_bug($sel, $test_bug_1);
 $sel->type_ok("work_time", 2.6);
 $sel->type_ok("comment",   "I did some work");
-$sel->click_ok("commit");
+$sel->click_ok("bottom-save-btn");
 $sel->wait_for_page_to_load_ok(WAIT_TIME);
 $sel->is_text_present_ok("Changes submitted for bug $test_bug_1");
 
@@ -57,8 +57,8 @@ ok($error_msg =~ /You apparently didn't choose any bugs to view/,
 
 open_advanced_search_page($sel);
 $sel->remove_all_selections("bug_status");
-$sel->select_ok("f1", "label=Hours Worked");
-$sel->select_ok("o1", "label=is greater than");
+$sel->select_ok("f1", "value=work_time");
+$sel->select_ok("o1", "value=greaterthan");
 $sel->type_ok("v1", "0");
 $sel->click_ok("Search");
 $sel->wait_for_page_to_load_ok(WAIT_TIME);

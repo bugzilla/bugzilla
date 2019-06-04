@@ -69,8 +69,8 @@ if ($config->{test_extensions}) {
 }
 $sel->type_ok("version", "0.1a");
 $sel->select_ok("security_group_id",   "label=core-security");
-$sel->select_ok("default_op_sys_id",   "Unspecified");
-$sel->select_ok("default_platform_id", "Unspecified");
+$sel->select_ok("default_op_sys_id",   "label=Unspecified");
+$sel->select_ok("default_platform_id", "label=Unspecified");
 $sel->click_ok('//input[@type="submit" and @value="Add"]');
 $sel->wait_for_page_to_load_ok(WAIT_TIME);
 $text = trim($sel->get_text("message"));
@@ -85,9 +85,6 @@ $sel->title_is("Add component to the Kill me! product");
 $sel->type_ok("component",    "first comp");
 $sel->type_ok("description",  "comp 1");
 $sel->type_ok("initialowner", $admin_user_login);
-$sel->uncheck_ok("watch_user_auto");
-$sel->type_ok("watch_user", "first-comp\@kill-me.bugs");
-$sel->check_ok("watch_user_auto");
 $sel->click_ok("create");
 $sel->wait_for_page_to_load_ok(WAIT_TIME);
 $sel->title_is("Component Created");
@@ -103,9 +100,6 @@ $sel->title_is("Add component to the Kill me! product");
 $sel->type_ok("component",    "first comp");
 $sel->type_ok("description",  "comp 2");
 $sel->type_ok("initialowner", $admin_user_login);
-$sel->uncheck_ok("watch_user_auto");
-$sel->type_ok("watch_user", "first-comp\@kill-me.bugs");
-$sel->check_ok("watch_user_auto");
 $sel->click_ok("create");
 $sel->wait_for_page_to_load_ok(WAIT_TIME);
 $sel->title_is("Component Already Exists");
@@ -119,9 +113,6 @@ $sel->type_ok("component", "second comp");
 # FIXME - Re-enter the default assignee (regression due to bug 577574)
 $sel->type_ok("initialowner", $admin_user_login);
 $sel->type_ok("initialcc",    $permanent_user);
-$sel->uncheck_ok("watch_user_auto");
-$sel->type_ok("watch_user", "second-comp\@kill-me.bugs");
-$sel->check_ok("watch_user_auto");
 $sel->click_ok("create");
 $sel->wait_for_page_to_load_ok(WAIT_TIME);
 $sel->title_is("Component Created");
@@ -129,7 +120,7 @@ $sel->title_is("Component Created");
 # Add a new version.
 
 edit_product($sel, "Kill me!");
-$sel->click_ok("//a[contains(text(),'Edit\nversions:')]");
+$sel->click_ok("link=Edit versions:");
 $sel->wait_for_page_to_load_ok(WAIT_TIME);
 $sel->title_is("Select version of product 'Kill me!'");
 $sel->click_ok("link=Add");
@@ -191,13 +182,18 @@ $sel->click_ok("commit");
 $sel->wait_for_page_to_load_ok(WAIT_TIME);
 $sel->is_text_present_ok('has been added to the database', 'Bug created');
 my $bug1_id = $sel->get_value("//input[\@name='id' and \@type='hidden']");
-my @cc_list = $sel->get_select_options("cc");
+go_to_bug($sel, $bug1_id);
+$sel->click_ok('cc-summary');
 ok(
-  grep($_ eq $unprivileged_user_login, @cc_list),
+  $sel->find_element(
+    qq{//div[\@class="cc-user"]//a[\@data-user-email="$unprivileged_user_login"]}),
   "$unprivileged_user_login correctly added to the CC list"
 );
-ok(!grep($_ eq $permanent_user, @cc_list),
-  "$permanent_user not in the CC list for 'first comp' by default");
+ok(
+  !$sel->find_element(
+    qq{//div[\@class="cc-user"]//a[\@data-user-email="$permanent_user"]}),
+  "$permanent_user not in the CC list for 'first comp' by default"
+);
 
 # File a second bug, and make sure users in the default CC list are added.
 file_bug_in_product($sel, "Kill me!");
@@ -208,9 +204,14 @@ $sel->type_ok("comment",    "is the CC list populated correctly?");
 $sel->click_ok("commit");
 $sel->wait_for_page_to_load_ok(WAIT_TIME);
 $sel->is_text_present_ok('has been added to the database', 'Bug created');
-@cc_list = $sel->get_select_options("cc");
-ok(grep($_ eq $permanent_user, @cc_list),
-  "$permanent_user in the CC list for 'second comp' by default");
+my $bug2_id = $sel->get_value("//input[\@name='id' and \@type='hidden']");
+go_to_bug($sel, $bug2_id);
+$sel->click_ok('cc-summary');
+ok(
+  $sel->find_element(
+    qq{//div[\@class="cc-user"]//a[\@data-user-email="$permanent_user"]}),
+  "$permanent_user in the CC list for 'second comp' by default"
+);
 
 # Edit product properties and set votes_to_confirm to 0, which has
 # the side-effect to disable auto-confirmation (new behavior compared
@@ -260,7 +261,7 @@ if ($config->{test_extensions}) {
   $sel->is_text_present_ok("Updated number of votes needed to confirm a bug");
 
   go_to_bug($sel, $bug1_id);
-  $sel->click_ok("link=vote");
+  $sel->click_ok("vote-btn");
   $sel->wait_for_page_to_load_ok(WAIT_TIME);
   $sel->title_is("Change Votes");
   $sel->type_ok("bug_$bug1_id", 1);
@@ -290,15 +291,16 @@ $sel->selected_label_is("bug_status", "CONFIRMED")
   if $config->{test_extensions};
 $sel->select_ok("target_milestone", "label=pre-0.1");
 $sel->select_ok("component",        "label=second comp");
-$sel->click_ok("commit");
+$sel->click_ok("bottom-save-btn");
 $sel->wait_for_page_to_load_ok(WAIT_TIME);
 $sel->is_text_present_ok("Changes submitted for bug $bug1_id");
-$sel->click_ok("link=bug $bug1_id");
-$sel->wait_for_page_to_load_ok(WAIT_TIME);
-$sel->title_like(qr/$bug1_id /);
-@cc_list = $sel->get_select_options("cc");
-ok(grep($_ eq $permanent_user, @cc_list),
-  "User $permanent_user automatically added to the CC list");
+go_to_bug($sel, $bug1_id);
+$sel->click_ok('cc-summary');
+ok(
+  $sel->find_element(
+    qq{//div[\@class="cc-user"]//a[\@data-user-email="$permanent_user"]}),
+  "User $permanent_user automatically added to the CC list"
+);
 
 # Delete the milestone the bug belongs to. This should retarget the bug
 # to the default milestone.
@@ -331,7 +333,7 @@ ok(
 $sel->click_ok("link='Kill me nicely'");
 $sel->wait_for_page_to_load_ok(WAIT_TIME);
 $sel->title_is("Edit Product 'Kill me nicely'");
-$sel->click_ok("//a[contains(text(),'Edit\nversions:')]");
+$sel->click_ok("link=Edit versions:");
 $sel->wait_for_page_to_load_ok(WAIT_TIME);
 $sel->title_is("Select version of product 'Kill me nicely'");
 $sel->click_ok(

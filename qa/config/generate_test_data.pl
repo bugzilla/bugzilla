@@ -753,7 +753,7 @@ foreach my $flag (@flagtypes) {
 ##########################################################################
 my @fields = (
   {
-    name        => 'cf_QA_status',
+    name        => 'cf_qa_status',
     description => 'QA Status',
     type        => FIELD_TYPE_MULTI_SELECT,
     sortkey     => 100,
@@ -790,8 +790,7 @@ foreach my $f (@fields) {
     # that 'values' is not an existing column name.
     delete $f->{values};
   }
-  Bugzilla::Field->create($f);
-  my $field = Bugzilla::Field->new({name => $f->{name}});
+  my $field = Bugzilla::Field->create($f);
 
   # Now populate the table with valid values, if necessary.
   next unless scalar @values;

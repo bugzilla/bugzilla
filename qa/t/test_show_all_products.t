@@ -28,7 +28,8 @@ set_parameters($sel, {"Bug Fields" => {"useclassification-on" => undef}});
 $sel->click_ok('//*[@class="link-file"]//a');
 $sel->wait_for_page_to_load_ok(WAIT_TIME);
 $sel->title_is("Enter Bug");
-$sel->click_ok("link=Other Products", undef, "Choose full product list");
+$sel->click_ok('//a/span[contains(text(),"Other Products")]',
+  undef, "Choose full product list");
 $sel->wait_for_page_to_load(WAIT_TIME);
 $sel->title_is("Enter Bug");
 ok(
@@ -49,7 +50,8 @@ if ($sel->is_text_present('None of the above; my bug is in')) {
   $sel->wait_for_page_to_load_ok(WAIT_TIME);
   $sel->title_is("Enter Bug");
 }
-$sel->click_ok('link=Other Products');
+$sel->click_ok('//a/span[contains(text(),"Other Products")]',
+  undef, "Choose full product list");
 $sel->wait_for_page_to_load_ok(WAIT_TIME);
 
 # For some unknown reason, Selenium doesn't like hyphens in links.

@@ -26,32 +26,44 @@ $sel->title_like(qr/\d+ \S $bug_summary/, "Bug created");
 my $bug_id = $sel->get_value("//input[\@name='id' and \@type='hidden']");
 
 $sel->type_ok("comment", "bp-63f096f7-253b-4ee2-ae3d-8bb782090824");
-$sel->click_ok("commit");
+$sel->click_ok("bottom-save-btn");
 $sel->wait_for_page_to_load_ok(WAIT_TIME);
 $sel->title_like(qr/\d+ \S $bug_summary/, "crash report added");
 $sel->click_ok("link=bug $bug_id");
 $sel->wait_for_page_to_load_ok(WAIT_TIME);
-$sel->attribute_is('link=bp-63f096f7-253b-4ee2-ae3d-8bb782090824@href',
+attribute_is($sel, 'bp-63f096f7-253b-4ee2-ae3d-8bb782090824',
   'https://crash-stats.mozilla.org/report/index/63f096f7-253b-4ee2-ae3d-8bb782090824'
 );
 
 $sel->type_ok("comment", "CVE-2010-2884");
-$sel->click_ok("commit");
+$sel->click_ok("bottom-save-btn");
 $sel->wait_for_page_to_load_ok(WAIT_TIME);
 $sel->title_like(qr/\d+ \S $bug_summary/, "cve added");
 $sel->click_ok("link=bug $bug_id");
 $sel->wait_for_page_to_load_ok(WAIT_TIME);
-$sel->attribute_is('link=CVE-2010-2884@href',
+
+attribute_is($sel, 'CVE-2010-2884',
   'https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2010-2884');
 
 $sel->type_ok("comment", "r12345");
-$sel->click_ok("commit");
+$sel->click_ok("bottom-save-btn");
 $sel->wait_for_page_to_load_ok(WAIT_TIME);
 $sel->title_like(qr/\d+ \S $bug_summary/, "svn revision added");
 $sel->click_ok("link=bug $bug_id");
 $sel->wait_for_page_to_load_ok(WAIT_TIME);
-$sel->attribute_is('link=r12345@href',
+
+attribute_is($sel, 'r12345',
   'https://viewvc.svn.mozilla.org/vc?view=rev&revision=12345');
 
 logout($sel);
+
+sub attribute_is {
+  my ($sel, $text, $href) = @_;
+  my $element = $sel->find_element(qq{//a[contains(text(),"$text")]});
+  if ($element) {
+    ok($element->get_attribute('href') eq $href, "Attribute is: $href");
+    return;
+  }
+  ok(0, "Attribute is: $href");
+}
 

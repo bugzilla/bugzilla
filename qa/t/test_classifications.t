@@ -31,18 +31,14 @@ $sel->title_is("Select classification");
 # Accessing action=delete directly must 1) trigger the security check page,
 # and 2) automatically reclassify products in this classification.
 if ($sel->is_text_present("cone")) {
-  $sel->open_ok(
-    "/editclassifications.cgi?action=delete&amp;classification=cone"
-  );
+  $sel->open_ok("/editclassifications.cgi?action=delete&amp;classification=cone");
   $sel->title_is("Suspicious Action");
   $sel->click_ok("confirm");
   $sel->wait_for_page_to_load_ok(WAIT_TIME);
   $sel->title_is("Classification Deleted");
 }
 if ($sel->is_text_present("ctwo")) {
-  $sel->open_ok(
-    "/editclassifications.cgi?action=delete&amp;classification=ctwo"
-  );
+  $sel->open_ok("/editclassifications.cgi?action=delete&amp;classification=ctwo");
   $sel->title_is("Suspicious Action");
   $sel->click_ok("confirm");
   $sel->wait_for_page_to_load_ok(WAIT_TIME);
@@ -134,7 +130,7 @@ $sel->click_ok(
 );
 $sel->wait_for_page_to_load_ok(WAIT_TIME);
 $sel->title_is("Reclassify products");
-$sel->add_selection_ok("myprodlist", "label=TestProduct");
+$sel->select_ok("myprodlist", "label=TestProduct");
 $sel->click_ok("remove_products");
 $sel->wait_for_page_to_load_ok(WAIT_TIME);
 $sel->title_is("Reclassify products");

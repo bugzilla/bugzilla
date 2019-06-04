@@ -273,7 +273,7 @@
 [% END %]
 
 [% BLOCK category_select %]
-  <select name="[% name FILTER html %]" multiple="multiple" size="7">
+  <select id="[% name FILTER html %]" name="[% name FILTER html %]" multiple="multiple" size="7">
     [% FOREACH option = categories.keys.sort %]
       <option value="[% categories.$option FILTER html %]">
         [% option FILTER html %]

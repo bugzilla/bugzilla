@@ -15,7 +15,7 @@
 
 [% FOREACH cc IN cc_list %]
   <div class="cc-user" data-n="[% loop.count FILTER none %]">
-    [% IF bug.user.canedit %]
+    [% IF bug.user.canedit OR bug.cc.contains(user.login) %]
       <a href="#" id="ccr-[% loop.count FILTER none %]" class="cc-remove"
         data-n="[% loop.count FILTER none %]" data-login="[% cc.login FILTER html %]"
         title="Remove" style="visibility:hidden">&nbsp;&#x2716;&nbsp;</a>

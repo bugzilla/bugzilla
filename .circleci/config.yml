@@ -10,6 +10,9 @@ defaults:
     image: mozillabteam/bmo-slim:20190404.1
     user: app
 
+  selenium_firefox_image: &selenium_firefox_image
+    image: selenium/standalone-firefox:3.141.59
+
   mysql_image: &mysql_image
     image: mozillabteam/bmo-mysql:5.6
 
@@ -49,11 +52,10 @@ defaults:
       environment:
         <<: *bmo_env
         BZ_QA_CONF_FILE: /app/.circleci/selenium_test.conf
-        BZ_QA_ANSWERS_FILE:  /app/.circleci/checksetup_answers.legacy.txt
-        BZ_QA_LEGACY_MODE: 1
+        BZ_QA_ANSWERS_FILE:  /app/.circleci/checksetup_answers.txt
     - <<: *mysql_image
       environment: *mysql_env
-    - image: selenium/standalone-firefox:2.53.1
+    - <<: *selenium_firefox_image
     - image: memcached:latest
 
   default_qa_setup: &default_qa_setup
@@ -223,7 +225,7 @@ jobs:
       - *default_qa_setup
       - run: |
           [[ -f build_info/only_version_changed.txt ]] && exit 0
-          /app/scripts/entrypoint.pl load_test_data --legacy
+          /app/scripts/entrypoint.pl load_test_data
       - run: |
           [[ -f build_info/only_version_changed.txt ]] && exit 0
           /app/scripts/entrypoint.pl test_selenium | tee artifacts/$CIRCLE_JOB.txt
@@ -245,7 +247,7 @@ jobs:
       - <<: *mysql_image
         environment: *mysql_env
       - image: memcached:latest
-      - image: selenium/standalone-firefox:2.53.1
+      - <<: *selenium_firefox_image
     steps:
       - checkout
       - attach_workspace:

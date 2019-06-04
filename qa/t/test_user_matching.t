@@ -32,28 +32,26 @@ set_parameters(
 );
 
 go_to_bug($sel, $test_bug_1);
-$sel->click_ok("cc_edit_area_showhide");
+$sel->click_ok("add-cc-btn");
 
 # We enter an incomplete email address. process_bug.cgi must ask
 # for confirmation as confirmuniqueusermatch is turned on.
 
-$sel->type_ok("newcc", $config->{unprivileged_user_login_truncated});
-$sel->click_ok("commit");
+$sel->type_ok("add-cc", $config->{unprivileged_user_login_truncated});
+$sel->click_ok('bottom-save-btn');
 $sel->wait_for_page_to_load_ok(WAIT_TIME);
 $sel->title_is("Confirm Match");
 $sel->is_text_present_ok(
   "$config->{unprivileged_user_login_truncated} matched");
-$sel->go_back_ok();
-$sel->wait_for_page_to_load_ok(WAIT_TIME);
-$sel->title_like(qr/^$test_bug_1/);
-$sel->click_ok("cc_edit_area_showhide");
+go_to_bug($sel, $test_bug_1);
+$sel->click_ok("add-cc-btn");
 
 # We now enter a complete and valid email address, so it must be accepted.
 # confirmuniqueusermatch = 1 must not trigger the confirmation page as we
 # type the complete email address.
 
-$sel->type_ok("newcc", $config->{unprivileged_user_login});
-$sel->click_ok("commit");
+$sel->type_ok("add-cc", $config->{unprivileged_user_login});
+$sel->click_ok('bottom-save-btn');
 $sel->wait_for_page_to_load_ok(WAIT_TIME);
 $sel->is_text_present_ok("Changes submitted for bug $test_bug_1");
 
@@ -61,21 +59,19 @@ $sel->is_text_present_ok("Changes submitted for bug $test_bug_1");
 # a confirmation page must be displayed.
 
 go_to_bug($sel, $test_bug_1);
-$sel->click_ok("cc_edit_area_showhide");
-$sel->type_ok("newcc", "$config->{unprivileged_user_login_truncated}*");
-$sel->click_ok("commit");
+$sel->click_ok("add-cc-btn");
+$sel->type_ok("add-cc", "$config->{unprivileged_user_login_truncated}*");
+$sel->click_ok('bottom-save-btn');
 $sel->wait_for_page_to_load_ok(WAIT_TIME);
 $sel->title_is("Confirm Match");
 $sel->is_text_present_ok("<$config->{unprivileged_user_login}>");
-$sel->go_back_ok();
-$sel->wait_for_page_to_load_ok(WAIT_TIME);
-$sel->title_like(qr/^$test_bug_1/);
-$sel->click_ok("cc_edit_area_showhide");
+go_to_bug($sel, $test_bug_1);
+$sel->click_ok("add-cc-btn");
 
 # This will return more than one account.
 
-$sel->type_ok("newcc", "*$config->{common_email}");
-$sel->click_ok("commit");
+$sel->type_ok("add-cc", "*$config->{common_email}");
+$sel->click_ok('bottom-save-btn');
 $sel->wait_for_page_to_load_ok(WAIT_TIME);
 $sel->title_is("Confirm Match");
 $sel->is_text_present_ok("*$config->{common_email} matched:");
@@ -86,26 +82,24 @@ set_parameters($sel,
   {"User Matching" => {"maxusermatches" => {type => 'text', value => '1'}}});
 
 go_to_bug($sel, $test_bug_1);
-$sel->click_ok("cc_edit_area_showhide");
+$sel->click_ok("add-cc-btn");
 
 # Several user accounts match this partial email address. Due to
 # maxusermatches = 1, no email address is suggested.
 
-$sel->type_ok("newcc", "*$config->{common_email}");
-$sel->click_ok("commit");
+$sel->type_ok("add-cc", "*$config->{common_email}");
+$sel->click_ok('bottom-save-btn');
 $sel->wait_for_page_to_load_ok(WAIT_TIME);
 $sel->title_is("Match Failed");
 $sel->is_text_present_ok("matches multiple users");
-$sel->go_back_ok();
-$sel->wait_for_page_to_load_ok(WAIT_TIME);
-$sel->title_like(qr/^$test_bug_1/);
-$sel->click_ok("cc_edit_area_showhide");
+go_to_bug($sel, $test_bug_1);
+$sel->click_ok("add-cc-btn");
 
 # We now type a complete and valid email address, so no confirmation
 # page should be displayed.
 
-$sel->type_ok("newcc", $config->{unprivileged_user_login});
-$sel->click_ok("commit");
+$sel->type_ok("add-cc", $config->{unprivileged_user_login});
+$sel->click_ok('bottom-save-btn');
 $sel->wait_for_page_to_load_ok(WAIT_TIME);
 $sel->is_text_present_ok("Changes submitted for bug $test_bug_1");
 
@@ -134,7 +128,7 @@ $sel->title_is("Change Group: tweakparams");
 
 my @groups = $sel->get_select_options("visible_from_add");
 if (grep { $_ eq 'tweakparams' } @groups) {
-  $sel->add_selection_ok("visible_from_add", "label=tweakparams");
+  $sel->select_ok("visible_from_add", "label=tweakparams");
   $sel->click_ok('//input[@value="Update Group"]');
   $sel->wait_for_page_to_load_ok(WAIT_TIME);
   $sel->title_is("Change Group: tweakparams");
@@ -143,39 +137,35 @@ logout($sel);
 log_in($sel, $config, 'tweakparams');
 
 go_to_bug($sel, $test_bug_1);
-$sel->click_ok("cc_edit_area_showhide");
+$sel->click_ok("add-cc-btn");
 
 # We are not in the same groups as the unprivileged user, so we cannot see him.
 
-$sel->type_ok("newcc", $config->{unprivileged_user_login_truncated});
-$sel->click_ok("commit");
+$sel->type_ok("add-cc", $config->{unprivileged_user_login_truncated});
+$sel->click_ok('bottom-save-btn');
 $sel->wait_for_page_to_load_ok(WAIT_TIME);
 $sel->title_is("Match Failed");
 $sel->is_text_present_ok(
   "$config->{unprivileged_user_login_truncated} did not match anything");
-$sel->go_back_ok();
-$sel->wait_for_page_to_load_ok(WAIT_TIME);
-$sel->title_like(qr/^$test_bug_1/);
-$sel->click_ok("cc_edit_area_showhide");
+go_to_bug($sel, $test_bug_1);
+$sel->click_ok("add-cc-btn");
 
 # This will return too many users (there are at least always three:
 # you, the admin and the permanent user (who has admin privs too)).
 
-$sel->type_ok("newcc", $config->{common_email});
-$sel->click_ok("commit");
+$sel->type_ok("add-cc", $config->{common_email});
+$sel->click_ok('bottom-save-btn');
 $sel->wait_for_page_to_load_ok(WAIT_TIME);
 $sel->title_is("Confirm Match");
 $sel->is_text_present_ok(
   "$config->{common_email} matched more than the maximum of 2 users");
-$sel->go_back_ok();
-$sel->wait_for_page_to_load_ok(WAIT_TIME);
-$sel->title_like(qr/^$test_bug_1/);
-$sel->click_ok("cc_edit_area_showhide");
+go_to_bug($sel, $test_bug_1);
+$sel->click_ok("add-cc-btn");
 
 # We can always see ourselves.
 
-$sel->type_ok("newcc", $config->{tweakparams_user_login_truncated});
-$sel->click_ok("commit");
+$sel->type_ok("add-cc", $config->{tweakparams_user_login_truncated});
+$sel->click_ok('bottom-save-btn');
 $sel->wait_for_page_to_load_ok(WAIT_TIME);
 $sel->title_is("Confirm Match");
 $sel->is_text_present_ok("<$config->{tweakparams_user_login}>");
@@ -185,8 +175,8 @@ $sel->is_text_present_ok("<$config->{tweakparams_user_login}>");
 set_parameters($sel, {"User Matching" => {"usemenuforusers-on" => undef}});
 
 go_to_bug($sel, $test_bug_1);
-$sel->click_ok("cc_edit_area_showhide");
-my @cc = $sel->get_select_options("newcc");
+$sel->click_ok("add-cc-btn");
+my @cc = $sel->get_select_options("add-cc");
 ok(
   !grep($_ =~ /$config->{unprivileged_user_login}/, @cc),
   "$config->{unprivileged_user_login} is not visible"

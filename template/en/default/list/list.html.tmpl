@@ -239,7 +239,7 @@
           [% defaultsavename OR searchname FILTER uri %]">Change&nbsp;Columns</a>
 
         [% IF bugs.size > 1 && caneditbugs && !dotweak %]
-          | <a href="[% basepath FILTER none %]buglist.cgi?[% urlquerypart FILTER html %]
+          | <a id="change-several" href="[% basepath FILTER none %]buglist.cgi?[% urlquerypart FILTER html %]
             [%- "&order=$qorder" FILTER html IF order %]&amp;tweak=1"
             >Change&nbsp;Several&nbsp;[% terms.Bugs %]&nbsp;at&nbsp;Once</a>
         [% END %]
@@ -247,13 +247,13 @@
     </td>
 
     <td valign="middle" class="bz_query_edit">
-      <a href="[% PROCESS edit_search_url %]">Edit&nbsp;Search</a>
+      <a id="edit-search" href="[% PROCESS edit_search_url %]">Edit&nbsp;Search</a>
     </td>
 
     [% IF searchtype == "saved" %]
       <td valign="middle" nowrap="nowrap" class="bz_query_forget">
         |
-        <a href="[% basepath FILTER none %]buglist.cgi?cmdtype=dorem&amp;remaction=forget&amp;namedcmd=
+        <a id="forget-search" href="[% basepath FILTER none %]buglist.cgi?cmdtype=dorem&amp;remaction=forget&amp;namedcmd=
                 [% searchname FILTER uri %]&amp;token=
                 [% issue_hash_token([search_id, searchname]) FILTER uri %]">
           Forget&nbsp;Search&nbsp;'[% searchname FILTER html %]'</a>

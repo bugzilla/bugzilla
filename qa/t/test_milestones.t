@@ -76,9 +76,10 @@ $sel->is_text_present_ok('has been added to the database',
 
 # 4th step: edit the bug (test musthavemilestoneonaccept ON).
 
+go_to_bug($sel, $bug1_id);
 $sel->select_ok("bug_status", "label=IN_PROGRESS",
   "Change bug status to IN_PROGRESS");
-$sel->click_ok("commit", undef, "Save changes");
+$sel->click_ok("bottom-save-btn", undef, "Save changes");
 $sel->wait_for_page_to_load(WAIT_TIME);
 $sel->title_is(
   "Milestone Required",
@@ -91,7 +92,7 @@ $sel->is_text_present_ok("You must select a target milestone",
 go_to_bug($sel, $bug1_id);
 $sel->select_ok("target_milestone", "label=2.0",
   "Select a non-default milestone");
-$sel->click_ok("commit", undef, "Save changes (2nd attempt)");
+$sel->click_ok("bottom-save-btn", undef, "Save changes (2nd attempt)");
 $sel->wait_for_page_to_load(WAIT_TIME);
 $sel->is_text_present_ok("Changes submitted for bug $bug1_id");
 
@@ -121,8 +122,9 @@ $sel->is_text_present_ok('has been added to the database',
 
 # 6th step: edit the bug (test musthavemilestoneonaccept ON).
 
+go_to_bug($sel, $bug2_id);
 $sel->select_ok("bug_status", "label=IN_PROGRESS");
-$sel->click_ok("commit");
+$sel->click_ok("bottom-save-btn", undef, 'Save changes');
 $sel->wait_for_page_to_load(WAIT_TIME);
 $sel->is_text_present_ok("Changes submitted for bug $bug2_id");
 
@@ -181,8 +183,7 @@ $sel->title_is("Milestone Deleted");
 
 # 8th step: make sure the (now deleted) milestone of the bug has fallen back to the default milestone.
 
-$sel->open_ok("/show_bug.cgi?id=$bug1_id");
-$sel->title_like(qr/^$bug1_id/);
+go_to_bug($sel, $bug1_id);
 $sel->is_text_present_ok('regexp:Target Milestone:\W+---',
   undef, "Milestone has fallen back to the default milestone");
 
@@ -211,8 +212,9 @@ $sel->is_text_present_ok('has been added to the database',
 # 10th step: musthavemilestoneonaccept must have no effect as there is
 #            no other milestone available besides the default one.
 
+go_to_bug($sel, $bug3_id);
 $sel->select_ok("bug_status", "label=IN_PROGRESS");
-$sel->click_ok("commit");
+$sel->click_ok("bottom-save-btn", undef, 'Save changes');
 $sel->wait_for_page_to_load(WAIT_TIME);
 $sel->is_text_present_ok("Changes submitted for bug $bug3_id");
 

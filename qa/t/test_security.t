@@ -23,6 +23,7 @@ file_bug_in_product($sel, "TestProduct");
 my $bug_summary = "Security checks";
 $sel->type_ok("short_desc", $bug_summary);
 $sel->type_ok("comment",    "This bug will be used to test security fixes.");
+$sel->click_ok('//input[@value="Add an attachment"]');
 $sel->attach_file('//input[@name="data"]', $config->{attachment_file});
 $sel->type_ok('//input[@name="description"]', "simple patch, v1");
 my $bug1_id = create_bug($sel, $bug_summary);
@@ -41,29 +42,31 @@ go_to_bug($sel, $bug1_id);
 $sel->click_ok("link=simple patch, v1");
 $sel->wait_for_page_to_load_ok(WAIT_TIME);
 $sel->title_is("");
-my @cookies = split(/[\s;]+/, $sel->get_cookie());
-my $nb_cookies = scalar @cookies;
-ok($nb_cookies, "Found $nb_cookies cookies:\n" . join("\n", @cookies));
-ok(!$sel->is_cookie_present("Bugzilla_login"), "Bugzilla_login not accessible");
-ok(!$sel->is_cookie_present("Bugzilla_logincookie"),
-  "Bugzilla_logincookie not accessible");
+my $cookies    = $sel->get_all_cookies();
+my $nb_cookies = scalar @$cookies;
+ok($nb_cookies, "Found $nb_cookies cookies");
+my %cookies = map { $_->{name} => $_->{value} } @$cookies;
+ok(exists $cookies{Bugzilla_login},       "Bugzilla_login is accessible");
+ok(exists $cookies{Bugzilla_logincookie}, "Bugzilla_logincookie is accessible");
 $sel->go_back_ok();
 $sel->wait_for_page_to_load_ok(WAIT_TIME);
 $sel->title_like(qr/^$bug1_id /);
 
-# # Alternate host for attachments; no cookie should be accessible.
+# Alternate host for attachments; no cookie should be accessible.
+# FIXME: Figure out how to do this properly in a CI environment.
+# Bugzilla->process_cache->{localconfig}->{attachment_base} = 'http://bmo.attachment/';
 
-# set_parameters($sel, { "Attachments" => {"attachment_base" => {type  => "text",
-#                                                                value => "$config->{browser_ip_url}/"}} });
 # go_to_bug($sel, $bug1_id);
 # $sel->click_ok("link=simple patch, v1");
 # $sel->wait_for_page_to_load_ok(WAIT_TIME);
 # $sel->title_is("");
-# @cookies = split(/[\s;]+/, $sel->get_cookie());
-# $nb_cookies = scalar @cookies;
+# $cookies = $sel->get_all_cookies();
+# $nb_cookies = scalar @$cookies;
 # ok(!$nb_cookies, "No cookies found");
-# ok(!$sel->is_cookie_present("Bugzilla_login"), "Bugzilla_login not accessible");
-# ok(!$sel->is_cookie_present("Bugzilla_logincookie"), "Bugzilla_logincookie not accessible");
+# my %cookies = map { $_->{name} => $_->{value} } @$cookies;
+# ok(!exists $cookies{Bugzilla_login}, "Bugzilla_login not accessible");
+# ok(!exists $cookies{Bugzilla_logincookie},
+#   "Bugzilla_logincookie not accessible");
 # $sel->go_back_ok();
 # $sel->wait_for_page_to_load_ok(WAIT_TIME);
 # $sel->title_like(qr/^$bug1_id /);
@@ -72,6 +75,7 @@ $sel->title_like(qr/^$bug1_id /);
 # Security bug 472362.
 #######################################################################
 
+$sel->click_ok('header-account-menu-button');
 $sel->click_ok("link=Preferences");
 $sel->wait_for_page_to_load_ok(WAIT_TIME);
 $sel->title_is("User Preferences");
@@ -79,6 +83,7 @@ my $admin_cookie = $sel->get_value("token");
 logout($sel);
 
 log_in($sel, $config, 'editbugs');
+$sel->click_ok('header-account-menu-button');
 $sel->click_ok("link=Preferences");
 $sel->wait_for_page_to_load_ok(WAIT_TIME);
 $sel->title_is("User Preferences");
@@ -99,8 +104,7 @@ my @args = ("", "token=", "token=i123x", "token=$admin_cookie",
   "token=$editbugs_cookie");
 
 foreach my $arg (@args) {
-  $sel->open_ok(
-    "/userprefs.cgi?tab=settings&dosave=1&display_quips=off&$arg");
+  $sel->open_ok("/userprefs.cgi?tab=settings&dosave=1&display_quips=off&$arg");
   $sel->title_is("Suspicious Action");
 
   if ($arg eq "token=$admin_cookie") {
@@ -138,7 +142,7 @@ ok(!$sel->is_text_present("secret_qa_bug_$bug2_id"),
 $sel->is_text_present_ok($bug2_id);
 logout($sel);
 
-go_to_bug($sel, $bug1_id);
+go_to_bug($sel, $bug1_id, 1);
 ok(!$sel->is_text_present("secret_qa_bug_$bug2_id"),
   "The alias 'secret_qa_bug_$bug2_id' is not visible for logged out users");
 $sel->is_text_present_ok($bug2_id);

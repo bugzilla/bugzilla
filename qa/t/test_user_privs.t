@@ -18,11 +18,10 @@ my $test_bug_1 = $config->{test_bug_1};
 
 # When being logged out, the 'Commit' button should not be displayed.
 
-$sel->open_ok("/index.cgi?logout=1",
-  undef, "Log out (if required)");
+$sel->open_ok("/logout", undef, "Log out (if required)");
 $sel->wait_for_page_to_load_ok(WAIT_TIME);
 $sel->title_is("Logged Out");
-go_to_bug($sel, $test_bug_1);
+go_to_bug($sel, $test_bug_1, 1);
 ok(!$sel->is_element_present('commit'), "Button 'Commit' not available");
 
 # Now create a new bug. As the reporter, some forms are editable to you.
@@ -42,9 +41,12 @@ logout($sel);
 
 # Some checks while being logged out.
 
-go_to_bug($sel, $bug1_id);
-ok(!$sel->is_element_present("commit"), "Button 'Commit' not available");
-my $text = trim($sel->get_text("//fieldset"));
+go_to_bug($sel, $bug1_id, 1);
+ok(
+  !$sel->is_element_present('bottom-save-btn'),
+  "Save changes button not available"
+);
+my $text = trim($sel->get_text('//div[@id="new-comment-notice"]'));
 ok(
   $text
     =~ /You need to log in before you can comment on or make changes to this bug./,
@@ -71,17 +73,15 @@ $sel->type_ok(
 $sel->click_ok("log_in", undef, "Submit credentials");
 $sel->wait_for_page_to_load_ok(WAIT_TIME);
 $sel->title_like(qr/^$bug1_id/, "Display bug $bug1_id");
+$sel->click_ok('mode-btn-readonly', 'Click Edit Bug');
+$sel->click_ok('action-menu-btn',   'Expand action menu');
+$sel->click_ok('action-expand-all', 'Expand all modal panels');
 
-# Neither the (edit) link nor the hidden form must exist, at all.
+# The assigned_to field must not exist.
 # But the 'Commit' button does exist.
-
-ok(
-  !$sel->is_element_present("bz_assignee_edit_action"),
-  "No (edit) link displayed for the assignee"
-);
 ok(
   !$sel->is_element_present("assigned_to"),
   "No hidden assignee field available"
 );
-$sel->is_element_present_ok("commit");
+$sel->is_element_present_ok('bottom-save-btn');
 logout($sel);

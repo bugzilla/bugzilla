@@ -18,7 +18,7 @@ my ($sel, $config) = get_selenium();
 
 # First, a very trivial search, which returns no result.
 
-go_to_home($sel, $config);
+go_to_home($sel);
 open_advanced_search_page($sel);
 $sel->type_ok("short_desc", "ois£jdfm#sd%fasd!fm",
   "Type a non-existent string in the bug summary field");
@@ -29,9 +29,7 @@ $sel->is_text_present_ok("Zarro Boogs found");
 
 # Display all available columns. Look for all bugs assigned to a user who doesn't exist.
 
-$sel->open_ok(
-  "/buglist.cgi?quicksearch=%40xx45ft&columnlist=all"
-);
+$sel->open_ok("/buglist.cgi?quicksearch=%40xx45ft&columnlist=all");
 $sel->title_like(qr/^Bug List:/);
 $sel->is_text_present_ok("Zarro Boogs found");
 
@@ -43,11 +41,11 @@ my $bug_summary = "Update this summary with this bug ID";
 $sel->type_ok("short_desc", $bug_summary);
 $sel->type_ok("comment",    "I'm supposed to appear in the coming buglist.");
 my $bug1_id = create_bug($sel, $bug_summary);
-$sel->click_ok("editme_action");
+go_to_bug($sel, $bug1_id);
 $bug_summary .= ": my ID is $bug1_id";
 $sel->type_ok("short_desc", $bug_summary);
 $sel->type_ok("comment",    "Updating bug summary....");
-$sel->click_ok("commit");
+$sel->click_ok('bottom-save-btn');
 $sel->wait_for_page_to_load_ok(WAIT_TIME);
 $sel->is_text_present_ok("Changes submitted for bug $bug1_id");
 
@@ -59,7 +57,7 @@ $sel->remove_all_selections("resolution");
 $sel->type_ok("short_desc", "my ID is $bug1_id");
 $sel->select_ok("f1", "label=Commenter");
 $sel->select_ok("o1", "label=is equal to");
-$sel->type_ok("v1", "%user%");
+$sel->type_ok("v1", "\%user\%");
 $sel->click_ok("add_button");
 $sel->wait_for_page_to_load_ok(WAIT_TIME);
 $sel->title_is("Search for bugs");

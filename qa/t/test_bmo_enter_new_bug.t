@@ -90,9 +90,7 @@ _check_product('Marketing');
 _check_component('Marketing', 'Trademark Permissions');
 _check_group('marketing-private');
 
-$sel->open_ok(
-  "/enter_bug.cgi?product=Marketing&format=trademark"
-);
+$sel->open_ok("/enter_bug.cgi?product=Marketing&format=trademark");
 $sel->wait_for_page_to_load_ok(WAIT_TIME);
 $sel->title_is("Trademark Usage Requests",
   "Open custom bug entry form - trademark");
@@ -181,9 +179,7 @@ _check_component('mozilla.org', 'Discussion Forums');
 _check_version('mozilla.org', 'other');
 _check_component('mozilla.org', 'Discussion Forums');
 
-$sel->open_ok(
-  "/enter_bug.cgi?product=mozilla.org&format=mozlist"
-);
+$sel->open_ok("/enter_bug.cgi?product=mozilla.org&format=mozlist");
 $sel->wait_for_page_to_load_ok(WAIT_TIME);
 $sel->title_is("Mozilla Discussion Forum",
   "Open custom bug entry form - mozlist");
@@ -233,8 +229,7 @@ _check_product('Legal');
 _check_component('Legal', 'Contract Request');
 _check_group('mozilla-employee-confidential');
 
-$sel->open_ok(
-  "/enter_bug.cgi?product=Legal&format=legal");
+$sel->open_ok("/enter_bug.cgi?product=Legal&format=legal");
 $sel->wait_for_page_to_load_ok(WAIT_TIME);
 $sel->title_is("Mozilla Corporation Legal Requests",
   "Open custom bug entry form - legal");
@@ -284,8 +279,8 @@ sub _check_product {
   $sel->type_ok("description", $product_description);
   $sel->type_ok("version",     $version) if $version;
   $sel->select_ok("security_group_id",   "label=core-security");
-  $sel->select_ok("default_op_sys_id",   "Unspecified");
-  $sel->select_ok("default_platform_id", "Unspecified");
+  $sel->select_ok("default_op_sys_id",   "label=Unspecified");
+  $sel->select_ok("default_platform_id", "label=Unspecified");
   $sel->click_ok('//input[@type="submit" and @value="Add"]');
   $sel->wait_for_page_to_load_ok(WAIT_TIME);
   $text = trim($sel->get_text("message"));
@@ -320,12 +315,6 @@ sub _check_component {
     return 1;
   }
 
-  # Add the watch user for component watching
-  my $watch_user = lc $component . "@" . lc $product . ".bugs";
-  $watch_user =~ s/ & /-/;
-  $watch_user =~ s/\s+/\-/g;
-  $watch_user =~ s/://g;
-
   go_to_admin($sel);
   $sel->click_ok("link=components");
   $sel->wait_for_page_to_load_ok(WAIT_TIME);
@@ -340,9 +329,6 @@ sub _check_component {
   $sel->type_ok("component",    $component);
   $sel->type_ok("description",  $component_description);
   $sel->type_ok("initialowner", $config->{'admin_user_login'});
-  $sel->uncheck_ok("watch_user_auto");
-  $sel->type_ok("watch_user", $watch_user);
-  $sel->check_ok("watch_user_auto");
   $sel->click_ok('//input[@type="submit" and @value="Add"]');
   $sel->wait_for_page_to_load_ok(WAIT_TIME);
   $sel->title_is("Component Created");

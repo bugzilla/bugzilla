@@ -73,9 +73,6 @@ $sel->title_is("Add component to the TestProduct product");
 $sel->type_ok("component",    "TempComponent");
 $sel->type_ok("description",  "Temp component");
 $sel->type_ok("initialowner", $admin_user_login);
-$sel->uncheck_ok("watch_user_auto");
-$sel->type_ok("watch_user", 'tempcomponent@testproduct.bugs');
-$sel->check_ok("watch_user_auto");
 $sel->click_ok('//input[@type="submit" and @value="Add"]');
 $sel->wait_for_page_to_load_ok(WAIT_TIME);
 $sel->title_is("Component Created");
@@ -120,16 +117,6 @@ go_to_bug($sel, $bug_id);
 
 # make sure the component is still tempcomponent
 $sel->selected_label_is("component", 'TempComponent');
-
-# update
-$sel->click_ok("commit");
-$sel->wait_for_page_to_load_ok(WAIT_TIME);
-$sel->is_text_present_ok("Changes submitted for bug $bug_id");
-$sel->click_ok("link=bug $bug_id");
-$sel->wait_for_page_to_load_ok(WAIT_TIME);
-
-# make sure the component is still tempcomponent
-ok($sel->get_selected_labels("component"), 'TempComponent');
 
 # try creating new bug with TempComponent
 
@@ -247,18 +234,18 @@ go_to_bug($sel, $bug_id);
 $sel->selected_label_is("version", 'TempVersion');
 
 # update
-$sel->click_ok("commit");
+$sel->click_ok("bottom-save-btn");
 $sel->wait_for_page_to_load_ok(WAIT_TIME);
 $sel->is_text_present_ok("Changes submitted for bug $bug_id");
-$sel->click_ok("link=bug $bug_id");
-$sel->wait_for_page_to_load_ok(WAIT_TIME);
+
+go_to_bug($sel, $bug_id);
 
 # make sure the version is still tempversion
 $sel->selected_label_is("version", 'TempVersion');
 
 # change the version so it can be deleted
 $sel->select_ok("version", "label=unspecified");
-$sel->click_ok("commit");
+$sel->click_ok("bottom-save-btn");
 $sel->wait_for_page_to_load_ok(WAIT_TIME);
 $sel->is_text_present_ok("Changes submitted for bug $bug_id");
 
@@ -381,11 +368,11 @@ go_to_bug($sel, $bug_id);
 $sel->selected_label_is("target_milestone", 'TempMilestone');
 
 # update
-$sel->click_ok("commit");
+$sel->click_ok("bottom-save-btn");
 $sel->wait_for_page_to_load_ok(WAIT_TIME);
 $sel->is_text_present_ok("Changes submitted for bug $bug_id");
-$sel->click_ok("link=bug $bug_id");
-$sel->wait_for_page_to_load_ok(WAIT_TIME);
+
+go_to_bug($sel, $bug_id);
 
 # make sure the milestone is still tempmilestone
 $sel->selected_label_is("target_milestone", 'TempMilestone');

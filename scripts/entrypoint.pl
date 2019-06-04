@@ -46,8 +46,7 @@ my $func = __PACKAGE__->can("cmd_$cmd") // sub {
 
 fix_path();
 check_user();
-check_env(
-  qw(
+check_env(qw(
     LOCALCONFIG_ENV
     BMO_db_host
     BMO_db_name
@@ -56,12 +55,11 @@ check_env(
     BMO_memcached_namespace
     BMO_memcached_servers
     BMO_urlbase
-    )
-);
+    ));
 
 if ($ENV{BMO_urlbase} eq 'AUTOMATIC') {
   $ENV{BMO_urlbase} = sprintf 'http://%s:%d/', hostname(), $ENV{PORT};
-  $ENV{BZ_BASE_URL} = sprintf 'http://%s:%d', hostname(), $ENV{PORT};
+  $ENV{BZ_BASE_URL} = sprintf 'http://%s:%d',  hostname(), $ENV{PORT};
 }
 
 $func->($opts->());
@@ -69,16 +67,14 @@ $func->($opts->());
 sub cmd_demo {
   unless (-f '/app/data/params') {
     cmd_load_test_data();
-    check_env(
-      qw(
+    check_env(qw(
         PHABRICATOR_BOT_LOGIN
         PHABRICATOR_BOT_PASSWORD
         PHABRICATOR_BOT_API_KEY
         CONDUIT_USER_LOGIN
         CONDUIT_USER_PASSWORD
         CONDUIT_USER_API_KEY
-        )
-    );
+        ));
     run('perl', 'scripts/generate_conduit_data.pl');
   }
   cmd_httpd();
@@ -98,6 +94,16 @@ sub cmd_jobqueue {
   check_data_dir();
   wait_for_db();
   exit run_cereal_and_jobqueue(@args)->get;
+}
+
+sub cmd_selenium_dev {
+  assert_database->get();
+  copy_qa_extension();
+  cmd_load_test_data() unless -f "/app/data/params";
+  mkdir('/app/artifacts') unless -d "/app/artifacts";
+  my $httpd_exit_f = run_cereal_and_httpd('-DACCESS_LOGS');
+  assert_httpd()->get;
+  exit $httpd_exit_f->get;
 }
 
 sub cmd_dev_httpd {
@@ -130,16 +136,15 @@ sub cmd_load_test_data {
   die 'BZ_QA_ANSWERS_FILE is not set' unless $ENV{BZ_QA_ANSWERS_FILE};
   run('perl', 'checksetup.pl', '--no-template', $ENV{BZ_QA_ANSWERS_FILE});
 
-  if ($ENV{BZ_QA_LEGACY_MODE}) {
-    run('perl', 'scripts/generate_bmo_data.pl', '--user-pref',
-      'ui_experiments=off');
-    chdir '/app/qa/config';
-    say 'chdir(/app/qa/config)';
-    run('perl', 'generate_test_data.pl');
-  }
-  else {
-    run('perl', 'scripts/generate_bmo_data.pl', '--param' => 'use_mailer_queue=0');
-  }
+  run(
+    'perl',        'scripts/generate_bmo_data.pl',
+    '--user-pref', 'ui_experiments=on',
+    '--param',     'use_mailer_queue=0'
+  );
+
+  chdir '/app/qa/config';
+  say 'chdir(/app/qa/config)';
+  run('perl', 'generate_test_data.pl');
 }
 
 sub cmd_test_webservices {

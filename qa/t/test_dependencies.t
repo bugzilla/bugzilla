@@ -34,7 +34,7 @@ $sel->check_ok('//input[@name="groups" and @value="Master"]');
 my $bug2_id = create_bug($sel, $bug_summary2);
 
 go_to_bug($sel, $bug1_id);
-$sel->click_ok("link=Mark as Duplicate");
+$sel->click_ok('//button[text()="DUPLICATE"]');
 $sel->type_ok("dup_id", $bug2_id);
 edit_bug_and_return($sel, $bug1_id, $bug_summary);
 $sel->is_text_present_ok("secret_qa_bug_$bug1_id+1");

@@ -9,6 +9,8 @@ use strict;
 use warnings;
 use lib qw(lib ../../lib ../../local/lib/perl5);
 
+use Bugzilla::RNG;
+
 use Test::More "no_plan";
 
 use QA::Util;
@@ -29,7 +31,7 @@ my @types = (
   "Free Text", "Multiple-Selection Box",
   "Drop Down", "Date/Time"
 );
-my $counter = int(rand(10000));
+my $counter = int(Bugzilla::RNG::rand(10000));
 
 foreach my $type (@types) {
   my $fname = "cf_field" . ++$counter;

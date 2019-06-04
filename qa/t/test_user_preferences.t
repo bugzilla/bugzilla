@@ -38,6 +38,7 @@ $sel->title_is("Default Preferences");
 
 # Update own user preferences. Some of them should no longer be present.
 
+$sel->click_ok('header-account-menu-button');
 $sel->click_ok("link=Preferences");
 $sel->wait_for_page_to_load(WAIT_TIME);
 $sel->title_is("User Preferences");
@@ -69,20 +70,20 @@ $sel->wait_for_page_to_load(WAIT_TIME);
 my $bug1_id = $sel->get_value('//input[@name="id" and @type="hidden"]');
 $sel->is_text_present_ok('has been added to the database',
   "Bug $bug1_id created");
-$sel->value_is("addselfcc", "off");
+go_to_bug($sel, $bug1_id);
+$sel->value_is("add-self-cc", "off");
 $sel->select_ok("bug_status", "label=IN_PROGRESS");
-$sel->click_ok("commit");
+$sel->click_ok('bottom-save-btn');
 $sel->wait_for_page_to_load(WAIT_TIME);
 $sel->is_text_present_ok("Changes submitted for bug $bug1_id");
-$sel->click_ok("editme_action");
-$sel->value_is("short_desc", "First bug created");
-$sel->value_is("addselfcc",  "off");
+go_to_bug($sel, $bug1_id);
+$sel->value_is("short_desc",  "First bug created");
+$sel->value_is("add-self-cc", "off");
 
 # Tag the bug.
 
 $sel->select_ok("lob_action", "label=Add");
 $sel->type_ok("lob_newqueryname", "sel-tmp");
-$sel->type_ok("bug_ids",          $bug1_id);
 $sel->click_ok("commit_list_of_bugs");
 $sel->wait_for_page_to_load(WAIT_TIME);
 $sel->title_is("Tag Updated");
@@ -105,13 +106,13 @@ $sel->wait_for_page_to_load(WAIT_TIME);
 my $bug2_id = $sel->get_value('//input[@name="id" and @type="hidden"]');
 $sel->is_text_present_ok('has been added to the database',
   "Bug $bug2_id created");
-$sel->value_is("addselfcc", "off");
+go_to_bug($sel, $bug2_id);
+$sel->value_is("add-self-cc", "off");
 
 # Add another bug to the tag.
 
 $sel->select_ok("lob_action",       "label=Add");
 $sel->select_ok("lob_oldqueryname", "label=sel-tmp");
-$sel->type_ok("bug_ids", $bug2_id);
 $sel->click_ok("commit_list_of_bugs");
 $sel->wait_for_page_to_load(WAIT_TIME);
 $sel->title_is("Tag Updated");
@@ -123,31 +124,25 @@ $sel->wait_for_page_to_load(WAIT_TIME);
 $sel->title_is("Bug List");
 $sel->is_text_present_ok("Tags: sel-tmp");
 $sel->is_text_present_ok("2 bugs found");
-$sel->click_ok("link=$bug1_id");
-$sel->wait_for_page_to_load(WAIT_TIME);
-$sel->title_like(qr/^$bug1_id /);
+go_to_bug($sel, $bug1_id);
 $sel->type_ok("comment", "The next bug I should see is this one.");
-$sel->click_ok("commit");
+$sel->click_ok('bottom-save-btn');
 $sel->wait_for_page_to_load(WAIT_TIME);
 $sel->is_text_present_ok("Changes submitted for bug $bug1_id");
 
-$sel->click_ok("editme_action");
+go_to_bug($sel, $bug1_id);
 $sel->value_is("short_desc", "First bug created");
 $sel->is_text_present_ok("The next bug I should see is this one.");
 
 # Remove the tag from all bugs.
 
-$sel->open_ok("/buglist.cgi?tag=sel-tmp",
-  undef, "List 'sel-tmp' bugs");
+$sel->open_ok("/buglist.cgi?tag=sel-tmp", undef, "List 'sel-tmp' bugs");
 $sel->wait_for_page_to_load(WAIT_TIME);
 $sel->title_is("Bug List");
 $sel->is_text_present_ok("Tags: sel-tmp");
-$sel->click_ok("link=$bug1_id");
-$sel->wait_for_page_to_load(WAIT_TIME);
-$sel->title_like(qr/^$bug1_id /);
+go_to_bug($sel, $bug1_id);
 $sel->select_ok("lob_action",       "label=Remove");
 $sel->select_ok("lob_oldqueryname", "label=sel-tmp");
-$sel->type_ok("bug_ids", $bug1_id);
 $sel->click_ok("commit_list_of_bugs");
 $sel->wait_for_page_to_load(WAIT_TIME);
 $sel->title_is("Tag Updated");
@@ -158,12 +153,9 @@ $sel->click_ok("link=sel-tmp");
 $sel->wait_for_page_to_load(WAIT_TIME);
 $sel->title_is("Bug List");
 $sel->is_text_present_ok("Tags: sel-tmp");
-$sel->click_ok("link=$bug2_id");
-$sel->wait_for_page_to_load(WAIT_TIME);
-$sel->title_like(qr/^$bug2_id /);
+go_to_bug($sel, $bug2_id);
 $sel->select_ok("lob_action",       "label=Remove");
 $sel->select_ok("lob_oldqueryname", "label=sel-tmp");
-$sel->type_ok("bug_ids", $bug2_id);
 $sel->click_ok("commit_list_of_bugs");
 $sel->wait_for_page_to_load(WAIT_TIME);
 $sel->title_is("Tag Updated");
@@ -180,6 +172,7 @@ logout($sel);
 # Edit own user preferences, now as an unprivileged user.
 
 log_in($sel, $config, 'unprivileged');
+$sel->click_ok('header-account-menu-button');
 $sel->click_ok("link=Preferences");
 $sel->wait_for_page_to_load(WAIT_TIME);
 $sel->title_is("User Preferences");
@@ -216,7 +209,7 @@ ok(
 
 open_advanced_search_page($sel);
 $sel->remove_all_selections_ok("product");
-$sel->add_selection_ok("product", "TestProduct");
+$sel->select_ok("product", "label=TestProduct");
 $sel->remove_all_selections_ok("bug_status");
 $sel->select_ok("bug_id_type", "label=only included in");
 $sel->type_ok("bug_id", "$bug1_id , $bug2_id");
@@ -237,36 +230,33 @@ ok(
 
 # Editing bugs should follow user preferences.
 
-$sel->click_ok("link=my_list");
+$sel->click_ok(
+  '//a[normalize-space(text())="my_list" and not(@role="option")]');
 $sel->wait_for_page_to_load(WAIT_TIME);
 $sel->title_is("Bug List: my_list");
-$sel->click_ok("link=$bug1_id");
-$sel->wait_for_page_to_load(WAIT_TIME);
-$sel->title_like(qr/^$bug1_id .* First bug created/);
-$sel->value_is("addselfcc", "on");
+go_to_bug($sel, $bug1_id);
+$sel->value_is("add-self-cc", "on");
 $sel->type_ok("comment",
   "I should be CC'ed and then I should see the next bug.");
-$sel->click_ok("commit");
+$sel->click_ok('bottom-save-btn');
 $sel->wait_for_page_to_load(WAIT_TIME);
 $sel->is_text_present_ok("Changes submitted for bug $bug1_id");
-$sel->is_text_present_ok("The next bug in your list is bug $bug2_id");
 ok(!$sel->is_text_present("I should see the next bug"),
   "The updated bug is no longer displayed");
 
 # The user has no privs, so the short_desc field is not present.
 $sel->is_text_present_ok("My second bug");
-$sel->value_is("addselfcc", "on");
-$sel->click_ok("link=bug $bug1_id");
-$sel->wait_for_page_to_load(WAIT_TIME);
-$sel->title_like(qr/^$bug1_id .* First bug created/);
-$sel->is_text_present_ok("1 user including you");
+$sel->value_is("add-self-cc", "on");
+go_to_bug($sel, $bug1_id);
+$sel->is_text_present_ok('Just you');
 
 # Delete the saved search and log out.
 
-$sel->click_ok("link=my_list");
+$sel->click_ok('quicksearch_top');
+$sel->click_ok('//a[normalize-space(text())="my_list" and @role="option"]');
 $sel->wait_for_page_to_load(WAIT_TIME);
 $sel->title_is("Bug List: my_list");
-$sel->click_ok("link=Forget Search 'my_list'");
+$sel->click_ok('forget-search');
 $sel->wait_for_page_to_load(WAIT_TIME);
 $sel->title_is("Search is gone");
 $text = trim($sel->get_text("message"));

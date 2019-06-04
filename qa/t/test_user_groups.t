@@ -54,7 +54,7 @@ $sel->click_ok("create");
 $sel->wait_for_page_to_load_ok(WAIT_TIME);
 $sel->title_is("New Group Created");
 my $slave_gid = $sel->get_value("group_id");
-$sel->add_selection_ok("members_add", "label=Master");
+$sel->select_ok("members_add", "label=Master");
 $sel->click_ok('//input[@value="Update Group"]');
 $sel->wait_for_page_to_load_ok(WAIT_TIME);
 $sel->title_is("Change Group: Slave");

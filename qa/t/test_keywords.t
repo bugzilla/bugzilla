@@ -110,13 +110,13 @@ go_to_bug($sel, $test_bug_1);
 # If another script is playing with keywords too, don't mess with it.
 my $kw1 = $sel->get_text("keywords");
 $sel->type_ok("keywords", "$kw1, key-selenium-kone");
-$sel->click_ok("commit");
+$sel->click_ok("bottom-save-btn");
 $sel->wait_for_page_to_load(WAIT_TIME);
 $sel->is_text_present_ok("Changes submitted for bug $test_bug_1");
 go_to_bug($sel, $test_bug_2);
 my $kw2 = $sel->get_text("keywords");
 $sel->type_ok("keywords", "$kw2, key-selenium-kone, key-selenium-ktwo");
-$sel->click_ok("commit");
+$sel->click_ok("bottom-save-btn");
 $sel->wait_for_page_to_load(WAIT_TIME);
 $sel->is_text_present_ok("Changes submitted for bug $test_bug_2");
 
@@ -131,9 +131,7 @@ $sel->wait_for_page_to_load(WAIT_TIME);
 $sel->title_is("Bug List");
 $sel->is_text_present_ok("2 bugs found");
 
-$sel->click_ok('//*[@class="link-search"]//a');
-$sel->wait_for_page_to_load(WAIT_TIME);
-$sel->title_is("Search for bugs");
+open_advanced_search_page($sel);
 $sel->remove_all_selections("product");
 $sel->remove_all_selections("bug_status");
 
@@ -144,9 +142,7 @@ $sel->wait_for_page_to_load(WAIT_TIME);
 $sel->title_is("Bug List");
 $sel->is_text_present_ok("One bug found");
 
-$sel->click_ok('//*[@class="link-search"]//a');
-$sel->wait_for_page_to_load(WAIT_TIME);
-$sel->title_is("Search for bugs");
+open_advanced_search_page($sel);
 $sel->remove_all_selections("product");
 $sel->remove_all_selections("bug_status");
 

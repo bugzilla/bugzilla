@@ -42,6 +42,7 @@ sub setup_routes {
   $r->get('/__heartbeat__')->to('CGI#heartbeat_cgi');
   $r->get('/robots.txt')->to('CGI#robots_cgi');
   $r->any('/login')->to('CGI#index_cgi' => {'GoAheadAndLogIn' => '1'});
+  $r->any('/logout')->to('CGI#index_cgi' => {'logout' => '1'});
   $r->any('/:new_bug' => [new_bug => qr{new[-_]bug}])->to('CGI#new_bug_cgi');
 }
 

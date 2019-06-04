@@ -92,6 +92,7 @@ ok(
 # Make sure this user is not an admin and has no privs at all, and that
 # he cannot access editusers.cgi (despite the sudoer can).
 
+$sel->click_ok('header-account-menu-button');
 $sel->click_ok("link=Preferences");
 $sel->wait_for_page_to_load_ok(WAIT_TIME);
 $sel->title_is("User Preferences");
@@ -106,6 +107,7 @@ $sel->title_is("Authorization Required");
 $error_msg = trim($sel->get_text("error_msg"));
 ok($error_msg =~ /^Sorry, you aren't a member of the 'editusers' group/,
   "Not a member of the editusers group");
+$sel->click_ok('header-account-menu-button');
 $sel->click_ok(
   "link=End sudo session impersonating " . $config->{unprivileged_user_login});
 $sel->wait_for_page_to_load_ok(WAIT_TIME);
@@ -115,8 +117,7 @@ $sel->is_text_present_ok("The sudo session has been ended");
 # Try to access the sudo page directly, with no credentials.
 
 $sel->open_ok(
-  "/relogin.cgi?action=begin-sudo&target_login=$config->{admin_user_login}"
-);
+  "/relogin.cgi?action=begin-sudo&target_login=$config->{admin_user_login}");
 $sel->title_is("Password Required");
 
 # The link should populate the target_login field correctly.
@@ -154,9 +155,7 @@ $sel->title_is("Password Required");
 
 # Same as above, but with your password.
 
-$sel->open_ok(
-  "/relogin.cgi?action=prepare-sudo&target_login=foo\@bar.com"
-);
+$sel->open_ok("/relogin.cgi?action=prepare-sudo&target_login=foo\@bar.com");
 $sel->title_is("Begin sudo session");
 $sel->value_is("target_login", 'foo@bar.com');
 $sel->type_ok(

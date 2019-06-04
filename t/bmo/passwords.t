@@ -3,17 +3,15 @@ use 5.10.1;
 use strict;
 use warnings;
 use autodie;
-use constant DRIVER => 'Test::Selenium::Remote::Driver';
 
-use Test::More 1.302;
+use Mojo::Base -strict;
+use Test::More;
+use Test::Selenium::Remote::Driver;
 
-#use constant DRIVER => 'Test::Selenium::Chrome';
 BEGIN {
   plan skip_all => "these tests only run in CI"
     unless $ENV{CI} && $ENV{CIRCLE_JOB} eq 'test_bmo';
 }
-
-use ok DRIVER;
 
 my $ADMIN_LOGIN  = $ENV{BZ_TEST_ADMIN} // 'admin@mozilla.bugs';
 my $ADMIN_PW_OLD = $ENV{BZ_TEST_ADMIN_PASS} // 'Te6Oovohch';
@@ -23,23 +21,24 @@ my @require_env = qw(
   BZ_BASE_URL
   BZ_TEST_NEWBIE
   BZ_TEST_NEWBIE_PASS
+  TWD_HOST
+  TWD_PORT
 );
 
-if (DRIVER =~ /Remote/) {
-  push @require_env, qw( TWD_HOST TWD_PORT );
-}
 my @missing_env = grep { !exists $ENV{$_} } @require_env;
 BAIL_OUT("Missing env: @missing_env") if @missing_env;
 
+my $sel = Test::Selenium::Remote::Driver->new(
+  base_url   => $ENV{BZ_BASE_URL},
+  browser    => 'firefox',
+  version    => '',
+  javascript => 1
+);
+
 eval {
-  my $sel = DRIVER->new(base_url => $ENV{BZ_BASE_URL});
   $sel->set_implicit_wait_timeout(600);
 
   login_ok($sel, $ADMIN_LOGIN, $ADMIN_PW_OLD);
-
-  change_password($sel, $ADMIN_PW_OLD, 'Ju9shiePhie6', 'zeeKuj0leib7');
-  $sel->title_is("Passwords Don't Match");
-  $sel->body_text_contains('The two passwords you entered did not match.');
 
   change_password($sel, $ADMIN_PW_OLD . "x", "newpassword2", "newpassword2");
   $sel->title_is("Incorrect Old Password");
@@ -158,7 +157,7 @@ done_testing();
 
 sub submit {
   my ($sel, $xpath) = @_;
-  $sel->find_element($xpath, 'xpath')->submit();
+  $sel->find_element($xpath, 'xpath')->click_ok('Submit OK');
 }
 
 sub get_token {
@@ -251,7 +250,7 @@ sub login {
   $sel->title_is("Log in to Bugzilla");
   click_and_type($sel, 'Bugzilla_login',    $login);
   click_and_type($sel, 'Bugzilla_password', $password);
-  submit($sel, '//*[@id="bugzilla-body"]//input[@name="GoAheadAndLogIn"]');
+  submit($sel, '//input[@id="log_in"]');
 }
 
 sub login_ok {

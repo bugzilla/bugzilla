@@ -39,8 +39,8 @@ $sel->type_ok("votesperuser",   10);
 $sel->type_ok("maxvotesperbug", 5);
 $sel->type_ok("votestoconfirm", 3);
 $sel->select_ok("security_group_id",   "label=core-security");
-$sel->select_ok("default_op_sys_id",   "Unspecified");
-$sel->select_ok("default_platform_id", "Unspecified");
+$sel->select_ok("default_op_sys_id",   "label=Unspecified");
+$sel->select_ok("default_platform_id", "label=Unspecified");
 $sel->click_ok('//input[@type="submit" and @value="Add"]');
 $sel->wait_for_page_to_load_ok(WAIT_TIME);
 $sel->title_is("Product Created");
@@ -54,9 +54,6 @@ $sel->type_ok(
   $config->{permanent_user},
   "Setting the default owner"
 );
-$sel->uncheck_ok("watch_user_auto");
-$sel->type_ok("watch_user", "pegasus\@eureka.bugs");
-$sel->check_ok("watch_user_auto");
 $sel->click_ok("create");
 $sel->wait_for_page_to_load_ok(WAIT_TIME);
 $sel->title_is("Component Created");
@@ -79,7 +76,8 @@ my $bug1_id = $sel->get_value('//input[@name="id" and @type="hidden"]');
 
 # Now vote for this bug.
 
-$sel->click_ok("link=vote");
+go_to_bug($sel, $bug1_id);
+$sel->click_ok("vote-btn");
 $sel->wait_for_page_to_load_ok(WAIT_TIME);
 $sel->title_is("Change Votes");
 
@@ -115,7 +113,8 @@ my $bug2_id = $sel->get_value('//input[@name="id" and @type="hidden"]');
 
 # Put enough votes on this bug to confirm it by popular votes.
 
-$sel->click_ok("link=vote");
+go_to_bug($sel, $bug2_id);
+$sel->click_ok("vote-btn");
 $sel->wait_for_page_to_load_ok(WAIT_TIME);
 $sel->title_is("Change Votes");
 $sel->type_ok("bug_$bug2_id", 5);
@@ -140,7 +139,8 @@ my $bug3_id = $sel->get_value('//input[@name="id" and @type="hidden"]');
 # to confirm the bug by popular votes.
 # We also change votes set on other bugs for testing purposes.
 
-$sel->click_ok("link=vote");
+go_to_bug($sel, $bug3_id);
+$sel->click_ok("vote-btn");
 $sel->wait_for_page_to_load_ok(WAIT_TIME);
 $sel->title_is("Change Votes");
 $sel->type_ok("bug_$bug1_id", 2);
@@ -166,7 +166,7 @@ ok(
 #        the bug we just visited and click the 'vote' link again.
 
 go_to_bug($sel, $bug3_id);
-$sel->click_ok("link=vote");
+$sel->click_ok("vote-btn");
 $sel->wait_for_page_to_load_ok(WAIT_TIME);
 $sel->title_is("Change Votes");
 
@@ -213,10 +213,8 @@ $sel->is_text_present_ok(
 
 # Go check that $bug2 has been correctly updated.
 
-$sel->click_ok("link=$bug2_id");
-$sel->wait_for_page_to_load_ok(WAIT_TIME);
-$sel->title_like(qr/$bug2_id /);
-$text = trim($sel->get_text("votes_container"));
+go_to_bug($sel, $bug2_id);
+$text = trim($sel->get_text("field-value-votes"));
 ok($text =~ /4 votes/, "4 votes remaining");
 
 # Decrease the number per user. Bugs should keep at least one vote,
@@ -236,10 +234,8 @@ $sel->is_text_present_ok("removed votes for bug");
 
 # Go check that $bug3 has been correctly updated.
 
-$sel->click_ok("link=$bug3_id");
-$sel->wait_for_page_to_load_ok(WAIT_TIME);
-$sel->title_like(qr/$bug3_id /);
-$text = trim($sel->get_text("votes_container"));
+go_to_bug($sel, $bug3_id);
+$text = trim($sel->get_text("field-value-votes"));
 ok($text =~ /2 votes/, "2 votes remaining");
 
 # Now disable UNCONFIRMED.

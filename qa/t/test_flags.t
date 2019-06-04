@@ -34,7 +34,7 @@ $sel->click_ok("categoryAction-include");
 $sel->wait_for_page_to_load_ok(WAIT_TIME);
 $sel->title_is("Create Flag Type for Bugs");
 $sel->remove_all_selections_ok("inclusion_to_remove");
-$sel->add_selection_ok("inclusion_to_remove", "label=__Any__:__Any__");
+$sel->select_ok("inclusion_to_remove", "label=__Any__:__Any__");
 $sel->click_ok("categoryAction-removeInclusion");
 $sel->wait_for_page_to_load_ok(WAIT_TIME);
 $sel->title_is("Create Flag Type for Bugs");
@@ -157,7 +157,7 @@ $sel->click_ok("categoryAction-include");
 $sel->wait_for_page_to_load_ok(WAIT_TIME);
 $sel->title_is("Create Flag Type for Attachments");
 $sel->remove_all_selections_ok("inclusion_to_remove");
-$sel->add_selection_ok("inclusion_to_remove", "label=__Any__:__Any__");
+$sel->select_ok("inclusion_to_remove", "label=__Any__:__Any__");
 $sel->click_ok("categoryAction-removeInclusion");
 $sel->wait_for_page_to_load_ok(WAIT_TIME);
 $sel->title_is("Create Flag Type for Attachments");
@@ -245,9 +245,7 @@ $sel->is_text_present_ok('has been added to the database',
 
 # All 3 bug flag types must be available; we are in the TestProduct product.
 
-$sel->click_ok("link=Bug $bug1_id");
-$sel->wait_for_page_to_load_ok(WAIT_TIME);
-$sel->title_like(qr/^$bug1_id .* test flags/);
+go_to_bug($sel, $bug1_id);
 $sel->is_text_present_ok("SeleniumBugFlag1Test");
 
 # We specify //select or //input, just to be sure. This is not required, though.
@@ -275,22 +273,26 @@ $sel->select_ok("flag_type-$flagtype2_id", "label=?");
 $sel->type_ok("requestee_type-$flagtype2_id", $config->{admin_user_login});
 $sel->select_ok("flag_type-$flagtype3_id", "label=?");
 $sel->type_ok("comment", "Setting all 3 flags to ?");
-$sel->click_ok("commit");
+$sel->click_ok('bottom-save-btn');
 $sel->wait_for_page_to_load_ok(WAIT_TIME);
 $sel->is_text_present_ok("Changes submitted for bug $bug1_id");
-$sel->click_ok("link=bug $bug1_id");
-$sel->wait_for_page_to_load_ok(WAIT_TIME);
-$sel->title_like(qr/^$bug1_id /);
+go_to_bug($sel, $bug1_id);
 
 # We need to store the new flag IDs.
 
-$sel->is_text_present_ok("$config->{admin_user_nick}: SeleniumBugFlag1Test");
+$sel->is_element_present_ok(
+  qq{//div[\@id="bug-flags"]/table/tbody/tr/td[\@class="flag-setter"]/div/a[\@data-user-email="$config->{admin_user_login}"]/../../../td[\@class="flag-name"]/*[text()="SeleniumBugFlag1Test"]}
+);
 my $flag1_1_id = $sel->get_attribute('//select[@title="bugflag1"]@id');
 $flag1_1_id =~ s/flag-//;
-$sel->is_text_present_ok("$config->{admin_user_nick}: SeleniumBugFlag2Test");
+$sel->is_element_present_ok(
+  qq{//div[\@id="bug-flags"]/table/tbody/tr/td[\@class="flag-setter"]/div/a[\@data-user-email="$config->{admin_user_login}"]/../../../td[\@class="flag-name"]/*[text()="SeleniumBugFlag2Test"]}
+);
 my $flag2_1_id = $sel->get_attribute('//select[@title="bugflag2"]@id');
 $flag2_1_id =~ s/flag-//;
-$sel->is_text_present_ok("$config->{admin_user_nick}: SeleniumBugFlag3Test");
+$sel->is_element_present_ok(
+  qq{//div[\@id="bug-flags"]/table/tbody/tr/td[\@class="flag-setter"]/div/a[\@data-user-email="$config->{admin_user_login}"]/../../../td[\@class="flag-name"]/a[normalize-space(text())="SeleniumBugFlag3Test"]}
+);
 my $flag3_1_id = $sel->get_attribute('//select[@title="bugflag3"]@id');
 $flag3_1_id =~ s/flag-//;
 
@@ -302,12 +304,10 @@ ok(
 );
 $sel->select_ok("flag_type-$flagtype1_id", "label=+");
 $sel->select_ok("flag_type-$flagtype2_id", "label=-");
-$sel->click_ok("commit");
+$sel->click_ok('bottom-save-btn');
 $sel->wait_for_page_to_load_ok(WAIT_TIME);
 $sel->is_text_present_ok("Changes submitted for bug $bug1_id");
-$sel->click_ok("link=bug $bug1_id");
-$sel->wait_for_page_to_load_ok(WAIT_TIME);
-$sel->title_like(qr/^$bug1_id /);
+go_to_bug($sel, $bug1_id);
 
 # Now let's test requestees. SeleniumBugFlag2Test requires the requestee
 # to be in the editbugs group.
@@ -317,35 +317,43 @@ $sel->type_ok("requestee_type-$flagtype1_id", $config->{admin_user_login});
 $sel->select_ok("flag_type-$flagtype2_id", "label=?");
 $sel->type_ok("requestee_type-$flagtype2_id",
   $config->{unprivileged_user_login});
-$sel->click_ok("commit");
+$sel->click_ok('bottom-save-btn');
 $sel->wait_for_page_to_load_ok(WAIT_TIME);
 $sel->title_is("Flag Requestee Not Authorized");
 $sel->go_back_ok();
 $sel->wait_for_page_to_load_ok(WAIT_TIME);
 $sel->title_like(qr/^$bug1_id /);
+
+# FIXME: Two issues that need to be investigated
+# 1. going back does not keep panels expanded
+# 2. to get the requestee field to display for the addl flags,
+#    we have to set to X and then back to ? for each one.
+$sel->click_ok('action-menu-btn',   'Expand action menu');
+$sel->click_ok('action-expand-all', 'Expand all modal panels');
+$sel->select_ok("flag_type-$flagtype1_id", "value=X");
+$sel->select_ok("flag_type-$flagtype1_id", "label=?");
+$sel->type_ok("requestee_type-$flagtype1_id", $config->{admin_user_login});
+$sel->select_ok("flag_type-$flagtype2_id", "value=X");
+$sel->select_ok("flag_type-$flagtype2_id", "label=?");
 $sel->type_ok("requestee_type-$flagtype2_id", $config->{admin_user_login});
-$sel->click_ok("commit");
+$sel->click_ok('bottom-save-btn');
 $sel->wait_for_page_to_load_ok(WAIT_TIME);
 $sel->is_text_present_ok("Changes submitted for bug $bug1_id");
-$sel->click_ok("link=bug $bug1_id");
-$sel->wait_for_page_to_load_ok(WAIT_TIME);
-$sel->title_like(qr/^$bug1_id /);
+go_to_bug($sel, $bug1_id);
 
 # Final tests for bug flags.
 
 $sel->select_ok("flag-$flag1_1_id", "value=X");
 $sel->select_ok("flag-$flag2_1_id", "label=+");
 $sel->select_ok("flag-$flag3_1_id", "label=-");
-$sel->click_ok("commit");
+$sel->click_ok('bottom-save-btn');
 $sel->wait_for_page_to_load_ok(WAIT_TIME);
 $sel->is_text_present_ok("Changes submitted for bug $bug1_id");
-$sel->click_ok("link=bug $bug1_id");
-$sel->wait_for_page_to_load_ok(WAIT_TIME);
-$sel->title_like(qr/^$bug1_id /);
+go_to_bug($sel, $bug1_id);
 
 # Now we test attachment flags.
 
-$sel->click_ok("link=Add an attachment");
+$sel->click_ok('attachments-add-link', 'Add an attachment');
 $sel->wait_for_page_to_load_ok(WAIT_TIME);
 $sel->title_is("Create New Attachment for Bug #$bug1_id");
 $sel->attach_file('//input[@name="data"]', $config->{attachment_file});
@@ -425,24 +433,24 @@ my $attachment3_id = $1;
 
 # Display the bug and check flags are correctly set.
 
-$sel->click_ok("link=bug $bug1_id");
-$sel->wait_for_page_to_load_ok(WAIT_TIME);
-$sel->title_like(qr/^$bug1_id /);
-$sel->is_text_present_ok(
-  "$config->{admin_user_nick}: SeleniumAttachmentFlag1Test? ($config->{admin_user_nick})"
-);
-$sel->is_text_present_ok(
-  "$config->{admin_user_nick}: SeleniumAttachmentFlag2Test?");
-$sel->is_text_present_ok(
-  "$config->{admin_user_nick}: SeleniumAttachmentFlag1Test+");
+go_to_bug($sel, $bug1_id, 1);
 
-# We marked the first attachment as obsolete, so it should have no flag on it.
-$sel->is_text_present_ok("no flags");
+# FIME: OMG there must be a better way :(
+$sel->is_element_present_ok(
+  qq{//div[\@class="attach-flag"]/div/span[text()="$config->{admin_user_nick}"]/../..//a[normalize-space(text())="SeleniumAttachmentFlag1Test?"]/../div[2]/span[text()="$config->{admin_user_nick}"]}
+);
+$sel->is_element_present_ok(
+  qq{//div[\@class="attach-flag"]/div/span[text()="$config->{admin_user_nick}"]/../..//a[normalize-space(text())="SeleniumAttachmentFlag2Test?"]}
+);
+$sel->is_element_present_ok(
+  qq{//div[\@class="attach-flag"]/div/span[text()="$config->{admin_user_nick}"]/../..//a[normalize-space(text())="SeleniumAttachmentFlag1Test+"]}
+);
 
 # Make the bug public and log out.
 
+$sel->click_ok('mode-btn-readonly', 'Click Edit Bug');
 $sel->uncheck_ok('//input[@name="groups" and @value="Master"]');
-$sel->click_ok("commit");
+$sel->click_ok('bottom-save-btn');
 $sel->wait_for_page_to_load_ok(WAIT_TIME);
 $sel->is_text_present_ok("Changes submitted for bug $bug1_id");
 logout($sel);
@@ -454,12 +462,10 @@ go_to_bug($sel, $bug1_id);
 
 # No privs are required to clear this flag.
 $sel->select_ok("flag-$flag3_1_id", "value=X");
-$sel->click_ok("commit");
+$sel->click_ok('bottom-save-btn');
 $sel->wait_for_page_to_load_ok(WAIT_TIME);
 $sel->is_text_present_ok("Changes submitted for bug $bug1_id");
-$sel->click_ok("link=bug $bug1_id");
-$sel->wait_for_page_to_load_ok(WAIT_TIME);
-$sel->title_like(qr/^$bug1_id /);
+go_to_bug($sel, $bug1_id);
 
 # editbugs privs are required to clear this flag, so no other option
 # should be displayed besides the currently set "+".
@@ -487,10 +493,8 @@ $sel->is_element_present_ok(
 
 # Add an attachment and set flags on it.
 
-$sel->click_ok("link=Bug $bug1_id");
-$sel->wait_for_page_to_load_ok(WAIT_TIME);
-$sel->title_like(qr/^$bug1_id/);
-$sel->click_ok("link=Add an attachment");
+go_to_bug($sel, $bug1_id);
+$sel->click_ok('attachments-add-link', 'Add an attachment');
 $sel->wait_for_page_to_load_ok(WAIT_TIME);
 $sel->title_is("Create New Attachment for Bug #$bug1_id");
 $sel->attach_file('//input[@name="data"]', $config->{attachment_file});
@@ -501,10 +505,9 @@ $sel->type_ok('//input[@name="description"]', "patch, v4");
 
 # canconfirm/editbugs privs are required to edit this flag.
 
-ok(
-  !$sel->is_editable("flag_type-$aflagtype1_id"),
-  "Flag type non editable by powerless users"
-);
+$sel->is_element_present_ok(
+  qq{//select[\@id="flag_type-$aflagtype1_id"][\@disabled]},
+  "Flag type non editable by powerless user");
 
 # No privs are required to edit this flag.
 
@@ -513,11 +516,10 @@ $sel->type_ok("comment", "granting again");
 $sel->click_ok("create");
 $sel->wait_for_page_to_load_ok(WAIT_TIME);
 $sel->is_text_present_ok('regexp:Attachment #\d+ to bug \d+ created');
-$sel->click_ok("link=bug $bug1_id");
-$sel->wait_for_page_to_load_ok(WAIT_TIME);
-$sel->title_like(qr/^$bug1_id/);
-$sel->is_text_present_ok(
-  "$config->{unprivileged_user_nick}: SeleniumAttachmentFlag2Test+");
+go_to_bug($sel, $bug1_id, 1);
+$sel->is_element_present_ok(
+  qq{//div[\@class="attach-flag"]/div/span[text()="$config->{unprivileged_user_nick}"]/../..//a[normalize-space(text())="SeleniumAttachmentFlag2Test+"]}
+);
 logout($sel);
 
 # Final tests as an admin. He has editbugs privs, so he can edit

@@ -417,7 +417,7 @@
   IF bug && bug.groups_in.size;
     is_security_bug = 0;
     FOREACH group IN bug.groups_in;
-      IF group.name.match('^(.*security|\w+sec)$'); is_security_bug = 1; END;
+      is_security_bug = 1 IF group.secure_mail;
     END;
 %]
   <div id="private-bug-banner" class="[% IF is_security_bug %]security[% ELSE %]confidential[% END %]">

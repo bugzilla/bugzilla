@@ -149,7 +149,7 @@ $(function() {
 
         const link_formatter = ({ data, value }) =>
           `<a href="${BUGZILLA.config.basepath}show_bug.cgi?id=${data.bug_id}" target="_blank">
-          ${String(value).htmlEncode()}</a>`;
+          ${isNaN(value) ? value.htmlEncode().wbr() : value}</a>`;
 
         lastChangesQuery = new Y.DataSource.IO({ source: `${BUGZILLA.config.basepath}jsonrpc.cgi` });
 

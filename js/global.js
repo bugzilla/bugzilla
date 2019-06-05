@@ -210,6 +210,25 @@ if (!String.prototype.htmlEncode) {
     })();
 }
 
+// Insert `<wbr>` HTML tags to camel and snake case words as well as
+// words containing dots in the given string so a long bug summary,
+// for example, will be wrapped in a preferred manner rather than
+// overflowing or expanding the parent element. This conversion
+// should exclude existing HTML tags such as links. Examples:
+// * `test<wbr>_switch<wbr>_window<wbr>_content<wbr>.py`
+// * `Test<wbr>Switch<wbr>To<wbr>Window<wbr>Content`
+// * `<a href="https://www.mozilla.org/">mozilla<wbr>.org</a>`
+// * `MOZILLA<wbr>_PKIX<wbr>_ERROR<wbr>_MITM<wbr>_DETECTED`
+// This is the JavaScript version of `wbr` in Bugzilla/Template.pm.
+if (!String.prototype.wbr) {
+    (function() {
+        String.prototype.wbr = function() {
+            return this.replace(/([a-z])([A-Z])(?![^<]*>)/g, '$1<wbr>$2')
+                       .replace(/([A-Za-z0-9])([\._])(?![^<]*>)/g, '$1<wbr>$2');
+        };
+    })();
+}
+
 // our auto-completion disables browser native autocompletion, however this
 // excludes it from being restored by bf-cache.  trick the browser into
 // restoring by changing the autocomplete attribute when a page is hidden and

@@ -707,9 +707,11 @@ sub create {
       # * `test<wbr>_switch<wbr>_window<wbr>_content<wbr>.py`
       # * `Test<wbr>Switch<wbr>To<wbr>Window<wbr>Content`
       # * `<a href="https://www.mozilla.org/">mozilla<wbr>.org</a>`
+      # * `MOZILLA<wbr>_PKIX<wbr>_ERROR<wbr>_MITM<wbr>_DETECTED`
       wbr => sub {
         my ($var) = @_;
-        $var =~ s/([a-z])([A-Z\._])(?![^<]*>)/$1<wbr>$2/g;
+        $var =~ s/([a-z])([A-Z])(?![^<]*>)/$1<wbr>$2/g;
+        $var =~ s/([A-Za-z0-9])([\._])(?![^<]*>)/$1<wbr>$2/g;
         return $var;
       },
 

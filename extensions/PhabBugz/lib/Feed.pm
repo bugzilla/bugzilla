@@ -508,8 +508,12 @@ sub process_revision_change {
     $attachment->update($timestamp);
   }
 
-  # Set status to request-review if revision is new and in draft state
-  if ($is_new && $revision->status eq 'draft') {
+  # Set status to request-review if revision is new and
+  # in draft state and not changes-planned
+  if ($is_new
+      && $revision->status ne 'changes-planned'
+      && ($revision->is_draft && !$revision->hold_as_draft))
+  {
     INFO("Moving from draft to needs-review");
     $revision->set_status('request-review');
   }

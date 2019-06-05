@@ -33,6 +33,8 @@ has phid             => (is => 'ro',   isa => Str);
 has title            => (is => 'ro',   isa => Str);
 has summary          => (is => 'ro',   isa => Str);
 has status           => (is => 'ro',   isa => Str);
+has is_draft         => (is => 'ro',   isa => Bool | JSONBool);
+has hold_as_draft    => (is => 'ro',   isa => Bool | JSONBool);
 has creation_ts      => (is => 'ro',   isa => Str);
 has modification_ts  => (is => 'ro',   isa => Str);
 has author_phid      => (is => 'ro',   isa => Str);
@@ -105,6 +107,8 @@ sub BUILDARGS {
   $params->{title}           = $params->{fields}->{title};
   $params->{summary}         = $params->{fields}->{summary};
   $params->{status}          = $params->{fields}->{status}->{value};
+  $params->{is_draft}        = $params->{fields}->{isDraft};
+  $params->{hold_as_draft}   = $params->{fields}->{holdAsDraft};
   $params->{creation_ts}     = $params->{fields}->{dateCreated};
   $params->{modification_ts} = $params->{fields}->{dateModified};
   $params->{author_phid}     = $params->{fields}->{authorPHID};

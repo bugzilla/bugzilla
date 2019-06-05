@@ -16,9 +16,10 @@
     </th>
     <td colspan="3">
       <div id="user_story_header">
-          <span id="user_story_edit">
-            (<a href="javascript:void(0)" id="user_story_edit_action">edit</a>)
-          </span>
+        <span id="user_story_edit">
+          <button type="button" class="minor"
+                  id="user_story_edit_action">Edit</button>
+        </span>
       </div>
       <div id="user_story_edit_container" class="bz_default_hidden">
         [% user_story_default = cloned_bug ? cloned_bug.cf_user_story : default.cf_user_story %]

@@ -415,8 +415,9 @@ TUI_hide_default('expert_fields');
       %]
       [% UNLESS assigned_to_disabled %]
         <span id="take_bug">
-        &nbsp;(<a title="Assign to yourself" href="#"
-                  onclick="return take_bug('[% user.login FILTER js %]')">take</a>)
+          <button title="Assign to yourself"
+                  type="button" class="minor"
+                  onclick="return take_bug('[% user.login FILTER js %]')">Take</button>
         </span>
       [% END %]
       <noscript>(Leave blank to assign to component's default assignee)</noscript>

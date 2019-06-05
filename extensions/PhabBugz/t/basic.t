@@ -21,6 +21,7 @@ use Bugzilla::Test::Util qw(mock_useragent_tx);
 use Carp;
 use Try::Tiny;
 
+use ok 'Bugzilla::Extension::PhabBugz::Constants';
 use ok 'Bugzilla::Extension::PhabBugz::Feed';
 use ok 'Bugzilla::Extension::PhabBugz::Util', qw( get_attachment_revisions );
 can_ok('Bugzilla::Extension::PhabBugz::Feed', 'group_query');
@@ -60,7 +61,7 @@ local Bugzilla->params->{phabricator_base_uri} = 'http://fake.fabricator.tld';
 my $Bugzilla = mock 'Bugzilla' => (
   override => [
     'dbh'  => sub { mock() },
-    'user' => sub { Bugzilla::User->new({name => 'phab-bot@bmo.tld'}) },
+    'user' => sub { Bugzilla::User->new({name => PHAB_AUTOMATION_USER}) },
   ],
 );
 
@@ -77,11 +78,18 @@ my $BugzillaUser = mock 'Bugzilla::User' => (
   override        => [
     'new' => sub {
       my ($class, $hash) = @_;
-      if ($hash->{name} eq 'phab-bot@bmo.tld') {
+      if ($hash->{name} eq PHAB_AUTOMATION_USER) {
         return $class->fake_new(
           id         => 8_675_309,
-          login_name => 'phab-bot@bmo.tld',
+          login_name => PHAB_AUTOMATION_USER,
           realname   => 'Fake PhabBot'
+        );
+      }
+      elsif ($hash->{name} eq LANDO_AUTOMATION_USER) {
+        return $class->fake_new(
+          id         => 8_675_309,
+          login_name => LANDO_AUTOMATION_USER,
+          realname   => 'Fake Lando Bot'
         );
       }
       else {
@@ -90,7 +98,6 @@ my $BugzillaUser = mock 'Bugzilla::User' => (
     'match' => sub { [mock()] },
   ],
 );
-
 
 my $feed = Bugzilla::Extension::PhabBugz::Feed->new;
 

@@ -104,6 +104,25 @@ if (!Bugzilla::User->new({name => $phab_login})) {
     });
   }
 }
+
+##########################################################################
+# Create Lando Automation Bot
+##########################################################################
+
+my $lando_login    = $ENV{LANDO_BOT_LOGIN}    || 'lobot@bmo.tld';
+my $lando_password = $ENV{LANDO_BOT_PASSWORD} || 'password123456789!';
+
+print "creating lando automation account...\n";
+if (!Bugzilla::User->new({name => $lando_login})) {
+  my $new_user = Bugzilla::User->create(
+    {
+      login_name    => $lando_login,
+      realname      => 'Lando Automation',
+      cryptpassword => $lando_password
+    },
+  );
+}
+
 ##########################################################################
 # Add Users to Groups
 ##########################################################################

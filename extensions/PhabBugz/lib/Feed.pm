@@ -266,7 +266,7 @@ sub group_query {
   # 1. Load flattened list of group members
   # 2. Check to see if Phab project exists for 'bmo-<group_name>'
   # 3. Create if does not exist with locked down policy.
-  # 4. Set project members to exact list including phab-bot user
+  # 4. Set project members to exact list including phab-bot and lando bot user
   # 5. Profit
 
   my $sync_groups = Bugzilla::Group->match({isactive => 1, isbuggroup => 1});
@@ -277,6 +277,14 @@ sub group_query {
   my $phab_user
     = Bugzilla::Extension::PhabBugz::User->new_from_query({
     ids => [$phab_bmo_user->id]
+    });
+
+  # Also load lando bot user to add as a member of each project
+  my $lando_bmo_user
+    = Bugzilla::User->new({name => LANDO_AUTOMATION_USER, cache => 1});
+  my $lando_user
+    = Bugzilla::Extension::PhabBugz::User->new_from_query({
+    ids => [$lando_bmo_user->id]
     });
 
   # secure-revision project that will be used for bmo group projects
@@ -316,7 +324,7 @@ sub group_query {
     # make policy changes to the private revisions
     INFO("Checking project members for " . $project->name);
     my $set_members          = $self->get_group_members($group);
-    my @set_member_phids     = uniq map { $_->phid } (@$set_members, $phab_user);
+    my @set_member_phids     = uniq map { $_->phid } (@$set_members, $phab_user, $lando_user);
     my @current_member_phids = uniq map { $_->phid } @{$project->members};
     my ($removed, $added) = diff_arrays(\@current_member_phids, \@set_member_phids);
 

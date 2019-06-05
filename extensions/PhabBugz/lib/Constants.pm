@@ -13,6 +13,7 @@ use warnings;
 
 use base qw(Exporter);
 our @EXPORT = qw(
+  LANDO_AUTOMATION_USER
   PHAB_AUTOMATION_USER
   PHAB_ATTACHMENT_PATTERN
   PHAB_CONTENT_TYPE
@@ -22,6 +23,7 @@ our @EXPORT = qw(
   PHAB_TIMEOUT
 );
 
+use constant LANDO_AUTOMATION_USER   => 'lobot@bmo.tld';
 use constant PHAB_ATTACHMENT_PATTERN => qr/^phabricator-D(\d+)/;
 use constant PHAB_AUTOMATION_USER    => 'phab-bot@bmo.tld';
 use constant PHAB_CONTENT_TYPE       => 'text/x-phabricator-request';

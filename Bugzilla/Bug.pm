@@ -4524,7 +4524,9 @@ sub GetBugActivity {
   # Use DISTINCT and value comparison to suppress duplicated changes weirdly
   # made at the same time by the same user
   my $query
-    = "SELECT DISTINCT fielddefs.name, bugs_activity.attach_id, "
+    = "SELECT DISTINCT fielddefs.name,
+               bugs_activity.id AS activity_id,
+               bugs_activity.attach_id, "
     . $dbh->sql_date_format('bugs_activity.bug_when', '%Y.%m.%d %H:%i:%s')
     . " AS bug_when, bugs_activity.removed, bugs_activity.added, profiles.login_name,
                bugs_activity.comment_id
@@ -4555,6 +4557,7 @@ sub GetBugActivity {
     $query .= "
             UNION ALL
             SELECT 'comment_tag' AS name,
+                   NULL AS activity_id,
                    NULL AS attach_id,"
       . $dbh->sql_date_format('longdescs_tags_activity.bug_when',
       '%Y.%m.%d %H:%i:%s')
@@ -4574,7 +4577,7 @@ sub GetBugActivity {
     push @args, $starttime if defined $starttime;
   }
 
-  $query .= "ORDER BY bug_when, comment_id";
+  $query .= "ORDER BY bug_when, comment_id, activity_id";
 
   my $list = $dbh->selectall_arrayref($query, undef, @args);
 
@@ -4584,7 +4587,7 @@ sub GetBugActivity {
   my $incomplete_data = 0;
 
   foreach my $entry (@$list) {
-    my ($fieldname, $attachid, $when, $removed, $added, $who, $comment_id)
+    my ($fieldname, $activity_id, $attachid, $when, $removed, $added, $who, $comment_id)
       = @$entry;
     my %change;
     my $activity_visible = 1;

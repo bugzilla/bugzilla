@@ -330,7 +330,7 @@ window.addEventListener('DOMContentLoaded', () => {
       divButton.setAttribute("id", "crash-stop-usf-button");
       divButton.setAttribute("style", "display:none;");
       button.setAttribute("type", "button");
-      button.setAttribute("style", "position:absolute;right:0;bottom:2px");
+      button.setAttribute("style", "position:absolute;right:0;top:0");
       button.innerText = "Update status flags";
       button.addEventListener("click", updateStatusFlags, false);
       divButton.append(button);

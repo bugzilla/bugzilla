@@ -283,9 +283,10 @@ sub login {
   # At this point, we now know if a real person is logged in.
 
   # Check if a password reset is required
-  my $cgi         = Bugzilla->cgi;
-  my $script_name = $cgi->script_name;
-  my $do_logout   = $cgi->param('logout');
+  my $cgi           = Bugzilla->cgi;
+  my $script_name   = $cgi->script_name;
+  my $do_logout     = $cgi->param('logout');
+  my $on_token_page = $script_name eq '/token.cgi';
 
   if ($authenticated_user->password_change_required) {
 
@@ -319,7 +320,6 @@ sub login {
     my $expired      = defined $date && $date < DateTime->now;
     my $on_mfa_page
       = $script_name eq '/userprefs.cgi' && $cgi->param('tab') eq 'mfa';
-    my $on_token_page = $script_name eq '/token.cgi';
 
     Bugzilla->request_cache->{mfa_warning}              = 1;
     Bugzilla->request_cache->{mfa_grace_period_expired} = $expired;
@@ -393,9 +393,12 @@ sub login {
 
   # If Mojo native app is requesting login, we need to possibly redirect
   my $C = $Bugzilla::App::CGI::C;
-  if ($C->session->{override_login_target}) {
-    my $mojo_url = Mojo::URL->new($C->session->{override_login_target});
-    $mojo_url->query($C->session->{cgi_params});
+  my $session = $C->session;
+  if (!$on_token_page && $session->{override_login_target}) {
+    my $override_login_target = delete $session->{override_login_target};
+    my $cgi_params            = delete $session->{cgi_params};
+    my $mojo_url              = Mojo::URL->new($override_login_target);
+    $mojo_url->query($cgi_params);
     $C->redirect_to($mojo_url);
   }
 

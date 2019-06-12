@@ -173,7 +173,6 @@ sub bug_revisions {
     my $revision_data = {
       id          => 'D' . $revision_obj->id,
       sortkey     => $revision_obj->id,
-      author      => $revision_obj->author->name,
       status      => $revision_obj->status,
       long_status => $revision_status_map->{$revision_obj->status}
         || $revision_obj->status

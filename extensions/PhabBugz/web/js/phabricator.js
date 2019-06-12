@@ -20,7 +20,6 @@ Phabricator.getBugRevisions = function() {
         var trRevision     = tr.clone();
         var tdId           = td.clone();
         var tdTitle        = td.clone();
-        var tdAuthor       = td.clone();
         var tdRevisionStatus       = td.clone();
         var tdReviewers    = td.clone();
         var tableReviews   = table.clone();
@@ -36,8 +35,6 @@ Phabricator.getBugRevisions = function() {
 
         tdTitle.text(revision.title);
         tdTitle.addClass('phabricator-title');
-
-        tdAuthor.text(revision.author);
 
         spanRevisionStatusIcon.addClass('revision-status-icon-' + revision.status);
         spanRevisionStatus.append(spanRevisionStatusIcon);
@@ -72,7 +69,6 @@ Phabricator.getBugRevisions = function() {
         trRevision.append(
             tdId,
             tdTitle,
-            tdAuthor,
             tdRevisionStatus,
             tdReviewers
         );

@@ -202,6 +202,59 @@ So if you are looking for bugs reported by any user being in the
 
     reporter   equals   "%group.editbugs%"
 
+.. _relative-dates:
+
+Searching on Relative Dates
+---------------------------
+
+In order to conduct searches over a window of time, you can use *relative dates* in query values. 
+
+The relative date values are of the form `nnV` where `nn` is a positive or negative integer and `V` is one of:
+
+* `h` – for hours
+* `d` – for days
+* `w` – for weeks
+* `m` – for months
+* `y` – for years
+
+A value of `1d` means 24 hours in the future from the time of the search. 
+
+A value of `-1d` means 24 hours in the past from the time of the search.
+
+These relative values can be used when the :guilabel:`Custom Search` operator is one of:
+
+* :guilabel:`is less than`
+* :guilabel:`is less than or equal to`
+* :guilabel:`is greater than`
+* :guilabel:`is greater than or equal to`
+
+and the field compared is a Datetime type.
+
+To find bugs opened in the last 24 hours, you could search on:
+
+    Opened   is less than   "-1d"
+    
+To find bugs opened during the current day (UTC),
+
+    Opened   is less than   "-0ds"
+    
+Appending `s` to a relative date means *start of*.
+
+You may also use relative dates for when a field changed. In the :guilabel:`Custom Search` operator that would be
+
+* :guilabel:`changed after`
+* :guilabel:`changed before`
+
+To find bugs whose :guilabel:`priority` changed in the last seven days, search on:
+
+    Priority   changed after   "-1w"
+
+You can also search for a change to a particular value over a relative date using the :guilabel:`Search by Change History` operator.
+
+To find the bugs `RESOLVED` as `WONTFIX` in the current year to date, you would search on
+
+    Resolution   changed to "WONTFIX"   between "-0ys" and "NOW"
+
 .. _list:
 
 Bug Lists

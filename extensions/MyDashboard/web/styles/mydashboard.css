@@ -27,6 +27,11 @@
   font-size: var(--font-size-large) !important;
 }
 
+.yui3-datatable-col-short_desc a:hover,
+.yui3-datatable-col-short_desc a:focus {
+  color: var(--hovered-link-text-color) !important;
+}
+
 #mydashboard .requests {
   margin-bottom: 2em;
 }

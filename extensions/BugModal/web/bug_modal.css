@@ -242,6 +242,10 @@ input[type="number"] {
   font-size: var(--font-size-large);
 }
 
+#field-value-bug_id a {
+  color: inherit;
+}
+
 #field-value-short_desc {
   margin: 0;
   font-size: var(--font-size-h3);
@@ -311,13 +315,21 @@ input[type="number"] {
 
 #user-story {
   margin: 8px;
+  width: calc(100% - 150px);
   min-height: 1em;
-  font-size: inherit;
+  font-size: var(--font-size-large);
+  line-height: var(--line-height-comfortable);
   font-family: inherit;
+  white-space: pre-wrap;
 }
 
 #user-story-actions {
   float: right;
+}
+
+#cf_user_story {
+  width: calc(100% - 150px);
+  font-size: var(--font-size-large);
 }
 
 #new-comment-notice {

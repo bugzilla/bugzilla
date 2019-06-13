@@ -2344,6 +2344,8 @@ div.bz_comment_text pre {
   padding: 12px;
   color: var(--primary-text-color);
   background-color: var(--primary-text-background-color);
+  font-size: var(--font-size-x-large);
+  line-height: var(--line-height-comfortable);
 }
 
 pre#comment_preview_text {

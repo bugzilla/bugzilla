@@ -192,7 +192,7 @@ td.bz_total {
 .bz_short_desc_column a:focus,
 .bz_short_short_desc_column a:hover,
 .bz_short_short_desc_column a:focus {
-  color: var(--secondary-label-color);
+  color: var(--hovered-link-text-color);
 }
 
 #request_form #filtering th {

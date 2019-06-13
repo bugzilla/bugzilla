@@ -8,7 +8,7 @@
 [role="button"] {
   outline: 0;
   border: 0;
-  padding: 0;
+  padding: 0 !important;
   color: inherit;
   background: none transparent !important;
   box-shadow: none !important;

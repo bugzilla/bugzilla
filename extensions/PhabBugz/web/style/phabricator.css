@@ -59,8 +59,6 @@ span[class^="revision-status-box-"] {
   border: none;
   border-radius: 3px;
   padding: 3px 9px;
-  font-size: var(--font-size-x-large);
-  font-weight: normal;
   white-space: nowrap;
 }
 

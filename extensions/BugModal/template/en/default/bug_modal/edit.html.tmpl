@@ -178,7 +178,9 @@
         view_only = 1
     %]
       <div id="field-value-bug_id">
-        [% terms.Bug _ " " _ bug.id FILTER none %]
+        <a href="[% basepath _ "show_bug.cgi?id=" _ bug.id FILTER html %]">
+          [%~ terms.Bug _ " " _ bug.id FILTER none ~%]
+        </a>
         [% IF bug.alias %]
           <span class="edit-hide">
             ([% bug.alias FILTER html %])

@@ -411,6 +411,7 @@ LOG4PERL_CONFIG_FILE
   If the file is given as a relative path, it will belative to the /app/conf/ directory.
 
 .. _`Devel::NYTProf`: https://metacpan.org/pod/Devel::NYTProf
+
 .. _`Log::Log4perl`: https://metacpan.org/pod/Log::Log4perl
 
 LOG4PERL_STDERR_DISABLE
@@ -419,6 +420,27 @@ LOG4PERL_STDERR_DISABLE
 
   Note: For programs that run using the `cereal` log aggregator, this environemnt
   variable will be ignored.
+
+
+Logging Configuration
+---------------------
+
+How Bugzilla logs is entirely configured by the environmental variable
+`LOG4PERL_CONFIG_FILE`.  This config file should be familiar to someone
+familiar with log4j, and it is extensively documented in `Log::Log4perl`_.
+
+Many examples are provided in the logs/ directory.
+
+If multiple processes will need to log, it should be configured to log to a socket on port 5880.
+This will be the "cereal" daemon, which will only be started for jobqueue and httpd-type containers.
+
+The example log config files will often be configured to log to stderr
+themselves.  To prevent duplicate lines (or corrupted log messages), stderr
+logging should be filtered on the existence of the LOG4PERL_STDERR_DISABLE
+environmental variable.
+
+Logging configuration also controls which errors are sent to Sentry.
+
 
 Persistent Data Volume
 ----------------------

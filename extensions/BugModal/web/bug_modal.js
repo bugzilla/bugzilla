@@ -282,6 +282,11 @@ $(function() {
                         $('#ccr-' + $(this).data('n')).css('visibility', 'hidden');
                     }
                 );
+                $('#cc-list .show_usermenu').click(function() {
+                    const $this = $(this);
+                    return show_usermenu($this.data('user-id'), $this.data('user-email'), $this.data('show-edit'),
+                        $this.data('hide-profile'));
+                });
                 $('#cc-list .cc-remove')
                     .click(function(event) {
                         event.preventDefault();

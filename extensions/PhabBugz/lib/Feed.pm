@@ -447,6 +447,9 @@ sub process_revision_change {
       $revision->make_private($set_project_names);
     }
 
+    # Always make sure secure-revison and proper bmo-<group> project tags are on the revision.
+    $revision->set_private_project_tags($set_project_names);
+
     # Subscriber list of the private revision should always match
     # the bug roles such as assignee, qa contact, and cc members.
     my $subscribers = get_bug_role_phids($bug);

@@ -433,15 +433,10 @@ sub remove_project {
 sub make_private {
   my ($self, $project_names) = @_;
 
-  my $secure_revision_project
-    = Bugzilla::Extension::PhabBugz::Project->new_from_query({
-    name => 'secure-revision'
-    });
-
   my @set_projects;
   foreach my $name (@$project_names) {
-    my $set_project
-      = Bugzilla::Extension::PhabBugz::Project->new_from_query({name => $name});
+    my $set_project = $self->{"_project_${name}"} ||=
+      Bugzilla::Extension::PhabBugz::Project->new_from_query({name => $name});
     push @set_projects, $set_project;
   }
 
@@ -449,18 +444,14 @@ sub make_private {
   $self->set_policy('view', $new_policy->phid);
   $self->set_policy('edit', $new_policy->phid);
 
-  foreach my $project ($secure_revision_project, @set_projects) {
-    $self->add_project($project->phid);
-  }
-
   return $self;
 }
 
 sub make_public {
   my ($self) = @_;
 
-  my $editbugs
-    = Bugzilla::Extension::PhabBugz::Project->new_from_query({
+  my $editbugs = $self->{'_project_bmo-editbugs-team'} ||=
+    Bugzilla::Extension::PhabBugz::Project->new_from_query({
     name => 'bmo-editbugs-team'
     });
 
@@ -474,6 +465,26 @@ sub make_public {
   }
 
   return $self;
+}
+
+sub set_private_project_tags {
+  my ($self, $project_names) = @_;
+
+  my $secure_revision_project = $self->{'_project_secure-revision'} ||=
+    Bugzilla::Extension::PhabBugz::Project->new_from_query({
+    name => 'secure-revision'
+    });
+
+  my @set_projects;
+  foreach my $name (@$project_names) {
+    my $set_project = $self->{"_project_${name}"} ||=
+      Bugzilla::Extension::PhabBugz::Project->new_from_query({name => $name});
+    push @set_projects, $set_project;
+  }
+
+  foreach my $project ($secure_revision_project, @set_projects) {
+    $self->add_project($project->phid);
+  }
 }
 
 1;

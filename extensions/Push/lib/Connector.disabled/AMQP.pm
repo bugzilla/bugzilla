@@ -28,7 +28,7 @@ sub init {
     $self->{queue_name} = $self->config->{queue};
   }
   else {
-    my $queue_name = Bugzilla->localconfig->{'urlbase'};
+    my $queue_name = Bugzilla->localconfig->urlbase;
     $queue_name =~ s#^https?://##;
     $queue_name =~ s#/$#|#;
     $queue_name .= generate_random_password(16);

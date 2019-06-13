@@ -25,7 +25,7 @@ use Test::Mojo;
 
 my $oauth_login    = 'oauth@mozilla.bugs';
 my $oauth_password = 'password123456789!';
-my $referer        = Bugzilla->localconfig->{urlbase};
+my $referer        = Bugzilla->localconfig->urlbase;
 my $stash          = {};
 
 # Create user to use as OAuth2 resource owner

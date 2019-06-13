@@ -162,11 +162,11 @@ sub connect_shadow {
   $connect_params->{db_port} = Bugzilla->get_param_with_override('shadowdbport');
   $connect_params->{db_sock} = Bugzilla->get_param_with_override('shadowdbsock');
 
-  if ( Bugzilla->localconfig->{'shadowdb_user'}
-    && Bugzilla->localconfig->{'shadowdb_pass'})
+  if ( Bugzilla->localconfig->shadowdb_user
+    && Bugzilla->localconfig->shadowdb_pass)
   {
-    $connect_params->{db_user} = Bugzilla->localconfig->{'shadowdb_user'};
-    $connect_params->{db_pass} = Bugzilla->localconfig->{'shadowdb_pass'};
+    $connect_params->{db_user} = Bugzilla->localconfig->shadowdb_user;
+    $connect_params->{db_pass} = Bugzilla->localconfig->shadowdb_pass;
   }
   return $shadow_dbh = _connect($connect_params);
 }
@@ -292,7 +292,7 @@ sub bz_create_database {
 
   # See if we can connect to the actual Bugzilla database.
   my $conn_success = eval { $dbh = connect_main() };
-  my $db_name      = Bugzilla->localconfig->{db_name};
+  my $db_name      = Bugzilla->localconfig->db_name;
 
   if (!$conn_success) {
     $dbh = _get_no_db_connection();
@@ -511,7 +511,7 @@ sub bz_server_version {
 sub bz_last_key {
   my ($self, $table, $column) = @_;
 
-  return $self->last_insert_id(Bugzilla->localconfig->{db_name},
+  return $self->last_insert_id(Bugzilla->localconfig->db_name,
     undef, $table, $column);
 }
 

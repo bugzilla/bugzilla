@@ -209,7 +209,7 @@ sub _get_apachectl {
 sub check_webdotbase {
   my ($output) = @_;
 
-  my $webdotbase = Bugzilla->localconfig->{'webdotbase'};
+  my $webdotbase = Bugzilla->localconfig->webdotbase;
   return 1 if $webdotbase =~ /^https?:/;
 
   my $return;
@@ -241,7 +241,7 @@ sub check_webdotbase {
 sub check_font_file {
   my ($output) = @_;
 
-  my $font_file = Bugzilla->localconfig->{'font_file'};
+  my $font_file = Bugzilla->localconfig->font_file;
 
   my $readable;
   $readable = 1 if -r $font_file;

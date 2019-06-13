@@ -673,7 +673,7 @@ sub _get_new_bugmail_fields {
 
 sub _parse_see_also {
   my (@links) = @_;
-  my $urlbase = Bugzilla->localconfig->{urlbase};
+  my $urlbase = Bugzilla->localconfig->urlbase;
   my $bug_link_re = qr/^\Q$urlbase\Eshow_bug\.cgi\?id=(\d+)$/;
 
   return grep { /^\d+$/ } map { /$bug_link_re/ ? int($1) : () } @links;

@@ -93,7 +93,7 @@ sub _check_value {
 sub local_uri {
   my ($self, $bug_id) = @_;
   $bug_id ||= '';
-  return Bugzilla->localconfig->{urlbase} . "show_bug.cgi?id=$bug_id";
+  return Bugzilla->localconfig->urlbase . "show_bug.cgi?id=$bug_id";
 }
 
 sub bug {

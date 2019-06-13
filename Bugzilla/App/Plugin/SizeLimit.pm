@@ -40,7 +40,7 @@ sub register {
   my ($self, $app, $conf) = @_;
 
   if (HAVE_BSD_RESOURCE) {
-    my $setrlimit = decode_json(Bugzilla->localconfig->{setrlimit});
+    my $setrlimit = decode_json(Bugzilla->localconfig->setrlimit);
 
     # This trick means the master process will not a size limit.
     Mojo::IOLoop->next_tick(sub {
@@ -55,7 +55,7 @@ sub register {
   }
 
   if (HAVE_LINUX_SMAPS_TINY) {
-    my $size_limit = Bugzilla->localconfig->{size_limit};
+    my $size_limit = Bugzilla->localconfig->size_limit;
     return unless $size_limit;
 
     if ($size_limit < MIN_SIZE_LIMIT) {

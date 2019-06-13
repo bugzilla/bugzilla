@@ -64,7 +64,7 @@ sub issue_auth_delegation_token {
   my $dbh      = Bugzilla->dbh;
   my $user     = Bugzilla->user;
   my $checksum = hmac_sha256_base64($user->id, $uri,
-    Bugzilla->localconfig->{'site_wide_secret'});
+    Bugzilla->localconfig->site_wide_secret);
 
   return _create_token($user->id, 'auth_delegation', $checksum);
 }
@@ -83,7 +83,7 @@ sub check_auth_delegation_token {
 
   if ($eventdata) {
     my $checksum = hmac_sha256_base64($user->id, $uri,
-      Bugzilla->localconfig->{'site_wide_secret'});
+      Bugzilla->localconfig->site_wide_secret);
     if ($eventdata eq $checksum) {
       delete_token($token);
       return 1;
@@ -241,7 +241,7 @@ sub issue_hash_sig {
   $salt //= generate_random_password(16);
 
   my $hmac = hmac_sha256_base64($salt, $type, $data,
-    Bugzilla->localconfig->{site_wide_secret});
+    Bugzilla->localconfig->site_wide_secret);
   return sprintf("%s|%s|%x", $salt, $hmac, length($data));
 }
 
@@ -272,7 +272,7 @@ sub issue_hash_token {
   # $token needs to be a byte string.
   utf8::encode($token);
   $token
-    = hmac_sha256_base64($token, Bugzilla->localconfig->{'site_wide_secret'});
+    = hmac_sha256_base64($token, Bugzilla->localconfig->site_wide_secret);
   $token =~ s/\+/-/g;
   $token =~ s/\//_/g;
 

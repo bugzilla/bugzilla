@@ -255,7 +255,7 @@ sub write_params {
   local $Data::Dumper::Sortkeys = 1;
 
   my %params = %$param_data;
-  $params{urlbase} = Bugzilla->localconfig->{urlbase};
+  $params{urlbase} = Bugzilla->localconfig->urlbase;
   __PACKAGE__->_write_file(Data::Dumper->Dump([\%params], ['*param']));
 
   # And now we have to reset the params cache so that Bugzilla will re-read

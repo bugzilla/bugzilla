@@ -179,7 +179,7 @@ my %whitelist = (
 
 #
 
-my $db_name = Bugzilla->localconfig->{db_name};
+my $db_name = Bugzilla->localconfig->db_name;
 print <<EOF;
 WARNING
 

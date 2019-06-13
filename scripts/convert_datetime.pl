@@ -25,8 +25,8 @@ my $root_mysql_pw = shift;
 defined $root_mysql_pw || die "MySQL root password required.\n";
 
 my $mysql_dbh = Bugzilla::DB::_connect({
-  db_driver => $localconfig->{db_driver},
-  db_host   => $localconfig->{db_host},
+  db_driver => $localconfig->db_driver,
+  db_host   => $localconfig->db_host,
   db_name   => 'mysql',
   db_user   => 'root',
   db_pass   => $root_mysql_pw
@@ -52,7 +52,7 @@ my $rows = $mysql_dbh->selectall_arrayref(
   "SELECT TABLE_NAME, COLUMN_NAME
        FROM INFORMATION_SCHEMA.COLUMNS
       WHERE TABLE_SCHEMA = ?
-            AND DATA_TYPE='datetime'", undef, Bugzilla->localconfig->{db_name}
+            AND DATA_TYPE='datetime'", undef, Bugzilla->localconfig->db_name
 );
 my $total = scalar @$rows;
 

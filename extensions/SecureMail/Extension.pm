@@ -130,7 +130,7 @@ sub object_validators {
         # PGP keys must be ASCII-armoured.
         my $tct = Bugzilla::Extension::SecureMail::TCT->new(
           public_key => $value,
-          command    => Bugzilla->localconfig->{tct_bin},
+          command    => Bugzilla->localconfig->tct_bin,
         );
         unless ($tct->is_valid->get) {
           ThrowUserError('securemail_invalid_key',
@@ -480,7 +480,7 @@ sub _make_secure {
 
     my $tct = Bugzilla::Extension::SecureMail::TCT->new(
       public_key => $key,
-      command    => Bugzilla->localconfig->{tct_bin},
+      command    => Bugzilla->localconfig->tct_bin,
     );
 
     if (scalar $email->parts > 1) {
@@ -580,7 +580,7 @@ sub _make_secure {
     my $message;
     my $email_type = $email->header('X-Bugzilla-Type');
     my $vars       = {
-      'urlbase'    => Bugzilla->localconfig->{urlbase},
+      'urlbase'    => Bugzilla->localconfig->urlbase,
       'bug_id'     => $bug_id,
       'maintainer' => Bugzilla->params->{'maintainer'},
       'email_type' => $email_type
@@ -619,7 +619,7 @@ sub _make_secure {
 sub _tct_encrypt {
   my ($tct, $text, $bug_id) = @_;
 
-  my $comment = Bugzilla->localconfig->{urlbase}
+  my $comment = Bugzilla->localconfig->urlbase
     . ($bug_id ? 'show_bug.cgi?id=' . $bug_id : '');
   my $encrypted;
   my $ok = eval { $encrypted = $tct->encrypt($text, $comment)->get; 1 };

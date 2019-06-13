@@ -289,7 +289,7 @@ sub bz_check_server_version {
   my $self = shift;
 
   my $lc = Bugzilla->localconfig;
-  if (lc(Bugzilla->localconfig->{db_name}) eq 'mysql') {
+  if (lc(Bugzilla->localconfig->db_name) eq 'mysql') {
     die "It is not safe to run Bugzilla inside a database named 'mysql'.\n"
       . " Please pick a different value for \$db_name in localconfig.\n";
   }
@@ -381,7 +381,7 @@ sub bz_setup_database {
   }
 
   # Upgrade tables from MyISAM to InnoDB
-  my $db_name       = Bugzilla->localconfig->{db_name};
+  my $db_name       = Bugzilla->localconfig->db_name;
   my $myisam_tables = $self->selectcol_arrayref(
     'SELECT TABLE_NAME FROM information_schema.TABLES
           WHERE TABLE_SCHEMA = ? AND ENGINE = ?', undef, $db_name, 'MyISAM'
@@ -823,7 +823,7 @@ sub default_row_format {
 
 sub _alter_db_charset_to_utf8 {
   my $self    = shift;
-  my $db_name = Bugzilla->localconfig->{db_name};
+  my $db_name = Bugzilla->localconfig->db_name;
   my $charset = $self->utf8_charset;
   my $collate = $self->utf8_collate;
   $self->do("ALTER DATABASE $db_name CHARACTER SET $charset COLLATE $collate");

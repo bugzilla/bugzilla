@@ -368,7 +368,7 @@ sub _handle_alias {
     if ($bug_id && Bugzilla->user->can_see_bug($bug_id) && !i_am_webservice()) {
       $alias = url_quote($alias);
       print Bugzilla->cgi->redirect(
-        -uri => Bugzilla->localconfig->{urlbase} . "show_bug.cgi?id=$alias");
+        -uri => Bugzilla->localconfig->urlbase . "show_bug.cgi?id=$alias");
       exit;
     }
   }

@@ -44,7 +44,7 @@ sub register {
     }
   );
 
-  $app->secrets([Bugzilla->localconfig->{side_wide_secret}]);
+  $app->secrets([Bugzilla->localconfig->site_wide_secret]);
 
   $app->renderer->add_handler(
     'bugzilla' => sub {
@@ -73,7 +73,7 @@ sub register {
       my ($c, $type) = @_;
 
       if ($type == LOGIN_REQUIRED) {
-        $c->redirect_to(Bugzilla->localconfig->{basepath} . 'login');
+        $c->redirect_to(Bugzilla->localconfig->basepath . 'login');
         return undef;
       }
       else {
@@ -146,7 +146,7 @@ sub register {
     'url_is_attachment_base' => sub {
       my ($c, $id) = @_;
       return 0 unless Bugzilla::Util::use_attachbase();
-      my $attach_base = Bugzilla->localconfig->{'attachment_base'};
+      my $attach_base = Bugzilla->localconfig->attachment_base;
 
       # If we're passed an id, we only want one specific attachment base
       # for a particular bug. If we're not passed an ID, we just want to

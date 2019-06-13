@@ -40,7 +40,7 @@ sub new {
 sub login_uri {
   my ($class, $target_uri) = @_;
 
-  my $uri = URI->new(Bugzilla->localconfig->{urlbase} . "github.cgi");
+  my $uri = URI->new(Bugzilla->localconfig->urlbase . "github.cgi");
   $uri->query_form(target_uri => $target_uri);
   return $uri;
 }
@@ -53,7 +53,7 @@ sub authorize_uri {
     client_id    => Bugzilla->params->{github_client_id},
     scope        => 'user:email',
     state        => $state,
-    redirect_uri => Bugzilla->localconfig->{urlbase} . "github.cgi",
+    redirect_uri => Bugzilla->localconfig->urlbase . "github.cgi",
   );
 
   return $uri;
@@ -68,7 +68,7 @@ sub get_email_key {
   $digest->add(remote_ip());
   $digest->add($cgi->cookie('Bugzilla_github_token')
       // Bugzilla->request_cache->{github_token} // '');
-  $digest->add(Bugzilla->localconfig->{site_wide_secret});
+  $digest->add(Bugzilla->localconfig->site_wide_secret);
   return $digest->hexdigest;
 }
 

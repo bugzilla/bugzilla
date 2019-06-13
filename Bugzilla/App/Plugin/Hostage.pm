@@ -30,11 +30,11 @@ sub register {
 
 sub _before_routes {
   my ($c) = @_;
-  state $urlbase               = Bugzilla->localconfig->{urlbase};
+  state $urlbase               = Bugzilla->localconfig->urlbase;
   state $urlbase_uri           = URI->new($urlbase);
   state $urlbase_host          = $urlbase_uri->host;
   state $urlbase_host_regex    = qr/^bug(\d+)\.\Q$urlbase_host\E$/;
-  state $attachment_base       = Bugzilla->localconfig->{attachment_base};
+  state $attachment_base       = Bugzilla->localconfig->attachment_base;
   state $attachment_root       = _attachment_root($attachment_base);
   state $attachment_host_regex = _attachment_host_regex($attachment_base);
 

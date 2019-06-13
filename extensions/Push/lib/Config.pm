@@ -196,7 +196,7 @@ sub _validate_config {
 sub _cipher {
   my ($self) = @_;
   $self->{_cipher} ||= Crypt::CBC->new(
-    -key    => Bugzilla->localconfig->{'site_wide_secret'},
+    -key    => Bugzilla->localconfig->site_wide_secret,
     -cipher => 'DES_EDE3'
   );
   return $self->{_cipher};

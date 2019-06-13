@@ -219,7 +219,7 @@ sub _mk_choose_email {
 
   return sub {
     my $email = shift;
-    my $uri   = URI->new(Bugzilla->localconfig->{urlbase} . "github.cgi");
+    my $uri   = URI->new(Bugzilla->localconfig->urlbase . "github.cgi");
     $uri->query_form(state => $state, email => $email);
     return $uri;
   };

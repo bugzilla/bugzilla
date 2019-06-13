@@ -92,7 +92,7 @@ sub handle {
   # also set up the correct handler method
   my $obj = {
     version => '1.1',
-    id      => Bugzilla->localconfig->{urlbase},
+    id      => Bugzilla->localconfig->urlbase,
     method  => $self->bz_method_name,
     params  => $params
   };

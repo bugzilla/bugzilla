@@ -288,7 +288,7 @@ sub get_attachment {
       # make sure we were not going to request credentials on the
       # alternate host.
       Bugzilla->login();
-      my $attachbase = Bugzilla->localconfig->{'attachment_base'};
+      my $attachbase = Bugzilla->localconfig->attachment_base;
 
       # Replace %bugid% by the ID of the bug the attachment
       # belongs to, if present.

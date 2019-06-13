@@ -44,7 +44,7 @@ our @EXPORT = qw(
 # Return an URL base appropriate for constructing a ref link
 # normally required by REST API calls.
 sub ref_urlbase {
-  return Bugzilla->localconfig->{urlbase} . "bzapi";
+  return Bugzilla->localconfig->urlbase . "bzapi";
 }
 
 # convert certain fields within a bug object

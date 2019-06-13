@@ -34,9 +34,9 @@ sub _new {
 
   # always return an object to simplify calling code when memcached is
   # disabled.
-  my $servers = Bugzilla->localconfig->{memcached_servers};
+  my $servers = Bugzilla->localconfig->memcached_servers;
   if (Bugzilla->feature('memcached') && $servers) {
-    $self->{namespace} = Bugzilla->localconfig->{memcached_namespace};
+    $self->{namespace} = Bugzilla->localconfig->memcached_namespace;
     TRACE("connecting servers: $servers, namespace: $self->{namespace}");
     $self->{memcached} = Cache::Memcached::Fast->new({
       servers         => [_parse_memcached_server_list($servers)],

@@ -134,7 +134,7 @@ sub template_before_process {
 
       # split see-also
       if ($change->{fieldname} eq 'see_also') {
-        my $url_base = Bugzilla->localconfig->{urlbase};
+        my $url_base = Bugzilla->localconfig->urlbase;
         foreach my $f (qw( added removed )) {
           my @values;
           foreach my $value (split(/, /, $change->{$f})) {

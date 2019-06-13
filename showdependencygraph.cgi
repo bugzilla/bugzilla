@@ -122,7 +122,7 @@ my ($fh, $filename) = File::Temp::tempfile(
 chmod Bugzilla::Install::Filesystem::CGI_WRITE, $filename
   or warn install_string('chmod_failed', {path => $filename, error => $!});
 
-my $urlbase = Bugzilla->localconfig->{urlbase};
+my $urlbase = Bugzilla->localconfig->urlbase;
 
 print $fh "digraph G {";
 print $fh qq(
@@ -260,7 +260,7 @@ if ($bug_count > MAX_WEBDOT_BUGS) {
 my $webdotbase = Bugzilla->params->{'webdotbase'};
 
 if ($webdotbase =~ /^https?:/) {
-  $webdotbase =~ s/%(?:sslbase|urlbase)%/Bugzilla->localconfig->{urlbase}/eg;
+  $webdotbase =~ s/%(?:sslbase|urlbase)%/Bugzilla->localconfig->urlbase/eg;
   my $url = $webdotbase . $filename;
   $vars->{'image_url'} = $url . ".gif";
   $vars->{'map_url'}   = $url . ".map";

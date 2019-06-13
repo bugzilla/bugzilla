@@ -112,7 +112,7 @@ sub send {
         }
       }
     }
-    $text .= Bugzilla->localconfig->{urlbase} . "show_bug.cgi?id=" . $bug->id;
+    $text .= Bugzilla->localconfig->urlbase . "show_bug.cgi?id=" . $bug->id;
 
     my $room_id     = $self->config->{spark_room_id};
     my $message_uri = $self->_spark_uri('messages');

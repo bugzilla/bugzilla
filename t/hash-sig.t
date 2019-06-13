@@ -10,13 +10,21 @@ use 5.10.1;
 use lib qw( . lib local/lib/perl5 );
 use Bugzilla::Util qw(generate_random_password);
 use Bugzilla::Token qw(issue_hash_sig check_hash_sig);
-use Test::More;
+use Bugzilla::Localconfig;
+use Test2::V0;
+use Test2::Mock qw(mock);
 
-my $localconfig = {site_wide_secret => generate_random_password(256)};
+my $site_wide_secret = generate_random_password(256);
+my $Localconfig = mock 'Bugzilla::Localconfig' => (
+  add_constructor => [fake_new => 'ref_copy'],
+  override => [
+    site_wide_secret => sub { $site_wide_secret },
+  ]
+);
+
 {
-
   package Bugzilla;
-  sub localconfig {$localconfig}
+  sub localconfig { Bugzilla::Localconfig->fake_new({}) }
 }
 
 my $sig = issue_hash_sig("hero", "batman");

@@ -28,6 +28,7 @@ use Bugzilla::Field;
 use Bugzilla::Flag;
 use Bugzilla::Hook;
 use Bugzilla::Install::Localconfig qw(read_localconfig);
+use Bugzilla::Localconfig;
 use Bugzilla::Install::Util qw(init_console include_languages);
 use Bugzilla::Memcached;
 use Bugzilla::Template;
@@ -163,8 +164,9 @@ sub input_params {
 }
 
 sub localconfig {
-  return $_[0]->process_cache->{localconfig} ||= read_localconfig();
+  return $_[0]->process_cache->{localconfig} ||= Bugzilla::Localconfig->new(read_localconfig());
 }
+
 
 sub params {
   return request_cache->{params} ||= Bugzilla::Config::read_param_file();
@@ -172,7 +174,7 @@ sub params {
 
 sub get_param_with_override {
   my ($class, $name) = @_;
-  return $class->localconfig->{param_override}{$name} // $class->params->{$name};
+  return $class->localconfig->param_override->{$name} // $class->params->{$name};
 }
 
 sub user {
@@ -449,7 +451,7 @@ sub job_queue {
 sub jwt {
   my ($class, @args) = @_;
   require Mojo::JWT;
-  return Mojo::JWT->new(@args, secret => $class->localconfig->{jwt_secret});
+  return Mojo::JWT->new(@args, secret => $class->localconfig->jwt_secret);
 }
 
 sub dbh {
@@ -751,8 +753,8 @@ sub memcached {
 # Connector to the Datadog metrics collection daemon.
 sub datadog {
   my ($class, $namespace) = @_;
-  my $host = $class->localconfig->{datadog_host};
-  my $port = $class->localconfig->{datadog_port};
+  my $host = $class->localconfig->datadog_host;
+  my $port = $class->localconfig->datadog_port;
 
   $namespace //= '';
 

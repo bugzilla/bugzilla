@@ -196,7 +196,7 @@ sub quoteUrls {
   }
 
   # Provide tooltips for full bug links (Bug 74355)
-  my $urlbase_re = '(' . quotemeta(Bugzilla->localconfig->{urlbase}) . ')';
+  my $urlbase_re = '(' . quotemeta(Bugzilla->localconfig->urlbase) . ')';
   $text =~ s~\b(${urlbase_re}\Qshow_bug.cgi?id=\E([0-9]+)(\#c([0-9]+))?)\b
               ~($things[$count++] = $bug_link_func->($3, $1, { comment_num => $5, user => $user })) &&
                ("\x{FDD2}" . ($count-1) . "\x{FDD3}")
@@ -289,7 +289,7 @@ sub get_attachment_link {
 
     $link_text =~ s/ \[details\]$//;
     $link_text =~ s/ \[diff\]$//;
-    state $basepath = Bugzilla->localconfig->{basepath};
+    state $basepath = Bugzilla->localconfig->basepath;
     my $linkval = "${basepath}attachment.cgi?id=$attachid";
 
     # If the attachment is a patch and patch_viewer feature is
@@ -381,7 +381,7 @@ sub multiline_sprintf {
 sub version_filter {
   my ($file_url) = @_;
   return
-      Bugzilla->localconfig->{basepath}
+      Bugzilla->localconfig->basepath
     . "static/v"
     . Bugzilla->VERSION
     . "/$file_url";
@@ -985,10 +985,10 @@ sub create {
       'sudoer' => sub { return Bugzilla->sudoer; },
 
       # Allow templates to access the "corect" URLBase value
-      'urlbase' => sub { return Bugzilla->localconfig->{urlbase}; },
+      'urlbase' => sub { return Bugzilla->localconfig->urlbase; },
 
       # Allow templates to get the absolute path of the URLBase value
-      'basepath' => sub { return Bugzilla->localconfig->{basepath}; },
+      'basepath' => sub { return Bugzilla->localconfig->basepath; },
 
       # Allow templates to access docs url with users' preferred language
       'docs_urlbase' => sub {
@@ -1093,7 +1093,7 @@ sub create {
         return '' unless @sigs;
 
         # use a URI object to encode the query string part.
-        my $uri = URI->new(Bugzilla->localconfig->{urlbase} . 'page.cgi');
+        my $uri = URI->new(Bugzilla->localconfig->urlbase . 'page.cgi');
         $uri->query_form({'id' => 'socorro-lens.html', 's' => join("\\", @sigs)});
         return $uri;
       },

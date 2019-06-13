@@ -294,7 +294,7 @@ sub is_webserver_group {
 
   state $web_server_gid;
   if (!defined $web_server_gid) {
-    my $web_server_group = Bugzilla->localconfig->{webservergroup};
+    my $web_server_group = Bugzilla->localconfig->webservergroup;
 
     if ($web_server_group eq '' || ON_WINDOWS) {
       $web_server_gid = $effective_gids[0];
@@ -318,7 +318,7 @@ sub is_webserver_group {
 # (doing so can mess up XML-RPC).
 sub do_ssl_redirect_if_required {
   return if !i_am_cgi();
-  my $uri = URI->new(Bugzilla->localconfig->{'urlbase'});
+  my $uri = URI->new(Bugzilla->localconfig->urlbase);
   return if $uri->scheme ne 'https';
 
   # If we're already running under SSL, never redirect.
@@ -423,8 +423,8 @@ sub is_ipv6 {
 }
 
 sub use_attachbase {
-  my $attachbase = Bugzilla->localconfig->{'attachment_base'};
-  my $urlbase    = Bugzilla->localconfig->{'urlbase'};
+  my $attachbase = Bugzilla->localconfig->attachment_base;
+  my $urlbase    = Bugzilla->localconfig->urlbase;
   return ($attachbase ne '' && $attachbase ne $urlbase);
 }
 
@@ -993,7 +993,7 @@ Bugzilla::Util - Generic utility functions for bugzilla
   # Functions that tell you about your environment
   my $is_cgi   = i_am_cgi();
   my $is_webservice = i_am_webservice();
-  my $urlbase  = Bugzilla->localconfig->{urlbase};
+  my $urlbase  = Bugzilla->localconfig->urlbase;
 
   # Data manipulation
   ($removed, $added) = diff_arrays(\@old, \@new);

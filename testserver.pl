@@ -51,7 +51,7 @@ if (!ON_WINDOWS) {
 
 # Determine the numeric GID of $webservergroup
 my $webgroupnum    = 0;
-my $webservergroup = Bugzilla->localconfig->{webservergroup};
+my $webservergroup = Bugzilla->localconfig->webservergroup;
 if ($webservergroup =~ /^(\d+)$/) {
   $webgroupnum = $1;
 }
@@ -66,7 +66,7 @@ if ($sgid > 0) {
 That is a very insecure practice. Please refer to the
 Bugzilla documentation.\n";
   }
-  elsif ($webgroupnum == $sgid || Bugzilla->localconfig->{use_suexec}) {
+  elsif ($webgroupnum == $sgid || Bugzilla->localconfig->use_suexec) {
     print "TEST-OK Webserver is running under group id in \$webservergroup.\n";
   }
   else {

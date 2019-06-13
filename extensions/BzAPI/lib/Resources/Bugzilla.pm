@@ -138,7 +138,7 @@ sub get_configuration {
 sub get_empty {
   my ($self) = @_;
   return {
-    ref => $self->type('string', Bugzilla->localconfig->{urlbase} . "bzapi/"),
+    ref => $self->type('string', Bugzilla->localconfig->urlbase . "bzapi/"),
     documentation => $self->type('string', BZAPI_DOC),
     version       => $self->type('string', BUGZILLA_VERSION)
   };

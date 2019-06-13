@@ -45,7 +45,7 @@ $current_panel = $1;
 my $current_module;
 my @panels       = ();
 my $param_panels = Bugzilla::Config::param_panels();
-my $override     = Bugzilla->localconfig->{param_override};
+my $override     = Bugzilla->localconfig->param_override;
 foreach my $panel (keys %$param_panels) {
   my $module = $param_panels->{$panel};
   require_module($module);

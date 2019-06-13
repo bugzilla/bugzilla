@@ -26,7 +26,7 @@ BEGIN { Bugzilla->extensions }
 use Bugzilla::Extension::GitHubAuth::Client;
 
 my $cgi     = Bugzilla->cgi;
-my $urlbase = Bugzilla->localconfig->{urlbase};
+my $urlbase = Bugzilla->localconfig->urlbase;
 
 if (lc($cgi->request_method) eq 'post') {
 

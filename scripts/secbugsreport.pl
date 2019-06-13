@@ -75,7 +75,7 @@ my @sorted_team_names = sort { ## no critic qw(BuiltinFunctions::ProhibitReverse
 } keys %$teams;
 
 my $vars = {
-  urlbase            => Bugzilla->localconfig->{urlbase},
+  urlbase            => Bugzilla->localconfig->urlbase,
   report_week        => $report_week,
   teams              => \@sorted_team_names,
   sec_keywords       => $sec_keywords,
@@ -132,7 +132,7 @@ $report_dump_file->spurt(Dumper($report));
 
 sub build_bugs_link {
   my ($arr, $product) = @_;
-  my $uri = URI->new(Bugzilla->localconfig->{urlbase} . 'buglist.cgi');
+  my $uri = URI->new(Bugzilla->localconfig->urlbase . 'buglist.cgi');
   $uri->query_param(bug_id => (join ',', @$arr));
   $uri->query_param(product => $product) if $product;
   return $uri->as_string;

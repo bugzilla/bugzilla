@@ -44,7 +44,7 @@ sub _validate_uri {
   my $uri = URI->new($url);
   $uri->query(undef);
   $uri->fragment(undef);
-  if ($uri->as_string ne Bugzilla->localconfig->{urlbase} . 'buglist.cgi') {
+  if ($uri->as_string ne Bugzilla->localconfig->urlbase . 'buglist.cgi') {
     ThrowUserError('bitly_unsupported');
   }
 
@@ -81,7 +81,7 @@ sub list {
 
   # form a bug_id only url, sanity check the length
   $uri
-    = URI->new(Bugzilla->localconfig->{urlbase}
+    = URI->new(Bugzilla->localconfig->urlbase
       . 'buglist.cgi?bug_id='
       . join(',', map { $_->[0] } @$data));
   if (length($uri->as_string) > CGI_URI_LIMIT) {

@@ -60,8 +60,8 @@ use constant HTTPD_ENV => qw(
 ###############
 
 # Used by the permissions "constants" below.
-sub _suexec { Bugzilla->localconfig->{'use_suexec'} }
-sub _group  { Bugzilla->localconfig->{'webservergroup'} }
+sub _suexec { Bugzilla->localconfig->use_suexec }
+sub _group  { Bugzilla->localconfig->webservergroup }
 
 # Writeable by the owner only.
 use constant OWNER_WRITE => 0600;
@@ -773,7 +773,7 @@ sub _fix_perms_recursively {
 sub _check_web_server_group {
   my ($output) = @_;
 
-  my $group    = Bugzilla->localconfig->{'webservergroup'};
+  my $group    = Bugzilla->localconfig->webservergroup;
   my $filename = bz_locations()->{'localconfig'};
   my $group_id;
 

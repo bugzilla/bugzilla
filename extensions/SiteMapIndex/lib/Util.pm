@@ -149,7 +149,7 @@ END
     $index_xml .= "
   <sitemap>
     <loc>"
-      . Bugzilla->localconfig->{urlbase} . "data/$extension_name/$filename</loc>
+      . Bugzilla->localconfig->urlbase . "data/$extension_name/$filename</loc>
     <lastmod>$timestamp</lastmod>
   </sitemap>
 ";
@@ -172,9 +172,9 @@ END
 sub _generate_sitemap_file {
   my ($extension_name, $filecount, $products, $bugs) = @_;
 
-  my $bug_url = Bugzilla->localconfig->{urlbase} . 'show_bug.cgi?id=';
+  my $bug_url = Bugzilla->localconfig->urlbase . 'show_bug.cgi?id=';
   my $product_url
-    = Bugzilla->localconfig->{urlbase} . 'describecomponents.cgi?product=';
+    = Bugzilla->localconfig->urlbase . 'describecomponents.cgi?product=';
 
   my $sitemap_xml = <<END;
 <?xml version="1.0" encoding="UTF-8"?>

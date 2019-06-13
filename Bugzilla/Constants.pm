@@ -779,7 +779,7 @@ sub DEFAULT_CSP {
 # Because show_bug code lives in many different .cgi files,
 # we needed a centralized place to define the policy.
 # normally the policy would just live in one .cgi file.
-# Additionally, Bugzilla->localconfig->{urlbase} cannot be called at compile time, so this can't be a constant.
+# Additionally, Bugzilla->localconfig->urlbase cannot be called at compile time, so this can't be a constant.
 sub SHOW_BUG_MODAL_CSP {
   my ($bug_id) = @_;
   my %policy = (
@@ -811,7 +811,7 @@ sub SHOW_BUG_MODAL_CSP {
     worker_src => ['none',],
   );
   if (Bugzilla::Util::use_attachbase() && $bug_id) {
-    my $attach_base = Bugzilla->localconfig->{'attachment_base'};
+    my $attach_base = Bugzilla->localconfig->attachment_base;
     $attach_base =~ s/\%bugid\%/$bug_id/g;
     push @{$policy{img_src}}, $attach_base;
     push @{$policy{media_src}}, $attach_base;

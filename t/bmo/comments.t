@@ -40,7 +40,7 @@ my $bug_1 = Bugzilla::Bug->create({
 });
 ok($bug_1->id, "got a new bug");
 
-my $urlbase  = Bugzilla->localconfig->{urlbase};
+my $urlbase  = Bugzilla->localconfig->urlbase;
 my $bug_1_id = $bug_1->id;
 my $bug_2    = Bugzilla::Bug->create({
   short_desc => 'A bug that references another bug',

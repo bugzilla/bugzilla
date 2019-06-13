@@ -54,7 +54,7 @@ sub BUILDARGS {
 
   # You can never connect to Oracle without a DB name,
   # and there is no default DB.
-  $dbname ||= Bugzilla->localconfig->{db_name};
+  $dbname ||= Bugzilla->localconfig->db_name;
 
   # Set the language enviroment
   $ENV{'NLS_LANG'} = '.AL32UTF8' if Bugzilla->params->{'utf8'};
@@ -646,7 +646,7 @@ sub bz_setup_database {
   # Create a WORLD_LEXER named BZ_LEX for multilingual fulltext search
   my $lexer = $self->selectcol_arrayref(
     "SELECT pre_name FROM CTXSYS.CTX_PREFERENCES WHERE pre_name = ? AND
-          pre_owner = ?", undef, 'BZ_LEX', uc(Bugzilla->localconfig->{db_user})
+          pre_owner = ?", undef, 'BZ_LEX', uc(Bugzilla->localconfig->db_user)
   );
   if (!@$lexer) {
     $self->do(

@@ -39,6 +39,7 @@ use parent qw(Exporter);
 our @EXPORT_OK = qw(
   read_localconfig
   update_localconfig
+  LOCALCONFIG_VARS
 );
 
 # might want to change this for upstream
@@ -96,7 +97,7 @@ use constant LOCALCONFIG_VARS => (
   {name => 'memcached_servers',   default => '',},
   {name => 'memcached_namespace', default => "bugzilla:",},
   {name => 'urlbase',             default => '',},
-  {name => 'canonical_urlbase',   default => '',},
+  {name => 'canonical_urlbase',   lazy => 1},
   {name => 'attachment_base',     default => '',},
   {name => 'ses_username',        default => '',},
   {name => 'ses_password',        default => '',},
@@ -192,16 +193,6 @@ sub read_localconfig {
     ? _read_localconfig_from_env()
     : _read_localconfig_from_file($include_deprecated);
 
-  # Use the site's URL as the default Canonical URL
-  $config->{canonical_urlbase} //= $config->{urlbase};
-
-  # Get the absolute path of the URLBase value
-  $config->{basepath} = do {
-    my $path = $config->{urlbase};
-    $path =~ s/^https?:\/\/.*?\//\//;
-    $path;
-  };
-
   return $config;
 }
 
@@ -264,7 +255,7 @@ sub update_localconfig {
     }
   }
 
-  if (!$localconfig->{'interdiffbin'} && $output) {
+  if (!$localconfig->{interdiffbin} && $output) {
     print "\n", install_string('patchutils_missing'), "\n";
   }
 

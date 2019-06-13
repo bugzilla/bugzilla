@@ -34,7 +34,7 @@ sub register {
   $conf->{verify_auth_code}          = \&_verify_auth_code;
   $conf->{store_access_token}        = \&_store_access_token;
   $conf->{verify_access_token}       = \&_verify_access_token;
-  $conf->{jwt_secret}                = Bugzilla->localconfig->{jwt_secret};
+  $conf->{jwt_secret}                = Bugzilla->localconfig->jwt_secret;
   $conf->{jwt_claims}                = sub {
     my $args = shift;
     if (!$args->{user_id}) {

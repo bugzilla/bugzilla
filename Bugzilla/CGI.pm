@@ -126,7 +126,7 @@ sub new {
 sub target_uri {
   my ($self) = @_;
 
-  my $base = Bugzilla->localconfig->{urlbase};
+  my $base = Bugzilla->localconfig->urlbase;
   if (my $request_uri = $self->request_uri) {
     my $base_uri = URI->new($base);
     $base_uri->path('');
@@ -386,7 +386,7 @@ sub _prevent_unsafe_response {
 
     # Note that urlbase must end with a /.
     # It almost certainly does, but let's be extra careful.
-    my $urlbase = Bugzilla->localconfig->{urlbase};
+    my $urlbase = Bugzilla->localconfig->urlbase;
     $urlbase =~ s{/$}{};
     qr{
             # Begins with literal urlbase
@@ -616,7 +616,7 @@ sub send_cookie {
   }
 
   # Add the default path and the domain in.
-  state $uri = URI->new(Bugzilla->localconfig->{urlbase});
+  state $uri = URI->new(Bugzilla->localconfig->urlbase);
   $paramhash{'-path'} = $uri->path;
 
   # we don't set the domain.
@@ -710,7 +710,7 @@ sub redirect_search_url {
 
 sub redirect_to_https {
   my $self    = shift;
-  my $urlbase = Bugzilla->localconfig->{'urlbase'};
+  my $urlbase = Bugzilla->localconfig->urlbase;
 
   # If this is a POST, we don't want ?POSTDATA in the query string.
   # We expect the client to re-POST, which may be a violation of
@@ -733,14 +733,14 @@ sub redirect_to_https {
 sub redirect_to_urlbase {
   my $self = shift;
   my $path = $self->url('-path_info' => 1, '-query' => 1, '-relative' => 1);
-  print $self->redirect('-location' => Bugzilla->localconfig->{urlbase} . $path);
+  print $self->redirect('-location' => Bugzilla->localconfig->urlbase . $path);
   exit;
 }
 
 sub base_redirect {
   my ($self, $path, $is_perm) = @_;
   print $self->redirect(
-    -location => Bugzilla->localconfig->{basepath} . ($path || ''),
+    -location => Bugzilla->localconfig->basepath . ($path || ''),
     -status   => $is_perm ? '301 Moved Permanently' : '302 Found'
   );
   exit;

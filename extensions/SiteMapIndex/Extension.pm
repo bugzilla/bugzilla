@@ -80,7 +80,7 @@ sub page_before_template {
 
 sub install_before_final_checks {
   my ($self) = @_;
-  if (!Bugzilla->localconfig->{urlbase}) {
+  if (!Bugzilla->localconfig->urlbase) {
     print STDERR get_text('sitemap_no_urlbase'), "\n";
     return;
   }
@@ -89,7 +89,7 @@ sub install_before_final_checks {
     return;
   }
 
-  return if (Bugzilla->localconfig->{urlbase} ne 'https://bugzilla.mozilla.org/');
+  return if (Bugzilla->localconfig->urlbase ne 'https://bugzilla.mozilla.org/');
 }
 
 sub install_filesystem {
@@ -126,7 +126,7 @@ EOT
 
 sub before_robots_txt {
   my ($self, $args) = @_;
-  $args->{vars}{SITEMAP_URL} = Bugzilla->localconfig->{urlbase} . SITEMAP_URL;
+  $args->{vars}{SITEMAP_URL} = Bugzilla->localconfig->urlbase . SITEMAP_URL;
 }
 
 __PACKAGE__->NAME;

@@ -297,6 +297,40 @@ The hash of changed fields. C<< $changes->{field} = [old, new] >>
 
 =back
 
+=head2 get_bug_activity
+
+This happens in L<Bugzilla::Bug::GetBugActivity>, where you can add custom bug
+activity, such as comment revisions, if needed.
+
+Params:
+
+=over
+
+=item C<bug_id>
+
+The bug ID that the activity belongs to.
+
+=item C<attach_id>
+
+An optional attachment ID that filters the activity.
+
+=item C<start_time>
+
+An optional time that filters the activity.
+
+=item C<include_comment_activity>
+
+Whether any comment activity, including comment tags, should be included.
+
+=item C<list>
+
+The core activity list that you can extend or modify in a hook. An list item is
+an array that should contain field name, activity ID (can be undef), attach ID
+(can be undef), timestamp, removed value, added value, user name and comment ID
+(can be undef).
+
+=back
+
 =head2 bug_check_can_change_field
 
 This hook controls what fields users are allowed to change. You can add code

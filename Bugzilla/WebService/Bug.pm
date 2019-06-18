@@ -523,7 +523,7 @@ sub history {
     $item{id} = $self->type('int', $bug_id);
 
     my ($activity)
-      = Bugzilla::Bug::GetBugActivity($bug_id, undef, $params->{new_since});
+      = Bugzilla::Bug::GetBugActivity($bug_id, undef, $params->{new_since}, 1);
 
     my @history;
     foreach my $changeset (@$activity) {
@@ -1533,7 +1533,7 @@ sub _bug_to_hash {
   if (filter_wants $params, 'history', ['extra']) {
     my @result;
     my ($activity)
-      = Bugzilla::Bug::GetBugActivity($bug->id, undef, $params->{new_since});
+      = Bugzilla::Bug::GetBugActivity($bug->id, undef, $params->{new_since}, 1);
     foreach my $changeset (@$activity) {
       push(@result,
            $self->_changeset_to_hash($changeset, $params, ['extra'], 'history'));
@@ -1737,11 +1737,14 @@ sub _changeset_to_hash {
     my $api_field_type = $api_field_types{$field_name} || 'string';
     my $api_field_name = $api_field_names{$field_name} || $field_name;
     my $attach_id      = delete $change->{attachid};
+    my $comment        = delete $change->{comment};
 
     $change->{field_name}    = $self->type('string',        $api_field_name);
     $change->{removed}       = $self->type($api_field_type, $change->{removed});
     $change->{added}         = $self->type($api_field_type, $change->{added});
     $change->{attachment_id} = $self->type('int', $attach_id) if $attach_id;
+    $change->{comment_id}    = $self->type('int', $comment->id) if $comment;
+    $change->{comment_count} = $self->type('int', $comment->count) if $comment;
 
     push (@{$item->{changes}}, $change);
   }

@@ -4493,7 +4493,7 @@ sub _bugs_in_order {
 # Get the activity of a bug, starting from $starttime (if given).
 # This routine assumes Bugzilla::Bug->check has been previously called.
 sub GetBugActivity {
-  my ($bug_id, $attach_id, $starttime, $include_comment_tags) = @_;
+  my ($bug_id, $attach_id, $starttime, $include_comment_activity) = @_;
   my $dbh = Bugzilla->dbh;
 
   # Arguments passed to the SQL query.
@@ -4527,7 +4527,7 @@ sub GetBugActivity {
     = "SELECT DISTINCT fielddefs.name,
                bugs_activity.id AS activity_id,
                bugs_activity.attach_id, "
-    . $dbh->sql_date_format('bugs_activity.bug_when', '%Y.%m.%d %H:%i:%s')
+    . $dbh->sql_date_format('bugs_activity.bug_when', '%Y-%m-%d %H:%i:%s')
     . " AS bug_when, bugs_activity.removed, bugs_activity.added, profiles.login_name,
                bugs_activity.comment_id
           FROM bugs_activity
@@ -4542,7 +4542,7 @@ sub GetBugActivity {
                $suppwhere ";
 
   if ( Bugzilla->params->{'comment_taggers_group'}
-    && $include_comment_tags
+    && $include_comment_activity
     && !$attach_id)
   {
     # Only includes comment tag activity for comments the user is allowed to see.
@@ -4560,7 +4560,7 @@ sub GetBugActivity {
                    NULL AS activity_id,
                    NULL AS attach_id,"
       . $dbh->sql_date_format('longdescs_tags_activity.bug_when',
-      '%Y.%m.%d %H:%i:%s')
+      '%Y-%m-%d %H:%i:%s')
       . " AS bug_when,
                    longdescs_tags_activity.removed,
                    longdescs_tags_activity.added,
@@ -4580,6 +4580,20 @@ sub GetBugActivity {
   $query .= "ORDER BY bug_when, comment_id, activity_id";
 
   my $list = $dbh->selectall_arrayref($query, undef, @args);
+
+  Bugzilla::Hook::process(
+    'get_bug_activity',
+    {
+      bug_id => $bug_id,
+      attach_id => $attach_id,
+      start_time => $starttime,
+      include_comment_activity => $include_comment_activity,
+      list => \@$list
+    }
+  );
+
+  # ORDER BY bug_when
+  @$list = sort { $a->[3] cmp $b->[3] } @$list;
 
   my @operations;
   my $operation       = {};

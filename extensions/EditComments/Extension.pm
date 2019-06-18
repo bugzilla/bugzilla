@@ -262,6 +262,44 @@ sub config_modify_panels {
     };
 }
 
+sub get_bug_activity {
+  my ($self, $args) = @_;
+
+  return unless $args->{include_comment_activity};
+
+  my $list = $args->{list};
+  my $is_insider = Bugzilla->user->is_insider;
+  my $hidden_placeholder = '(Hidden by Administrator)';
+
+  my $edited_comment_ids
+    = Bugzilla->dbh->selectcol_arrayref('
+      SELECT DISTINCT(c.comment_id) from longdescs_activity AS a
+      INNER JOIN longdescs AS c ON c.comment_id = a.comment_id AND c.bug_id = ?
+    ' . ($is_insider ? '' : 'AND c.isprivate = 0'), undef, $args->{bug_id});
+
+  foreach my $comment_id (@$edited_comment_ids) {
+    my $prev_rev = {};
+
+    foreach my $revision (@{Bugzilla::Comment->new($comment_id)->activity}) {
+      # Exclude original comment, because we are interested only in revisions
+      if ($revision->{old}) {
+        push(@$list, [
+          'comment_revision',
+          undef,
+          undef,
+          $revision->{created_time},
+          $prev_rev->{is_hidden} && !$is_insider ? $hidden_placeholder : $revision->{old},
+          $revision->{is_hidden} && !$is_insider ? $hidden_placeholder : $revision->{new},
+          $revision->{author}->{login_name},
+          $comment_id
+        ]);
+      }
+
+      $prev_rev = $revision;
+    }
+  }
+}
+
 sub webservice {
   my ($self, $args) = @_;
   my $dispatch = $args->{dispatch};

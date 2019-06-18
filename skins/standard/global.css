@@ -779,6 +779,10 @@ input[type="radio"]:checked {
   background-color: var(--selected-button-background-color);
 }
 
+.buttons.toggle[role="radiogroup"] input[type="radio"]:disabled + label {
+  color: var(--disabled-button-foreground-color);
+}
+
 .buttons.toggle[role="radiogroup"] input[type="radio"]:focus + label {
   z-index: 2;
   border-color: var(--focused-control-border-color);

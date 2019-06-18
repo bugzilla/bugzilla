@@ -1,0 +1,157 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this file,
+ * You can obtain one at http://mozilla.org/MPL/2.0/.
+ *
+ * This Source Code Form is "Incompatible With Secondary Licenses", as
+ * defined by the Mozilla Public License, v. 2.0. */
+
+#custom-search {
+  display: flex;
+}
+
+#custom-search label {
+  -moz-user-select: none;
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+#custom-search button.iconic {
+  display: inline-flex;
+  border-width: 0;
+  border-radius: 0;
+  padding: 0;
+  width: 24px;
+  height: 24px;
+  color: inherit;
+  background: transparent;
+  box-shadow: none;
+  text-shadow: none;
+  transition: none;
+}
+
+#custom-search button.iconic .icon,
+#custom-search button.iconic .icon::before {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  pointer-events: auto; /* DnD doesn't work on Firefox without this */
+}
+
+#custom-search button.iconic-text {
+  display: inline-flex;
+  align-items: center;
+}
+
+#custom-search .icon::before {
+  display: inline-block;
+  font-size: 16px;
+  font-family: 'Material Icons';
+  vertical-align: top;
+}
+
+#custom-search .conditions {
+  display: flex;
+  flex-direction: column;
+  padding: 4px 0;
+}
+
+#custom-search .condition.group {
+  margin: 4px 0;
+  border: 1px solid var(--control-border-color);
+  border-radius: var(--control-border-radius);
+  padding: 8px;
+}
+
+#custom-search .condition.group [role="toolbar"] {
+  display: flex;
+  align-items: center;
+  margin: 0 -4px;
+}
+
+#custom-search .condition.group footer[role="toolbar"] {
+  justify-content: flex-end;
+}
+
+#custom-search .condition.group [role="toolbar"] > * {
+  margin: 0 4px;
+}
+
+#custom-search .condition.group [role="toolbar"] .match {
+  flex: auto;
+}
+
+#custom-search .condition.row {
+  display: flex;
+  align-items: center;
+  margin: 4px 0;
+  border-radius: 4px;
+  padding: 8px;
+  background-color: var(--secondary-region-background-color);
+}
+
+#custom-search .condition.row > * {
+  margin: 0 4px;
+}
+
+#custom-search .condition.row > input[type="text"] {
+  flex: auto;
+  min-width: 200px;
+}
+
+#custom-search .drop-target {
+  display: flex;
+  align-items: center;
+  z-index: 2;
+  margin: -16px 0;
+  height: 32px;
+}
+
+#custom-search .drop-target[aria-dropeffect="none"] {
+  pointer-events: none;
+}
+
+#custom-search .drop-target .indicator {
+  width: 100%;
+  height: 4px;
+  pointer-events: none;
+}
+
+#custom-search .drop-target.dragover .indicator {
+  background-color: rgb(var(--accent-color-blue-2));
+}
+
+#custom-search [draggable] {
+  transition: all .3s;
+}
+
+#custom-search [draggable="false"] > [data-action="grab"],
+#custom-search [draggable="false"] > [role="toolbar"] > [data-action="grab"] {
+  cursor: grab;
+}
+
+#custom-search [draggable="true"] > [data-action="grab"],
+#custom-search [draggable="true"] > [role="toolbar"] > [data-action="grab"] {
+  cursor: grabbing;
+}
+
+#custom-search [draggable="true"] {
+  color: var(--pressed-button-foreground-color) !important;
+  background-color: var(--pressed-button-background-color) !important;
+}
+
+#custom-search [data-action="grab"] .icon::before {
+  text-indent: -11px;
+  letter-spacing: -11px;
+  content: '\E5D4\E5D4';
+}
+
+#custom-search [data-action="remove"] .icon::before {
+  content: '\E5C9';
+}
+
+#custom-search [data-action^="add-"] .icon::before {
+  margin-right: 2px;
+  content: '\E145';
+}

@@ -34,8 +34,8 @@ var queryform = "reportform"
   generate_api_token = 1
   onload = "doOnSelectProduct(0); chartTypeChanged()"
   javascript = js_data
-  javascript_urls = [ "js/productform.js", "js/TUI.js", "js/field.js" ]
-  style_urls = [ "skins/standard/search_form.css" ]
+  javascript_urls = [ "js/productform.js", "js/TUI.js", "js/field.js", "js/advanced-search.js" ]
+  style_urls = [ "skins/standard/search_form.css", "skins/standard/advanced-search.css" ]
   doc_section = "reporting.html#reports"
 %]
 
@@ -130,7 +130,7 @@ var queryform = "reportform"
 
 [% PROCESS search/form.html.tmpl %]
 
-[% PROCESS "search/boolean-charts.html.tmpl" %]
+[% PROCESS "search/custom-search.html.tmpl" %]
 
   <div id="knob">
     <input type="submit" id="[% button_name FILTER css_class_quote %]"

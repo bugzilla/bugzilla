@@ -70,14 +70,12 @@ returned by a query, over and above those defined in the fields at the top
 of the page. It is thereby possible to search for bugs
 based on elaborate combinations of criteria.
 
-The simplest custom searches have only one term. These searches
-permit the selected *field*
-to be compared using a
-selectable *operator* to a
-specified *value.* Much of this could be reproduced using the standard
-fields. However, you can then combine terms using "Match ANY" or "Match ALL",
-using parentheses for combining and priority, in order to construct searches
-of almost arbitrary complexity.
+The simplest custom searches have only one term. These searches permit the
+selected *field* to be compared using a selectable *operator* to a specified
+*value*. Much of this could be reproduced using the standard fields. However,
+you can then combine terms using "Match All" (AND) or "Match Any" (OR), using
+groups for combining and priority, in order to construct searches of almost
+arbitrary complexity.
 
 There are three fields in each row (known as a "term") of a custom search:
 
@@ -105,11 +103,12 @@ operators for :guilabel:`is empty` and :guilabel:`is not empty`, because
 Bugzilla can't tell the difference between a value field left blank on
 purpose and one left blank by accident.
 
-You can have an arbitrary number of rows, and the dropdown box above them
-defines how they relate—:guilabel:`Match ALL of the following separately`,
-:guilabel:`Match ANY of the following separately`, or :guilabel:`Match ALL of
-the following against the same field`. The difference between the first and
-the third can be illustrated with a comment search. If you have a search::
+You can have an arbitrary number of rows and groups, and rearrange them by
+dragging and dropping the handle on each item. You can even duplicate an item by
+holding the Alt key while dragging it. The radio buttons above them define how
+they relate — :guilabel:`Match All`, :guilabel:`Match All (Same Field)` or
+:guilabel:`Match Any`. The difference between the first and second can be
+illustrated with a comment search. If you have a search::
 
     Comment   contains the string   "Fred"
     Comment   contains the string   "Barney"
@@ -120,15 +119,6 @@ comment, whereas under the second (match against the same field), both strings
 would need to occur in exactly the same comment.
 
 .. _advanced-features:
-
-Advanced Features
------------------
-
-If you click :guilabel:`Show Advanced Features`, then more capabilities appear.
-You can negate any row with a checkbox (see below) and also group lines of the
-search with parentheses to determine how different search terms relate. Within
-each bracketed set, you get the choice of combining them using ALL (i.e. AND)
-or ANY (i.e. OR).
 
 Negation
 --------

@@ -21,7 +21,7 @@
 [%# INTERFACE:
   # This template has no interface. However, to use it, you need to fulfill
   # the interfaces of search/form.html.tmpl, search/knob.html.tmpl and
-  # search/boolean-charts.html.tmpl.
+  # search/custom-search.html.tmpl.
   #%]
 
 [% PROCESS global/variables.none.tmpl %]
@@ -45,8 +45,8 @@ function remove_token() {
   generate_api_token = 1
   onload = "doOnSelectProduct(0);"
   javascript = js_data
-  javascript_urls = [ "js/productform.js", "js/TUI.js", "js/field.js"]
-  style_urls = [ "skins/standard/search_form.css" ]
+  javascript_urls = [ "js/productform.js", "js/TUI.js", "js/field.js", "js/advanced-search.js" ]
+  style_urls = [ "skins/standard/search_form.css", "skins/standard/advanced-search.css" ]
   doc_section = "query.html"
   style = "dl.bug_changes dt {
              margin-top: 15px;
@@ -64,7 +64,7 @@ function remove_token() {
 
 [% PROCESS search/form.html.tmpl %]
 
-[% PROCESS "search/boolean-charts.html.tmpl" %]
+[% PROCESS "search/custom-search.html.tmpl" %]
 
 [% PROCESS search/knob.html.tmpl %]
 

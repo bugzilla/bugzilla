@@ -313,7 +313,9 @@ if ($cloned_bug_id) {
 else {
   $default{'component_'} = formvalue('component');
   $default{'bug_type'}
-    = formvalue('bug_type', Bugzilla->params->{'default_bug_type'});
+    = defined $cgi->param('regressed_by')
+    ? 'defect'
+    : formvalue('bug_type', Bugzilla->params->{'default_bug_type'});
   $default{'priority'}
     = formvalue('priority', Bugzilla->params->{'defaultpriority'});
   $default{'bug_severity'}

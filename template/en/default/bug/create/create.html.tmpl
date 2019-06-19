@@ -69,7 +69,7 @@ function initCrashSignatureField() {
 }
 
 const params = new URLSearchParams(location.search);
-let bug_type_specified = params.has('bug_type') || params.has('cloned_bug_id');
+let bug_type_specified = params.has('bug_type') || params.has('cloned_bug_id') || params.has('regressed_by');
 
 var initialowners = new Array([% product.components.size %]);
 var last_initialowner;

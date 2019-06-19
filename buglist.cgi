@@ -745,9 +745,6 @@ $params->delete('limit') if $vars->{'default_limited'};
 # Query Execution
 ################################################################################
 
-# Time to use server push to display an interim message to the user until
-# the query completes and we can display the bug list.
-
 # Connect to the shadow database if this installation is using one to improve
 # query performance.
 $dbh = Bugzilla->switch_to_shadow_db();
@@ -1132,8 +1129,8 @@ if ($format->{'extension'} eq "csv") {
   $vars->{'human'} = $cgi->param('human');
 }
 
-$cgi->close_standby_message($contenttype, $disposition, $disp_prefix,
-  $format->{'extension'});
+$cgi->set_dated_content_disp($disposition, $disp_prefix, $format->{extension});
+print $cgi->header($contenttype);
 
 ################################################################################
 # Content Generation

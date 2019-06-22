@@ -266,7 +266,8 @@ sub get_attachment {
         unless ($userid && $valid_token) {
 
           # Not a valid token.
-          $cgi->base_redirect($path);
+          print $cgi->redirect('-location' => Bugzilla->localconfig->urlbase . $path);
+          exit;
         }
 
         # Change current user without creating cookies.

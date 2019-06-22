@@ -33,6 +33,8 @@ has 'page' => (is => 'ro', isa => Int, default => 1);
 
 has 'rows' => (is => 'ro', default => 10);
 
+has 'since' => (is => 'ro', predicate => 1);
+
 has 'user_agent' => (
   is       => 'lazy',
   init_arg => undef,

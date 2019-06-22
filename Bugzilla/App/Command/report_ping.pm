@@ -26,13 +26,14 @@ sub run {
     = JSON::MaybeXS->new(convert_blessed => 1, canonical => 1, pretty => 1);
   my $class       = 'Simple';
   my $working_dir = cwd();
-  my ($namespace, $doctype, $page, $rows, $base_url, $test, $dump_schema, $dump_documents);
+  my ($namespace, $doctype, $page, $rows, $base_url, $test, $dump_schema, $dump_documents, $since);
 
   Bugzilla->usage_mode(USAGE_MODE_CMDLINE);
   getopt \@args,
     'base-url|u=s'   => \$base_url,
     'page|p=i'       => \$page,
     'rows|r=i'       => \$rows,
+    'since=s'        => \$since,
     'dump-schema'    => \$dump_schema,
     'dump-documents' => \$dump_documents,
     'class|c=s'      => \$class,
@@ -64,6 +65,7 @@ sub run {
     maybe page      => $page,
     maybe namespace => $namespace,
     maybe doctype   => $doctype,
+    maybe since     => $since,
   );
 
   if ($dump_schema) {
@@ -141,6 +143,7 @@ Bugzilla::App::Command::report_ping - descriptionsend a report ping to a url';
     -u, --base-url           URL to send the json documents to.
     -r, --rows num           (Optional) Number of requests to send at once. Default: 10.
     -p, --page num           (Optional) Page to start on. Default: 1
+    --since str              (Optional) Typically the date of the last run.
     --class word             (Optional) Report class to use. Default: Simple
     --test                   Validate the json documents against the json schema.
     --dump-schema            Print the json schema.

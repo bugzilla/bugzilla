@@ -10,6 +10,7 @@ use warnings;
 use lib qw( . lib local/lib/perl5 );
 
 use Bugzilla::Test::MockDB;
+use Bugzilla::Test::MockLocalconfig urlbase => 'http://bmo-web.vm/';
 use Bugzilla::Test::MockParams (password_complexity => 'no_constraints');
 use Mojo::DOM;
 use Bugzilla;
@@ -34,7 +35,7 @@ is(
 
 is(
   $parser->render_html('http://bmo-web.vm'),
-  "<p><a href=\"http://bmo-web.vm\">http://bmo-web.vm</a></p>\n",
+  "<p><a href=\"http://bmo-web.vm\" rel=\"nofollow\">http://bmo-web.vm</a></p>\n",
   'Autolink extension'
 );
 

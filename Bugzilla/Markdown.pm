@@ -79,6 +79,8 @@ sub render_html {
   my $dom = Mojo::DOM->new($html);
 
   $dom->find(join(', ', @bad_tags))->map('remove');
+
+  $dom->find("a[href]")->grep(\&_is_external_link)->map(attr => rel => 'nofollow');
   $dom->find(join ', ', @valid_text_parent_tags)->map(sub {
     my $node = shift;
     $node->descendant_nodes->map(sub {
@@ -96,6 +98,13 @@ sub render_html {
   });
   return $dom->to_string;
 
+}
+
+sub _is_external_link {
+  # the urlbase, without the trailing /
+  state $urlbase = substr(Bugzilla->localconfig->urlbase, 0, -1);
+
+  return index($_->attr('href'), $urlbase) != 0;
 }
 
 

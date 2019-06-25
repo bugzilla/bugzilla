@@ -892,10 +892,11 @@ $(function() {
     $('.reply-btn')
         .click(function(event) {
             event.preventDefault();
-            var comment_id = $(event.target).data('reply-id');
+            var comment_id = $(event.target).data('id');
+            var comment_no = $(event.target).data('no');
             var comment_author = $(event.target).data('reply-name');
 
-            var prefix = "(In reply to " + comment_author + " from comment #" + comment_id + ")\n";
+            var prefix = "(In reply to " + comment_author + " from comment #" + comment_no + ")\n";
             var reply_text = "";
 
             var quoteMarkdown = function($comment) {
@@ -934,7 +935,7 @@ $(function() {
             }
 
             if (BUGZILLA.user.settings.quote_replies == 'quoted_reply') {
-                var $comment = $('#ct-' + comment_id);
+                var $comment = $('#ct-' + comment_no);
                 if ($comment.attr('data-ismarkdown')) {
                     quoteMarkdown($comment);
                 } else {

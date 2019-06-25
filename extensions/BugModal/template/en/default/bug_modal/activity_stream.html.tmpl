@@ -142,7 +142,8 @@
               </button>
             [% END %]
             <button type="button" class="reply-btn minor iconic" title="Reply to this comment" aria-label="Reply"
-                    [% 'disabled' IF !comment.body %] data-reply-id="[% comment.count FILTER none %]"
+                    [% 'disabled' IF !comment.body %]
+                    data-id="[% comment.id FILTER none %]" data-no="[% comment.count FILTER none %]"
                     data-reply-name="[% comment.author.name || comment.author.nick FILTER html %]">
               <span class="icon" aria-hidden="true"></span>
             </button>

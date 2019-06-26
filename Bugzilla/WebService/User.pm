@@ -187,10 +187,8 @@ sub suggest {
     name      => $self->type(email  => $_->{name}),
   } } @$results;
 
-  unless ($params->{fast_mode}) {
-    Bugzilla::Hook::process('webservice_user_suggest',
-      {webservice => $self, params => $params, users => \@users});
-  }
+  Bugzilla::Hook::process('webservice_user_suggest',
+    {webservice => $self, params => $params, users => \@users});
 
   return {users => \@users};
 }

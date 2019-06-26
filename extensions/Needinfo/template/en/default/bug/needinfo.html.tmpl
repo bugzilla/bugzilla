@@ -183,14 +183,12 @@ $(function() {
         <input type="checkbox" name="needinfo" id="needinfo" value="1">
       </td>
       <td>
-        <label for="needinfo" id="needinfo_from_label">
-          Request information from
-        </label>
-        <select name="needinfo_type" id="needinfo_type" style="display:none;">
+        <label for="needinfo" id="needinfo_from_label">Request information</label> from
+        <select name="needinfo_type" id="needinfo_type" style="display:none;" aria-label="Request info actions">
           <option value="needinfo_from" selected="true">Need more information from</option>
           <option value="redirect_to">Redirect needinfo request to</option>
         </select>
-        <select name="needinfo_role" id="needinfo_role">
+        <select name="needinfo_role" id="needinfo_role" aria-label="Request info from">
           <option value="other">other</option>
           [% IF NOT bug.reporter.needinfo_blocked %]
             <option

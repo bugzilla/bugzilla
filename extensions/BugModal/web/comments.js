@@ -14,7 +14,6 @@ $(function() {
         const str = spinner.data('strings');
 
         spinner.attr({
-            'title': expanded ? str.collapse_tooltip : str.expand_tooltip,
             'aria-label': expanded ? str.collapse_label : str.expand_label,
             'aria-expanded': expanded,
         });
@@ -315,7 +314,7 @@ $(function() {
         $.each(tags, function() {
             var span = $('<span/>').addClass('comment-tag').text(this);
             if (BUGZILLA.user.can_tag) {
-                span.prepend($('<a>x</a>').click(deleteTag));
+                span.prepend($('<a role="button" aria-label="Remove">x</a>').click(deleteTag));
             }
             root.append(span);
         });

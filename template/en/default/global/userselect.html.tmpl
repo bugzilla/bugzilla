@@ -98,5 +98,6 @@
     [% IF mandatory %] required [% END %]
     [% IF multiple %] data-multiple="1" [% END %]
     [% IF request_type %] data-request-type="[% request_type FILTER html %]" [% END %]
+    [% IF aria_labelledby %] aria-labelledby="[% aria_labelledby FILTER html %]" [% END %]
   >
 [% END %]

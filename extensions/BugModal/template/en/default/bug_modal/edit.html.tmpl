@@ -162,8 +162,8 @@
 
 [%# === header === %]
 
-<div id="xhr-error" style="display:none"></div>
-<div id="floating-message" style="display:none">
+<div role="status" id="xhr-error" style="display:none"></div>
+<div role="status" id="floating-message" style="display:none">
   <div id="floating-message-text"></div>
 </div>
 
@@ -286,7 +286,7 @@
   <div id="mode-container">
     <div>
       [% IF user.id %]
-        <button type="button" id="cancel-btn" class="secondary" style="display:none">Cancel</button>
+        <button type="button" id="cancel-btn" class="secondary" style="display:none" aria-label="Cancel Editing">Cancel</button>
         <button type="button" id="mode-btn" class="primary">
           <span id="mode-btn-readonly" title="Enable editing fields for [% terms.bug %] metadata">Edit [% terms.Bug %]</span>
           <span id="mode-btn-loading">
@@ -309,7 +309,7 @@
         </button>
       [% END %]
       <div class="dropdown">
-        <button type="button" id="action-menu-btn" aria-haspopup="true" aria-label="Actions Menu"
+        <button type="button" id="action-menu-btn" aria-haspopup="true" aria-label="Actions"
           aria-expanded="false" aria-controls="action-menu" class="dropdown-button minor">&#9662;</button>
         <ul class="dropdown-content left" id="action-menu" role="menu" style="display:none;">
           <li role="presentation">
@@ -412,8 +412,9 @@
             hidden        = 1
             throbber      = "product-throbber"
         %]
-        <button id="product-search" type="button" class="secondary">Search</button>
-        <button id="product-search-cancel" type="button" class="secondary" style="display:none">X</button>
+        <button id="product-search" type="button" class="secondary" aria-label="Search Component">Search</button>
+        <button id="product-search-cancel" type="button" class="secondary" style="display:none"
+                aria-label="Stop Searching Component">x</button>
         <img id="product-throbber" src="[% basepath FILTER none %]extensions/BugModal/web/throbber.gif"
           width="16" height="11" style="display:none">
         <img id="product-search-error" class="tt" src="[% basepath FILTER none %]extensions/BugModal/web/error.png"
@@ -786,7 +787,7 @@
       [% END %]
 
       [% IF user.id %]
-        <button type="button" id="add-cc-btn" class="secondary">Add</button>
+        <button type="button" id="add-cc-btn" class="secondary" aria-label="Add Subscriber">Add</button>
       [% END %]
 
       [% IF bug.cc && bug.cc.size %]
@@ -1227,16 +1228,17 @@
     [% IF user.id %]
       <div id="user-story-actions">
         [% IF bug.check_can_change_field('cf_user_story', 0, 1) %]
-          <button type="button" class="secondary" id="user-story-edit-btn">Edit</button>
+          <button type="button" class="secondary" id="user-story-edit-btn" aria-label="Edit User Story">Edit</button>
         [% END %]
         [% IF bug.cf_user_story != "" && bug.check_can_change_field('longdesc', 0, 1) %]
-          <button type="button" class="secondary" id="user-story-reply-btn">Reply</button>
+          <button type="button" class="secondary" id="user-story-reply-btn" aria-label="Reply to User Story">Reply</button>
         [% END %]
       </div>
     [% END %]
     <pre id="user-story">[% bug.cf_user_story FILTER quoteUrls(bug) %]</pre>
     [% IF user.id %]
-      <textarea id="cf_user_story" name="cf_user_story" style="display:none" rows="10" cols="80">
+      <textarea id="cf_user_story" name="cf_user_story" style="display:none" rows="10" cols="80"
+                aria-label="User Story">
         [%~ bug.cf_user_story FILTER html ~%]
       </textarea>
     [% END %]
@@ -1396,9 +1398,9 @@
 
 <div id="bottom-actions">
   <div id="bottom-right-actions">
-    <button type="button" id="top-btn" class="secondary">Top &uarr;</button>
+    <button type="button" id="top-btn" class="secondary" aria-label="Go to Page Top">Top &uarr;</button>
     <div class="dropdown">
-      <button type="button" id="format-btn" aria-haspopup="true" aria-label="Format [% terms.Bug %] Menu"
+      <button type="button" id="format-btn" aria-haspopup="true" aria-label="Format [% terms.Bug %]"
         aria-expanded="false" aria-controls="format-menu" class="dropdown-button minor">Format [% terms.Bug %] &#9652;</button>
       <ul class="dropdown-content left menu-up" id="format-menu" role="menu" style="display:none;">
         <li role="presentation">
@@ -1413,7 +1415,7 @@
     </div>
     [% IF user.id %]
       <div class="dropdown">
-        <button type="button" id="new-bug-btn" aria-haspopup="true" aria-label="New/Clone [% terms.Bug %] Menu"
+        <button type="button" id="new-bug-btn" aria-haspopup="true" aria-label="New/Clone [% terms.Bug %]"
           aria-expanded="false" aria-controls="new-bug-menu" class="dropdown-button minor">New/Clone [% terms.Bug %] &#9652;</button>
         <ul class="dropdown-content left menu-up" id="new-bug-menu" role="menu" style="display:none;">
           <li role="presentation">
@@ -1498,7 +1500,8 @@
                 seen_header = 1;
                 " Resolve as ";
               END;
-              %] <button type="button" class="secondary resolution-btn">[% resolution FILTER html %]</button> [%
+              %] <button type="button" class="secondary resolution-btn"
+                    aria-label="[% 'Resolve as ' _ resolution FILTER html %]">[% resolution FILTER html %]</button> [%
             END;
           ELSE;
             IF bug.choices.bug_status.only("name", "VERIFIED").size && bug.bug_status != "VERIFIED";

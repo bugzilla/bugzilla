@@ -118,8 +118,8 @@ END;
     </div>
   [% END %]
 
-  [% IF aria_label.defined %]
-    [% aria_labelledby_html = BLOCK %]aria-label="[% aria_label FILTER html %]"[% END %]
+  [% IF !aria_labelledby_html && (aria_label.defined || label.defined) %]
+    [% aria_labelledby_html = BLOCK %]aria-label="[% aria_label || label FILTER html %]"[% END %]
   [% END %]
 
   [%# read-only html %]
@@ -392,8 +392,10 @@ END;
   [% END %]
 
   [% IF edit %]
-    <button type="button" id="[% name FILTER html %]-btn" class="bug-urls-btn minor">Add</button>
-    <input id="[% name FILTER html %]" name="[% name FILTER html %]" style="display:none">
+    <button type="button" id="[% name FILTER html %]-btn" class="bug-urls-btn minor"
+            aria-label="[% 'Add ' _ label FILTER html %]">Add</button>
+    <input id="[% name FILTER html %]" name="[% name FILTER html %]" style="display:none"
+           aria-label="[% label FILTER html %]">
   [% END %]
 [% END %]
 

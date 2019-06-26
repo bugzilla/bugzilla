@@ -8,12 +8,12 @@
 
 <div id="comment-actions">
   [% IF user.id && user.settings.comment_box_position.value == 'after_comments' %]
-    <button type="button" id="add-comment-btn" class="secondary">Add Comment &darr;</button>
+    <button type="button" id="add-comment-btn" class="secondary" aria-label="Add Comment">Add Comment &darr;</button>
   [% ELSE %]
-    <button type="button" id="bottom-btn" class="secondary">Bottom &darr;</button>
+    <button type="button" id="bottom-btn" class="secondary" aria-label="Go to Page Bottom">Bottom &darr;</button>
   [% END %]
   <div class="dropdown">
-    <button type="button" id="comment-tags-btn" arai-haspopup="true" aria-label="Tags Menu"
+    <button type="button" id="comment-tags-btn" aria-haspopup="true" aria-label="Tags"
       aria-expanded="false" aria-controls="comment-tags-menu" class="dropdown-button minor">Tags &#9662;</button>
     <ul id="comment-tags-menu" role="menu" tabindex="0" class="dropdown-content left" style="display:none">
       <li role="presentation">
@@ -22,7 +22,7 @@
     </ul>
   </div>
   <div class="dropdown">
-    <button type="button" id="view-menu-btn" arai-haspopup="true" aria-label="View Menu"
+    <button type="button" id="view-menu-btn" aria-haspopup="true" aria-label="View"
       aria-expanded="false" aria-controls="view-menu" class="dropdown-button minor">View &#9662;</button>
     <ul id="view-menu" role="menu" tabindex="0" class="dropdown-content left" style="display:none">
       <li role="presentation">
@@ -84,11 +84,11 @@
   <div id="ctag" style="display:none">
     <input id="ctag-add" size="10" placeholder="add tag"
       maxlength="[% constants.MAX_COMMENT_TAG_LENGTH FILTER html %]">
-    <button type="button" id="ctag-close" class="minor">X</button>
+    <button type="button" id="ctag-close" class="minor" aria-label="Close">x</button>
     <a href="https://wiki.mozilla.org/BMO/comment_tagging" target="_blank" rel="noopener noreferrer" title="About Comment Tagging">Help</a>
   </div>
   <div id="ctag-error" style="display:none">
-    <a href="#" class="close-btn" data-for="ctag-error">x</a>
+    <a href="#" class="close-btn" data-for="ctag-error" aria-label="Close">x</a>
     <span id="ctag-error-message"></span>
   </div>
 [% END %]
@@ -98,7 +98,7 @@
        data-tags="[% comment.tags.join(' ') FILTER html %]">
     [%# normal comment header %]
     <table class="layout-table change-head [% extra_class FILTER none %]" id="ch-[% comment.count FILTER none %]"
-      [% IF comment.collapsed +%] style="display:none"[% END %]>
+      [% IF comment.collapsed +%] style="display:none"[% END %] role="presentation">
       <tr>
         <td rowspan="2" class="change-gravatar">
           [% INCLUDE bug_modal/user.html.tmpl
@@ -130,28 +130,26 @@
               <input type="checkbox" name="isprivate_[% comment.id FILTER none %]"
                   id="is-private-[% comment.id FILTER none %]"
                   class="is-private" value="1" [%= "checked" IF comment.is_private %]>
-              <label for="is-private-[% comment.id FILTER none %]">Private</label>
+              <label for="is-private-[% comment.id FILTER none %]" aria-label="Mark as Private">Private</label>
             </div>
           [% END %]
           [% Hook.process('comment_action', 'bug_modal/activity_stream.html.tmpl') %]
           [% IF user.id %]
             [% IF user.can_tag_comments %]
-              <button type="button" class="tag-btn minor iconic" title="Add a tag to this comment" aria-label="Tag"
+              <button type="button" class="tag-btn minor iconic" aria-label="Tag"
                       data-id="[% comment.id FILTER none %]" data-no="[% comment.count FILTER none %]">
                 <span class="icon" aria-hidden="true"></span>
               </button>
             [% END %]
-            <button type="button" class="reply-btn minor iconic" title="Reply to this comment" aria-label="Reply"
-                    [% 'disabled' IF !comment.body %]
+            <button type="button" class="reply-btn minor iconic" aria-label="Reply" [% 'disabled' IF !comment.body %]
                     data-id="[% comment.id FILTER none %]" data-no="[% comment.count FILTER none %]"
                     data-reply-name="[% comment.author.name || comment.author.nick FILTER html %]">
               <span class="icon" aria-hidden="true"></span>
             </button>
           [% END %]
           <button type="button" class="change-spinner minor iconic" id="cs-[% comment.count FILTER none %]"
-                  title="Collapse this comment" aria-label="Collapse" aria-expanded="true"
-                  data-strings='{ "collapse_label": "Collapse", "collapse_tooltip": "Collapse this comment",
-                                  "expand_label": "Expanded", "expand_tooltip": "Expanded this comment" }'>
+                  aria-label="Collapse" aria-expanded="true"
+                  data-strings='{ "collapse_label": "Collapse", "expand_label": "Expanded" }'>
             <span class="icon" aria-hidden="true"></span>
           </button>
         </div></td>
@@ -176,7 +174,7 @@
         <td colspan="2" class="comment-tags">
           [% FOREACH tag IN comment.tags ~%]
             <span class="comment-tag">
-              [%~ "<a>x</a>" IF user.can_tag_comments %][% tag FILTER html ~%]
+              [%~ '<a role="button" aria-label="Remove">x</a>' IF user.can_tag_comments %][% tag FILTER html ~%]
             </span>
           [%~ END %]
         </td>
@@ -185,7 +183,8 @@
 
     [%# default-collapsed comment header %]
     [% IF comment.collapsed %]
-      <table class="layout-table change-head default-collapsed" id="cc-[% comment.count FILTER none %]">
+      <table class="layout-table change-head default-collapsed" id="cc-[% comment.count FILTER none %]"
+             role="presentation">
       <tr>
         <td class="comment-collapse-reason"
             [% IF user.setting("ui_use_absolute_time") == "on" %]
@@ -197,11 +196,9 @@
         </td>
         <td class="comment-actions">
           <button type="button" class="change-spinner minor iconic" id="ccs-[% comment.count FILTER none %]"
-                  title="[% comment.collapsed ? 'Expand this comment' : 'Collapse this comment' %]"
                   aria-label="[% comment.collapsed ? 'Expand' : 'Collapse' %]"
                   aria-expanded="[% comment.collapsed ? 'false' : 'true' %]"
-                  data-strings='{ "collapse_label": "Collapse", "collapse_tooltip": "Collapse this comment",
-                                  "expand_label": "Expanded", "expand_tooltip": "Expanded this comment" }'>
+                  data-strings='{ "collapse_label": "Collapse", "expand_label": "Expanded" }'>
             <span class="icon" aria-hidden="true"></span>
           </button>
         </td>
@@ -214,7 +211,7 @@
 [% BLOCK activity_header %]
   [% action = activities.0 %]
   <div class="change" id="a[% id FILTER none %]">
-    <table class="layout-table change-head [% extra_class FILTER none %]">
+    <table class="layout-table change-head [% extra_class FILTER none %]" role="presentation">
       <tr>
         <td rowspan="2" class="change-gravatar">
           [% INCLUDE bug_modal/user.html.tmpl
@@ -234,9 +231,8 @@
         </td>
         <td rowspan="2" class="comment-actions"><div role="group">
           <button type="button" class="change-spinner minor iconic" id="as-[% id FILTER none %]"
-                  title="Collapse this change" aria-label="Collapse" aria-expanded="true"
-                  data-strings='{ "collapse_label": "Collapse", "collapse_tooltip": "Collapse this change",
-                                  "expand_label": "Expanded", "expand_tooltip": "Expanded this change" }'>
+                  aria-label="Collapse" aria-expanded="true"
+                  data-strings='{ "collapse_label": "Collapse", "expand_label": "Expanded" }'>
             <span class="icon" aria-hidden="true"></span>
           </button>
         </div></td>

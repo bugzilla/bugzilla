@@ -936,7 +936,10 @@ sub install_update_db {
   my $field = Bugzilla::Field->new({name => 'bug_mentor'});
   if (!$field) {
     Bugzilla::Field->create({
-      name => 'bug_mentor', description => 'Mentor', mailhead => 1
+      name        => 'bug_mentor',
+      description => 'Mentors',
+      type        => FIELD_TYPE_USERS,
+      mailhead    => 1,
     });
   }
   elsif (!$field->in_new_bugmail) {

@@ -84,8 +84,12 @@ sub install_update_db {
 
   my $field = new Bugzilla::Field({name => 'votes'});
   if (!$field) {
-    Bugzilla::Field->create(
-      {name => 'votes', description => 'Votes', buglist => 1});
+    Bugzilla::Field->create({
+      name        => 'votes',
+      description => 'Votes',
+      type        => FIELD_TYPE_INTEGER,
+      buglist     => 1,
+    });
   }
 
   $dbh->bz_add_column('products', 'votesperuser',

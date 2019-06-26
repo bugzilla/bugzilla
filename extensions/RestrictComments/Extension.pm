@@ -90,8 +90,11 @@ sub install_update_db {
 
   my $field = new Bugzilla::Field({name => 'restrict_comments'});
   if (!$field) {
-    Bugzilla::Field->create(
-      {name => 'restrict_comments', description => 'Restrict Comments'});
+    Bugzilla::Field->create({
+      name        => 'restrict_comments',
+      description => 'Restrict Comments',
+      type        => FIELD_TYPE_BOOLEAN,
+    });
   }
 
   $dbh->bz_add_column('bugs', 'restrict_comments', {TYPE => 'BOOLEAN'});

@@ -64,13 +64,19 @@ $stash->set(
     field_types => {
         Bugzilla::Constants::FIELD_TYPE_UNKNOWN()       => "Unknown Type",
         Bugzilla::Constants::FIELD_TYPE_FREETEXT()      => "Free Text",
-        Bugzilla::Constants::FIELD_TYPE_INTEGER()       => "Integer",
         Bugzilla::Constants::FIELD_TYPE_SINGLE_SELECT() => "Drop Down",
         Bugzilla::Constants::FIELD_TYPE_MULTI_SELECT()  => "Multiple-Selection Box",
         Bugzilla::Constants::FIELD_TYPE_TEXTAREA()      => "Large Text Box",
         Bugzilla::Constants::FIELD_TYPE_DATETIME()      => "Date/Time",
-        Bugzilla::Constants::FIELD_TYPE_DATE()          => "Date",
         Bugzilla::Constants::FIELD_TYPE_BUG_ID()        => "$terms->{Bug} ID",
+        Bugzilla::Constants::FIELD_TYPE_BUG_URLS()      => "$terms->{Bug} URL List",
+        Bugzilla::Constants::FIELD_TYPE_KEYWORDS()      => "Keywords",
+        Bugzilla::Constants::FIELD_TYPE_DATE()          => "Date",
+        Bugzilla::Constants::FIELD_TYPE_INTEGER()       => "Integer",
+        Bugzilla::Constants::FIELD_TYPE_BOOLEAN()       => "Boolean",
+        Bugzilla::Constants::FIELD_TYPE_USER()          => "User",
+        Bugzilla::Constants::FIELD_TYPE_USERS()         => "User List",
+        Bugzilla::Constants::FIELD_TYPE_BUG_LIST()      => "$terms->{Bug} ID List",
         Bugzilla::Constants::FIELD_TYPE_EXTENSION()     => "Extension",
     }
 );

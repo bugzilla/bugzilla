@@ -17,6 +17,8 @@ use Bugzilla::Install::Util qw( extension_code_files );
 
 use File::Basename;
 use File::Spec;
+use List::Util qw(any);
+use Scalar::Util qw(refaddr);
 
 BEGIN { push @INC, \&INC_HOOK }
 
@@ -56,17 +58,6 @@ sub INC_HOOK {
     };
   }
   return;
-}
-
-####################
-# Subclass Methods #
-####################
-
-sub new {
-  my ($class, $params) = @_;
-  $params ||= {};
-  bless $params, $class;
-  return $params;
 }
 
 #######################################
@@ -146,6 +137,8 @@ sub load_all {
     my $package = $class->load(@$file_set);
     push(@$EXTENSIONS, $package);
   }
+
+  Bugzilla::Hook::finalize($EXTENSIONS);
 
   return $EXTENSIONS;
 }

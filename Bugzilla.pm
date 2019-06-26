@@ -110,7 +110,7 @@ sub preload_templates {
 
 sub template {
   request_cache->{template}
-    //= Bugzilla::Template->create(preload => $preload_templates);
+    ||= Bugzilla::Template->create(preload => $preload_templates);
   request_cache->{template}->{_is_main} = 1;
 
   return request_cache->{template};
@@ -127,19 +127,16 @@ sub template_inner {
 }
 
 sub extensions {
-  my $cache = request_cache;
-  if (!$cache->{extensions}) {
-    my $extension_packages = Bugzilla::Extension->load_all();
-    my @extensions;
-    foreach my $package (@$extension_packages) {
-      my $extension = $package->new();
-      if ($extension->enabled) {
-        push(@extensions, $extension);
-      }
+  state $extensions;
+  return $extensions if $extensions;
+  my $extension_packages = Bugzilla::Extension->load_all();
+  $extensions = [];
+  foreach my $package (@$extension_packages) {
+    if ($package->enabled) {
+      push @$extensions, $package;
     }
-    $cache->{extensions} = \@extensions;
   }
-  return $cache->{extensions};
+  return $extensions;
 }
 
 sub cgi {

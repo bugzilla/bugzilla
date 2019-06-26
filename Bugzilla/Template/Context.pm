@@ -46,6 +46,7 @@ sub process {
 # our stash hasn't been set correctly--the parameters we were passed
 # in the PROCESS or INCLUDE directive haven't been set, and if we're
 # in an INCLUDE, the stash is not yet localized during process().
+our $in_template_before_process = 0;
 sub stash {
   my $self  = shift;
   my $stash = $self->SUPER::stash(@_);
@@ -73,8 +74,9 @@ sub stash {
   if (  $self->{bz_in_process}
     and $name =~ /\./
     and !grep($_ eq $name, @$pre_process)
-    and !Bugzilla::Hook::in('template_before_process'))
+    and !$in_template_before_process)
   {
+    local $in_template_before_process = 1;
     Bugzilla::Hook::process("template_before_process",
       {vars => $stash, context => $self, file => $name});
   }

@@ -6,39 +6,45 @@
 # defined by the Mozilla Public License, v. 2.0.
 
 package Bugzilla::Hook;
+use Mojo::Base -strict;
 
-use 5.10.1;
-use strict;
-use warnings;
+use Bugzilla::Logging;
+use List::Util qw(any);
+use Package::Stash;
+use Sub::Identify qw(stash_name);
+use Type::Params qw(compile);
+use Type::Utils -all;
+use Types::Standard -all;
+
+my %HOOKS;
+
+sub finalize {
+  state $check = compile(ArrayRef[ClassName]);
+  my ($extensions) = $check->(@_);
+
+  foreach my $extension (@$extensions) {
+    my $stash = Package::Stash->new($extension);
+    foreach my $name ($stash->list_all_symbols('CODE')) {
+      next if $name =~ /^[A-Z_]+/;
+      my $hook = $extension->can($name) or die "$extension has no method '$name'";
+      next if stash_name($hook) ne $extension; # skip imported methods.
+      push @{$HOOKS{$name}}, [$hook, $extension];
+    }
+  }
+}
 
 sub process {
   my ($name, $args) = @_;
 
-  _entering($name);
-
-  foreach my $extension (@{Bugzilla->extensions}) {
-    if ($extension->can($name)) {
-      $extension->$name($args);
+  # this state variable is used to execute the load_all() method only once.
+  # The double-negation is used because I don't want to hold a reference to it.
+  state $once = !!Bugzilla::Extension->load_all();
+  if ($HOOKS{$name}) {
+    foreach my $hook (@{$HOOKS{$name}}) {
+      $hook->[0]->($hook->[1], $args);
     }
   }
-
-  _leaving($name);
-}
-
-sub in {
-  my $hook_name = shift;
-  my $currently_in = Bugzilla->request_cache->{hook_stack}->[-1] || '';
-  return $hook_name eq $currently_in ? 1 : 0;
-}
-
-sub _entering {
-  my ($hook_name) = @_;
-  my $hook_stack = Bugzilla->request_cache->{hook_stack} ||= [];
-  push(@$hook_stack, $hook_name);
-}
-
-sub _leaving {
-  pop @{Bugzilla->request_cache->{hook_stack}};
+  return;
 }
 
 1;

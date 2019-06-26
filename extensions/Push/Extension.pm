@@ -58,22 +58,24 @@ sub _get_instance {
 
 sub _enabled {
   my ($self) = @_;
-  if (!exists $self->{'enabled'}) {
+  my $cache = Bugzilla->request_cache->{+__PACKAGE__} //= {};
+
+  if (!exists $cache->{'enabled'}) {
     my $push = Bugzilla->push_ext;
-    $self->{'enabled'} = $push->config->{enabled} eq 'Enabled';
-    if ($self->{'enabled'}) {
+    $cache->{'enabled'} = $push->config->{enabled} eq 'Enabled';
+    if ($cache->{'enabled'}) {
 
       # if no connectors are enabled, no need to push anything
-      $self->{'enabled'} = 0;
+      $cache->{'enabled'} = 0;
       foreach my $connector (Bugzilla->push_ext->connectors->list) {
         if ($connector->enabled) {
-          $self->{'enabled'} = 1;
+          $cache->{'enabled'} = 1;
           last;
         }
       }
     }
   }
-  return $self->{'enabled'};
+  return $cache->{'enabled'};
 }
 
 #

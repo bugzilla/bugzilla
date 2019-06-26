@@ -148,6 +148,15 @@ $(function() {
             });
         })
         .data('counter', 0);
+
+    const $input = document.querySelector('.prod_comp_search');
+
+    // Check for product name passed with the URL hash, which was supported by the experimental new-bug page now
+    // redirected to enter_bug.cgi, e.g. https://bugzilla.mozilla.org/new-bug#Firefox
+    if ($input && location.pathname === `${BUGZILLA.config.basepath}enter_bug.cgi` && location.hash) {
+        $input.value = location.hash.substr(1);
+        $input.dispatchEvent(new InputEvent('input'));
+    }
 });
 
 /**

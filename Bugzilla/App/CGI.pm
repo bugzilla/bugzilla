@@ -43,7 +43,12 @@ sub setup_routes {
   $r->get('/robots.txt')->to('CGI#robots_cgi');
   $r->any('/login')->to('CGI#index_cgi' => {'GoAheadAndLogIn' => '1'});
   $r->any('/logout')->to('CGI#index_cgi' => {'logout' => '1'});
-  $r->any('/:new_bug' => [new_bug => qr{new[-_]bug}])->to('CGI#new_bug_cgi');
+
+  $r->any('/:new_bug' => [new_bug => qr{new[-_]bug}] => sub {
+    my $c = shift;
+    $c->res->code(301);
+    $c->redirect_to(Bugzilla->localconfig->basepath . 'enter_bug.cgi');
+  });
 }
 
 sub load_one {

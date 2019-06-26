@@ -2732,17 +2732,33 @@ sub search_params_to_data_structure {
     # Replace keys
     if ($key =~ $flag_re) {
       my ($canonical, $alias) = _get_search_param_name($1, $2, $3);
-      ThrowUserError('product_versions_unavailable') unless $canonical;
+      ThrowUserError('product_version_pronouns_unavailable') unless $canonical;
       $params->{$canonical} = delete $params->{$key};
     }
 
     # Replace values (custom search)
     if ($params->{$key} =~ $flag_re) {
       my ($canonical, $alias) = _get_search_param_name($1, $2, $3);
-      ThrowUserError('product_versions_unavailable') unless $canonical;
+      ThrowUserError('product_version_pronouns_unavailable') unless $canonical;
       $params->{$key} = $canonical;
     }
   }
+}
+
+# Allow to use Firefox release date pronouns, including `%LAST_MERGE_DATE%`,
+# `%LAST_RELEASE_DATE%` and `%LAST_SOFTFREEZE_DATE%`.
+sub search_timestamp_translate {
+  my ($self, $args) = @_;
+  $args = $args->{args};
+  my $key = uc($args->{value});
+  $key =~ s/^%([A-Z_]+)%$/$1/;
+  my $keys = ['LAST_MERGE_DATE', 'LAST_RELEASE_DATE', 'LAST_SOFTFREEZE_DATE'];
+  return unless grep(/^$key$/, @$keys);
+
+  my $date = _fetch_product_version_file('firefox')->{$key};
+  ThrowUserError('product_date_pronouns_unavailable') unless $date;
+  $args->{value}  = $date;
+  $args->{quoted} = Bugzilla->dbh->quote($date);
 }
 
 sub tf_buglist_columns {

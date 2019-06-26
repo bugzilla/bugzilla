@@ -2207,6 +2207,10 @@ sub _timestamp_translate {
   my $value = $args->{value};
   my $dbh   = Bugzilla->dbh;
 
+  # Allow to support custom date pronouns
+  Bugzilla::Hook::process('search_timestamp_translate',
+    {search => $self, args => $args});
+
   return if $value !~ /^(?:[\+\-]?\d+[hdwmy]s?|now)$/i;
 
   $value = SqlifyDate($value);

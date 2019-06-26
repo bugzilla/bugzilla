@@ -46,9 +46,14 @@
   You cannot set this [% terms.bug %]'s status to ASSIGNED because the
   [%+ terms.bug %] is not assigned to a person.
 
-[% ELSIF error == "product_versions_unavailable" %]
-  [% title = "Product Version Info Unavailable" %]
+[% ELSIF error == "product_version_pronouns_unavailable" %]
+  [% title = "Product Version Pronouns Unavailable" %]
   The pronouns for Status and Tracking Flags cannot be used at this time.
   Please try again later or use actual version numbers instead.
+
+[% ELSIF error == "product_date_pronouns_unavailable" %]
+  [% title = "Product Date Pronouns Unavailable" %]
+  The pronoun for the merge date and release date cannot be used at this time.
+  Please try again later or use actual dates instead.
 
 [% END %]

@@ -597,6 +597,22 @@ Params:
 
 =back
 
+=head2 search_timestamp_translate
+
+This happens in L<Bugzilla::Search/_timestamp_translate> and allows you to
+support pronouns for specific dates, such as a product release date. Check the
+`value` argument and replace it with actual date where needed.
+
+Params:
+
+=over
+
+=item C<search> - The L<Bugzilla::Search> object.
+
+=item C<args> - The original arguments including C<value>.
+
+=back
+
 =head2 search_operator_field_override
 
 This allows you to modify L<Bugzilla::Search/OPERATOR_FIELD_OVERRIDE>,

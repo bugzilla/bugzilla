@@ -32,7 +32,6 @@ my $prod_tag     = "release-$version_info->{version}";
 my $tag_url      = "$github_repo/tree/$tag";
 
 my @log = capture(qw(git log --oneline), "$prod_tag..HEAD");
-die "nothing to commit\n" unless @log;
 chomp @log;
 
 my @revisions;

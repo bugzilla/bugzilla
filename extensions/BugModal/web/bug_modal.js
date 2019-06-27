@@ -1390,6 +1390,46 @@ $(function() {
             saveBugComment(event.target.value);
         });
 
+    // Allow to attach pasted text directly
+    document.querySelector('#comment').addEventListener('paste', event => {
+      const text = event.clipboardData.getData('text');
+      const lines = text.split(/(?:\r\n|\r|\n)/).length;
+
+      if (lines < 50) {
+        return;
+      }
+
+      const extract = text.replace(/(?:\r\n|\r|\n)/, ' ').trim().substr(0, 20);
+      const summary = (window.prompt(
+        `You’re pasting ${lines} lines of text starting with “${extract}”. ` +
+        'Enter the summary below and click OK to upload it as an attachment. Click Cancel to paste it normally.'
+      ) || '').trim();
+
+      if (!summary) {
+        return;
+      }
+
+      event.preventDefault();
+
+      bugzilla_ajax({
+        type: 'POST',
+        url: `/rest/bug/${BUGZILLA.bug_id}/attachment`,
+        data: {
+          // https://developer.mozilla.org/en-US/docs/Web/API/WindowBase64/Base64_encoding_and_decoding
+          data: btoa(encodeURIComponent(text).replace(/%([0-9A-F]{2})/g, (m, p1) => String.fromCharCode(`0x${p1}`))),
+          file_name: 'pasted.txt',
+          summary,
+          content_type: 'text/plain',
+          comment: event.target.value.trim(),
+        },
+      }, () => {
+        // Reload the page once upload is complete
+        location.replace(`${BUGZILLA.config.basepath}show_bug.cgi?id=${BUGZILLA.bug_id}`);
+      }, message => {
+        window.alert(`Couldn’t upload the text as an attachment. Please try again later. Error: ${message}`);
+      });
+    });
+
     restoreEditMode();
     restoreSavedBugComment();
 });

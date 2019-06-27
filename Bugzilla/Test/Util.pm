@@ -103,7 +103,7 @@ sub create_bug {
       default => sub {$Component}
     },
     bug_type => Str,
-    {default => 'defect'},
+    {default => '--'},
     bug_severity => Str,
     {default => 'normal'},
     groups => ArrayRef [Str],

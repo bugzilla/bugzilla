@@ -483,7 +483,7 @@ my %set_params = (
   confirmuniqueusermatch => 0,
   maxusermatches         => '100',
   debug_group            => 'editbugs',
-  default_bug_type       => 'defect',
+  default_bug_type       => '--',
   defaultpriority        => '--',         # FIXME: add priority
   defaultquery => 'resolution=---&emailassigned_to1=1&emailassigned_to2=1'
     . '&emailreporter2=1&emailqa_contact2=1&emailtype1=exact'

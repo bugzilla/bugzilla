@@ -260,6 +260,12 @@ sub file_bug_in_product {
   }
   $sel->title_is("Enter Bug: $product", "Display form to enter bug data");
   sleep(1); # FIXME: Delay for slow page performance
+
+  # Select the defect type by default
+  # `check_ok()` doesn't work here because the checkbox is invisible
+  $sel->driver->execute_script('
+    document.querySelector(\'input[name="bug_type"][value="defect"]\').checked = true;
+  ');
 }
 
 sub create_bug {

@@ -548,9 +548,13 @@ $(function() {
                         if (!$select) return;
                         // It can be radio-button-like UI
                         const use_buttons = $select.matches('.buttons.toggle');
+                        const is_required = $select.matches('[aria-required="true"]');
                         const selected = use_buttons ? $select.querySelector('input').value : $select.value;
                         $select.innerHTML = '';
                         value.forEach(({ name }) => {
+                            if (is_required && name === '--') {
+                                return;
+                            }
                             if (use_buttons) {
                                 $select.insertAdjacentHTML('beforeend', `
                                   <div class="item">

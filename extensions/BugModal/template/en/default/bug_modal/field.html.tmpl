@@ -190,11 +190,13 @@ END;
           [%# single value select %]
           <input type="hidden" id="[% name FILTER html %]-dirty">
           [% IF use_buttons %]
-          <div role="radiogroup" class="buttons toggle" id="[% name FILTER html %]" [% aria_labelledby_html FILTER none %]>
+          <div role="radiogroup" class="buttons toggle" id="[% name FILTER html %]"
+               [%= 'aria-required="true"' IF field.is_mandatory %] [%= aria_labelledby_html FILTER none %]>
             [% IF values.defined %]
               [% FOREACH v IN values %]
                 [% NEXT IF NOT v.is_active AND NOT value.contains(v.name).size %]
                 [% NEXT IF NOT bug.check_can_change_field(name, bug.${field_name}, v.name) %]
+                [% NEXT IF field.is_mandatory && v.name == '--' %]
                 <div class="item">
                   <input id="v[% v.id FILTER html %]_[% name FILTER html %]" type="radio" name="[% name FILTER html %]"
                          value="[% v.name FILTER html %]" [% " checked" IF value.contains(v.name).size %]>

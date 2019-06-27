@@ -193,7 +193,7 @@ Example response for authenticated user:
           "defaultplatform" : "",
           "defaultpriority" : "--",
           "defaultseverity" : "normal",
-          "default_bug_type" : "defect",
+          "default_bug_type" : "--",
           "duplicate_or_move_bug_status" : "RESOLVED",
           "emailregexp" : "^[\\w\\.\\+\\-=']+@[\\w\\.\\-]+\\.[\\w\\-]+$",
           "emailsuffix" : "",

@@ -35,6 +35,7 @@ function validateEnterBug(theform) {
     var short_desc = theform.short_desc;
     var version = theform.version;
     var bug_status = theform.bug_status;
+    var bug_type = theform.bug_type;
     var description = theform.comment;
     var attach_data = theform.data;
     var attach_desc = theform.description;
@@ -75,6 +76,10 @@ function validateEnterBug(theform) {
     if (component.selectedIndex < 0) {
         _errorFor(component);
         focus_me = component;
+    }
+    if (!bug_type.value) {
+        _errorFor(document.querySelector('#bug_type'));
+        focus_me = bug_type[0];
     }
 
     if (focus_me) {

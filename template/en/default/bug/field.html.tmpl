@@ -103,7 +103,8 @@
               constants.FIELD_TYPE_MULTI_SELECT ] %]
         <input type="hidden" id="[% field.name FILTER html %]_dirty">
         [% IF use_buttons %]
-        <div role="radiogroup" class="buttons toggle" id="[% field.name FILTER html %]">
+        <div role="radiogroup" class="buttons toggle" id="[% field.name FILTER html %]"
+             [% ' aria-required="true"' IF field.is_mandatory %]>
         [% ELSE %]
         <select id="[% field.name FILTER html %]"
                 name="[% field.name FILTER html %]"
@@ -161,6 +162,7 @@
             [% END %]
 
             [% IF use_buttons %]
+            [% NEXT IF field.is_mandatory && legal_value.name == '--' %]
             <div class="item">
               <input id="[% option_id FILTER html %]" type="radio"
                      name="[% field.name FILTER html %]" value="[% legal_value.name FILTER html %]"

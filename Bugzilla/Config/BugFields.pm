@@ -44,7 +44,7 @@ sub get_param_list {
       name    => 'default_bug_type',
       type    => 's',
       choices => \@legal_types,
-      default => 'defect',
+      default => $legal_types[-1],
       checker => \&check_bug_type
     },
 

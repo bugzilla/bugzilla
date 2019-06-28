@@ -11,8 +11,8 @@
 PROCESS "global/field-descs.none.tmpl";
 
 _initial = {
-  j_top       => initial.j_top.0 || "AND",
-  conditions  => initial.custom_search || [],
+  j_top       => default.j_top.0 || "AND",
+  conditions  => default.custom_search || [],
 };
 
 _fields = [];

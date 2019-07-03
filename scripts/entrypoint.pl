@@ -142,12 +142,9 @@ sub cmd_load_test_data {
     '--param',     'use_mailer_queue=0'
   );
 
-  if ($ENV{BZ_QA_CONFIG}) {
-    chdir '/app/qa/config';
-    say 'chdir(/app/qa/config)';
-    run('perl', 'generate_test_data.pl');
-    chdir '/app';
-  }
+  chdir '/app/qa/config';
+  say 'chdir(/app/qa/config)';
+  run('perl', 'generate_test_data.pl');
 }
 
 sub cmd_test_webservices {

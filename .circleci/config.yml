@@ -53,6 +53,7 @@ defaults:
         <<: *bmo_env
         BZ_QA_CONF_FILE: /app/.circleci/selenium_test.conf
         BZ_QA_ANSWERS_FILE:  /app/.circleci/checksetup_answers.txt
+        BZ_QA_CONFIG: 1
     - <<: *mysql_image
       environment: *mysql_env
     - <<: *selenium_firefox_image
@@ -173,7 +174,8 @@ jobs:
       - <<: *bmo_slim_image
         environment: *bmo_env
     steps:
-      - checkout
+      - run: |
+          mkdir -p /app && cd /tmp/_circleci_local_build_repo && git ls-files -z | xargs -s 2091853 -0 tar -c | tar -x -C /app && cp -a /tmp/_circleci_local_build_repo/.git /app
       - attach_workspace:
           at: /app/build_info
       - run: |

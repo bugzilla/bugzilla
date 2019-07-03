@@ -429,64 +429,54 @@ foreach my $bug (@bug_objects) {
 # Delete the session token used for the mass-change.
 delete_token($token) unless $cgi->param('id');
 
-# BMO: add show_bug_format hook for experimental UI work
-my $format_params = {
-  format => scalar $cgi->param('format'),
-  ctype  => scalar $cgi->param('ctype'),
-};
-Bugzilla::Hook::process('show_bug_format', $format_params);
-if ($format_params->{format} eq 'modal') {
-  my $bug_id = $vars->{bug} ? $vars->{bug}->id : undef;
-  $C->content_security_policy(SHOW_BUG_MODAL_CSP($bug_id));
-}
-my $format = $template->get_format(
-  "bug/show",
-  $format_params->{format},
-  $format_params->{ctype}
-);
-
 if (Bugzilla->usage_mode != USAGE_MODE_EMAIL) {
-  print $cgi->header();
-
-  foreach my $sent_changes (@all_sent_changes) {
-    foreach my $sent_change (@$sent_changes) {
-      my $params       = $sent_change->{params};
-      my $sent_bugmail = $sent_change->{sent_bugmail};
-      $vars->{$_} = $params->{$_} foreach keys %$params;
-      $vars->{'sent_bugmail'} = $sent_bugmail;
-      $template->process("bug/process/results.html.tmpl", $vars)
-        || ThrowTemplateError($template->error());
-      $vars->{'header_done'} = 1;
-    }
-  }
-
   if ($action eq 'next_bug' or $action eq 'same_bug') {
-    my $bug = $vars->{'bug'};
-    if ($bug and $user->can_see_bug($bug)) {
-      if ($action eq 'same_bug') {
-
-        # $bug->update() does not update the internal structure of
-        # the bug sufficiently to display the bug with the new values.
-        # (That is, if we just passed in the old Bug object, we'd get
-        # a lot of old values displayed.)
-        $bug = Bugzilla::Bug->new($bug->id);
-        $vars->{'bug'} = $bug;
+    # We strip the sent changes to just the necessary parameters so that they can
+    # be saved in the session flash.
+    my @saved_sent_changes;
+    foreach my $sent_changes (@all_sent_changes) {
+      foreach my $sent_change (@$sent_changes) {
+        my $saved_sent_change = {
+          id => $sent_change->{params}->{id},
+          type => $sent_change->{params}->{type},
+          recipient_count => scalar @{$sent_change->{sent_bugmail}->{sent}},
+        };
+        push @saved_sent_changes, $saved_sent_change;
       }
-      $vars->{'bugs'} = [$bug];
-      if ($action eq 'next_bug') {
-        $vars->{'nextbug'} = $bug->id;
-      }
-
-      $template->process($format->{template}, $vars)
-        || ThrowTemplateError($template->error());
-      exit;
     }
-  }
 
-  # End the response page.
-  $template->process("bug/navigate.html.tmpl", $vars)
-    || ThrowTemplateError($template->error());
-  $template->process("global/footer.html.tmpl", $vars)
-    || ThrowTemplateError($template->error());
+    $Bugzilla::App::CGI::C->flash(last_sent_changes => \@saved_sent_changes);
+
+    # Redirect to show_bug.cgi.
+    # $bug_id will be the same bug or the next bug due to checks earlier in this file.
+    # An undefined $bug_id (in the case of $action = 'nothing') will still redirect to
+    # show_bug.cgi which will prompt for a bug. This allows mass bug updates to still see
+    # the result of what changed/emails sent.
+    my $bug_id = $vars->{bug} ? $vars->{bug}->id : undef;
+    my $redirect_url = $Bugzilla::App::CGI::C->url_for('show_bugcgi')->query(id => $bug_id);
+    $Bugzilla::App::CGI::C->redirect_to($redirect_url);
+    exit;
+  }
+  else { # Handle $action = 'nothing' or mass bug update case.
+    print $cgi->header();
+
+    foreach my $sent_changes (@all_sent_changes) {
+      foreach my $sent_change (@$sent_changes) {
+        my $params       = $sent_change->{params};
+        my $recipient_count = scalar @{$sent_change->{sent_bugmail}->{sent}};
+        $vars->{$_} = $params->{$_} foreach keys %$params;
+        $vars->{'recipient_count'} = $recipient_count;
+        $template->process("bug/process/results.html.tmpl", $vars)
+          || ThrowTemplateError($template->error());
+        $vars->{'header_done'} = 1;
+      }
+    }
+
+    # End the response page.
+    $template->process("bug/navigate.html.tmpl", $vars)
+      || ThrowTemplateError($template->error());
+    $template->process("global/footer.html.tmpl", $vars)
+      || ThrowTemplateError($template->error());
+  }
 }
 1;

@@ -29,6 +29,17 @@
 [% IF !header_done %]
   [% PROCESS "bug/show-header.html.tmpl" %]
   [% PROCESS global/header.html.tmpl %]
+  [% header_done = 1 %]
+[% END %]
+
+[%# Displays changes to bugs that happened in the last request #%]
+[% sentmail = c.flash("last_sent_changes") %]
+[% FOREACH item = sentmail %]
+  [% INCLUDE bug/process/results.html.tmpl
+     id = item.id
+     type = item.type
+     recipient_count = item.recipient_count
+   %]
 [% END %]
 
 [% IF nextbug %]

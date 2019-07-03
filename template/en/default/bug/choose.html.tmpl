@@ -20,9 +20,20 @@
 
 [% PROCESS global/variables.none.tmpl %]
 
-[% PROCESS global/header.html.tmpl
-   title = "Search by $terms.bug number"
- %]
+[% UNLESS header_done %]
+  [% PROCESS bug/process/header.html.tmpl title = "Search by $terms.bug number" %]
+  [% header_done = 1 %]
+[% END %]
+
+[%# Displays changes to bugs that happened in the last request #%]
+[% sentmail = c.flash("last_sent_changes") %]
+[% FOREACH item = sentmail %]
+  [% INCLUDE bug/process/results.html.tmpl
+     id = item.id
+     type = item.type
+     recipient_count = item.recipient_count
+   %]
+[% END %]
 
 <form method="get" action="[% basepath FILTER none %]show_bug.cgi" data-no-csrf>
   <p>

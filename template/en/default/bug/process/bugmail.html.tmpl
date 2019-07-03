@@ -21,70 +21,16 @@
 
 [%# INTERFACE:
   # mailing_bugid: The bug ID that email is being sent for.
-  # sent_bugmail: The results of Bugzilla::BugMail::Send().
+  # recipient_count: The number of people that were emailed.
   #%]
 
 [% USE Bugzilla %]
 [% PROCESS global/variables.none.tmpl %]
 
-[%# hide the recipient list by default from new users %]
-[% show_recipients =
-     user.settings.post_bug_submit_action.value == 'nothing'
-     || Bugzilla.cgi.cookie('show_bugmail_recipients')
-     || !user.can_see_bug(mailing_bugid)
-%]
-[% recipient_count = sent_bugmail.sent.size %]
-
-<script [% script_nonce FILTER none %]>
-  function toggleBugmailRecipients(bug_id, show) {
-    if (show) {
-      $("#bugmail_summary_" + bug_id).show();
-      $("#bugmail_summary_" + bug_id + "_short").hide();
-    } else {
-      $("#bugmail_summary_" + bug_id).hide();
-      $("#bugmail_summary_" + bug_id + "_short").show();
-    }
-    $.cookie('show_bugmail_recipients', (show ? 1 : 0), {
-        expires: new Date("January 12, 2025")
-    });
-  }
-  $(function() {
-    $(".toggleBugmailRecipients").on("click", function (event) {
-      event.preventDefault();
-      toggleBugmailRecipients($(event.target).data('mailing-bugid'),
-                              $(event.target).data('mailing-show'));
-     });
-   });
-</script>
-
-<dl id="bugmail_summary_[% mailing_bugid FILTER none %]"
-    [% IF !show_recipients %]style="display:none;"[% END %]>
-  <dt>Email sent to:</dt>
-  <dd>
-  [% IF user.can_see_bug(mailing_bugid) %]
-    [% IF sent_bugmail.sent.size > 0 %]
-      [%+ FOREACH name = sent_bugmail.sent %]
-        <code>[% name FILTER html %]</code>[% ", " UNLESS loop.last() %]
-      [% END %]
-    [% ELSE %]
-      no one
-    [% END %]
-    (<a href="#" class="toggleBugmailRecipients" data-mailing-bugid="[% mailing_bugid FILTER html %]"
-        data-mailing-show="false">hide</a>)
-  [% ELSE %]
-    (list of e-mails not available)
-  [% END %]
-  </dd>
-</dl>
-
-<div id="bugmail_summary_[% mailing_bugid FILTER none %]_short"
-     [% IF show_recipients %]style="display:none;"[% END %]>
+<div id="bugmail_summary_[% mailing_bugid FILTER none %]_short">
   [% IF recipient_count > 0 %]
     Email sent to [% recipient_count FILTER html %] recipient[% 's' UNLESS recipient_count == 1 %].
-    (<a href="#" class="toggleBugmailRecipients" data-mailing-bugid="[% mailing_bugid FILTER html %]"
-                                                 data-mailing-show="true">show</a>)
   [% ELSE %]
     No emails were sent.
   [% END %]
 </div>
-

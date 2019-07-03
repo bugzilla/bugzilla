@@ -469,11 +469,14 @@ sub check_page_load {
     }
   }
 
-  if ($expected_uri->query_param('id')) {
-    if ($expected_uri->query_param('id') eq '__BUG_ID__') {
-      $uri->query_param('id' => '__BUG_ID__');
-    }
+  if ($expected_uri->query_param('id') and $expected_uri->query_param('id') eq '__BUG_ID__') {
+    $uri->query_param('id' => '__BUG_ID__');
   }
+
+  if ($expected_uri->query_param('list_id') and $expected_uri->query_param('list_id') eq '__LIST_ID__') {
+    $uri->query_param('list_id' => '__LIST_ID__');
+  }
+
   my ($pkg, $file, $line) = caller;
   is($uri, $expected_uri, "checking location on $file line $line");
 }

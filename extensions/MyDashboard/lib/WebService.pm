@@ -156,7 +156,14 @@ sub bug_interest_unmark {
 }
 
 sub rest_resources {
-  return [qr{^/bug_interest_unmark$}, {PUT => {method => 'bug_interest_unmark'}}];
+  return [
+    # REST API v1: Expose `bug_interest_unmark` method without prefix for backward compatibility
+    qr{^/(mydashboard/)?bug_interest_unmark$}, {PUT => {method => 'bug_interest_unmark'}},
+    # Other methods are new, so require the prefix
+    qr{^/mydashboard/run_bug_query$}, {GET => {method => 'run_bug_query'}},
+    qr{^/mydashboard/run_flag_query$}, {GET => {method => 'run_flag_query'}},
+    qr{^/mydashboard/run_last_changes$}, {GET => {method => 'run_last_changes'}},
+  ];
 }
 
 1;

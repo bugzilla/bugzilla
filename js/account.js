@@ -88,7 +88,7 @@ $(function() {
     // mfa
 
     $('#mfa-select-totp')
-        .click(function(event) {
+        .click(async event => {
             event.preventDefault();
             $('#mfa').val('TOTP');
 
@@ -102,29 +102,19 @@ $(function() {
             $('#mfa-totp-throbber').show();
             $('#mfa-totp-issued').hide();
 
-            var url = `${BUGZILLA.config.basepath}rest/user/mfa/totp/enroll` +
-                `?Bugzilla_api_token=${encodeURIComponent(BUGZILLA.api_token)}`;
-            $.ajax({
-                "url": url,
-                "contentType": "application/json",
-                "processData": false
-            })
-            .done(function(data) {
+            try {
+                const { png, secret32 } = await Bugzilla.API.get('user/mfa/totp/enroll');
+
                 $('#mfa-totp-throbber').hide();
                 var iframe = $('#mfa-enable-totp-frame').contents();
-                iframe.find('#qr').attr('src', 'data:image/png;base64,' + data.png);
-                iframe.find('#secret').text(data.secret32);
+                iframe.find('#qr').attr('src', `data:image/png;base64,${png}`);
+                iframe.find('#secret').text(secret32);
                 $('#mfa-totp-issued').show();
                 $('#mfa-password').focus();
                 $('#update').attr('disabled', false);
-            })
-            .fail(function(data) {
+            } catch (ex) {
                 $('#mfa-totp-throbber').hide();
-                if (data.statusText === 'abort')
-                    return;
-                var message = data.responseJSON ? data.responseJSON.message : 'Unexpected Error';
-                console.log(message);
-            });
+            }
         });
 
     $('#mfa-select-duo')

@@ -169,7 +169,7 @@ Bugzilla.FlagTypeComment = class FlagTypeComment {
    * Called whenever a flag selection is changed. Insert or remove a comment template.
    * @param {HTMLSelectElement} $select `<select>` element that the `change` event is fired.
    */
-  flag_onselect($select) {
+  async flag_onselect($select) {
     const id = Number($select.dataset.id);
     const { name } = $select.dataset;
     const state = $select.value;
@@ -189,10 +189,10 @@ Bugzilla.FlagTypeComment = class FlagTypeComment {
         this.$fieldset_wrapper.appendChild($fieldset);
 
         // Show any other patches that can be requested for approval
-        bugzilla_ajax({
-          url: `${BUGZILLA.config.basepath}rest/bug/${this.bug_id}/attachment?` +
-            'include_fields=id,summary,content_type,is_patch,is_obsolete',
-        }, ({ bugs }) => {
+        try {
+          const { bugs } = await Bugzilla.API.get(`bug/${this.bug_id}/attachment`, {
+            include_fields: ['id', 'summary', 'content_type', 'is_patch', 'is_obsolete'],
+          });
           const attachments = bugs ? bugs[this.bug_id] : [];
           const others = attachments.filter(att => att.id !== this.attachment_id && !att.is_obsolete &&
             (att.is_patch || this.extra_patch_types.includes(att.content_type)));
@@ -208,7 +208,7 @@ Bugzilla.FlagTypeComment = class FlagTypeComment {
               </td></tr>
             `);
           }
-        });
+        } catch (ex) {}
       }
     }
 
@@ -269,20 +269,18 @@ Bugzilla.FlagTypeComment = class FlagTypeComment {
     });
 
     // Request approval for other patches if any
-    await Promise.all([...this.inserted_fieldsets].map($fieldset => new Promise(resolve => {
+    await Promise.all([...this.inserted_fieldsets].map($fieldset => new Promise(async resolve => {
       const ids = [...$fieldset.querySelectorAll('tr.other-patches input:checked')]
         .map($input => Number($input.dataset.id));
       const flags = this.find_selectors($fieldset).map($select => ({ name: $select.dataset.name, status: '?' }));
 
       if (ids.length && flags.length) {
-        bugzilla_ajax({
-          type: 'PUT',
-          url: `${BUGZILLA.config.basepath}rest/bug/attachment/${ids[0]}`,
-          data: { ids, flags },
-        }, () => resolve(), () => resolve());
-      } else {
-        resolve();
+        try {
+          await Bugzilla.API.put(`bug/attachment/${ids[0]}`, { ids, flags });
+        } catch (ex) {}
       }
+
+      resolve();
     })));
 
     // Collect bug flags from checkboxes
@@ -291,12 +289,12 @@ Bugzilla.FlagTypeComment = class FlagTypeComment {
 
     // Update bug flags if needed
     if (bug_flags.length) {
-      await new Promise(resolve => {
-        bugzilla_ajax({
-          type: 'PUT',
-          url: `${BUGZILLA.config.basepath}rest/bug/${this.bug_id}`,
-          data: { flags: bug_flags },
-        }, () => resolve(), () => resolve());
+      await new Promise(async resolve => {
+        try {
+          await Bugzilla.API.put(`bug/${this.bug_id}`, { flags: bug_flags });
+        } catch (ex) {}
+
+        resolve();
       });
     }
 

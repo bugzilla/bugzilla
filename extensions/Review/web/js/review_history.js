@@ -47,44 +47,7 @@ $(function () {
             return new Date(parts[0], parts[1] - 1, parts[2], parts[3], parts[4], parts[5]);
         }
 
-        var flagDS, bugDS, attachmentDS, historyTable;
-        flagDS = new Y.DataSource.IO({ source: `${BUGZILLA.config.basepath}jsonrpc.cgi` });
-        flagDS.plug(Y.Plugin.DataSourceJSONSchema, {
-            schema: {
-                resultListLocator: 'result',
-                resultFields: [
-                    { key: 'id' },
-                    { key: 'requestee' },
-                    { key: 'setter' },
-                    { key: 'flag_id' },
-                    { key: 'creation_time' },
-                    { key: 'status' },
-                    { key: 'bug_id' },
-                    { key: 'type' },
-                    { key: 'attachment_id' }
-                ]
-            }
-        });
-
-        bugDS = new Y.DataSource.IO({ source: `${BUGZILLA.config.basepath}jsonrpc.cgi` });
-        bugDS.plug(Y.Plugin.DataSourceJSONSchema, {
-            schema: {
-                resultListLocator: 'result.bugs',
-                resultFields: [
-                    { key: 'id' },
-                    { key: 'summary' }
-                ]
-            }
-        });
-
-        attachmentDS = new Y.DataSource.IO({ source: `${BUGZILLA.config.basepath}jsonrpc.cgi` });
-        attachmentDS.plug(Y.Plugin.DataSourceJSONSchema, {
-            schema: {
-                metaFields: { 'attachments': 'result.attachments' }
-            }
-        });
-
-        historyTable = new Y.DataTable({
+        const historyTable = new Y.DataTable({
             columns: [
                 { key: 'creation_time', label: 'Created', sortable: true, formatter: format_date },
                 { key: 'attachment', label: 'Attachment', formatter: format_attachment },
@@ -97,159 +60,55 @@ $(function () {
             ]
         });
 
-        function fetch_flag_ids(user) {
-            return new Y.Promise(function (resolve, reject) {
-                var flagIdCallback = {
-                    success: function (e) {
-                        var flags = e.response.results;
-                        var flag_ids = flags.filter(function (flag) {
-                            return flag.status == '?';
-                        })
-                        .map(function (flag) {
-                            return flag.flag_id;
-                        });
+        const fetch_flags = async user => {
+            try {
+                const data = await Bugzilla.API.get('review/flag_activity', { type_name: 'review', requestee: user });
+                const flags = data.filter(flag => flag.status === '?');
 
-                        if (flag_ids.length > 0) {
-                            resolve(flag_ids);
-                        } else {
-                            reject("No reviews found");
-                        }
-                    },
-                    failure: function (e) {
-                        reject(e.error.message);
-                    }
-                };
+                if (!flags.length) {
+                    return Promise.reject("No reviews found");
+                }
 
-                flagDS.sendRequest({
-                    request: JSON.stringify({
-                        version: '1.1',
-                        method: 'Review.flag_activity',
-                        params: {
-                            type_name: 'review',
-                            requestee: user,
-                            include_fields: ['flag_id', 'status'],
-                            Bugzilla_api_token : (BUGZILLA.api_token ? BUGZILLA.api_token : '')
-                        }
-                    }),
-                    cfg: {
-                        method: "POST",
-                        headers: { 'Content-Type': 'application/json' }
-                    },
-                    callback: flagIdCallback
-                });
-            });
+                flags.forEach(flag => flag.creation_time = parse_date(flag.creation_time));
+                flags.sort((a, b) => a.id > b.id ? 1 : a.id < b.id ? -1 : 0);
+
+                return Promise.resolve(flags);
+            } catch ({ message }) {
+                return Promise.reject(message);
+            }
         }
 
-        function fetch_flags(flag_ids) {
-            return new Y.Promise(function (resolve, reject) {
-                flagDS.sendRequest({
-                    request: JSON.stringify({
-                        version: '1.1',
-                        method: 'Review.flag_activity',
-                        params: {
-                            flag_ids: flag_ids,
-                            Bugzilla_api_token: (BUGZILLA.api_token ? BUGZILLA.api_token : '')
-                        }
-                    }),
-                    cfg: {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' }
-                    },
-                    callback: {
-                        success: function (e) {
-                            var flags = e.response.results;
-                            flags.forEach(function(flag) {
-                                flag.creation_time = parse_date(flag.creation_time);
-                            });
-                            resolve(flags.sort(function (a, b) {
-                                if (a.id > b.id) return 1;
-                                if (a.id < b.id) return -1;
-                                return 0;
-                            }));
-                        },
-                        failure: function (e) {
-                            reject(e.error.message);
-                        }
-                    }
-                });
-            });
+        const fetch_bug_summaries = async flags => {
+            const bug_ids = [...(new Set(flags.map(flag => flag.bug_id)))]; // remove duplicates with `Set`
+            const summary = {};
+
+            try {
+                const { bugs } = await Bugzilla.API.get('bug', { id: bug_ids, include_fields: ['id', 'summary'] });
+
+                bugs.forEach(bug => summary[bug.id] = bug.summary);
+                flags.forEach(flag => flag.bug_summary = summary[flag.bug_id]);
+
+                return Promise.resolve(flags);
+            } catch ({ message }) {
+                return Promise.reject(message);
+            }
         }
 
-        function fetch_bug_summaries(flags) {
-            return new Y.Promise(function (resolve, reject) {
-                var bug_ids = Y.Array.dedupe(flags.map(function (f) {
-                    return f.bug_id;
-                }));
+        const fetch_attachment_descriptions = async flags => {
+            const attachment_ids = [...(new Set(flags.map(flag => flag.attachment_id)))]; // remove duplicates
 
-                bugDS.sendRequest({
-                    request: JSON.stringify({
-                        version: '1.1',
-                        method: 'Bug.get',
-                        params: {
-                            ids: bug_ids,
-                            include_fields: ['summary', 'id'],
-                            Bugzilla_api_token: (BUGZILLA.api_token ? BUGZILLA.api_token : '')
-                        }
-                    }),
-                    cfg: {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' }
-                    },
-                    callback: {
-                        success: function (e) {
-                            var bugs    = e.response.results,
-                                summary = {};
-
-                            bugs.forEach(function (bug) {
-                                summary[bug.id] = bug.summary;
-                            });
-                            flags.forEach(function (flag) {
-                                flag.bug_summary = summary[flag.bug_id];
-                            });
-                            resolve(flags);
-                        },
-                        failure: function (e) {
-                            reject(e.error.message);
-                        }
-                    }
+            try {
+                const { attachments } = await Bugzilla.API.get(`bug/attachment/${attachment_ids[0]}`, {
+                    attachment_ids,
+                    include_fields: ['id', 'description'],
                 });
-            });
-        }
 
-        function fetch_attachment_descriptions(flags) {
-            return new Y.Promise(function (resolve, reject) {
-                var attachment_ids = Y.Array.dedupe(flags.map(function (f) {
-                    return f.attachment_id;
-                }));
+                flags.forEach(flag => flag.attachment = attachments[flag.attachment_id]);
 
-                attachmentDS.sendRequest({
-                    request: JSON.stringify({
-                        version: '1.1',
-                        method: 'Bug.attachments',
-                        params: {
-                            attachment_ids: attachment_ids,
-                            include_fields: ['id', 'description'],
-                            Bugzilla_api_token : (BUGZILLA.api_token ? BUGZILLA.api_token : '')
-                        }
-                    }),
-                    cfg: {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' }
-                    },
-                    callback: {
-                        success: function (e) {
-                            var attachments = e.response.meta.attachments;
-                            flags.forEach(function (flag) {
-                                flag.attachment = attachments[flag.attachment_id];
-                            });
-                            resolve(flags);
-                        },
-                        failure: function (e) {
-                            reject(e.error.message);
-                        }
-                    }
-                });
-            });
+                return Promise.resolve(flags);
+            } catch ({ message }) {
+                return Promise.reject(message);
+            }
         }
 
         function add_historical_action(history, flag, stash, action) {
@@ -359,12 +218,11 @@ $(function () {
             });
             historyTable.set('data', null);
             historyTable.showMessage('Loading...');
-            fetch_flag_ids(user)
-            .then(fetch_flags)
+            fetch_flags(user)
             .then(fetch_bug_summaries)
             .then(fetch_attachment_descriptions)
             .then(function (flags) {
-                return new Y.Promise(function (resolve, reject) {
+                return new Promise((resolve, reject) => {
                     try {
                         resolve(generate_history(flags, user));
                     }
@@ -385,9 +243,8 @@ $(function () {
 
     }, '0.0.1', {
         requires: [
-            "node", "datatype-date", "datatable", "datatable-sort", "datatable-message",
-            "datatable-datasource", "datasource-io", "datasource-jsonschema", "cookie",
-            "gallery-datatable-row-expansion-bmo", "handlebars", "promise"
+            'node', 'datatype-date', 'datatable', 'datatable-sort', 'datatable-message', 'cookie',
+            'gallery-datatable-row-expansion-bmo', 'handlebars'
         ]
     });
 });

@@ -13,13 +13,13 @@ var Bugzilla = Bugzilla || {};
 
 /**
  * Implement the one-click Component Watching functionality that can be added to any page.
- * @abstract
  */
 Bugzilla.ComponentWatching = class ComponentWatching {
   /**
    * Initialize a new ComponentWatching instance. Since constructors can't be async, use a separate function to move on.
    */
   constructor() {
+    this._method = 'component-watching';
     this.buttons = document.querySelectorAll('button.component-watching');
 
     // Check if the user is logged in and the API key is available. If not, remove the Watch buttons.
@@ -31,34 +31,30 @@ Bugzilla.ComponentWatching = class ComponentWatching {
   }
 
   /**
-   * Send a REST API request, and return the results in a Promise.
-   * @param {Object} [request={}] Request data. If omitted, all the current watches will be returned.
-   * @param {String} [path=''] Optional path to be appended to the request URL.
-   * @returns {Promise<Object|String>} Response data or error message.
+   * Retrieve the user's current watch list.
+   * @returns {Promise.<(Array.<Object>|Error)>} List of the current watches.
    */
-  async fetch(request = {}, path = '') {
-    request.url = `${BUGZILLA.config.basepath}rest/component-watching${path}`;
-
-    return new Promise((resolve, reject) => bugzilla_ajax(request, data => resolve(data), error => reject(error)));
+  async list() {
+    return Bugzilla.API.get(this._method);
   }
 
   /**
    * Start watching the current product or component.
    * @param {String} product Product name.
    * @param {String} [component=''] Component name. If omitted, all the components in the product will be watched.
-   * @returns {Promise<Object|String>} Response data or error message.
+   * @returns {Promise.<(Object|Error)>} Detail of the added watch.
    */
   async watch(product, component = '') {
-    return this.fetch({ type: 'POST', data: { product, component } });
+    return Bugzilla.API.post(this._method, { product, component });
   }
 
   /**
    * Stop watching the current product or component.
    * @param {Number} id ID of the watch to be removed.
-   * @returns {Promise<Object|String>} Response data or error message.
+   * @returns {Promise.<(Array.<Object>|Error)>} List of the current watches excluding the removed one.
    */
   async unwatch(id) {
-    return this.fetch({ type: 'DELETE' }, `/${id}`);
+    return Bugzilla.API.delete(`${this._method}/${id}`);
   }
 
   /**
@@ -195,7 +191,7 @@ Bugzilla.ComponentWatching = class ComponentWatching {
    */
   async init() {
     try {
-      const all_watches = await this.fetch();
+      const all_watches = await this.list();
 
       this.get_buttons().forEach($button => {
         const { product, component } = $button.dataset;

@@ -717,10 +717,6 @@ $(function() {
     var options_user = {
         appendTo: $('#main-inner'),
         forceFixPosition: true,
-        serviceUrl: `${BUGZILLA.config.basepath}rest/user/suggest`,
-        params: {
-            Bugzilla_api_token: BUGZILLA.api_token,
-        },
         paramName: 'match',
         deferRequestBy: 250,
         minChars: 2,
@@ -729,16 +725,15 @@ $(function() {
         autoSelectFirst: true,
         preserveInput: true,
         triggerSelectOnValidInput: false,
-        transformResult: function(response) {
-            response = $.parseJSON(response);
-            return {
-                suggestions: $.map(response.users, function({ name, real_name, requests, gravatar } = {}) {
-                    return {
-                        value: name,
-                        data : { email: name, real_name, requests, gravatar }
-                    };
-                })
-            };
+        lookup: (query, done) => {
+            // Note: `async` doesn't work for this `lookup` function, so use a `Promise` chain instead
+            Bugzilla.API.get('user/suggest', { match: query })
+                .then(({ users }) => users.map(({ name, real_name, requests, gravatar }) => ({
+                    value: name,
+                    data: { email: name, real_name, requests, gravatar },
+                })))
+                .catch(() => [])
+                .then(suggestions => done({ suggestions }));
         },
         formatResult: function(suggestion) {
             const $input = this;
@@ -921,7 +916,7 @@ function initDirtyFieldTracking() {
 
 var last_comment_text = '';
 
-function show_comment_preview(bug_id) {
+async function show_comment_preview(bug_id) {
     var Dom = YAHOO.util.Dom;
     var comment = document.getElementById('comment');
     var preview = document.getElementById('comment_preview');
@@ -951,46 +946,24 @@ function show_comment_preview(bug_id) {
     Dom.addClass('comment_preview_text', 'bz_default_hidden');
     Dom.removeClass('comment_preview_loading', 'bz_default_hidden');
 
-    YAHOO.util.Connect.setDefaultPostHeader('application/json', true);
-    YAHOO.util.Connect.asyncRequest('POST', `${BUGZILLA.config.basepath}jsonrpc.cgi`,
-    {
-        success: function(res) {
-            data = JSON.parse(res.responseText);
-            if (data.error) {
-                Dom.addClass('comment_preview_loading', 'bz_default_hidden');
-                Dom.removeClass('comment_preview_error', 'bz_default_hidden');
-                Dom.get('comment_preview_error').innerHTML =
-                    data.error.message.htmlEncode();
-            } else {
-                $comment_body.innerHTML = data.result.html;
+    try {
+        const { html } = await Bugzilla.API.post('bug/comment/render', { id: bug_id, text: comment.value });
 
-                // Highlight code if possible
-                if (Prism) {
-                  Prism.highlightAllUnder($comment_body);
-                }
+        $comment_body.innerHTML = html;
 
-                Dom.addClass('comment_preview_loading', 'bz_default_hidden');
-                Dom.removeClass('comment_preview_text', 'bz_default_hidden');
-                last_comment_text = comment.value;
-            }
-        },
-        failure: function(res) {
-            Dom.addClass('comment_preview_loading', 'bz_default_hidden');
-            Dom.removeClass('comment_preview_error', 'bz_default_hidden');
-            Dom.get('comment_preview_error').innerHTML =
-                res.responseText.htmlEncode();
+        // Highlight code if possible
+        if (Prism) {
+            Prism.highlightAllUnder($comment_body);
         }
-    },
-    JSON.stringify({
-        version: "1.1",
-        method: 'Bug.render_comment',
-        params: {
-            Bugzilla_api_token: BUGZILLA.api_token,
-            id: bug_id,
-            text: comment.value
-        }
-    })
-    );
+
+        Dom.addClass('comment_preview_loading', 'bz_default_hidden');
+        Dom.removeClass('comment_preview_text', 'bz_default_hidden');
+        last_comment_text = comment.value;
+    } catch ({ message }) {
+        Dom.addClass('comment_preview_loading', 'bz_default_hidden');
+        Dom.removeClass('comment_preview_error', 'bz_default_hidden');
+        Dom.get('comment_preview_error').innerHTML = YAHOO.lang.escapeHTML(message);
+    }
 }
 
 function show_comment_edit() {

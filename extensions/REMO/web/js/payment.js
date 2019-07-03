@@ -25,7 +25,7 @@ function validateAndSubmit() {
     return true;
 }
 
-function getBugInfo (evt) {
+async function getBugInfo (evt) {
     var bug_id = parseInt(this.value);
     var div = $("#bug_info");
 
@@ -42,33 +42,22 @@ function getBugInfo (evt) {
 
     div.text('Getting bug info...');
 
-    var url = `${BUGZILLA.config.basepath}rest/bug/${bug_id}?` +
-              `include_fields=product,component,status,summary&Bugzilla_api_token=${BUGZILLA.api_token}`;
-    $.getJSON(url).done(function(data) {
-        var bug_message = "";
-        if (data) {
-            if (data.bugs[0].product !== 'Mozilla Reps'
-                || data.bugs[0].component !== 'Budget Requests')
-            {
-                bug_message = "You can only attach budget payment " +
-                    "information to bugs under the product " +
-                    "'Mozilla Reps' and component 'Budget Requests'.";
-            }
-            else {
-                bug_message = "Bug " + bug_id + " - " + data.bugs[0].status +
-                    " - " + data.bugs[0].summary;
-            }
-        }
-        else {
-            bug_message = "Get bug failed: " + data.responseText;
-        }
+    try {
+        const { bugs } = await Bugzilla.API.get(`bug/${bug_id}?`, {
+            include_fields: ['product', 'component', 'status', 'summary'],
+        });
+        const { product, component, status, summary } = bugs[0];
+        const bug_message = (product !== 'Mozilla Reps' || component !== 'Budget Requests') ?
+            "You can only attach budget payment information to bugs under \
+                the product 'Mozilla Reps' and component 'Budget Requests'." :
+            `Bug ${bug_id} - ${status} - ${summary}`;
+
         div.text(bug_message);
         bug_cache[bug_id] = bug_message;
-    }).fail(function(res, x, y) {
-        if (res.responseJSON && res.responseJSON.error) {
-            div.text(res.responseJSON.message);
-        }
-    });
+    } catch ({ message }) {
+        div.text(`Get bug failed: ${message}`);
+    }
+
     return true;
 }
 

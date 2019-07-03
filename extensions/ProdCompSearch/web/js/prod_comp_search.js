@@ -59,19 +59,11 @@ $(function() {
     $('.prod_comp_search')
         .each(function() {
             var that = $(this);
-            var params = {
-                limit: (that.data('max_results') + 1)
-            };
-            if (BUGZILLA.api_token) {
-                params.Bugzilla_api_token = BUGZILLA.api_token;
-            }
+            const limit = that.data('max_results') + 1;
+
             that.devbridgeAutocomplete({
                 appendTo: $('#main-inner'),
                 forceFixPosition: true,
-                serviceUrl: function(query) {
-                    return `${BUGZILLA.config.basepath}rest/prod_comp_search/find/${encodeURIComponent(query)}`;
-                },
-                params: params,
                 deferRequestBy: 250,
                 minChars: 3,
                 maxHeight: 500,
@@ -79,28 +71,15 @@ $(function() {
                 autoSelectFirst: true,
                 triggerSelectOnValidInput: false,
                 width: '',
-                transformResult: function(response) {
-                    response = $.parseJSON(response);
-                    if (response.error) {
-                        that.data('error', response.message);
-                        return { suggestions: [] };
-                    }
-                    return {
-                        suggestions: $.map(response.products, function(dataItem) {
-                            if (dataItem.component) {
-                                return {
-                                    value: dataItem.product + ' :: ' + dataItem.component,
-                                    data : dataItem
-                                };
-                            }
-                            else {
-                                return {
-                                    value: dataItem.product,
-                                    data : dataItem
-                                };
-                            }
-                        })
-                    };
+                lookup: (query, done) => {
+                    // Note: `async` doesn't work for this `lookup` function, so use a `Promise` chain instead
+                    Bugzilla.API.get(`prod_comp_search/find/${encodeURIComponent(query)}`, { limit })
+                        .then(({ products }) => products.map(item => ({
+                            value: `${item.product}${item.component ? ` :: ${item.component}` : ''}`,
+                            data : item,
+                        })))
+                        .catch(() => [])
+                        .then(suggestions => done({ suggestions }));
                 },
                 formatResult: function(suggestion, currentValue) {
                     var value = (suggestion.data.component ? suggestion.data.component : suggestion.data.product);
@@ -224,19 +203,21 @@ Bugzilla.FrequentComponents = class FrequentComponents {
    * @returns {Promise} Results or error.
    */
   async fetch() {
-    return new Promise((resolve, reject) => bugzilla_ajax({
-      url: `${BUGZILLA.config.basepath}rest/prod_comp_search/frequent`
-    }, ({ results }) => {
+    try {
+      const { results } = await Bugzilla.API.get('prod_comp_search/frequent');
+
       if (!results) {
-        reject(new Error('Your frequent components could not be retrieved.'));
-      } else if (!results.length) {
-        reject(new Error(('Your frequent components could not be found.')));
-      } else {
-        resolve(results);
+        return Promise.reject(new Error('Your frequent components could not be retrieved.'));
       }
-    }, () => {
-      reject(new Error('Your frequent components could not be retrieved.'));
-    }));
+
+      if (!results.length) {
+        return Promise.reject(new Error('Your frequent components could not be found.'));
+      }
+
+      return Promise.resolve(results);
+    } catch (ex) {
+      return Promise.reject(new Error('Your frequent components could not be retrieved.'));
+    }
   }
 };
 

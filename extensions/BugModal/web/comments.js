@@ -261,7 +261,7 @@ $(function() {
         $('#ctag-error').show();
     }
 
-    function deleteTag(event) {
+    async function deleteTag(event) {
         event.preventDefault();
         $('#ctag-error').hide();
 
@@ -280,21 +280,12 @@ $(function() {
         updateTagsMenu();
 
         // update bugzilla
-        bugzilla_ajax(
-            {
-                url: `${BUGZILLA.config.basepath}rest/bug/comment/${commentID}/tags`,
-                type: 'PUT',
-                data: { remove: [ tag ] },
-                hideError: true
-            },
-            function(data) {
-                renderTags(commentNo, data);
-                updateTagsMenu();
-            },
-            function(message) {
-                taggingError(commentNo, message);
-            }
-        );
+        try {
+            renderTags(commentNo, await Bugzilla.API.put(`bug/comment/${commentID}/tags`, { remove: [tag] }));
+            updateTagsMenu();
+        } catch ({ message }) {
+            taggingError(commentNo, message);
+        }
     }
     $('.comment-tag a').click(deleteTag);
 
@@ -322,30 +313,33 @@ $(function() {
         $(`.comment[data-no="${commentNo}"]`).attr('data-tags', tags.join(' '));
     }
 
-    var refreshXHR;
+    let abort_controller;
 
-    function refreshTags(commentNo, commentID) {
+    const refreshTags = async (commentNo, commentID) => {
         cancelRefresh();
-        refreshXHR = bugzilla_ajax(
-            {
-                url: `${BUGZILLA.config.basepath}rest/bug/comment/${commentID}?include_fields=tags`,
-                hideError: true
-            },
-            function(data) {
-                refreshXHR = false;
-                renderTags(commentNo, data.comments[commentID].tags);
-            },
-            function(message) {
-                refreshXHR = false;
+
+        try {
+            abort_controller = new AbortController();
+
+            const { signal } = abort_controller;
+            const { comments } = await Bugzilla.API.get(`bug/comment/${commentID}`, {
+              include_fields: ['tags'],
+            }, { signal });
+
+            renderTags(commentNo, comments[commentID].tags);
+        } catch ({ name, message }) {
+            if (name !== 'AbortError') {
                 taggingError(commentNo, message);
             }
-        );
+        } finally {
+            abort_controller = undefined;
+        }
     }
 
     function cancelRefresh() {
-        if (refreshXHR) {
-            refreshXHR.abort();
-            refreshXHR = false;
+        if (abort_controller) {
+            abort_controller.abort();
+            abort_controller = undefined;
         }
     }
 
@@ -353,31 +347,24 @@ $(function() {
         .devbridgeAutocomplete({
             appendTo: $('#main-inner'),
             forceFixPosition: true,
-            serviceUrl: function(query) {
-                return `${BUGZILLA.config.basepath}rest/bug/comment/tags/${encodeURIComponent(query)}`;
-            },
-            params: {
-                Bugzilla_api_token: (BUGZILLA.api_token ? BUGZILLA.api_token : '')
-            },
             deferRequestBy: 250,
             minChars: 3,
             tabDisabled: true,
             autoSelectFirst: true,
             triggerSelectOnValidInput: false,
-            transformResult: function(response) {
-                response = $.parseJSON(response);
-                return {
-                    suggestions: $.map(response, function(tag) {
-                        return { value: tag };
-                    })
-                };
+            lookup: (query, done) => {
+                // Note: `async` doesn't work for this `lookup` function, so use a `Promise` chain instead
+                Bugzilla.API.get(`bug/comment/tags/${encodeURIComponent(query)}`)
+                    .then(data => data.map(tag => ({ value: tag })))
+                    .catch(() => [])
+                    .then(suggestions => done({ suggestions }));
             },
             formatResult: function(suggestion, currentValue) {
                 // disable <b> wrapping of matched substring
                 return suggestion.value.htmlEncode();
             }
         })
-        .keydown(function(event) {
+        .keydown(async event => {
             if (event.which === 27) {
                 event.preventDefault();
                 $('#ctag-close').click();
@@ -426,22 +413,13 @@ $(function() {
                 renderTags(commentNo, tags);
 
                 // update bugzilla
-                bugzilla_ajax(
-                    {
-                        url: `${BUGZILLA.config.basepath}rest/bug/comment/${commentID}/tags`,
-                        type: 'PUT',
-                        data: { add: addTags },
-                        hideError: true
-                    },
-                    function(data) {
-                        renderTags(commentNo, data);
-                        updateTagsMenu();
-                    },
-                    function(message) {
-                        taggingError(commentNo, message);
-                        refreshTags(commentNo, commentID);
-                    }
-                );
+                try {
+                    renderTags(commentNo, await Bugzilla.API.put(`bug/comment/${commentID}/tags`, { add: addTags }));
+                    updateTagsMenu();
+                } catch ({ message }) {
+                    taggingError(commentNo, message);
+                    refreshTags(commentNo, commentID);
+                }
             }
         });
 
@@ -602,12 +580,9 @@ Bugzilla.BugModal.Comments = class Comments {
     // Show text smaller than 50 KB
     if (is_text && size < 50000) {
       // Load text body
-      bugzilla_ajax({ url: `${BUGZILLA.config.basepath}rest/bug/attachment/${id}?include_fields=data` }, data => {
-        if (data.error) {
-          return;
-        }
-
-        const text = decodeURIComponent(escape(atob(data.attachments[id].data)));
+      try {
+        const { attachments } = await Bugzilla.API.get(`bug/attachment/${id}`, { include_fields: 'data' });
+        const text = decodeURIComponent(escape(atob(attachments[id].data)));
         const lang = is_patch ? 'diff' : type.match(/\w+$/)[0];
 
         $att.insertAdjacentHTML('beforeend', `
@@ -621,7 +596,7 @@ Bugzilla.BugModal.Comments = class Comments {
           Prism.highlightElement($att.querySelector('pre'));
           $att.querySelectorAll('pre a').forEach($a => $a.tabIndex = -1);
         }
-      });
+      } catch (ex) {}
     }
   }
 };

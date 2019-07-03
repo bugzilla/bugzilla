@@ -21,39 +21,30 @@
    already. */
 
 YAHOO.bugzilla.dupTable = {
-    counter: 0,
-    dataSource: null,
-    updateTable: function(dataTable, product_name, summary_field) {
+    updateTable: async (dataTable, product_name, summary_field) => {
         if (summary_field.value.length < 4) return;
 
-        YAHOO.bugzilla.dupTable.counter = YAHOO.bugzilla.dupTable.counter + 1;
-        YAHOO.util.Connect.setDefaultPostHeader('application/json', true);
-        var json_object = {
-            version : "1.1",
-            method : "Bug.possible_duplicates",
-            id : YAHOO.bugzilla.dupTable.counter,
-            params : {
-                Bugzilla_api_token: BUGZILLA.api_token,
-                product : product_name,
-                summary : summary_field.value,
-                limit : 7,
-                include_fields : [ "id", "summary", "status", "resolution",
-                                   "update_token" ]
-            }
-        };
-        var post_data = JSON.stringify(json_object);
-
-        var callback = {
-            success: dataTable.onDataReturnInitializeTable,
-            failure: dataTable.onDataReturnInitializeTable,
-            scope:   dataTable,
-            argument: dataTable.getState()
-        };
         dataTable.showTableMessage(dataTable.get("MSG_LOADING"),
                                    YAHOO.widget.DataTable.CLASS_LOADING);
         YAHOO.util.Dom.removeClass('possible_duplicates_container',
                                    'bz_default_hidden');
-        dataTable.getDataSource().sendRequest(post_data, callback);
+
+        let data = {};
+
+        try {
+            const { bugs } = await Bugzilla.API.get('bug/possible_duplicates', {
+                product: product_name,
+                summary: summary_field.value,
+                limit: 7,
+                include_fields: ['id', 'summary', 'status', 'resolution', 'update_token'],
+            });
+
+            data = { results: bugs };
+        } catch (ex) {
+            data = { error: true };
+        }
+
+        dataTable.onDataReturnInitializeTable('', data);
     },
     // This is the keyup event handler. It calls updateTable with a relatively
     // long delay, to allow additional input. However, the delay is short
@@ -98,108 +89,13 @@ YAHOO.bugzilla.dupTable = {
         el.appendChild(button);
         new YAHOO.widget.Button(button);
     },
-    init_ds: function() {
-        var new_ds = new YAHOO.util.XHRDataSource(`${BUGZILLA.config.basepath}jsonrpc.cgi`);
-        new_ds.connTimeout = 30000;
-        new_ds.connMethodPost = true;
-        new_ds.connXhrMode = "cancelStaleRequests";
-        new_ds.maxCacheEntries = 3;
-        new_ds.responseSchema = {
-            resultsList : "result.bugs",
-            metaFields : { error: "error", jsonRpcId: "id" }
-        };
-        // DataSource can't understand a JSON-RPC error response, so
-        // we have to modify the result data if we get one.
-        new_ds.doBeforeParseData =
-            function(oRequest, oFullResponse, oCallback) {
-                if (oFullResponse.error) {
-                    oFullResponse.result = {};
-                    oFullResponse.result.bugs = [];
-                    if (console) {
-                        console.log("JSON-RPC error:", oFullResponse.error);
-                    }
-                }
-                return oFullResponse;
-        }
-
-        this.dataSource = new_ds;
-    },
     init: function(data) {
-        if (this.dataSource == null) this.init_ds();
         data.options.initialLoad = false;
-        var dt = new YAHOO.widget.DataTable(data.container, data.columns,
-            this.dataSource, data.options);
+
+        const ds = new YAHOO.util.LocalDataSource([]); // Dummy data source
+        const dt = new YAHOO.widget.DataTable(data.container, data.columns, ds, data.options);
+
         YAHOO.util.Event.on(data.summary_field, 'input', this.doUpdateTable,
                             [dt, data.product_name]);
     }
 };
-
-(function(){
-    'use strict';
-
-    YAHOO.bugzilla.bugUserLastVisit = {
-        update: function(bug_ids) {
-            var args = JSON.stringify({
-                version: "1.1",
-                method: 'BugUserLastVisit.update',
-                params: {
-                    Bugzilla_api_token: BUGZILLA.api_token,
-                    ids: bug_ids
-                }
-            });
-            var callbacks = {
-                failure: function(res) {
-                    if (console)
-                        console.log("failed to update last visited: "
-                            + res.responseText);
-                },
-            };
-
-            YAHOO.util.Connect.setDefaultPostHeader('application/json', true);
-            YAHOO.util.Connect.asyncRequest('POST', `${BUGZILLA.config.basepath}jsonrpc.cgi`, callbacks,
-                args)
-        },
-
-        get: function(done) {
-            var args = JSON.stringify({
-                version: "1.1",
-                method: 'BugUserLastVisit.get',
-                params: {
-                    Bugzilla_api_token: BUGZILLA.api_token
-                }
-            });
-            var callbacks = {
-                success: function(res) { done(JSON.parse(res.responseText)) },
-                failure: function(res) {
-                    if (console)
-                        console.log("failed to get last visited: "
-                                + res.responseText);
-                },
-            };
-            YAHOO.util.Connect.setDefaultPostHeader('application/json', true);
-            YAHOO.util.Connect.asyncRequest('POST', `${BUGZILLA.config.basepath}jsonrpc.cgi`, callbacks, args)
-        },
-    };
-
-    YAHOO.bugzilla.bugInterest = {
-        unmark: function(bug_ids) {
-            var args = JSON.stringify({
-                version: "1.1",
-                method: 'MyDashboard.bug_interest_unmark',
-                params: {
-                    bug_ids: bug_ids,
-                    Bugzilla_api_token: (BUGZILLA.api_token ? BUGZILLA.api_token : '')
-                },
-            });
-            var callbacks = {
-                failure: function(res) {
-                    if (console)
-                        console.log("failed to unmark interest: "
-                            + res.responseText);
-                },
-            };
-            YAHOO.util.Connect.setDefaultPostHeader('application/json', true);
-            YAHOO.util.Connect.asyncRequest('POST', `${BUGZILLA.config.basepath}jsonrpc.cgi`, callbacks, args)
-        },
-    };
-})();

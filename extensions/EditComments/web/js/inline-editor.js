@@ -78,7 +78,7 @@ Bugzilla.InlineCommentEditor = class InlineCommentEditor {
    * Called whenever the Edit button is clicked. Hide the current comment and insert the inline comment editor instead.
    * @param {MouseEvent} event Click event.
    */
-  edit_button_onclick(event) {
+  async edit_button_onclick(event) {
     event.preventDefault();
 
     this.toggle_toolbar_buttons(true);
@@ -148,14 +148,11 @@ Bugzilla.InlineCommentEditor = class InlineCommentEditor {
     }
 
     // Retrieve the raw comment text
-    bugzilla_ajax({
-      url: `${BUGZILLA.config.basepath}rest/editcomments/comment/${this.comment_id}`,
-      hideError: true,
-    }, data => {
-      this.fetch_onload(data);
-    }, message => {
+    try {
+      this.fetch_onload(await Bugzilla.API.get(`editcomments/comment/${this.comment_id}`));
+    } catch ({ message }) {
       this.fetch_onerror(message);
-    });
+    }
   }
 
   /**
@@ -208,7 +205,7 @@ Bugzilla.InlineCommentEditor = class InlineCommentEditor {
   /**
    * Called whenever the Preview tab is clicked. Fetch and display the rendered comment.
    */
-  preview() {
+  async preview() {
     this.$preview.style.height = `${this.$textarea.scrollHeight}px`;
     this.$edit_tab.setAttribute('aria-selected', 'false');
     this.$edit_tabpanel.hidden = true;
@@ -219,13 +216,11 @@ Bugzilla.InlineCommentEditor = class InlineCommentEditor {
 
     this.render_message(this.str.loading);
 
-    bugzilla_ajax({
-      url: `${BUGZILLA.config.basepath}rest/bug/comment/render`,
-      type: 'POST',
-      hideError: true,
-      data: { id: BUGZILLA.bug_id, text: this.$textarea.value },
-    }, data => {
-      this.$preview.innerHTML = data.html;
+    try {
+      const text = this.$textarea.value;
+      const { html } = await Bugzilla.API.post('bug/comment/render', { id: BUGZILLA.bug_id, text });
+
+      this.$preview.innerHTML = html;
 
       // Highlight code if possible
       if (Prism) {
@@ -234,10 +229,10 @@ Bugzilla.InlineCommentEditor = class InlineCommentEditor {
 
       this.$preview.style.removeProperty('height');
       this.$preview.setAttribute('aria-busy', 'false');
-    }, () => {
+    } catch (ex) {
       this.render_message(this.str.preview_error);
       this.$preview.setAttribute('aria-busy', 'false');
-    });
+    }
   }
 
   /**
@@ -255,7 +250,7 @@ Bugzilla.InlineCommentEditor = class InlineCommentEditor {
   /**
    * Called whenever the Update Comment button is clicked. Upload the changes to the server.
    */
-  save() {
+  async save() {
     if (!this.edited) {
       return;
     }
@@ -264,19 +259,14 @@ Bugzilla.InlineCommentEditor = class InlineCommentEditor {
     this.$textarea.disabled = this.$save_button.disabled = this.$cancel_button.disabled = true;
     this.$status.textContent = this.str.saving;
 
-    bugzilla_ajax({
-      url: `${BUGZILLA.config.basepath}rest/editcomments/comment/${this.comment_id}`,
-      type: 'PUT',
-      hideError: true,
-      data: {
+    try {
+      this.save_onsuccess(await Bugzilla.API.put(`editcomments/comment/${this.comment_id}`, {
         new_comment: this.$textarea.value,
         is_hidden: this.$is_hidden_checkbox && this.$is_hidden_checkbox.checked ? 1 : 0,
-      },
-    }, data => {
-      this.save_onsuccess(data);
-    }, message => {
+      }));
+    } catch ({ message }) {
       this.save_onerror(message);
-    });
+    }
   }
 
   /**

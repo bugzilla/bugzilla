@@ -18,7 +18,6 @@ Event.onDOMReady(function() {
 });
 
 YAHOO.bugzilla.instantSearch = {
-  counter: 0,
   dataTable: null,
   dataTableColumns: null,
   elContent: null,
@@ -27,8 +26,6 @@ YAHOO.bugzilla.instantSearch = {
   currentSearchProduct: '',
 
   onInit: function() {
-    YAHOO.util.Connect.setDefaultPostHeader('application/json; charset=UTF-8');
-
     this.elContent = Dom.get('content');
     this.elList = Dom.get('results');
 
@@ -46,37 +43,10 @@ YAHOO.bugzilla.instantSearch = {
   },
 
   initDataTable: function() {
-    var dataSource = new YAHOO.util.XHRDataSource(`${BUGZILLA.config.basepath}jsonrpc.cgi`);
-    dataSource.connTimeout = 15000;
-    dataSource.connMethodPost = true;
-    dataSource.connXhrMode = "cancelStaleRequests";
-    dataSource.maxCacheEntries = 3;
-    dataSource.responseSchema = {
-      resultsList : "result.bugs",
-      metaFields : { error: "error", jsonRpcId: "id" }
-    };
-    // DataSource can't understand a JSON-RPC error response, so
-    // we have to modify the result data if we get one.
-    dataSource.doBeforeParseData =
-      function(oRequest, oFullResponse, oCallback) {
-        if (oFullResponse.error) {
-          oFullResponse.result = {};
-          oFullResponse.result.bugs = [];
-          if (console)
-            console.error("JSON-RPC error:", oFullResponse.error);
-        }
-        return oFullResponse;
-      };
-    dataSource.subscribe('dataErrorEvent',
-      function() {
-        YAHOO.bugzilla.instantSearch.currentSearchQuery = '';
-      }
-    );
-
     this.dataTable = new YAHOO.widget.DataTable(
       'results',
       this.dataTableColumns,
-      dataSource,
+      new YAHOO.util.LocalDataSource([]), // Dummy data source
       {
         initialLoad: false,
         MSG_EMPTY: 'No matching bugs found.',
@@ -117,7 +87,7 @@ YAHOO.bugzilla.instantSearch = {
     YAHOO.bugzilla.instantSearch.doSearch(YAHOO.bugzilla.instantSearch.getContent());
   },
 
-  doSearch: function(query) {
+  doSearch: async query => {
     if (query.length < 4)
       return;
 
@@ -142,39 +112,28 @@ YAHOO.bugzilla.instantSearch = {
         ' width="16" height="11">',
         YAHOO.widget.DataTable.CLASS_LOADING
       );
-      var jsonObject = {
-        version: "1.1",
-        method: "Bug.possible_duplicates",
-        id: ++YAHOO.bugzilla.instantSearch.counter,
-        params: {
+
+      let data;
+
+      try {
+        const { bugs } = await Bugzilla.API.get('bug/possible_duplicates', {
           product: YAHOO.bugzilla.instantSearch.getProduct(),
           summary: query,
           limit: 20,
-          include_fields: [ "id", "summary", "status", "resolution", "component" ]
-        }
-      };
-      if (BUGZILLA.api_token) {
-        jsonObject.params.Bugzilla_api_token = BUGZILLA.api_token;
+          include_fields: ['id', 'summary', 'status', 'resolution', 'component'],
+        });
+
+        data = { results: bugs };
+      } catch (ex) {
+        YAHOO.bugzilla.instantSearch.currentSearchQuery = '';
+        data = { error: true };
       }
 
-      YAHOO.bugzilla.instantSearch.dataTable.getDataSource().sendRequest(
-        JSON.stringify(jsonObject),
-        {
-          success: YAHOO.bugzilla.instantSearch.onSearchResults,
-          failure: YAHOO.bugzilla.instantSearch.onSearchResults,
-          scope: YAHOO.bugzilla.instantSearch.dataTable,
-          argument: YAHOO.bugzilla.instantSearch.dataTable.getState()
-        }
-      );
-
+      YAHOO.bugzilla.instantSearch.dataTable.onDataReturnInitializeTable('', data);
     } catch(err) {
       if (console)
         console.error(err.message);
     }
-  },
-
-  onSearchResults: function(sRequest, oResponse, oPayload) {
-    YAHOO.bugzilla.instantSearch.dataTable.onDataReturnInitializeTable(sRequest, oResponse, oPayload);
   },
 
   getContent: function() {

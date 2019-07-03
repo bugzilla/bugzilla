@@ -368,3 +368,283 @@ function timeAgo(param) {
     if (mo < 18) return 'Last year';
     return yy + ' years ago';
 }
+
+/**
+ * Reference or define the Bugzilla app namespace.
+ * @namespace
+ */
+var Bugzilla = Bugzilla || {}; // eslint-disable-line no-var
+
+/**
+ * Enable easier access to the Bugzilla REST API.
+ * @hideconstructor
+ * @see https://bugzilla.readthedocs.io/en/latest/api/
+ */
+Bugzilla.API = class API {
+  /**
+   * Initialize the request settings for `fetch()` or `XMLHttpRequest`.
+   * @private
+   * @param {String} endpoint See the {@link Bugzilla.API._fetch} method.
+   * @param {String} [method='GET'] See the {@link Bugzilla.API._fetch} method.
+   * @param {Object} [params] See the {@link Bugzilla.API._fetch} method.
+   * @returns {Request} Request settings including the complete URL, HTTP method, headers and body.
+   */
+  static _init(endpoint, method = 'GET', params = {}) {
+    const url = new URL(`${BUGZILLA.config.basepath}rest/${endpoint}`, location.origin);
+
+    if (method === 'GET') {
+      for (const [key, value] of Object.entries(params)) {
+        if (Array.isArray(value)) {
+          if (['include_fields', 'exclude_fields'].includes(key)) {
+            url.searchParams.set(key, value.join(','));
+          } else {
+            // Because the REST API v1 doesn't support comma-separated values for certain params, array values have to
+            // be appended as duplicated params, so the query string will look like `attachment_ids=1&attachment_ids=2`
+            // instead of `attachment_ids=1,2`.
+            value.forEach(val => url.searchParams.append(key, val));
+          }
+        } else {
+          url.searchParams.set(key, value);
+        }
+      }
+    }
+
+    /** @todo Remove this once Bug 1477163 is solved */
+    url.searchParams.set('Bugzilla_api_token', BUGZILLA.api_token);
+
+    return new Request(url, {
+      method,
+      body: method !== 'GET' ? JSON.stringify(params) : null,
+      credentials: 'same-origin',
+      cache: 'no-cache',
+    });
+  }
+
+  /**
+   * Send a `fetch()` request to a Bugzilla REST API endpoint and return results.
+   * @private
+   * @param {String} endpoint URL path excluding the `/rest/` prefix; may also contain query parameters.
+   * @param {Object} [options] Request options.
+   * @param {String} [options.method='GET'] HTTP request method. POST, GET, PUT, etc.
+   * @param {Object} [options.params] Request parameters. For a GET request, it will be sent as the URL query params.
+   * The values will be automatically URL-encoded, so don't use `encodeURIComponent()` for each. For a non-GET request,
+   * this will be part of the request body. The params can be included in `endpoint` if those are simple (no encoding
+   * required) or if the request is not GET but URL query params are required.
+   * @param {Object} [options.init] Extra options for the `fetch()` method.
+   * @returns {Promise.<(Object|Array.<Object>|Error)>} Response data for a valid response, or an `Error` object for an
+   * error returned from the REST API as well as any other exception including an aborted or failed HTTP request.
+   * @see https://developer.mozilla.org/en-US/docs/Web/API/WindowOrWorkerGlobalScope/fetch
+   */
+  static async _fetch(endpoint, { method = 'GET', params = {}, init = {} } = {}) {
+    const request = this._init(endpoint, method, params);
+
+    if (!navigator.onLine) {
+      return Promise.reject(new Bugzilla.Error({ name: 'OfflineError', message: 'You are currently offline.' }));
+    }
+
+    return new Promise((resolve, reject) => {
+      const timer = window.setTimeout(() => {
+        reject(new Bugzilla.Error({ name: 'TimeoutError', message: 'Request Timeout' }));
+      }, 30000);
+
+      /** @throws {AbortError} */
+      fetch(request, init).then(response => {
+        /** @throws {SyntaxError} */
+        return response.ok ? response.json() : { error: true };
+      }).then(result => {
+        const { error, code, message } = result;
+
+        if (error) {
+          reject(new Bugzilla.Error({ name: 'APIError', code, message }));
+        } else {
+          resolve(result);
+        }
+      }).catch(({ name, code, message }) => {
+        reject(new Bugzilla.Error({ name, code, detail: message }));
+      });
+
+      window.clearTimeout(timer);
+    });
+  }
+
+  /**
+   * Shorthand for a GET request with the {@link Bugzilla.API._fetch} method.
+   * @param {String} endpoint See the {@link Bugzilla.API._fetch} method.
+   * @param {Object} [params] See the {@link Bugzilla.API._fetch} method.
+   * @param {Object} [init] See the {@link Bugzilla.API._fetch} method.
+   * @returns {Promise.<(Object|Array.<Object>|Error)>} See the {@link Bugzilla.API._fetch} method.
+   */
+  static async get(endpoint, params = {}, init = {}) {
+    return this._fetch(endpoint, { method: 'GET', params, init });
+  }
+
+  /**
+   * Shorthand for a POST request with the {@link Bugzilla.API._fetch} method.
+   * @param {String} endpoint See the {@link Bugzilla.API._fetch} method.
+   * @param {Object} [params] See the {@link Bugzilla.API._fetch} method.
+   * @param {Object} [init] See the {@link Bugzilla.API._fetch} method.
+   * @returns {Promise.<(Object|Array.<Object>|Error)>} See the {@link Bugzilla.API._fetch} method.
+   */
+  static async post(endpoint, params = {}, init = {}) {
+    return this._fetch(endpoint, { method: 'POST', params, init });
+  }
+
+  /**
+   * Shorthand for a PUT request with the {@link Bugzilla.API._fetch} method.
+   * @param {String} endpoint See the {@link Bugzilla.API._fetch} method.
+   * @param {Object} [params] See the {@link Bugzilla.API._fetch} method.
+   * @param {Object} [init] See the {@link Bugzilla.API._fetch} method.
+   * @returns {Promise.<(Object|Array.<Object>|Error)>} See the {@link Bugzilla.API._fetch} method.
+   */
+  static async put(endpoint, params = {}, init = {}) {
+    return this._fetch(endpoint, { method: 'PUT', params, init });
+  }
+
+  /**
+   * Shorthand for a PATCH request with the {@link Bugzilla.API._fetch} method.
+   * @param {String} endpoint See the {@link Bugzilla.API._fetch} method.
+   * @param {Object} [params] See the {@link Bugzilla.API._fetch} method.
+   * @param {Object} [init] See the {@link Bugzilla.API._fetch} method.
+   * @returns {Promise.<(Object|Array.<Object>|Error)>} See the {@link Bugzilla.API._fetch} method.
+   */
+  static async patch(endpoint, params = {}, init = {}) {
+    return this._fetch(endpoint, { method: 'PATCH', params, init });
+  }
+
+  /**
+   * Shorthand for a DELETE request with the {@link Bugzilla.API._fetch} method.
+   * @param {String} endpoint See the {@link Bugzilla.API._fetch} method.
+   * @param {Object} [params] See the {@link Bugzilla.API._fetch} method.
+   * @param {Object} [init] See the {@link Bugzilla.API._fetch} method.
+   * @returns {Promise.<(Object|Array.<Object>|Error)>} See the {@link Bugzilla.API._fetch} method.
+   */
+  static async delete(endpoint, params = {}, init = {}) {
+    return this._fetch(endpoint, { method: 'DELETE', params, init });
+  }
+
+  /**
+   * Success callback function for the {@link Bugzilla.API.xhr} method.
+   * @callback Bugzilla.API~resolve
+   * @param {Object|Array.<Object>} data Response data for a valid response.
+   */
+
+  /**
+   * Error callback function for the {@link Bugzilla.API.xhr} method.
+   * @callback Bugzilla.API~reject
+   * @param {Error} error `Error` object providing a reason. See the {@link Bugzilla.Error} for details.
+   */
+
+  /**
+   * Make an `XMLHttpRequest` to a Bugzilla REST API endpoint and return results. This is useful when you need more
+   * control than `fetch()`, particularly to upload a file while monitoring the progress.
+   * @param {String} endpoint See the {@link Bugzilla.API._fetch} method.
+   * @param {Object} [options] Request options.
+   * @param {String} [options.method='GET'] See the {@link Bugzilla.API._fetch} method.
+   * @param {Object} [options.params] See the {@link Bugzilla.API._fetch} method.
+   * @param {Bugzilla.API~resolve} [options.resolve] Callback function for a valid response.
+   * @param {Bugzilla.API~reject} [options.reject] Callback function for an error returned from the REST API as well as
+   * any other exception including an aborted or failed HTTP request.
+   * @param {Object.<String, Function>} [options.download] Raw event listeners for download; the key is an event type
+   * such as `load` or `error`, the value is an event listener.
+   * @param {Object.<String, Function>} [options.upload] Raw event listeners for upload; the key is an event type such
+   * as `progress` or `error`, the value is an event listener.
+   * @returns {XMLHttpRequest} Request.
+   * @see https://developer.mozilla.org/en-US/docs/Web/API/XMLHttpRequest/Using_XMLHttpRequest#Monitoring_progress
+   */
+  static xhr(endpoint, { method = 'GET', params = {}, resolve, reject, download, upload } = {}) {
+    const xhr = new XMLHttpRequest();
+    const { url, headers, body } = this._init(endpoint, method, params);
+
+    resolve = typeof resolve === 'function' ? resolve : () => {};
+    reject = typeof reject === 'function' ? reject : () => {};
+
+    if (!navigator.onLine) {
+      reject(new Bugzilla.Error({ name: 'OfflineError', message: 'You are currently offline.' }));
+
+      return xhr;
+    }
+
+    xhr.addEventListener('load', () => {
+      try {
+        /** @throws {SyntaxError} */
+        const result = JSON.parse(xhr.responseText);
+        const { error, code, message } = result;
+
+        if (parseInt(xhr.status / 100) !== 2 || error) {
+          reject(new Bugzilla.Error({ name: 'APIError', code, message }));
+        } else {
+          resolve(result);
+        }
+      } catch ({ name, code, message }) {
+        reject(new Bugzilla.Error({ name, code, detail: message }));
+      }
+    });
+
+    xhr.addEventListener('abort', () => {
+      reject(new Bugzilla.Error({ name: 'AbortError' }));
+    });
+
+    xhr.addEventListener('error', () => {
+      reject(new Bugzilla.Error({ name: 'NetworkError' }));
+    });
+
+    xhr.addEventListener('timeout', () => {
+      reject(new Bugzilla.Error({ name: 'TimeoutError', message: 'Request Timeout' }));
+    });
+
+    for (const [type, handler] of Object.entries(download || {})) {
+      xhr.addEventListener(type, event => handler(event));
+    }
+
+    for (const [type, handler] of Object.entries(upload || {})) {
+      xhr.upload.addEventListener(type, event => handler(event));
+    }
+
+    xhr.open(method, url);
+
+    for (const [key, value] of headers) {
+      xhr.setRequestHeader(key, value);
+    }
+
+    // Set timeout in 30 seconds given some large results
+    xhr.timeout = 30000;
+
+    xhr.send(body);
+
+    return xhr;
+  }
+};
+
+/**
+ * Extend the generic `Error` class so it can contain a custom name and other data if needed. This allows to gracefully
+ * handle an error from either the REST API or the browser.
+ */
+Bugzilla.Error = class CustomError extends Error {
+  /**
+   * Initialize the `CustomError` object.
+   * @param {Object} [options] Error options.
+   * @param {String} [options.name='Error'] Distinguishable error name that can be taken from an original `DOMException`
+   * object if any, e.g. `AbortError` or `SyntaxError`.
+   * @param {String} [options.message='Unexpected Error'] Localizable, user-friendly message probably from the REST API.
+   * @param {Number} [options.code=0] Custom error code from the REST API or `DOMException` code.
+   * @param {String} [options.detail] Detailed, technical message probably from an original `DOMException` that end
+   * users don't have to see.
+   */
+  constructor({ name = 'Error', message = 'Unexpected Error', code = 0, detail } = {}) {
+    super(message);
+    this.name = name;
+    this.code = code;
+    this.detail = detail;
+
+    console.error(this.toString());
+  }
+
+  /**
+   * Define the string representation of the error object.
+   * @override
+   * @returns {String} Custom string representation.
+   */
+  toString() {
+    return `${this.name}: "${this.message}" (code: ${this.code}${this.detail ? `, detail: ${this.detail}` : ''})`;
+  }
+};

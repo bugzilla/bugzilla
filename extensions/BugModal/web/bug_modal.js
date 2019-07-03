@@ -266,50 +266,50 @@ $(function() {
         );
     }
 
-    function ccListUpdate() {
-        bugzilla_ajax(
-            {
-                url: `${BUGZILLA.config.basepath}rest/bug_modal/cc/${BUGZILLA.bug_id}`
-            },
-            function(data) {
-                $('#cc-list').html(data.html);
-                $('#cc-latch').data('fetched', true);
-                $('#cc-list .cc-user').hover(
-                    function() {
-                        $('#ccr-' + $(this).data('n')).css('visibility', 'visible');
-                    },
-                    function() {
-                        $('#ccr-' + $(this).data('n')).css('visibility', 'hidden');
+    async function ccListUpdate() {
+        try {
+            const { html } = await Bugzilla.API.get(`bug_modal/cc/${BUGZILLA.bug_id}`);
+
+            $('#io-error').empty().hide();
+            $('#cc-list').html(html);
+            $('#cc-latch').data('fetched', true);
+            $('#cc-list .cc-user').hover(
+                function() {
+                    $('#ccr-' + $(this).data('n')).css('visibility', 'visible');
+                },
+                function() {
+                    $('#ccr-' + $(this).data('n')).css('visibility', 'hidden');
+                }
+            );
+            $('#cc-list .show_usermenu').click(function() {
+                const $this = $(this);
+                return show_usermenu($this.data('user-id'), $this.data('user-email'), $this.data('show-edit'),
+                    $this.data('hide-profile'));
+            });
+            $('#cc-list .cc-remove')
+                .click(function(event) {
+                    event.preventDefault();
+                    $('#top-save-btn').show();
+                    var n = $(this).data('n');
+                    var ccu = $('#ccu-' + n);
+                    if (ccu.hasClass('cc-removed')) {
+                        ccu.removeClass('cc-removed');
+                        $('#cc-' + n).remove();
                     }
-                );
-                $('#cc-list .show_usermenu').click(function() {
-                    const $this = $(this);
-                    return show_usermenu($this.data('user-id'), $this.data('user-email'), $this.data('show-edit'),
-                        $this.data('hide-profile'));
+                    else {
+                        $('#removecc').val('on');
+                        ccu.addClass('cc-removed');
+                        $('<input>').attr({
+                            type: 'hidden',
+                            id: 'cc-' + n,
+                            value: $('#ccr-' + n).data('login'),
+                            name: 'cc'
+                        }).appendTo('#changeform');
+                    }
                 });
-                $('#cc-list .cc-remove')
-                    .click(function(event) {
-                        event.preventDefault();
-                        $('#top-save-btn').show();
-                        var n = $(this).data('n');
-                        var ccu = $('#ccu-' + n);
-                        if (ccu.hasClass('cc-removed')) {
-                            ccu.removeClass('cc-removed');
-                            $('#cc-' + n).remove();
-                        }
-                        else {
-                            $('#removecc').val('on');
-                            ccu.addClass('cc-removed');
-                            $('<input>').attr({
-                                type: 'hidden',
-                                id: 'cc-' + n,
-                                value: $('#ccr-' + n).data('login'),
-                                name: 'cc'
-                            }).appendTo('#changeform');
-                        }
-                    });
-            }
-        );
+        } catch ({ message }) {
+            $('#io-error').html(message).show('fast');
+        }
     }
 
     if (BUGZILLA.user.id) {
@@ -510,7 +510,7 @@ $(function() {
 
     // edit/save mode button
     $('#mode-btn')
-        .click(function(event) {
+        .click(async event => {
             event.preventDefault();
 
             // hide buttons, old error messages
@@ -535,119 +535,119 @@ $(function() {
             $('#mode-btn').prop('disabled', true);
 
             // load the missing select data
-            bugzilla_ajax(
-                {
-                    url: `${BUGZILLA.config.basepath}rest/bug_modal/edit/${BUGZILLA.bug_id}`
-                },
-                function(data) {
-                    $('#mode-btn').hide();
+            try {
+                const data = await Bugzilla.API.get(`bug_modal/edit/${BUGZILLA.bug_id}`);
 
-                    // populate select menus
-                    Object.entries(data.options).forEach(([key, value]) => {
-                        const $select = document.querySelector(`#${key}`);
-                        if (!$select) return;
-                        // It can be radio-button-like UI
-                        const use_buttons = $select.matches('.buttons.toggle');
-                        const is_required = $select.matches('[aria-required="true"]');
-                        const selected = use_buttons ? $select.querySelector('input').value : $select.value;
-                        $select.innerHTML = '';
-                        value.forEach(({ name }) => {
-                            if (is_required && name === '--') {
-                                return;
-                            }
-                            if (use_buttons) {
-                                $select.insertAdjacentHTML('beforeend', `
-                                  <div class="item">
-                                    <input id="${$select.id}_${name}_radio" type="radio" name="${$select.id}"
-                                           value="${name}" ${name === selected ? 'checked' : ''}>
-                                    <label for="${$select.id}_${name}_radio">
-                                    ${$select.id === 'bug_type' ? `
-                                      <span class="bug-type-label iconic-text" data-type="${name}">
-                                        <span class="icon" aria-hidden="true"></span>${name}
-                                      </span>
-                                    ` : `${name}`}
-                                    </label>
-                                  </div>
-                                `);
-                            } else {
-                                $select.insertAdjacentHTML('beforeend', `
-                                  <option value="${name}" ${name === selected ? 'selected' : ''}>${name}</option>
-                                `);
-                            }
-                        });
-                        if ($select.matches('[multiple]') && value.length < 5) {
-                            $select.size = value.length;
+                $('#io-error').empty().hide();
+                $('#mode-btn').hide();
+
+                // populate select menus
+                for (const [key, value] of Object.entries(data.options)) {
+                    const $select = document.querySelector(`#${key}`);
+                    if (!$select) {
+                        continue;
+                    }
+                    // It can be radio-button-like UI
+                    const use_buttons = $select.matches('.buttons.toggle');
+                    const is_required = $select.matches('[aria-required="true"]');
+                    const selected = use_buttons ? $select.querySelector('input').value : $select.value;
+                    $select.innerHTML = '';
+                    for (const { name } of value) {
+                        if (is_required && name === '--') {
+                            continue;
                         }
-                    });
-
-                    // build our product description hash
-                    $.each(data.options.product, function() {
-                        products[this.name] = this.description;
-                    });
-
-                    // keywords is a multi-value autocomplete
-                    keywords = data.keywords;
-                    $('#keywords')
-                        .devbridgeAutocomplete({
-                            appendTo: $('#main-inner'),
-                            forceFixPosition: true,
-                            lookup: function(query, done) {
-                                query = query.toLowerCase();
-                                var matchStart =
-                                    $.grep(keywords, function(keyword) {
-                                        return keyword.toLowerCase().substr(0, query.length) === query;
-                                    });
-                                var matchSub =
-                                    $.grep(keywords, function(keyword) {
-                                        return keyword.toLowerCase().indexOf(query) !== -1 &&
-                                            $.inArray(keyword, matchStart) === -1;
-                                    });
-                                var suggestions =
-                                    $.map($.merge(matchStart, matchSub), function(suggestion) {
-                                        return { value: suggestion };
-                                    });
-                                done({ suggestions: suggestions });
-                            },
-                            tabDisabled: true,
-                            delimiter: /,\s*/,
-                            minChars: 0,
-                            autoSelectFirst: false,
-                            triggerSelectOnValidInput: false,
-                            formatResult: function(suggestion, currentValue) {
-                                // disable <b> wrapping of matched substring
-                                return suggestion.value.htmlEncode();
-                            },
-                            onSearchStart: function(params) {
-                                var that = $(this);
-                                // adding spaces shouldn't initiate a new search
-                                var parts = that.val().split(/,\s*/);
-                                var query = parts[parts.length - 1];
-                                return query === $.trim(query);
-                            },
-                            onSelect: function() {
-                                this.value = this.value + ', ';
-                                this.focus();
-                            }
-                        })
-                        .addClass('bz_autocomplete');
-
-                    $('#cancel-btn').prop('disabled', false);
-                    $('#top-save-btn').show();
-                    $('#cancel-btn').show();
-                    $('#commit-btn').show();
-                },
-                function() {
-                    $('#mode-btn-readonly').show();
-                    $('#mode-btn-loading').hide();
-                    $('#mode-btn').prop('disabled', false);
-                    $('#mode-btn').show();
-                    $('#cancel-btn').hide();
-                    $('#commit-btn').hide();
-
-                    $('.edit-show').hide();
-                    $('.edit-hide').show();
+                        if (use_buttons) {
+                            $select.insertAdjacentHTML('beforeend', `
+                              <div class="item">
+                                <input id="${$select.id}_${name}_radio" type="radio" name="${$select.id}"
+                                        value="${name}" ${name === selected ? 'checked' : ''}>
+                                <label for="${$select.id}_${name}_radio">
+                                ${$select.id === 'bug_type' ? `
+                                  <span class="bug-type-label iconic-text" data-type="${name}">
+                                    <span class="icon" aria-hidden="true"></span>${name}
+                                  </span>
+                                ` : `${name}`}
+                                </label>
+                              </div>
+                            `);
+                        } else {
+                            $select.insertAdjacentHTML('beforeend', `
+                              <option value="${name}" ${name === selected ? 'selected' : ''}>${name}</option>
+                            `);
+                        }
+                    }
+                    if ($select.matches('[multiple]') && value.length < 5) {
+                        $select.size = value.length;
+                    }
                 }
-            );
+
+                // build our product description hash
+                for (const { name, description } of data.options.product) {
+                    products[name] = description;
+                }
+
+                // keywords is a multi-value autocomplete
+                keywords = data.keywords;
+                $('#keywords')
+                    .devbridgeAutocomplete({
+                        appendTo: $('#main-inner'),
+                        forceFixPosition: true,
+                        lookup: function(query, done) {
+                            query = query.toLowerCase();
+                            var matchStart =
+                                $.grep(keywords, function(keyword) {
+                                    return keyword.toLowerCase().substr(0, query.length) === query;
+                                });
+                            var matchSub =
+                                $.grep(keywords, function(keyword) {
+                                    return keyword.toLowerCase().indexOf(query) !== -1 &&
+                                        $.inArray(keyword, matchStart) === -1;
+                                });
+                            var suggestions =
+                                $.map($.merge(matchStart, matchSub), function(suggestion) {
+                                    return { value: suggestion };
+                                });
+                            done({ suggestions });
+                        },
+                        tabDisabled: true,
+                        delimiter: /,\s*/,
+                        minChars: 0,
+                        autoSelectFirst: false,
+                        triggerSelectOnValidInput: false,
+                        formatResult: function(suggestion, currentValue) {
+                            // disable <b> wrapping of matched substring
+                            return suggestion.value.htmlEncode();
+                        },
+                        onSearchStart: function(params) {
+                            var that = $(this);
+                            // adding spaces shouldn't initiate a new search
+                            var parts = that.val().split(/,\s*/);
+                            var query = parts[parts.length - 1];
+                            return query === $.trim(query);
+                        },
+                        onSelect: function() {
+                            this.value = this.value + ', ';
+                            this.focus();
+                        }
+                    })
+                    .addClass('bz_autocomplete');
+
+                $('#cancel-btn').prop('disabled', false);
+                $('#top-save-btn').show();
+                $('#cancel-btn').show();
+                $('#commit-btn').show();
+            } catch ({ message }) {
+                $('#io-error').html(message).show('fast');
+                $('#mode-btn-readonly').show();
+                $('#mode-btn-loading').hide();
+                $('#mode-btn').prop('disabled', false);
+                $('#mode-btn').show();
+                $('#cancel-btn').hide();
+                $('#commit-btn').hide();
+
+                $('.edit-show').hide();
+                $('.edit-hide').show();
+            }
         });
     $('#mode-btn').prop('disabled', false);
 
@@ -675,7 +675,7 @@ $(function() {
 
     // cc toggle (follow/stop following)
     $('#cc-btn')
-        .click(function(event) {
+        .click(async event => {
             event.preventDefault();
             var is_cced = $(event.target).data('is-cced') == '1';
 
@@ -731,36 +731,34 @@ $(function() {
                 $('#add-self-cc').attr('disabled', false);
             }
 
-            bugzilla_ajax(
-                {
-                    url: `${BUGZILLA.config.basepath}rest/bug/${BUGZILLA.bug_id}`,
-                    type: 'PUT',
-                    data: JSON.stringify({ cc: cc_change })
-                },
-                function(data) {
-                    $('#cc-btn').prop('disabled', false);
-                    if (!(data.bugs[0].changes && data.bugs[0].changes.cc))
-                        return;
-                    if (data.bugs[0].changes.cc.added == BUGZILLA.user.login) {
-                        $('#cc-btn')
-                            .text('Stop Following')
-                            .data('is-cced', '1');
-                    }
-                    else if (data.bugs[0].changes.cc.removed == BUGZILLA.user.login) {
-                        $('#cc-btn')
-                            .text('Follow')
-                            .data('is-cced', '0');
-                    }
-                    if ($('#cc-latch').data('expanded'))
-                        ccListUpdate();
-                },
-                function(message) {
-                    $('#cc-btn').prop('disabled', false);
-                    if ($('#cc-latch').data('expanded'))
-                        ccListUpdate();
-                }
-            );
+            try {
+                const { bugs } = await Bugzilla.API.put(`bug/${BUGZILLA.bug_id}`, { cc: cc_change });
+                const { changes } = bugs[0];
 
+                $('#io-error').empty().hide();
+                $('#cc-btn').prop('disabled', false);
+
+                if (!(changes && changes.cc)) {
+                    return;
+                }
+
+                if (changes.cc.added == BUGZILLA.user.login) {
+                    $('#cc-btn').text('Stop Following').data('is-cced', '1');
+                } else if (changes.cc.removed == BUGZILLA.user.login) {
+                    $('#cc-btn').text('Follow').data('is-cced', '0');
+                }
+
+                if ($('#cc-latch').data('expanded')) {
+                    ccListUpdate();
+                }
+            } catch ({ message }) {
+                $('#io-error').html(message).show('fast');
+                $('#cc-btn').prop('disabled', false);
+
+                if ($('#cc-latch').data('expanded')) {
+                    ccListUpdate();
+                }
+            }
         });
 
     // cancel button, reset the ui back to read-only state
@@ -903,18 +901,16 @@ $(function() {
             var prefix = "(In reply to " + comment_author + " from comment #" + comment_no + ")\n";
             var reply_text = "";
 
-            var quoteMarkdown = function($comment) {
+            var quoteMarkdown = async $comment => {
                 const uid = $comment.data('comment-id');
-                bugzilla_ajax(
-                    {
-                        url: `rest/bug/comment/${uid}`,
-                    },
-                    (data) => {
-                        const quoted = data['comments'][uid]['text'].replace(/\n/g, "\n> ");
-                        reply_text = `${prefix}> ${quoted}\n\n`;
-                        populateNewComment();
-                    }
-                );
+
+                try {
+                    const { comments } = await Bugzilla.API.get(`bug/comment/${uid}`, { include_fields: 'text' });
+                    const quoted = comments[uid]['text'].replace(/\n/g, '\n> ');
+
+                    reply_text = `${prefix}> ${quoted}\n\n`;
+                    populateNewComment();
+                } catch (ex) {}
             }
 
             var populateNewComment = function() {
@@ -1141,7 +1137,7 @@ $(function() {
         $(this).data('default', $(this).val());
     });
     $('#product')
-        .change(function(event) {
+        .change(async event => {
             $('#product-throbber').show();
             $('#component, #version, #target_milestone').attr('disabled', true);
 
@@ -1154,74 +1150,72 @@ $(function() {
                 }
             });
 
-            bugzilla_ajax(
-                {
-                    url: `${BUGZILLA.config.basepath}rest/bug_modal/new_product/${BUGZILLA.bug_id}?` +
-                         `product=${encodeURIComponent($('#product').val())}`
-                },
-                function(data) {
-                    $('#product-throbber').hide();
-                    $('#component, #version, #target_milestone').attr('disabled', false);
-                    var is_default = $('#product').val() == $('#product').data('default');
+            try {
+                const product = $('#product').val();
+                const data = await Bugzilla.API.get(`bug_modal/new_product/${BUGZILLA.bug_id}`, { product });
 
-                    // populate selects
-                    $.each(data, function(key, value) {
-                        if (key == 'groups') return;
-                        var el = $('#' + key);
-                        if (!el) return;
-                        el.empty();
-                        var selected = el.data('preselect');
-                        $(value).each(function(i, v) {
-                            el.append($('<option>', { value: v.name, text: v.name }));
-                            if (typeof selected === 'undefined' && v.selected)
-                                selected = v.name;
-                        });
-                        el.val(selected);
-                        el.prop('required', true);
-                        if (is_default) {
-                            el.removeClass('attention');
-                            el.val(el.data('default'));
-                        }
-                        else {
-                            el.addClass('attention');
-                        }
+                $('#io-error').empty().hide();
+                $('#product-throbber').hide();
+                $('#component, #version, #target_milestone').attr('disabled', false);
+                var is_default = $('#product').val() == $('#product').data('default');
+
+                // populate selects
+                $.each(data, function(key, value) {
+                    if (key == 'groups') return;
+                    var el = $('#' + key);
+                    if (!el) return;
+                    el.empty();
+                    var selected = el.data('preselect');
+                    $(value).each(function(i, v) {
+                        el.append($('<option>', { value: v.name, text: v.name }));
+                        if (typeof selected === 'undefined' && v.selected)
+                            selected = v.name;
                     });
+                    el.val(selected);
+                    el.prop('required', true);
+                    if (is_default) {
+                        el.removeClass('attention');
+                        el.val(el.data('default'));
+                    }
+                    else {
+                        el.addClass('attention');
+                    }
+                });
 
-                    // update groups
-                    var dirtyGroups = [];
-                    var any_groups_checked = 0;
+                // update groups
+                var dirtyGroups = [];
+                var any_groups_checked = 0;
+                $('#module-security').find('input[name=groups]').each(function() {
+                    var that = $(this);
+                    var defaultChecked = !!that.attr('checked');
+                    if (defaultChecked !== that.is(':checked')) {
+                        dirtyGroups.push({ name: that.val(), value: that.is(':checked') });
+                    }
+                    if (that.is(':checked')) {
+                        any_groups_checked = 1;
+                    }
+                });
+                $('#module-security .module-content')
+                    .html(data.groups)
+                    .addClass('attention');
+                $.each(dirtyGroups, function() {
+                    $('#module-security').find('input[value=' + this.name + ']').prop('checked', this.value);
+                });
+                // clear any default groups if user was making bug public
+                // unless the group is mandatory for the new product
+                if (!any_groups_checked) {
                     $('#module-security').find('input[name=groups]').each(function() {
                         var that = $(this);
-                        var defaultChecked = !!that.attr('checked');
-                        if (defaultChecked !== that.is(':checked')) {
-                            dirtyGroups.push({ name: that.val(), value: that.is(':checked') });
-                        }
-                        if (that.is(':checked')) {
-                            any_groups_checked = 1;
+                        if (!that.data('mandatory')) {
+                            that.prop('checked', false);
                         }
                     });
-                    $('#module-security .module-content')
-                        .html(data.groups)
-                        .addClass('attention');
-                    $.each(dirtyGroups, function() {
-                        $('#module-security').find('input[value=' + this.name + ']').prop('checked', this.value);
-                    });
-                    // clear any default groups if user was making bug public
-                    // unless the group is mandatory for the new product
-                    if (!any_groups_checked) {
-                        $('#module-security').find('input[name=groups]').each(function() {
-                            var that = $(this);
-                            if (!that.data('mandatory')) {
-                                that.prop('checked', false);
-                            }
-                        });
-                    }
-                },
-                function() {
-                    $('#product-throbber').hide();
-                    $('#component, #version, #target_milestone').attr('disabled', false);
                 }
-            );
+            } catch ({ message }) {
+                $('#io-error').html(message).show('fast');
+                $('#product-throbber').hide();
+                $('#component, #version, #target_milestone').attr('disabled', false);
+            }
         });
 
     // product/component search
@@ -1285,8 +1279,8 @@ $(function() {
 
     // comment preview
     var last_comment_text = '';
-    $('#comment-tabs li').click(function() {
-        var that = $(this);
+    $('#comment-tabs li').click(async event => {
+        var that = $(event.target);
         if (that.attr('aria-selected') === 'true')
             return;
 
@@ -1311,30 +1305,25 @@ $(function() {
             return;
         $('#preview-throbber').show();
         preview.html('');
-        bugzilla_ajax(
-            {
-                url: `${BUGZILLA.config.basepath}rest/bug/comment/render`,
-                type: 'POST',
-                data: { text: comment.val() },
-                hideError: true
-            },
-            function(data) {
-                $('#preview-throbber').hide();
-                preview.html(data.html);
 
-                // Highlight code if possible
-                if (Prism) {
-                  Prism.highlightAllUnder(preview.get(0));
-                }
-            },
-            function(message) {
-                $('#preview-throbber').hide();
-                var container = $('<div/>');
-                container.addClass('preview-error');
-                container.text(message);
-                preview.html(container);
+        try {
+            const { html } = await Bugzilla.API.post('bug/comment/render', { text: comment.val() });
+
+            $('#preview-throbber').hide();
+            preview.html(html);
+
+            // Highlight code if possible
+            if (Prism) {
+                Prism.highlightAllUnder(preview.get(0));
             }
-        );
+        } catch ({ message }) {
+            $('#preview-throbber').hide();
+            var container = $('<div/>');
+            container.addClass('preview-error');
+            container.text(message);
+            preview.html(container);
+        }
+
         last_comment_text = comment.val();
     }).keydown(function(event) {
         var that = $(this);
@@ -1395,7 +1384,7 @@ $(function() {
         });
 
     // Allow to attach pasted text directly
-    document.querySelector('#comment').addEventListener('paste', event => {
+    document.querySelector('#comment').addEventListener('paste', async event => {
       const text = event.clipboardData.getData('text');
       const lines = text.split(/(?:\r\n|\r|\n)/).length;
 
@@ -1415,23 +1404,21 @@ $(function() {
 
       event.preventDefault();
 
-      bugzilla_ajax({
-        type: 'POST',
-        url: `/rest/bug/${BUGZILLA.bug_id}/attachment`,
-        data: {
+      try {
+        await Bugzilla.API.post(`bug/${BUGZILLA.bug_id}/attachment`, {
           // https://developer.mozilla.org/en-US/docs/Web/API/WindowBase64/Base64_encoding_and_decoding
           data: btoa(encodeURIComponent(text).replace(/%([0-9A-F]{2})/g, (m, p1) => String.fromCharCode(`0x${p1}`))),
           file_name: 'pasted.txt',
           summary,
           content_type: 'text/plain',
           comment: event.target.value.trim(),
-        },
-      }, () => {
+        });
+
         // Reload the page once upload is complete
         location.replace(`${BUGZILLA.config.basepath}show_bug.cgi?id=${BUGZILLA.bug_id}`);
-      }, message => {
+      } catch ({ message }) {
         window.alert(`Couldn’t upload the text as an attachment. Please try again later. Error: ${message}`);
-      });
+      }
     });
 
     restoreEditMode();
@@ -1444,13 +1431,15 @@ function confirmUnsafeURL(url) {
         'The full URL is:\n\n' + url + '\n\nContinue?');
 }
 
-function show_new_changes_indicator() {
-    const url = `${BUGZILLA.config.basepath}rest/bug_user_last_visit/${BUGZILLA.bug_id}`;
+async function show_new_changes_indicator() {
+    const url = `bug_user_last_visit/${BUGZILLA.bug_id}`;
 
-    // Get the last visited timestamp
-    bugzilla_ajax({ url }, data => {
+    try {
+        // Get the last visited timestamp
+        const data = await Bugzilla.API.get(url);
+
         // Save the current timestamp
-        bugzilla_ajax({ url, type: 'POST' });
+        Bugzilla.API.post(url);
 
         if (!data[0] || !data[0].last_visit_ts) {
             return;
@@ -1530,7 +1519,7 @@ function show_new_changes_indicator() {
 
         // TODO: Enable auto-scroll once the modal page layout is optimized
         // scroll_element_into_view($separator);
-    });
+    } catch (ex) {}
 }
 
 // fix url after bug creation/update

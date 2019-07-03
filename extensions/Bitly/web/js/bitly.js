@@ -9,7 +9,7 @@ $(function() {
     'use strict';
     var popup, urls = [];
 
-    function execute() {
+    async function execute() {
         var type = $('#bitly-type').val();
 
         if (urls[type]) {
@@ -18,17 +18,15 @@ $(function() {
         }
 
         $('#bitly-url').val('');
-        var request = `${BUGZILLA.config.basepath}rest/bitly/${type}?` +
-                      `url=${encodeURIComponent($('#bitly-shorten').data('url'))}&` +
-                      `Bugzilla_api_token=${encodeURIComponent(BUGZILLA.api_token)}`;
-        $.ajax(request)
-            .done(function(data) {
-                urls[type] = data.url;
-                $('#bitly-url').val(urls[type]).select().focus();
-            })
-            .fail(function(data) {
-                $('#bitly-url').val(data.responseJSON.message);
-            });
+
+        try {
+            const { url } = await Bugzilla.API.get(`bitly/${type}`, { url: $('#bitly-shorten').data('url') });
+
+            urls[type] = url;
+            $('#bitly-url').val(urls[type]).select().focus();
+        } catch ({ message }) {
+            $('#bitly-url').val(message);
+        }
     }
 
     $('#bitly-shorten')

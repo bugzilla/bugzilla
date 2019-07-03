@@ -8,7 +8,7 @@
 
 var Phabricator = {};
 
-Phabricator.getBugRevisions = function() {
+Phabricator.getBugRevisions = async () => {
     var phabUrl = $('.phabricator-revisions').data('phabricator-base-uri');
     var tr      = $('<tr/>');
     var td      = $('<td/>');
@@ -84,32 +84,19 @@ Phabricator.getBugRevisions = function() {
         errRow.removeClass('bz_default_hidden');
     }
 
-    var $getUrl = '/rest/phabbugz/bug_revisions/' + BUGZILLA.bug_id +
-                  '?Bugzilla_api_token=' + BUGZILLA.api_token;
+    try {
+        const { revisions } = await Bugzilla.API.get(`phabbugz/bug_revisions/${BUGZILLA.bug_id}`);
 
-    $.getJSON($getUrl, function(data) {
-        if (data.revisions.length === 0) {
+        if (revisions.length) {
+            revisions.forEach(rev => tbody.append(revisionRow(rev)));
+        } else {
             displayLoadError('none returned from server');
-        } else {
-            var i = 0;
-            for (; i < data.revisions.length; i++) {
-                tbody.append(revisionRow(data.revisions[i]));
-            }
         }
-        tbody.find('.phabricator-loading-row').addClass('bz_default_hidden');
-    }).fail(function(jqXHR, textStatus, errorThrown) {
-        var errStr;
-        if (jqXHR.responseJSON && jqXHR.responseJSON.err &&
-            jqXHR.responseJSON.err.msg) {
-            errStr = jqXHR.responseJSON.err.msg;
-        } else if (errorThrown) {
-            errStr = errorThrown;
-        } else {
-            errStr = 'unknown';
-        }
-        displayLoadError(errStr);
-        tbody.find('.phabricator-loading-row').addClass('bz_default_hidden');
-    });
+    } catch ({ message }) {
+        displayLoadError(message);
+    }
+
+    tbody.find('.phabricator-loading-row').addClass('bz_default_hidden');
 };
 
 $().ready(function() {

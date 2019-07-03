@@ -39,15 +39,7 @@ Bugzilla.CommentRevisionsManager = class CommentRevisionsManager {
     const change_when = $revision.dataset.revisedTime;
 
     $checkbox.addEventListener('change', () => {
-      bugzilla_ajax({
-        url: `${BUGZILLA.config.basepath}rest/editcomments/revision`,
-        type: 'PUT',
-        data: {
-          comment_id,
-          change_when,
-          is_hidden: $checkbox.checked ? 1 : 0,
-        },
-      });
+      Bugzilla.API.put('editcomments/revision', { comment_id, change_when, is_hidden: $checkbox.checked ? 1 : 0 });
     });
   }
 };

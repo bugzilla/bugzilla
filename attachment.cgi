@@ -653,31 +653,26 @@ sub insert {
 
   $dbh->bz_commit_transaction;
 
-  # Define the variables and functions that will be passed to the UI template.
-  $vars->{'attachment'} = $attachment;
-
-  # We cannot reuse the $bug object as delta_ts has eventually been updated
-  # since the object was created.
-  $vars->{'bugs'}              = [new Bugzilla::Bug($bugid)];
-  $vars->{'header_done'}       = 1;
-  $vars->{'contenttypemethod'} = $cgi->param('contenttypemethod');
-
+  # Persist details of what changed and redirect to show_bug page.
   my $recipients = {'changer' => $user, 'owner' => $owner};
-  $vars->{'sent_bugmail'} = Bugzilla::BugMail::Send($bugid, $recipients);
+  my $sent_bugmail = Bugzilla::BugMail::Send($bugid, $recipients);
+  my $content_type_method = $cgi->param('contenttypemethod');
 
-  # BMO: add show_bug_format hook for experimental UI work
-  my $show_bug_format = {};
-  Bugzilla::Hook::process('show_bug_format', $show_bug_format);
+  my $last_sent_attachment_change = {
+    attachment => {
+      id => $attachment->id,
+      bug_id => $attachment->bug_id,
+      contenttype => $attachment->contenttype,
+      description => $attachment->description,
+    },
+    type => 'created',
+    recipient_count => scalar @{$sent_bugmail->{sent}},
+    content_type_method => $content_type_method,
+  };
+  $Bugzilla::App::CGI::C->flash(last_sent_attachment_changes => [$last_sent_attachment_change]);
 
-  if ($show_bug_format->{format} eq 'modal') {
-    $C->content_security_policy(SHOW_BUG_MODAL_CSP($bugid));
-  }
-
-  print $cgi->header();
-
-  # Generate and return the UI (HTML page) from the appropriate template.
-  $template->process("attachment/created.html.tmpl", $vars)
-    || ThrowTemplateError($template->error());
+  my $redirect_url = $Bugzilla::App::CGI::C->url_for('show_bugcgi')->query(id => $bugid);
+  $Bugzilla::App::CGI::C->redirect_to($redirect_url);
 }
 
 # Displays a form for editing attachment properties.
@@ -840,26 +835,23 @@ sub update {
   # Commit the transaction now that we are finished updating the database.
   $dbh->bz_commit_transaction();
 
-  # Define the variables and functions that will be passed to the UI template.
-  $vars->{'attachment'}  = $attachment;
-  $vars->{'bugs'}        = [$bug];
-  $vars->{'header_done'} = 1;
-  $vars->{'sent_bugmail'}
-    = Bugzilla::BugMail::Send($bug->id, {'changer' => $user});
+  # Persist details of what changed and redirect to show_bug page.
+  my $sent_bugmail = Bugzilla::BugMail::Send($bug->id, {'changer' => $user});
 
-  # BMO: add show_bug_format hook for experimental UI work
-  my $show_bug_format = {};
-  Bugzilla::Hook::process('show_bug_format', $show_bug_format);
+  my $last_sent_attachment_change = {
+    attachment => {
+      id => $attachment->id,
+      bug_id => $attachment->bug_id,
+      contenttype => $attachment->contenttype,
+      description => $attachment->description,
+    },
+    type => 'updated',
+    recipient_count => scalar @{$sent_bugmail->{sent}},
+  };
+  $Bugzilla::App::CGI::C->flash(last_sent_attachment_changes => [$last_sent_attachment_change]);
 
-  if ($show_bug_format->{format} eq 'modal') {
-    $C->content_security_policy(SHOW_BUG_MODAL_CSP($bug->id));
-  }
-
-  print $cgi->header();
-
-  # Generate and return the UI (HTML page) from the appropriate template.
-  $template->process("attachment/updated.html.tmpl", $vars)
-    || ThrowTemplateError($template->error());
+  my $redirect_url = $Bugzilla::App::CGI::C->url_for('show_bugcgi')->query(id => $bug->id);
+  $Bugzilla::App::CGI::C->redirect_to($redirect_url);
 }
 
 # Only administrators can delete attachments.
@@ -914,24 +906,23 @@ sub delete_attachment {
     # Insert the comment.
     $bug->update();
 
-    # Required to display the bug the deleted attachment belongs to.
-    $vars->{'bugs'}        = [$bug];
-    $vars->{'header_done'} = 1;
+    # Persist details of what changed and redirect to show_bug page.
+    my $sent_bugmail = Bugzilla::BugMail::Send($bug->id, {'changer' => $user});
 
-    $vars->{'sent_bugmail'}
-      = Bugzilla::BugMail::Send($bug->id, {'changer' => $user});
+    my $last_sent_attachment_change = {
+      attachment => {
+        id => $attachment->id,
+        bug_id => $attachment->bug_id,
+        contenttype => $attachment->contenttype,
+        description => $attachment->description,
+      },
+      type => 'deleted',
+      recipient_count => scalar @{$sent_bugmail->{sent}},
+    };
+    $Bugzilla::App::CGI::C->flash(last_sent_attachment_changes => [$last_sent_attachment_change]);
 
-    # BMO: add show_bug_format hook for experimental UI work
-    my $show_bug_format = {};
-    Bugzilla::Hook::process('show_bug_format', $show_bug_format);
-
-    if ($show_bug_format->{format} eq 'modal') {
-      $C->content_security_policy(SHOW_BUG_MODAL_CSP($bug->id));
-    }
-
-    print $cgi->header();
-    $template->process("attachment/updated.html.tmpl", $vars)
-      || ThrowTemplateError($template->error());
+    my $redirect_url = $Bugzilla::App::CGI::C->url_for('show_bugcgi')->query(id => $bug->id);
+    $Bugzilla::App::CGI::C->redirect_to($redirect_url);
   }
   else {
     # Create a token.

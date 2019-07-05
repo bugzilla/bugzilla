@@ -59,8 +59,12 @@
   font-weight: normal;
 }
 
+.bz_search_section .field_help {
+  white-space: nowrap;
+}
+
 #bug_id_container .field_help {
-  font-size: var(--font-size-x-small);
+  display: block;
 }
 
 .search_field_row {

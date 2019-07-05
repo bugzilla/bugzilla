@@ -311,7 +311,7 @@ $sel->type_ok("email2", $config->{QA_Selenium_TEST_user_login});
 screenshot_page($sel, '/app/artifacts/line271.png');
 $sel->click_ok("Search");
 check_page_load($sel,
-  q{http://HOSTNAME/buglist.cgi?emailreporter2=1&emailtype2=exact&order=Importance&list_id=__LIST_ID__&emailtype1=exact&emailcc2=1&query_format=advanced&emailassigned_to1=1&emailqa_contact2=1&email2=QA-Selenium-TEST%40mozilla.test&email1=admin%40mozilla.test&emailassigned_to2=1&product=TestProduct}
+  q{http://HOSTNAME/buglist.cgi?emailreporter2=1&order=Importance&emailtype2=exact&list_id=__LIST_ID__&emailtype1=exact&emailcc2=1&emailassigned_to1=1&query_format=advanced&emailqa_contact2=1&email2=QA-Selenium-TEST%40mozilla.test&emailassigned_to2=1&email1=admin%40mozilla.test&product=TestProduct}
 );
 $sel->title_is("Bug List");
 screenshot_page($sel, '/app/artifacts/line275.png');

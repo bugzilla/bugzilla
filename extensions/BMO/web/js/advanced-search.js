@@ -12,9 +12,15 @@
 var Bugzilla = Bugzilla || {}; // eslint-disable-line no-var
 
 /**
+ * Reference or define the BMO extension namespace.
+ * @namespace
+ */
+Bugzilla.BMO = Bugzilla.BMO || {};
+
+/**
  * Implement Advanced Search page features.
  */
-Bugzilla.AdvancedSearch = class AdvancedSearch {
+Bugzilla.BMO.AdvancedSearch = class AdvancedSearch {
   /**
    * Initialize a new AdvancedSearch instance.
    */
@@ -44,4 +50,4 @@ Bugzilla.AdvancedSearch = class AdvancedSearch {
   }
 };
 
-window.addEventListener('DOMContentLoaded', () => new Bugzilla.AdvancedSearch(), { once: true });
+window.addEventListener('DOMContentLoaded', () => new Bugzilla.BMO.AdvancedSearch(), { once: true });

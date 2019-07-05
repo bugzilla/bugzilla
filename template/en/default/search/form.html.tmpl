@@ -258,7 +258,7 @@ TUI_hide_default('custom_search_query');
     <div id="bug_id_container">
       <input type="text" name="bug_id" id="bug_id"
            value="[% default.bug_id.0 FILTER html %]" size="20">
-           <div class="field_help">(comma-separated list)</div>
+           <small class="field_help">(comma-separated list)</small>
     </div>
     should be
     <select name="bug_id_type" id="bug_id_type">
@@ -391,25 +391,14 @@ TUI_hide_default('custom_search_query');
   </li>
   <li>
     <label for="chfieldfrom">between:</label>
-    <input name="chfieldfrom" id="chfieldfrom" size="10"
-           value="[% default.chfieldfrom.0 FILTER html %]" onchange="updateCalendarFromField(this)">
-           <button type="button" class="calendar_button"
-                          id="button_calendar_chfieldfrom"
-                          onclick="showCalendar('chfieldfrom')"><span>Calendar</span></button>
-           and
-           <div id="con_calendar_chfieldfrom"></div>
-          <input name="chfieldto" size="10" id="chfieldto"
-                 value="[% default.chfieldto.0 || "Now" FILTER html %]"
-                 onchange="updateCalendarFromField(this)">
-          <button type="button" class="calendar_button"
-                         id="button_calendar_chfieldto"
-                         onclick="showCalendar('chfieldto')"><span>Calendar</span></button>
-          <div id="con_calendar_chfieldto"></div>
-    (YYYY-MM-DD or relative dates)
-    <script [% script_nonce FILTER none %]>
-      createCalendar('chfieldfrom');
-      createCalendar('chfieldto');
-    </script>
+    <input name="chfieldfrom" id="chfieldfrom" size="10" value="[% default.chfieldfrom.0 FILTER html %]">
+    <button type="button" class="calendar_button" id="button_calendar_chfieldfrom"><span>Calendar</span></button>
+    and
+    <div id="con_calendar_chfieldfrom"></div>
+    <input name="chfieldto" size="10" id="chfieldto" value="[% default.chfieldto.0 FILTER html %]" placeholder="Now">
+    <button type="button" class="calendar_button" id="button_calendar_chfieldto"><span>Calendar</span></button>
+    <div id="con_calendar_chfieldto"></div>
+    <small class="field_help">(YYYY-MM-DD or <a href="[% docs_urlbase FILTER html %]using/finding.html#relative-dates">relative dates</a>)</small>
   </li>
 </ul>
 

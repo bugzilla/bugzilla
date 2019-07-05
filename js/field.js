@@ -197,6 +197,7 @@ function setFieldFromCalendar(type, args, date_field) {
     }
 
     date_field.value = dateStr;
+    date_field.dispatchEvent(new Event('input'));
     hideCalendar(date_field.id);
 }
 

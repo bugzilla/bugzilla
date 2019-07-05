@@ -11,6 +11,48 @@
  */
 var Bugzilla = Bugzilla || {}; // eslint-disable-line no-var
 
+Bugzilla.AdvancedSearch = {};
+
+/**
+ * Implement features in the Search By Change History section.
+ */
+Bugzilla.AdvancedSearch.HistoryFilter = class HistoryFilter {
+  /**
+   * Initialize a new HistoryFilter instance.
+   */
+  constructor() {
+    this.$chfield = document.querySelector('#chfield');
+    this.$chfieldfrom = document.querySelector('#chfieldfrom');
+    this.$chfieldfrom_button = document.querySelector('#chfieldfrom + button');
+    this.$chfieldto = document.querySelector('#chfieldto');
+    this.$chfieldto_button = document.querySelector('#chfieldto + button');
+
+    this.$chfieldfrom.addEventListener('input', event => this.on_date_change(event));
+    this.$chfieldto.addEventListener('input', event => this.on_date_change(event));
+
+    // Use on-event handler because `field.js` will update it
+    this.$chfieldfrom_button.onclick = () => showCalendar('chfieldfrom');
+    this.$chfieldto_button.onclick = () => showCalendar('chfieldto');
+
+    createCalendar('chfieldfrom');
+    createCalendar('chfieldto');
+  }
+
+  /**
+   * Called whenever the date field value is updated.
+   * @param {InputEvent} event `input` event fired on date fields.
+   */
+  on_date_change(event) {
+    // Update the calendar when the user enters a date manually
+    if (event.isTrusted) {
+      updateCalendarFromField(event.target);
+    }
+
+    // Mark `<select>` required if the value is not empty
+    this.$chfield.required = !!this.$chfieldfrom.value.trim() || !!this.$chfieldto.value.trim();
+  }
+};
+
 /**
  * Implement Custom Search features.
  */
@@ -659,4 +701,7 @@ Bugzilla.CustomSearch.DropTarget = class CustomSearchDropTarget {
   }
 };
 
-window.addEventListener('DOMContentLoaded', () => new Bugzilla.CustomSearch(), { once: true });
+window.addEventListener('DOMContentLoaded', () => {
+  new Bugzilla.AdvancedSearch.HistoryFilter();
+  new Bugzilla.CustomSearch();
+}, { once: true });

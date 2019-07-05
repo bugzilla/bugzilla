@@ -114,7 +114,7 @@ sub report {
                    bugs_activity.bug_id,
                    bugs_activity.attach_id,
                    "
-      . $dbh->sql_date_format('bugs_activity.bug_when', '%Y.%m.%d %H:%i:%s')
+      . $dbh->sql_date_format('bugs_activity.bug_when', '%Y-%m-%d %H:%i:%s')
       . " AS ts,
                    bugs_activity.removed,
                    bugs_activity.added,
@@ -140,7 +140,7 @@ sub report {
                    NULL as attach_id,
                    "
       . $dbh->sql_date_format('longdescs_tags_activity.bug_when',
-      '%Y.%m.%d %H:%i:%s')
+      '%Y-%m-%d %H:%i:%s')
       . " AS bug_when,
                    longdescs_tags_activity.removed,
                    longdescs_tags_activity.added,
@@ -163,7 +163,7 @@ sub report {
                    bugs.bug_id,
                    NULL AS attach_id,
                    "
-      . $dbh->sql_date_format('bugs.creation_ts', '%Y.%m.%d %H:%i:%s') . " AS ts,
+      . $dbh->sql_date_format('bugs.creation_ts', '%Y-%m-%d %H:%i:%s') . " AS ts,
                    '(new bug)' AS removed,
                    bugs.short_desc AS added,
                    profiles.login_name,
@@ -182,7 +182,7 @@ sub report {
                    'longdesc' AS name,
                    longdescs.bug_id,
                    NULL AS attach_id,
-                   DATE_FORMAT(longdescs.bug_when, '%Y.%m.%d %H:%i:%s') AS ts,
+                   DATE_FORMAT(longdescs.bug_when, '%Y-%m-%d %H:%i:%s') AS ts,
                    '' AS removed,
                    '' AS added,
                    profiles.login_name,
@@ -203,7 +203,7 @@ sub report {
                    attachments.bug_id,
                    attachments.attach_id,
                    "
-      . $dbh->sql_date_format('attachments.creation_ts', '%Y.%m.%d %H:%i:%s')
+      . $dbh->sql_date_format('attachments.creation_ts', '%Y-%m-%d %H:%i:%s')
       . " AS ts,
                    '(new attachment)' AS removed,
                    attachments.description AS added,

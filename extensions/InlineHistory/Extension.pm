@@ -208,7 +208,7 @@ sub _add_duplicates {
   my $dbh = Bugzilla->dbh;
   my $sth = $dbh->prepare("
         SELECT profiles.login_name, "
-      . $dbh->sql_date_format('bug_when', '%Y.%m.%d %H:%i:%s') . ",
+      . $dbh->sql_date_format('bug_when', '%Y-%m-%d %H:%i:%s') . ",
                extra_data
           FROM longdescs
                INNER JOIN profiles ON profiles.userid = longdescs.who

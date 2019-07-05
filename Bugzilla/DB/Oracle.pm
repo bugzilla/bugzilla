@@ -177,7 +177,7 @@ sub sql_fulltext_search {
 sub sql_date_format {
   my ($self, $date, $format) = @_;
 
-  $format = "%Y.%m.%d %H:%i:%s" if !$format;
+  $format = "%Y-%m-%d %H:%i:%s" if !$format;
 
   $format =~ s/\%Y/YYYY/g;
   $format =~ s/\%y/YY/g;

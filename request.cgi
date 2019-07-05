@@ -104,7 +104,7 @@ sub queue {
                 flags.attach_id, attachments.description,
                 requesters.realname, requesters.login_name,
                 requestees.realname, requestees.login_name, COUNT(privs.group_id),
-    " . $dbh->sql_date_format('flags.modification_date', '%Y.%m.%d %H:%i') . ",
+    " . $dbh->sql_date_format('flags.modification_date', '%Y-%m-%d %H:%i') . ",
                 attachments.mimetype,
                 attachments.ispatch,
                 bugs.bug_status,

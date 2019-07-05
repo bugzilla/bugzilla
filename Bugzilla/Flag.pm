@@ -80,9 +80,9 @@ sub DB_COLUMNS {
     requestee_id
     setter_id
     status),
-    $dbh->sql_date_format('creation_date', '%Y.%m.%d %H:%i:%s')
+    $dbh->sql_date_format('creation_date', '%Y-%m-%d %H:%i:%s')
     . ' AS creation_date',
-    $dbh->sql_date_format('modification_date', '%Y.%m.%d %H:%i:%s')
+    $dbh->sql_date_format('modification_date', '%Y-%m-%d %H:%i:%s')
     . ' AS modification_date';
 }
 
@@ -479,7 +479,7 @@ sub update {
     $dbh->do('UPDATE flags SET modification_date = ? WHERE id = ?',
       undef, ($timestamp, $self->id));
     $self->{'modification_date'}
-      = format_time($timestamp, '%Y.%m.%d %T', Bugzilla->local_timezone);
+      = format_time($timestamp, '%Y-%m-%d %T', Bugzilla->local_timezone);
     Bugzilla->memcached->clear({table => 'flags', id => $self->id});
   }
 
@@ -530,8 +530,8 @@ sub update_flags {
       # This is a new flag.
       my $flag = $class->create($new_flag, $timestamp);
       $new_flag->{id}                = $flag->id;
-      $new_flag->{creation_date}     = format_time($timestamp, '%Y.%m.%d %H:%i:%s');
-      $new_flag->{modification_date} = format_time($timestamp, '%Y.%m.%d %H:%i:%s');
+      $new_flag->{creation_date}     = format_time($timestamp, '%Y-%m-%d %H:%i:%s');
+      $new_flag->{modification_date} = format_time($timestamp, '%Y-%m-%d %H:%i:%s');
       $class->notify($new_flag, undef, $self, $timestamp);
     }
     else {

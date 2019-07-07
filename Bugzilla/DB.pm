@@ -14,14 +14,7 @@ use DBI;
 use DBIx::Connector;
 our %Connector;
 
-has 'dbh' => (
-  is      => 'lazy',
-  handles => [qw[
-    begin_work column_info commit disconnect do errstr get_info last_insert_id ping prepare
-    primary_key quote_identifier rollback selectall_arrayref selectall_hashref
-    selectcol_arrayref selectrow_array selectrow_arrayref selectrow_hashref table_info
-  ]],
-);
+has 'connector' => (is => 'lazy', handles => [qw( dbh )],);
 
 use Bugzilla::Constants;
 use Bugzilla::Mailer;
@@ -37,6 +30,29 @@ use List::Util qw(max);
 use Storable qw(dclone);
 
 has [qw(dsn user pass attrs)] => (is => 'ro', required => 1,);
+
+
+# Install proxy methods to the DBI object.
+# We can't use handles() as DBIx::Connector->dbh has to be called each
+# time we need a DBI handle to ensure the connection is alive.
+{
+  my @DBI_METHODS = qw(
+    begin_work column_info commit disconnect do errstr get_info last_insert_id ping prepare
+    primary_key quote_identifier rollback selectall_arrayref selectall_hashref
+    selectcol_arrayref selectrow_array selectrow_arrayref selectrow_hashref table_info
+  );
+  my $stash = Package::Stash->new(__PACKAGE__);
+
+  foreach my $method (@DBI_METHODS) {
+    my $symbol = '&' . $method;
+    $stash->add_symbol(
+      $symbol => sub {
+        my $self = shift;
+        return $self->dbh->$method(@_);
+      }
+    );
+  }
+}
 
 #####################################################################
 # Constants
@@ -139,9 +155,7 @@ sub _connect {
     "'$driver' is not a valid choice for \$db_driver in " . " localconfig: " . $@);
 
   # instantiate the correct DB specific module
-  my $dbh = $pkg_module->new($params);
-
-  return $dbh;
+  return $pkg_module->new($params);
 }
 
 sub _handle_error {
@@ -1307,7 +1321,7 @@ sub bz_rollback_transaction {
 # Subclass Helpers
 #####################################################################
 
-sub _build_dbh {
+sub _build_connector {
   my ($self) = @_;
   my ($dsn, $user, $pass, $override_attrs)
     = map { $self->$_ } qw(dsn user pass attrs);
@@ -1338,10 +1352,8 @@ sub _build_dbh {
       = {connected => sub { $class->on_dbi_connected(@_); return },};
   }
 
-  my $connector = $Connector{"$user.$dsn"}
+  return $Connector{"$user.$dsn"}
     //= DBIx::Connector->new($dsn, $user, $pass, $attributes);
-
-  return $connector->dbh;
 }
 
 #####################################################################

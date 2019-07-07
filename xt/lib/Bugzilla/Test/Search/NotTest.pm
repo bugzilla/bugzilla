@@ -12,7 +12,7 @@
 # it to OrTest and AndTest, but without Moose there isn't much of an
 # easy way to do that.
 package Bugzilla::Test::Search::NotTest;
-use parent qw(Bugzilla::Test::Search::FieldTest);
+use base qw(Bugzilla::Test::Search::FieldTest);
 use strict;
 use warnings;
 use Bugzilla::Test::Search::Constants;

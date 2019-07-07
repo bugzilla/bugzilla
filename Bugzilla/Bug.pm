@@ -36,7 +36,7 @@ use List::Util qw(min max first);
 use Storable qw(dclone);
 use Scalar::Util qw(blessed);
 
-use parent qw(Bugzilla::Object Exporter);
+use base qw(Bugzilla::Object Exporter);
 @Bugzilla::Bug::EXPORT = qw(
   bug_alias_to_id
   LogActivityEntry

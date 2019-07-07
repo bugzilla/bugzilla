@@ -12,7 +12,7 @@ use strict;
 use warnings;
 
 use Bugzilla::Mailer;
-BEGIN { eval "use parent qw(TheSchwartz::Worker)"; }
+BEGIN { eval "use base qw(TheSchwartz::Worker)"; }
 
 # The longest we expect a job to possibly take, in seconds.
 use constant grab_for => 300;

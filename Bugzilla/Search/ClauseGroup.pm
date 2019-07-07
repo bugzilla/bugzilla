@@ -11,7 +11,7 @@ use 5.10.1;
 use strict;
 use warnings;
 
-use parent qw(Bugzilla::Search::Clause);
+use base qw(Bugzilla::Search::Clause);
 
 use Bugzilla::Error;
 use Bugzilla::Search::Condition qw(condition);

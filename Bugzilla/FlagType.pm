@@ -43,7 +43,7 @@ use Bugzilla::Group;
 use Email::Address;
 use List::MoreUtils qw(uniq);
 
-use parent qw(Bugzilla::Object);
+use base qw(Bugzilla::Object);
 
 ###############################
 ####    Initialization     ####

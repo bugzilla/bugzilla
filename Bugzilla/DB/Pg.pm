@@ -30,7 +30,7 @@ use Bugzilla::Version;
 use DBD::Pg;
 
 # This module extends the DB interface via inheritance
-use parent qw(Bugzilla::DB);
+use base qw(Bugzilla::DB);
 
 use constant BLOB_TYPE => {pg_type => DBD::Pg::PG_BYTEA};
 

@@ -12,7 +12,7 @@ use 5.10.1;
 use strict;
 use warnings;
 
-use parent qw(Bugzilla::User::Setting);
+use base qw(Bugzilla::User::Setting);
 
 use Bugzilla::Constants;
 use File::Spec::Functions;

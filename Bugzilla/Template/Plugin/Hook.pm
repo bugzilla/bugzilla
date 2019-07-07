@@ -11,7 +11,7 @@ use 5.10.1;
 use strict;
 use warnings;
 
-use parent qw(Template::Plugin);
+use base qw(Template::Plugin);
 
 use Bugzilla::Constants;
 use Bugzilla::Install::Util qw(template_include_path);

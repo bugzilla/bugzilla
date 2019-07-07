@@ -23,7 +23,7 @@ use Bugzilla::Install::Util qw(install_string bin_loc
 use List::Util qw(max);
 use Term::ANSIColor;
 
-use parent qw(Exporter);
+use base qw(Exporter);
 our @EXPORT = qw(
   REQUIRED_MODULES
   OPTIONAL_MODULES

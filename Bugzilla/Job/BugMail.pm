@@ -12,7 +12,7 @@ use strict;
 use warnings;
 
 use Bugzilla::BugMail;
-BEGIN { eval "use parent qw(Bugzilla::Job::Mailer)"; }
+BEGIN { eval "use base qw(Bugzilla::Job::Mailer)"; }
 
 sub work {
   my ($class, $job) = @_;

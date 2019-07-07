@@ -25,7 +25,7 @@ use 5.10.1;
 use strict;
 use warnings;
 
-use parent qw(Bugzilla::DB);
+use base qw(Bugzilla::DB);
 
 use DBD::Oracle;
 use DBD::Oracle qw(:ora_types);
@@ -752,7 +752,7 @@ use 5.10.1;
 use strict;
 use warnings;
 
-use parent -norequire, qw(DBI::st);
+use base -norequire, qw(DBI::st);
 
 sub fetchrow_arrayref {
   my $self = shift;

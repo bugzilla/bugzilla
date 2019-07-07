@@ -22,7 +22,7 @@ use Date::Parse;
 use File::Basename;
 use Digest::SHA qw(hmac_sha256_base64);
 
-use parent qw(Exporter);
+use base qw(Exporter);
 
 @Bugzilla::Token::EXPORT = qw(issue_api_token issue_session_token
   check_token_data delete_token

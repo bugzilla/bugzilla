@@ -34,7 +34,7 @@ use File::Spec;
 use IO::File;
 use POSIX ();
 
-use parent qw(Exporter);
+use base qw(Exporter);
 our @EXPORT = qw(
   update_filesystem
   create_htaccess

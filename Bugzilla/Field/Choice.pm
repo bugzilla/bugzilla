@@ -11,7 +11,7 @@ use 5.10.1;
 use strict;
 use warnings;
 
-use parent qw(Bugzilla::Field::ChoiceInterface Bugzilla::Object);
+use base qw(Bugzilla::Field::ChoiceInterface Bugzilla::Object);
 
 use Bugzilla::Config qw(SetParam write_params);
 use Bugzilla::Constants;
@@ -99,7 +99,7 @@ sub type {
   if (!defined *{"${package}::DB_TABLE"}) {
     eval <<EOC;
             package $package;
-            use parent qw(Bugzilla::Field::Choice);
+            use base qw(Bugzilla::Field::Choice);
             use constant DB_TABLE => '$field_name';
 EOC
   }

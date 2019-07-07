@@ -11,7 +11,7 @@ use 5.10.1;
 use strict;
 use warnings;
 
-use parent qw(Email::MIME);
+use base qw(Email::MIME);
 
 sub new {
   my ($class, $msg) = @_;

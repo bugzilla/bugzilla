@@ -11,7 +11,7 @@ use 5.10.1;
 use strict;
 use warnings;
 
-use parent qw(Bugzilla::BugUrl);
+use base qw(Bugzilla::BugUrl);
 
 use Bugzilla::Error;
 use Bugzilla::Util;

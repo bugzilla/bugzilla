@@ -11,7 +11,7 @@ use 5.10.1;
 use strict;
 use warnings;
 
-use parent qw(Bugzilla::Auth::Verify);
+use base qw(Bugzilla::Auth::Verify);
 
 use Bugzilla::Constants;
 use Bugzilla::Token;

@@ -11,7 +11,7 @@ use 5.10.1;
 use strict;
 use warnings;
 
-use parent qw(Pod::Simple::HTMLBatch);
+use base qw(Pod::Simple::HTMLBatch);
 
 # This is the same hack that HTMLBatch does to "import" this subroutine.
 BEGIN { *esc = \&Pod::Simple::HTML::esc }

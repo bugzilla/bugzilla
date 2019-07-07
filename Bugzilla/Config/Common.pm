@@ -20,7 +20,7 @@ use Bugzilla::Field;
 use Bugzilla::Group;
 use Bugzilla::Status;
 
-use parent qw(Exporter);
+use base qw(Exporter);
 @Bugzilla::Config::Common::EXPORT
   = qw(check_multi check_numeric check_regexp check_url check_group
   check_sslbase check_priority check_severity check_platform

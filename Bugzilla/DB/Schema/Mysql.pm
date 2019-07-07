@@ -135,12 +135,8 @@ sub _get_create_table_ddl {
 
   my $charset = Bugzilla->dbh->bz_db_is_utf8 ? "CHARACTER SET utf8" : '';
   my $type = grep($_ eq $table, MYISAM_TABLES) ? 'MYISAM' : 'InnoDB';
-
-  my $ddl = $self->SUPER::_get_create_table_ddl($table);
-  $ddl =~ s/CREATE TABLE (.*) \(/CREATE TABLE `$1` (/;
-  $ddl .= " ENGINE = $type $charset";
-
-  return $ddl;
+  return (
+    $self->SUPER::_get_create_table_ddl($table) . " ENGINE = $type $charset");
 
 }    #eosub--_get_create_table_ddl
 
@@ -155,7 +151,7 @@ sub _get_create_index_ddl {
   my $sql = "CREATE ";
   $sql .= "$index_type "
     if ($index_type eq 'UNIQUE' || $index_type eq 'FULLTEXT');
-  $sql .= "INDEX \`$index_name\` ON \`$table_name\` \("
+  $sql .= "INDEX \`$index_name\` ON $table_name \("
     . join(", ", @$index_fields) . "\)";
 
   return ($sql);

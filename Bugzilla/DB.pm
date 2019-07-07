@@ -11,6 +11,8 @@ use 5.10.1;
 use Moo;
 
 use DBI;
+use DBIx::Connector;
+our %Connector;
 
 has 'dbh' => (
   is      => 'lazy',
@@ -207,7 +209,6 @@ sub bz_check_server_version {
   my ($self, $db, $output) = @_;
 
   my $sql_vers = $self->bz_server_version;
-  $self->disconnect;
 
   my $sql_want   = $db->{db_version};
   my $version_ok = vers_cmp($sql_vers, $sql_want) > -1 ? 1 : 0;
@@ -268,7 +269,6 @@ sub bz_create_database {
     }
   }
 
-  $dbh->disconnect;
 }
 
 # A helper for bz_create_database and bz_check_requirements.
@@ -277,6 +277,7 @@ sub _get_no_db_connection {
   my $dbh;
   my %connect_params = %{Bugzilla->localconfig};
   $connect_params{db_name} = '';
+  local %Connector = ();
   my $conn_success = eval { $dbh = _connect(\%connect_params); };
   if (!$conn_success) {
     my $driver     = $connect_params{db_driver};
@@ -1314,7 +1315,7 @@ sub _build_dbh {
   # set up default attributes used to connect to the database
   # (may be overridden by DB driver implementations)
   my $attributes = {
-    RaiseError         => 0,
+    RaiseError         => 1,
     AutoCommit         => 1,
     PrintError         => 0,
     ShowErrorStatement => 1,
@@ -1337,17 +1338,10 @@ sub _build_dbh {
       = {connected => sub { $class->on_dbi_connected(@_); return },};
   }
 
-  # connect using our known info to the specified db
-  my $dbh = DBI->connect($dsn, $user, $pass, $attributes)
-    or die "\nCan't connect to the database.\nError: $DBI::errstr\n"
-    . "  Is your database installed and up and running?\n  Do you have"
-    . " the correct username and password selected in localconfig?\n\n";
+  my $connector = $Connector{"$user.$dsn"}
+    //= DBIx::Connector->new($dsn, $user, $pass, $attributes);
 
-  # RaiseError was only set to 0 so that we could catch the
-  # above "die" condition.
-  $dbh->{RaiseError} = 1;
-
-  return $dbh;
+  return $connector->dbh;
 }
 
 #####################################################################

@@ -37,9 +37,10 @@ has [qw(dsn user pass attrs)] => (is => 'ro', required => 1,);
 # time we need a DBI handle to ensure the connection is alive.
 {
   my @DBI_METHODS = qw(
-    begin_work column_info commit disconnect do errstr get_info last_insert_id ping prepare
-    primary_key quote_identifier rollback selectall_arrayref selectall_hashref
-    selectcol_arrayref selectrow_array selectrow_arrayref selectrow_hashref table_info
+    begin_work column_info commit disconnect do errstr get_info last_insert_id
+    ping prepare prepare_cached primary_key quote_identifier rollback
+    selectall_arrayref selectall_hashref selectcol_arrayref selectrow_array
+    selectrow_arrayref selectrow_hashref table_info
   );
   my $stash = Package::Stash->new(__PACKAGE__);
 

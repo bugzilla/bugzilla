@@ -326,7 +326,6 @@ Product: <b><span id="dupes_product_name">?</span></b>:
 
 <form method="post" action="[% basepath FILTER none %]post_bug.cgi" enctype="multipart/form-data" onsubmit="return bugForm.validate()">
 <input type="hidden" name="token" value="[% token FILTER html %]">
-<input type="hidden" name="bug_type" value="defect">
 <input type="hidden" name="product" id="product" value="">
 <input type="hidden" name="component" id="component" value="">
 <input type="hidden" name="bug_severity" value="normal">
@@ -472,6 +471,28 @@ explain how to write effective [% terms.bug %] reports.</li>
   <td class="label">File Description:</td>
   <td colspan="2"><input type="text" name="description" id="data_description" class="textInput" disabled></td>
   <td>&nbsp;</td>
+</tr>
+
+<tr>
+  <td class="label">[% terms.Bug %] Type:</td>
+  <td>
+    <label>
+      <input type="radio" name="bug_type" value="defect" required>
+      This is a defect report.
+    </label>
+  </td>
+  <td>
+    <label>
+      <input type="radio" name="bug_type" value="enhancement" required>
+      This is a request for enhancement.
+    </label>
+  </td>
+  <td>
+    [% PROCESS help id="type_help" %]
+    <div id="type_help" class="hidden help">
+      Please select what kind of [% terms.bug %] you’re about to submit.
+    </div>
+  </td>
 </tr>
 
 <tr>

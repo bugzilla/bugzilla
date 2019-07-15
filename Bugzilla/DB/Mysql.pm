@@ -349,7 +349,7 @@ sub bz_setup_database {
     foreach my $table (@$tables) {
       my ($table, undef, undef, $row_format) = @$table;
       my $new_row_format = $self->default_row_format($table);
-      next if lc($table->[-1]) eq 'view'
+      next if lc($table->[-1]) eq 'view';
       next if lc($new_row_format) eq 'compact';
       next if lc($row_format) eq 'dynamic';
       next if lc($row_format) eq 'compressed';

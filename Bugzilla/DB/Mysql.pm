@@ -349,7 +349,10 @@ sub bz_setup_database {
     foreach my $table (@$tables) {
       my ($table, undef, undef, $row_format) = @$table;
       my $new_row_format = $self->default_row_format($table);
-      next if $new_row_format =~ /compact/i;
+      next if lc($table->[-1]) eq 'view'
+      next if lc($new_row_format) eq 'compact';
+      next if lc($row_format) eq 'dynamic';
+      next if lc($row_format) eq 'compressed';
       if (lc($new_row_format) ne lc($row_format)) {
         print install_string(
           'mysql_row_format_conversion', {table => $table, format => $new_row_format}

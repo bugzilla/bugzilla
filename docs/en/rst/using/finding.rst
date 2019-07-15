@@ -192,6 +192,26 @@ So if you are looking for bugs reported by any user being in the
 
     reporter   equals   "%group.editbugs%"
 
+.. _group_restrictions:
+
+Searching for Bugs Restricted to Groups
+---------------------------------------
+
+When administrators set up products, they can establish one or more 
+groups bugs in the product can be associated with. If a bug is associated
+with a group then only users who are members of the group can see them. 
+
+This restriction is mostly used for security-related bugs, or internal tickets.
+
+In order to search for bugs restricted to a group, you must be a member of the group. 
+
+Visit `the Permissions page <https://bugzilla.mozilla.org/userprefs.cgi?tab=permissions>`_ 
+to find the groups you belong to, then search using the clause
+
+    Group   is equal to "%group.groupname%"
+    
+to list the bugs restricted to `groupname`.
+
 .. _relative-dates:
 
 Searching on Relative Dates

@@ -2305,15 +2305,6 @@ sub _detect_content_type {
 sub buglist_columns {
   my ($self, $args) = @_;
   my $columns = $args->{columns};
-  $columns->{'cc_count'} = {
-    name  => '(SELECT COUNT(*) FROM cc WHERE cc.bug_id = bugs.bug_id)',
-    title => 'CC Count',
-  };
-  $columns->{'dupe_count'} = {
-    name =>
-      '(SELECT COUNT(*) FROM duplicates WHERE duplicates.dupe_of = bugs.bug_id)',
-    title => 'Duplicate Count',
-  };
 
   $columns->{'attachments.ispatch'} = {
     # Return `1` if the bug has any regular patch or external review request,

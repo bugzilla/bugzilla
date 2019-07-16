@@ -4053,6 +4053,27 @@ sub comment_count {
   );
 }
 
+sub counts {
+  my ($self) = @_;
+  my $dbh = Bugzilla->dbh;
+  my $extra = !Bugzilla->user->is_insider ? 'AND isprivate = 0' : '';
+  my $id = $self->id;
+
+  $self->{counts} ||= $dbh->selectrow_hashref("SELECT
+    (SELECT COUNT(*) FROM attachments WHERE bug_id = ? $extra) AS attachments,
+    (SELECT COUNT(*) FROM cc WHERE bug_id = ?) AS cc,
+    (SELECT COUNT(*) FROM longdescs WHERE bug_id = ? $extra) AS comments,
+    (SELECT COUNT(*) FROM keywords WHERE bug_id = ?) AS keywords,
+    (SELECT COUNT(*) FROM dependencies WHERE blocked = ?) AS blocks,
+    (SELECT COUNT(*) FROM dependencies WHERE dependson = ?) AS depends_on,
+    (SELECT COUNT(*) FROM regressions WHERE regressed_by = ?) AS regressed_by,
+    (SELECT COUNT(*) FROM regressions WHERE regresses = ?) AS regressions,
+    (SELECT COUNT(*) FROM duplicates WHERE dupe_of = ?) AS duplicates
+  ", undef, $id, $id, $id, $id, $id, $id, $id, $id, $id);
+
+  return $self->{counts};
+}
+
 # This is needed by xt/search.t.
 sub percentage_complete {
   my $self = shift;

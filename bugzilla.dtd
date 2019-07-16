@@ -7,7 +7,7 @@
 >
 <!ELEMENT bug (bug_id, (alias?, creation_ts, short_desc, delta_ts, reporter_accessible,
     cclist_accessible, classification_id, classification, product, component,
-    version, rep_platform, op_sys, bug_status, resolution?, dup_id?, see_also*,
+    version, rep_platform, op_sys, bug_status, resolution?, dup_id?, duplicates*, see_also*,
     bug_file_loc?, status_whiteboard?, keywords*, bug_type, priority, bug_severity,
     target_milestone?, dependson*, blocked*, regressed_by*, regresses*, everconfirmed,
     reporter, assigned_to, cc*, (estimated_time, remaining_time, actual_time, deadline?)?,
@@ -50,6 +50,7 @@
 <!ELEMENT op_sys (#PCDATA)>
 <!ELEMENT resolution (#PCDATA)>
 <!ELEMENT dup_id (#PCDATA)>
+<!ELEMENT duplicates (#PCDATA)>
 <!ELEMENT bug_file_loc (#PCDATA)>
 <!ELEMENT short_desc (#PCDATA)>
 <!ELEMENT keywords (#PCDATA)>

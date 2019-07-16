@@ -243,6 +243,13 @@ use constant DEFAULT_FIELDS => (
     buglist        => 1
   },
   {
+    name           => 'keywords.count',
+    desc           => 'Number of Keywords',
+    type           => FIELD_TYPE_INTEGER,
+    buglist        => 1,
+    is_numeric     => 1,
+  },
+  {
     name    => 'resolution',
     desc    => 'Resolution',
     type    => FIELD_TYPE_SINGLE_SELECT,
@@ -298,36 +305,80 @@ use constant DEFAULT_FIELDS => (
     in_new_bugmail => 1,
   },
   {
+    name           => 'cc_count', # Originated in BMO extension
+    desc           => 'Number of CC',
+    type           => FIELD_TYPE_INTEGER,
+    buglist        => 1,
+    is_numeric     => 1,
+  },
+  {
     name           => 'dependson',
     desc           => 'Depends on',
     type           => FIELD_TYPE_BUG_LIST,
     in_new_bugmail => 1,
-    is_numeric     => 1,
     buglist        => 1
+  },
+  {
+    name           => 'dependson.count',
+    desc           => 'Number of Depends on',
+    type           => FIELD_TYPE_INTEGER,
+    buglist        => 1,
+    is_numeric     => 1,
   },
   {
     name           => 'blocked',
     desc           => 'Blocks',
     type           => FIELD_TYPE_BUG_LIST,
     in_new_bugmail => 1,
-    is_numeric     => 1,
     buglist        => 1
+  },
+  {
+    name           => 'blocked.count',
+    desc           => 'Number of Blocks',
+    type           => FIELD_TYPE_INTEGER,
+    buglist        => 1,
+    is_numeric     => 1,
   },
   {
     name           => 'regressed_by',
     desc           => 'Regressed by',
     type           => FIELD_TYPE_BUG_LIST,
     in_new_bugmail => 1,
-    is_numeric     => 1,
     buglist        => 1
+  },
+  {
+    name           => 'regressed_by.count',
+    desc           => 'Number of Regressed by',
+    type           => FIELD_TYPE_INTEGER,
+    buglist        => 1,
+    is_numeric     => 1,
   },
   {
     name           => 'regresses',
     desc           => 'Regressions',
     type           => FIELD_TYPE_BUG_LIST,
     in_new_bugmail => 1,
-    is_numeric     => 1,
     buglist        => 1
+  },
+  {
+    name           => 'regresses.count',
+    desc           => 'Number of Regressions',
+    type           => FIELD_TYPE_INTEGER,
+    buglist        => 1,
+    is_numeric     => 1,
+  },
+  {
+    name           => 'dupe_count', # Originated in BMO extension
+    desc           => 'Number of Duplicates',
+    type           => FIELD_TYPE_INTEGER,
+    buglist        => 1,
+    is_numeric     => 1,
+  },
+  {
+    name           => 'duplicates',
+    desc           => 'Duplicates',
+    type           => FIELD_TYPE_BUG_ID,
+    buglist        => 1,
   },
 
   {
@@ -337,6 +388,13 @@ use constant DEFAULT_FIELDS => (
     buglist => 1
   },
 
+  {
+    name           => 'attachments.count',
+    desc           => 'Number of Attachments',
+    type           => FIELD_TYPE_INTEGER,
+    buglist        => 1,
+    is_numeric     => 1,
+  },
   {name => 'attachments.description', desc => 'Attachment description'},
   {name => 'attachments.filename',    desc => 'Attachment filename'},
   {name => 'attachments.mimetype',    desc => 'Attachment mime type'},

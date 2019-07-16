@@ -783,8 +783,10 @@ sub update_table_definitions {
   # Bug 1354589 - dkl@mozilla.com
   _populate_oauth2_scopes();
 
-  # Bug 1510109 - kohei.yoshino@gmail.com
+  # Bug 1510109, 1252298 - kohei.yoshino@gmail.com
   $dbh->bz_add_column('products', 'bug_description_template',
+    {TYPE => 'MEDIUMTEXT'});
+  $dbh->bz_add_column('components', 'bug_description_template',
     {TYPE => 'MEDIUMTEXT'});
 
   # Bug 1522341, 1541617, 1546788 - kohei.yoshino@gmail.com

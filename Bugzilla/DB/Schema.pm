@@ -1452,6 +1452,7 @@ use constant ABSTRACT_SCHEMA => {
         TYPE       => 'INT3',
         REFERENCES => {TABLE => 'profiles', COLUMN => 'userid', DELETE => 'SET NULL'}
       },
+      bug_description_template => {TYPE => 'MEDIUMTEXT'},
       default_bug_type  => {TYPE => 'varchar(20)'},
     ],
     INDEXES => [

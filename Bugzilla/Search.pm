@@ -2874,13 +2874,37 @@ sub _assignee_last_login {
 
 sub _component_nonchanged {
   my ($self, $args) = @_;
+  my $dbh = Bugzilla->dbh;
+  my $product;
+
+  # Allow to search product/component pairs like "Core::General" with a simple
+  # operator. Since product/component names may include spaces, other operators
+  # like `anywords` won't work.
+  if ($args->{operator} =~ /^(:?(:?not)?equals)$/
+    && $args->{value} =~ /^(?:(.+)\s*::\s*)?(.+)$/)
+  {
+    $product = $1;
+    $args->{value}  = $args->{all_values} = $2;
+    $args->{quoted} = $dbh->quote($2);
+  }
 
   $args->{full_field} = "components.name";
   $self->_do_operator_function($args);
+
   my $term = $args->{term};
-  $args->{term}
-    = build_subselect("bugs.component_id", "components.id", "components",
-    $args->{term});
+
+  if ($product) {
+    # Pass the complete condition and negative option to make sure both product
+    # and component are included or excluded
+    $args->{term} = build_subselect('bugs.component_id', 'components.id',
+      'components JOIN products ON components.product_id = products.id',
+      'products.name = ' . $dbh->quote($product)
+        . ' AND components.name = ' . $args->{quoted},
+      $args->{operator} eq 'notequals');
+  } else {
+    $args->{term} = build_subselect('bugs.component_id', 'components.id',
+      'components', $term);
+  }
 }
 
 sub _product_nonchanged {

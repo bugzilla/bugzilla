@@ -3476,30 +3476,34 @@ sub _changedbefore_changedafter {
     = @$args{qw(chart_id joins field operator value)};
   my $dbh = Bugzilla->dbh;
 
-  my $field_object = $self->_chart_fields->{$field}
-    || ThrowCodeError("invalid_field_name", {field => $field});
+  my $table;
+  my $join = {table => 'bugs_activity', extra => []};
 
-  # Asking when creation_ts changed is just asking when the bug was created.
-  if ($field_object->name eq 'creation_ts') {
-    $args->{operator}
-      = $operator eq 'changedbefore' ? 'lessthaneq' : 'greaterthaneq';
-    return $self->_do_operator_function($args);
+  if ($field eq 'anything') {
+    # Handle special field name to find changes in any field
+    $table = $join->{as} = "act_x_$chart_id";
+  } else {
+    my $field_object = $self->_chart_fields->{$field}
+      || ThrowCodeError("invalid_field_name", {field => $field});
+
+    # Asking when creation_ts changed is just asking when the bug was created.
+    if ($field_object->name eq 'creation_ts') {
+      $args->{operator}
+        = $operator eq 'changedbefore' ? 'lessthaneq' : 'greaterthaneq';
+      return $self->_do_operator_function($args);
+    }
+
+    my $field_id = $field_object->id;
+
+    # Charts on changed* fields need to be field-specific. Otherwise,
+    # OR chart rows make no sense if they contain multiple fields.
+    $table = $join->{as} = "act_${field_id}_$chart_id";
+    push(@{$join->{extra}}, "$table.fieldid = $field_id");
   }
 
   my $sql_operator = ($operator =~ /before/) ? '<=' : '>=';
-  my $field_id = $field_object->id;
-
-  # Charts on changed* fields need to be field-specific. Otherwise,
-  # OR chart rows make no sense if they contain multiple fields.
-  my $table = "act_${field_id}_$chart_id";
-
   my $sql_date = $dbh->quote(SqlifyDate($value));
-  my $join     = {
-    table => 'bugs_activity',
-    as    => $table,
-    extra =>
-      ["$table.fieldid = $field_id", "$table.bug_when $sql_operator $sql_date"],
-  };
+  push(@{$join->{extra}}, "$table.bug_when $sql_operator $sql_date");
 
   $args->{term} = "$table.bug_when IS NOT NULL";
   $self->_changed_security_check($args, $join);
@@ -3511,16 +3515,22 @@ sub _changedfrom_changedto {
   my ($chart_id, $joins, $field, $operator, $quoted)
     = @$args{qw(chart_id joins field operator quoted)};
 
+  my $table;
+  my $join = {table => 'bugs_activity', extra => []};
   my $column = ($operator =~ /from/) ? 'removed' : 'added';
-  my $field_object = $self->_chart_fields->{$field}
-    || ThrowCodeError("invalid_field_name", {field => $field});
-  my $field_id = $field_object->id;
-  my $table    = "act_${field_id}_$chart_id";
-  my $join     = {
-    table => 'bugs_activity',
-    as    => $table,
-    extra => ["$table.fieldid = $field_id", "$table.$column = $quoted"],
-  };
+
+  if ($field eq 'anything') {
+    # Handle special field name to find changes in any field
+    $table = $join->{as} = "act_x_$chart_id";
+  } else {
+    my $field_object = $self->_chart_fields->{$field}
+      || ThrowCodeError("invalid_field_name", {field => $field});
+    my $field_id = $field_object->id;
+    $table = $join->{as} = "act_${field_id}_$chart_id";
+    push(@{$join->{extra}}, "$table.fieldid = $field_id");
+  }
+
+  push(@{$join->{extra}}, "$table.$column = $quoted");
 
   $args->{term} = "$table.bug_when IS NOT NULL";
   $self->_changed_security_check($args, $join);
@@ -3532,16 +3542,22 @@ sub _changedby {
   my ($chart_id, $joins, $field, $operator, $value)
     = @$args{qw(chart_id joins field operator value)};
 
-  my $field_object = $self->_chart_fields->{$field}
-    || ThrowCodeError("invalid_field_name", {field => $field});
-  my $field_id = $field_object->id;
-  my $table    = "act_${field_id}_$chart_id";
-  my $user_id  = login_to_id($value, THROW_ERROR);
-  my $join     = {
-    table => 'bugs_activity',
-    as    => $table,
-    extra => ["$table.fieldid = $field_id", "$table.who = $user_id"],
-  };
+  my $table;
+  my $join = {table => 'bugs_activity', extra => []};
+
+  if ($field eq 'anything') {
+    # Handle special field name to find changes in any field
+    $table = $join->{as} = "act_x_$chart_id";
+  } else {
+    my $field_object = $self->_chart_fields->{$field}
+      || ThrowCodeError("invalid_field_name", {field => $field});
+    my $field_id = $field_object->id;
+    $table = $join->{as} = "act_${field_id}_$chart_id";
+    push(@{$join->{extra}}, "$table.fieldid = $field_id");
+  }
+
+  my $user_id = login_to_id($value, THROW_ERROR);
+  push(@{$join->{extra}}, "$table.who = $user_id");
 
   $args->{term} = "$table.bug_when IS NOT NULL";
   $self->_changed_security_check($args, $join);

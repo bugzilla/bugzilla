@@ -19,6 +19,7 @@ use base qw(Exporter);
   get_all_settings
   get_defaults
   add_setting
+  remove_setting
   clear_settings_cache
 );
 
@@ -144,18 +145,7 @@ sub add_setting {
   if ($exists) {
 
     # If this setting exists, we delete it and regenerate it.
-    $dbh->do('DELETE FROM setting_value WHERE name = ?', undef, $name);
-    $dbh->do('DELETE FROM setting WHERE name = ?',       undef, $name);
-
-    # Remove obsolete user preferences for this setting.
-    if (defined $options && scalar(@$options)) {
-      my $list = join(', ', map { $dbh->quote($_) } @$options);
-      $dbh->do(
-        "DELETE FROM profile_setting
-                      WHERE setting_name = ? AND setting_value NOT IN ($list)", undef,
-        $name
-      );
-    }
+    remove_setting($name, $options);
   }
   elsif (!$silently) {
     print get_text('install_setting_new', {name => $name}) . "\n";
@@ -176,6 +166,26 @@ sub add_setting {
     $sth->execute($name, $key, $sortindex);
     $sortindex += 5;
   }
+}
+
+sub remove_setting {
+  my ($name, $options) = @_;
+  my $dbh = Bugzilla->dbh;
+
+  return unless _setting_exists($name);
+
+  $dbh->do('DELETE FROM setting_value WHERE name = ?', undef, $name);
+  $dbh->do('DELETE FROM setting WHERE name = ?',       undef, $name);
+
+  my $sql = 'DELETE FROM profile_setting WHERE setting_name = ?';
+
+  # Remove obsolete user preferences for this setting.
+  if (defined $options && scalar(@$options)) {
+    my $list = join(', ', map { $dbh->quote($_) } @$options);
+    $sql .= " AND setting_value NOT IN ($list)";
+  }
+
+  $dbh->do($sql, undef, $name);
 }
 
 sub get_all_settings {
@@ -384,6 +394,13 @@ Params:      C<$name> - string - the name of the new setting
 
 Returns:     a pointer to a hash of settings
 
+=item C<remove_setting($name, \@options)>
+
+Description: Removes an existing setting and the options.
+
+Params:      C<$name> - string - the name of the setting to be removed.
+             C<$options> (optional) - arrayref - contains the existing setting
+             choices that shouldn't be removed.
 
 =item C<get_all_settings($user_id)>
 

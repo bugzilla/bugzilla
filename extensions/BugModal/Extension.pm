@@ -61,7 +61,7 @@ sub _alternative_show_bug_format {
     # as the Long Format option
     return $format;
   }
-  return $user->setting('ui_experiments') eq 'on' ? 'modal' : '';
+  return 'modal';
 }
 
 sub template_after_create {
@@ -333,12 +333,7 @@ sub webservice {
 
 sub install_before_final_checks {
   my ($self, $args) = @_;
-  add_setting({
-    name     => 'ui_experiments',
-    options  => ['on', 'off'],
-    default  => 'on',
-    category => 'User Interface'
-  });
+  remove_setting('ui_experiments');
   add_setting({
     name     => 'ui_remember_collapsed',
     options  => ['on', 'off'],

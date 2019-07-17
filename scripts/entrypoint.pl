@@ -138,7 +138,6 @@ sub cmd_load_test_data {
 
   run(
     'perl',        'scripts/generate_bmo_data.pl',
-    '--user-pref', 'ui_experiments=on',
     '--param',     'use_mailer_queue=0'
   );
 

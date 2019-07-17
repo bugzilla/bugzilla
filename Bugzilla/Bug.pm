@@ -4520,13 +4520,6 @@ sub GetBugActivity {
   # Arguments passed to the SQL query.
   my @args = ($bug_id);
 
-  # Only consider changes since $starttime, if given.
-  my $datepart = "";
-  if (defined $starttime) {
-    push(@args, $starttime);
-    $datepart = "AND bug_when > ?";
-  }
-
   my $attachpart = "";
   if ($attach_id) {
     push(@args, $attach_id);
@@ -4542,14 +4535,23 @@ sub GetBugActivity {
     $suppwhere = "AND COALESCE(attachments.isprivate, 0) = 0";
   }
 
-  # Use DISTINCT and value comparison to suppress duplicated changes weirdly
-  # made at the same time by the same user
-  my $query
-    = "SELECT DISTINCT fielddefs.name,
+  my $bug_when
+    = $dbh->sql_date_format('bugs_activity.bug_when', '%Y-%m-%d %H:%i:%s');
+
+  # Use an outer table so alias column `bug_when` will work within the `where`
+  # clause. Also use `DISTINCT` to suppress duplicated changes weirdly made at
+  # the same time by the same user.
+  my $query = "
+    SELECT
+      field_name, activity_id, attach_id, bug_when, removed, added, who, comment_id
+    FROM (
+        SELECT DISTINCT fielddefs.name AS field_name,
                bugs_activity.id AS activity_id,
-               bugs_activity.attach_id, "
-    . $dbh->sql_date_format('bugs_activity.bug_when', '%Y-%m-%d %H:%i:%s')
-    . " AS bug_when, bugs_activity.removed, bugs_activity.added, profiles.login_name,
+               bugs_activity.attach_id,
+               $bug_when AS bug_when,
+               bugs_activity.removed,
+               bugs_activity.added,
+               profiles.login_name AS who,
                bugs_activity.comment_id
           FROM bugs_activity
                $suppjoins
@@ -4558,7 +4560,6 @@ sub GetBugActivity {
     INNER JOIN profiles
             ON profiles.userid = bugs_activity.who
          WHERE bugs_activity.bug_id = ?
-               $datepart
                $attachpart
                $suppwhere ";
 
@@ -4575,30 +4576,36 @@ sub GetBugActivity {
       $suppwhere = "AND longdescs.isprivate = 0";
     }
 
+    $bug_when
+      = $dbh->sql_date_format('longdescs_tags_activity.bug_when', '%Y-%m-%d %H:%i:%s');
     $query .= "
             UNION ALL
-            SELECT 'comment_tag' AS name,
+            SELECT 'comment_tag' AS field_name,
                    NULL AS activity_id,
-                   NULL AS attach_id,"
-      . $dbh->sql_date_format('longdescs_tags_activity.bug_when',
-      '%Y-%m-%d %H:%i:%s')
-      . " AS bug_when,
+                   NULL AS attach_id,
+                   $bug_when AS bug_when,
                    longdescs_tags_activity.removed,
                    longdescs_tags_activity.added,
-                   profiles.login_name,
-                   longdescs_tags_activity.comment_id as comment_id
+                   profiles.login_name AS who,
+                   longdescs_tags_activity.comment_id
               FROM longdescs_tags_activity
                    INNER JOIN profiles ON profiles.userid = longdescs_tags_activity.who
                    $suppjoins
              WHERE longdescs_tags_activity.bug_id = ?
-                   $datepart
                    $suppwhere
         ";
     push @args, $bug_id;
-    push @args, $starttime if defined $starttime;
   }
 
-  $query .= "ORDER BY bug_when, comment_id, activity_id";
+  $query .= ") AS OUTER_TABLE";
+
+  # Only consider changes since $starttime, if given.
+  if (defined $starttime) {
+    $query .= ' WHERE bug_when > ?';
+    push(@args, $starttime);
+  }
+
+  $query .= " ORDER BY bug_when, comment_id, activity_id";
 
   my $list = $dbh->selectall_arrayref($query, undef, @args);
 

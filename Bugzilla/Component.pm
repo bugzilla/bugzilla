@@ -52,6 +52,7 @@ use constant UPDATE_COLUMNS => qw(
   description
   isactive
   triage_owner_id
+  bug_description_template
 );
 
 use constant REQUIRED_FIELD_MAP => {product_id => 'product',};
@@ -324,6 +325,7 @@ sub set_name             { $_[0]->set('name',             $_[1]); }
 sub set_description      { $_[0]->set('description',      $_[1]); }
 sub set_is_active        { $_[0]->set('isactive',         $_[1]); }
 sub set_default_bug_type { $_[0]->set('default_bug_type', $_[1]); }
+sub set_bug_description_template { $_[0]->set('bug_description_template', $_[1]); }
 
 sub set_default_assignee {
   my ($self, $owner) = @_;
@@ -372,6 +374,22 @@ sub bug_count {
     ) || 0;
   }
   return $self->{'bug_count'};
+}
+
+# Lazy-load the bug_description_template column. If the component-specific
+# template is not found, look for the product's template instead. Can be empty.
+sub bug_description_template {
+  my $self = shift;
+
+  if (!exists $self->{'bug_description_template'}) {
+    my ($comp_template, $prod_template) = Bugzilla->dbh->selectrow_array('
+      SELECT c.bug_description_template, p.bug_description_template
+      FROM components AS c INNER JOIN products AS p ON c.product_id = p.id
+      WHERE c.id = ?', undef, $self->id);
+    $self->{'bug_description_template'} = $comp_template || $prod_template;
+  }
+
+  return $self->{'bug_description_template'};
 }
 
 sub bug_ids {
@@ -535,6 +553,7 @@ Bugzilla::Component - Bugzilla product component class.
     my $product            = $component->product;
     my $bug_flag_types     = $component->flag_types->{'bug'};
     my $attach_flag_types  = $component->flag_types->{'attachment'};
+    my $bug_desc_template  = $component->bug_description_template;
 
     my $component = Bugzilla::Component->check({ product => $product, name => $name });
 
@@ -554,6 +573,7 @@ Bugzilla::Component - Bugzilla product component class.
     $component->set_default_qa_contact($new_login_name);
     $component->set_cc_list(\@new_login_names);
     $component->set_triage_owner($new_triage_owner);
+    $component->set_bug_description_template($new_template);
     $component->update();
 
     $component->remove_from_db;
@@ -588,6 +608,16 @@ Component.pm represents a Product Component object.
  Params:      none.
 
  Returns:     Integer with the number of bugs.
+
+=item C<bug_description_template()>
+
+ Description: Returns the default description text for new bugs filed under this
+              component. If missing, the product's template, if any, will be
+              returned.
+
+ Params:      none.
+
+ Returns:     A string.
 
 =item C<bugs_ids()>
 
@@ -679,6 +709,15 @@ Component.pm represents a Product Component object.
               $name        - the name of the flag
 
  Returns:     a new Bugzilla::FlagType object or undef
+
+=item C<set_bug_description_template($new_template)>
+
+ Description: Changes the default description text for new bugs filed under this
+              component.
+
+ Params:      $new_template - new description template of the component (string).
+
+ Returns:     Nothing.
 
 =item C<set_description($new_desc)>
 

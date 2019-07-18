@@ -41,6 +41,13 @@
   </td>
 </tr>
 <tr>
+  <th class="field_label"><label for="bug_description_template">New [% terms.bug %] comment template:</label></th>
+  <td><textarea rows="8" cols="64" wrap="virtual" name="bug_description_template"
+                placeholder="[% product.bug_description_template FILTER html %]">
+        [% comp.bug_description_template FILTER html %]</textarea>
+  </td>
+</tr>
+<tr>
   <th class="field_label"><label for="default_bug_type">Default [% terms.Bug %] Type:</label></th>
   <td>
     [% INCLUDE admin/default_select.html.tmpl

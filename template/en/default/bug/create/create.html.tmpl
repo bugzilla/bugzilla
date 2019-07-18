@@ -55,6 +55,10 @@ function init() {
   document.querySelector('#bug_type').addEventListener('change', () => {
     bug_type_specified = true;
   }, { once: true });
+
+  document.querySelector('#comment').addEventListener('input', () => {
+    desc_edited = true;
+  }, { once: true });
 }
 
 function initCrashSignatureField() {
@@ -70,10 +74,12 @@ function initCrashSignatureField() {
 
 const params = new URLSearchParams(location.search);
 let bug_type_specified = params.has('bug_type') || params.has('cloned_bug_id') || params.has('regressed_by');
+let desc_edited = false;
 
 var initialowners = new Array([% product.components.size %]);
 var last_initialowner;
 var default_bug_types = new Array([% product.components.size %]);
+var desc_templates = new Array([% product.components.size %]);
 var initialccs = new Array([% product.components.size %]);
 var components = new Array([% product.components.size %]);
 var comp_desc = new Array([% product.components.size %]);
@@ -89,6 +95,7 @@ var flags = new Array([% product.components.size %]);
     comp_desc[[% count %]] = "[% comp.description FILTER html_light FILTER js %]";
     initialowners[[% count %]] = "[% comp.default_assignee.login FILTER js %]";
     default_bug_types[[% count %]] = "[% comp.default_bug_type FILTER js %]";
+    desc_templates[[% count %]] = "[% comp.bug_description_template.replace('\\r', '') FILTER js %]";
     [% flag_list = [] %]
     [% FOREACH f = comp.flag_types.bug %]
       [% flag_list.push(f.id) %]
@@ -140,6 +147,13 @@ function set_assign_to() {
 
         if (!bug_type_specified) {
           form.bug_type.value = default_bug_types[index];
+        }
+
+        // Fill the Description field with the product- or component-specific
+        // template if defined. Skip if the Description is edited by the user.
+        const desc_template = desc_templates[index];
+        if ((!desc_edited && form.comment.value !== desc_template) || !form.comment.value) {
+          form.comment.value = desc_template;
         }
 
         document.getElementById('initial_cc').innerHTML = initialccs[index];

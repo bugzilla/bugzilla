@@ -120,6 +120,7 @@ if ($action eq 'new') {
   my @initial_cc         = $cgi->param('initialcc');
   my $isactive           = $cgi->param('isactive');
   my $default_bug_type   = $cgi->param('default_bug_type');
+  my $bug_desc_template  = $cgi->param('bug_description_template');
 
   my $component = Bugzilla::Component->create({
     name             => $comp_name,
@@ -130,6 +131,7 @@ if ($action eq 'new') {
     initial_cc       => \@initial_cc,
     triage_owner_id  => $triage_owner,
     default_bug_type => $default_bug_type,
+    bug_description_template => $bug_desc_template,
 
     # XXX We should not be creating series for products that we
     # didn't create series for.
@@ -230,6 +232,7 @@ if ($action eq 'update') {
   my $triage_owner       = trim($cgi->param('triage_owner')     || '');
   my @initial_cc         = $cgi->param('initialcc');
   my $isactive           = $cgi->param('isactive');
+  my $bug_desc_template  = $cgi->param('bug_description_template'),
 
   my $component
     = Bugzilla::Component->check({product => $product, name => $comp_old_name});
@@ -242,6 +245,7 @@ if ($action eq 'update') {
   $component->set_triage_owner($triage_owner);
   $component->set_cc_list(\@initial_cc);
   $component->set_is_active($isactive);
+  $component->set_bug_description_template($bug_desc_template);
   my $changes = $component->update();
 
   $vars->{'message'} = 'component_updated';

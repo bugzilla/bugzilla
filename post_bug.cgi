@@ -171,16 +171,6 @@ my $timestamp
   = $dbh->selectrow_array('SELECT creation_ts FROM bugs WHERE bug_id = ?',
   undef, $id);
 
-# Set Version cookie, but only if the user actually selected
-# a version on the page.
-if (defined $cgi->param('version')) {
-  $cgi->send_cookie(
-    -name    => "VERSION-" . $bug->product,
-    -value   => $bug->version,
-    -expires => "Fri, 01-Jan-2038 00:00:00 GMT"
-  );
-}
-
 # We don't have to check if the user can see the bug, because a user filing
 # a bug can always see it. You can't change reporter_accessible until
 # after the bug is filed.

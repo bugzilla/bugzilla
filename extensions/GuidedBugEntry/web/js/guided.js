@@ -692,10 +692,6 @@ var bugForm = {
         }
       }
     }
-    if (!defaultVersion) {
-      // load last selected version
-      defaultVersion = YAHOO.util.Cookie.get('VERSION-' + productName);
-    }
 
     if (elVersions.length > 1) {
       // more than one version, show select

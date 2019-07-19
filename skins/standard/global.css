@@ -991,7 +991,6 @@ input[type="radio"]:checked {
     overflow-x: auto;
     overflow-y: scroll;
     -webkit-overflow-scrolling: touch; /* Enable momentum scrolling on iOS */
-    scroll-behavior: smooth;
     will-change: transform; /* Enable smooth scrolling (Safari) */
   }
 }

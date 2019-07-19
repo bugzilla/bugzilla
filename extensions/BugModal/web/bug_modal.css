@@ -839,8 +839,13 @@ h3.change-name a {
   text-decoration: none;
 }
 
+.change-set .attachment .outer:empty {
+  width: 426px;
+  height: 240px;
+}
+
 .change-set .attachment button.outer {
-  padding: 0;
+  padding: 0 !important;
   box-shadow: none;
   font-weight: normal;
   transition: none;

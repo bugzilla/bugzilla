@@ -157,7 +157,7 @@ $(function() {
           </label>
         </td>
       [% ELSIF user.in_group("canconfirm") || flag.setter_id == user.id %]
-        [%# needinfo targetted at someone else, but the user can clear %]
+        [%# needinfo targeted at someone else, but the user can clear %]
         <td align="center">
           <input type="checkbox" id="needinfo_override_[% flag.id FILTER html %]"
                   name="needinfo_override_[% flag.id FILTER html %]" value="1">

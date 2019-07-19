@@ -23,7 +23,7 @@ use Bugzilla::Error;
 use Bugzilla::Extension::Push::Constants;
 
 #
-# initialisation
+# initialization
 #
 
 use constant DB_TABLE   => 'push_log';

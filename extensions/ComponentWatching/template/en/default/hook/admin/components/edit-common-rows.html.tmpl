@@ -28,7 +28,7 @@
 </tr>
 
 <script [% script_nonce FILTER none %]>
-function sanitise_name(name) {
+function sanitize_name(name) {
   return name.toLowerCase()
              .replace(/[^a-z0-9_]/g, '-')
              .replace(/-+/g, '-')
@@ -46,8 +46,8 @@ function update_watch_user() {
       watch = '(no component name)';
     }
     else {
-      watch = sanitise_name(component) +
-              '@' + sanitise_name('[% product.name FILTER js %]') + '.bugs';
+      watch = sanitize_name(component) +
+              '@' + sanitize_name('[% product.name FILTER js %]') + '.bugs';
     }
     Dom.get('watch_user_suggestion').innerHTML = ' : <b>' + watch + '</b>';
     Dom.get('watch_user').value = watch;

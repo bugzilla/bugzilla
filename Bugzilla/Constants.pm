@@ -210,7 +210,7 @@ use Memoize;
 # CONSTANTS
 #
 # Bugzilla version
-# BMO: we don't map exactly to a specific bugzilla version, so override our
+# BMO: we don't map exactly to a specific Bugzilla version, so override our
 # reported version with a parameter.
 sub BUGZILLA_VERSION {
   my $bugzilla_version = '4.2';
@@ -654,7 +654,7 @@ use constant AUDIT_CREATE => '__create__';
 use constant AUDIT_REMOVE => '__remove__';
 
 # The maximum number of emails per minute and hour a recipient can receive.
-# Email will be queued/backlogged to avoid exceeeding these limits.
+# Email will be queued/backlogged to avoid exceeding these limits.
 # Setting a limit to 0 will disable this feature.
 use constant EMAIL_LIMIT_PER_MINUTE => 1000;
 use constant EMAIL_LIMIT_PER_HOUR   => 2500;
@@ -726,7 +726,7 @@ sub _bz_locations {
 
     # $webdotdir must be in the web server's tree somewhere. Even if you use a
     # local dot, we output images to there. Also, if $webdotdir is
-    # not relative to the bugzilla root directory, you'll need to
+    # not relative to the Bugzilla root directory, you'll need to
     # change showdependencygraph.cgi to set image_url to the correct
     # location.
     # The script should really generate these graphs directly...

@@ -24,7 +24,7 @@ use Bugzilla::Extension::Push::Util;
 use Encode;
 
 #
-# initialisation
+# initialization
 #
 
 use constant DB_TABLE   => 'push';

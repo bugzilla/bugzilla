@@ -77,7 +77,7 @@
     <td>
       <input type="password" size="16" name="password" id="password" value="" autocomplete="off">
       [%# if a user's cryptpassword is '*' it means they use an auth provider
-        # such as github, or you can't log in with that account.  in either case
+        # such as GitHub, or you can't log in with that account.  in either case
         # forcing a password reset isn't valid %]
       [% IF otheruser.cryptpassword != '*' && editform %]
         <br>

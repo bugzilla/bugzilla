@@ -44,7 +44,7 @@ if ($cgi->param('logout')) {
   $cgi->delete('logout');
 }
 
-# our weak etag is based on the bugzilla version parameter (BMO customization) and the announcehtml
+# our weak etag is based on the Bugzilla version parameter (BMO customization) and the announcehtml
 # if either change, the cache will be considered invalid.
 my @etag_parts = (
   Bugzilla->VERSION,

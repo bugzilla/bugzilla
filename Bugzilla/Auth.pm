@@ -396,7 +396,7 @@ on what constant you pass into it:
 =head2 C<LOGIN_OPTIONAL>
 
 A login is never required to access this data. Attempting to login is
-still useful, because this allows the page to be personalised. Note that
+still useful, because this allows the page to be personalized. Note that
 an incorrect login will still trigger an error, even though the lack of
 a login will be OK.
 
@@ -518,7 +518,7 @@ password.
 
 If an Info Getter returns only a C<user_id> and no username/password,
 then it MUST NOT require verification. If an Info Getter requires
-verfication, then it MUST return at least a C<username>.
+verification, then it MUST return at least a C<username>.
 
 =head2 The Verifier
 

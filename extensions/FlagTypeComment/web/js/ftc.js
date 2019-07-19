@@ -83,7 +83,7 @@ Bugzilla.FlagTypeComment = class FlagTypeComment {
         $fieldset.className = 'approval-request';
         $fieldset.dataset.flags = $template.dataset.flags;
 
-        // Make the request form dismissable
+        // Make the request form dismissible
         $fieldset.querySelector('header').insertAdjacentHTML('beforeend',
           '<button type="button" class="dismiss" title="Dismiss" aria-label="Dismiss">' +
           '<span class="icon" aria-hidden="true"></span></button>');

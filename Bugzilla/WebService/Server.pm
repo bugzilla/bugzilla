@@ -101,7 +101,7 @@ sub bz_etag {
     # Append content_type to the end of the data
     # string as we want the etag to be unique to
     # the content_type. We do not need this for
-    # XMLRPC as text/xml is always returned.
+    # XML-RPC as text/xml is always returned.
     if (blessed($self) && $self->can('content_type')) {
       $data .= $self->content_type if $self->content_type;
     }
@@ -120,7 +120,7 @@ Bugzilla::WebService::Server - Base server class for the WebService API
 =head1 DESCRIPTION
 
 Bugzilla::WebService::Server is the base class for the individual WebService API
-servers such as XMLRPC, JSONRPC, and REST. You never actually create a
+servers such as XML-RPC, JSON-RPC, and REST. You never actually create a
 Bugzilla::WebService::Server directly, you only make subclasses of it.
 
 =head1 FUNCTIONS
@@ -130,7 +130,7 @@ Bugzilla::WebService::Server directly, you only make subclasses of it.
 =item C<bz_etag>
 
 This function is used to store an ETag value that will be used when returning
-the data by the different API server modules such as XMLRPC, or REST. The individual
+the data by the different API server modules such as XML-RPC, or REST. The individual
 webservice methods can also set the value earlier in the process if needed such as
 before a unique update token is added. If a value is not set earlier, an etag will
 automatically be created using the returned data except in some cases when an error

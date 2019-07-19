@@ -360,7 +360,7 @@ sub mailer_before_send {
     }
     elsif ($is_passwordmail) {
 
-      # Mail is made unsecure only if the user does not have a public
+      # Mail is made insecure only if the user does not have a public
       # key and is not in any security groups. So specifying a public
       # key OR being in a security group means the mail is kept secure
       # (but, as noted above, the check is the other way around because
@@ -412,10 +412,10 @@ sub mailer_before_send {
 sub bugmail_referenced_bugs {
   my ($self, $args) = @_;
 
-  # Sanitise subjects of referenced bugs.
+  # sanitize subjects of referenced bugs.
   my $referenced_bugs = $args->{'referenced_bugs'};
 
-  # No need to sanitise subjects if the entire email will be secured.
+  # No need to sanitize subjects if the entire email will be secured.
   return if _should_secure_bug($args->{'updated_bug'});
 
   # Replace the subject if required
@@ -457,7 +457,7 @@ sub _should_secure_whine {
 }
 
 sub _make_secure {
-  my ($email, $key, $sanitise_subject, $add_new) = @_;
+  my ($email, $key, $sanitize_subject, $add_new) = @_;
 
   # Add header showing this email has been secured
   $email->header_set('X-Bugzilla-Secure-Email', 'Yes');
@@ -495,7 +495,7 @@ sub _make_secure {
 
       $email->walk_parts(sub {
         my ($part) = @_;
-        if ($sanitise_subject) {
+        if ($sanitize_subject) {
           _insert_subject($part, $subject);
         }
         return if $part->parts > 1;    # Top-level
@@ -533,7 +533,7 @@ sub _make_secure {
     }
     else {
       _fix_encoding($email);
-      if ($sanitise_subject) {
+      if ($sanitize_subject) {
         _insert_subject($email, $subject);
       }
       $email->body_set(_tct_encrypt($tct, $email->body, $bug_id));
@@ -547,7 +547,7 @@ sub _make_secure {
 
     $email->walk_parts(\&_fix_encoding);
 
-    if ($sanitise_subject) {
+    if ($sanitize_subject) {
       $email->walk_parts(sub { _insert_subject($_[0], $subject) });
     }
 
@@ -595,7 +595,7 @@ sub _make_secure {
     $email->body_set($message);
   }
 
-  if ($sanitise_subject) {
+  if ($sanitize_subject) {
 
     # This is designed to still work if the admin changes the word
     # 'bug' to something else. However, it could break if they change
@@ -605,7 +605,7 @@ sub _make_secure {
     my $component = $email->header('X-Bugzilla-Component');
 
     # Note: the $bug_id is required within the parentheses in order to keep
-    # gmail's threading algorithm happy.
+    # Gmail's threading algorithm happy.
     $subject
       =~ s/($bug_id\])\s+(.*)$/$1$new (Secure bug $bug_id in $product :: $component)/;
     {
@@ -637,7 +637,7 @@ sub _tct_encrypt {
 }
 
 # Insert the subject into the part's body, as the subject of the message will
-# be sanitised.
+# be sanitized.
 # XXX this incorrectly assumes all parts of the message are the body
 # we should only alter parts whose parent is multipart/alternative
 sub _insert_subject {

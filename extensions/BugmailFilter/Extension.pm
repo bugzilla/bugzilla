@@ -112,7 +112,7 @@ sub user_preferences {
   my %fields = map { $_->name => $field_descs->{$_->name} }
     @{Bugzilla->fields({obsolete => 0})};
 
-  # remove time trackinger fields
+  # remove time tracking fields
   if (!Bugzilla->user->is_timetracker) {
     foreach my $field (TIMETRACKING_FIELDS) {
       delete $fields{$field};
@@ -143,7 +143,7 @@ sub user_preferences {
   }
 
   # some fields are present in the changed-fields x-header but are not real
-  # bugzilla fields
+  # Bugzilla fields
   foreach
     my $field (@{Bugzilla::Extension::BugmailFilter::FakeField->fake_fields()})
   {
@@ -229,7 +229,7 @@ sub user_wants_mail {
   my $fields = [
     map { {
       filter_field => $_->{field_name},    # filter's field_name
-      field_name   => $_->{field_name},    # raw bugzilla field_name
+      field_name   => $_->{field_name},    # raw Bugzilla field_name
     } } grep {
 
       # flags are added later

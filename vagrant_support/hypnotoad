@@ -2,7 +2,7 @@
 #
 # bugzilla-push This starts, stops, and restarts the Bugzilla push
 #        daemon, which manages syncronising bugzilla.mozilla.org and
-#        third party bugzilla installs.
+#        third party Bugzilla installs.
 #
 # chkconfig: 345 85 15
 # description: Bugzilla push daemon

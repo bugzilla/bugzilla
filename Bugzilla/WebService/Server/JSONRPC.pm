@@ -55,8 +55,8 @@ sub create_json_coder {
   $json->allow_nonref(1);
 
   # This may seem a little backwards, but what this really means is
-  # "don't convert our utf8 into byte strings, just leave it as a
-  # utf8 string."
+  # "don't convert our UTF-8 into byte strings, just leave it as a
+  # UTF-8 string."
   $json->utf8(0) if Bugzilla->params->{'utf8'};
   return $json;
 }
@@ -74,7 +74,7 @@ sub response_header {
     utf8::encode($_[1]);
 
     # Since we're going to just be sending raw bytes, we need to
-    # set STDOUT to not expect utf8.
+    # set STDOUT to not expect UTF-8.
     disable_utf8();
   }
   return $self->SUPER::response_header(@_);
@@ -522,7 +522,7 @@ Here's a call to C<User.get>, with several parameters:
 
  jsonrpc.cgi?method=User.get&params=[ { "ids": [1,2], "names": ["user@domain.com"] } ]
 
-Although in reality you would url-encode the C<params> argument, so it would
+Although in reality you would URL-encode the C<params> argument, so it would
 look more like this:
 
  jsonrpc.cgi?method=User.get&params=%5B+%7B+%22ids%22%3A+%5B1%2C2%5D%2C+%22names%22%3A+%5B%22user%40domain.com%22%5D+%7D+%5D

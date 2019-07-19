@@ -96,7 +96,7 @@ my %html_quote = (
   q{@} => '&#64;',    # Obscure '@'.
 );
 
-# Bug 120030: Override html filter to obscure the '@' in user
+# Bug 120030: Override HTML filter to obscure the '@' in user
 #             visible strings.
 # Bug 319331: Handle BiDi disruptions.
 sub html_quote {
@@ -108,8 +108,8 @@ sub html_quote {
 
   if ($use_utf8) {
 
-    # Remove control characters if the encoding is utf8.
-    # Other multibyte encodings may be using this range; so ignore if not utf8.
+    # Remove control characters if the encoding is UTF-8.
+    # Other multibyte encodings may be using this range; so ignore if not UTF-8.
     $var =~ s/(?![\t\r\n])[[:cntrl:]]//g;
 
     # Remove the following characters because they're
@@ -955,8 +955,8 @@ sub extract_nicks {
             (?<!\d)
             :
             # try tp capture a "word", plus some symbols
-            # this covers most everything people use for ircnicks
-            # in bmo.
+            # this covers most everything people use for IRC nicks
+            # in BMO.
             ([\p{IsAlnum}|._-]+)
             # require a word terminator, which
             # can be the end of the string or some punctuation.
@@ -974,7 +974,7 @@ __END__
 
 =head1 NAME
 
-Bugzilla::Util - Generic utility functions for bugzilla
+Bugzilla::Util - Generic utility functions for Bugzilla
 
 =head1 SYNOPSIS
 
@@ -1059,7 +1059,7 @@ B<MUST> check the result of this routine to avoid security holes.
 
 =head2 Quoting
 
-Some values may need to be quoted from perl. However, this should in general
+Some values may need to be quoted from Perl. However, this should in general
 be done in the template where possible.
 
 =over 4
@@ -1078,7 +1078,7 @@ escaped (if HTML::Scrubber is not installed) or removed.
 
 =item C<url_quote($val)>
 
-Quotes characters so that they may be included as part of a url.
+Quotes characters so that they may be included as part of a URL.
 
 =item C<css_class_quote($val)>
 
@@ -1114,7 +1114,7 @@ in a command-line script.
 =item C<i_am_webservice()>
 
 Tells you whether or not the current usage mode is WebServices related
-such as JSONRPC or XMLRPC.
+such as JSON-RPC or XML-RPC.
 
 =item C<is_webserver_group()>
 
@@ -1190,11 +1190,11 @@ The search starts at $maxpos and goes back to the beginning of the string.
 =item C<is_7bit_clean($str)>
 
 Returns true is the string contains only 7-bit characters (ASCII 32 through 126,
-ASCII 10 (LineFeed) and ASCII 13 (Carrage Return).
+ASCII 10 (LineFeed) and ASCII 13 (Carriage Return).
 
 =item C<disable_utf8()>
 
-Disable utf8 on STDOUT (and display raw data instead).
+Disable UTF-8 on STDOUT (and display raw data instead).
 
 =item C<detect_encoding($str)>
 
@@ -1269,7 +1269,7 @@ the Bugzilla server's local timezone if there isn't a logged-in user.
 
 =item C<time_ago($datetime_object)>, C<time_ago($seconds)>
 
-Returns a concise representation of the time passed.  eg. "11 months ago".
+Returns a concise representation of the time passed. e.g. "11 months ago".
 
 Accepts either a DateTime object, which is assumed to be in the past, or
 seconds.
@@ -1284,7 +1284,7 @@ seconds.
 =item C<file_mod_time($filename)>
 
 Takes a filename and returns the modification time. It returns it in the format
-of the "mtime" parameter of the perl "stat" function.
+of the "mtime" parameter of the Perl "stat" function.
 
 =back
 
@@ -1297,7 +1297,7 @@ of the "mtime" parameter of the perl "stat" function.
 Takes a string and returns a hashed (encrypted) value for it, using a
 random salt. An optional salt string may also be passed in.
 
-Please always use this function instead of the built-in perl C<crypt>
+Please always use this function instead of the built-in Perl C<crypt>
 function, when checking or setting a password. Bugzilla does not use
 C<crypt>.
 

@@ -209,14 +209,14 @@ sub object_end_of_update {
 sub _generate_watch_user_name {
 
 # this is mirrored in template/en/default/hook/admin/components/edit-common-rows.html.tmpl
-# that javascript needs to be kept in sync with this perl
+# that JavaScript needs to be kept in sync with this Perl
   my ($component) = @_;
   return
-      _sanitise_name($component->name) . '@'
-    . _sanitise_name($component->product->name) . '.bugs';
+      _sanitize_name($component->name) . '@'
+    . _sanitize_name($component->product->name) . '.bugs';
 }
 
-sub _sanitise_name {
+sub _sanitize_name {
   my ($name) = @_;
   $name = lc($name);
   $name =~ s/[^a-z0-9_]/-/g;

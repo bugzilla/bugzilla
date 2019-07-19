@@ -342,7 +342,7 @@ function bz_toggleClass(anElement, aClass) {
     }
 }
 
-/* Retruns a string representation of a duration.
+/* Returns a string representation of a duration.
  *
  * @param ss   Duration in seconds
  * or

@@ -194,7 +194,7 @@ sub _check_product {
 ###############################
 
 # This is taken straight from Sort::Versions 1.5, which is not included
-# with perl by default.
+# with Perl by default.
 sub vers_cmp {
   my ($a, $b) = @_;
 

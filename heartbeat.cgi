@@ -20,7 +20,7 @@ use Bugzilla::Update;
 
 my $ok = eval {
 
-# Ensure that any Throw*Error calls just use die, rather than trying to return html...
+# Ensure that any Throw*Error calls just use die, rather than trying to return HTML...
   Bugzilla->error_mode(ERROR_MODE_DIE);
   my $memcached    = Bugzilla->memcached;
   my $dbh          = Bugzilla->dbh;

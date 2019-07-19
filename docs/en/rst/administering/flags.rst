@@ -33,10 +33,10 @@ Category
     You can set a flag to be visible or not visible on any combination of
     products and components.
 
-    Default behaviour for a newly created flag is to appear on all
+    Default behavior for a newly created flag is to appear on all
     products and all components, which is why ``__Any__:__Any__``
     is already entered in the :guilabel:`Inclusions` box.
-    If this is not your desired behaviour, you must either set some
+    If this is not your desired behavior, you must either set some
     exclusions (for products on which you don't want the flag to appear),
     or you must remove ``__Any__:__Any__`` from the :guilabel:`Inclusions` box
     and define products/components specifically for this flag.

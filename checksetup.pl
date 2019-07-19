@@ -132,7 +132,7 @@ exit 0 if $switch{'check-modules'};
 # It's never safe to "use" a Bugzilla module in checksetup. If a module
 # prerequisite is missing, and you "use" a module that requires it,
 # then instead of our nice normal checksetup message, the user would
-# get a cryptic perl error about the missing module.
+# get a cryptic Perl error about the missing module.
 
 require Bugzilla;
 require Bugzilla::User;
@@ -421,7 +421,7 @@ F<checksetup.pl> runs through several stages during installation:
 
 =item 1
 
-Checks if the required and optional perl modules are installed,
+Checks if the required and optional Perl modules are installed,
 using L<Bugzilla::Install::Requirements/check_requirements>.
 
 =item 2

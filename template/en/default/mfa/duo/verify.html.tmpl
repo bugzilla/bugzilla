@@ -57,7 +57,7 @@ $(function() {
 
 <p>
   <b>[% reason FILTER html %]</b> requires verification.<br>
-  [% UNLESS is_enrolment %]
+  [% UNLESS is_enrollment %]
     <a href="#" id="recovery-toggle">Verify using a recovery code</a>.
   [% END %]
 </p>
@@ -70,7 +70,7 @@ $(function() {
   [% FOREACH field IN postback.fields.keys %]
     <input type="hidden" name="[% field FILTER html %]" value="[% postback.fields.item(field) FILTER html %]">
   [% END %]
-  [% UNLESS is_enrolment %]
+  [% UNLESS is_enrollment %]
     <div id="recovery" style="display:none">
       <p>
         Provide a two-factor recovery code:

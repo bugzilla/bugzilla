@@ -55,7 +55,7 @@ where someone just adds themselves to the CC field of a bug
 and add a comment saying "Adding self to CC", then that person
 gets a pointless piece of mail they would otherwise have avoided.
 
-Don't use sigs in comments. Signing your name ("Bill") is acceptable,
+Don't use signs in comments. Signing your name ("Bill") is acceptable,
 if you do it out of habit, but full mail/news-style
 four line ASCII art creations are not.
 

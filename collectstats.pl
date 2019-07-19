@@ -460,7 +460,7 @@ sub delta_time {
 
 sub CollectSeriesData {
 
-  # We need some way of randomising the distribution of series, such that
+  # We need some way of randomizing the distribution of series, such that
   # all of the series which are to be run every 7 days don't run on the same
   # day. This is because this might put the server under severe load if a
   # particular frequency, such as once a week, is very common. We achieve

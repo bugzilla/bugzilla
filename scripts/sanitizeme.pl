@@ -275,7 +275,7 @@ sub disable_email_delivery {
 
 =head1 NAME
 
-sanitizeme.pl - remove sensitive information from a bugzilla database
+sanitizeme.pl - remove sensitive information from a Bugzilla database
 
 =head1 SYNOPSIS
 

@@ -14,7 +14,7 @@ use warnings;
 use parent qw(Bugzilla::Object);
 
 #####################################################################
-# Overriden Constants that are used as methods
+# Overridden Constants that are used as methods
 #####################################################################
 
 use constant DB_TABLE       => 'bug_user_last_visit';

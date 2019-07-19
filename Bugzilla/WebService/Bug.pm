@@ -1076,7 +1076,7 @@ sub update_attachment {
     }
     elsif (scalar @$update_flags && !scalar(@$new_flags) && !scalar keys %$params) {
 
-      # Requestees can set flags targetted to them, even if they cannot
+      # Requestees can set flags targeted to them, even if they cannot
       # edit the attachment. Flag setters can edit their own flags too.
       my %flag_list = map { $_->{id} => $_ } @$update_flags;
       my $flag_objs = Bugzilla::Flag->new_from_list([keys %flag_list]);
@@ -1867,7 +1867,7 @@ or get information about bugs that have already been filed.
 See L<Bugzilla::WebService> for a description of how parameters are passed,
 and what B<STABLE>, B<UNSTABLE>, and B<EXPERIMENTAL> mean.
 
-Although the data input and output is the same for JSONRPC, XMLRPC and REST,
+Although the data input and output is the same for JSON-RPC, XML-RPC and REST,
 the directions for how to access the data via REST is noted in each method
 where applicable.
 
@@ -2689,7 +2689,7 @@ B<STABLE>
 
 Gets information about particular bugs in the database.
 
-Note: Can also be called as "get_bugs" for compatibilty with Bugzilla 3.0 API.
+Note: Can also be called as "get_bugs" for compatibility with Bugzilla 3.0 API.
 
 =item B<REST>
 

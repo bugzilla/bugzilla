@@ -165,7 +165,7 @@ sub _get_create_index_ddl {
 sub get_create_database_sql {
   my ($self, $name) = @_;
 
-  # We only create as utf8 if we have no params (meaning we're doing
+  # We only create as UTF-8 if we have no params (meaning we're doing
   # a new installation) or if the utf8 param is on.
   my $charset = Bugzilla::DB::Mysql->utf8_charset;
   my $collate = Bugzilla::DB::Mysql->utf8_collate;
@@ -284,7 +284,7 @@ sub get_set_serial_sql {
 }
 
 # Converts a DBI column_info output to an abstract column definition.
-# Expects to only be called by Bugzila::DB::Mysql::_bz_build_schema_from_disk,
+# Expects to only be called by Bugzilla::DB::Mysql::_bz_build_schema_from_disk,
 # although there's a chance that it will also work properly if called
 # elsewhere.
 sub column_info_to_column {
@@ -322,7 +322,7 @@ sub column_info_to_column {
   if (defined $column_info->{COLUMN_DEF}) {
 
     # The defaults that MySQL inputs automatically are usually
-    # something that would be considered "false" by perl, either
+    # something that would be considered "false" by Perl, either
     # a 0 or an empty string. (Except for datetime and decimal
     # fields, which have their own special auto-defaults.)
     #

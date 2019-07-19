@@ -73,7 +73,7 @@ sub bug_update_before_logging {
 }
 
 # stop inline-history from displaying changes to the user story
-sub inline_history_activtiy {
+sub inline_history_activity {
   my ($self, $args) = @_;
   foreach my $activity (@{$args->{activity}}) {
     foreach my $change (@{$activity->{changes}}) {

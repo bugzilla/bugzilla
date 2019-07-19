@@ -50,7 +50,7 @@ sub suggestions {
   my @reviewers;
   if ($bug) {
 
-    # we always need to be authentiated to perform user matching
+    # we always need to be authenticated to perform user matching
     my $user = Bugzilla->user;
     if (!$user->id) {
       Bugzilla->set_user(Bugzilla::User->check({name => 'nobody@mozilla.org'}));
@@ -316,14 +316,14 @@ __END__
 =head1 NAME
 
 Bugzilla::Extension::Review::WebService - Functions for the Mozilla specific
-'review' flag optimisations.
+'review' flag optimizations.
 
 =head1 METHODS
 
 See L<Bugzilla::WebService> for a description of how parameters are passed,
 and what B<STABLE>, B<UNSTABLE>, and B<EXPERIMENTAL> mean.
 
-Although the data input and output is the same for JSONRPC, XMLRPC and REST,
+Although the data input and output is the same for JSON-RPC, XML-RPC and REST,
 the directions for how to access the data via REST is noted in each method
 where applicable.
 
@@ -429,9 +429,9 @@ Use one or more of the following parameters to find specific flag status changes
 
 Note that searching by C<flag_id> is not reliable because when flags are removed, flag_ids cease to exist.
 
-=item C<requestee> (string) - The bugzilla login of the flag's requestee
+=item C<requestee> (string) - The Bugzilla login of the flag's requestee
 
-=item C<setter> (string) - The bugzilla login of the flag's setter
+=item C<setter> (string) - The Bugzilla login of the flag's setter
 
 =item C<type_id> (int) - The flag type id of a change
 
@@ -495,17 +495,17 @@ Boolean flag indicating if the flag type is multiplicable.
 
 =item C<setter> (object)
 
-The setter is the bugzilla user that set the flag. It is represented by an object with the following fields.
+The setter is the Bugzilla user that set the flag. It is represented by an object with the following fields.
 
 =over
 
 =item C<id> (integer)
 
-The id of the bugzilla user. A unique integer value.
+The id of the Bugzilla user. A unique integer value.
 
 =item C<real_name> (string)
 
-The real name of the bugzilla user.
+The real name of the Bugzilla user.
 
 =item C<nick> (string)
 
@@ -514,27 +514,27 @@ email field.
 
 =item C<name> (string)
 
-The bugzilla login of the bugzilla user (typically an email address).
+The Bugzilla login of the Bugzilla user (typically an email address).
 
 =back
 
 =item C<requestee> (object)
 
-The requestee is the bugzilla user that is specified by the flag. Optional - absent if there is no requestee.
+The requestee is the Bugzilla user that is specified by the flag. Optional - absent if there is no requestee.
 
 Requestee has the same keys/values as the setter object.
 
 =item C<bug_id> (integer)
 
-The id of the bugzilla bug that the changed flag belongs to.
+The id of the Bugzilla bug that the changed flag belongs to.
 
 =item C<attachment_id> (integer)
 
-The id of the bugzilla attachment that the changed flag belongs to.
+The id of the Bugzilla attachment that the changed flag belongs to.
 
 =item C<status> (string)
 
-The status of the bugzilla flag that changed. One of C<+ - ? X>.
+The status of the Bugzilla flag that changed. One of C<+ - ? X>.
 
 =back
 

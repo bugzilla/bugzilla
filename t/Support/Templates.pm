@@ -96,7 +96,7 @@ foreach my $include_path (@include_paths) {
   $num_actual_files += scalar(@{$actual_files{$include_path}});
 }
 
-# Scan Bugzilla's perl code looking for templates used and put them
+# Scan Bugzilla's Perl code looking for templates used and put them
 # in the @referenced_files array to be used by the 004template.t test.
 my %seen;
 

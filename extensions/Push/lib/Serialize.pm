@@ -5,7 +5,7 @@
 # This Source Code Form is "Incompatible With Secondary Licenses", as
 # defined by the Mozilla Public License, v. 2.0.
 
-package Bugzilla::Extension::Push::Serialise;
+package Bugzilla::Extension::Push::Serialize;
 
 use 5.10.1;
 use strict;
@@ -21,7 +21,7 @@ use JSON ();
 my $_instance;
 
 sub instance {
-  $_instance ||= Bugzilla::Extension::Push::Serialise->_new();
+  $_instance ||= Bugzilla::Extension::Push::Serialize->_new();
   return $_instance;
 }
 
@@ -32,7 +32,7 @@ sub _new {
   return $self;
 }
 
-# given an object, serliase to a hash
+# given an object, serialize to a hash
 sub object_to_hash {
   my ($self, $object, $is_shallow) = @_;
 
@@ -49,7 +49,7 @@ sub object_to_hash {
     return wantarray ? ($cache->{$cache_id}, $name) : $cache->{$cache_id};
   }
 
-  # call the right method to serialise to a hash
+  # call the right method to serialize to a hash
   my $rh = $self->$method($object, $is_shallow);
 
   # store in cache
@@ -75,14 +75,14 @@ sub changes_to_event {
   foreach my $change (@{$changes->{'changes'}}) {
     if (exists $change->{'field'}) {
 
-      # map undef to emtpy
+      # map undef to empty
       hash_undef_to_empty($change);
 
       # custom_fields change from undef to empty, ignore these changes
       return
         if ($change->{'added'} || "") eq "" && ($change->{'removed'} || "") eq "";
 
-      # use saner field serialisation
+      # use saner field serialization
       my $field = $change->{'field'};
       $change->{'field'} = $field;
 
@@ -104,7 +104,7 @@ sub changes_to_event {
   return $event;
 }
 
-# bugzilla returns '---' or '--' for single-select fields that have no value
+# Bugzilla returns '---' or '--' for single-select fields that have no value
 # selected.  it makes more sense to return an empty string.
 sub _select {
   my ($value) = @_;
@@ -112,7 +112,7 @@ sub _select {
   return $value;
 }
 
-# return an object which serialises to a json boolean, but still acts as a perl
+# return an object which serializes to a JSON boolean, but still acts as a Perl
 # boolean
 sub _boolean {
   my ($value) = @_;
@@ -162,7 +162,7 @@ sub _custom_field {
 
 #
 # class mappings
-# automatically derrived from the class name
+# automatically derived from the class name
 # Bugzilla::Bug --> _bug, Bugzilla::User --> _user, etc
 #
 

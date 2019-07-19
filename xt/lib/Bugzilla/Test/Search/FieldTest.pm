@@ -147,7 +147,7 @@ sub bug_values {
   return @{$self->_field_values->{$number}};
 }
 
-# The untranslated, non-overriden value--used in the name of the test
+# The untranslated, non-overridden value--used in the name of the test
 # and other places.
 sub main_value { return $_[0]->{raw_test}->{value} }
 

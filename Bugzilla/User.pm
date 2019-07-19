@@ -2493,7 +2493,7 @@ sub wants_mail {
 
   # Don't send any mail, ever, if account is disabled
   # XXX Temporary Compatibility Change 1 of 2:
-  # This code is disabled for the moment to make the behaviour like the old
+  # This code is disabled for the moment to make the behavior like the old
   # system, which sent bugmail to disabled accounts.
   # return 0 if $self->{'disabledtext'};
 
@@ -3027,7 +3027,7 @@ containing the user's recent searches.
 =item C<recent_search_containing(bug_id)>
 
 Returns a L<Bugzilla::Search::Recent> object that contains the most recent
-search by the user for the specified bug id. Retuns undef if no match is found.
+search by the user for the specified bug id. Returns undef if no match is found.
 
 =item C<recent_search_for(bug)>
 

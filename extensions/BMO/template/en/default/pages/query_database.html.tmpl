@@ -14,7 +14,7 @@
 <form method="post" action="[% basepath FILTER none %]page.cgi">
   <input type="hidden" name="id" value="query_database.html">
   <textarea cols="80" rows="10" name="query">[% query FILTER html %]</textarea><br>
-  <input type="checkbox" id="csv" name="csv" value="1"><label for="csv">Ouput as CSV</label><br><br>
+  <input type="checkbox" id="csv" name="csv" value="1"><label for="csv">Output as CSV</label><br><br>
   <input type="submit" value="Execute">
   <input type="hidden" name="token" value="[% issue_hash_token(['query_database']) FILTER html %]">
 </form>

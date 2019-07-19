@@ -99,7 +99,7 @@ YAHOO.bugzilla.instantSearch = {
     YAHOO.bugzilla.instantSearch.currentSearchQuery = query;
     YAHOO.bugzilla.instantSearch.currentSearchProduct = product;
 
-    // initialise the datatable as late as possible
+    // initialize the datatable as late as possible
     YAHOO.bugzilla.instantSearch.initDataTable();
 
     try {

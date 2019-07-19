@@ -155,7 +155,7 @@ are installed.
 
 =head2 C<cpan_meta>
 
-Returns a L<CPAN::Meta> from the contents of MYMETA.json in the bugzilla directory.
+Returns a L<CPAN::Meta> from the contents of MYMETA.json in the Bugzilla directory.
 
 =head2 C<preload_features()>
 

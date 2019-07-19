@@ -520,7 +520,7 @@ log in/out using an existing account.
 See L<Bugzilla::WebService> for a description of how parameters are passed,
 and what B<STABLE>, B<UNSTABLE>, and B<EXPERIMENTAL> mean.
 
-Although the data input and output is the same for JSONRPC, XMLRPC and REST,
+Although the data input and output is the same for JSON-RPC, XML-RPC and REST,
 the directions for how to access the data via REST is noted in each method
 where applicable.
 
@@ -555,7 +555,7 @@ call to login should expire with the session or not.  In order for
 this option to have effect the Bugzilla server must be configured to
 allow the user to set this option - the Bugzilla parameter
 I<rememberlogin> must be set to "defaulton" or
-"defaultoff". Addionally, the client application must implement
+"defaultoff". Additionally, the client application must implement
 management of cookies across sessions.
 
 =back
@@ -564,10 +564,10 @@ management of cookies across sessions.
 
 On success, a hash containing two items, C<id>, the numeric id of the
 user that was logged in, and a C<token> which can be passed in
-the parameters as authentication in other calls. A set of http cookies
+the parameters as authentication in other calls. A set of HTTP cookies
 is also sent with the response. These cookies *or* the token can be sent
 along with any future requests to the webservice, for the duration of the
-session. Note that cookies are not accepted for GET requests for JSONRPC
+session. Note that cookies are not accepted for GET requests for JSON-RPC
 and REST for security reasons. You may, however, use the token or valid
 login parameters for those requests.
 
@@ -601,7 +601,7 @@ A login or password parameter was not provided.
 
 =item C<token> was added in Bugzilla B<4.4.3>.
 
-=item This function will be removed in the release after Bugzilla 5.0, in favour of API keys.
+=item This function will be removed in the release after Bugzilla 5.0, in favor of API keys.
 
 =back
 
@@ -665,7 +665,7 @@ for the provided username.
 
 =item Added in Bugzilla B<5.0>.
 
-=item This function will be removed in the release after Bugzilla 5.0, in favour of API keys.
+=item This function will be removed in the release after Bugzilla 5.0, in favor of API keys.
 
 =back
 
@@ -814,7 +814,7 @@ C<string> The new name of the user.
 
 =item C<email>
 
-C<string> The email of the user. Note that email used to login to bugzilla.
+C<string> The email of the user. Note that email used to login to Bugzilla.
 Also note that you can only update one user at a time when changing the
 login name / email. (An error will be thrown if you try to update this field
 for multiple users at once.)
@@ -830,7 +830,7 @@ C<boolean> A boolean value to enable/disable sending bug-related mail to the use
 =item C<login_denied_text>
 
 C<string> A text field that holds the reason for disabling a user from logging
-into bugzilla, if empty then the user account is enabled otherwise it is
+into Bugzilla, if empty then the user account is enabled otherwise it is
 disabled/closed.
 
 =item C<groups>
@@ -1042,7 +1042,7 @@ different than their email.
 
 =item can_login
 
-C<boolean> A boolean value to indicate if the user can login into bugzilla.
+C<boolean> A boolean value to indicate if the user can login into Bugzilla.
 
 =item email_enabled
 
@@ -1052,7 +1052,7 @@ to the user or not.
 =item login_denied_text
 
 C<string> A text field that holds the reason for disabling a user from logging
-into bugzilla, if empty then the user account is enabled. Otherwise it is
+into Bugzilla, if empty then the user account is enabled. Otherwise it is
 disabled/closed.
 
 =item groups
@@ -1171,7 +1171,7 @@ illegal to pass a group name you don't belong to.
 =item B<Description>
 
 Allows for validating a user's API key, token, or username and password.
-If sucessfully authenticated, it returns simple information about the
+If successfully authenticated, it returns simple information about the
 logged in user.
 
 =item B<Params> (none)

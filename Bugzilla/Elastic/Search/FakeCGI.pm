@@ -12,8 +12,8 @@ use namespace::clean;
 has 'params' => (is => 'ro', default => sub { {} });
 
 # we pretend to be Bugzilla::CGI at times.
-sub canonicalise_query {
-  return Bugzilla::CGI::canonicalise_query(@_);
+sub canonicalize_query {
+  return Bugzilla::CGI::canonicalize_query(@_);
 }
 
 sub delete {

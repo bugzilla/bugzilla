@@ -18,7 +18,7 @@ use Bugzilla::Error;
 use Bugzilla::Util;
 
 #
-# initialisation
+# initialization
 #
 
 use constant DB_TABLE   => 'push_options';

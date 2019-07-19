@@ -1053,7 +1053,7 @@ currently-logged-in user. Returns an arrayref of C<Bugzilla::Group> objects.
 Tells you whether or not the currently-logged-in user can set a group
 on a bug (whether or not they match the MemberControl/OtherControl
 settings for a group in this product). Groups that are C<Mandatory> for
-the currently-loggeed-in user are also acceptable since from Bugzilla's
+the currently-logged-in user are also acceptable since from Bugzilla's
 perspective, there's no problem with "setting" a Mandatory group on
 a bug. (In fact, the user I<must> set the Mandatory group on the bug.)
 

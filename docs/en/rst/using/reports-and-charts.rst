@@ -59,7 +59,7 @@ can define as a search.
    they have done so.
 
 An individual line on a chart is called a data set.
-All data sets are organised into categories and subcategories. The
+All data sets are organized into categories and subcategories. The
 data sets that Bugzilla defines automatically use the Product name
 as a :guilabel:`Category` and Component names as :guilabel:`Subcategories`,
 but there is no need for you to follow that naming scheme with your own

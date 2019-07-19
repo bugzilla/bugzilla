@@ -223,7 +223,7 @@ product_id  int     If you're picking a product-specific field, you have to
                     specify the ID of the product you want the values for.
 ==========  ======  =============================================================
 
-**Resppnse**
+**Response**
 
 .. code-block:: js
 

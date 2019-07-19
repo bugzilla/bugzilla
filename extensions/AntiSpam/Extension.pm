@@ -95,7 +95,7 @@ sub _domain_blocking {
 }
 
 #
-# ip blocking
+# IP blocking
 #
 
 sub _ip_blocking {
@@ -154,7 +154,7 @@ sub bug_set_flags {
   my $flag_count = @{$args->{new_flags}};
   if ($flag_count > Bugzilla->params->{antispam_multi_user_limit_count}) {
     Bugzilla->audit(sprintf(
-      "blocked <%s> from flaging %s users",
+      "blocked <%s> from flagging %s users",
       Bugzilla->user->login, $flag_count
     ));
 

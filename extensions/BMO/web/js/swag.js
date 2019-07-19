@@ -1,6 +1,6 @@
 /**
  * Swag Request Form Functions
- * Form Interal Swag Request Form
+ * Form Internal Swag Request Form
  * dtran
  * 7/6/09
  **/

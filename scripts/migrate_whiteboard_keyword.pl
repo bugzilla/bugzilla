@@ -22,7 +22,7 @@
 #         BUGS:  1279368
 #        NOTES:  None
 #       AUTHOR:  David Lawrence (dkl@mozilla.com),
-#      COMPANY:  Mozilla Corproation
+#      COMPANY:  Mozilla Corporation
 #      VERSION:  1.0
 #      CREATED:  10/31/2012
 #     REVISION:  1

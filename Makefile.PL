@@ -377,7 +377,7 @@ my %test_requires = (
 my @bmo_features = grep { is_bmo_feature($_) } keys %optional_features;
 
 $optional_features{bmo} = {
-  description => 'features that bmo needs',
+  description => 'features that BMO needs',
   prereqs     => {
     runtime => {
       requires => {

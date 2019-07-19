@@ -96,13 +96,13 @@ var DE = {
 
     if (fieldValue('vouched_mozillian') == 'Yes')
       required_text_fields['mozillian_profile_url']
-        = 'Please enter your mozillian profile url.';
+        = 'Please enter your mozillian profile URL.';
     if (fieldValue('mozilla_attending') == 'Yes')
       required_text_fields['mozilla_attending_list']
         = 'Please enter a list of Mozilla persons attending the event.';
     if (fieldValue('code_of_conduct') == 'Yes')
       required_text_fields['code_of_conduct_url']
-        = 'Please enter a code of conduct url.';
+        = 'Please enter a code of conduct URL.';
     if (fieldValue('previous_event') == 'Yes') {
       required_text_fields['previous_event_year']
         = 'Please select a year for the previous sponsored event.';

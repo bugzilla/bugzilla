@@ -153,7 +153,7 @@ foreach my $file (@testitems) {
   close(FILE);
 }
 
-# Forbird the { foo => $cgi->param() } syntax, for security reasons.
+# Forbid the { foo => $cgi->param() } syntax, for security reasons.
 foreach my $file (@testitems) {
   $file =~ s/\s.*$//;    # nuke everything after the first space (#comment)
   next unless $file;     # skip null entries

@@ -65,7 +65,7 @@ sub render_html {
     return $html;
   }
 
-  no warnings 'utf8'; # this is needed because our perl is so old.
+  no warnings 'utf8'; # this is needed because our Perl is so old.
   # This is a bit faster since it doesn't engage the regex engine.
   # Replace < with \x{FDD4}, and remove \x{FDD4}.
   $markdown =~ tr/\x{FDD4}//d;

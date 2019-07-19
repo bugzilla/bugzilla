@@ -534,7 +534,7 @@ sub _adjust_request_count {
   Bugzilla->memcached->clear({table => 'profiles', id => $requestee_id});
 }
 
-# bugzilla's handling of requestee matching when creating bugs is "if it's
+# Bugzilla's handling of requestee matching when creating bugs is "if it's
 # wrong, or matches too many, default to empty", which breaks mandatory
 # reviewer requirements.  instead we just throw an error.
 sub post_bug_attachment_flags {
@@ -591,11 +591,11 @@ sub _check_review_flag {
       }
 
       # we want to throw an error if the requestee does not have access
-      # to the bug.  bugzilla's default behaviour is to sliently drop the
+      # to the bug.  Bugzilla's default behavior is to silently drop the
       # requestee, which results in a confusing 'reviewer required'
       # error.
       # fake it by creating a flag and try to set the requestee.
-      # bugzilla's flags don't have a normal constructor or property
+      # Bugzilla's flags don't have a normal constructor or property
       # setters, so we have to bless it directly then call the internal
       # check_requestee method.  urgh.
       my $flag = bless(

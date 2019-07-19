@@ -127,7 +127,7 @@ try {
       bugs_by_sec_keyword => {
         'sec-critical' => {
 
-          # 2 wasn't a sec-crtical bug and 4 wasn't created yet on the report date.
+          # 2 wasn't a sec-critical bug and 4 wasn't created yet on the report date.
           open            => [],
           closed          => [],
           median_age_open => 0

@@ -36,7 +36,7 @@ use constant AUDIT_CREATES         => 1;
 use constant AUDIT_UPDATES         => 1;
 use constant AUDIT_REMOVES         => 1;
 
-# When USE_MEMCACHED is true, the class is suitable for serialisation to
+# When USE_MEMCACHED is true, the class is suitable for serialization to
 # Memcached.  See documentation in Bugzilla::Memcached for more information.
 use constant USE_MEMCACHED => 1;
 
@@ -206,7 +206,7 @@ sub new_from_hash {
   my $invocant    = shift;
   my $class       = ref($invocant) || $invocant;
   my $object_data = shift || return;
-  $class->_serialisation_keys($object_data);
+  $class->_serialization_keys($object_data);
   bless($object_data, $class);
   $object_data->initialize();
   return $object_data;
@@ -275,11 +275,11 @@ sub object_cache_clearall {
   }
 }
 
-# To support serialisation, we need to capture the keys in an object's default
+# To support serialization, we need to capture the keys in an object's default
 # hashref.
-sub _serialisation_keys {
+sub _serialization_keys {
   my ($class, $object) = @_;
-  my $cache = Bugzilla->request_cache->{serialisation_keys} ||= {};
+  my $cache = Bugzilla->request_cache->{serialization_keys} ||= {};
   $cache->{$class} = [keys %$object] if $object && !exists $cache->{$class};
   return @{$cache->{$class}};
 }
@@ -425,7 +425,7 @@ sub _do_list_select {
     # they're only used in placeholders here.
     my @untainted = @{$values || []};
     $objects = $dbh->selectall_arrayref($sql, {Slice => {}}, @untainted);
-    $class->_serialisation_keys($objects->[0]) if @$objects;
+    $class->_serialization_keys($objects->[0]) if @$objects;
   }
 
   if ($objects && $set_memcached) {
@@ -640,7 +640,7 @@ sub audit_log {
 sub flatten_to_hash {
   my $self  = shift;
   my $class = blessed($self);
-  my %hash  = map { $_ => $self->{$_} } $class->_serialisation_keys;
+  my %hash  = map { $_ => $self->{$_} } $class->_serialization_keys;
   return \%hash;
 }
 

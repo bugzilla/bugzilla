@@ -12,7 +12,7 @@ use lib qw( . lib local/lib/perl5 );
 BEGIN {
   unlink('data/db/report_ping_simple') if -f 'data/db/report_ping_simple';
   $ENV{test_db_name} = 'report_ping_simple';
-  # Our code will store dates in localtime with sqlite.
+  # Our code will store dates in localtime with SQLite.
   # So for these tests to pass, everything should be UTC.
   $ENV{TZ} = 'UTC';
 }
@@ -34,7 +34,7 @@ use ok 'Bugzilla::Report::Ping::Simple';
 Bugzilla->dbh->model->resultset('Keyword')
   ->create({name => 'regression', description => 'the regression keyword'});
 
-# Our code will store dates in localtime with sqlite.
+# Our code will store dates in localtime with SQLite.
 # So for these tests to pass, everything should be UTC.
 my $UTC = DateTime::TimeZone->new(name => 'UTC');
 Bugzilla->local_timezone($UTC);

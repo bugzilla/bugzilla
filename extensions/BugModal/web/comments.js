@@ -279,7 +279,7 @@ $(function() {
         renderTags(commentNo, tagsFromDom(container));
         updateTagsMenu();
 
-        // update bugzilla
+        // update Bugzilla
         try {
             renderTags(commentNo, await Bugzilla.API.put(`bug/comment/${commentID}/tags`, { remove: [tag] }));
             updateTagsMenu();
@@ -412,7 +412,7 @@ $(function() {
                 tags.sort();
                 renderTags(commentNo, tags);
 
-                // update bugzilla
+                // update Bugzilla
                 try {
                     renderTags(commentNo, await Bugzilla.API.put(`bug/comment/${commentID}/tags`, { add: addTags }));
                     updateTagsMenu();

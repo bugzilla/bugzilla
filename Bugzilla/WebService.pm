@@ -17,7 +17,7 @@ use Bugzilla::WebService::Server;
 use Bugzilla::WebService::Wants;
 use PerlX::Maybe qw(maybe);
 
-# Used by the JSON-RPC server to convert incoming date fields apprpriately.
+# Used by the JSON-RPC server to convert incoming date fields appropriately.
 use constant DATE_FIELDS => {};
 
 # Used by the JSON-RPC server to convert incoming base64 fields appropriately.
@@ -214,7 +214,7 @@ convenience.
 
 =back
 
-There are also two deprecreated methods of authentications. This will be
+There are also two deprecated methods of authentications. This will be
 removed in the version after Bugzilla 5.0.
 
 =over

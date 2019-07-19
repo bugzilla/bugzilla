@@ -324,8 +324,8 @@ $sel->title_is("Milestone Deleted");
 $text = trim($sel->get_text("message"));
 ok(
   $text
-    =~ /Bugs targetted to this milestone have been retargetted to the default milestone/,
-  "Bug retargetted"
+    =~ /Bugs targeted to this milestone have been retargeted to the default milestone/,
+  "Bug retargeted"
 );
 
 # Try deleting the version used by the bug. This action must be rejected.

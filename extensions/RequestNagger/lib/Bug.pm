@@ -18,7 +18,7 @@ use Bugzilla::User;
 
 sub short_desc {
   my ($self) = @_;
-  return $self->{sanitise_bug} ? '(Secure bug)' : $self->SUPER::short_desc;
+  return $self->{sanitize_bug} ? '(Secure bug)' : $self->SUPER::short_desc;
 }
 
 sub is_private {
@@ -36,7 +36,7 @@ sub tooltip {
   if ($self->bug_status eq 'RESOLVED') {
     $tooltip .= '/' . $self->resolution;
   }
-  if (!$self->{sanitise_bug}) {
+  if (!$self->{sanitize_bug}) {
     $tooltip .= ' ' . $self->product . ' :: ' . $self->component;
   }
   return $tooltip;

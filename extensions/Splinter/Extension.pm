@@ -76,8 +76,8 @@ sub page_before_template {
         ThrowUserError('bug_attach_id_mismatch');
       }
 
-      # The patch is going to be displayed in a HTML page and if the utf8
-      # param is enabled, we have to encode attachment data as utf8.
+      # The patch is going to be displayed in a HTML page and if the UTF-8
+      # param is enabled, we have to encode attachment data as UTF-8.
       if (Bugzilla->params->{'utf8'}) {
         $attachment->data;    # load data
         utf8::decode($attachment->{data});

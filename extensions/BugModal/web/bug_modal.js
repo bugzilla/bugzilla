@@ -149,14 +149,14 @@ $(function() {
         });
     }
 
-    // expand/colapse module
+    // expand/collapse module
     $('.module-latch')
         .click(function(event) {
             event.preventDefault();
             slide_module($(this).parents('.module'));
         })
         .keydown(function(event) {
-            // expand/colapse module with the enter or space key
+            // expand/collapse module with the enter or space key
             if (event.keyCode === 13 || event.keyCode === 32) {
                 event.preventDefault();
                 slide_module($(this).parents('.module'));
@@ -171,7 +171,7 @@ $(function() {
             $('#attachments tr.attach-obsolete').toggle();
         });
 
-    // url --> unsafe warning
+    // URL --> unsafe warning
     $('.bug-url')
         .click(function(event) {
             var that = $(this);
@@ -503,7 +503,7 @@ $(function() {
         that.data('preselected', value);
 
         // if the user hasn't touched a field, override the browser's choice
-        // with bugzilla's
+        // with Bugzilla's
         if (!dirty.val())
             that.val(value);
     });
@@ -1056,7 +1056,7 @@ $(function() {
         // subtracts time spent from remaining time
         // prevent negative values if work_time > fRemainingTime
         var new_time = Math.max(BUGZILLA.remaining_time - $('#work_time').val(), 0.0);
-        // get upto 2 decimal places
+        // get up to 2 decimal places
         $('#remaining_time').val(Math.round((new_time * 100)/100).toFixed(1));
     });
     $('#remaining_time').change(function() {
@@ -1522,7 +1522,7 @@ async function show_new_changes_indicator() {
     } catch (ex) {}
 }
 
-// fix url after bug creation/update
+// fix URL after bug creation/update
 if (history && history.replaceState) {
     var href = document.location.href;
     if (!href.match(/show_bug\.cgi/)) {
@@ -1593,7 +1593,7 @@ $(function() {
 
 (function($) {
     $.extend({
-        // Case insensative $.inArray (http://api.jquery.com/jquery.inarray/)
+        // Case insensitive $.inArray (http://api.jquery.com/jquery.inarray/)
         // $.inArrayIn(value, array [, fromIndex])
         //  value (type: String)
         //    The value to search for
@@ -1624,7 +1624,7 @@ $(function() {
 
         // Bring an element into view, leaving space for the outline. If passed
         // a string, it will be treated as an id - the page will scroll and the
-        // url will be added to the browser's history. If passed an element, no
+        // URL will be added to the browser's history. If passed an element, no
         // entry will be added to the history.
         scrollTo: function(target, complete) {
             let $target;

@@ -423,7 +423,7 @@ elsif (($cmdtype eq "doit") && defined $cgi->param('remtype')) {
     $user = Bugzilla->login(LOGIN_REQUIRED);
     my $token = $cgi->param('token');
     check_hash_token($token, ['searchknob']);
-    $buffer = $params->canonicalise_query('cmdtype', 'remtype', 'query_based_on',
+    $buffer = $params->canonicalize_query('cmdtype', 'remtype', 'query_based_on',
       'token');
     InsertNamedQuery(DEFAULT_QUERY_NAME, $buffer);
     $vars->{'message'} = "buglist_new_default_query";
@@ -439,7 +439,7 @@ elsif (($cmdtype eq "doit") && defined $cgi->param('remtype')) {
     # individual bugs.
     if ($cgi->param('list_of_bugs')) {
 
-      # We add/remove tags based on the action choosen.
+      # We add/remove tags based on the action chosen.
       my $action = trim($cgi->param('action') || '');
       $action =~ /^(add|remove)$/
         || ThrowUserError('unknown_action', {action => $action});
@@ -1116,7 +1116,7 @@ else {
 
 # Set 'urlquerypart' once the buglist ID is known.
 $vars->{'urlquerypart'}
-  = $params->canonicalise_query('order', 'cmdtype', 'query_based_on', 'token');
+  = $params->canonicalize_query('order', 'cmdtype', 'query_based_on', 'token');
 
 if ($format->{'extension'} eq "csv") {
 

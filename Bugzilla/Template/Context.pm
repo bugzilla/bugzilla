@@ -67,7 +67,7 @@ sub stash {
   # templates, because if somebody calls Throw*Error globally inside of
   # template_before_process, that causes an infinite recursion into
   # the PRE_PROCESS templates (because Bugzilla, while inside
-  # global/intialize.none.tmpl, loads the template again to create the
+  # global/initialize.none.tmpl, loads the template again to create the
   # template object for Throw*Error).
   #
   # Checking Bugzilla::Hook::in prevents infinite recursion on this hook.

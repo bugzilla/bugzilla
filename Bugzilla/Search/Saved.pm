@@ -231,7 +231,7 @@ sub edit_link {
   {
     $cgi->param('query_type', 'advanced');
   }
-  $self->{edit_link} = $cgi->canonicalise_query;
+  $self->{edit_link} = $cgi->canonicalize_query;
   return $self->{edit_link};
 }
 
@@ -369,7 +369,7 @@ These return data about the object, without modifying the object.
 
 =item C<edit_link>
 
-A url with which you can edit the search.
+A URL with which you can edit the search.
 
 =item C<url>
 

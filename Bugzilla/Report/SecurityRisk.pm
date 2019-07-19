@@ -314,7 +314,7 @@ sub _build_events {
   } @$result;
 
   # We sort by reverse chronological order instead of ORDER BY
-  # since values %hash doesn't guareentee any order.
+  # since values %hash doesn't guarantee any order.
   @events = sort { $b->{bug_when} cmp $a->{bug_when} } @events;
   return \@events;
 }
@@ -334,7 +334,7 @@ sub _build_results {
     )
   {
 
-# We rewind events while there are still events existing which occured after the start
+# We rewind events while there are still events existing which occurred after the start
 # of the report week. The bugs will reflect a snapshot of how they were at the start of the week.
 # $self->events is ordered reverse chronologically, so the end of the array is the earliest event.
     while ($e < @{$self->events}

@@ -80,9 +80,9 @@ sub init_page {
     Bugzilla::Logging->fields->{remote_ip} = remote_ip();
   }
 
-  # Because this function is run live from perl "use" commands of
+  # Because this function is run live from Perl "use" commands of
   # other scripts, we're skipping the rest of this function if we get here
-  # during a perl syntax check (perl -c, like we do during the
+  # during a Perl syntax check (perl -c, like we do during the
   # 001compile.t test).
   return if $^C;
 
@@ -717,7 +717,7 @@ sub local_timezone {
     ||= DateTime::TimeZone->new(name => 'local');
 }
 
-# Send messages to syslog for the auditing systems (eg. mozdef) to pick up.
+# Send messages to syslog for the auditing systems (e.g. mozdef) to pick up.
 sub audit {
   my (undef, $message) = @_;
   state $logger = Log::Log4perl->get_logger("audit");
@@ -885,7 +885,7 @@ all passed from the caller, and the caller's caller, and....
 
 =item *
 
-We can reuse objects across requests using mod_perl where appropriate (eg
+We can reuse objects across requests using mod_perl where appropriate (e.g.
 templates), whilst destroying those which are only valid for a single request
 (such as the current user)
 
@@ -895,7 +895,7 @@ Note that items accessible via this object are demand-loaded when requested.
 
 For something to be added to this object, it should either be able to benefit
 from persistence when run under mod_perl (such as the a C<template> object),
-or should be something which is globally required by a large ammount of code
+or should be something which is globally required by a large amount of code
 (such as the current C<user> object).
 
 =head1 METHODS
@@ -1022,7 +1022,7 @@ If false (or not specified), this method will return an arrayref of
 the requested fields.
 
 If true, this method will return a hashref of fields, where the keys
-are field names and the valules are L<Bugzilla::Field> objects.
+are field names and the values are L<Bugzilla::Field> objects.
 
 =item C<type>
 
@@ -1102,7 +1102,7 @@ Change the database object to refer to the main database.
 
 The current Parameters of Bugzilla, as a hashref. If C<data/params>
 does not exist, then we return an empty hashref. If C<data/params>
-is unreadable or is not valid perl, we C<die>.
+is unreadable or is not valid Perl, we C<die>.
 
 =item C<local_timezone>
 
@@ -1123,7 +1123,7 @@ of features, see C<OPTIONAL_MODULES> in C<Bugzilla::Install::Requirements>.
 
 =item C<audit>
 
-Feeds the provided message into our centralised auditing system.
+Feeds the provided message into our centralized auditing system.
 
 =item C<markdown>
 
@@ -1143,7 +1143,7 @@ collisions.
 
 =item B<Request Cache>
 
-The request cache is a hashref which supports caching any perl variable for the
+The request cache is a hashref which supports caching any Perl variable for the
 duration of the current request. At the end of the current request the contents
 of this cache are cleared.
 
@@ -1155,7 +1155,7 @@ Bugzilla.
 
 =item C<request_cache>
 
-Returns a hashref which can be checked and modified to store any perl variable
+Returns a hashref which can be checked and modified to store any Perl variable
 for the duration of the current request.
 
 =item C<clear_request_cache>
@@ -1166,7 +1166,7 @@ Removes all entries from the C<request_cache>.
 
 =item B<Process Cache>
 
-The process cache is a hashref which support caching of any perl variable. If
+The process cache is a hashref which support caching of any Perl variable. If
 Bugzilla is configured to run using Apache mod_perl, the contents of this cache
 are persisted across requests for the lifetime of the Apache worker process
 (which varies depending on the SizeLimit configuration in mod_perl.pl).
@@ -1181,7 +1181,7 @@ is running (for example the path where Bugzilla is installed).
 
 =item C<process_cache>
 
-Returns a hashref which can be checked and modified to store any perl variable
+Returns a hashref which can be checked and modified to store any Perl variable
 for the duration of the current process (mod_perl) or request (mod_cgi).
 
 =back

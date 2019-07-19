@@ -34,7 +34,7 @@ else {
 
 =head1 NAME
 
-block-ip.pl -- block or unlock ip addresses from Bugzilla's IP block list
+block-ip.pl -- block or unlock IP addresses from Bugzilla's IP block list
 
 =head1 SYNOPSIS
 
@@ -55,4 +55,4 @@ If passed, the IPs will be unblocked instead of blocked. Use this to remove IPs 
 
 =head1 DESCRIPTION
 
-This is just a simple CLI inteface to L<Bugzilla::App::Plugin::BlockIP>.
+This is just a simple CLI interface to L<Bugzilla::App::Plugin::BlockIP>.

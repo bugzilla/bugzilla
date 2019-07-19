@@ -21,7 +21,7 @@ use English qw(-no_match_vars);
 
 Bugzilla->usage_mode(USAGE_MODE_CMDLINE);
 Bugzilla->error_mode(ERROR_MODE_DIE);
-use Try::Tiny;    # bmo ships with this nowadays
+use Try::Tiny;    # BMO ships with this nowadays
 
 my $config = {
 

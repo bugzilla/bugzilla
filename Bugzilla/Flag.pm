@@ -645,8 +645,8 @@ sub force_retarget {
 
     # $bug is undefined when e.g. editing inclusion and exclusion lists.
     my $obj = $flag->attachment || $bug || $flag->bug;
-    my $is_retargetted = $flag->retarget($obj);
-    if ($is_retargetted) {
+    my $is_retargeted = $flag->retarget($obj);
+    if ($is_retargeted) {
       $dbh->do('UPDATE flags SET type_id = ? WHERE id = ?',
         undef, ($flag->type_id, $flag->id));
       Bugzilla->memcached->clear({table => 'flags', id => $flag->id});
@@ -720,7 +720,7 @@ sub _check_requestee {
     ThrowCodeError('flag_type_requestee_disabled', {type => $self->type})
       if !$self->type->is_requesteeble;
 
-    # BMO customisation:
+    # BMO customization:
     # You can't ask a disabled account, as they don't have the ability to
     # set the flag.
     ThrowUserError('flag_requestee_disabled', {requestee => $requestee})
@@ -813,7 +813,7 @@ sub _check_setter {
     unless $setter->can_change_flag($self->type, $self->{_old_status} || 'X',
     $status);
 
-  # If the request is being retargetted, we don't update
+  # If the request is being retargeted, we don't update
   # the setter, so that the setter gets the notification.
   if ($status eq '?' && $self->{_old_status} eq '?') {
     return $self->setter;

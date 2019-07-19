@@ -54,10 +54,10 @@ my $UserAgent = mock 'Mojo::UserAgent' => ();
 }
 
 my @bad_response = (
-  ['http error',   mock_useragent_tx("doesn't matter", sub { $_->code(500) })],
-  ['invalid json', mock_useragent_tx('<xml>foo</xml>')],
+  ['HTTP error',   mock_useragent_tx("doesn't matter", sub { $_->code(500) })],
+  ['invalid JSON', mock_useragent_tx('<xml>foo</xml>')],
   [
-    'json containing error code',
+    'JSON containing error code',
     mock_useragent_tx(encode_json({error_code => 1234}))
   ],
 );

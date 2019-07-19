@@ -20,7 +20,7 @@ and the Bugzilla site is `http://bugzilla.mozilla.org`.
      with a the request body data being a JSON object with keys `client_api_key` and `client_api_login`.
   2. The callback, when responding to the POST request must return a JSON object with a key `result`. This result
      is intended to be a unique token used to identify this transaction.
-  3. Bugzilla will then cause the useragent to redirect (using a GET request) to `http://app.example.org/callback`
+  3. Bugzilla will then cause the user agent to redirect (using a GET request) to `http://app.example.org/callback`
      with additional query string parameters `client_api_login` and `callback_result`.
   4. At this point, the consumer now has the api key and login information. Be sure to compare the `callback_result` to whatever result was initially sent back
      to Bugzilla.
@@ -28,7 +28,7 @@ and the Bugzilla site is `http://bugzilla.mozilla.org`.
    resource.
 
 Your application should take measures to ensure when receiving a user at your
-callback URL that you previously redirected them to Bugzilla. The simplest method would be ensuring the callback url always has the
+callback URL that you previously redirected them to Bugzilla. The simplest method would be ensuring the callback URL always has the
 hostname and path you specified, with only the query string parameters varying.
 
 The description should include the name of your application, in a form that will be recognizable to users.

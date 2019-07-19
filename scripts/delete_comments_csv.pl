@@ -43,7 +43,7 @@ while (my $line = <CSV>) {
   my $comment = Bugzilla::Comment->new($comment_id);
 
   if (!$comment || $comment->bug_id ne $bug_id) {
-    print "... commment '$comment_id' does not exist ... skipping.\n";
+    print "... comment '$comment_id' does not exist ... skipping.\n";
     next;
   }
   $comment->remove_from_db();

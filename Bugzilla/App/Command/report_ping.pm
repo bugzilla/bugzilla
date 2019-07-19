@@ -17,7 +17,7 @@ use Mojo::Util 'getopt';
 use PerlX::Maybe 'maybe';
 use Try::Tiny;
 
-has description => 'send a report ping to a url';
+has description => 'send a report ping to a URL';
 has usage       => sub { shift->extract_usage };
 
 sub run {
@@ -130,7 +130,7 @@ __END__
 
 =head1 NAME
 
-Bugzilla::App::Command::report_ping - descriptionsend a report ping to a url';
+Bugzilla::App::Command::report_ping - Send a report ping to a URL';
 
 =head1 SYNOPSIS
 
@@ -140,17 +140,17 @@ Bugzilla::App::Command::report_ping - descriptionsend a report ping to a url';
 
   Options:
     -h, --help               Print a brief help message and exits.
-    -u, --base-url           URL to send the json documents to.
+    -u, --base-url           URL to send the JSON documents to.
     -r, --rows num           (Optional) Number of requests to send at once. Default: 10.
     -p, --page num           (Optional) Page to start on. Default: 1
     --since str              (Optional) Typically the date of the last run.
     --class word             (Optional) Report class to use. Default: Simple
-    --test                   Validate the json documents against the json schema.
-    --dump-schema            Print the json schema.
+    --test                   Validate the JSON documents against the JSON schema.
+    --dump-schema            Print the JSON schema.
 
 =head1 DESCRIPTION
 
-send a report ping to a url.
+send a report ping to a URL.
 
 =head1 ATTRIBUTES
 

@@ -29,7 +29,7 @@ $C->content_security_policy(report_only => 0);
 
 # Go straight back to query.cgi if we are adding a boolean chart.
 if (grep(/^cmd-/, $cgi->param())) {
-  my $params = $cgi->canonicalise_query("format", "ctype");
+  my $params = $cgi->canonicalize_query("format", "ctype");
   $cgi->base_redirect('query.cgi?format='
       . $cgi->param('query_format') . ($params ? "&$params" : ''));
 }
@@ -244,15 +244,15 @@ if ($action eq "wrap") {
 
   # We need a number of different variants of the base URL for different
   # URLs in the HTML.
-  $vars->{'buglistbase'} = $cgi->canonicalise_query(
+  $vars->{'buglistbase'} = $cgi->canonicalize_query(
     "x_axis_field", "y_axis_field", "z_axis_field", "ctype",
     "format",       "query_format", @axis_fields
   );
   $vars->{'imagebase'}
-    = $cgi->canonicalise_query($tbl_field, "action", "ctype", "format", "width",
+    = $cgi->canonicalize_query($tbl_field, "action", "ctype", "format", "width",
     "height");
   $vars->{'switchbase'}
-    = $cgi->canonicalise_query("query_format", "action", "ctype", "format",
+    = $cgi->canonicalize_query("query_format", "action", "ctype", "format",
     "width", "height");
   $vars->{'data'} = \%data;
 }

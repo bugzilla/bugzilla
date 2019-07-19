@@ -76,7 +76,7 @@ sub _arrayref_of_fields {
 
 
 # Future maintainer: Maybe consider removing "changeddate" from the codebase entirely.
-# At some point, bugzilla tried to rename some fields
+# At some point, Bugzilla tried to rename some fields
 # one of these is "delta_ts" to changeddate.
 # But the DB column stayed the same... and elasticsearch uses the db name
 # However search likes to use the "new" name.

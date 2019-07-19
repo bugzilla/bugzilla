@@ -154,7 +154,7 @@ sub initFromCGI {
   $self->{'frequency'} = $cgi->param('frequency');
   detaint_natural($self->{'frequency'}) || ThrowUserError("missing_frequency");
 
-  $self->{'query'} = $cgi->canonicalise_query(
+  $self->{'query'} = $cgi->canonicalize_query(
     "format",      "ctype", "action",    "category",
     "subcategory", "name",  "frequency", "public",
     "query_format"

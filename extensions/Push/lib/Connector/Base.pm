@@ -35,7 +35,7 @@ sub init {
   my ($self) = @_;
 
   # abstract
-  # perform any initialisation here
+  # perform any initialization here
   # will be run when created by the web pages or by the daemon
   # and also when the configuration needs to be reloaded
 }

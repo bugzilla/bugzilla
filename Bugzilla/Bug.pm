@@ -889,7 +889,7 @@ sub create {
   my $dbh = Bugzilla->dbh;
 
   # BMO - allow parameter alteration before creation.  also add support for
-  # fields which are not bug columns (eg bug_mentors). extensions should move
+  # fields which are not bug columns (e.g. bug_mentors). extensions should move
   # fields from $params to $stash, then use the bug_end_of_create hook to
   # update the database
   my $stash = {};
@@ -3553,7 +3553,7 @@ sub remove_see_also {
       {field => 'see_also', oldvalue => $url, privs => $privs});
   }
 
-  # Since we remove also the url from the referenced bug,
+  # Since we remove also the URL from the referenced bug,
   # we need to notify changes for that bug too.
   $removed_bug_url = $removed_bug_url->[0];
   if ( !$skip_recursion
@@ -4314,7 +4314,7 @@ sub groups {
   }
 
   # BMO: if required, hack in groups exposed by -visible membership
-  # (eg mozilla-employee-confidential-visible), so reporters can add the
+  # (e.g. mozilla-employee-confidential-visible), so reporters can add the
   # bug to a group on show_bug.
   # if the bug is already in the group, the user will not be able to remove
   # it unless they are a true group member.
@@ -4746,7 +4746,7 @@ sub _join_activity_entries {
     }
   }
 
-  # Assume bug_file_loc contain a single url, don't insert a delimiter
+  # Assume bug_file_loc contain a single URL, don't insert a delimiter
   if ($field eq 'bug_file_loc') {
     return $current_change . $new_change;
   }

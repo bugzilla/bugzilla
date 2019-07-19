@@ -96,7 +96,7 @@ sub all_open_states {
   if (scalar @$added == 1 && $added->[0] eq $new_status) {
     push(@query_states, $new_status);
     $cgi->param('bug_status', @query_states);
-    return $cgi->canonicalise_query();
+    return $cgi->canonicalize_query();
   }
 
   return '';

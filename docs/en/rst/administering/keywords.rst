@@ -4,7 +4,7 @@ Keywords
 ########
 
 The administrator can define keywords which can be used to tag and
-categorise bugs. For example, the keyword "regression" is commonly used.
+categorize bugs. For example, the keyword "regression" is commonly used.
 A company might have a policy stating all regressions
 must be fixed by the next release—this keyword can make tracking those
 bugs much easier. Keywords are global, rather than per product.

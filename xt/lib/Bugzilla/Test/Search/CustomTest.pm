@@ -51,7 +51,7 @@ sub test        { return $_[0]->{raw_test} }
 
 sub operator_test { die "unimplemented" }
 sub field_object  { die "unimplemented" }
-sub main_value    { die "unimplenmented" }
+sub main_value    { die "unimplemented" }
 sub test_value    { die "unimplemented" }
 
 # Custom tests don't use transforms.

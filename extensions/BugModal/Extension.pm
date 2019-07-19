@@ -113,7 +113,7 @@ sub template_after_create {
   );
 
   # flatten a list of hashrefs to a list of values
-  # eg.  logins = users.pluck("login")
+  # e.g. logins = users.pluck("login")
   $context->define_vmethod(
     list => pluck => sub {
       my ($list, $field) = @_;
@@ -123,7 +123,7 @@ sub template_after_create {
 
   # returns array where the value in $field does not equal $value
   # opposite of "only"
-  # eg.  not_byron = users.skip("name", "Byron")
+  # e.g. not_byron = users.skip("name", "Byron")
   $context->define_vmethod(
     list => skip => sub {
       my ($list, $field, $value) = @_;
@@ -133,7 +133,7 @@ sub template_after_create {
 
   # returns array where the value in $field equals $value
   # opposite of "skip"
-  # eg.  byrons_only = users.only("name", "Byron")
+  # e.g. byrons_only = users.only("name", "Byron")
   $context->define_vmethod(
     list => only => sub {
       my ($list, $field, $value) = @_;
@@ -142,7 +142,7 @@ sub template_after_create {
   );
 
   # returns boolean indicating if the value exists in the list
-  # eg.  has_byron = user_names.exists("byron")
+  # e.g. has_byron = user_names.exists("byron")
   $context->define_vmethod(
     list => exists => sub {
       my ($list, $value) = @_;
@@ -292,7 +292,7 @@ sub template_before_process {
   }
   $vars->{tracking_flags_table} = \@tracking_table;
 
-  # for the "view -> hide treeherder comments" menu item
+  # for the "View -> Hide Treeherder Comments" menu item
   my @treeherder_ids = map { $_->id } @{Bugzilla->treeherder_users};
   foreach my $change_set (@{$bug->activity_stream}) {
     if (

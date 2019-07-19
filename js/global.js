@@ -155,7 +155,7 @@ function display_value(field, value) {
     return value;
 }
 
-// html encoding
+// HTML encoding
 if (!String.prototype.htmlEncode) {
     (function() {
         String.prototype.htmlEncode = function() {

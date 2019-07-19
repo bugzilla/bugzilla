@@ -25,7 +25,7 @@ use Bugzilla::Util;
 use Encode;
 
 #
-# initialisation
+# initialization
 #
 
 use constant DB_TABLE   => 'push_backlog';

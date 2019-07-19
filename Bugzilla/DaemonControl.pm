@@ -295,7 +295,7 @@ check for running services (L<assert_httpd()>, L<assert_database()>, L<assert_se
 or help build more functions like the above (L<on_exception()>, L<on_finish()>).
 
 The C<run_> and C<assert_> functions return Futures, see L<Future> for details
-on that. But if you've used Promises in the javascript, Futures are the same concept.
+on that. But if you've used Promises in the JavaScript, Futures are the same concept.
 
 =head1 FUNCTIONS
 

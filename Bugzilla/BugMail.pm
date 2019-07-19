@@ -616,8 +616,8 @@ sub _get_new_bugmail_fields {
   my @diffs;
 
   # Show fields in the same order as the DEFAULT_FIELDS list, which mirrors
-  # 4.0's behavour and provides sane grouping of similar fields.
-  # Any additional fields are sorted by descrsiption
+  # 4.0's behavior and provides sane grouping of similar fields.
+  # Any additional fields are sorted by description
   my @prepend;
   foreach my $name (map { $_->{name} } Bugzilla::Field::DEFAULT_FIELDS) {
     my $idx = firstidx { $_->name eq $name } @fields;

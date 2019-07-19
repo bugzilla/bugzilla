@@ -458,7 +458,7 @@ sub active_custom_fields {
 sub cf_hidden_in_product {
   my ($field_name, $product_name, $component_name, $bug) = @_;
 
-  # check bugzilla's built-in visibility controls first
+  # check Bugzilla's built-in visibility controls first
   if ($bug) {
     my $field = Bugzilla::Field->new({name => $field_name, cache => 1});
     return 1 if $field && !$field->is_visible_on_bug($bug);
@@ -1212,7 +1212,7 @@ sub object_start_of_update {
   }
 }
 
-# detect github pull requests and reviewboard reviews, set the content-type
+# detect GitHub pull requests and Review Board reviews, set the content-type
 sub attachment_process_data {
   my ($self, $args) = @_;
   my $attributes = $args->{attributes};
@@ -1245,7 +1245,7 @@ sub attachment_process_data {
 sub _detect_attached_url {
   my ($url) = @_;
 
-  # trim and check for the pull request url
+  # trim and check for the pull request URL
   return unless defined $url;
   return if length($url) > 256;
   $url = trim($url);
@@ -1322,7 +1322,7 @@ sub attachment_view {
   # don't redirect if the content-type is specified explicitly
   return if defined $cgi->param('content_type');
 
-  # must be a valid redirection url
+  # must be a valid redirection URL
   return unless defined $attachment->external_redirect;
 
   # redirect
@@ -1824,7 +1824,7 @@ sub _inject_headers_into_body {
       # text/plain|html only
       return unless $part->content_type =~ /^text\/(?:html|plain)/;
 
-      # hide in html content
+      # hide in HTML content
       if ($replacement && $part->content_type =~ /^text\/html/) {
         $replacement
           = '<pre style="font-size: 0pt; color: #fff">' . $replacement . '</pre>';
@@ -2279,7 +2279,7 @@ sub _add_attachment {
 # Note: you must call $bug->update($bug->creation_ts) after adding all attachments
 }
 
-# bugzilla's content_type detection makes assumptions about form fields, which
+# Bugzilla's content_type detection makes assumptions about form fields, which
 # means we can't use it here.  this code is lifted from
 # Bugzilla::Attachment::get_content_type and the TypeSniffer extension.
 sub _detect_content_type {

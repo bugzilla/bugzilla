@@ -198,7 +198,7 @@ sub _load_from_input {
     $value->{is_active} = $value->{is_active} ? 1 : 0;
   }
 
-  # vibility
+  # visibility
 
   my $visibilities = decode_json($input->{visibility} || '[]');
   foreach my $visibility (@$visibilities) {
@@ -426,7 +426,7 @@ sub _update_db_visibility {
 }
 
 #
-# serialisation
+# serialization
 #
 
 sub _groups_to_json {
@@ -459,7 +459,7 @@ sub _flag_values_to_json {
 sub _flag_visibility_to_json {
   my ($visibilities, $is_copy) = @_;
 
-  # setting is_copy will set the id's to zero, to force new visibilites
+  # setting is_copy will set the id's to zero, to force new visibilities
   # rather than editing existing ones
   my @data;
 

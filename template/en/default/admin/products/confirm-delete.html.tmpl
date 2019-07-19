@@ -44,7 +44,7 @@
     </tr>
     <tr>
       <td>Classification Description:</td>
-      [%# descriptions are intentionally not filtered to allow html content %]
+      [%# descriptions are intentionally not filtered to allow HTML content %]
       <td>
         [% IF classification.description %]
           [% classification.description FILTER html_light %]
@@ -65,7 +65,7 @@
   </tr>
   <tr>
     <td valign="top">Description:</td>
-    [%# descriptions are intentionally not filtered to allow html content %]
+    [%# descriptions are intentionally not filtered to allow HTML content %]
     <td valign="top">
       [% IF product.description %]
         [% product.description FILTER html_light %]
@@ -118,7 +118,7 @@
           [% FOREACH comp = product.components %]
             <tr>
               <th align="right">[% comp.name FILTER html %]:</th>
-              [%# descriptions are intentionally not filtered to allow html content %]
+              [%# descriptions are intentionally not filtered to allow HTML content %]
               <td>
                 [% IF comp.description %]
                   [% comp.description FILTER html_light %]

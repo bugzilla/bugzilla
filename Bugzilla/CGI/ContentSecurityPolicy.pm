@@ -292,9 +292,9 @@ style attributes are disabled unless you specify 'unsafe-inline'.
 =head2 upgrade_insecure_requests
 
 The upgrade-insecure-requests directive instructs user agents to treat all of a
-site's unsecure URL's (those serverd over HTTP) as though they have been
+site's insecure URL's (those served over HTTP) as though they have been
 replaced with secure URL's (those served over HTTPS). This directive is intended
-for web sites with large numbers of unsecure legacy URL's that need to be
+for web sites with large numbers of insecure legacy URL's that need to be
 rewritten.
 
 =head1 METHODS

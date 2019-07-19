@@ -170,14 +170,14 @@ sub feed_query {
     }
 
     # Skip changes done by phab-bot user
-    # If changer does not exist in bugzilla database
+    # If changer does not exist in Bugzilla database
     # we use the phab-bot account as the changer
     my $author = Bugzilla::Extension::PhabBugz::User->new_from_query(
       {phids => [$author_phid]});
 
     if ($author && $author->bugzilla_id) {
       if ($author->bugzilla_user->login eq PHAB_AUTOMATION_USER) {
-        INFO("SKIPPING: Change made by phabricator user");
+        INFO("SKIPPING: Change made by Phabricator user");
         $self->save_last_id($story_id, 'feed');
         next;
       }
@@ -287,7 +287,7 @@ sub group_query {
     ids => [$lando_bmo_user->id]
     });
 
-  # secure-revision project that will be used for bmo group projects
+  # secure-revision project that will be used for BMO group projects
   my $secure_revision
     = Bugzilla::Extension::PhabBugz::Project->new_from_query({
     name => 'secure-revision'
@@ -419,7 +419,7 @@ sub process_revision_change {
   # else bug is private.
   else {
     # Here we create a new custom policy containing the project
-    # groups that are mapped to bugzilla groups.
+    # groups that are mapped to Bugzilla groups.
     my $set_project_names = [map { "bmo-" . $_->name } @{$bug->groups_in}];
 
     # If current policy projects matches what we want to set, then
@@ -551,7 +551,7 @@ sub process_new_user {
   my $phab_user = Bugzilla::Extension::PhabBugz::User->new($user_data);
 
   if (!$phab_user->bugzilla_id) {
-    WARN("SKIPPING: No bugzilla id associated with user");
+    WARN("SKIPPING: No Bugzilla ID associated with user");
     return;
   }
 
@@ -579,11 +579,11 @@ sub process_new_user {
     foreach my $row (@$results) {
       WARN(
         'Possible username squatter: ',
-        'phab user login: ' . $phab_user->name,
-        ' phab user realname: ' . $phab_user->realname,
-        ' bugzilla user id: ' . $row->{userid},
-        ' bugzilla login: ' . $row->{login_name},
-        ' bugzilla realname: ' . $row->{realname}
+        'Phab user login: ' . $phab_user->name,
+        ' Phab user realname: ' . $phab_user->realname,
+        ' Bugzilla user id: ' . $row->{userid},
+        ' Bugzilla login: ' . $row->{login_name},
+        ' Bugzilla realname: ' . $row->{realname}
       );
 
       my $vars = {

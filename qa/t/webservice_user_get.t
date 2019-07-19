@@ -188,7 +188,7 @@ sub post_success {
   else {
     ok(
       !exists $item->{saved_searches},
-      "Users cannot get the list of saved searches and reports from someone else's acccount"
+      "Users cannot get the list of saved searches and reports from someone else's account"
     );
   }
 

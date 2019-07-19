@@ -156,7 +156,7 @@ To add a new user preference:
   :file:`hook/global/setting-descs-settings.none.tmpl`. Your code can see the
   hash variable; just set more members in it.
 
-* To change behaviour based on the setting, reference it in templates using
+* To change behavior based on the setting, reference it in templates using
   ``[% user.settings.setting_name.value %]``. Reference it in code using
   ``$user->settings->{'setting_name'}->{'value'}``. The value will be one of
   the option tag names (e.g. some_option).

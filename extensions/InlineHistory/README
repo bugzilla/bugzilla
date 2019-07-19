@@ -6,5 +6,5 @@ and is enabled by a User Preference.
 
 It works with an unmodified install of Bugzilla 4.0 and 4.2.
 
-If you have modified your show_bug template, the javascript in
+If you have modified your show_bug template, the JavaScript in
 web/inline-history.js may need to be updated to suit your installation.

@@ -29,15 +29,15 @@
   # subheader: string. Page subheader.
   # bodyclasses: array of extra CSS classes for the <body>
   # onload: string. JavaScript code to run when the page finishes loading.
-  # javascript: string. Javascript to go in the header.
-  # javascript_urls: list. List of URLs to Javascript.
+  # javascript: string. JavaScript to go in the header.
+  # javascript_urls: list. List of URLs to JavaScript.
   # style: string. CSS style.
   # style_urls: list. List of URLs to CSS style sheets.
   # message: string. A message to display to the user. May contain HTML.
   # atomlink: Atom link URL, May contain HTML
   # generate_api_token: generate a token which can be used to make authenticated webservice calls
   # no_body: if true the body element will not be generated
-  # allow_mobile: allow special CSS and viewport for detected mobile useragents
+  # allow_mobile: allow special CSS and viewport for detected mobile user agents
   # use_login_page: display a link to the full login page, rather than an inline login.
   # robots: index / noindex (default: index)
   #%]
@@ -213,14 +213,14 @@
       [% PROCESS format_js_link %]
     [% END %]
 
-    [%# this puts the live bookmark up on firefox for the Atom feed %]
+    [%# this puts the live bookmark up on Firefox for the Atom feed %]
     [% IF atomlink %]
        <link rel="alternate"
              type="application/atom+xml" title="Atom feed"
              href="[% atomlink FILTER html %]">
     [% END %]
 
-    [%# Required for the 'Autodiscovery' feature in Firefox 2 and IE 7. %]
+    [%# Required for the 'Auto-discovery' feature in Firefox 2 and IE 7. %]
     <link rel="search" type="application/opensearchdescription+xml"
                        title="[% terms.BugzillaTitle %]" href="[% basepath FILTER none %]search_plugin.cgi">
     [% IF allow_mobile && is_mobile_browser %]

@@ -366,7 +366,7 @@ sub owners {
           @{$input->{component}}
           );
         $selected = 1
-          if (!ref $input->{componet} && $input->{component} eq $component->name);
+          if (!ref $input->{component} && $input->{component} eq $component->name);
       }
       my $comp_data = {name => $component->name, selected => $selected};
       push(@{$prod_data->{components}}, $comp_data);

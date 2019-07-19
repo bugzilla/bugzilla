@@ -14,7 +14,7 @@ use warnings;
 use base qw(Bugzilla::Object);
 
 #####################################################################
-# Overriden Constants that are used as methods
+# Overridden Constants that are used as methods
 #####################################################################
 
 use constant DB_TABLE   => 'logincookies';

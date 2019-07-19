@@ -113,7 +113,7 @@ sub _throw_error {
     }
 
     if (Bugzilla->error_mode == ERROR_MODE_DIE_SOAP_FAULT) {
-      $logfunc->("XMLRPC error: $error ($code)");
+      $logfunc->("XML-RPC error: $error ($code)");
       die SOAP::Fault->faultcode($code)->faultstring($message);
     }
     else {
@@ -127,7 +127,7 @@ sub _throw_error {
       }
       else {
         my $fake_code = 100000 + $code;
-        $logfunc->("JSONRPC error: $error ($fake_code)");
+        $logfunc->("JSON-RPC error: $error ($fake_code)");
       }
 
       # Technically JSON-RPC isn't allowed to have error numbers
@@ -256,7 +256,7 @@ END
 
 sub ThrowErrorPage {
 
-  # BMO customisation for bug 659231
+  # BMO customization for bug 659231
   my ($template_name, $message) = @_;
 
   my $dbh = Bugzilla->dbh;
@@ -339,7 +339,7 @@ This function is used when an internal check detects an error of some sort.
 This usually indicates a bug in Bugzilla, although it can occur if the user
 manually constructs urls without correct parameters.
 
-This function's behaviour is similar to C<ThrowUserError>, except that the
+This function's behavior is similar to C<ThrowUserError>, except that the
 template used to display errors is I<global/code-error.html.tmpl>. In addition
 if the hashref used as the optional second argument contains a key I<variables>
 then the contents of the hashref (which is expected to be another hashref) will

@@ -7,7 +7,7 @@
 # defined by the Mozilla Public License, v. 2.0.
 
 # This script reads in xml bug data from standard input and inserts
-# a new bug into bugzilla. Everything before the beginning <?xml line
+# a new bug into Bugzilla. Everything before the beginning <?xml line
 # is removed so you can pipe in email messages.
 
 use 5.10.1;
@@ -16,9 +16,9 @@ use warnings;
 
 #####################################################################
 #
-# This script is used to import bugs from another installation of bugzilla.
+# This script is used to import bugs from another installation of Bugzilla.
 # It can be used in two ways.
-# First using the move function of bugzilla
+# First using the move function of Bugzilla
 # on another system will send mail to an alias provided by
 # the administrator of the target installation (you). Set up an alias
 # similar to the one given below so this mail will be automatically
@@ -29,7 +29,7 @@ use warnings;
 # bugzilla-import: "|/usr/bin/perl /opt/bugzilla/importxml.pl"
 #
 # Second it can be run from the command line with any xml file from
-# STDIN that conforms to the bugzilla DTD. In this case you can pass
+# STDIN that conforms to the Bugzilla DTD. In this case you can pass
 # an argument to set whether you want to send the
 # mail that will be sent to the exporter and maintainer normally.
 #
@@ -289,7 +289,7 @@ sub _to_array {
 # maintainer and URL base are set.
 #
 #    exporter:   email address of the person moving the bugs
-#    maintainer: the maintainer of the bugzilla installation
+#    maintainer: the maintainer of the Bugzilla installation
 #                as set in the parameters file
 #    urlbase:    The urlbase parameter of the installation
 #                bugs are being moved from
@@ -329,7 +329,7 @@ sub init() {
 # one bugs' attachments at a time.
 # The cycle will then repeat for the next <bug>
 #
-# The attach_id is ignored since mysql generates a new one for us.
+# The attach_id is ignored since MySQL generates a new one for us.
 # The submitter_id gets filled in with $exporterid.
 
 sub process_attachment() {
@@ -517,7 +517,7 @@ sub process_bug {
 
     # Same goes for bug #'s Since we don't know if the referenced bug
     # is also being moved, lets make sure they know it means a different
-    # bugzilla.
+    # Bugzilla.
     my $url = $urlbase . "show_bug.cgi?id=";
     $data =~ s/([Bb]ugs?\s*\#?\s*(\d+))/$url$2/g;
 
@@ -1338,7 +1338,7 @@ __END__
 
 =head1 NAME
 
-importxml - Import bugzilla bug data from xml.
+importxml - Import Bugzilla bug data from xml.
 
 =head1 SYNOPSIS
 
@@ -1379,9 +1379,9 @@ XML doesn't exist.
 
 =head1 DESCRIPTION
 
-     This script is used to import bugs from another installation of bugzilla.
+     This script is used to import bugs from another installation of Bugzilla.
      It can be used in two ways.
-     First using the move function of bugzilla
+     First using the move function of Bugzilla
      on another system will send mail to an alias provided by
      the administrator of the target installation (you). Set up an alias
      similar to the one given below so this mail will be automatically
@@ -1392,7 +1392,7 @@ XML doesn't exist.
      bugzilla-import: "|/usr/bin/perl /opt/bugzilla/importxml.pl --mail"
 
      Second it can be run from the command line with any xml file from
-     STDIN that conforms to the bugzilla DTD. In this case you can pass
+     STDIN that conforms to the Bugzilla DTD. In this case you can pass
      an argument to set whether you want to send the
      mail that will be sent to the exporter and maintainer normally.
 

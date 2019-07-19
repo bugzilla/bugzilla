@@ -734,7 +734,7 @@
 <ul>
   <li>The <kbd>B[% %]ug.create</kbd> WebService method now throws an error if you
     pass a group name which doesn't exist. In [% terms.Bugzilla %] 4.0 and 4.0.1,
-    this group name was silently ignored, leaving your [% terms.bug %] unsecure
+    this group name was silently ignored, leaving your [% terms.bug %] insecure
     if no other group applied.
     (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=653341">[% terms.Bug %] 653341</a>)</li>
   <li>Moving several [% terms.bugs %] at once into another product displayed the
@@ -792,7 +792,7 @@
    <li>Autcomplete for users now works even if you are using the
      "emailsuffix" option.
      (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=641519">[% terms.Bug %] 641519</a>)</li>
-   <li>Javascript errors during series creation in New Charts have been
+   <li>JavaScript errors during series creation in New Charts have been
      fixed.
      (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=644285">[% terms.Bug %] 644285</a>)</li>
     <li>The "Show Votes" page now works, for installations using the Voting
@@ -896,7 +896,7 @@
 
 <h3 id="v40_req_optional_mod">Optional Perl Modules</h3>
 
-<p>The following perl modules, if installed, enable various
+<p>The following Perl modules, if installed, enable various
   features of [% terms.Bugzilla %]:</p>
 
   <table cellspacing="0" cellpadding="0" border="0" class="req_table">
@@ -1069,7 +1069,7 @@
   <li><a href="#v40_feat_ws">Major WebService Enhancements</a></li>
   <li><a href="#v40_feat_mandatory">Mandatory Custom Fields</a></li>
   <li><a href="#v40_feat_vot_ext">Voting Is Now An Extension</a></li>
-  <li><a href="#v40_feat_js_css_update">Users Get New CSS and Javascript
+  <li><a href="#v40_feat_js_css_update">Users Get New CSS and JavaScript
     Automatically</a></li>
   <li><a href="#v40_feat_hooks">Many New Hooks</a></li>
   <li><a href="#v40_feat_apache_config">New Apache Configuration</a></li>
@@ -1220,16 +1220,16 @@
   to get addressed is for somebody to step up and offer to maintain the
   system outside of [% terms.Bugzilla %]'s core code.</p>
 
-<h3 id="v40_feat_js_css_update">Users Get New CSS and Javascript
+<h3 id="v40_feat_js_css_update">Users Get New CSS and JavaScript
   Automatically</h3>
 
 <p>In past versions of [% terms.Bugzilla %], if you changed
-  [%+ terms.Bugzilla %]'s CSS or Javascript files, then every user of
+  [%+ terms.Bugzilla %]'s CSS or JavaScript files, then every user of
   [%+ terms.Bugzilla %] would have to clear their cache in order to get
   the updated files. Now, if you are using Apache as your webserver and
   you have the <a href="#v40_req_apache">optional Apache modules</a>
   installed and enabled, users will automatically get every new version of
-  [%+ terms.Bugzilla %]'s Javascript and CSS without having to clear
+  [%+ terms.Bugzilla %]'s JavaScript and CSS without having to clear
   their caches.</p>
 
 <p>This feature also gives a slight performance speedup to
@@ -1296,7 +1296,7 @@
     shown as columns in the search results.</li>
   <li><strong>Searches:</strong> When using the Boolean Charts (now called
     "Custom Search"), if you specify both a criterion for an attachment
-    and a criteron for a flag, then only [% terms.bugs %] that have
+    and a criterion for a flag, then only [% terms.bugs %] that have
     attachments with that flag will be found.</li>
   <li><strong>Searches:</strong> If you hover your mouse over the field labels
     on the Advanced Search page, you will get a description of what that

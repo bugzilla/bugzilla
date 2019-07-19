@@ -979,7 +979,7 @@ sub _setup_dependencies {
   my ($self) = @_;
   my $dbh = Bugzilla->dbh;
 
-  # Set up depedency relationships between the bugs.
+  # Set up dependency relationships between the bugs.
   # Bug 1 + 6 depend on bug 2 and block bug 3.
   my $bug2 = $self->bug(2);
   my $bug3 = $self->bug(3);

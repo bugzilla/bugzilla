@@ -128,7 +128,7 @@ sub _generate_tree {
       _generate_tree($dep_id, $relationship, $depth + 1, $bugs, $ids);
     }
 
-    # remove bugs according to visiblity
+    # remove bugs according to visibility
     if (!Bugzilla->user->can_see_bug($dep_id)) {
       delete $ids->{$dep_id};
     }

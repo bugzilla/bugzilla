@@ -41,7 +41,7 @@ var default_query = '[% default_query FILTER js %]';
     </select>
 
     was changed to (and is currently)
-    <select id="flag_value" onchange="serialiseForm()">
+    <select id="flag_value" onchange="serializeForm()">
       <option value="?">?</option>
       <option value="-">-</option>
       <option value="+">+</option>
@@ -49,7 +49,7 @@ var default_query = '[% default_query FILTER js %]';
 
     between
     <span id="fixed_range">
-      <select id="range" onChange="serialiseForm()">
+      <select id="range" onChange="serializeForm()">
         [% FOREACH range = ranges %]
           <option value="[% range.value FILTER html %]">
             [% range.label FILTER html %]
@@ -58,10 +58,10 @@ var default_query = '[% default_query FILTER js %]';
       </select>
     </span>
     <span id="custom_range" style="display:none;">
-      <input class="date_field" name="from" id="from" onChange="serialiseForm()">
+      <input class="date_field" name="from" id="from" onChange="serializeForm()">
       <img class="date_field-img" id="from-img" src="[% basepath FILTER none %]extensions/BugModal/web/calendar.png" width="16" height="16">
       and
-      <input class="date_field" name="to" id="to" onChange="serialiseForm()">
+      <input class="date_field" name="to" id="to" onChange="serializeForm()">
       <img class="date_field-img" id="to-img" src="[% basepath FILTER none %]extensions/BugModal/web/calendar.png" width="16" height="16">
     </span>
     <input type="checkbox" id="is_custom" onchange="selectRangeType()" [% "checked" IF is_custom %]>
@@ -81,7 +81,7 @@ var default_query = '[% default_query FILTER js %]';
 <tr>
   <td>&nbsp;</td>
   <td>
-    <select id="op" onChange="serialiseForm()">
+    <select id="op" onChange="serializeForm()">
       <option value="and">All selected tracking fields (AND)</option>
       <option value="or">Any selected tracking fields (OR)</option>
     </select>

@@ -201,10 +201,10 @@ sorttable = {
       return 0;
   },
 
-  /* Visualy mark the cell as sorted.
+  /* Visually mark the cell as sorted.
    *
    * @param cell: the cell being marked
-   * @param text: the text being used to mark. you can use html
+   * @param text: the text being used to mark. you can use HTML
    * @param reversed: whether the column is reversed or not.
    *
    */

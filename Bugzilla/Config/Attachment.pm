@@ -62,7 +62,7 @@ sub check_storage {
   if ($value eq 's3') {
     return Bugzilla->feature('s3')
       ? ''
-      : 'The perl modules required for S3 support are not installed';
+      : 'The Perl modules required for S3 support are not installed';
   }
   else {
     return '';

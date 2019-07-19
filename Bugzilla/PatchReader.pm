@@ -39,7 +39,7 @@ PatchReader - Utilities to read and manipulate patches and CVS
 
 =head1 ABSTRACT
 
-This perl library allows you to manipulate patches programmatically by
+This Perl library allows you to manipulate patches programmatically by
 chaining together a variety of objects that read, manipulate, and output
 patch information:
 

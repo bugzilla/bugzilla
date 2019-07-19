@@ -66,7 +66,7 @@ sub check_rate_limit_rules {
   my $rules = shift;
 
   my $val = eval { decode_json($rules) };
-  return "failed to parse json" unless defined $val;
+  return "failed to parse JSON" unless defined $val;
   return "value is not HASH"    unless ref $val && ref($val) eq 'HASH';
   return "rules are invalid"    unless all {
     ref($_) eq 'ARRAY' && looks_like_number($_->[0]) && looks_like_number($_->[1])

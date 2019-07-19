@@ -108,7 +108,7 @@ sub usage {
   die <<EOF;
 usage $0 --admin bob\@mozilla.org --users-file users.txt --group pants
 
---users-file  File containing one bugzilla email per line.
+--users-file  File containing one Bugzilla email per line.
 --admin      Admin user capable of adding people to the group.
 --group      Group name to add users from user.txt into.
 --do-adds    Add users in users-file to the group.

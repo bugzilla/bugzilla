@@ -22,7 +22,7 @@ sub get_param_list {
   # Hardcoded bug statuses which existed before Bugzilla 3.1.
   my @closed_bug_statuses = ('RESOLVED', 'VERIFIED', 'CLOSED');
 
-  # If we are upgrading from 3.0 or older, bug statuses are not customisable
+  # If we are upgrading from 3.0 or older, bug statuses are not customizable
   # and bug_status.is_open is not yet defined (hence the eval), so we use
   # the bug statuses above as they are still hardcoded.
   eval {

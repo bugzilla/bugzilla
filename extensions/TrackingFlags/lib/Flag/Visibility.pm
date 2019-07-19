@@ -33,7 +33,7 @@ use constant DB_COLUMNS => qw(
 
 use constant LIST_ORDER => 'id';
 
-use constant UPDATE_COLUMNS => ();    # imutable
+use constant UPDATE_COLUMNS => ();    # immutable
 
 use constant VALIDATORS => {
   tracking_flag_id => \&_check_tracking_flag,

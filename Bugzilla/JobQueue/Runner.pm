@@ -224,7 +224,7 @@ sub gd_run {
 }
 
 # This executes the script "jobqueue-worker.pl"
-# $EXECUTABLE_NAME is the name of the perl interpreter.
+# $EXECUTABLE_NAME is the name of the Perl interpreter.
 sub run_worker {
   my ($self) = @_;
 

@@ -15,7 +15,7 @@ The APIs currently available are as follows:
 Ad-Hoc APIs
 ===========
 
-Various pages on Bugzilla are available in machine-parseable formats as well
+Various pages on Bugzilla are available in machine-parsable formats as well
 as HTML. For example, bugs can be downloaded as XML, and buglists as CSV.
 CSV is useful for spreadsheet import. There should be links on the HTML page
 to alternate data formats where they are available.

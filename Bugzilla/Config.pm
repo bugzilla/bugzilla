@@ -25,7 +25,7 @@ use Module::Runtime qw(require_module);
   = (admin => [qw(update_params SetParam write_params)],);
 Exporter::export_ok_tags('admin');
 
-# INITIALISATION CODE
+# INITIALIZATION CODE
 # Perl throws a warning if we use bz_locations() directly after do.
 our %params;
 

@@ -77,7 +77,7 @@ sub _handle_response {
   my $data = eval { decode_json($response->content); };
   if ($@) {
     ThrowCodeError("github_bad_response",
-      {message => "Unable to parse json response"});
+      {message => "Unable to parse JSON response"});
   }
 
   unless ($response->is_success) {

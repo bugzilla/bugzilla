@@ -110,7 +110,7 @@ sub get_config {
     $config->{browser_ip_url} = "$uri";
   }
   else {
-    die "unable to find ip for $config->{browser_url}\n";
+    die "unable to find IP for $config->{browser_url}\n";
   }
   return $config;
 }

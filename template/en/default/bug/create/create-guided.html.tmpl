@@ -38,7 +38,7 @@
 
 [% INCLUDE 'bug/create/user-message.html.tmpl' %]
 
-[% tablecolour = "#FFFFCC" %]
+[% tablecolor = "#FFFFCC" %]
 
 [%# This script displays the descriptions for selected components. %]
 <script [% script_nonce FILTER none %]>
@@ -145,7 +145,7 @@ function PutDescription() {
 
 <table valign="top" cellpadding="5" cellspacing="5" border="0">
 
-  <tr bgcolor="[% tablecolour %]">
+  <tr bgcolor="[% tablecolor %]">
     <td align="right" valign="top">
       <b>Product</b>
     </td>
@@ -207,7 +207,7 @@ function PutDescription() {
       are based on which are most common in the b.m.o database %]
   [% rep_platform = [ "x86", "x86_64", "PowerPC", "All", "Other" ] %]
 
-  <tr bgcolor="[% tablecolour %]">
+  <tr bgcolor="[% tablecolor %]">
     <td align="right" valign="top">
       <b>Hardware Platform</b>
     </td>
@@ -240,7 +240,7 @@ function PutDescription() {
    </td>
   </tr>
 
-  <tr bgcolor="[% tablecolour %]">
+  <tr bgcolor="[% tablecolor %]">
     <td align="right" valign="top">
       <b>Summary</b>
     </td>
@@ -248,7 +248,7 @@ function PutDescription() {
       <input type="text" size="80" name="short_desc" id="short_desc"
              maxlength="255" spellcheck="true">
       <p>
-        A sentence which summarises the problem.
+        A sentence which summarizes the problem.
         Please be descriptive and use lots of keywords.
       </p>
       <p>
@@ -294,7 +294,7 @@ function PutDescription() {
     </td>
   </tr>
 
-  <tr bgcolor="[% tablecolour %]">
+  <tr bgcolor="[% tablecolor %]">
     <td align="right" valign="top">
       <b>Reproducibility</b>
     </td>
@@ -334,7 +334,7 @@ function PutDescription() {
     </td>
   </tr>
 
-  <tr bgcolor="[% tablecolour %]">
+  <tr bgcolor="[% tablecolor %]">
     <td valign="top" align="right">
       <b>Actual Results</b>
     </td>
@@ -366,7 +366,7 @@ function PutDescription() {
     </td>
   </tr>
 
-  <tr bgcolor="[% tablecolour %]">
+  <tr bgcolor="[% tablecolor %]">
     <td valign="top" align="right">
       <b>Additional Information</b>
     </td>

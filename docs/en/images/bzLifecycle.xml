@@ -1055,7 +1055,7 @@ work on bug#</dia:string>
         <dia:composite type="text">
           <dia:attribute name="string">
             <dia:string>#Bug is not fixable
-(e.g because it is invalid)#</dia:string>
+(e.g. because it is invalid)#</dia:string>
           </dia:attribute>
           <dia:attribute name="font">
             <dia:font family="sans" style="0" name="Helvetica"/>

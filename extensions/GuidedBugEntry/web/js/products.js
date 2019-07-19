@@ -5,13 +5,13 @@
  * This Source Code Form is "Incompatible With Secondary Licenses", as
  * defined by the Mozilla Public License, v. 2.0. */
 
-/* Product-specifc configuration for guided bug entry
+/* Product-specific configuration for guided bug entry
  *
  * related: array of product names which will also be searched for duplicates
- * version: function which returns a version (eg. detected from UserAgent)
+ * version: function which returns a version (e.g. detected from UserAgent)
  * support: string which is displayed at the top of the duplicates page
  * secgroup: the group to place confidential bugs into
- * defaultComponent: the default compoent to select.  Defaults to 'General'
+ * defaultComponent: the default component to select.  Defaults to 'General'
  * noComponentSelection: when true, the default component will always be
  *     used.  Defaults to 'false';
  * detectPlatform: when true the platform and op_sys will be set from the

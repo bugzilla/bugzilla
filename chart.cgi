@@ -20,7 +20,7 @@
 #
 # JS-less chart creation - hard.
 # Broken image on error or no data - need to do much better.
-# Centralise permission checking, so Bugzilla->user->in_group('editbugs')
+# Centralize permission checking, so Bugzilla->user->in_group('editbugs')
 #   not scattered everywhere.
 # User documentation :-)
 #
@@ -61,7 +61,7 @@ if (!Bugzilla->feature('new_charts')) {
 
 # Go back to query.cgi if we are adding a boolean chart parameter.
 if (grep(/^cmd-/, $cgi->param())) {
-  my $params = $cgi->canonicalise_query("format", "ctype", "action");
+  my $params = $cgi->canonicalize_query("format", "ctype", "action");
   $cgi->base_redirect("query.cgi?format="
       . $cgi->param('query_format') . ($params ? "&$params" : ''));
 }
@@ -84,7 +84,7 @@ $action ||= "assemble";
 
 # Go to buglist.cgi if we are doing a search.
 if ($action eq "search") {
-  my $params = $cgi->canonicalise_query("format", "ctype", "action");
+  my $params = $cgi->canonicalize_query("format", "ctype", "action");
   $cgi->base_redirect('buglist.cgi' . ($params ? "?$params" : ""));
 }
 
@@ -221,7 +221,7 @@ elsif ($action eq "convert_search") {
     my $params = new Bugzilla::CGI($query->edit_link);
 
     # These two parameters conflict with the one below.
-    $url = '&' . $params->canonicalise_query('format', 'query_format');
+    $url = '&' . $params->canonicalize_query('format', 'query_format');
   }
   $cgi->base_redirect("query.cgi?format=create-series$url");
 }
@@ -340,7 +340,7 @@ sub wrap {
   $vars->{'time'} = localtime(time());
 
   $vars->{'imagebase'}
-    = $cgi->canonicalise_query("action", "action-wrap", "ctype", "format",
+    = $cgi->canonicalize_query("action", "action-wrap", "ctype", "format",
     "width", "height");
 
   print $cgi->header();

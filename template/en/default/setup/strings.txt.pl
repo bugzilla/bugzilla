@@ -82,7 +82,7 @@ the documentation of Bugzilla::Extension for details.
 END
   file_remove => 'Removing ##name##...',
   file_rename => 'Renaming ##from## to ##to##...',
-  header      => "* This is Bugzilla ##bz_ver## on perl ##perl_ver##\n"
+  header      => "* This is Bugzilla ##bz_ver## on Perl ##perl_ver##\n"
     . "* Running on ##os_name## ##os_ver##",
   installation_failed => '*** Installation aborted. Read the messages above. ***',
   install_data_too_long => <<EOT,
@@ -161,7 +161,7 @@ SQLite, this is a name (or path) for the DB file.
 END
   localconfig_db_pass => <<'END',
 Enter your database password here. It's normally advisable to specify
-a password for your bugzilla database user.
+a password for your Bugzilla database user.
 If you use apostrophe (') or a backslash (\) in your password, you'll
 need to escape it by preceding it with a '\' character. (\') or (\)
 (It is far simpler to just not use those characters.)
@@ -173,7 +173,7 @@ database server is running on. Setting this to 0 means "use the default
 port for my database server."
 END
   localconfig_db_sock => <<'END',
-MySQL Only: Enter a path to the unix socket for MySQL. If this is
+MySQL Only: Enter a path to the Unix socket for MySQL. If this is
 blank, then MySQL's compiled-in default will be used. You probably
 want that.
 END
@@ -239,7 +239,7 @@ The URL that is the common initial leading part of all URLs.
 END
   localconfig_canonical_urlbase => <<'END',
 The URL that is the canonical initial leading part of all URLs.
-This will be the production url for a dev site, for instance.
+This will be the production URL for a dev site, for instance.
 END
   localconfig_use_suexec => <<'END',
 Set this to 1 if Bugzilla runs in an Apache SuexecUserGroup environment.
@@ -277,7 +277,7 @@ If you set this to anything other than "", you will need to run checksetup.pl
 as ##root## or as a user who is a member of the specified group.
 END
   localconfig_setrlimit => <<EOT,
-This a json object whose keys are the named constants for the setrlimit(1) C library
+This a JSON object whose keys are the named constants for the setrlimit(1) C library
 function. The default sets RLIMIT_AS to 2GiB.
 EOT
   localconfig_size_limit => <<EOT,

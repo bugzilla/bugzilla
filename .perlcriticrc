@@ -57,7 +57,7 @@ severity = 2
 
 # This is not a good policy.
 # Non-explicit return is often easier to read.
-# think of javascript arrow functions.
+# think of JavaScript arrow functions.
 [-Subroutines::RequireFinalReturn]
 
 # This test is technically correct but I do not care.

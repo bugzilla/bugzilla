@@ -357,7 +357,7 @@ sub html_strip {
   # Trivial HTML tag remover (this is just for error messages, really.)
   $var =~ s/<[^>]*>//g;
 
-  # And this basically reverses the Template-Toolkit html filter.
+  # And this basically reverses the Template-Toolkit HTML filter.
   $var =~ s/\&amp;/\&/g;
   $var =~ s/\&lt;/</g;
   $var =~ s/\&gt;/>/g;

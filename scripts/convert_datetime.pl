@@ -32,7 +32,7 @@ my $mysql_dbh = Bugzilla::DB::_connect({
   db_pass   => $root_mysql_pw
 });
 
-# Check that the mysql timezones are populated and up to date
+# Check that the MySQL timezones are populated and up to date
 my $mysql_tz_install
   = "Please populate using instuctions at http://dev.mysql.com/doc/refman/5.6/en/time-zone-support.html#time-zone-installation and re-run this script.";
 my $mysql_tz_count

@@ -82,7 +82,7 @@ __END__
 
 =head1 NAME
 
-Log::Log4perl::Layout::Mozilla - Implement the mozilla-services json log format
+Log::Log4perl::Layout::Mozilla - Implement the mozilla-services JSON log format
 
 =head1 SYNOPSIS
 
@@ -95,7 +95,7 @@ Example configuration:
 =head1 DESCRIPTION
 
 This class implements a C<Log::Log4perl> layout format
-that implements the recommend json format using in Mozilla services.
+that implements the recommend JSON format using in Mozilla services.
 L<https://wiki.mozilla.org/Firefox/Services/Logging#MozLog_JSON_schema>.
 
 The JSON hash is ASCII encoded, with no newlines or other whitespace, and is

@@ -23,7 +23,7 @@ use Bugzilla;
 sub _notify {
   my ($bug_id, $delta_ts) = @_;
 
-  # beacuse the push_notify table is hot, we defer updating it until the
+  # because the push_notify table is hot, we defer updating it until the
   # request has completed.  this ensures we are outside the scope of any
   # transaction blocks.
 

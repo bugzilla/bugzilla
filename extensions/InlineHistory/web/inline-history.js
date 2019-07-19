@@ -35,7 +35,7 @@ var inline_history = {
           // remove the element
           comment.parentNode.removeChild(comment);
           comments[i] = false;
-          // update the html for the history item to include the comment number
+          // update the HTML for the history item to include the comment number
           if (dupeId == 0)
             continue;
           for (var j = 0, jl = ih_activity.length; j < jl; j++) {
@@ -86,8 +86,8 @@ var inline_history = {
       var item = ih_activity[i];
       // item[0] : who
       // item[1] : when
-      // item[2] : change html
-      // item[3] : header html
+      // item[2] : change HTML
+      // item[3] : header HTML
       // item[4] : bool; cc-only
       // item[5] : int; dupe bug id (or 0)
       // item[6] : bool; is flag

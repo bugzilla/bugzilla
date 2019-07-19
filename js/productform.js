@@ -19,7 +19,7 @@
  */
 
 // Functions to update form select elements based on a
-// collection of javascript arrays containing strings.
+// collection of JavaScript arrays containing strings.
 
 /**
  * Reads the selected classifications and updates product, component,

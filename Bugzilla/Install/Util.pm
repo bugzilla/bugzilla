@@ -9,7 +9,7 @@ package Bugzilla::Install::Util;
 
 # The difference between this module and Bugzilla::Util is that this
 # module may require *only* Bugzilla::Constants and built-in
-# perl modules.
+# Perl modules.
 
 use 5.10.1;
 use strict;
@@ -356,7 +356,7 @@ sub template_include_path {
 }
 
 # This is taken straight from Sort::Versions 1.5, which is not included
-# with perl by default.
+# with Perl by default.
 sub vers_cmp {
   my ($a, $b) = @_;
 
@@ -615,7 +615,7 @@ non-installation code, so they have been split out into this module.
 
 The difference between this module and L<Bugzilla::Util> is that this
 module is safe to C<use> anywhere in Bugzilla, even during installation,
-because it depends only on L<Bugzilla::Constants> and built-in perl modules.
+because it depends only on L<Bugzilla::Constants> and built-in Perl modules.
 
 None of the subroutines are exported by default--you must explicitly
 export them.
@@ -632,7 +632,7 @@ binary, if the binary is in the C<PATH>.
 =item C<get_version_and_os>
 
 Returns a hash containing information about what version of Bugzilla we're
-running, what perl version we're using, and what OS we're running on.
+running, what Perl version we're using, and what OS we're running on.
 
 =item C<get_console_locale>
 

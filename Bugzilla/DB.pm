@@ -41,7 +41,7 @@ around 'attrs' => sub {
   my $class = ref $self;
 
   # This is only used by the DBIx::Class code DBIx::Connector does something
-  # different because the old bugzilla code has its own ideas about
+  # different because the old Bugzilla code has its own ideas about
   # transactions.
   $attrs->{Callbacks}{connected} = sub {
     my ($dbh, $dsn) = @_;
@@ -1374,7 +1374,7 @@ sub _build_connector {
   $attributes->{Callbacks} = {
     connected => sub {
       my ($dbh, $dsn) = @_;
-      TRACE("$PROGRAM_NAME connected mysql $dsn");
+      TRACE("$PROGRAM_NAME connected MySQL $dsn");
       ThrowCodeError('not_in_transaction') if $self && $self->bz_in_transaction;
       $class->on_dbi_connected(@_) if $class->can('on_dbi_connected');
       return;
@@ -1682,7 +1682,7 @@ should use the L<Bugzilla> module to access the current C<dbh> instead.
 This module also contains methods extending the returned handle with
 functionality which is different between databases allowing for easy
 customization for particular database via inheritance. These methods
-should be always preffered over hard-coding SQL commands.
+should be always preferred over hard-coding SQL commands.
 
 =head1 CONSTANTS
 
@@ -1973,7 +1973,7 @@ Formatted SQL for negative regular expression search (e.g. NOT REGEXP)
 =item B<Description>
 
 Returns SQL syntax for limiting results to some number of rows
-with optional offset if not starting from the begining.
+with optional offset if not starting from the beginning.
 
 Abstract method, should be overridden by database specific code.
 
@@ -2228,7 +2228,7 @@ specified text on a given column.
 
 If one value is returned, it is a numeric expression that indicates
 a match with a positive value and a non-match with zero. In this case,
-the DB must support casting numeric expresions to booleans.
+the DB must support casting numeric expressions to booleans.
 
 If two values are returned, then the first value is a boolean expression
 that indicates the presence of a match, and the second value is a numeric
@@ -2372,7 +2372,7 @@ Returns the last serial number, usually from a previous INSERT.
 
 Must be executed directly following the relevant INSERT.
 This base implementation uses L<DBI/last_insert_id>. If the
-DBD supports it, it is the preffered way to obtain the last
+DBD supports it, it is the preferred way to obtain the last
 serial index. If it is not supported, the DB-specific code
 needs to override this function.
 
@@ -2582,7 +2582,7 @@ the function returns without changing anything.
 =item C<$name> - the name of the column you want to change
 
 =item C<\%new_def> - An abstract column definition for the new
-data type of the columm
+data type of the column
 
 =item C<$set_nulls_to> (Optional) - If you are changing the column
 to be NOT NULL, you probably also want to set any existing NULL columns
@@ -2767,7 +2767,7 @@ Returns nothing and takes no parameters.
 
 =item C<bz_commit_transaction>
 
-Ends a transaction, commiting all changes. Returns nothing and takes
+Ends a transaction, committing all changes. Returns nothing and takes
 no parameters.
 
 =item C<bz_rollback_transaction>

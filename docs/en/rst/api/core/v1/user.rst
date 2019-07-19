@@ -12,7 +12,7 @@ Login
 Logging in with a username and password is required for many Bugzilla
 installations, in order to search for private bugs, post new bugs, etc. This
 method allows you to retrieve a token that can be used as authentication for
-subsequent API calls. Otherwise yuou will need to pass your ``login`` and
+subsequent API calls. Otherwise you will need to pass your ``login`` and
 ``password`` with each call.
 
 This method will be going away in the future in favor of using *API keys*.
@@ -159,7 +159,7 @@ password    string  The password for the new user account, in plain text. It
    }
 
 ====  ====  ============================================
-name  type  desciption
+name  type  description
 ====  ====  ============================================
 id    int   The numeric ID of the user that was created.
 ====  ====  ============================================
@@ -197,7 +197,7 @@ login names using the ``ids`` or ``names`` parameters respectively.
 **names**          array    Additional login names of users to update.
 full_name          string   The new name of the user.
 email              string   The email of the user. Note that email used to
-                            login to bugzilla. Also note that you can only
+                            login to Bugzilla. Also note that you can only
                             update one user at a time when changing the login
                             name / email. (An error will be thrown if you try to
                             update this field for multiple users at once.)
@@ -355,7 +355,7 @@ email              string   The email address of the user.
 name               string   The login name of the user. Note that in some
                             situations this is different than their email.
 can_login          boolean  A boolean value to indicate if the user can login
-                            into bugzilla.
+                            into Bugzilla.
 email_enabled      boolean  A boolean value to indicate if bug-related mail will
                             be sent to the user or not.
 login_denied_text  string   A text field that holds the reason for disabling a
@@ -427,7 +427,7 @@ Who Am I
 --------
 
 Allows for validating a user's API key, token, or username and password.
-If sucessfully authenticated, it returns simple information about the
+If successfully authenticated, it returns simple information about the
 logged in user.
 
 **Request**
@@ -442,7 +442,7 @@ logged in user.
 
    {
      "id" : "1234",
-     "name" : "user@bugzulla.org",
+     "name" : "user@bugzilla.org",
      "real_name" : "Test User",
      "nick" : "user"
    }

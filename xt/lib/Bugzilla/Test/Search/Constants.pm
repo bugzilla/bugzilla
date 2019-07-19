@@ -203,7 +203,7 @@ use constant ALLWORDS_BROKEN => (
   cc => {contains => [1]},
 
   # bug 828344 changed how these searches operate to revert back to the 4.0
-  # behavour, so these tests need to be updated (bug 849117).
+  # behavior, so these tests need to be updated (bug 849117).
   'flagtypes.name' => {contains => [1]},
   longdesc         => {contains => [1]},
 );
@@ -233,7 +233,7 @@ use constant CHANGED_VALUE_BROKEN => (
 
 
 # Any test listed in KNOWN_BROKEN gets marked TODO by Test::More
-# (using some complex code in Bugzilla::Test::Seach::FieldTest).
+# (using some complex code in Bugzilla::Test::Search::FieldTest).
 # This means that if you run the test under "prove -v", these tests will
 # still show up as "not ok", but the test suite results won't show them
 # as a failure.

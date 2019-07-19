@@ -344,7 +344,7 @@ if ($dbh->selectrow_array("SELECT 1 FROM bug_status WHERE value = 'ASSIGNED'"))
 # Create Bugs
 ##########################################################################
 
-# login to bugzilla
+# login to Bugzilla
 my $admin_user = Bugzilla::User->check($config->{admin_user_login});
 Bugzilla->set_user($admin_user);
 

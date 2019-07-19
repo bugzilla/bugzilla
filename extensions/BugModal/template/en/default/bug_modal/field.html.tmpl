@@ -14,7 +14,7 @@
   # aria_label: (string) invisible aria-label attribute
   # view_only: (boolean) don't allow editing (default: determined from bug.check_can_change_field)
   # edit_only: (boolean) always render the edit ui
-  # container: (boolean) output just a label and the content (eg. for multiple fields next to one label)
+  # container: (boolean) output just a label and the content (e.g. for multiple fields next to one label)
   # name: (string) field name (default: field.name)
   # prefix: (string) string to prepend to 'name' and 'id' attributes (default: empty)
   # value: (string) visible value (default: bug.$name)
@@ -26,9 +26,9 @@
   # hide_on_view: (boolean) hide field from read-only view (default: false)
   # hide_on_edit: (boolean) hide content when in edit mode (default: false)
   # append_content: (boolean) when called as a WRAPPER, the content will be appended to the
-  #                 edit html instead of replacing it.  forces edit_only (default: false);
-  # default: (string) default value (eg. used as a placeholder in user fields)
-  # help: (string) optional url that describes the field (requires a label to be defined and visible)
+  #                 edit HTML instead of replacing it.  forces edit_only (default: false);
+  # default: (string) default value (e.g. used as a placeholder in user fields)
+  # help: (string) optional URL that describes the field (requires a label to be defined and visible)
   # required: (boolean) if the field is required. (At present, only implemented for FIELD_TYPE_FREETEXT)
   # action: (hash) show a button to the right of the edit field (user fields only currently).  keys:
   #   id: (string) optional button id
@@ -122,7 +122,7 @@ END;
     [% aria_labelledby_html = BLOCK %]aria-label="[% aria_label || label FILTER html %]"[% END %]
   [% END %]
 
-  [%# read-only html %]
+  [%# read-only HTML %]
   [% UNLESS edit_only %]
     <div class="[% "value" IF !container %][% " edit-hide" IF editable %][% " container" IF container %]">
       [% IF name %]
@@ -144,7 +144,7 @@ END;
             [% INCLUDE bug_urls values=values edit=0 %]
 
           [% CASE constants.FIELD_TYPE_BUG_LIST %]
-            [%# bug lists (generally dependancies) %]
+            [%# bug lists (generally dependencies) %]
             [% INCLUDE bug_list values=values edit=0 %]
 
           [% CASE constants.FIELD_TYPE_TEXTAREA %]
@@ -179,7 +179,7 @@ END;
     </div>
   [% END %]
 
-  [%# edit html %]
+  [%# edit HTML %]
   [% IF editable %]
     [% "MISSING NAME" UNLESS name %]
     <div class="value edit edit-show [% " wide" IF full_width %][% " short" IF short_width %]"
@@ -401,7 +401,7 @@ END;
   [% END %]
 [% END %]
 
-[%# bug lists, depencancies, blockers %]
+[%# bug lists, dependencies, blockers %]
 [% BLOCK bug_list %]
   [% IF NOT edit %]
     [% FOREACH type IN bug_fields.bug_type.legal_values.pluck('name') %]

@@ -106,7 +106,7 @@ sub get_format {
   $template .= ".$ctype.tmpl";
 
   # Now check that the template actually exists. We only want to check
-  # if the template exists; any other errors (eg parse errors) will
+  # if the template exists; any other errors (e.g. parse errors) will
   # end up being detected later.
   eval { $self->context->template($template); };
 
@@ -210,7 +210,7 @@ sub quoteUrls {
                ("\x{FDD2}" . ($count-1) . "\x{FDD3}")
               ~egox;
 
-  # We have to quote now, otherwise the html itself is escaped
+  # We have to quote now, otherwise the HTML itself is escaped
   # THIS MEANS THAT A LITERAL ", <, >, ' MUST BE ESCAPED FOR A MATCH
 
   $text = html_quote($text);
@@ -393,7 +393,7 @@ sub version_filter {
 #  2. standard/global.css
 #  3. Standard Bugzilla stylesheet set
 #  4. Third-party "skin" stylesheet set, per user prefs
-#  5. Inline css passed to global/header.html.tmpl
+#  5. Inline CSS passed to global/header.html.tmpl
 #  6. Custom Bugzilla stylesheet set
 
 sub css_files {
@@ -677,8 +677,8 @@ sub create {
       strip_control_chars => sub {
         my ($data) = @_;
 
-        # Only run for utf8 to avoid issues with other multibyte encodings
-        # that may be reassigning meaning to ascii characters.
+        # Only run for UTF-8 to avoid issues with other multibyte encodings
+        # that may be reassigning meaning to ASCII characters.
         if (Bugzilla->params->{'utf8'}) {
           $data =~ s/(?![\t\r\n])[[:cntrl:]]//g;
         }
@@ -686,7 +686,7 @@ sub create {
       },
 
       # HTML collapses newlines in element attributes to a single space,
-      # so form elements which may have whitespace (ie comments) need
+      # so form elements which may have whitespace (i.e. comments) need
       # to be encoded using &#013;
       # See bugs 4928, 22983 and 32000 for more details
       html_linebreak => sub {
@@ -875,7 +875,7 @@ sub create {
         # Trivial HTML tag remover
         $var =~ s/<[^>]*>//g;
 
-        # And this basically reverses the html filter.
+        # And this basically reverses the HTML filter.
         $var =~ s/\&#64;/@/g;
         $var =~ s/\&lt;/</g;
         $var =~ s/\&gt;/>/g;
@@ -972,7 +972,7 @@ sub create {
       # If an sudo session is in progress, this is the user we're faking
       'user' => sub { return Bugzilla->user; },
 
-      # Currenly active language
+      # Currently active language
       'current_language' => sub { return Bugzilla->current_language; },
 
       'script_nonce' => sub {
@@ -984,13 +984,13 @@ sub create {
       # started the session.
       'sudoer' => sub { return Bugzilla->sudoer; },
 
-      # Allow templates to access the "corect" URLBase value
+      # Allow templates to access the "correct" URLBase value
       'urlbase' => sub { return Bugzilla->localconfig->urlbase; },
 
       # Allow templates to get the absolute path of the URLBase value
       'basepath' => sub { return Bugzilla->localconfig->basepath; },
 
-      # Allow templates to access docs url with users' preferred language
+      # Allow templates to access docs URL with users' preferred language
       'docs_urlbase' => sub {
         my $language     = Bugzilla->current_language;
         my $docs_urlbase = Bugzilla->params->{'docs_urlbase'};

@@ -239,7 +239,7 @@ sub merge_users_before {
   my ($old_id, $new_id) = @$args{qw(old_id new_id)};
 
   # when users are merged, we have to delete all the statistics for both users
-  # we'll recalcuate the stats after the merge
+  # we'll recalculate the stats after the merge
   print "deleting user profile statistics for $old_id and $new_id\n";
   my $dbh = Bugzilla->dbh;
   foreach my $table (

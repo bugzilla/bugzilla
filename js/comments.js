@@ -146,7 +146,7 @@ function goto_add_comments( anchor ){
     document.getElementById('comment').focus();
     setTimeout(function(){
         document.location.hash = anchor;
-        // firefox doesn't seem to keep focus through the anchor change
+        // Firefox doesn't seem to keep focus through the anchor change
         document.getElementById('comment').focus();
     },10);
     return false;

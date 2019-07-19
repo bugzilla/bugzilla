@@ -228,7 +228,7 @@ Bugzilla::S3::Bucket - A container class for a S3 bucket and its contents.
 
 =head2 new
 
-Instaniates a new bucket object.
+Instantiates a new bucket object.
 
 Requires a hash containing two arguments:
 
@@ -246,7 +246,7 @@ bucket is associated with.
 =back
 
 NOTE: This method does not check if a bucket actually
-exists. It simply instaniates the bucket.
+exists. It simply instantiates the bucket.
 
 Typically a developer will not call this method directly,
 but work through the interface in L<S3::Amazon> that will
@@ -275,9 +275,9 @@ Adding them to the configuration hash will override what the
 library would send and add headers that are not typically
 required for S3 interactions.
 
-In addition to additional and overriden HTTP headers, this
+In addition to additional and overridden HTTP headers, this
 HASHREF can have a C<acl_short> key to set the permissions
-(access) of the resource without a seperate call via
+(access) of the resource without a separate call via
 C<add_acl> or in the form of an XML document.  See the
 documentation in C<add_acl> for the values and usage.
 

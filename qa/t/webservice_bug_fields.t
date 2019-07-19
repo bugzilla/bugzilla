@@ -145,7 +145,7 @@ foreach my $rpc (@clients) {
       '=~', qr/^-?\d+$/, "The first value has a numeric sortkey");
 
     ok(defined $first_value->{visibility_values},
-      "$field has visibilty_values defined on its first value")
+      "$field has visibility_values defined on its first value")
       or diag(Dumper($field_data->{values}));
     my @value_visibility_values
       = map { @{$_->{visibility_values}} } @{$field_data->{values}};

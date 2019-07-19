@@ -64,7 +64,7 @@ sub vnc_start {
   if (!$pid) {
     open(STDOUT, ">/dev/null");
     open(STDERR, ">/dev/null");
-    exec(@vnc_cmd) || die "unabled to execute: $!";
+    exec(@vnc_cmd) || die "unable to execute: $!";
   }
   return $pid;
 }

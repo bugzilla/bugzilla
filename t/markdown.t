@@ -40,7 +40,7 @@ is(
 );
 
 SKIP: {
-  skip("currently no raw html is allowed via the safe option", 1);
+  skip("currently no raw HTML is allowed via the safe option", 1);
   is(
     $parser->render_html('<script>hijack()</script>'),
     "&lt;script&gt;hijack()&lt;/script&gt;\n",

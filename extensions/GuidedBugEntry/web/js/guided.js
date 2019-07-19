@@ -19,7 +19,7 @@ var guided = {
   updateStep: true,
 
   setStep: function(newStep, noSetHistory) {
-    // initialise new step
+    // initialize new step
     this.updateStep = true;
     switch(newStep) {
       case 'webdev':
@@ -456,7 +456,7 @@ var dupes = {
       return;
     dupes._currentSearchQuery = dupes.getSummary();
 
-    // initialise the datatable as late as possible
+    // initialize the datatable as late as possible
     dupes._initDataTable();
 
     try {
@@ -721,7 +721,7 @@ var bugForm = {
         // standards
         elVersions.add(opt, elVersions.options[0]);
       } catch(ex) {
-        // ie only
+        // IE only
         elVersions.add(opt, 0);
       }
       elVersions.value = '';

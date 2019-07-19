@@ -124,7 +124,7 @@ description  string   A new description for the groups. This is what will appear
                       in the UI as the name of the groups.
 user_regexp  string   A new regular expression for email. Will automatically
                       grant membership to these groups to anyone with an email
-                      address that matches this perl regular expression.
+                      address that matches this Perl regular expression.
 is_active    boolean  Set if groups are active and eligible to be used for bugs.
                       ``true`` if bugs can be restricted to this group, ``false``
                       otherwise.
@@ -287,7 +287,7 @@ email          string   The email address of the user.
 name           string   The login name of the user. Note that in some situations
                         this is different than their email.
 can_login      boolean  A boolean value to indicate if the user can login into
-                        bugzilla.
+                        Bugzilla.
 email_enabled  boolean  A boolean value to indicate if bug-related mail will
                         be sent to the user or not.
 disabled_text  string   A text field that holds the reason for disabling a user
@@ -301,7 +301,7 @@ disabled_text  string   A text field that holds the reason for disabling a user
   A non existing group name was passed to the function, as a result no
   group object existed for that invalid name.
 * 805 (Cannot view groups)
-  Logged-in users are not authorized to edit bugzilla groups as they are not
-  members of the creategroups group in bugzilla, or they are not authorized to
+  Logged-in users are not authorized to edit Bugzilla groups as they are not
+  members of the creategroups group in Bugzilla, or they are not authorized to
   access group member's information as they are not members of the "editusers"
   group or can bless the group.

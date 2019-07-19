@@ -393,7 +393,7 @@ function delete_confirm(flag) {
 function on_submit() {
     if (Dom.get('delete') && Dom.get('delete').value)
         return;
-    // let perl manage most validation errors, because they are clearly marked
+    // let Perl manage most validation errors, because they are clearly marked
     // the exception is an empty visibility list, so catch that here as well
     if (!flag_visibility.length) {
         alert('You must provide at least one product for visibility.');

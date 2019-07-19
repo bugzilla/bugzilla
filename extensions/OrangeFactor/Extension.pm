@@ -37,7 +37,7 @@ sub template_before_process {
     unless ($user->id && $user->settings->{'orange_factor'}->{'value'} eq 'on');
 
   # in the header we just need to set the var,
-  # to ensure the css and javascript get included
+  # to ensure the CSS and JavaScript get included
   my $bug = exists $vars->{'bugs'} ? $vars->{'bugs'}[0] : $vars->{'bug'};
   if ($bug && grep($_->name eq 'intermittent-failure', @{$bug->keyword_objects}))
   {

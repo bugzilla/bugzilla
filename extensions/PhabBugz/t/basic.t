@@ -233,7 +233,7 @@ JSON
   my $revisions = get_attachment_revisions($bug);
   is(ref($revisions), 'ARRAY', 'it is an array ref');
   isa_ok($revisions->[0], 'Bugzilla::Extension::PhabBugz::Revision');
-  is($revisions->[0]->bug_id, 23, 'Bugzila ID is 23');
+  is($revisions->[0]->bug_id, 23, 'Bugzilla ID is 23');
   ok(try { $revisions->[0]->update }, 'update revision');
 
 };

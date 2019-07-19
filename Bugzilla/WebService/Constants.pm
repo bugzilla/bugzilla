@@ -233,7 +233,7 @@ use constant WS_ERROR_CODE => {
   rest_invalid_resource         => 32614,
 };
 
-# RESTful webservices use the http status code
+# RESTful webservices use the HTTP status code
 # to describe whether a call was successful or
 # to describe the type of error that occurred.
 use constant STATUS_OK               => 200;
@@ -248,7 +248,7 @@ use constant STATUS_GONE             => 410;
 
 # The integer value is the error code above returned by
 # the related webvservice call. We choose the appropriate
-# http status code based on the error code or use the
+# HTTP status code based on the error code or use the
 # default STATUS_BAD_REQUEST.
 sub REST_STATUS_CODE_MAP {
   my $status_code_map = {

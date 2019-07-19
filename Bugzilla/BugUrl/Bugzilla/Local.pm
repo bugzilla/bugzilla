@@ -47,7 +47,7 @@ sub should_handle {
 
   # Check if it is a local Bugzilla uri and call
   # Bugzilla::BugUrl::Bugzilla to check if it's a valid Bugzilla
-  # see also url.
+  # See Also URL.
   my $canonical_local = URI->new($class->local_uri)->canonical;
   if (  $canonical_local->authority eq $uri->canonical->authority
     and $canonical_local->path eq $uri->canonical->path)
@@ -69,7 +69,7 @@ sub _check_value {
   }
   else {
     # It's not a word, then we have to check
-    # if it's a valid Bugzilla url.
+    # if it's a valid Bugzilla URL.
     $uri = $class->SUPER::_check_value($uri);
   }
 

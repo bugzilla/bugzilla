@@ -13,7 +13,7 @@ $(function() {
             "comment": "Please enter a value for description in the initial questions section.",
             "key_initiative": "Please select a value for key initiative in the initial questions section.",
             "contract_type": "Please select a value for contract type in the initial questions section.",
-            "mozilla_data": "Please select a value for mozilla data in the initial questions section.",
+            "mozilla_data": "Please select a value for Mozilla data in the initial questions section.",
             "vendor_cost": "Please select a value for vendor cost in the initial questions section.",
             "timeframe": "Please select a value for timeframe in the initial questions section.",
             "contract_priority": "Please select a value for priority in the initial questions section.",
@@ -23,7 +23,7 @@ $(function() {
             "key_initiative_other": "Please enter a value for other key initiative in the initial questions section."
         },
         "mozilla_data_explain_row": {
-            "mozilla_data_explain": "Please enter a value for mozilla data access explanation in the initial questions section."
+            "mozilla_data_explain": "Please enter a value for Mozilla data access explanation in the initial questions section."
         },
         "contract_type_other": {
             "contract_type_other": "Please enter a value for other contract type in the initial questions section."
@@ -64,7 +64,7 @@ $(function() {
             "sow_vendor_total_max": "Please enter a value for SOW vendor maximum total to be paid.",
         },
         "sow_vendor_mozilla_systems_explain_row": {
-            "sow_vendor_mozilla_systems_explain": "Please enter a value for SOW vendor explanation for use of mozilla systems."
+            "sow_vendor_mozilla_systems_explain": "Please enter a value for SOW vendor explanation for use of Mozilla systems."
         },
         "sow_vendor_onsite_where_row": {
             "sow_vendor_onsite_where": "Please enter a value for SOW vendor onsite where and when."

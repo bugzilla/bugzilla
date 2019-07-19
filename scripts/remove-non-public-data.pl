@@ -194,7 +194,7 @@ getc();
 
 my $dbh = Bugzilla->dbh;
 
-# run sanitiseme.pl
+# run sanitizeme.pl
 
 print "running sanitizeme.pl\n";
 my $sanitizeme = catfile(realpath(dirname(__FILE__)), 'sanitizeme.pl');

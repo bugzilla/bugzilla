@@ -97,7 +97,7 @@ creator_detail    object    An object containing detailed user information for
                             detail object, see :ref:`rest_single_bug`.
 flags             array     Array of objects, each containing the information
                             about the flag currently set for each attachment.
-                            Each flag object contains items descibed in the
+                            Each flag object contains items described in the
                             Flag object below.
 ================  ========  =====================================================
 

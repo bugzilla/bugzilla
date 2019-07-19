@@ -238,7 +238,7 @@ sub get_attachment {
       $attachments{$field_name} = $attachment;
     }
     my @args = map { $_ . '=' . $attachments{$_}->id } @field_names;
-    my $cgi_params = $cgi->canonicalise_query(@field_names, 't', 'Bugzilla_login',
+    my $cgi_params = $cgi->canonicalize_query(@field_names, 't', 'Bugzilla_login',
       'Bugzilla_password');
     push(@args, $cgi_params) if $cgi_params;
     my $path = 'attachment.cgi?' . join('&', @args);
@@ -381,7 +381,7 @@ sub view {
   # Return the appropriate HTTP response headers.
   $attachment->datasize || ThrowUserError("attachment_removed");
 
-  # BMO add a hook for github url redirection
+  # BMO add a hook for GitHub URL redirection
   Bugzilla::Hook::process('attachment_view', {attachment => $attachment});
 
   my $do_redirect = 0;
@@ -569,7 +569,7 @@ sub insert {
 
   if ($attach_text) {
 
-    # Convert to unix line-endings if pasting a patch
+    # Convert to Unix line-endings if pasting a patch
     if (scalar($cgi->param('ispatch'))) {
       $attach_text =~ s/[\012\015]{1,2}/\012/g;
     }
@@ -791,7 +791,7 @@ sub update {
     $attachment->set_flags($flags, $new_flags);
   }
 
-  # Requestees can set flags targetted to them, even if they cannot
+  # Requestees can set flags targeted to them, even if they cannot
   # edit the attachment. Flag setters can edit their own flags too.
   elsif (scalar @$flags) {
     my @flag_ids  = map { $_->{id} } @$flags;

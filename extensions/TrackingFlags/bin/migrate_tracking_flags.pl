@@ -205,7 +205,7 @@ sub migrate_flag_bugs {
 sub migrate_flag_activity {
   my ($new_flag, $field) = @_;
 
-  print "Migating flag activity...";
+  print "Migrating flag activity...";
 
   my $new_field = Bugzilla::Field->new({name => $new_flag->name});
   $dbh->do("UPDATE bugs_activity SET fieldid = ? WHERE fieldid = ?",

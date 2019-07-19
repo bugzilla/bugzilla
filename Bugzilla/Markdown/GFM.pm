@@ -89,4 +89,4 @@ Bugzilla::Markdown::GFM - Sets up the FFI to libcmark_gfm.
 =head1 DESCRIPTION
 
 This modules mainly just does setup work. See L<Bugzilla::Markdown::GFM::Parser>
-to actually render markdown to html.
+to actually render markdown to HTML.

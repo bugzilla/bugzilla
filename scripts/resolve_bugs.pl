@@ -54,7 +54,7 @@ if ($bug_count == 0) {
   exit 1;
 }
 
-# if running from commmand line
+# if running from command line
 if (-t STDIN) {
   print STDERR <<EOF;
 About to resolve $bug_count bugs as $resolution

@@ -219,7 +219,7 @@ sub generate_chart {
     "grey_background" => "false",
     "colors"          => {
 
-      # default dataset colours are too alike
+      # default dataset colors are too alike
       dataset4 => [0, 0, 0],    # black
     },
   );

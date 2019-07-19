@@ -197,7 +197,7 @@ sub FILESYSTEM {
     "$extensionsdir/*/*.pl"        => {perms => WS_EXECUTE},
     "$extensionsdir/*/bin/*"       => {perms => WS_EXECUTE},
 
-    # google webmaster tools verification files
+    # Google Webmaster Tools verification files
     'google*.html'    => {perms => WS_SERVE},
     'contribute.json' => {perms => WS_SERVE},
   );
@@ -491,7 +491,7 @@ sub _remove_empty_css {
   }
 }
 
-# We used to allow a single css file in the skins/contrib/ directory
+# We used to allow a single CSS file in the skins/contrib/ directory
 # to be a whole skin.
 sub _convert_single_file_skins {
   my $skinsdir = bz_locations()->{'skinsdir'};
@@ -795,7 +795,7 @@ sub _check_web_server_group {
     ThrowCodeError('invalid_webservergroup', {group => $group})
       unless defined $group_id;
 
-    # If on unix, see if we need to print a warning about a webservergroup
+    # If on Unix, see if we need to print a warning about a webservergroup
     # that we can't chgrp to
     if ($output && $< != 0 && !grep($_ eq $group_id, split(" ", $)))) {
       print "\n\n" . get_text('install_webservergroup_not_in') . "\n\n";

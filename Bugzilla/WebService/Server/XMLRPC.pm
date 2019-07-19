@@ -141,7 +141,7 @@ use Scalar::Util qw(tainted);
 sub new {
   my $self = shift->SUPER::new(@_);
 
-  # Initialise XML::Parser to not expand references to entities, to prevent DoS
+  # Initialize XML::Parser to not expand references to entities, to prevent DoS
   require XML::Parser;
   my $parser = XML::Parser->new(
     NoExpand => 1,

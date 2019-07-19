@@ -270,7 +270,7 @@ Bugzilla.InlineCommentEditor = class InlineCommentEditor {
   }
 
   /**
-   * Finish editing by restoring the UI, once editing is complete or cancelled. Any unsaved comment will be discarded.
+   * Finish editing by restoring the UI, once editing is complete or canceled. Any unsaved comment will be discarded.
    */
   finish() {
     this.toggle_toolbar_buttons(false);
@@ -281,7 +281,7 @@ Bugzilla.InlineCommentEditor = class InlineCommentEditor {
 
   /**
    * Enable or disable buttons on the comment actions toolbar (not the editor's own toolbar) while editing the comment
-   * to avoid any unexpected behaviour. The Reply button should always be disabled if the comment is empty.
+   * to avoid any unexpected behavior. The Reply button should always be disabled if the comment is empty.
    * @param {Boolean} disabled Whether the buttons should be disabled.
    */
   toggle_toolbar_buttons(disabled) {

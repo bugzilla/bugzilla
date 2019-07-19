@@ -23,7 +23,7 @@ use Bugzilla::Logging;
 use Bugzilla::Util;
 
 #
-# initialisation
+# initialization
 #
 
 use constant DB_TABLE   => 'push_backoff';

@@ -447,7 +447,7 @@ function showDuplicateItem(e) {
             dup_id.blur();
         }
     }
-    YAHOO.util.Event.preventDefault(e); //prevents the hyperlink from going to the url in the href.
+    YAHOO.util.Event.preventDefault(e); //prevents the hyperlink from going to the URL in the href.
 }
 
 function setResolutionToDuplicate(e, duplicate_or_move_bug_status) {

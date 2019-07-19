@@ -15,7 +15,7 @@ use QA::Util;
 
 my ($sel, $config) = get_selenium();
 
-# Set the email regexp for new bugzilla accounts to end with @bugzilla.test.
+# Set the email regexp for new Bugzilla accounts to end with @bugzilla.test.
 
 log_in($sel, $config, 'admin');
 set_parameters(
@@ -74,7 +74,7 @@ foreach my $account (@accounts) {
   $sel->is_text_present_ok("User account creation has been restricted.");
 }
 
-# These accounts are illegal and should cause a javascript alert.
+# These accounts are illegal and should cause a JavaScript alert.
 @accounts = qw(
   test\bugzilla@bugzilla.test
   testbugzilla.test
@@ -98,7 +98,7 @@ foreach my $account (@accounts) {
   );
 }
 
-# These accounts are illegal but do not cause a javascript alert
+# These accounts are illegal but do not cause a JavaScript alert
 @accounts = ('test@bugzilla.org@bugzilla.test', 'test@bugzilla..test');
 
 # Logins larger than 127 characters must be rejected, for security reasons.

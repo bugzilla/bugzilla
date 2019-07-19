@@ -8,7 +8,7 @@
 package Bugzilla::Install::Requirements;
 
 # NOTE: This package MUST NOT "use" any Bugzilla modules other than
-# Bugzilla::Constants, anywhere. We may "use" standard perl modules.
+# Bugzilla::Constants, anywhere. We may "use" standard Perl modules.
 #
 # Subroutines may "require" and "import" from modules, but they
 # MUST NOT "use."
@@ -331,7 +331,7 @@ Bugzilla::Install::Requirements - Functions and variables dealing
 
 This module is used primarily by C<checksetup.pl> to determine whether
 or not all of Bugzilla's prerequisites are installed. (That is, all the
-perl modules it requires.)
+Perl modules it requires.)
 
 =head1 CONSTANTS
 
@@ -355,7 +355,7 @@ of file names (which are passed to C<glob>, so shell patterns work).
 
 =item B<Description>
 
-This checks what required perl modules are installed, like
+This checks what required Perl modules are installed, like
 C<checksetup.pl> does.
 
 =item B<Params>

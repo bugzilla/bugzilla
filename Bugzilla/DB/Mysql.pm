@@ -562,9 +562,9 @@ sub bz_setup_database {
     }    # foreach table
   }    # if old-name indexes
 
-  # If there are no tables, but the DB isn't utf8 and it should be,
-  # then we should alter the database to be utf8. We know it should be
-  # if the utf8 parameter is true or there are no params at all.
+  # If there are no tables, but the DB isn't UTF-8 and it should be,
+  # then we should alter the database to be UTF-8. We know it should be
+  # if the UTF-8 parameter is true or there are no params at all.
   # This kind of situation happens when people create the database
   # themselves, and if we don't do this they will get the big
   # scary WARNING statement about conversion to UTF8.
@@ -599,10 +599,10 @@ sub bz_setup_database {
     );
   }
 
-  # Convert the database to UTF-8 if the utf8 parameter is on.
-  # We check if any table isn't utf8, because lots of crazy
+  # Convert the database to UTF-8 if the UTF-8 parameter is on.
+  # We check if any table isn't UTF-8, because lots of crazy
   # partial-conversion situations can happen, and this handles anything
-  # that could come up (including having the DB charset be utf8 but not
+  # that could come up (including having the DB charset be UTF-8 but not
   # the table charsets.
   #
   # TABLE_COLLATION IS NOT NULL prevents us from trying to convert views.
@@ -640,7 +640,7 @@ sub bz_setup_database {
         # all go away later in checksetup anyway.
         next if $column->{Type} =~ /enum/i;
 
-        # If this particular column isn't stored in utf-8
+        # If this particular column isn't stored in UTF-8
         if ( $column->{Collation}
           && $column->{Collation} ne 'NULL'
           && $column->{Collation} ne $collate)
@@ -705,7 +705,7 @@ sub bz_setup_database {
     }    # foreach my $table (@tables)
   }
 
-  # Sometimes you can have a situation where all the tables are utf8,
+  # Sometimes you can have a situation where all the tables are UTF-8,
   # but the database isn't. (This tends to happen when you've done
   # a mysqldump.) So we have this change outside of the above block,
   # so that it just happens silently if no actual *table* conversion

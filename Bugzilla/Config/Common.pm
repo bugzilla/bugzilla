@@ -337,7 +337,7 @@ sub check_theschwartz_available {
 sub check_comment_taggers_group {
   my $group_name = shift;
   if ($group_name && !Bugzilla->feature('jsonrpc')) {
-    return "Comment tagging requires installation of the JSONRPC feature";
+    return "Comment tagging requires installation of the JSON-RPC feature";
   }
   return check_group($group_name);
 }
@@ -433,8 +433,8 @@ in the relevant F<Bugzilla::Config::*> package.
 
 =item C<check_multi>
 
-Checks that a multi-valued parameter (ie types C<s>, C<o> or C<m>) satisfies
-its contraints.
+Checks that a multi-valued parameter (i.e. types C<s>, C<o> or C<m>) satisfies
+its constraints.
 
 =item C<check_numeric>
 

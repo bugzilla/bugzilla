@@ -222,10 +222,10 @@ sub _send_email {
           # non-public bugs
           if ($request->{bug}->is_private) {
             $has_private_bug = 1;
-            $request->{bug}->{sanitise_bug} = !$securemail || !$has_key;
+            $request->{bug}->{sanitize_bug} = !$securemail || !$has_key;
           }
           else {
-            $request->{bug}->{sanitise_bug} = 0;
+            $request->{bug}->{sanitize_bug} = 0;
           }
         }
       }

@@ -127,7 +127,7 @@ ok(
   'TempComponent is missing from create'
 );
 
-# try changing compoent of existing bug to TempComponent
+# try changing component of existing bug to TempComponent
 
 go_to_bug($sel, $clean_bug_id);
 ok(

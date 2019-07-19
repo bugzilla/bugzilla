@@ -61,7 +61,7 @@ name         type    description
 ===========  ======  ============================================================
 id           int     The ID of the classification.
 name         string  The name of the classification.
-description  string  The description of the classificaion.
+description  string  The description of the classification.
 sort_key     int     The value which determines the order the classification is
                      sorted.
 products     array   Products the user is authorized to access within the

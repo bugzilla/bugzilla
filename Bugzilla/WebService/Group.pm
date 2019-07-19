@@ -243,7 +243,7 @@ get information about them.
 See L<Bugzilla::WebService> for a description of how parameters are passed,
 and what B<STABLE>, B<UNSTABLE>, and B<EXPERIMENTAL> mean.
 
-Although the data input and output is the same for JSONRPC, XMLRPC and REST,
+Although the data input and output is the same for JSON-RPC, XML-RPC and REST,
 the directions for how to access the data via REST is noted in each method
 where applicable.
 
@@ -384,7 +384,7 @@ as the name of the groups.
 
 C<string> A new regular expression for email. Will automatically grant
 membership to these groups to anyone with an email address that matches
-this perl regular expression.
+this Perl regular expression.
 
 =item C<is_active>
 
@@ -567,7 +567,7 @@ different than their email.
 
 =item can_login
 
-C<boolean> A boolean value to indicate if the user can login into bugzilla.
+C<boolean> A boolean value to indicate if the user can login into Bugzilla.
 
 =item email_enabled
 
@@ -577,7 +577,7 @@ to the user or not.
 =item disabled_text
 
 C<string> A text field that holds the reason for disabling a user from logging
-into bugzilla, if empty then the user account is enabled otherwise it is
+into Bugzilla, if empty then the user account is enabled otherwise it is
 disabled/closed.
 
 =back
@@ -595,8 +595,8 @@ group object existed for that invalid name.
 
 =item 805 (Cannot view groups)
 
-Logged-in users are not authorized to edit bugzilla groups as they are not
-members of the creategroups group in bugzilla, or they are not authorized to
+Logged-in users are not authorized to edit Bugzilla groups as they are not
+members of the creategroups group in Bugzilla, or they are not authorized to
 access group member's information as they are not members of the "editusers"
 group or can bless the group.
 

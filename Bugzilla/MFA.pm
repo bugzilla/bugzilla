@@ -54,7 +54,7 @@ sub prompt { }
 # throws errors if code is invalid
 sub check { }
 
-# if true verifcation can happen inline (during enrollment/pref changes)
+# if true verification can happen inline (during enrollment/pref changes)
 # if false then the mfa provider requires an intermediate verification page
 sub can_verify_inline {0}
 

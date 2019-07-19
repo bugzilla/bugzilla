@@ -30,7 +30,7 @@ DESCRIPTION
 
 SYNTAX
 
-  --connector  (required) connector's name (eg. ReviewBoard)
+  --connector  (required) connector's name (e.g. ReviewBoard)
   --warn       (optional) number of messages that trigger a warning (def: 5)
   --alarm      (optional) number of messages that trigger an alarm (def: 10)
 

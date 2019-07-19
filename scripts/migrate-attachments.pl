@@ -35,7 +35,7 @@ Syntax:
     again. Attachments deleted on the source will be deleted from the
     destination.
 
-    eg. migrate-attachments.pl --mirror database s3
+    e.g. migrate-attachments.pl --mirror database s3
 
 'copy'
     Copies all attachments from the specified source to the destination.
@@ -43,13 +43,13 @@ Syntax:
     again. Unlike 'mirror', attachments deleted from the source will not be
     removed from the destination.
 
-    eg. migrate-attachments.pl --copy database s3
+    e.g. migrate-attachments.pl --copy database s3
 
 'delete'
     Deletes all attachments in the specified location.  This operation cannot
     be undone.
 
-    eg. migrate-attachments.pl --delete database
+    e.g. migrate-attachments.pl --delete database
 
 Valid locations:
     @storage_names

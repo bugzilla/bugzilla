@@ -6,7 +6,7 @@ Templates
 Bugzilla uses a system of templates to define its user interface. The standard
 templates can be modified, replaced or overridden. You can also use template
 hooks in an :ref:`extension <extensions>` to add or modify the
-behaviour of templates using a stable interface.
+behavior of templates using a stable interface.
 
 .. _template-directory:
 
@@ -199,9 +199,9 @@ customizing for your installation.
   This template controls the appearance of the bug lists created
   by Bugzilla. Editing this template allows per-column control of
   the width and title of a column, the maximum display length of
-  each entry, and the wrap behaviour of long entries.
+  each entry, and the wrap behavior of long entries.
   For long bug lists, Bugzilla inserts a 'break' every 100 bugs by
-  default; this behaviour is also controlled by this template, and
+  default; this behavior is also controlled by this template, and
   that value can be modified here.
 
 :file:`bug/create/user-message.html.tmpl`:

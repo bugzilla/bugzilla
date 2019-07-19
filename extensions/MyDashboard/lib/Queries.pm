@@ -240,7 +240,7 @@ sub query_bugs {
     push(@bugs, $bug);
   }
 
-  return (\@bugs, $params->canonicalise_query());
+  return (\@bugs, $params->canonicalize_query());
 }
 
 sub query_flags {

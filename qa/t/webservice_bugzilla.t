@@ -23,7 +23,7 @@ foreach my $rpc (@clients) {
 
   my $tz_call = $rpc->bz_call_success('Bugzilla.timezone');
   my $tz      = $tz_call->result->{timezone};
-  ok($tz, "Bugzilla.timezone retuns $tz");
+  ok($tz, "Bugzilla.timezone returns $tz");
 
   my $ext_call   = $rpc->bz_call_success('Bugzilla.extensions');
   my $extensions = $ext_call->result->{extensions};

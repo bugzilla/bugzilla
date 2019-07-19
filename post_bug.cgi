@@ -71,7 +71,7 @@ Bugzilla::Hook::process('bug_user_match_fields',
 Bugzilla::User::match_field($user_match_fields);
 
 if (defined $cgi->param('maketemplate')) {
-  $vars->{'url'}        = $cgi->canonicalise_query('token');
+  $vars->{'url'}        = $cgi->canonicalize_query('token');
   $vars->{'short_desc'} = $cgi->param('short_desc');
 
   print $cgi->header();
@@ -201,7 +201,7 @@ if ($data_fh || $attach_text || $data_base64) {
 
   if ($attach_text) {
 
-    # Convert to unix line-endings if pasting a patch
+    # Convert to Unix line-endings if pasting a patch
     if (scalar($cgi->param('ispatch'))) {
       $attach_text =~ s/[\012\015]{1,2}/\012/g;
     }

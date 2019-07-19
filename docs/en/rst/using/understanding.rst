@@ -69,7 +69,7 @@ installation of Bugzilla.
 
 *Keywords:*
    The administrator can define keywords which you can use to tag and
-   categorise bugs—e.g. ``crash`` or ``regression``.
+   categorize bugs—e.g. ``crash`` or ``regression``.
 
 *Personal Tags:*
    Unlike Keywords which are global and visible by all users, Personal Tags

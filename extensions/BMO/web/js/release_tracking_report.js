@@ -21,7 +21,7 @@ function onFieldToggle(cbEl, id) {
     selectedFields['field_' + id] = false;
   }
   $('#field_' + id + '_select').attr('disabled', !cbEl.checked);
-  serialiseForm();
+  serializeForm();
 }
 
 function onProductChange() {
@@ -57,7 +57,7 @@ function onProductChange() {
     html += '</table>';
   }
   trackingEl.innerHTML = html;
-  serialiseForm();
+  serializeForm();
 }
 
 function onFlagChange() {
@@ -88,7 +88,7 @@ function selectAllFields() {
     cb.checked = true;
     onFieldToggle(cb, fields_data[i].id);
   }
-  serialiseForm();
+  serializeForm();
 }
 
 function selectNoFields() {
@@ -98,7 +98,7 @@ function selectNoFields() {
     cb.checked = false;
     onFieldToggle(cb, fields_data[i].id);
   }
-  serialiseForm();
+  serializeForm();
 }
 
 function invertFields() {
@@ -111,7 +111,7 @@ function invertFields() {
       el.options[0].selected = true;
     }
   }
-  serialiseForm();
+  serializeForm();
 }
 
 function onFormSubmit() {
@@ -119,12 +119,12 @@ function onFormSubmit() {
     alert('You must enter both the start and end dates.');
     return false;
   }
-  serialiseForm();
+  serializeForm();
   return true;
 }
 
 function onFormReset() {
-  deserialiseForm('');
+  deserializeForm('');
 }
 
 function selectRangeType() {
@@ -136,10 +136,10 @@ function selectRangeType() {
     $('#custom_range').hide();
     $('#fixed_range').show();
   }
-  serialiseForm();
+  serializeForm();
 }
 
-function serialiseForm() {
+function serializeForm() {
   var q = flagEl.value + ':' +
           $('#flag_value').val() + ':';
   if ($('#is_custom').is(':checked')) {
@@ -165,7 +165,7 @@ function serialiseForm() {
                               `${is_custom}&q=${encodeURIComponent(q)}`);
 }
 
-function deserialiseForm(q) {
+function deserializeForm(q) {
   var parts = q.split(/:/);
   selectValue(flagEl, parts[0]);
   onFlagChange();
@@ -191,7 +191,7 @@ function deserialiseForm(q) {
       selectValue($('#field_' + id + '_select')[0], value);
     }
   }
-  serialiseForm();
+  serializeForm();
 }
 
 // utils
@@ -201,7 +201,7 @@ $().ready(function() {
   productEl = $('#product')[0];
   trackingEl = $('#tracking_span')[0];
   onFlagChange();
-  deserialiseForm(default_query);
+  deserializeForm(default_query);
   selectRangeType();
 });
 

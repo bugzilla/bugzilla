@@ -238,7 +238,7 @@ YAHOO.bugzilla.commentTagging = {
     },
 
     add : function(comment_id, comment_no, add_tags) {
-        // build list of current tags from html
+        // build list of current tags from HTML
         var tags = new Array();
         var spans = Dom.getElementsByClassName('bz_comment_tag', undefined, 'ct_' + comment_no);
         for (var i = 0, l = spans.length; i < l; i++) {

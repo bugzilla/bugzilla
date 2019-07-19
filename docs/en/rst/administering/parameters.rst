@@ -389,7 +389,7 @@ necessary to configure Bugzilla for use with LDAP authentication.
 The existing authentication
 scheme for Bugzilla uses email addresses as the primary user ID and a
 password to authenticate that user. All places within Bugzilla that
-require a user ID (e.g assigning a bug) use the email
+require a user ID (e.g. assigning a bug) use the email
 address. The LDAP authentication builds on top of this scheme, rather
 than replacing it. The initial log-in is done with a username and
 password for the LDAP directory. Bugzilla tries to bind to LDAP using

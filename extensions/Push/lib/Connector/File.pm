@@ -48,7 +48,7 @@ sub should_send {
 sub send {
   my ($self, $message) = @_;
 
-  # pretty-format json payload
+  # pretty-format JSON payload
   my $payload = $message->payload_decoded;
   $payload = to_json($payload, 1);
 

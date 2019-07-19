@@ -18,8 +18,8 @@ with 'Bugzilla::Report::Ping';
 sub _build_validator {
   my ($self) = @_;
 
-  # For prototyping we use joi, but after protyping
-  # $schema should be set to the file path or url of a json schema file.
+  # For prototyping we use joi, but after prototyping
+  # $schema should be set to the file path or URL of a JSON schema file.
   my $schema = joi->object->strict->props({
     reporter    => joi->integer->required,
     assigned_to => joi->integer->required,

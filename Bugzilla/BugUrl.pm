@@ -50,7 +50,7 @@ use constant VALIDATORS => {
 };
 
 # This is the order we go through all of subclasses and
-# pick the first one that should handle the url. New
+# pick the first one that should handle the URL. New
 # subclasses should be added at the end of the list.
 use constant SUB_CLASSES => qw(
   Bugzilla::BugUrl::Bugzilla::Local

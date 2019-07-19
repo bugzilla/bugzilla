@@ -72,7 +72,7 @@ sub BUILDARGS {
   my ($class, $params) = @_;
   my $db_name = $params->{db_name};
 
-  # Let people specify paths intead of data/ for the DB.
+  # Let people specify paths instead of data/ for the DB.
   if ($db_name && $db_name ne ':memory:' && $db_name !~ m{[\\/]}) {
 
     # When the DB is first created, there's a chance that the
@@ -106,7 +106,7 @@ sub on_dbi_connected {
 
   my %pragmas = (
 
-    # Make sure that the sqlite file doesn't grow without bound.
+    # Make sure that the SQLite file doesn't grow without bound.
     auto_vacuum  => 1,
     encoding     => "'UTF-8'",
     foreign_keys => 'ON',

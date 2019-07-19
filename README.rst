@@ -118,7 +118,7 @@ Technical Details
 
 This Vagrant environment is a very complete but scaled-down version of
 production BMO.  It uses roughly the same RPMs (from CentOS 6, versus RHEL 6
-in production) and the same perl dependencies (via
+in production) and the same Perl dependencies (via
 https://github.com/mozilla-bteam/carton-bundles).
 
 It includes a couple example products, some fake users, and some of BMO's
@@ -137,7 +137,7 @@ Perl Shell (re.pl, repl)
 
 Installed on the vagrant vm is also a program called re.pl.
 
-re.pl an interactive perl shell (somtimes called a REPL (short for Read-Eval-Print-Loop)).
+re.pl an interactive Perl shell (sometimes called a REPL (short for Read-Eval-Print-Loop)).
 It loads Bugzilla.pm and you can call Bugzilla internal API methods from it, an example session is reproduced below:
 
 .. code-block:: plain
@@ -186,9 +186,9 @@ Using Docker (For Development)
 ==============================
 
 While not yet as featureful or complete as the vagrant setup, this repository now contains a
-docker-compose file that will create a local bugzilla for testing.
+docker-compose file that will create a local Bugzilla for testing.
 
-To use docker-compose, ensure you have the latest Docker install for your environemnt
+To use docker-compose, ensure you have the latest Docker install for your environment
 (Linux, Windows, or Mac OS). If you are using Ubuntu, then you can read the next section
 to ensure that you have the correct docker setup.
 
@@ -199,7 +199,7 @@ to ensure that you have the correct docker setup.
 
 Then, you must configure your browser to use http://localhost:1091 as an HTTP proxy.
 For setting a proxy in Firefox, see `Firefox Connection Settings`_.
-The procecure should be similar for other browsers.
+The procedure should be similar for other browsers.
 
 .. _`Firefox Connection Settings`: https://support.mozilla.org/en-US/kb/connection-settings-firefox
 
@@ -302,15 +302,15 @@ BUGZILLA_ALLOW_INSECURE_HTTP
   This should never be set in production. It allows auth delegation and oauth over http.
 
 BMO_urlbase
-  The public url for this instance. Note that if this begins with https://
+  The public URL for this instance. Note that if this begins with https://
   and BMO_inbound_proxies is set to '*' Bugzilla will believe the connection to it
   is using SSL.
 
 BMO_canonical_urlbase
-  The public url for the production instance, if different from urlbase above.
+  The public URL for the production instance, if different from urlbase above.
 
 BMO_attachment_base
-  This is the url for attachments.
+  This is the URL for attachments.
   When the allow_attachment_display parameter is on, it is possible for a
   malicious attachment to steal your cookies or perform an attack on Bugzilla
   using your credentials.
@@ -367,19 +367,19 @@ BMO_memcached_namespace
   The global namespace for the memcached servers.
 
 BMO_memcached_servers
-  A list of memcached servers (ip addresses or host names). Can be empty.
+  A list of memcached servers (IP addresses or host names). Can be empty.
 
 BMO_shadowdb
   The database name of the read-only database.
 
 BMO_shadowdbhost
-  The hotname or ip address of the read-only database.
+  The hotname or IP address of the read-only database.
 
 BMO_shadowdbport
    The port of the read-only database.
 
 BMO_setrlimit
-    This is a json object and can set any limit described in https://metacpan.org/pod/BSD::Resource.
+    This is a JSON object and can set any limit described in https://metacpan.org/pod/BSD::Resource.
     Typically it used for setting RLIMIT_AS, and the default value is ``{ "RLIMIT_AS": 2000000000 }``.
 
 BMO_size_limit
@@ -408,7 +408,7 @@ NYTPROF_DIR
 LOG4PERL_CONFIG_FILE
   Filename of `Log::Log4perl`_ config file.
   It defaults to log4perl-syslog.conf.
-  If the file is given as a relative path, it will belative to the /app/conf/ directory.
+  If the file is given as a relative path, it will relative to the /app/conf/ directory.
 
 .. _`Devel::NYTProf`: https://metacpan.org/pod/Devel::NYTProf
 
@@ -418,7 +418,7 @@ LOG4PERL_STDERR_DISABLE
   Boolean. By default log messages are logged as plain text to `STDERR`.
   Setting this to a true value disables this behavior.
 
-  Note: For programs that run using the `cereal` log aggregator, this environemnt
+  Note: For programs that run using the `cereal` log aggregator, this environment
   variable will be ignored.
 
 
@@ -455,9 +455,9 @@ Development Tips
 Testing Emails
 --------------
 
-With vagrant have two options to test emails sent by a local bugzilla instance. You can configure
+With vagrant have two options to test emails sent by a local Bugzilla instance. You can configure
 which setting you want to use by going to http://bmo-web.vm/editparams.cgi?section=mta and
-changing the mail_delivery_method to either 'Test' or 'Sendmail'. Afterwards restart bmo with
+changing the mail_delivery_method to either 'Test' or 'Sendmail'. Afterwards restart BMO with
 ``vagrant reload``. With docker, only the default 'Test' option is supported.
 
 'Test' option (Default for Docker)
@@ -466,7 +466,7 @@ changing the mail_delivery_method to either 'Test' or 'Sendmail'. Afterwards res
 With this option, all mail will be appended to a ``mailer.testfile``.
 
 - Using docker, run ``docker-compose run bmo-web.vm cat /app/data/mailer.testfile``.
-- Using vagrant, run ``vagrant ssh web`` and then naviage to ``/vagrant/data/mailer.testfile``.
+- Using vagrant, run ``vagrant ssh web`` and then navigate to ``/vagrant/data/mailer.testfile``.
 
 'Sendmail' option (Default for Vagrant)
 ~~~~~~~~~~~~~~~~~
@@ -490,6 +490,6 @@ mail (SMTP, which bmo-web.vm doesn't provide). To work around this, using a regu
 account to first setup, then modify the settings of that account: Right Click the account in
 the left side bar > Settings > Server Settings. Update the server settings to match those
 listed above. Afterwards, you may update the account name to be vagrant@bmo-web.vm. Thunderbird
-will now pull email from bmo. You can try it out by commenting on a bug.
+will now pull email from BMO. You can try it out by commenting on a bug.
 
 .. _`Thunderbird's`: https://www.mozilla.org/en-US/thunderbird/

@@ -80,7 +80,7 @@ $public_bug->{see_also}         = ["${base_url}show_bug.cgi?id=$private_id"];
 $public_bug->{cf_qa_status}     = [];
 $public_bug->{cf_single_select} = '---';
 
-# Fill in the timetracking fields on the public bug.
+# Fill in the time tracking fields on the public bug.
 $xmlrpc->bz_log_in('admin');
 $xmlrpc->bz_call_success(
   'Bug.update',

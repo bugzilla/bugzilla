@@ -292,7 +292,7 @@ sub quicksearch {
 
   # List of quicksearch-specific CGI parameters to get rid of.
   my @params_to_strip = ('quicksearch', 'load', 'run');
-  my $modified_query_string = $cgi->canonicalise_query(@params_to_strip);
+  my $modified_query_string = $cgi->canonicalize_query(@params_to_strip);
 
   if ($cgi->param('load')) {
     # Param 'load' asks us to display the query in the advanced search form.
@@ -315,7 +315,7 @@ sub _parse_line {
   return () unless defined $line;
 
   # parse_line always treats ' as a quote character, making it impossible
-  # to sanely search for contractions. As this behavour isn't
+  # to sanely search for contractions. As this behavior isn't
   # configurable, we replace ' with a placeholder to hide it from the
   # parser.
 

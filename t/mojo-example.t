@@ -22,7 +22,7 @@ BEGIN {
 # Most localconfig options the other Bugzilla::Test::Mock* modules take care for us.
 use Bugzilla::Test::MockLocalconfig (urlbase => 'http://bmo-web.vm');
 
-# This configures an in-memory sqlite database.
+# This configures an in-memory SQLite database.
 use Bugzilla::Test::MockDB;
 
 # This redirects reads and writes from the config file (data/params)

@@ -329,7 +329,7 @@ sub queue {
   }
   $vars->{'components'} = [sort { $a cmp $b } keys %components];
 
-  $vars->{'urlquerypart'} = $cgi->canonicalise_query('ctype');
+  $vars->{'urlquerypart'} = $cgi->canonicalize_query('ctype');
 
   # Generate and return the UI (HTML page) from the appropriate template.
   $template->process($format->{'template'}, $vars)

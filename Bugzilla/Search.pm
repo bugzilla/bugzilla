@@ -802,7 +802,7 @@ sub data {
   my %tf_map = map { $_ => 1 } Bugzilla->tracking_flag_names;
   my @tf_selected = grep { exists $tf_map{$_} } @orig_fields;
 
-  # mysql has a limit of 61 joins, and we want to avoid massive amounts of joins
+  # MySQL has a limit of 61 joins, and we want to avoid massive amounts of joins
   # 30 ensures we won't hit the limit, nor generate too many joins
   if (scalar @tf_selected > 30) {
     foreach my $column (@tf_selected) {
@@ -1979,7 +1979,7 @@ sub _handle_chart {
 
   $search_args{quoted} = $self->_quote_unless_numeric(\%search_args);
 
-  # This should add a "term" selement to %search_args.
+  # This should add a "term" element to %search_args.
   $self->do_search_function(\%search_args);
 
   # If term is left empty, then this means the criteria
@@ -3700,7 +3700,7 @@ sub _empty_value {
 sub IsValidQueryType {
   my ($queryType) = @_;
 
-  # BMO: Added google and instant
+  # BMO: Added Google and instant
   if (grep { $_ eq $queryType } qw(specific advanced google instant)) {
     return 1;
   }

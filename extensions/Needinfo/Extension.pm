@@ -273,7 +273,7 @@ sub object_before_delete {
     unless $object->isa('Bugzilla::Flag') && $object->type->name eq 'needinfo';
   my $user = Bugzilla->user;
 
-  # Require canconfirm to clear requests targetted at someone else
+  # Require canconfirm to clear requests targeted at someone else
   if ( $object->setter_id != $user->id
     && $object->requestee
     && $object->requestee->id != $user->id

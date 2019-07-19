@@ -375,7 +375,7 @@ sub search_bugs_request {
     $params->{actual_time} = delete $params->{work_time};
   }
 
-  # Other convenience search ariables used by BzAPI
+  # Other convenience search variables used by BzAPI
   my @field_ids = grep(/^f(\d+)$/, keys %$params);
   my $last_field_id = @field_ids ? max @field_ids + 1 : 1;
   foreach my $field (qw(setters.login_name requestees.login_name)) {
@@ -399,7 +399,7 @@ sub create_bug_request {
     }
   }
 
-  # CC should just be a list of bugzilla logins
+  # CC should just be a list of Bugzilla logins
   if (exists $params->{cc}) {
     $params->{cc} = [map { $_->{name} } @{$params->{cc}}];
   }

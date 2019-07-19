@@ -35,7 +35,7 @@ sub usage() {
 Usage: syncmsandversions.pl <srcproduct> <tgtproduct>
 
 E.g.: syncmsandversions.pl FoodReplicator SeaMonkey
-will copy any versions and milstones in the product "FoodReplicator"
+will copy any versions and milestones in the product "FoodReplicator"
 which do not exist in product "SeaMonkey" into it. This script is normally
 used prior to moving components from srcproduct to tgtproduct.
 USAGE

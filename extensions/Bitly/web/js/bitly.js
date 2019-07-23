@@ -36,7 +36,7 @@ $(function() {
                 speed: 100,
                 followSpeed: 100,
                 modalColor: '#fff'
-            }, execute);
+            }, function(){ execute(); });
         });
 
     $('#bitly-type')

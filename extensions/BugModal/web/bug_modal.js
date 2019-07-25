@@ -212,10 +212,36 @@ $(function() {
         });
 
     // use non-native tooltips for relative/absolute times and bug summaries
-    $('.rel-time, .rel-time-title, .abs-time-title, .bz_bug_link, .tt').tooltip({
+    const tooltip_sources = $('.rel-time, .rel-time-title, .abs-time-title, .bz_bug_link, .tt').tooltip({
         position: { my: "left top+8", at: "left bottom", collision: "flipfit" },
         show: { effect: 'none' },
         hide: { effect: 'none' }
+    }).on('tooltipopen', function(event, ui) {
+        const $this = $(this);
+        const $parent = $this.offsetParent();
+        const { top, left } = $this.position();
+        const right_margin = $parent.width() - left;
+        const flip = right_margin < 250;
+
+        // Move the tooltip from `<body>` to a proper parent and position
+        // because the tooltip `position` option doesn't accept `within` for
+        // some reason
+        ui.tooltip
+          .appendTo($parent)
+          .css({
+            top: `${parseInt(top + $this.height() + 4)}px`,
+            right: flip ? `${parseInt(right_margin - $this.width())}px` : 'auto',
+            left: flip ? 'auto' : `${parseInt(left)}px`,
+          });
+    });
+
+    // Don't show the tooltip when the window gets focus
+    window.addEventListener('focus', event => {
+      // Temporarily disable the tooltip and enable it again
+      tooltip_sources.tooltip('option', 'disabled', true);
+      window.setTimeout(() => {
+        tooltip_sources.tooltip('option', 'disabled', false);
+      }, 150);
     });
 
     // tooltips create a new ui-helper-hidden-accessible div each time a

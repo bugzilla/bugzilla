@@ -2947,7 +2947,7 @@ sub _component_nonchanged {
   # Allow to search product/component pairs like "Core::General" with a simple
   # operator. Since product/component names may include spaces, other operators
   # like `anywords` won't work.
-  if ($args->{operator} =~ /^(:?(:?not)?equals)$/
+  if ($args->{operator} =~ /^(?:(?:not)?equals)$/
     && $args->{value} =~ /^(?:(.+)\s*::\s*)?(.+)$/)
   {
     $product = $1;

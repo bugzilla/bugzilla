@@ -43,7 +43,7 @@ $(function () {
                 Y.one(`#${type}_loading`).addClass('bz_default_hidden');
                 Y.one(`#${type}_count_refresh`).removeClass('bz_default_hidden');
 
-                alert(`Failed to load requests:\n\n${message}`);
+                dataTable[type].showMessage(`Failed to load requests.`);
             }
         };
 

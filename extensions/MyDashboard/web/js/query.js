@@ -84,7 +84,7 @@ $(function() {
                 Y.one('#query_loading').addClass('bz_default_hidden');
                 Y.one('#query_count_refresh').removeClass('bz_default_hidden');
 
-                alert(`Failed to load bug list from Bugzilla:\n\n${message}`);
+                bugQueryTable.showMessage(`Failed to load bug list.`);
             }
         };
 
@@ -124,6 +124,8 @@ $(function() {
         bugQueryTable.plug(Y.Plugin.DataTableRowExpansion, {
             uniqueIdKey: 'bug_id',
             template: ({ bug_id, changeddate_api }) => {
+                bugQueryTable.hideMessage();
+
                 // Note: `async` doesn't work for this `template` function, so use an inner `async` function instead
                 if (!lastChangesCache[bug_id]) {
                     try {
@@ -137,7 +139,7 @@ $(function() {
                             Y.one('#last_changes_stub_' + bug_id).setHTML(last_changes_template(last_changes));
                         })();
                     } catch ({ message }) {
-                        alert(`Failed to load last changes from Bugzilla:\n\n${message}`);
+                        bugQueryTable.showMessage(`Failed to load last changes.`);
                     }
 
                     return stub_template({bug_id: bug_id});

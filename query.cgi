@@ -69,6 +69,7 @@ sub PrefillForm {
   my $cgi = Bugzilla->cgi;
   $buf = new Bugzilla::CGI($buf);
   my $foundone = 0;
+  my $custom_fields = {};
 
   # If there are old-style boolean charts in the URL (from an old saved
   # search or from an old link on the web somewhere) then convert them
@@ -95,6 +96,12 @@ sub PrefillForm {
       $default{'custom_search'}->[$2]->{$1} = $values[0];
     }
 
+    # If the name starts with `cf_`, it's a custom field's shorthand syntax.
+    # We'll append this to Custom Search conditions.
+    elsif ($name =~ /^cf_\w+$/) {
+      $custom_fields->{$name} = \@values;
+    }
+
     # If the name ends in a number (which it does for the fields which
     # are part of the email searching), we use the array
     # positions to show the defaults for that number field.
@@ -103,6 +110,28 @@ sub PrefillForm {
     }
     else {
       push(@{$default{$name}}, @values);
+    }
+  }
+
+  # Append custom fields to Custom Search
+  if (scalar keys %$custom_fields) {
+    $default{'custom_search'} //= [];
+
+    my @j_top = $buf->param('j_top');
+
+    # If the top joiner is `AND_G` or `OR`, wrap the current conditions with an
+    # extra group, then make the top joiner `AND`.
+    if (scalar @j_top && $j_top[0] ne 'AND') {
+      unshift(@{$default{'custom_search'}}, {f => 'OP', j => $j_top[0]});
+      push(@{$default{'custom_search'}}, {f => 'CP'});
+      $default{'j_top'} = ['AND'];
+    }
+
+    while (my ($name, $values) = each(%$custom_fields)) {
+      # Join multiple values with a comma, and use the `anyexact` operator
+      # because values may contain spaces.
+      push(@{$default{'custom_search'}},
+        {f => $name, o => 'anyexact', v => join(', ', @$values)});
     }
   }
 

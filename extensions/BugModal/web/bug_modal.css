@@ -84,7 +84,7 @@ a.activity-ref {
 
 .module-latch {
   padding: 4px 8px;
-  cursor: default;
+  cursor: pointer;
   -moz-user-select: none;
   -webkit-user-select: none;
   user-select: none;

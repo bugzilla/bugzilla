@@ -459,6 +459,10 @@ fieldset {
   border: 1px solid var(--control-border-color);
 }
 
+select {
+  cursor: pointer;
+}
+
 select:not([multiple]):not([size]) {
   background-position: calc(100% - 4px) center;
   background-repeat: no-repeat;
@@ -613,6 +617,7 @@ input[type="submit"] {
   font-weight: normal;
   text-shadow: none;
   box-shadow: none;
+  cursor: pointer;
 }
 
 button:hover,
@@ -695,6 +700,7 @@ input[type="radio"] {
   height: 16px;
   background-color: var(--control-background-color);
   vertical-align: -8px;
+  cursor: pointer;
 }
 
 input[type="checkbox"] {
@@ -751,6 +757,7 @@ input[type="radio"]:checked {
   min-width: 1em;
   min-height: 1em;
   background-color: var(--secondary-button-background-color);
+  cursor: pointer;
 }
 
 .buttons.toggle[role="radiogroup"] .item:first-child label {
@@ -798,7 +805,7 @@ input[type="radio"]:checked {
   border-style: solid;
   border-color: transparent;
   background-color: transparent;
-  cursor: default;
+  cursor: pointer;
 }
 
 [role="tab"][aria-selected="true"] {
@@ -1792,7 +1799,6 @@ input.validation_error_field {
   color: var(--control-foreground-color);
   background-color: var(--menu-background-color);
   box-shadow: var(--menu-box-shadow);
-  cursor: default;
   width: auto !important;
 }
 
@@ -1802,6 +1808,7 @@ input.validation_error_field {
   padding: 4px 8px;
   width: 100%;
   white-space: nowrap;
+  cursor: pointer;
 }
 
 .autocomplete-suggestion [itemtype] {
@@ -2038,7 +2045,7 @@ table.tabs .clickable_area {
 .dropdown-content [role="option"] {
   outline: 0;
   text-decoration: none;
-  cursor: default;
+  cursor: pointer;
 }
 
 .dropdown-content [role^="menuitem"]:hover,

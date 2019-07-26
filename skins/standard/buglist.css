@@ -74,6 +74,10 @@
   border-right: 1px solid var(--grid-border-color);
 }
 
+.bz_buglist.sortable .bz_buglist_header th {
+  cursor: pointer;
+}
+
 .bz_buglist_header th a {
   color: inherit;
 }

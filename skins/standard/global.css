@@ -13,72 +13,56 @@
   font-family: 'FiraGO';
   font-style: normal;
   font-weight: normal;
-  src: local('FiraGO Book'),
-    url('fonts/FiraGO-Book.woff2?v=1.001') format('woff2'),
-    url('fonts/FiraGO-Book.woff?v=1.001') format('woff');
+  src: local('FiraGO Book'), url('fonts/FiraGO-Book.woff2?v=1.001') format('woff2');
 }
 
 @font-face {
   font-family: 'FiraGO';
   font-style: italic;
   font-weight: normal;
-  src: local('FiraGO Book Italic'),
-    url('fonts/FiraGO-BookItalic.woff2?v=1.001') format('woff2'),
-    url('fonts/FiraGO-BookItalic.woff?v=1.001') format('woff');
+  src: local('FiraGO Book Italic'), url('fonts/FiraGO-BookItalic.woff2?v=1.001') format('woff2');
 }
 
 @font-face {
   font-family: 'FiraGO';
   font-style: normal;
   font-weight: 500;
-  src: local('FiraGO Medium'),
-    url('fonts/FiraGO-Medium.woff2?v=1.001') format('woff2'),
-    url('fonts/FiraGO-Medium.woff?v=1.001') format('woff');
+  src: local('FiraGO Medium'), url('fonts/FiraGO-Medium.woff2?v=1.001') format('woff2');
 }
 
 @font-face {
   font-family: 'FiraGO';
   font-style: italic;
   font-weight: 500;
-  src: local('FiraGO Medium Italic'),
-    url('fonts/FiraGO-MediumItalic.woff2?v=1.001') format('woff2'),
-    url('fonts/FiraGO-MediumItalic.woff?v=1.001') format('woff');
+  src: local('FiraGO Medium Italic'), url('fonts/FiraGO-MediumItalic.woff2?v=1.001') format('woff2');
 }
 
 @font-face {
   font-family: 'FiraGO';
   font-style: normal;
   font-weight: bold;
-  src: local('FiraGO SemiBold'),
-    url('fonts/FiraGO-SemiBold.woff2?v=1.001') format('woff2'),
-    url('fonts/FiraGO-SemiBold.woff?v=1.001') format('woff');
+  src: local('FiraGO SemiBold'), url('fonts/FiraGO-SemiBold.woff2?v=1.001') format('woff2');
 }
 
 @font-face {
   font-family: 'FiraGO';
   font-style: italic;
   font-weight: bold;
-  src: local('FiraGO SemiBold Italic'),
-    url('fonts/FiraGO-SemiBoldItalic.woff2?v=1.001') format('woff2'),
-    url('fonts/FiraGO-SemiBoldItalic.woff?v=1.001') format('woff');
+  src: local('FiraGO SemiBold Italic'), url('fonts/FiraGO-SemiBoldItalic.woff2?v=1.001') format('woff2');
 }
 
 @font-face {
   font-family: 'Noto Mono';
   font-style: normal;
   font-weight: normal;
-  src: local('Noto Mono'),
-    url('fonts/NotoMono-Regular.woff2?v=1.00') format('woff2'),
-    url('fonts/NotoMono-Regular.woff?v=1.00') format('woff');
+  src: local('Noto Mono'), url('fonts/NotoMono-Regular.woff2?v=1.00') format('woff2');
 }
 
 @font-face {
   font-family: 'Material Icons';
   font-style: normal;
   font-weight: normal;
-  src:
-    url('fonts/MaterialIcons-Regular.woff2') format('woff2'),
-    url('fonts/MaterialIcons-Regular.woff') format('woff');
+  src: url('fonts/MaterialIcons-Regular.woff2') format('woff2');
 }
 
 /**

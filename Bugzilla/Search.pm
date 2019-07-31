@@ -381,6 +381,9 @@ sub SPECIAL_PARSING {
 
     # BMO - add ability to use pronoun for triage owners
     triage_owner => \&_triage_owner_pronoun,
+
+    # Misc.
+    resolution => \&_chart_resolution_parser,
   };
   foreach my $field (Bugzilla->active_custom_fields({skip_extensions => 1})) {
     if ($field->type == FIELD_TYPE_DATETIME) {
@@ -2538,6 +2541,21 @@ sub _triage_owner_pronoun {
     else {
       ThrowUserError('login_required_for_pronoun');
     }
+  }
+}
+
+######################################
+# "Special Parsing" Functions: Misc. #
+######################################
+
+sub _chart_resolution_parser {
+  my ($self, $args) = @_;
+  my ($value, $operator) = @$args{qw(value operator)};
+
+  # Treat `---` as empty
+  if (trim($value) eq '---' && $operator =~ /^(?:not)?equals$/) {
+    $args->{value} = $args->{all_values} = $args->{quoted} = '';
+    $args->{operator} = $operator eq 'equals' ? 'isempty' : 'isnotempty';
   }
 }
 

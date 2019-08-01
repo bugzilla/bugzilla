@@ -719,10 +719,19 @@ input[type="radio"]:checked {
 
 .buttons.toggle[role="radiogroup"] {
   display: inline-flex;
+  overflow: hidden;
+  border: 1px solid var(--control-border-color);
+  border-radius: var(--button-border-radius);
+  color: var(--secondary-label-color);
+  background-color: var(--control-background-color);
 }
 
 .buttons.toggle[role="radiogroup"] .item {
   display: flex;
+}
+
+.buttons.toggle[role="radiogroup"] .item:not(:first-child) {
+  border-left: 1px solid var(--control-border-color);
 }
 
 .buttons.toggle[role="radiogroup"] input[type="radio"] {
@@ -734,40 +743,35 @@ input[type="radio"]:checked {
   display: flex;
   align-items: center;
   justify-content: center;
-  position: relative;
-  z-index: 1;
-  border: 1px solid var(--secondary-button-border-color);
   padding: var(--button-padding);
   min-width: 1em;
   min-height: 1em;
-  background-color: var(--secondary-button-background-color);
   cursor: pointer;
 }
 
+.buttons.toggle[role="radiogroup"] label:hover {
+  color: var(--hovered-secondary-button-foreground-color);
+  background-color: var(--hovered-secondary-button-background-color);
+}
+
 .buttons.toggle[role="radiogroup"] .item:first-child label {
-  border-top-left-radius: 4px;
-  border-bottom-left-radius: 4px;
+  border-top-left-radius: 3px;
+  border-bottom-left-radius: 3px;
 }
 
 .buttons.toggle[role="radiogroup"] .item:last-child label {
-  border-top-right-radius: 4px;
-  border-bottom-right-radius: 4px;
-}
-
-.buttons.toggle[role="radiogroup"] .item:not(:first-child) label {
-  margin-left: -1px;
-  border-left-color: var(--secondary-control-border-color);
-}
-
-.buttons.toggle[role="radiogroup"] .item:not(:last-child) label {
-  border-right-color: var(--secondary-control-border-color);
+  border-top-right-radius: 3px;
+  border-bottom-right-radius: 3px;
 }
 
 .buttons.toggle[role="radiogroup"] input[type="radio"]:checked + label {
   z-index: 2;
-  border-color: var(--secondary-button-border-color);
-  color: var(--selected-button-foreground-color);
-  background-color: var(--selected-button-background-color);
+  color: var(--secondary-button-foreground-color);
+  background-color: var(--secondary-button-background-color);
+  /* The following rules are for high contrast system themes */
+  border: 2px solid var(--secondary-button-background-color);
+  padding: 2px 10px;
+  text-decoration: underline solid var(--secondary-button-background-color);
 }
 
 .buttons.toggle[role="radiogroup"] input[type="radio"]:disabled + label {
@@ -775,7 +779,6 @@ input[type="radio"]:checked {
 }
 
 .buttons.toggle[role="radiogroup"] input[type="radio"]:focus + label {
-  z-index: 2;
   border-color: var(--focused-control-border-color);
 }
 
@@ -2784,6 +2787,7 @@ pre.comment-text {
 }
 
 .bug-type-label.iconic-text .icon {
+  display: inline-block;
   margin-right: .2em;
   font-size: 16px;
   vertical-align: bottom;

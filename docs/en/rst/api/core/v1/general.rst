@@ -52,6 +52,13 @@ The error contents look similar to:
      "code": 123
    }
 
+To protect the application from large requests, Bugzilla returns a 302 redirect
+to the homepage when your query string is too long. The current limit is 10 KB,
+which can accept roughly 1,000 bug IDs in the ``id`` parameter for the
+``/rest/bug`` method, but it could be smaller or may lead to a 414 URI Too Long
+HTTP error depending on the server configuration. Split your query into multiple
+requests if you encounter the issue.
+
 Common Data Types
 -----------------
 

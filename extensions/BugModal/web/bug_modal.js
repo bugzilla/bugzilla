@@ -56,11 +56,13 @@ $(function() {
     // update relative dates
     var relative_timer_duration = 60000;
     var relative_timer_id = window.setInterval(relativeTimer, relative_timer_duration);
-    $(document).on('show.visibility', function() {
-        relative_timer_id = window.setInterval(relativeTimer, relative_timer_duration);
-    });
-    $(document).on('hide.visibility', function() {
+
+    window.addEventListener('visibilitychange', () => {
+      if (document.hidden) {
         window.clearInterval(relative_timer_id);
+      } else {
+        relative_timer_id = window.setInterval(relativeTimer, relative_timer_duration);
+      }
     });
 
     function relativeTimer() {

@@ -137,14 +137,6 @@ function check_mini_login_fields( suffix ) {
     }
 }
 
-function set_language( value ) {
-    Cookies.set('LANG', value, {
-        expires: new Date('January 1, 2038'),
-        path: BUGZILLA.param.cookie_path
-    });
-    window.location.reload()
-}
-
 // This basically duplicates Bugzilla::Util::display_value for code that
 // can't go through the template and has to be in JS.
 function display_value(field, value) {

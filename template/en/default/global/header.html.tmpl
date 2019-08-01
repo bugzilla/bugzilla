@@ -78,7 +78,7 @@
 [% style_urls.import(jquery_css, jq_css_urls) FILTER null %]
 
 [%# Add our required jQuery plugins %]
-[% jquery.push("cookie", "devbridgeAutocomplete") %]
+[% jquery.push("devbridgeAutocomplete") %]
 
 [% IF allow_mobile && is_mobile_browser %]
   [% style_urls.push("skins/standard/mobile.css") %]

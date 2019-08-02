@@ -27,8 +27,8 @@ Bugzilla.AdvancedSearch.HistoryFilter = class HistoryFilter {
     this.$chfieldto = document.querySelector('#chfieldto');
     this.$chfieldto_button = document.querySelector('#chfieldto + button');
 
-    this.$chfieldfrom.addEventListener('input', event => this.on_date_change(event));
-    this.$chfieldto.addEventListener('input', event => this.on_date_change(event));
+    this.$chfieldfrom.addEventListener('change', event => this.on_date_change(event));
+    this.$chfieldto.addEventListener('change', event => this.on_date_change(event));
 
     // Use on-event handler because `field.js` will update it
     this.$chfieldfrom_button.onclick = () => showCalendar('chfieldfrom');
@@ -40,7 +40,7 @@ Bugzilla.AdvancedSearch.HistoryFilter = class HistoryFilter {
 
   /**
    * Called whenever the date field value is updated.
-   * @param {InputEvent} event `input` event fired on date fields.
+   * @param {Event} event `change` event fired on date fields.
    */
   on_date_change(event) {
     // Update the calendar when the user enters a date manually

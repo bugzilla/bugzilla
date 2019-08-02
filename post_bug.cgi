@@ -117,7 +117,6 @@ push(
     bug_status
     bug_type
     dependson
-    filed_via
     keywords
     short_desc
     op_sys

@@ -247,7 +247,6 @@ use constant ABSTRACT_SCHEMA => {
       bug_severity => {TYPE => 'varchar(64)',  NOTNULL => 1},
       bug_status   => {TYPE => 'varchar(64)',  NOTNULL => 1},
       bug_type     => {TYPE => 'varchar(20)',  NOTNULL => 1},
-      filed_via    => {TYPE => 'varchar(40)',  NOTNULL => 1, DEFAULT => "'unknown'"},
       creation_ts  => {TYPE => 'DATETIME'},
       delta_ts     => {TYPE => 'DATETIME',     NOTNULL => 1},
       short_desc   => {TYPE => 'varchar(255)', NOTNULL => 1},

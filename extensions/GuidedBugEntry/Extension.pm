@@ -22,12 +22,6 @@ use Bugzilla::Extension::BMO::Data;
 
 our $VERSION = '1';
 
-sub bug_file_methods {
-  my ($self, $args) = @_;
-
-  push(@{$args->{methods}}, 'guided_form');
-}
-
 sub enter_bug_start {
   my ($self, $args) = @_;
   my $vars     = $args->{vars};

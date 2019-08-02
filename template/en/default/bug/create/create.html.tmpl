@@ -223,7 +223,6 @@ TUI_hide_default('expert_fields');
 <form name="Create" id="Create" method="post" action="[% basepath FILTER none %]post_bug.cgi"
       class="enter_bug_form" enctype="multipart/form-data"
       onsubmit="return validateEnterBug(this)">
-<input type="hidden" name="filed_via" value="standard_form">
 <input type="hidden" name="product" value="[% product.name FILTER html %]">
 <input type="hidden" name="token" value="[% token FILTER html %]">
 <input type="hidden" name="bug_ignored" value="[% bug_ignored ? "1" : "0" %]">

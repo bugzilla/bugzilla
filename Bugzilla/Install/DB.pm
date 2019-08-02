@@ -798,10 +798,6 @@ sub update_table_definitions {
 
   _add_oauth2_jwt_support();
 
-  # Bug 1565403 - kohei.yoshino@gmail.com
-  $dbh->bz_add_column('bugs', 'filed_via',
-    {TYPE => 'varchar(40)', NOTNULL => 1, DEFAULT => "'unknown'"});
-
   ################################################################
   # New --TABLE-- changes should go *** A B O V E *** this point #
   ################################################################

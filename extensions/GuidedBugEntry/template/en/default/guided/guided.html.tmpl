@@ -26,7 +26,7 @@
 
 <noscript>
 You require JavaScript to use this [% terms.bug %] entry form.<br><br>
-Please use the <a href="[% basepath FILTER none %]enter_bug.cgi?format=__default__">standard [% terms.bug %] entry form</a>.
+Please use the <a href="[% basepath FILTER none %]enter_bug.cgi?format=__default__">advanced [% terms.bug %] entry form</a>.
 </noscript>
 
 <div id="loading" class="hidden">
@@ -47,7 +47,7 @@ YAHOO.util.Dom.removeClass('loading', 'hidden');
 <div id="advanced">
   <a id="advanced_img" href="[% basepath FILTER none %]enter_bug.cgi?format=__default__"><img
   src="[% basepath FILTER none %]extensions/GuidedBugEntry/web/images/advanced.png" width="16" height="16" border="0"></a>
-  <a id="advanced_link" href="[% basepath FILTER none %]enter_bug.cgi?format=__default__">Switch to the standard [% terms.bug %] entry form</a>
+  <a id="advanced_link" href="[% basepath FILTER none %]enter_bug.cgi?format=__default__">Switch to the advanced [% terms.bug %] entry form</a>
 </div>
 
 <script [% script_nonce FILTER none %]>
@@ -325,7 +325,6 @@ Product: <b><span id="dupes_product_name">?</span></b>:
 [% INCLUDE page_title %]
 
 <form method="post" action="[% basepath FILTER none %]post_bug.cgi" enctype="multipart/form-data" onsubmit="return bugForm.validate()">
-<input type="hidden" name="filed_via" value="guided_form">
 <input type="hidden" name="token" value="[% token FILTER html %]">
 <input type="hidden" name="product" id="product" value="">
 <input type="hidden" name="component" id="component" value="">

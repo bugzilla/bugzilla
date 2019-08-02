@@ -878,9 +878,6 @@ sub create {
 
   $params = Bugzilla::Bug::map_fields($params);
 
-  # Define the bug file method if missing
-  $params->{filed_via} //= 'api';
-
   my $flags = delete $params->{flags};
 
   # We start a nested transaction in case flag setting fails
@@ -1528,9 +1525,6 @@ sub _bug_to_hash {
   }
   if (filter_wants $params, 'duplicates') {
     $item{'duplicates'} = [map { $self->type('int', $_->id) } @{$bug->duplicates}];
-  }
-  if (filter_wants $params, 'filed_via', ['extra']) {
-    $item{'filed_via'} = $self->type('string', $bug->filed_via);
   }
   if (filter_wants $params, 'groups') {
     my @groups = map { $self->type('string', $_->name) } @{$bug->groups_in};
@@ -2874,13 +2868,6 @@ take.
 If you are not in the time-tracking group, this field will not be included
 in the return value.
 
-=item C<filed_via>
-
-How the bug was filed, e.g. C<standard_form>.
-
-This is an B<extra> field returned only by specifying C<filed_via> or
-C<_extra> in C<include_fields>.
-
 =item C<flags>
 
 An array of hashes containing the information about flags currently set
@@ -3231,9 +3218,8 @@ and all custom fields.
 in Bugzilla B<4.4>.
 
 =item The C<attachments>, C<comment_count>, C<comments>, C<counts>,
-C<description>, C<duplicates>, C<filed_via>, C<history>, C<regressed_by>,
-C<regressions>, C<triage_owner> and C<type> fields were added in Bugzilla
-B<6.0>.
+C<description>, C<duplicates>, C<history>, C<regressed_by>, C<regressions>,
+C<triage_owner> and C<type> fields were added in Bugzilla B<6.0>.
 
 =back
 
@@ -3511,10 +3497,6 @@ backwards compatibility with older Bugzillas.
 
 C<string> The description (initial comment) of the bug.
 
-=item C<filed_via>
-
-C<string> Searches for bugs that were created with this method.
-
 =item C<id>
 
 C<int> The numeric id of the bug.
@@ -3743,9 +3725,6 @@ the version the bug was found in.
 
 =item C<description> (string) B<Defaulted> - The description (initial comment)
 of the bug. Some Bugzilla installations require this to not be blank.
-
-=item C<filed_via> (string) B<Defaulted> - How the bug is being filed.
-It will be C<api> by default when filing through the API.
 
 =item C<op_sys> (string) B<Defaulted> - The operating system the bug was
 discovered on.

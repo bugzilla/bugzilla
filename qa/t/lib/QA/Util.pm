@@ -227,8 +227,8 @@ sub file_bug_in_product {
   $sel->wait_for_page_to_load(WAIT_TIME);
 
   # Use normal bug form instead of helper
-  if ($sel->is_text_present('Switch to the advanced bug entry form')) {
-    $sel->click_ok('//a[@id="advanced_link"]', undef, 'Switch to the advanced bug entry form');
+  if ($sel->is_text_present('Switch to the standard bug entry form')) {
+    $sel->click_ok('//a[@id="advanced_link"]', undef, 'Switch to the standard bug entry form');
   }
 
   my $title = $sel->get_title();

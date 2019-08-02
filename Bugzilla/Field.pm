@@ -423,6 +423,7 @@ use constant DEFAULT_FIELDS => (
   },
 
   {name => 'target_milestone',    desc => 'Target Milestone',   buglist    => 1},
+  {name => 'filed_via', desc => 'Filed via', buglist => 1,},
   {
     name    => 'creation_ts',
     desc    => 'Opened',

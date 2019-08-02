@@ -62,6 +62,7 @@
 
 <form method="post" action="[% basepath FILTER none %]post_bug.cgi" id="mozListRequestForm"
       enctype="multipart/form-data" onSubmit="return trySubmit();">
+  <input type="hidden" name="filed_via" value="custom_form">
   <input type="hidden" id="format" name="format" value="mozlist">
   <input type="hidden" id="product" name="product" value="mozilla.org">
   <input type="hidden" id="rep_platform" name="rep_platform" value="All">

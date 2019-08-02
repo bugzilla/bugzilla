@@ -5,7 +5,7 @@
           maintainer CDATA #REQUIRED
           exporter CDATA #IMPLIED
 >
-<!ELEMENT bug (bug_id, (alias?, creation_ts, short_desc, delta_ts, reporter_accessible,
+<!ELEMENT bug (bug_id, (alias?, filed_via, creation_ts, short_desc, delta_ts, reporter_accessible,
     cclist_accessible, classification_id, classification, product, component,
     version, rep_platform, op_sys, bug_status, resolution?, dup_id?, duplicates*, see_also*,
     bug_file_loc?, status_whiteboard?, keywords*, bug_type, priority, bug_severity,

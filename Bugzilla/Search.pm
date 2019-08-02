@@ -2257,11 +2257,7 @@ sub _timestamp_translate {
   my $value = $args->{value};
   my $dbh   = Bugzilla->dbh;
 
-  # Allow to support custom date pronouns
-  Bugzilla::Hook::process('search_timestamp_translate',
-    {search => $self, args => $args});
-
-  return if $value !~ /^(?:[\+\-]?\d+[hdwmy]s?|now)$/i;
+  return if $value !~ /^(?:[\+\-]?\d+[hdwmy]s?|now)$/i && $value !~ /^%\w+%$/;
 
   $value = SqlifyDate($value);
 
@@ -2304,6 +2300,16 @@ sub SqlifyDate {
   if ($str eq "") {
     my ($sec, $min, $hour, $mday, $month, $year, $wday) = localtime(time());
     return sprintf("%4d-%02d-%02d 00:00:00", $year + 1900, $month + 1, $mday);
+  }
+
+  # Allow to support custom date pronouns
+  if ($str =~ /^%(\w+)%$/) {
+    my $pronoun = {name => uc($1)};
+    Bugzilla::Hook::process('search_date_pronoun', {pronoun => $pronoun});
+    unless ($pronoun->{date}) {
+      ThrowUserError('illegal_date_pronoun', {pronoun => $str});
+    }
+    return $pronoun->{date};
   }
 
   if ($str =~ /^(-|\+)?(\d+)([hdwmy])(s?)$/i) {    # relative date

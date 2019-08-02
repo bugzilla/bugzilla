@@ -2738,18 +2738,16 @@ sub search_params_to_data_structure {
 
 # Allow to use Firefox release date pronouns, including `%LAST_MERGE_DATE%`,
 # `%LAST_RELEASE_DATE%` and `%LAST_SOFTFREEZE_DATE%`.
-sub search_timestamp_translate {
+sub search_date_pronoun {
   my ($self, $args) = @_;
-  $args = $args->{args};
-  my $key = uc($args->{value});
-  $key =~ s/^%([A-Z_]+)%$/$1/;
+  my $pronoun = $args->{pronoun};
+  my $key = $pronoun->{name};
   my $keys = ['LAST_MERGE_DATE', 'LAST_RELEASE_DATE', 'LAST_SOFTFREEZE_DATE'];
   return unless grep(/^$key$/, @$keys);
 
   my $date = _fetch_product_version_file('firefox')->{$key};
   ThrowUserError('product_date_pronouns_unavailable') unless $date;
-  $args->{value}  = $date;
-  $args->{quoted} = Bugzilla->dbh->quote($date);
+  $pronoun->{date} = $date;
 }
 
 sub tf_buglist_columns {

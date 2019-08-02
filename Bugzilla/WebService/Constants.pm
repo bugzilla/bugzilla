@@ -70,6 +70,7 @@ use constant WS_ERROR_CODE => {
   number_too_large      => 54,
   number_too_small      => 55,
   illegal_date          => 56,
+  illegal_date_pronoun  => 57,
 
   # Bug errors usually occupy the 100-200 range.
   improper_bug_id_field_value => 100,

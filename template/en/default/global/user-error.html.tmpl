@@ -977,6 +977,10 @@
       Please use the format '<tt>[% format FILTER html %]</tt>'.
     [% END %]
 
+  [% ELSIF error == "illegal_date_pronoun" %]
+    [% title = "Illegal Date Pronoun" %]
+    '<code>[% pronoun FILTER html %]</code>' is not a legal date pronoun.
+
   [% ELSIF error == "illegal_email_address" %]
     [% title = "Invalid Email Address" %]
     The e-mail address you entered (<b>[% addr FILTER html %]</b>)

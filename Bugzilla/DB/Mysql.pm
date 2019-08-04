@@ -346,10 +346,11 @@ sub bz_setup_database {
     die install_string('mysql_innodb_settings') unless $utf8mb4_supported;
 
     my $tables = $self->selectall_arrayref('SHOW TABLE STATUS');
-    foreach my $table (@$tables) {
-      my ($table, undef, undef, $row_format) = @$table;
+    foreach my $table_status (@$tables) {
+      my ($table, undef, undef, $row_format) = @$table_status;
+      my $table_type = $table_status->[-1];
       my $new_row_format = $self->default_row_format($table);
-      next if lc($table->[-1]) eq 'view';
+      next if lc($table_type) eq 'view';
       next if lc($new_row_format) eq 'compact';
       next if lc($row_format) eq 'dynamic';
       next if lc($row_format) eq 'compressed';

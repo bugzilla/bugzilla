@@ -482,8 +482,8 @@ use constant SAFE_PROTOCOLS => (
 
 # Valid MIME types for attachments.
 use constant LEGAL_CONTENT_TYPES => (
-  'application', 'audio',     'image', 'message',
-  'model',       'multipart', 'text',  'video'
+  'application', 'audio',     'font', 'image', 'message',
+  'model',       'multipart', 'text', 'video'
 );
 
 use constant contenttypes => {

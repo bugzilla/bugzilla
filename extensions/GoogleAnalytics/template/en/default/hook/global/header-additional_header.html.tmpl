@@ -6,9 +6,9 @@
   # defined by the Mozilla Public License, v. 2.0.
   #%]
 
-[%# Disable tracking of DNT-enabled users, security group members as well as private bugs #%]
+[%# Disable tracking of DNT-enabled users as well as private bugs #%]
 [% RETURN IF !Bugzilla.params.google_analytics_tracking_id || Bugzilla.cgi.http('dnt') == '1' ||
-    user.in_group(Param('insidergroup')) || (bug.defined && bug.groups_in.size) %]
+    (bug.defined && bug.groups_in.size) %]
 
 <meta name="google-analytics" content="[% Bugzilla.params.google_analytics_tracking_id FILTER html %]" data-location="
   [%~ urlbase FILTER html %][% template.name.replace('\.html\.tmpl$', '') FILTER html ~%]

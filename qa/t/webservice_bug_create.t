@@ -13,7 +13,7 @@ use strict;
 use warnings;
 use lib qw(lib ../../lib ../../local/lib/perl5);
 use Storable qw(dclone);
-use Test::More tests => 293;
+use Test::More tests => 311;
 use QA::Util;
 use QA::Tests qw(create_bug_fields PRIVATE_BUG_USER);
 
@@ -67,6 +67,14 @@ my $fields = {
   status => {
     invalid => {
       faultstring => "There is no status named 'does-not-exist'",
+      value       => 'does-not-exist'
+    },
+  },
+
+  type => {
+    undefined => {faultstring => 'you must first choose a type', value => undef},
+    invalid   => {
+      faultstring => "There is no Type named 'does-not-exist'.",
       value       => 'does-not-exist'
     },
   },
@@ -155,6 +163,7 @@ my @tests = (
     user => PRIVATE_BUG_USER,
     args => {
       %$bug_fields,
+      type             => 'defect',
       product          => 'QA-Selenium-TEST',
       component        => 'QA-Selenium-TEST',
       target_milestone => 'QAMilestone',

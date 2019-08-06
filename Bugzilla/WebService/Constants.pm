@@ -157,6 +157,9 @@ use constant WS_ERROR_CODE => {
   flag_type_not_unique         => 133,
   flag_type_inactive           => 134,
 
+  # Bug Type errors
+  bug_type_required => 135,
+
   # Authentication errors are usually 300-400.
   invalid_username_or_password => 300,
   account_disabled             => 301,

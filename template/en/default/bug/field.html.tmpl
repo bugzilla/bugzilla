@@ -28,6 +28,10 @@
   #   override_legal_values (optional): The list of legal values, for select fields.
   #   editable: Whether the field should be displayed as an editable
   #             <input> or as just the plain text of its value.
+  #   required: Whether the field should be entered or selected. This can override
+  #             the field definition's `is_mandatory` property.
+  #   use_buttons: Whether the field should be displayed as rich radio buttons.
+  #                Use this for a single-select field with a few options.
   #   allow_dont_change: display the --do_not_change-- option for select fields.
   #   value_span: A colspan for the table cell containing
   #               the field value.
@@ -58,13 +62,13 @@
                value="[% value FILTER html %]" size="40"
                maxlength="[% constants.MAX_FREETEXT_LENGTH FILTER none %]"
                [% IF field.type == constants.FIELD_TYPE_INTEGER %] pattern="\d+[% IF dontchange %]|[% dontchange FILTER html %][% END %]" [% END %]
-               [% ' aria-required="true"' IF field.is_mandatory %]>
+               [% ' aria-required="true"' IF (field.is_mandatory || required) %]>
     [% CASE [constants.FIELD_TYPE_DATETIME, constants.FIELD_TYPE_DATE] %]
       [% size = (field.type == constants.FIELD_TYPE_DATE) ? 10 : 20 %]
       <input name="[% field.name FILTER html %]" size="[% size FILTER none %]"
              id="[% field.name FILTER html %]"
              value="[% value FILTER html %]"
-             [% ' aria-required="true"' IF field.is_mandatory %]
+             [% ' aria-required="true"' IF (field.is_mandatory || required) %]
              onchange="updateCalendarFromField(this)">
       <button type="button" class="calendar_button"
               id="button_calendar_[% field.name FILTER html %]"
@@ -81,7 +85,7 @@
         <span id="[% field.name FILTER html %]_input_area">
           <input name="[% field.name FILTER html %]" id="[% field.name FILTER html %]"
                  value="[% value FILTER html %]" size="7"
-                 [% ' aria-required="true"' IF field.is_mandatory %]>
+                 [% ' aria-required="true"' IF (field.is_mandatory || required) %]>
 
         </span>
 
@@ -104,7 +108,7 @@
         <input type="hidden" id="[% field.name FILTER html %]_dirty">
         [% IF use_buttons %]
         <div role="radiogroup" class="buttons toggle" id="[% field.name FILTER html %]"
-             [% ' aria-required="true"' IF field.is_mandatory %]>
+             [% ' aria-required="true"' IF (field.is_mandatory || required) %]>
         [% ELSE %]
         <select id="[% field.name FILTER html %]"
                 name="[% field.name FILTER html %]"
@@ -114,7 +118,7 @@
                         [% SET field_size = field.legal_values.size %]
                     [% END %]
                     size="[% field_size FILTER html %]" multiple="multiple"
-                    [% ' aria-required="true"' IF field.is_mandatory %]
+                    [% ' aria-required="true"' IF (field.is_mandatory || required) %]
                 [% END %]
                 >
           [% IF allow_dont_change %]
@@ -162,7 +166,7 @@
             [% END %]
 
             [% IF use_buttons %]
-            [% NEXT IF field.is_mandatory && legal_value.name == '--' %]
+            [% NEXT IF (field.is_mandatory || required) && legal_value.name == '--' %]
             <div class="item">
               <input id="[% option_id FILTER html %]" type="radio"
                      name="[% field.name FILTER html %]" value="[% legal_value.name FILTER html %]"
@@ -223,7 +227,7 @@
        <div id="[% field.name FILTER html %]_input">
          [% INCLUDE global/textarea.html.tmpl
             id = field.name name = field.name minrows = 4 maxrows = 8
-            cols = 60 defaultcontent = value mandatory = field.is_mandatory %]
+            cols = 60 defaultcontent = value mandatory = (field.is_mandatory || required) %]
        </div>
        <script [% script_nonce FILTER none %]>
          hideEditableField('[% field.name FILTER js %]_edit_container',

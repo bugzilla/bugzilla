@@ -40,6 +40,8 @@ sub get_param_list {
 
     {name => 'use_see_also', type => 'b', default => 1},
 
+    {name => 'require_bug_type', type => 'b', default => 1},
+
     {
       name    => 'default_bug_type',
       type    => 's',

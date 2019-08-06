@@ -653,7 +653,8 @@ priority            string   (defaulted) What order the bug will be fixed in by
                              the developer, compared to the developer's other
                              bugs.
 severity            string   (defaulted) How severe the bug is.
-type                string   (defaulted) The basic category of the bug.
+type                string   (defaulted) The basic category of the bug. Some
+                             Bugzilla installations require this to be specified.
 alias               string   The alias for the bug that can be used instead of a
                              bug number when accessing this bug. Must be unique
                              in all of this Bugzilla.
@@ -762,6 +763,8 @@ id    int   This is the ID of the newly-filed bug.
   the type id value to update or add a flag.
 * 134 (Inactive Flag Type)
   The flag type is inactive and cannot be used to create new flags.
+* 135 (Bug Type Required)
+  You didn't specify a type for the bug.
 * 504 (Invalid User)
   Either the QA Contact, Assignee, or CC lists have some invalid user
   in them. The error message will have more details.

@@ -207,6 +207,7 @@ Example response for authenticated user:
           "noresolveonopenblockers" : "0",
           "password_complexity" : "no_constraints",
           "rememberlogin" : "on",
+          "require_bug_type" : "1",
           "requirelogin" : "0",
           "urlbase" : "http://bugzilla.example.com/",
           "use_regression_fields" : "1",
@@ -247,6 +248,7 @@ A logged-in user can access the following parameters (listed alphabetically):
 * noresolveonopenblockers
 * password_complexity
 * rememberlogin
+* require_bug_type
 * requirelogin
 * search_allow_no_criteria
 * urlbase

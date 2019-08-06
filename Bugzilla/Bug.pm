@@ -121,7 +121,7 @@ sub VALIDATORS {
     bug_file_loc      => \&_check_bug_file_loc,
     bug_severity      => \&_check_select_field,
     bug_status        => \&_check_bug_status,
-    bug_type          => \&_check_select_field,
+    bug_type          => \&_check_bug_type,
     cc                => \&_check_cc,
     comment           => \&_check_comment,
     component         => \&_check_component,
@@ -903,24 +903,6 @@ sub create {
     unless defined $params->{bug_severity};
   $params->{priority} = Bugzilla->params->{defaultpriority}
     unless defined $params->{priority};
-
-  # Bug type can be defined at the component, product or instance level
-  unless (defined $params->{bug_type}) {
-    my $product
-      = (defined $params->{product})
-      ? Bugzilla::Product->new({name => $params->{product}, cache => 1})
-      : undef;
-    my $component
-      = ($product && defined $params->{component})
-      ? Bugzilla::Component->new({name => $params->{component}, product => $product, cache => 1})
-      : undef;
-    # The component's default bug type inherits or overrides the default bug
-    # type of the product or instance
-    $params->{bug_type}
-      = ($component)
-      ? $component->default_bug_type
-      : Bugzilla->params->{default_bug_type};
-  }
 
   # BMO - per-product hw/os defaults
   if (!defined $params->{rep_platform} || !defined $params->{op_sys}) {
@@ -1877,6 +1859,35 @@ sub _check_bug_status {
   }
 
   return $new_status->name;
+}
+
+sub _check_bug_type {
+  my ($invocant, $type, undef, $params) = @_;
+
+  if (defined $type && trim($type)) {
+    return $invocant->_check_select_field($type, 'bug_type');
+  }
+
+  if (Bugzilla->params->{'require_bug_type'}) {
+    ThrowUserError('bug_type_required');
+  }
+
+  if (blessed $invocant) {
+    return $invocant->component_obj->default_bug_type;
+  }
+
+  my $product
+    = (defined $params->{product})
+    ? Bugzilla::Product->new({name => $params->{product}, cache => 1})
+    : undef;
+  my $component
+    = ($product && defined $params->{component})
+    ? Bugzilla::Component->new({name => $params->{component}, product => $product, cache => 1})
+    : undef;
+
+  return $component
+    ? $component->default_bug_type
+    : Bugzilla->params->{default_bug_type};
 }
 
 sub _check_cc {

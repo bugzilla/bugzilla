@@ -16,7 +16,7 @@ use Data::Dumper;
 use DateTime;
 use QA::Util;
 use QA::Tests qw(bug_tests PRIVATE_BUG_USER);
-use Test::More tests => 1012;
+use Test::More tests => 1036;
 my ($config, @clients) = get_rpc_clients();
 
 my $xmlrpc = $clients[0];

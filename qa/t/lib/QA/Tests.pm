@@ -22,6 +22,7 @@ use constant INVALID_BUG_ALIAS => 'aaaaaaa12345';
 use constant PRIVATE_BUG_USER  => 'QA_Selenium_TEST';
 
 use constant CREATE_BUG => {
+  'type'        => 'defect',
   'priority'    => 'Highest',
   'status'      => 'CONFIRMED',
   'version'     => 'unspecified',

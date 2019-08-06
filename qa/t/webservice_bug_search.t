@@ -19,7 +19,7 @@ use List::MoreUtils qw(uniq);
 use Test::More;
 
 my ($config, @clients) = get_rpc_clients();
-plan tests => $config->{test_extensions} ? 515 : 506;
+plan tests => $config->{test_extensions} ? 533 : 524;
 
 my ($public_bug, $private_bug) = $clients[0]->bz_create_test_bugs('private');
 

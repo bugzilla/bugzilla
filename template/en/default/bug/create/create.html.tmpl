@@ -341,7 +341,7 @@ TUI_hide_default('expert_fields');
 
     [% INCLUDE bug/field.html.tmpl
       bug = default, field = bug_fields.bug_type, editable = 1, use_buttons = 1,
-      value = default.bug_type %]
+      value = default.bug_type, required = Param('require_bug_type') %]
   </tr>
 
   [% needs_extra_tr = 1 %]

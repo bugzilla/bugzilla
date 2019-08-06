@@ -257,6 +257,9 @@ use_see_also
     prevents addition of new relationships, but existing ones will continue to
     appear.
 
+require_bug_type
+    If this is on, users are asked to choose a type when they file a new bug.
+
 default_bug_type
     This is the type that newly entered bugs are set to.
 

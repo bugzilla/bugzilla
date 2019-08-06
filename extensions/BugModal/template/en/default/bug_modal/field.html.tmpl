@@ -29,7 +29,8 @@
   #                 edit HTML instead of replacing it.  forces edit_only (default: false);
   # default: (string) default value (e.g. used as a placeholder in user fields)
   # help: (string) optional URL that describes the field (requires a label to be defined and visible)
-  # required: (boolean) if the field is required. (At present, only implemented for FIELD_TYPE_FREETEXT)
+  # required: (boolean) if the field is required. (At present, only implemented for FIELD_TYPE_FREETEXT
+  #           and FIELD_TYPE_SINGLE_SELECT)
   # action: (hash) show a button to the right of the edit field (user fields only currently).  keys:
   #   id: (string) optional button id
   #   class: (string) optional button class
@@ -191,12 +192,12 @@ END;
           <input type="hidden" id="[% name FILTER html %]-dirty">
           [% IF use_buttons %]
           <div role="radiogroup" class="buttons toggle" id="[% name FILTER html %]"
-               [%= 'aria-required="true"' IF field.is_mandatory %] [%= aria_labelledby_html FILTER none %]>
+               [%= 'aria-required="true"' IF (field.is_mandatory || required) %] [%= aria_labelledby_html FILTER none %]>
             [% IF values.defined %]
               [% FOREACH v IN values %]
                 [% NEXT IF NOT v.is_active AND NOT value.contains(v.name).size %]
                 [% NEXT IF NOT bug.check_can_change_field(name, bug.${field_name}, v.name) %]
-                [% NEXT IF field.is_mandatory && v.name == '--' %]
+                [% NEXT IF (field.is_mandatory || required) && v.name == '--' %]
                 <div class="item">
                   <input id="v[% v.id FILTER html %]_[% name FILTER html %]" type="radio" name="[% name FILTER html %]"
                          value="[% v.name FILTER html %]" [% " checked" IF value.contains(v.name).size %]>

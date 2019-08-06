@@ -83,7 +83,7 @@ use constant ALL_SELECT_FIELDS =>
 use constant PRODUCT_FIELDS => qw(version target_milestone component);
 use constant ALL_FIELDS =>
   (GLOBAL_GENERAL_FIELDS, ALL_SELECT_FIELDS, PRODUCT_FIELDS);
-use constant MANDATORY_FIELDS => qw(short_desc product version component bug_type);
+use constant MANDATORY_FIELDS => qw(short_desc product version component);
 
 use constant PUBLIC_PRODUCT  => 'Another Product';
 use constant PRIVATE_PRODUCT => 'QA-Selenium-TEST';

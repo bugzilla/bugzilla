@@ -13,7 +13,7 @@
       [% INCLUDE global/userselect.html.tmpl
           id          => "needinfo_from"
           name        => "needinfo_from"
-          value       => ""
+          value       => cgi.param('needinfo_from')
           size        => 30
           multiple    => 5
           field_title => "Enter one or more comma separated users to request more information from"

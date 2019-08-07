@@ -26,7 +26,12 @@ sub run {
     = JSON::MaybeXS->new(convert_blessed => 1, canonical => 1, pretty => 1);
   my $class       = 'Simple';
   my $working_dir = cwd();
-  my ($namespace, $doctype, $page, $rows, $base_url, $test, $dump_schema, $dump_documents, $since);
+  my $dbh         = Bugzilla->dbh;
+  my (
+    $namespace, $doctype,  $page,        $rows,
+    $base_url,  $test,     $dump_schema, $dump_documents,
+    $since,     $since_db, $current_ts
+  );
 
   Bugzilla->usage_mode(USAGE_MODE_CMDLINE);
   getopt \@args,
@@ -34,6 +39,7 @@ sub run {
     'page|p=i'       => \$page,
     'rows|r=i'       => \$rows,
     'since=s'        => \$since,
+    'since-db'       => \$since_db,
     'dump-schema'    => \$dump_schema,
     'dump-documents' => \$dump_documents,
     'class|c=s'      => \$class,
@@ -58,8 +64,17 @@ sub run {
     }
     exit 1;
   };
+
+  if ($since_db) {
+    my $current_ts = $dbh->selectrow_array('SELECT LOCALTIMESTAMP(0)');
+    $since
+      = $dbh->selectrow_array(
+      'SELECT last_ping_ts FROM report_ping WHERE class = ?',
+      undef, $class);
+  }
+
   my $report = $class->new(
-    model           => Bugzilla->dbh->model,
+    model           => $dbh->model,
     base_url        => $base_url,
     maybe rows      => $rows,
     maybe page      => $page,
@@ -69,7 +84,7 @@ sub run {
   );
 
   if ($dump_schema) {
-    my $schema =  $report->validator->schema->data ;
+    my $schema = $report->validator->schema->data;
     $schema->{'$schema'} = "http://json-schema.org/draft-04/schema#";
     print $json->encode($schema);
     exit;
@@ -97,7 +112,7 @@ sub run {
       sub {
         foreach my $result (@_) {
           my $doc = $report->extract_content($result);
-          my $id = $result->id;
+          my $id  = $result->id;
           path($working_dir, "$id.json")->spurt($json->encode($doc));
         }
       }
@@ -108,9 +123,21 @@ sub run {
       $report,
       'Sending',
       sub {
-        Mojo::Promise->all(map { $report->send_row($_) } @_)->wait;
+        Mojo::Promise->all(map { $report->send_row($_) } @_)->wait if @_;
       }
     );
+
+    # Store last ping timestamp if since-db option as used
+    if ($since_db) {
+      if ($since) {
+        $dbh->do('UPDATE report_ping SET last_ping_ts = ? WHERE class = ?',
+          undef, $current_ts, $class);
+      }
+      else {
+        $dbh->do('INSERT INTO report_ping (class, last_ping_ts) VALUES (?, ?)',
+          undef, $class, $current_ts);
+      }
+    }
   }
 }
 
@@ -120,7 +147,7 @@ sub foreach_page {
   foreach my $p ($report->page .. $report->pager->last_page) {
     $rs = $rs->page($p);
     say "$label page $p of ", $report->pager->last_page;
-    $cb->( $rs->all );
+    $cb->($rs->all);
   }
 }
 
@@ -144,6 +171,7 @@ Bugzilla::App::Command::report_ping - Send a report ping to a URL';
     -r, --rows num           (Optional) Number of requests to send at once. Default: 10.
     -p, --page num           (Optional) Page to start on. Default: 1
     --since str              (Optional) Typically the date of the last run.
+    --since-db               (Optional) Store and retrieve the last run timestamp from the DB.
     --class word             (Optional) Report class to use. Default: Simple
     --test                   Validate the JSON documents against the JSON schema.
     --dump-schema            Print the JSON schema.

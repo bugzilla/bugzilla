@@ -1898,7 +1898,19 @@ use constant ABSTRACT_SCHEMA => {
     INDEXES => [
       oauth2_jwt_jti_type_idx => {FIELDS => [qw(jti type)], TYPE => 'UNIQUE'},
     ],
+  },
+
+  # Report Ping Table
+  # -----------------
+
+  report_ping => {
+    FIELDS => [
+      id           => {TYPE => 'INTSERIAL', NOTNULL => 1, PRIMARYKEY => 1},
+      class        => {TYPE => 'varchar(255)', NOTNULL => 1},
+      last_ping_ts => {TYPE => 'DATETIME', NOTNULL => 1},
+    ]
   }
+
 };
 
 # Foreign Keys are added in Bugzilla::DB::bz_add_field_tables

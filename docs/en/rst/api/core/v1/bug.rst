@@ -262,6 +262,7 @@ counts               object  An object containing the numbers of the items in th
                              ``depends_on``, ``regressed_by``, ``regressions``
                              and ``duplicates``.
 description          string  The description (initial comment) of the bug.
+filed_via            string  How the bug was filed, e.g. ``standard_form``.
 history              array   Each array item is a History object. See
                              :ref:`rest_history` for details of the object.
 tags                 array   Each array item is a tag name. Note that tags are
@@ -504,6 +505,7 @@ creator           string    The login name of the user who created the bug. You
                             ``reporter``, for backwards compatibility with
                             older Bugzillas.
 description       string    The description (initial comment) of the bug.
+filed_via         string    Searches for bugs that were created with this method.
 id                int       The numeric ID of the bug.
 last_change_time  datetime  Searches for bugs that were modified at this time
                             or later. May not be an array.
@@ -645,6 +647,8 @@ name                type     description
 description         string   (defaulted) The description (initial comment) of the
                              bug. Some Bugzilla installations require this to not
                              be blank.
+filed_via           string   (defaulted) How the bug is being filed. It will be
+                             ``api`` by default when filing through the API.
 op_sys              string   (defaulted) The operating system the bug was
                              discovered on.
 platform            string   (defaulted) What type of hardware the bug was

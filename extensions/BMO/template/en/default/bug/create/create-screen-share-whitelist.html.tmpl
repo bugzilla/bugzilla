@@ -90,6 +90,7 @@ function fieldValue(elem_id) {
 
 <form id="whitelist_form" method="post" action="[% basepath FILTER none %]post_bug.cgi" enctype="multipart/form-data"
       onSubmit="return validateAndSubmit();">
+  <input type="hidden" name="filed_via" value="custom_form">
   <input type="hidden" name="format" value="screen-share-whitelist">
   <input type="hidden" name="product" value="Firefox">
   <input type="hidden" name="component" value="Screen Sharing Whitelist">

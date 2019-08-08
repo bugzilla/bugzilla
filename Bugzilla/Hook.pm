@@ -400,6 +400,20 @@ User is not a sufficiently empowered user, so B<deny>.
 
 =back
 
+=head2 bug_file_methods
+
+This happens in L<Bugzilla::Bug/BUG_FILE_METHODS>, and allows you to add one or
+more valid file methods stored with bugs.
+
+Params:
+
+=over
+
+=item C<method> - A arrayref containing an array of method names. Push your
+method name(s) onto the array.
+
+=back
+
 =head2 bug_fields
 
 Allows the addition of database fields from the bugs table to the standard

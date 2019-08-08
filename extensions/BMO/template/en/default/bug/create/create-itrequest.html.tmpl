@@ -93,6 +93,7 @@
 
 <form method="post" action="[% basepath FILTER none %]post_bug.cgi" id="itRequestForm" enctype="multipart/form-data"
       onsubmit="return on_submit()">
+  <input type="hidden" name="filed_via" value="custom_form">
   <input type="hidden" id="product" name="product" value="Infrastructure & Operations">
   <input type="hidden" name="rep_platform" value="All">
   <input type="hidden" name="op_sys" value="Other">

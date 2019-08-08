@@ -72,6 +72,7 @@ $(function() {
 <p>[ <span class="required_star">*</span> <span class="required_explanation">Required Field</span> ]</p>
 
 <form method="post" action="[% basepath FILTER none %]post_bug.cgi" id="nameForm">
+  <input type="hidden" name="filed_via" value="custom_form">
   <input type="hidden" id="short_desc" name="short_desc" value="New Name Clearance Request">
   <input type="hidden" name="product" value="Legal">
   <input type="hidden" name="component" value="Name Clearance (Trademark Search)">

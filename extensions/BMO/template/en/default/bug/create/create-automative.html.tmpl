@@ -80,6 +80,7 @@ function validateAndSubmit() {
 
 <form id="automative_form" method="post" action="[% basepath FILTER none %]post_bug.cgi"
   enctype="multipart/form-data" onSubmit="return validateAndSubmit();">
+  <input type="hidden" name="filed_via" value="custom_form">
   <input type="hidden" name="format" value="automative">
   <input type="hidden" name="product" value="Testing">
   <input type="hidden" name="component" value="General">

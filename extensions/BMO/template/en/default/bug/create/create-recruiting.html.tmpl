@@ -72,6 +72,7 @@ function jobDescToggle(what) {
   </p>
 
   <form method="post" action="[% basepath FILTER none %]post_bug.cgi" id="recruitingForm" enctype="multipart/form-data">
+    <input type="hidden" name="filed_via" value="custom_form">
     <input type="hidden" name="product" value="Recruiting">
     <input type="hidden" name="component" value="General">
     <input type="hidden" name="rep_platform" value="All">

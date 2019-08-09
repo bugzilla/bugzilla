@@ -2277,14 +2277,12 @@ sub _last_visit_datetime {
   my ($self, $args) = @_;
   my $value = $args->{value};
 
-  $self->_datetime_translate($args);
-  if ($value eq $args->{value}) {
-
-    # Failed to translate a datetime. let's try the pronoun expando.
-    if ($value eq '%last_changed%') {
-      $self->_add_extra_column('changeddate');
-      $args->{value} = $args->{quoted} = 'bugs.delta_ts';
-    }
+  if ($value eq '%last_changed%') {
+    $self->_add_extra_column('changeddate');
+    $args->{value} = $args->{quoted} = 'bugs.delta_ts';
+  }
+  else {
+    $self->_datetime_translate($args);
   }
 }
 

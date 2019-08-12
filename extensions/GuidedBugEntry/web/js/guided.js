@@ -724,10 +724,21 @@ var bugForm = {
     }
     bugForm.onVersionChange(elVersions.value);
 
-    // set default hw/os/group
-    Dom.get('rep_platform').value = product.details.default_platform;
-    Dom.get('op_sys').value = product.details.default_op_sys;
-    Dom.get('groups').value = product.details.default_security_group;
+    // Set default Platform, OS and Security Group
+    // Skip if the default value is empty = auto-detect
+    const { default_platform, default_op_sys, default_security_group } = product.details;
+
+    if (default_platform) {
+      document.querySelector('#rep_platform').value = default_platform;
+    }
+
+    if (default_op_sys) {
+      document.querySelector('#op_sys').value = default_op_sys;
+    }
+
+    if (default_security_group) {
+      document.querySelector('#groups').value = default_security_group;
+    }
   },
 
   onComponentChange: function(componentName) {

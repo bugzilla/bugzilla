@@ -37,14 +37,6 @@ sub new {
   return $self;
 }
 
-sub login_uri {
-  my ($class, $target_uri) = @_;
-
-  my $uri = URI->new(Bugzilla->localconfig->urlbase . "github.cgi");
-  $uri->query_form(target_uri => $target_uri);
-  return $uri;
-}
-
 sub authorize_uri {
   my ($class, $state) = @_;
 

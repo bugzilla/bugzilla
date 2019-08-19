@@ -123,21 +123,6 @@ sub new {
   return $self;
 }
 
-sub target_uri {
-  my ($self) = @_;
-
-  my $base = Bugzilla->localconfig->urlbase;
-  if (my $request_uri = $self->request_uri) {
-    my $base_uri = URI->new($base);
-    $base_uri->path('');
-    $base_uri->query(undef);
-    return $base_uri . $request_uri;
-  }
-  else {
-    return $base . ($self->url(-relative => 1, -query => 1) || 'index.cgi');
-  }
-}
-
 # We want this sorted plus the ability to exclude certain params
 sub canonicalize_query {
   my ($self, @exclude) = @_;

@@ -92,13 +92,6 @@ if ($confirmed || $skip_confirmation) {
       = Bugzilla::User::APIKey->create({
       user_id => $user->id, description => $description, app_id => $app_id,
       });
-    my $template = Bugzilla->template_inner($user->setting('lang'));
-    my $vars = {user => $user, new_key => $api_key};
-    my $message;
-    $template->process('email/new-api-key.txt.tmpl', $vars, \$message)
-      or ThrowTemplateError($template->error());
-
-    MessageToMTA($message);
   }
 
   my $ua = LWP::UserAgent->new();

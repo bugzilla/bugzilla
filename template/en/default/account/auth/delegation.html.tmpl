@@ -10,16 +10,19 @@
    title = "Auth Delegation Request" %]
 
 <h1>[% title FILTER html %] </h1>
-<p>
-  A third-party website (<a href="[% callback_base FILTER html %]">[% callback_base FILTER html %]</a>)
-    would like to have <strong>complete</strong> access to your [% terms.Bugzilla %] account.
-</p>
+
+<p>A third-party website (<a href="[% callback_base FILTER html %]">[% callback_base FILTER html %]</a>)
+  would like to have <strong>complete</strong> access to your [% terms.Bugzilla %] account.</p>
 
 <p>The description of the site reads:
   <blockquote>
     [% description FILTER html %]
-  </blockquote>
-</p>
+  </blockquote></p>
+
+<p>A new [% terms.Bugzilla %] API key[% IF description %], with the description
+  '[% description FILTER truncate(10) FILTER html %]'[% END %] will also be created. You can
+  view or update the key in <a href="[% basepath FILTER html %]userprefs.cgi?tab=apikey">
+  your preferences</a>.</p>
 
 <p>Do you want this website to have <strong>complete</strong> access to your [% terms.Bugzilla %]
   account?</p>

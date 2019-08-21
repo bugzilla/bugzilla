@@ -23,6 +23,8 @@
     [% INCLUDE bug_modal/user.html.tmpl
           u  = cc
           id = "ccu-" _ loop.count
+          gravatar_size = 20
+          nick_only = 1
     %]
   </div>
 [% END %]

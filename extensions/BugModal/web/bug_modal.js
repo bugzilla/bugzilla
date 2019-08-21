@@ -169,7 +169,7 @@ $(function() {
     $('#attachments-obsolete-btn')
         .click(function(event) {
             event.preventDefault();
-            $(event.target).text(($('#attachments tr:hidden').length ? 'Hide' : 'Show') + ' Obsolete Attachments');
+            $(event.target).text(($('#attachments tr:hidden').length ? 'Hide Obsolete' : 'Show Obsolete'));
             $('#attachments tr.attach-obsolete').toggle();
         });
 

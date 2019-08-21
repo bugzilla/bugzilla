@@ -12,6 +12,7 @@
   # obsolete_attachments: array of obsolete attachment objects
   #%]
 
+[% IF active_attachments || obsolete_attachments %]
 <table role="table" class="layout-table" id="attachments">
   [% FOREACH attachment IN bug.attachments %]
     [%
@@ -94,12 +95,19 @@
     </tr>
   [% END %]
 </table>
+[% END %]
 
-<div id="attachments-actions">
-  [% IF obsolete_attachments %]
-    <button type="button" id="attachments-obsolete-btn" class="secondary">Show Obsolete Attachments</button>
-  [% END %]
-</div>
-
-[%# BMO - attachment related warnings %]
-[% Hook.process("warnings") %]
+<footer id="attachments-footer">
+  <div id="attachments-actions">
+    [% IF user.id %]
+      <a href="[% basepath FILTER none %]attachment.cgi?bugid=[% bug.id FILTER uri %]&amp;action=enter" id="attachments-add-link">
+        <button type="button" role="none" id="attachments-add-btn" class="secondary">Attach New File</button>
+      </a>
+    [% END %]
+    [% IF obsolete_attachments %]
+      <button type="button" id="attachments-obsolete-btn" class="secondary">Show Obsolete</button>
+    [% END %]
+  </div>
+  [%# BMO - attachment related warnings %]
+  [% Hook.process("warnings") %]
+</footer>

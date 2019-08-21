@@ -1414,6 +1414,21 @@ input[type="radio"]:checked {
 }
 
 /**
+ * Page toolbar
+ */
+
+#page-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  color: var(--secondary-label-color);
+}
+
+#page-toolbar .buttons {
+  flex: none;
+}
+
+/**
  * Link lists
  */
 
@@ -1939,7 +1954,7 @@ table.tabs .clickable_area {
   position: absolute;
   top: calc(100% + 4px);
   right: 0;
-  z-index: 1;
+  z-index: 10;
   margin: 0;
   border-width: 1px;
   border-style: solid;
@@ -2021,7 +2036,7 @@ table.tabs .clickable_area {
 .dropdown-content li > div {
   display: block;
   box-sizing: border-box;
-  padding: 4px 8px 4px 24px;
+  padding: 4px 24px;
   width: 100%;
   color: inherit;
   background: none transparent;
@@ -2752,7 +2767,7 @@ pre.comment-text {
  */
 
 :root {
-  --bug-status-color-open: #229921;
+  --bug-status-color-open: #188716;
   --bug-status-color-closed: #1B6AB8;
   --bug-type-color-defect: #EA3C3D;
   --bug-type-color-enhancement: #2ABA27;

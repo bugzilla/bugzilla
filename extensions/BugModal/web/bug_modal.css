@@ -25,9 +25,11 @@
 .inline {
   display: table-cell !important;
   width: auto !important;
+  vertical-align: middle !important;
 }
 
 .gravatar {
+  margin-right: 4px;
   border-radius: 4px;
   vertical-align: middle;
 }
@@ -130,26 +132,25 @@ a.activity-ref {
   opacity: 0;
 }
 
-.module .fields-lhs {
-  display: table-cell;
-  min-width: 450px;
-  vertical-align: top;
-}
-
+.module .fields-lhs,
 .module .fields-rhs {
-  display: table-cell;
+  flex: none;
+  width: 50%;
   min-width: 450px;
-  width: 100%;
+  display: table-cell;
   vertical-align: top;
 }
 
 .module-content {
-  padding: 4px;
+  display: flex;
+  flex-wrap: wrap;
+  padding: 5px;
 }
 
 .module .field {
   display: table;
-  margin: 4px;
+  box-sizing: border-box;
+  margin: 4px 0;
   width: 100%;
   vertical-align: top;
 }
@@ -176,6 +177,7 @@ a.activity-ref {
 }
 
 .module .indent {
+  padding-right: 10px;
   padding-left: 10px;
 }
 
@@ -239,11 +241,12 @@ input[type="number"] {
  */
 
 #field-value-bug_id {
+  margin-left: 8px;
   font-size: var(--font-size-large);
 }
 
 #field-value-bug_id a {
-  color: inherit;
+  color: var(--primary-label-color);
 }
 
 #field-value-short_desc {
@@ -252,25 +255,57 @@ input[type="number"] {
 }
 
 #field-status_summary {
-  padding-top: 6px;
-  padding-bottom: 4px;
+  padding-top: 4px;
+  padding-bottom: 8px;
   color: var(--secondary-label-color);
 }
 
-#status-assignee,
-#status-assignee .vcard,
-#status-needinfo,
-#status-needinfo .vcard {
-  display: inline;
+#field-status_summary .bug-status-label {
+  border-radius: 4px;
+  padding: 2px 8px;
+  color: #FFF;
+  font-weight: bold;
 }
 
-#field-status_summary .bug-type-label {
-  margin-right: 8px;
+#field-status_summary .bug-status-label[data-status="open"] {
+  background-color: var(--bug-status-color-open);
 }
 
-#status-assignee,
-#status-needinfo {
+#field-status_summary .bug-status-label[data-status="closed"] {
+  background-color: var(--bug-status-color-closed);
+}
+
+#field-status_summary .bug-time-label {
   margin-left: 8px;
+  color: var(--secondary-label-color);
+}
+
+#field-status_summary .bug-time-label span {
+  text-transform: lowercase;
+}
+
+#field-importance .name {
+  vertical-align: middle;
+}
+
+#field-importance .container {
+  display: flex;
+}
+
+#field-bug_severity[style="display:none"] {
+  display: none !important; /* Override `inline` */
+}
+
+#field-resolution {
+  padding: 0;
+}
+
+#status-action-buttons,
+#duplicate-container {
+  display: inline-flex;
+  align-items: center;
+  vertical-align: top;
+  white-space: nowrap;
 }
 
 #duplicate-container,
@@ -285,6 +320,11 @@ input[type="number"] {
 
 #dup_id {
   margin-left: 4px;
+}
+
+#mark-as-assigned-btn,
+#mark-as-dup-btn {
+  white-space: nowrap;
 }
 
 #resolve-as,
@@ -339,6 +379,11 @@ input[type="number"] {
 
 #cc-latch {
   color: var(--secondary-label-color);
+}
+
+#cc-latch,
+#cc-summary {
+  cursor: default;
 }
 
 #cc-list {
@@ -421,10 +466,14 @@ input[type="number"] {
 #bottom-right-actions,
 .edit-textarea-set-btn {
   float: right;
+  margin-left: 8px;
+}
+
+#new-comment-actions {
+  float: left;
 }
 
 #bottom-actions {
-  margin-top: 8px;
   margin-bottom: 50px;
   max-width: 1024px;
 }
@@ -491,6 +540,17 @@ input[type="number"] {
 
 #attachments .vcard {
   display: inline;
+}
+
+#attachments-footer {
+  display: flex;
+  align-items: center;
+  padding: 4px;
+}
+
+#attachments-actions {
+  flex: auto;
+  display: flex;
 }
 
 #attachments-actions button {
@@ -1004,8 +1064,8 @@ h3.change-name a {
 #mode-container {
   display: table-cell;
   margin: 5px;
-  border-left: 5px solid transparent;
-  padding: 5px;
+  border-left: 10px solid transparent;
+  padding: 10px 5px;
   text-align: right;
   white-space: nowrap;
 }
@@ -1028,8 +1088,7 @@ h3.change-name a {
 }
 
 #mode-container .button-row {
-  margin-top: 4px;
-  border-left: 5px solid transparent;
+  margin: 4px 0;
 }
 
 /**
@@ -1037,7 +1096,7 @@ h3.change-name a {
  */
 
 #main-inner {
-  margin: 15px auto;
+  margin: 8px auto;
   max-width: 1024px;
   min-width: 800px;
 }
@@ -1213,9 +1272,8 @@ a.lightbox-icon.markdown {
  */
 
 #search-nav {
-  padding: 4px 8px;
-  color: var(--secondary-label-color);
-  background: var(--primary-region-header-background-color);
+  flex: auto;
+  margin: 4px;
 }
 
 #search-nav-label {
@@ -1225,10 +1283,6 @@ a.lightbox-icon.markdown {
 .search-nav-link,
 .search-nav-disabled {
   margin-left: 4px;
-}
-
-#search-nav-reget {
-  margin-left: 8px;
 }
 
 .search-nav-disabled {
@@ -1264,11 +1318,6 @@ a.lightbox-icon.markdown {
 
   #header .inner {
     width: auto !important;
-  }
-
-  .module .fields-lhs,
-  .module .fields-rhs {
-    min-width: 380px;
   }
 
   #main-inner {

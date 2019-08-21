@@ -108,7 +108,7 @@ window.addEventListener('DOMContentLoaded', () => {
   }
 
   let oldWay = false;
-  let container = document.getElementById("module-details-content");
+  let container = document.getElementById("module-crash-data-content");
   if (!container) {
     container = document.getElementById("field_label_cf_crash_signature");
     oldWay = true;
@@ -331,7 +331,8 @@ window.addEventListener('DOMContentLoaded', () => {
       divButton.setAttribute("style", "display:none;");
       button.setAttribute("type", "button");
       button.setAttribute("style", "position:absolute;right:0;top:0");
-      button.innerText = "Update status flags";
+      button.classList.add("minor");
+      button.innerText = "Update Status Flags";
       button.addEventListener("click", updateStatusFlags, false);
       divButton.append(button);
       rightDiv.append(divButton);
@@ -391,7 +392,7 @@ window.addEventListener('DOMContentLoaded', () => {
         mainDiv.setAttribute("class", "field");
         const leftDiv = document.createElement("div");
         leftDiv.setAttribute("class", "name");
-        leftDiv.innerText = "Crash Data:";
+        leftDiv.innerText = "Stats:";
         mainDiv.append(leftDiv, rightDiv);
         container.append(mainDiv);
       }

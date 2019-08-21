@@ -96,8 +96,6 @@
   # build Firefox flags subtitle
   firefox_flags = [];
   firefox_fixed_versions = [];
-  scores = {firefox => 0, thunderbird => 0, seamonkey => 0};
-  tracking_flags_title = "Firefox Tracking Flags";
   # project flags
   FOREACH row IN tracking_flags_table;
     NEXT UNLESS row.type == "project";
@@ -127,18 +125,6 @@
       END;
     END;
     firefox_flags.push(blurb);
-    IF row.name.search("^thunderbird");
-      scores.thunderbird = scores.thunderbird + 1;
-    ELSIF row.name.search("^seamonkey");
-      scores.seamonkey = scores.seamonkey + 1;
-    ELSE;
-      scores.firefox = scores.firefox + 1;
-    END;
-  END;
-  IF scores.thunderbird AND NOT scores.firefox;
-    tracking_flags_title = "Thunderbird Tracking Flags";
-  ELSIF scores.seamonkey AND NOT scores.firefox;
-    tracking_flags_title = "SeaMonkey Tracking Flags";
   END;
   firefox_fixed_version = firefox_fixed_versions.join(", ");
   IF firefox_flags.size;
@@ -156,9 +142,110 @@
   <input type="hidden" name="format" value="modal">
   <input type="hidden" name="editing" id="editing" value="">
   <input type="hidden" name="token" value="[% issue_hash_token([bug.id, bug.delta_ts]) FILTER html %]">
-
-  [% PROCESS bug_modal/navigate.html.tmpl %]
 [% END %]
+
+<div role="toolbar" id="page-toolbar">
+  [% IF user.id %]
+    [% PROCESS bug_modal/navigate.html.tmpl %]
+  [% END %]
+  <div role="group" class="buttons">
+    <button type="button" id="copy-summary" class="secondary"
+      title="Copy [% terms.bug %] number and summary to your clipboard">Copy Summary</button>
+    <div id="clip-container" style="display:none"><input type="text" id="clip"></div>
+    [% IF user.id %]
+      <button type="button" class="secondary" id="cc-btn" data-is-cced="[% is_cced ? 1 : 0 %]">
+        [%~ is_cced ? "Stop Following" : "Follow" ~%]
+      </button>
+    [% END %]
+    <div class="dropdown">
+      <button type="button" id="action-menu-btn" aria-haspopup="true" aria-label="View"
+        aria-expanded="false" aria-controls="action-menu" class="dropdown-button secondary">View &#9662;</button>
+      <ul class="dropdown-content left" id="action-menu" role="menu" style="display:none;">
+        [% IF user.id %]
+        <li role="presentation">
+          <a id="action-enable-perm-edit" role="menuitemcheckbox" tabindex="-1">Always Enable Edit Mode</a>
+        </li>
+        <li role="separator"></li>
+        [% END %]
+        <li role="presentation">
+          <a id="action-reset" role="menuitem" tabindex="-1">Reset Sections</a>
+        </li>
+        <li role="presentation">
+          <a id="action-expand-all" role="menuitem" tabindex="-1">Expand All Sections</a>
+        </li>
+        <li role="presentation">
+          <a id="action-collapse-all" role="menuitem" tabindex="-1">Collapse All Sections</a>
+        </li>
+        <li role="separator"></li>
+        <li role="presentation">
+          <a id="action-history" role="menuitem" tabindex="-1">History</a>
+        </li>
+        <li role="separator"></li>
+        <li role="presentation">
+          <a href="[% basepath FILTER none %]rest/bug/[% bug.id FILTER uri %]" role="menuitem" tabindex="-1">JSON</a>
+        </li>
+        <li role="presentation">
+          <a href="[% basepath FILTER none %]show_bug.cgi?ctype=xml&amp;id=[% bug.id FILTER uri %]" role="menuitem" tabindex="-1">XML</a>
+        </li>
+      </ul>
+    </div>
+    [% IF user.id %]
+      <div class="dropdown">
+        <button type="button" id="new-bug-btn" aria-haspopup="true" aria-label="New/Clone [% terms.Bug %]"
+          aria-expanded="false" aria-controls="new-bug-menu" class="dropdown-button secondary">New/Clone &#9662;</button>
+        <ul class="dropdown-content left" id="new-bug-menu" role="menu" style="display:none;">
+          <li role="presentation">
+            <a href="[% basepath FILTER none %]enter_bug.cgi" role="menuitem" tabindex="-1" target="_blank">
+              Create a new [% terms.bug %]</a>
+          </li>
+          <li role="presentation">
+            <a href="[% basepath FILTER none %]enter_bug.cgi?product=[% bug.product FILTER uri %]"
+              role="menuitem" tabindex="-1" target="_blank">&#8230; in this product</a>
+          </li>
+          <li role="presentation">
+            <a href="[% basepath FILTER none %]enter_bug.cgi?product=[% bug.product FILTER uri %]&amp;component=[% bug.component FILTER uri %]"
+              role="menuitem" tabindex="-1" target="_blank">&#8230; in this component</a>
+          </li>
+          <li role="separator"></li>
+          <li role="presentation">
+            <a href="[% basepath FILTER none %]enter_bug.cgi?format=__default__&amp;blocked=[% bug.id FILTER uri %]
+                    [%~%]&amp;product=[% bug.product FILTER uri %]&amp;component=[% bug.component FILTER uri %]"
+              role="menuitem" tabindex="-1" target="_blank">&#8230; that blocks this [% terms.bug %]</a>
+          </li>
+          <li role="presentation">
+            <a href="[% basepath FILTER none %]enter_bug.cgi?format=__default__&amp;dependson=[% bug.id FILTER uri %]
+                    [%~%]&amp;product=[% bug.product FILTER uri %]&amp;component=[% bug.component FILTER uri %]"
+              role="menuitem" tabindex="-1" target="_blank">&#8230; that depends on this [% terms.bug %]</a>
+          </li>
+          <li role="presentation">
+            <a href="[% basepath FILTER none %]enter_bug.cgi?format=__default__&amp;regressed_by=[% bug.id FILTER uri %]
+                    [%~%]&amp;product=[% bug.product FILTER uri %]&amp;component=[% bug.component FILTER uri %]"
+              role="menuitem" tabindex="-1" target="_blank">&#8230; that is regressed by this [% terms.bug %]</a>
+          </li>
+          <li role="separator"></li>
+          <li role="presentation">
+            <a href="[% basepath FILTER none %]enter_bug.cgi?format=__default__&amp;cloned_bug_id=[% bug.id FILTER uri %]
+                    [%~%]&amp;product=[% bug.product FILTER uri %]&amp;component=[% bug.component FILTER uri %]"
+              role="menuitem" tabindex="-1" target="_blank">&#8230; as a clone of this [% terms.bug %]</a>
+          </li>
+          <li role="presentation">
+            <a href="[% basepath FILTER none %]enter_bug.cgi?format=__default__&amp;cloned_bug_id=[% bug.id FILTER uri %]"
+              role="menuitem" tabindex="-1" target="_blank">&#8230; as a clone, in a different product</a>
+          </li>
+        </ul>
+      </div>
+      <button type="button" id="cancel-btn" class="secondary" aria-label="Cancel Editing" style="display:none">Cancel</button>
+      <button type="button" id="mode-btn" class="primary">
+        <span id="mode-btn-readonly" title="Enable editing fields for [% terms.bug %] metadata">Edit [% terms.Bug %]</span>
+        <span id="mode-btn-loading">
+          <img id="edit-throbber" src="[% basepath FILTER none %]extensions/BugModal/web/throbber.gif" width="16" height="11">
+          Fetching
+        </span>
+      </button>
+      <button type="submit" id="commit-btn" class="save-btn primary" style="display:none">Save Changes</button>
+    [% END %]
+  </div>
+</div>
 
 [%# === header === %]
 
@@ -171,23 +258,33 @@
     title = ""
 %]
   <div id="summary-container">
-    [%# bug id, alias, and summary %]
+    [%# status summary %]
     [% WRAPPER bug_modal/field.html.tmpl
         container = 1
+        name = "status_summary"
         no_label = 1
-        view_only = 1
     %]
-      <div id="field-value-bug_id">
+      <span class="bug-status-label text" data-status="[% bug.isopened ? 'open' : 'closed' %]">
+        [%~ bug.isopened ? 'Open' : 'Closed' ~%]
+      </span>
+      <span id="field-value-bug_id">
         <a href="[% basepath _ "show_bug.cgi?id=" _ bug.id FILTER html %]">
           [%~ terms.Bug _ " " _ bug.id FILTER none ~%]
         </a>
         [% IF bug.alias %]
-          <span class="edit-hide">
-            ([% bug.alias FILTER html %])
-          </span>
+          <span class="edit-hide">([% bug.alias FILTER html %])</span>
         [% END %]
-      </div>
+      </span>
+      <span class="edit-hide">
+        <span class="bug-time-label">Opened [% INCLUDE bug_modal/rel_time.html.tmpl ts=bug.creation_ts %]</span>
+        [% IF !bug.isopened %]
+          <span class="bug-time-label">Closed [% INCLUDE bug_modal/rel_time.html.tmpl ts=bug.cf_last_resolved %]</span>
+        [% ELSIF bug.creation_ts != bug.delta_ts %]
+          <span class="bug-time-label">Updated [% INCLUDE bug_modal/rel_time.html.tmpl ts=bug.delta_ts %]</span>
+        [% END %]
+      </span>
     [% END %]
+
     [% WRAPPER bug_modal/field.html.tmpl
         container = 1
         no_label = 1
@@ -195,15 +292,6 @@
     %]
       <h1 id="field-value-short_desc">[% bug.short_desc FILTER quoteUrls(bug) FILTER wbr %]</h1>
     [% END %]
-
-    [%# alias %]
-    [% INCLUDE bug_modal/field.html.tmpl
-        field = bug_fields.alias
-        field_type = constants.FIELD_TYPE_FREETEXT
-        hide_on_view = 1
-        short_width = 1
-        help = "https://wiki.mozilla.org/BMO/UserGuide/BugFields#alias"
-    %]
 
     [%# summary %]
     [% INCLUDE bug_modal/field.html.tmpl
@@ -213,151 +301,21 @@
         help = "https://wiki.mozilla.org/BMO/UserGuide/BugFields#short_desc"
         required = 1
     %]
-
-    [%# status summary %]
-    [% WRAPPER bug_modal/field.html.tmpl
-        name = "status_summary"
-        no_label = 1
-        hide_on_edit = 1
-    %]
-      <b class="bz_status_[% bug.bug_status FILTER html %]">
-        [% bug.bug_status FILTER html %]
-        [%+ bug.resolution FILTER html IF bug.resolution %]
-      </b>
-      [% IF bug.resolution == "FIXED"
-            && bug.target_milestone
-            && bug.target_milestone != "---"
-      %]
-        in [% firefox_fixed_version || bug.target_milestone FILTER html %]
-      [% ELSIF bug.dup_id %]
-        of [% terms.bug _ " $bug.dup_id" FILTER bug_link(bug.dup_id) FILTER none %]
-      [% ELSIF bug.resolution == "" %]
-        <div id="status-assignee">
-          [%
-            IF unassigned;
-              "Unassigned";
-            ELSE;
-              "Assigned to ";
-              INCLUDE bug_modal/user.html.tmpl u=bug.assigned_to nick_only=1;
-            END;
-          %]
-        </div>
-      [% END %]
-      [% IF needinfo.size %]
-        <div id="status-needinfo">
-          [%~ IF needinfo.size == 1 %]
-            [%
-              ni = needinfo.0;
-              activity_id = bug.find_activity_id_for_flag(ni);
-            %]
-            [% IF activity_id %]
-              (<a href="#[% activity_id FILTER none %]"
-            [% ELSE %]
-              (<span
-            [% END %]
-            [% IF user.setting("ui_use_absolute_time") == "on" %]
-              class="flag-name-status abs-time-title[% " activity-ref" IF activity_id %]"
-              title="[% ni.creation_date FILTER time("%Y-%m-%d %H:%M %Z") FILTER html %]"
-            [% ELSE %]
-              class="flag-name-status rel-time-title[% " activity-ref" IF activity_id %]"
-              title="[% ni.creation_date FILTER time_duration FILTER html %]"
-            [% END %]
-              data-time="[% ni.creation_date FILTER epoch FILTER none %]"
-            >NeedInfo
-            [% activity_id ? "</a>" : "</span>" %]
-            from
-            [%
-              IF ni.requestee;
-                INCLUDE bug_modal/user.html.tmpl u=ni.requestee nick_only=1;
-              ELSE;
-                "anyone";
-              END;
-            %])
-          [% ELSE %]
-            (Needinfo from [% needinfo.size FILTER none %] people)
-          [% END ~%]
-        </div>
-      [% END %]
-    [% END %]
-  </div>
-
-  [%# buttons %]
-
-  <div id="mode-container">
-    <div>
-      [% IF user.id %]
-        <button type="button" id="cancel-btn" class="secondary" style="display:none" aria-label="Cancel Editing">Cancel</button>
-        <button type="button" id="mode-btn" class="primary">
-          <span id="mode-btn-readonly" title="Enable editing fields for [% terms.bug %] metadata">Edit [% terms.Bug %]</span>
-          <span id="mode-btn-loading">
-            <img id="edit-throbber" src="[% basepath FILTER none %]extensions/BugModal/web/throbber.gif" width="16" height="11">
-            Fetching
-          </span>
-        </button>
-        <button type="submit" id="commit-btn" class="save-btn major" style="display:none">Save Changes</button>
-      [% END %]
-    </div>
-    <div class="button-row">
-      [% IF bug.assigned_to.id == user.id || user.in_group("editbugs") %]
-        <button type="button" id="copy-summary" class="secondary"
-          title="Copy [% terms.bug %] number and summary to your clipboard">Copy Summary</button>
-        <div id="clip-container" style="display:none"><input type="text" id="clip"></div>
-      [% END %]
-      [% IF user.id %]
-        <button type="button" class="secondary" id="cc-btn" data-is-cced="[% is_cced ? 1 : 0 %]">
-          [% is_cced ? "Stop Following" : "Follow" %]
-        </button>
-      [% END %]
-      <div class="dropdown">
-        <button type="button" id="action-menu-btn" aria-haspopup="true" aria-label="Actions"
-          aria-expanded="false" aria-controls="action-menu" class="dropdown-button minor">&#9662;</button>
-        <ul class="dropdown-content left" id="action-menu" role="menu" style="display:none;">
-          <li role="presentation">
-            <a id="action-enable-perm-edit" role="menuitemcheckbox" tabindex="-1">Always Enable Edit Mode</a>
-          </li>
-          <li role="separator"></li>
-          <li role="presentation">
-            <a id="action-reset" role="menuitem" tabindex="-1">Reset Sections</a>
-          </li>
-          <li role="presentation">
-            <a id="action-expand-all" role="menuitem" tabindex="-1">Expand All Sections</a>
-          </li>
-          <li role="presentation">
-            <a id="action-collapse-all" role="menuitem" tabindex="-1">Collapse All Sections</a>
-          </li>
-          <li role="separator"></li>
-          [% IF user.id %]
-            <li role="presentation">
-              <a id="action-add-comment" role="menuitem" tabindex="-1">Add Comment</a>
-            </li>
-          [% END %]
-          <li role="presentation">
-            <a id="action-last-comment" role="menuitem" tabindex="-1">Last Comment</a>
-          </li>
-          <li role="separator"></li>
-          <li role="presentation">
-            <a id="action-history" role="menuitem" tabindex="-1">History</a>
-          </li>
-        </ul>
-      </div>
-    </div>
-    <div id="user-guide">
-      <a title="User guide for [% terms.Bugzilla %]" href="https://wiki.mozilla.org/BMO/UserGuide">Get help with this page</a>
-    </div>
   </div>
 [% END %]
 
-[%# === status === %]
-[% IF readable_bug_status_json %]
-    [% readable_bug_status_span = BLOCK -%]
-        [%- %]<span id="readable-bug-status" data-readable-bug-status="[% readable_bug_status_json FILTER html %]"></span>
-    [% END %]
+[%# === categories === %]
 
-    [% subtitle = [{ unfiltered = readable_bug_status_span }] %]
-[% END %]
-
+[%
+  sub = [];
+  sub.push(bug.product _ " :: " _ bug.component);
+  sub.push(bug.bug_type);
+  sub.push(bug.priority) IF bug.priority != "--";
+  sub.push(bug.bug_severity) IF bug.bug_severity != "normal";
+%]
 [% WRAPPER bug_modal/module.html.tmpl
-    title = "Status"
+  title = "Categories"
+  subtitle = sub
 %]
   [% WRAPPER fields_lhs %]
 
@@ -458,6 +416,47 @@
       </div>
     [% END %]
 
+    [%# version %]
+    [% INCLUDE bug_modal/field.html.tmpl
+        field = bug_fields.version
+        field_type = constants.FIELD_TYPE_SINGLE_SELECT
+        hide_on_view = bug.version == "---" || bug.version.lower == "unspecified"
+          || bug.version.lower == "trunk" || bug.version.lower == "other"
+        help = "https://wiki.mozilla.org/BMO/UserGuide/BugFields#version"
+    %]
+
+    [%# platform %]
+    [% WRAPPER bug_modal/field.html.tmpl
+        container = 1
+        label = "Platform"
+        hide_on_view = (bug.rep_platform == 'All' && bug.op_sys == 'All')
+          || (bug.rep_platform == 'Unspecified' && bug.op_sys == 'Unspecified')
+        help = "https://wiki.mozilla.org/BMO/UserGuide/BugFields#rep_platform"
+    %]
+      [% INCLUDE bug_modal/field.html.tmpl
+          field = bug_fields.rep_platform
+          field_type = constants.FIELD_TYPE_SINGLE_SELECT
+          aria_label = bug_fields.rep_platform.description
+          inline = 1
+          no_indent = 1
+      %]
+      [% INCLUDE bug_modal/field.html.tmpl
+          field = bug_fields.op_sys
+          field_type = constants.FIELD_TYPE_SINGLE_SELECT
+          aria_label = bug_fields.op_sys.description
+          inline = 1
+      %]
+      [% WRAPPER bug_modal/field.html.tmpl
+          container = 1
+          inline = 1
+      %]
+        [% Hook.process("after_op_sys", 'bug/edit.html.tmpl') %]
+      [% END %]
+    [% END %]
+
+  [% END %]
+  [% WRAPPER fields_rhs %]
+
     [%# type %]
     [% WRAPPER bug_modal/field.html.tmpl
         field      = bug_fields.bug_type
@@ -474,23 +473,32 @@
 
     [%# importance %]
     [% WRAPPER bug_modal/field.html.tmpl
-        label = "Importance"
+        name = "importance"
+        label = "Priority"
         container = 1
-        hide_on_view = bug.priority == "--" && bug.bug_severity == "normal"
         help = "https://wiki.mozilla.org/BMO/UserGuide/BugFields#priority"
     %]
-      [% INCLUDE bug_modal/field.html.tmpl
+      [% WRAPPER bug_modal/field.html.tmpl
           field = bug_fields.priority
           field_type = constants.FIELD_TYPE_SINGLE_SELECT
           aria_label = bug_fields.priority.description
           no_indent = 1
           inline = 1
       %]
+        [% IF bug.priority == "--" %]
+          <em>Not set</em>
+        [% ELSE %]
+          [% bug.priority FILTER html %]
+        [% END %]
+      [% END %]
       [% INCLUDE bug_modal/field.html.tmpl
           field = bug_fields.bug_severity
           field_type = constants.FIELD_TYPE_SINGLE_SELECT
           aria_label = bug_fields.bug_severity.description
           inline = 1
+          label = "Severity"
+          hide_on_view = bug.bug_severity == "normal"
+          help = "https://wiki.mozilla.org/BMO/UserGuide/BugFields#bug_severity"
       %]
       [% UNLESS cf_hidden_in_product('cf_rank', bug.product, bug.component, bug) %]
         [% rendered_custom_fields.push('cf_rank') %]
@@ -501,9 +509,39 @@
             label = "Rank"
             hide_on_view = bug.cf_rank == ""
             hide_on_edit = !user.in_group('rank-setters')
+            help = "https://wiki.mozilla.org/BMO/UserGuide/BugFields#rank"
         %]
       [% END %]
     [% END %]
+
+    [%# points %]
+    [% UNLESS cf_hidden_in_product('cf_fx_points', bug.product, bug.component, bug) %]
+      [% rendered_custom_fields.push('cf_fx_points') %]
+      [% INCLUDE bug_modal/field.html.tmpl
+          field = bug_fields.cf_fx_points
+          field_type = bug_fields.cf_fx_points.type
+          hide_on_view = bug.cf_fx_points == "---"
+      %]
+    [% END %]
+
+  [% END %]
+[% END %]
+
+[%# === tracking === %]
+
+[% IF readable_bug_status_json %]
+  [% readable_bug_status_span = BLOCK -%]
+    [%- %]<span id="readable-bug-status" data-readable-bug-status="[% readable_bug_status_json FILTER html %]"></span>
+  [% END %]
+  [% sub = [{ unfiltered = readable_bug_status_span }] %]
+[% ELSE %]
+  [% sub = [firefox_flags_subtitle] %]
+[% END %]
+[% WRAPPER bug_modal/module.html.tmpl
+  title = "Tracking"
+  subtitle = sub
+%]
+  [% WRAPPER fields_lhs %]
 
     [%# status, resolution %]
     [% IF bug.assigned_to.id != user.id %]
@@ -522,40 +560,89 @@
       [% END %]
     [% END %]
 
+    [%# status/resolution knob %]
+    [% WRAPPER bug_modal/field.html.tmpl
+        name         = "status-edit"
+        container    = 1
+        label        = "Status"
+        hide_on_view = bug.assigned_to.id != user.id
+        help         = "https://wiki.mozilla.org/BMO/UserGuide/BugStatuses"
+    %]
+      [% INCLUDE status_block %]
+    [% END %]
+
+    [%# milestone %]
+    [% INCLUDE bug_modal/field.html.tmpl
+        field = bug_fields.target_milestone
+        field_type = constants.FIELD_TYPE_SINGLE_SELECT
+        label = "Milestone"
+        hide_on_view = bug.target_milestone == "---"
+        help = "https://wiki.mozilla.org/BMO/UserGuide/BugFields#target_milestone"
+    %]
+
+    [%# iteration %]
+    [% UNLESS cf_hidden_in_product('cf_fx_iteration', bug.product, bug.component, bug) %]
+      [% rendered_custom_fields.push('cf_fx_iteration') %]
+      [% INCLUDE bug_modal/field.html.tmpl
+          field = bug_fields.cf_fx_iteration
+          field_type = bug_fields.cf_fx_iteration.type
+          hide_on_view = bug.cf_fx_iteration == "---"
+      %]
+    [% END %]
+
+    [% UNLESS cf_hidden_in_product('cf_due_date', bug.product, bug.component, bug) %]
+      [% rendered_custom_fields.push('cf_due_date') %]
+      [% INCLUDE bug_modal/field.html.tmpl
+          field = bug_fields.cf_due_date
+          field_type = bug_fields.cf_due_date.type
+          hide_on_view = bug.cf_due_date == ""
+      %]
+    [% END %]
+
+    [% IF project_flags_has %]
+      [%# project flags %]
+      [% WRAPPER bug_modal/field.html.tmpl
+          container    = 1
+          label        = "Project Flags"
+          hide_on_view = !project_flags_set
+          help         = "https://wiki.mozilla.org/BMO/UserGuide#Tracking_Flags"
+      %]
+        [% INCLUDE bug_modal/tracking_flags.html.tmpl
+            type = "project"
+        %]
+      [% END %]
+    [% END %]
+
   [% END %]
   [% WRAPPER fields_rhs %]
 
-    [%# creation time %]
-    [% WRAPPER bug_modal/field.html.tmpl
-        field = bug_fields.creation_ts
-        label = "Opened"
-        view_only = 1
-        help = "https://wiki.mozilla.org/BMO/UserGuide/BugFields#creation_ts"
-    %]
-      [% INCLUDE bug_modal/rel_time.html.tmpl ts=bug.creation_ts %]
+    [% IF tracking_flags_has %]
+      [%# tracking flags %]
+      [% WRAPPER bug_modal/field.html.tmpl
+          container    = 1
+          label        = "Tracking Flags"
+          hide_on_view = !tracking_flags_set
+          help         = "https://wiki.mozilla.org/BMO/UserGuide#Tracking_Flags"
+      %]
+        [% INCLUDE bug_modal/tracking_flags.html.tmpl
+            type = "tracking"
+        %]
+      [% END %]
     [% END %]
 
-    [%# last modified %]
-    [% WRAPPER bug_modal/field.html.tmpl
-        field = bug_fields.delta_ts
-        label = "Updated"
-        view_only = 1
-        help = "https://wiki.mozilla.org/BMO/UserGuide/BugFields#delta_ts"
-    %]
-      [% INCLUDE bug_modal/rel_time.html.tmpl ts=bug.delta_ts %]
+    [% IF blocking_flags_has %]
+      [%# blocking flags %]
+      [% WRAPPER bug_modal/field.html.tmpl
+          container = 1
+          label = "Blocking Flags"
+          hide_on_view = !blocking_flags_set
+      %]
+        [% INCLUDE bug_modal/tracking_flags.html.tmpl
+            type = "blocking"
+        %]
+      [% END %]
     [% END %]
 
-  [% END %]
-
-  [%# status/resolution knob %]
-  [% WRAPPER bug_modal/field.html.tmpl
-      name         = "status-edit"
-      container    = 1
-      label        = "Status"
-      hide_on_view = bug.assigned_to.id != user.id
-      help         = "https://wiki.mozilla.org/BMO/UserGuide/BugStatuses"
-  %]
-    [% INCLUDE status_block %]
   [% END %]
 [% END %]
 
@@ -581,25 +668,29 @@
       inline = 1
       edit_only = 1
   %]
-  [% UNLESS prefix %]
-    <div id="assigned-container" style="display:none">
-      <button type="button" class="secondary" id="mark-as-assigned-btn">
-        Mark as Assigned
-      </button>
-    </div>
-  [% END %]
   [% IF bug.choices.resolution.only("name", "DUPLICATE").size %]
     <div id="[% prefix FILTER none %]duplicate-container">
       of
       <input id="[% prefix FILTER none %]dup_id" name="[% prefix FILTER none %]dup_id"
         size="6" value="[% bug.dup_id FILTER html %]">
     </div>
-    <div id="[% prefix FILTER none %]duplicate-actions">
-      <button type="button" class="secondary" id="[% prefix FILTER none %]mark-as-dup-btn">
-        Mark as Duplicate
-      </button>
-    </div>
   [% END %]
+  <div id="status-action-buttons">
+    [% IF bug.choices.resolution.only("name", "DUPLICATE").size %]
+      <div id="[% prefix FILTER none %]duplicate-actions">
+        <button type="button" class="secondary" id="[% prefix FILTER none %]mark-as-dup-btn">
+          Mark as Duplicate
+        </button>
+      </div>
+    [% END %]
+    [% UNLESS prefix %]
+      <div id="assigned-container" style="display:none">
+        <button type="button" class="secondary" id="mark-as-assigned-btn">
+          Mark as Assigned
+        </button>
+      </div>
+    [% END %]
+  </div>
 [% END %]
 
 [%# === people === %]
@@ -632,10 +723,10 @@
       [% IF unassigned %]
         <i>Unassigned</i>
         [% IF bug.check_can_change_field("assigned_to", 0, 1) %]
-          <button type="button" class="take-btn minor" data-field="assigned_to">Take</button>
+          <button type="button" class="take-btn secondary" data-field="assigned_to">Take</button>
         [% END %]
       [% ELSE %]
-        [% INCLUDE bug_modal/user.html.tmpl u=bug.assigned_to %]
+        [% INCLUDE bug_modal/user.html.tmpl u=bug.assigned_to nick_only=1 gravatar_size=20 %]
       [% END %]
     [% END %]
     [% WRAPPER bug_modal/field.html.tmpl
@@ -671,7 +762,7 @@
       [%
         IF bug.mentors.size;
           FOREACH mentor IN bug.mentors;
-            INCLUDE bug_modal/user.html.tmpl u=mentor;
+            INCLUDE bug_modal/user.html.tmpl u=mentor nick_only=1 gravatar_size=20;
           END;
         ELSE;
           "---";
@@ -687,7 +778,7 @@
         hide_on_edit = 1
         help = "https://wiki.mozilla.org/BMO/UserGuide/BugFields#qa_contact"
     %]
-      [% INCLUDE bug_modal/user.html.tmpl u=bug.qa_contact %]
+      [% INCLUDE bug_modal/user.html.tmpl u=bug.qa_contact nick_only=1 gravatar_size=20 %]
     [% END %]
     [% WRAPPER bug_modal/field.html.tmpl
         field = bug_fields.qa_contact
@@ -712,6 +803,7 @@
         field = bug_fields.reporter
         field_type = constants.FIELD_TYPE_USER
         view_only = 1
+        hide_on_edit = 1
         help = "https://wiki.mozilla.org/BMO/UserGuide/BugFields#reporter"
     %]
 
@@ -721,6 +813,8 @@
         field_type = constants.FIELD_TYPE_USER
         value = bug.component_obj.triage_owner
         view_only = 1
+        hide_on_view = bug.triage_owner == ""
+        hide_on_edit = 1
         help = "https://wiki.mozilla.org/BMO/UserGuide/BugFields#triage_owner"
     %]
 
@@ -799,160 +893,41 @@
   [% END %]
 [% END %]
 
-[%# === tracking === %]
+[%# === references === %]
 
 [%
-  col =
-    (bug.version.lower == "unspecified" || bug.version.lower == "other" || bug.version == "---")
-    && bug.target_milestone == "---"
-    && !has_bug_flags
-    && !project_flags_set
-    && !tracking_flags_set
-    && !blocking_flags_set;
   sub = [];
   open_deps = bug.depends_on_obj.only("resolution", "").size;
   IF open_deps;
-    sub.push("Depends on " _ open_deps _ " bug" _ (open_deps == 1 ? "" : "s"));
+    sub.push("Depends on " _ open_deps _ " open bug" _ (open_deps == 1 ? "" : "s"));
   END;
   open_deps = bug.blocks_obj.only("resolution", "").size;
   IF open_deps;
-    sub.push("Blocks " _ open_deps _ " bug" _ (open_deps == 1 ? "" : "s"));
+    sub.push("Blocks " _ open_deps _ " open bug" _ (open_deps == 1 ? "" : "s"));
+  END;
+  open_regs = bug.regresses_obj.only("resolution", "").size;
+  IF open_regs;
+    sub.push("Regressed " _ open_regs _ " open bug" _ (open_regs == 1 ? "" : "s"));
   END;
   IF bug.regressed_by.size;
     sub.push("Regression");
   END;
-  open_regs = bug.regresses_obj.only("resolution", "").size;
-  IF open_regs;
-    sub.push("Regressed " _ open_regs _ " bug" _ (open_regs == 1 ? "" : "s"));
-  END;
-  IF bug.keyword_objects.size;
-    IF bug.keyword_objects.size <= 3;
-      sub.push("{" _ bug.keyword_objects.pluck("name").join(", ") _ "}");
-    ELSE;
-      sub.push(bug.keyword_objects.size _ " keywords");
-    END;
+  IF bug.bug_file_loc != "";
+    loc_html = INCLUDE bug_url_link link_text="URL";
+    sub.push({ unfiltered => loc_html });
   END;
 %]
 [% WRAPPER bug_modal/module.html.tmpl
-  title = "Tracking"
+  title = "References"
   subtitle = sub
-  collapsed = col
+  collapsed = 1
+  hide_on_view = !bug.dependson.size && !bug.blocked.size
+    && !bug.regresses.size && !bug.regressed_by.size
+    && !bug.duplicates.size && !bug.bug_file_loc && !bug.see_also.size;
 %]
   [% WRAPPER fields_lhs %]
 
-    [%# version %]
-    [% INCLUDE bug_modal/field.html.tmpl
-        field = bug_fields.version
-        field_type = constants.FIELD_TYPE_SINGLE_SELECT
-        help = "https://wiki.mozilla.org/BMO/UserGuide/BugFields#version"
-    %]
-
-    [%# milestone %]
-    [% INCLUDE bug_modal/field.html.tmpl
-        field = bug_fields.target_milestone
-        field_type = constants.FIELD_TYPE_SINGLE_SELECT
-        label = "Target"
-        help = "https://wiki.mozilla.org/BMO/UserGuide/BugFields#target_milestone"
-    %]
-
-    [%# platform, op-sys %]
-    [% WRAPPER bug_modal/field.html.tmpl
-        container = 1
-        label = "Platform"
-        hide_on_view = (bug.rep_platform == 'All' && bug.op_sys == 'All')
-          || (bug.rep_platform == 'Unspecified' && bug.op_sys == 'Unspecified')
-        help = "https://wiki.mozilla.org/BMO/UserGuide/BugFields#rep_platform"
-    %]
-      [% INCLUDE bug_modal/field.html.tmpl
-          field = bug_fields.rep_platform
-          field_type = constants.FIELD_TYPE_SINGLE_SELECT
-          aria_label = bug_fields.rep_platform.description
-          inline = 1
-          no_indent = 1
-      %]
-      [% INCLUDE bug_modal/field.html.tmpl
-          field = bug_fields.op_sys
-          field_type = constants.FIELD_TYPE_SINGLE_SELECT
-          aria_label = bug_fields.op_sys.description
-          inline = 1
-      %]
-      [% WRAPPER bug_modal/field.html.tmpl
-          container = 1
-          inline = 1
-      %]
-        [% Hook.process("after_op_sys", 'bug/edit.html.tmpl') %]
-      [% END %]
-    [% END %]
-
-    [%# keywords %]
-    [% WRAPPER bug_modal/field.html.tmpl
-        field = bug_fields.keywords
-        field_type = constants.FIELD_TYPE_KEYWORDS
-        hide_on_view = bug.keyword_objects.size == 0
-        help = basepath _ "describekeywords.cgi"
-    %]
-      [% IF bug.keyword_objects.size %]
-        [% FOREACH keyword IN bug.keyword_objects.pluck("name") %]
-          <a href="[% basepath FILTER none %]buglist.cgi?keywords=[% keyword FILTER html %]&amp;resolution=---">
-            [%~ keyword FILTER html %]</a>[% ", " UNLESS loop.last %]
-        [% END %]
-      [% ELSE %]
-        [% "---" FILTER html %]
-      [% END %]
-    [% END %]
-
-    [% UNLESS cf_hidden_in_product('cf_fx_iteration', bug.product, bug.component, bug) %]
-      [% rendered_custom_fields.push('cf_fx_iteration') %]
-      [% INCLUDE bug_modal/field.html.tmpl
-          field = bug_fields.cf_fx_iteration
-          field_type = bug_fields.cf_fx_iteration.type
-          hide_on_view = bug.cf_iteration == ""
-      %]
-    [% END %]
-
-    [% UNLESS cf_hidden_in_product('cf_fx_points', bug.product, bug.component, bug) %]
-      [% rendered_custom_fields.push('cf_fx_points') %]
-      [% INCLUDE bug_modal/field.html.tmpl
-          field = bug_fields.cf_fx_points
-          field_type = bug_fields.cf_fx_points.type
-          hide_on_view = bug.cf_fx_points == ""
-      %]
-    [% END %]
-
-    [% UNLESS cf_hidden_in_product('cf_cab_review', bug.product, bug.component, bug) %]
-      [% rendered_custom_fields.push('cf_cab_review') %]
-      [% IF bug.cf_cab_review == "---" %]
-        [% WRAPPER bug_modal/field.html.tmpl
-            field = bug_fields.cf_cab_review
-            field_type = bug_fields.cf_cab_review.type
-            container = 1
-            hide_on_view = 1
-        %]
-          <span id="cab-review-gate">
-            <a href="https://mozilla.service-now.com/change_request.do?sysparm_stack=change_request_list.do&amp;sys_id=-1&amp;sysparm_query=active=true" target="_blank" rel="noopener noreferrer">ServiceNow Change Request</a>
-            <button id="cab-review-gate-close" type="button" class="secondary">Use Flag</button>
-          </span>
-          <span id="cab-review-edit" style="display:none">
-            [% INCLUDE bug_modal/field.html.tmpl
-                field = bug_fields.cf_cab_review
-                field_type = bug_fields.cf_cab_review.type
-                inline = 1
-                no_indent = 1
-            %]
-          </span>
-        [% END %]
-      [% ELSE %]
-        [% INCLUDE bug_modal/field.html.tmpl
-            field = bug_fields.cf_cab_review
-            field_type = bug_fields.cf_cab_review.type
-        %]
-      [% END %]
-    [% END %]
-
-  [% END %]
-  [% WRAPPER fields_rhs %]
-
-    [%# depends on %]
+    [%# dependencies %]
     [% INCLUDE bug_modal/field.html.tmpl
         field = bug_fields.dependson
         field_type = constants.FIELD_TYPE_BUG_LIST
@@ -960,8 +935,6 @@
         hide_on_view = bug.dependson.size == 0
         help = "https://wiki.mozilla.org/BMO/UserGuide/BugFields#dependson"
     %]
-
-    [%# blocks %]
     [% INCLUDE bug_modal/field.html.tmpl
         field = bug_fields.blocked
         field_type = constants.FIELD_TYPE_BUG_LIST
@@ -969,7 +942,6 @@
         hide_on_view = bug.blocked.size == 0
         help = "https://wiki.mozilla.org/BMO/UserGuide/BugFields#blocks"
     %]
-
     [% IF bug.dependson.size + bug.blocked.size > 0 %]
       [% WRAPPER bug_modal/field.html.tmpl
           name = "dependencytree"
@@ -1007,105 +979,50 @@
           field_type = constants.FIELD_TYPE_BUG_LIST
           label = "Duplicates"
           values = bug.duplicates
-          hide_on_edit = 1
+          view_only = 1
           help = "https://wiki.mozilla.org/BMO/UserGuide/BugFields#duplicates"
       %]
     [% END %]
 
-    [%# flags %]
+  [% END %]
+  [% WRAPPER fields_rhs %]
+
+    [%# url %]
     [% WRAPPER bug_modal/field.html.tmpl
-        name = "bug_flags"
-        container = 1
-        label = terms.Bug _ " Flags"
-        hide_on_view = !has_bug_flags
+        field = bug_fields.bug_file_loc
+        field_type = constants.FIELD_TYPE_FREETEXT
+        hide_on_view = bug.bug_file_loc == ""
+        default = "https://"
+        help = "https://wiki.mozilla.org/BMO/UserGuide/BugFields#bug_file_loc"
     %]
-      [% INCLUDE bug_modal/flags.html.tmpl
-          types = bug.flag_types.skip("name", "needinfo")
-      %]
+      [% INCLUDE bug_url_link %]
     [% END %]
+
+    [%# see also %]
+    [% INCLUDE bug_modal/field.html.tmpl
+        field = bug_fields.see_also
+        field_type = constants.FIELD_TYPE_BUG_URLS
+        values = bug.see_also
+        hide_on_view = bug.see_also.size == 0
+        help = "https://wiki.mozilla.org/BMO/UserGuide/BugFields#see_also"
+    %]
 
   [% END %]
-[% END %]
-
-[% IF tracking_flags.size %]
-
-  [%# === tracking flags === %]
-
-  [% WRAPPER bug_modal/module.html.tmpl
-      title = tracking_flags_title
-      collapsed = 1
-      subtitle = firefox_flags_subtitle
-  %]
-    [% WRAPPER fields_lhs %]
-
-      [% UNLESS tracking_flags_set || project_flags_set || blocking_flags_set %]
-        <p class="edit-hide">
-          This [% terms.bug %] is not currently tracked.
-        </p>
-      [% END %]
-
-      [% IF tracking_flags_has %]
-        [%# tracking flags %]
-        [% WRAPPER bug_modal/field.html.tmpl
-            container    = 1
-            label        = "Tracking Flags"
-            hide_on_view = !tracking_flags_set
-            help         = "https://wiki.mozilla.org/BMO/UserGuide#Tracking_Flags"
-        %]
-          [% INCLUDE bug_modal/tracking_flags.html.tmpl
-              type = "tracking"
-          %]
-        [% END %]
-      [% END %]
-
-    [% END %]
-    [% WRAPPER fields_rhs %]
-
-      [% IF blocking_flags_has %]
-        [%# blocking flags %]
-        [% WRAPPER bug_modal/field.html.tmpl
-            container = 1
-            label = "Blocking Flags"
-            hide_on_view = !blocking_flags_set
-        %]
-          [% INCLUDE bug_modal/tracking_flags.html.tmpl
-              type = "blocking"
-          %]
-        [% END %]
-      [% END %]
-
-      [% IF project_flags_has %]
-        [%# project flags %]
-        [% WRAPPER bug_modal/field.html.tmpl
-            container    = 1
-            label        = "Project Flags"
-            hide_on_view = !project_flags_set
-            help         = "https://wiki.mozilla.org/BMO/UserGuide#Tracking_Flags"
-        %]
-          [% INCLUDE bug_modal/tracking_flags.html.tmpl
-              type = "project"
-          %]
-        [% END %]
-      [% END %]
-
-    [% END %]
-  [% END %]
-
 [% END %]
 
 [%# === details === %]
 
 [%
   sub = [];
+  IF bug.keyword_objects.size;
+    IF bug.keyword_objects.size <= 3;
+      sub.push("Keywords: " _ bug.keyword_objects.pluck("name").join(", "));
+    ELSE;
+      sub.push(bug.keyword_objects.size _ " keywords");
+    END;
+  END;
   IF bug.status_whiteboard != "";
     sub.push("Whiteboard: " _ bug.status_whiteboard.truncate(256, '…'));
-  END;
-  IF bug.cf_crash_signature != "";
-    sub.push("crash signature");
-  END;
-  IF bug.bug_file_loc != "";
-    loc_html = INCLUDE bug_url_link link_text="URL";
-    sub.push({ unfiltered => loc_html });
   END;
 %]
 [% WRAPPER bug_modal/module.html.tmpl
@@ -1115,30 +1032,78 @@
 %]
   [% WRAPPER fields_lhs %]
 
-    [%# whiteboard %]
+    [%# alias %]
+    [% INCLUDE bug_modal/field.html.tmpl
+        field = bug_fields.alias
+        field_type = constants.FIELD_TYPE_FREETEXT
+        hide_on_view = 1
+        short_width = 1
+        help = "https://wiki.mozilla.org/BMO/UserGuide/BugFields#alias"
+    %]
+
+    [%# keywords %]
+    [% WRAPPER bug_modal/field.html.tmpl
+        field = bug_fields.keywords
+        field_type = constants.FIELD_TYPE_KEYWORDS
+        hide_on_view = bug.keyword_objects.size == 0
+        help = basepath _ "describekeywords.cgi"
+    %]
+      [% IF bug.keyword_objects.size %]
+        [% FOREACH keyword IN bug.keyword_objects.pluck("name") %]
+          <a href="[% basepath FILTER none %]buglist.cgi?keywords=[% keyword FILTER html %]&amp;resolution=---">
+            [%~ keyword FILTER html %]</a>[% ", " UNLESS loop.last %]
+        [% END %]
+      [% ELSE %]
+        [% "---" FILTER html %]
+      [% END %]
+    [% END %]
+
+    [%# whiteboards %]
     [% WRAPPER bug_modal/field.html.tmpl
         field = bug_fields.status_whiteboard
         field_type = constants.FIELD_TYPE_FREETEXT
+        hide_on_view = bug.status_whiteboard == ""
         help = "https://wiki.mozilla.org/BMO/UserGuide/Whiteboard"
     %]
       [% bug.status_whiteboard == "" ? "---" : bug.status_whiteboard FILTER html %]
     [% END %]
-
-    [%# votes %]
-    [% IF bug.product_obj.votesperuser %]
-      [% WRAPPER bug_modal/field.html.tmpl
-          container = 1
-          label = "Votes"
-          name = "votes"
-          help = "https://wiki.mozilla.org/BMO/UserGuide/BugFields#votes"
+    [% UNLESS cf_hidden_in_product('cf_qa_whiteboard', bug.product, bug.component, bug) %]
+      [% rendered_custom_fields.push('cf_qa_whiteboard') %]
+      [% INCLUDE bug_modal/field.html.tmpl
+          field = bug_fields.cf_qa_whiteboard
+          field_type = bug_fields.cf_qa_whiteboard.type
+          hide_on_view = bug.cf_qa_whiteboard == ""
       %]
-        [% bug.votes FILTER html %]
-        vote[% "s" IF bug.votes != 1 %]
-        [% IF user.id %]
-          <button type="button" class="secondary" id="vote-btn">
-            [% bug.user_votes ? "Remove vote" : "Vote" %]
-          </button>
+    [% END %]
+
+    [%# cab review %]
+    [% UNLESS cf_hidden_in_product('cf_cab_review', bug.product, bug.component, bug) %]
+      [% rendered_custom_fields.push('cf_cab_review') %]
+      [% IF bug.cf_cab_review == "---" %]
+        [% WRAPPER bug_modal/field.html.tmpl
+            field = bug_fields.cf_cab_review
+            field_type = bug_fields.cf_cab_review.type
+            container = 1
+            hide_on_view = 1
+        %]
+          <span id="cab-review-gate">
+            <a href="https://mozilla.service-now.com/change_request.do?sysparm_stack=change_request_list.do&amp;sys_id=-1&amp;sysparm_query=active=true" target="_blank" rel="noopener noreferrer">ServiceNow Change Request</a>
+            <button id="cab-review-gate-close" type="button" class="secondary">Use Flag</button>
+          </span>
+          <span id="cab-review-edit" style="display:none">
+            [% INCLUDE bug_modal/field.html.tmpl
+                field = bug_fields.cf_cab_review
+                field_type = bug_fields.cf_cab_review.type
+                inline = 1
+                no_indent = 1
+            %]
+          </span>
         [% END %]
+      [% ELSE %]
+        [% INCLUDE bug_modal/field.html.tmpl
+            field = bug_fields.cf_cab_review
+            field_type = bug_fields.cf_cab_review.type
+        %]
       [% END %]
     [% END %]
 
@@ -1163,29 +1128,38 @@
       END;
     %]
 
+    [%# votes %]
+    [% IF bug.product_obj.votesperuser %]
+      [% WRAPPER bug_modal/field.html.tmpl
+          container = 1
+          label = "Votes"
+          name = "votes"
+          help = "https://wiki.mozilla.org/BMO/UserGuide/BugFields#votes"
+      %]
+        [% bug.votes FILTER html %]
+        [% IF user.id %]
+          <button type="button" class="secondary" id="vote-btn">
+            [%~ bug.user_votes ? "Remove vote" : "Vote" ~%]
+          </button>
+        [% END %]
+      [% END %]
+    [% END %]
+
     [% Hook.process('details_lhs') %]
   [% END %]
   [% WRAPPER fields_rhs %]
 
-    [%# url %]
+    [%# flags %]
     [% WRAPPER bug_modal/field.html.tmpl
-        field = bug_fields.bug_file_loc
-        field_type = constants.FIELD_TYPE_FREETEXT
-        hide_on_view = bug.bug_file_loc == ""
-        default = "https://"
-        help = "https://wiki.mozilla.org/BMO/UserGuide/BugFields#bug_file_loc"
+        name = "bug_flags"
+        container = 1
+        label = terms.Bug _ " Flags"
+        hide_on_view = !has_bug_flags
     %]
-      [% INCLUDE bug_url_link %]
+      [% INCLUDE bug_modal/flags.html.tmpl
+          types = bug.flag_types.skip("name", "needinfo")
+      %]
     [% END %]
-
-    [%# see also %]
-    [% INCLUDE bug_modal/field.html.tmpl
-        field = bug_fields.see_also
-        field_type = constants.FIELD_TYPE_BUG_URLS
-        values = bug.see_also
-        hide_on_view = bug.see_also.size == 0
-        help = "https://wiki.mozilla.org/BMO/UserGuide/BugFields#see_also"
-    %]
 
     [% Hook.process('details_rhs') %]
   [% END %]
@@ -1194,6 +1168,7 @@
   [%
     FOREACH field IN custom_fields;
       NEXT IF field.type != constants.FIELD_TYPE_TEXTAREA;
+      NEXT IF field.name == "cf_crash_signature"; # Rendered below
       Hook.process('custom_field-' _ field.name);
       NEXT IF rendered_custom_fields.exists(field.name);
       INCLUDE bug_modal/field.html.tmpl
@@ -1202,6 +1177,16 @@
         hide_on_view = bug.${field.name} == "" || bug.${field.name} == "---";
     END;
   %]
+[% END %]
+
+[%# === Crash === %]
+
+[% WRAPPER bug_modal/module.html.tmpl
+  title = "Crash Data"
+  collapsed = 1
+  hide_on_view = bug.cf_crash_signature == ""
+%]
+  [% Hook.process('custom_field-cf_crash_signature'); %]
 [% END %]
 
 [%# === groups === %]
@@ -1343,20 +1328,22 @@
 
 [%# === attachments === %]
 
-[% IF active_attachments || obsolete_attachments %]
+[% IF active_attachments || obsolete_attachments || user.id %]
   [%
     sub = [];
+    IF active_attachments + obsolete_attachments == 0;
+      sub.push("No files");
+    END;
     IF active_attachments;
-      sub.push(active_attachments _ " attachment" _ (active_attachments == 1 ? "" : "s"));
+      sub.push(active_attachments _ " file" _ (active_attachments == 1 ? "" : "s"));
     END;
     IF obsolete_attachments;
-      sub.push(obsolete_attachments _ " obsolete attachment" _ (obsolete_attachments == 1 ? "" : "s"));
+      sub.push(obsolete_attachments _ " obsolete file" _ (obsolete_attachments == 1 ? "" : "s"));
     END;
   %]
   [% WRAPPER bug_modal/module.html.tmpl
       title = "Attachments"
       subtitle = sub
-      collapsed = active_attachments == 0
   %]
     [% INCLUDE bug_modal/attachments.html.tmpl
         active_attachments = active_attachments
@@ -1375,9 +1362,8 @@
 
 [% IF user.id %]
   <div id="top-actions">
-    <a href="[% basepath FILTER none %]attachment.cgi?bugid=[% bug.id FILTER uri %]&amp;action=enter" id="attachments-add-link">Attach File</a>
     [%+ Hook.process('top_actions') %]
-    <button type="submit" class="save-btn major" id="top-save-btn" style="display:none">Save Changes</button>
+    <button type="submit" class="save-btn primary" id="top-save-btn" style="display:none">Save Changes</button>
   </div>
 [% END %]
 
@@ -1400,66 +1386,6 @@
 <div id="bottom-actions">
   <div id="bottom-right-actions">
     <button type="button" id="top-btn" class="secondary" aria-label="Go to Page Top">Top &uarr;</button>
-    <div class="dropdown">
-      <button type="button" id="format-btn" aria-haspopup="true" aria-label="Format [% terms.Bug %]"
-        aria-expanded="false" aria-controls="format-menu" class="dropdown-button minor">Format [% terms.Bug %] &#9652;</button>
-      <ul class="dropdown-content left menu-up" id="format-menu" role="menu" style="display:none;">
-        <li role="presentation">
-          <a href="[% basepath FILTER none %]show_bug.cgi?ctype=xml&amp;id=[% bug.id FILTER uri %]" role="menuitem" tabindex="-1">XML</a>
-        </li>
-        [% IF bug.groups_in.size == 0 %]
-          <li role="presentation">
-            <a href="[% basepath FILTER none %]rest/bug/[% bug.id FILTER uri %]" role="menuitem" tabindex="-1">JSON</a>
-          </li>
-        [% END %]
-      </ul>
-    </div>
-    [% IF user.id %]
-      <div class="dropdown">
-        <button type="button" id="new-bug-btn" aria-haspopup="true" aria-label="New/Clone [% terms.Bug %]"
-          aria-expanded="false" aria-controls="new-bug-menu" class="dropdown-button minor">New/Clone [% terms.Bug %] &#9652;</button>
-        <ul class="dropdown-content left menu-up" id="new-bug-menu" role="menu" style="display:none;">
-          <li role="presentation">
-            <a href="[% basepath FILTER none %]enter_bug.cgi" role="menuitem" tabindex="-1" target="_blank">
-              Create a new [% terms.bug %]</a>
-          </li>
-          <li role="presentation">
-            <a href="[% basepath FILTER none %]enter_bug.cgi?product=[% bug.product FILTER uri %]"
-               role="menuitem" tabindex="-1" target="_blank">&#8230; in this product</a>
-          </li>
-          <li role="presentation">
-            <a href="[% basepath FILTER none %]enter_bug.cgi?product=[% bug.product FILTER uri %]&amp;component=[% bug.component FILTER uri %]"
-               role="menuitem" tabindex="-1" target="_blank">&#8230; in this component</a>
-          </li>
-          <li role="separator"></li>
-          <li role="presentation">
-            <a href="[% basepath FILTER none %]enter_bug.cgi?format=__default__&amp;blocked=[% bug.id FILTER uri %]
-                     [%~%]&amp;product=[% bug.product FILTER uri %]&amp;component=[% bug.component FILTER uri %]"
-               role="menuitem" tabindex="-1" target="_blank">&#8230; that blocks this [% terms.bug %]</a>
-          </li>
-          <li role="presentation">
-            <a href="[% basepath FILTER none %]enter_bug.cgi?format=__default__&amp;dependson=[% bug.id FILTER uri %]
-                     [%~%]&amp;product=[% bug.product FILTER uri %]&amp;component=[% bug.component FILTER uri %]"
-               role="menuitem" tabindex="-1" target="_blank">&#8230; that depends on this [% terms.bug %]</a>
-          </li>
-          <li role="presentation">
-            <a href="[% basepath FILTER none %]enter_bug.cgi?format=__default__&amp;regressed_by=[% bug.id FILTER uri %]
-                     [%~%]&amp;product=[% bug.product FILTER uri %]&amp;component=[% bug.component FILTER uri %]"
-               role="menuitem" tabindex="-1" target="_blank">&#8230; that is regressed by this [% terms.bug %]</a>
-          </li>
-          <li role="separator"></li>
-          <li role="presentation">
-            <a href="[% basepath FILTER none %]enter_bug.cgi?format=__default__&amp;cloned_bug_id=[% bug.id FILTER uri %]
-                     [%~%]&amp;product=[% bug.product FILTER uri %]&amp;component=[% bug.component FILTER uri %]"
-               role="menuitem" tabindex="-1" target="_blank">&#8230; as a clone of this [% terms.bug %]</a>
-          </li>
-          <li role="presentation">
-            <a href="[% basepath FILTER none %]enter_bug.cgi?format=__default__&amp;cloned_bug_id=[% bug.id FILTER uri %]"
-               role="menuitem" tabindex="-1" target="_blank">&#8230; as a clone, in a different product</a>
-          </li>
-        </ul>
-      </div>
-    [% END %]
   </div>
 </div>
 
@@ -1490,7 +1416,7 @@
   [%# === comment actions === %]
   [% IF user.id %]
     <div id="new-comment-actions">
-      <button type="submit" class="save-btn major" id="bottom-save-btn">Save Changes</button>
+      <button type="submit" class="save-btn primary" id="bottom-save-btn">Save Changes</button>
       <div id="resolve-as">
         [%
           IF bug.resolution == "";

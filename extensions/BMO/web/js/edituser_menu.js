@@ -24,7 +24,7 @@ function show_usermenu(id, email, show_edit, hide_profile) {
         }
     ];
     if (!hide_profile) {
-        items.push({
+        items.unshift({
             name: "Profile",
             callback: function () {
                 var href = `${BUGZILLA.config.basepath}user_profile?user_id=${id}`;

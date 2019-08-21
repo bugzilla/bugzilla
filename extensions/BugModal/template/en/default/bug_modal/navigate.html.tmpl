@@ -15,7 +15,7 @@
 %]
 
 <nav id="search-nav" aria-labelledby="search-nav-label">
-  <span id="search-nav-label">[% terms.Bug %] List:</span>
+  <a id="search-nav-label" href="[% basepath FILTER none %]buglist.cgi?regetlastlist=[% search.id FILTER uri %]">[% terms.Bug %] List</a>
   ([% this_bug_idx + 1 %] of [% last_bug_list.size %])
   [% INCLUDE nav_link text="&#10096;&#10096; First" bug_id=last_bug_list.first %]
   [% IF this_bug_idx > 0 %]
@@ -29,7 +29,6 @@
     [% INCLUDE nav_link text="Next &#10097;" bug_id="" %]
   [% END %]
   [% INCLUDE nav_link text="Last &#10097;&#10097;" bug_id=last_bug_list.last %]
-  <a id="search-nav-reget" href="[% basepath FILTER none %]buglist.cgi?regetlastlist=[% search.id FILTER uri %]">Last search results</a>
 </nav>
 
 [% BLOCK nav_link %]

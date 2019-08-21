@@ -138,7 +138,7 @@ END;
 
           [% CASE constants.FIELD_TYPE_USER %]
             [%# users %]
-            [% INCLUDE bug_modal/user.html.tmpl u=value %]
+            [% INCLUDE bug_modal/user.html.tmpl u=value nick_only=1 gravatar_size=20 %]
 
           [% CASE constants.FIELD_TYPE_BUG_URLS %]
             [%# see also %]

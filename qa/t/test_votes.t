@@ -215,7 +215,7 @@ $sel->is_text_present_ok(
 
 go_to_bug($sel, $bug2_id);
 $text = trim($sel->get_text("field-value-votes"));
-ok($text =~ /4 votes/, "4 votes remaining");
+ok($text =~ /\b4\b/, "4 votes remaining");
 
 # Decrease the number per user. Bugs should keep at least one vote,
 # i.e. not all votes are removed (which was the old behavior).
@@ -236,7 +236,7 @@ $sel->is_text_present_ok("removed votes for bug");
 
 go_to_bug($sel, $bug3_id);
 $text = trim($sel->get_text("field-value-votes"));
-ok($text =~ /2 votes/, "2 votes remaining");
+ok($text =~ /\b2\b/, "2 votes remaining");
 
 # Now disable UNCONFIRMED.
 

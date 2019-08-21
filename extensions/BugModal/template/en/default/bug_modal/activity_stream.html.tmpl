@@ -22,8 +22,8 @@
     </ul>
   </div>
   <div class="dropdown">
-    <button type="button" id="view-menu-btn" aria-haspopup="true" aria-label="View"
-      aria-expanded="false" aria-controls="view-menu" class="dropdown-button minor">View &#9662;</button>
+    <button type="button" id="view-menu-btn" aria-haspopup="true" aria-label="Timeline"
+      aria-expanded="false" aria-controls="view-menu" class="dropdown-button minor">Timeline &#9662;</button>
     <ul id="view-menu" role="menu" tabindex="0" class="dropdown-content left" style="display:none">
       <li role="presentation">
         <a id="view-reset" role="menuitem" tabindex="-1">Reset</a>
@@ -263,7 +263,7 @@
       <meta itemprop="contentSize" content="[% att.datasize FILTER none %]">
       <meta itemprop="encodingFormat" content="[% att.mimetype FILTER html %]">
       <div class="label">
-        Posted [% IF att.is_image %]image
+        Attached [% IF att.is_image %]image
           [% ELSIF att.is_audio %]audio[% ELSIF att.is_video %]video
           [% ELSIF att.ispatch %]patch[% ELSE %]file[% END %]
         [% IF att.ispatch %]

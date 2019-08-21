@@ -40,7 +40,7 @@ $sel->title_is("Milestone Created");
 # Edit the milestone of test_bug_1.
 
 go_to_bug($sel, $test_bug_1);
-$sel->is_text_present_ok("Target:");
+$sel->is_text_present_ok("Milestone:");
 $sel->select_ok("target_milestone", "label=TM1");
 $sel->click_ok("bottom-save-btn");
 $sel->wait_for_page_to_load(WAIT_TIME);

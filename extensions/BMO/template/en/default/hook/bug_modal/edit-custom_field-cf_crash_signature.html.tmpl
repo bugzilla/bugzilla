@@ -9,9 +9,10 @@
 [%
   rendered_custom_fields.push('cf_crash_signature');
   WRAPPER bug_modal/field.html.tmpl
-    field = field
-    field_type = field.type
-    hide_on_view = bug.${field.name} == "" || bug.${field.name} == "---";
+    label = "Signature"
+    field = bug_fields.cf_crash_signature
+    field_type = bug_fields.cf_crash_signature.type
+    hide_on_view = bug.cf_crash_signature == "" || bug.cf_crash_signature == "---";
 %]
   [% IF split_cf_crash_signature.size %]
     [% FOREACH sig IN split_cf_crash_signature %]

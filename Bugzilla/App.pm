@@ -129,6 +129,16 @@ sub startup {
       }
     );
   }
+  $self->hook(
+    before_dispatch => sub {
+      # Ensure the request_cache is always cleared prior to every request,
+      # regardless of routing or Bugzilla::App wrapping.
+      # This is not an expensive operation.
+      Bugzilla->clear_request_cache();
+      # We also need to clear CGI's globals.
+      CGI::initialize_globals();
+    }
+  );
   $self->hook(after_dispatch => sub {
     my ($c) = @_;
     my ($req, $res) = ($c->req, $c->res);

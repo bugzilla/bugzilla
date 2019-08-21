@@ -76,7 +76,6 @@ sub load_one {
     $c->stash->{cleanup_guard}->dismiss;
     Bugzilla->usage_mode(USAGE_MODE_BROWSER);
     try {
-      CGI::initialize_globals();
       Bugzilla->init_page();
       $inner->();
     }

@@ -275,7 +275,7 @@
           <span class="edit-hide">([% bug.alias FILTER html %])</span>
         [% END %]
       </span>
-      <span class="edit-hide">
+      <span>
         <span class="bug-time-label">Opened [% INCLUDE bug_modal/rel_time.html.tmpl ts=bug.creation_ts %]</span>
         [% IF !bug.isopened %]
           <span class="bug-time-label">Closed [% INCLUDE bug_modal/rel_time.html.tmpl ts=bug.cf_last_resolved %]</span>
@@ -803,7 +803,6 @@
         field = bug_fields.reporter
         field_type = constants.FIELD_TYPE_USER
         view_only = 1
-        hide_on_edit = 1
         help = "https://wiki.mozilla.org/BMO/UserGuide/BugFields#reporter"
     %]
 
@@ -814,7 +813,6 @@
         value = bug.component_obj.triage_owner
         view_only = 1
         hide_on_view = bug.component_obj.triage_owner.login == ""
-        hide_on_edit = 1
         help = "https://wiki.mozilla.org/BMO/UserGuide/BugFields#triage_owner"
     %]
 

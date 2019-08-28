@@ -1529,12 +1529,14 @@ sub visible_bugs {
       # same result for bug_group_map.bug_id (so DISTINCT filters
       # out duplicate rows).
       "SELECT DISTINCT bugs.bug_id, reporter, assigned_to, qa_contact,
-                    reporter_accessible, cclist_accessible, cc.who,
-                    bug_group_map.bug_id
+                    components.triage_owner_id, reporter_accessible,
+                    cclist_accessible, cc.who, bug_group_map.bug_id
                FROM bugs
                     LEFT JOIN cc
                               ON cc.bug_id = bugs.bug_id
                                  AND cc.who = $user_id
+                    LEFT JOIN components
+                              ON bugs.component_id = components.id
                     LEFT JOIN bug_group_map
                               ON bugs.bug_id = bug_group_map.bug_id
                                  AND bug_group_map.group_id NOT IN ("
@@ -1549,12 +1551,13 @@ sub visible_bugs {
     $sth->execute(@check_ids);
     my $use_qa_contact = Bugzilla->params->{'useqacontact'};
     while (my $row = $sth->fetchrow_arrayref) {
-      my ($bug_id, $reporter, $owner, $qacontact, $reporter_access, $cclist_access,
-        $isoncclist, $missinggroup)
+      my ($bug_id, $reporter, $owner, $qacontact, $triage_owner, $reporter_access,
+          $cclist_access, $isoncclist, $missinggroup)
         = @$row;
       $visible_cache->{$bug_id}
         ||= ((($reporter == $user_id) && $reporter_access)
           || ($use_qa_contact && $qacontact && ($qacontact == $user_id))
+          || ($triage_owner && $triage_owner == $user_id)
           || ($owner == $user_id)
           || ($isoncclist && $cclist_access)
           || !$missinggroup) ? 1 : 0;

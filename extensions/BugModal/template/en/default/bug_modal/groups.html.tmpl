@@ -108,8 +108,8 @@
              [% " disabled=\"disabled\"" UNLESS user_can_edit_accessible %]>
       <label for="cclist_accessible">CC List</label>
     </div>
-    The assignee [% IF (Param('useqacontact')) %]and QA contact[% END %]
-    can always see [% terms.abug %], and this section does not take effect
-    unless the [% terms.bug %] is restricted to at least one group.
+    The assignee[% IF (Param('useqacontact')) %], QA contact, [% END %]
+    and triage owner can always see [% terms.abug %], and this section does not
+    take effect unless the [% terms.bug %] is restricted to at least one group.
   [% END %]
 </div>

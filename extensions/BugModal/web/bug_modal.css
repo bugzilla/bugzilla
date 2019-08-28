@@ -384,7 +384,7 @@ input[type="number"] {
 
 #cc-latch,
 #cc-summary {
-  cursor: default;
+  cursor: pointer;
 }
 
 #cc-list {

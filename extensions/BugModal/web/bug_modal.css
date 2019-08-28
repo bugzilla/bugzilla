@@ -330,6 +330,7 @@ input[type="number"] {
 #resolve-as,
 #bottom-status {
   display: inline;
+  vertical-align: top;
 }
 
 #after-comment-commit-button {

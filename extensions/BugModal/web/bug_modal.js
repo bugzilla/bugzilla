@@ -20,7 +20,7 @@ function slide_module(module, action, fast) {
             'aria-expanded': is_visible,
             'aria-label': is_visible ? latch.data('label-expanded') : latch.data('label-collapsed'),
         });
-        if (BUGZILLA.user.settings.remember_collapsed)
+        if (BUGZILLA.user.settings.remember_collapsed && module.is(':visible'))
             localStorage.setItem(module.attr('id') + '.visibility', is_visible ? 'show' : 'hide');
     }
 

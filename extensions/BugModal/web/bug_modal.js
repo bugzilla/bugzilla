@@ -701,6 +701,12 @@ $(function() {
         })
         .attr('disabled', false);
 
+    // re-enable the save buttons when the user goes back to the page due to any
+    // field error or mid-air collision
+    $(window).on('pageshow', function() {
+        $('.save-btn').attr('disabled', false);
+    });
+
     // cc toggle (follow/stop following)
     $('#cc-btn')
         .click(async event => {

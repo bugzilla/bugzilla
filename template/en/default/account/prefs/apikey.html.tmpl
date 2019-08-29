@@ -32,6 +32,7 @@ here. Sticky keys may only be used from the last IP that used the API key, and c
   <tr>
     <th>API key</th>
     <th>Description (optional)</th>
+    <th>Created</th>
     <th>Last used</th>
     <th>Sticky</th>
     <th>Revoked</th>
@@ -47,6 +48,9 @@ here. Sticky keys may only be used from the last IP that used the API key, and c
         <input name="description_[% api_key.id FILTER html %]"
           id="description_[% api_key.id FILTER html %]"
           value="[% api_key.description FILTER html %]">
+      </td>
+      <td>
+        [% api_key.creation_ts FILTER time %]
       </td>
       [% IF api_key.last_used %]
         <td>[% api_key.last_used FILTER time %]

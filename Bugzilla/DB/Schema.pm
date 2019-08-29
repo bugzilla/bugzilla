@@ -1788,6 +1788,7 @@ use constant ABSTRACT_SCHEMA => {
       api_key      => {TYPE => 'varchar(40)', NOTNULL => 1},
       description  => {TYPE => 'varchar(255)'},
       revoked      => {TYPE => 'BOOLEAN', NOTNULL => 1, DEFAULT => 'FALSE'},
+      creation_ts  => {TYPE => 'DATETIME', NOTNULL => 1},
       last_used    => {TYPE => 'DATETIME'},
       last_used_ip => {TYPE => 'varchar(40)'},
       app_id       => {TYPE => 'varchar(64)'},

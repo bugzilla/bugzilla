@@ -802,6 +802,9 @@ sub update_table_definitions {
   $dbh->bz_add_column('bugs', 'filed_via',
     {TYPE => 'varchar(40)', NOTNULL => 1, DEFAULT => "'unknown'"});
 
+  # Bug 1576667 - dkl@mozilla.com
+  _populate_api_keys_creation_ts();
+
   ################################################################
   # New --TABLE-- changes should go *** A B O V E *** this point #
   ################################################################
@@ -4305,6 +4308,22 @@ sub _add_oauth2_jwt_support {
   $dbh->bz_rename_column('oauth2_client_scope', 'client_id_new', 'client_id');
   $dbh->bz_alter_column('oauth2_client_scope', 'client_id',
     {TYPE => 'INT4', NOTNULL => 1});
+}
+
+sub _populate_api_keys_creation_ts {
+  my $dbh = Bugzilla->dbh;
+
+  # Return if we have already made these changes
+  return if $dbh->bz_column_info('user_api_keys', 'creation_ts');
+
+  $dbh->bz_add_column('user_api_keys', 'creation_ts', {TYPE => 'DATETIME'});
+
+  # We do not have a way to tell when an API key was originally created
+  # so we use the last_used timestamp as the initial creation value.
+  $dbh->do('UPDATE user_api_keys SET creation_ts = COALESCE(last_used, LOCALTIMESTAMP(0))');
+
+  $dbh->bz_alter_column('user_api_keys', 'creation_ts',
+    {TYPE => 'DATETIME', NOTNULL => 1});
 }
 
 1;

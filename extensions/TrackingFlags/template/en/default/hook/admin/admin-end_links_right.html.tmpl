@@ -6,7 +6,7 @@
   # defined by the Mozilla Public License, v. 2.0.
   #%]
 
-[% IF user.in_group('admin') %]
+[% IF user.in_group('edittrackingflags') %]
   <dt id="push">
     <a href="[% basepath FILTER none %]page.cgi?id=tracking_flags_admin_list.html">Release Tracking Flags</a>
   </dt>

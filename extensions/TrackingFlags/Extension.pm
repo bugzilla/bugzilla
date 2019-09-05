@@ -64,14 +64,14 @@ sub page_before_template {
   my $vars = $args->{'vars'};
 
   if ($page eq 'tracking_flags_admin_list.html') {
-    Bugzilla->user->in_group('admin')
+    Bugzilla->user->in_group('edittrackingflags')
       || ThrowUserError('auth_failure',
       {group => 'admin', action => 'access', object => 'administrative_pages'});
     admin_list($vars);
 
   }
   elsif ($page eq 'tracking_flags_admin_edit.html') {
-    Bugzilla->user->in_group('admin')
+    Bugzilla->user->in_group('edittrackingflags')
       || ThrowUserError('auth_failure',
       {group => 'admin', action => 'access', object => 'administrative_pages'});
     admin_edit($vars);

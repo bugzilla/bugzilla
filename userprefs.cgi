@@ -742,6 +742,11 @@ sub SaveMFAupdate {
     $user->update({keep_session => 1, keep_tokens => 1});
 
   }
+
+  # Invalidate all logins except for the current one
+  if ($action eq 'enable' || $action eq 'disable') {
+    Bugzilla->logout(LOGOUT_KEEP_CURRENT);
+  }
 }
 
 sub SaveMFAcallback {

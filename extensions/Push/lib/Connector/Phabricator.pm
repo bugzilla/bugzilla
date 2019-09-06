@@ -84,6 +84,7 @@ sub send {
       ));
       my $set_project_names = [map { "bmo-" . $_->name } @{$bug->groups_in}];
       $revision->make_private($set_project_names);
+      $revision->set_private_project_tags($set_project_names);
     }
 
     # Subscriber list of the private revision should always match

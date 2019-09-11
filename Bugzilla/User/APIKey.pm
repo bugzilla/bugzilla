@@ -46,13 +46,8 @@ use constant VALIDATORS     => {
 use constant LIST_ORDER => 'id';
 use constant NAME_FIELD => 'api_key';
 
-# turn off auditing and exclude these objects from memcached
-use constant {
-  AUDIT_CREATES => 0,
-  AUDIT_UPDATES => 0,
-  AUDIT_REMOVES => 0,
-  USE_MEMCACHED => 0
-};
+# Exclude these objects from memcached
+use constant USE_MEMCACHED => 0;
 
 # Accessors
 sub id           { return $_[0]->{id} }
@@ -79,6 +74,20 @@ sub update_last_used {
   $self->set('last_used',    $timestamp);
   $self->set('last_used_ip', $remote_ip);
   $self->update;
+}
+
+# We override Object.pm audit_log cause we need to remove the
+# last_used and last_used_ip changes so they are not logged.
+# Otherwise the audit_log table would fill up from people just
+# normally using the api keys.
+sub audit_log {
+  my ($self, $changes) = @_;
+  # Only interested in AUDIT_UPDATE
+  if (ref $changes eq 'HASH') {
+    delete $changes->{last_used};
+    delete $changes->{last_used_ip};
+  }
+  $self->SUPER::audit_log($changes);
 }
 
 # Setters

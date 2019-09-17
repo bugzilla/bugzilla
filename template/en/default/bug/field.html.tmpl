@@ -206,14 +206,6 @@
           <input type="hidden" name="defined_[% field.name FILTER html %]">
         [% END %]
 
-        <script [% script_nonce FILTER none %]>
-        <!--
-          initHidingOptionsForIE('[% field.name FILTER js %]');
-          [%+ INCLUDE "bug/field-events.js.tmpl"
-                      field = field, product = bug.product_obj %]
-        //-->
-        </script>
-
      [% CASE constants.FIELD_TYPE_TEXTAREA %]
        <div id="[% field.name FILTER html %]_edit_container" class="bz_default_hidden">
          <div>

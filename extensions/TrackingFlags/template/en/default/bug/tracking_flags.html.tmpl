@@ -32,9 +32,6 @@
               [% value.name FILTER html %]</option>
           [% END %]
         </select>
-        <script [% script_nonce FILTER none %]>
-          initHidingOptionsForIE('[% flag.name FILTER js %]');
-        </script>
         [% IF !new_bug && user.id %]
           <span id="ro_[% flag.name FILTER html %]" class="bz_default_hidden">
             [%  flag_bug_value FILTER html %]

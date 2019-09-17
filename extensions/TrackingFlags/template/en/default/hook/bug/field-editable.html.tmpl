@@ -29,10 +29,3 @@
     </option>
   [% END %]
 </select>
-<script [% script_nonce FILTER none %]>
-<!--
-  initHidingOptionsForIE('[% field.name FILTER js %]');
-  [%+ INCLUDE "bug/field-events.js.tmpl"
-      field = field, product = bug.product_obj %]
-//-->
-</script>

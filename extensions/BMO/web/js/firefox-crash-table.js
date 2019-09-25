@@ -355,7 +355,7 @@ window.addEventListener('DOMContentLoaded', () => {
             });
           } else {
             document.getElementById("mode-btn").click();
-            const e = document.getElementById("module-firefox-tracking-flags");
+            const e = document.getElementById("module-tracking");
             e.scrollIntoView();
           }
           statusFlagsSelects.affected.map(function (select) {

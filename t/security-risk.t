@@ -37,6 +37,7 @@ try {
     teams      => decode_json($teams_json),
     sec_keywords     => ['sec-critical', 'sec-high'],
     check_open_state => \&check_open_state_mock,
+    very_old_days    => 45,
     initial_bug_ids  => [1, 2, 3, 4],
     initial_bugs     => {
       1 => {
@@ -114,14 +115,14 @@ try {
           # Rewind the event that caused 1 to close.
           open            => [1],
           closed          => [],
-          median_age_open => 8
+          very_old_bugs   => []
         },
         'Backend' => {
 
           # 2 wasn't a sec-critical bug on the report date.
           open            => [3],
           closed          => [],
-          median_age_open => 4
+          very_old_bugs   => []
         }
       },
       bugs_by_sec_keyword => {
@@ -130,26 +131,26 @@ try {
           # 2 wasn't a sec-critical bug and 4 wasn't created yet on the report date.
           open            => [],
           closed          => [],
-          median_age_open => 0
+          very_old_bugs   => []
         },
         'sec-high' => {
 
           # Rewind the event that caused 1 to close.
           open            => [1, 3],
           closed          => [],
-          median_age_open => 6
+          very_old_bugs   => []
         }
       },
     },
     {    # The report on 2000-01-16 matches the state of initial_bugs.
       date         => DateTime->new(year => 2000, month => 1, day => 16),
       bugs_by_team => {
-        'Frontend' => {open => [4], closed => [1], median_age_open => 6},
-        'Backend'  => {open => [3], closed => [2], median_age_open => 11}
+        'Frontend' => {open => [4], closed => [1], very_old_bugs => []},
+        'Backend'  => {open => [3], closed => [2], very_old_bugs => []}
       },
       bugs_by_sec_keyword => {
-        'sec-critical' => {open => [4], closed => [2], median_age_open => 6},
-        'sec-high'     => {open => [3], closed => [1], median_age_open => 11}
+        'sec-critical' => {open => [4], closed => [2], very_old_bugs => []},
+        'sec-high'     => {open => [3], closed => [1], very_old_bugs => []}
       },
     },
   ];

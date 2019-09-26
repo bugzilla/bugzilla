@@ -65,7 +65,8 @@ my $report       = Bugzilla::Report::SecurityRisk->new(
   start_date   => $start_date,
   end_date     => $end_date,
   teams        => $teams,
-  sec_keywords => $sec_keywords
+  sec_keywords => $sec_keywords,
+  very_old_days => 45
 );
 
 my $bugs_by_team = $report->results->[-1]->{bugs_by_team};
@@ -83,6 +84,7 @@ my $vars = {
   deltas             => $report->deltas,
   missing_products   => $report->missing_products,
   missing_components => $report->missing_components,
+  very_old_days      => $report->very_old_days,
   build_bugs_link    => \&build_bugs_link,
 };
 

@@ -94,7 +94,7 @@
     <th style="padding: 0px 15px 10px 0px; text-align: right;">Closed<br />Last Week</th>
     <th style="padding: 0px 15px 10px 0px; text-align: right;">Added<br />Last Week</th>
     <th style="padding: 0px 15px 10px 0px; text-align: right; border-right: 1px solid grey;">
-      Median Age<br/>of Open [% terms.Bugs %]<br>
+      Older than <br> [% very_old_days FILTER html %] Days<br>
     </th>
     [% FOREACH result IN results.reverse %]
       [% NEXT IF loop.count < 2 %]
@@ -108,7 +108,7 @@
     <tr>
       <td style="padding: 0px 15px 10px 0px;">[% keyword FILTER html %]</td>
       <td style="padding: 0px 15px 10px 0px; text-align: right;">
-          [% IF results.reverse.0.bugs_by_sec_keyword.$keyword.open %]
+          [% IF results.reverse.0.bugs_by_sec_keyword.$keyword.open.size %]
             <a style="text-decoration: none;" href="[% build_bugs_link(results.reverse.0.bugs_by_sec_keyword.$keyword.open) FILTER html %]">
               [% results.reverse.0.bugs_by_sec_keyword.$keyword.open.size FILTER html %]
             </a>
@@ -137,7 +137,13 @@
         [% END %]
       </td>
       <td style="padding: 0px 15px 10px 0px; text-align: right; border-right: 1px solid grey; ">
-        [% results.-1.bugs_by_sec_keyword.$keyword.median_age_open FILTER format("%.0f") FILTER html %] days
+        [% IF results.reverse.0.bugs_by_sec_keyword.$keyword.very_old_bugs.size %]
+            <a style="text-decoration: none;" href="[% build_bugs_link(results.reverse.0.bugs_by_sec_keyword.$keyword.very_old_bugs) FILTER html %]">
+              [% results.reverse.0.bugs_by_sec_keyword.$keyword.very_old_bugs.size FILTER html %]
+            </a>
+          [% ELSE %]
+            0
+          [% END %]
       </td>
       [% FOREACH result IN results.reverse %]
         [% NEXT IF loop.count < 2 %]

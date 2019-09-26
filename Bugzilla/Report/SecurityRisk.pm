@@ -102,6 +102,8 @@ has 'initial_bugs' => (
 has 'check_open_state' =>
   (is => 'ro', isa => CodeRef, default => sub { return \&is_open_state; },);
 
+has 'very_old_days' => (is => 'ro', isa => Int, default => 45);
+
 has 'events' => (
   is  => 'lazy',
   isa => ArrayRef [
@@ -121,10 +123,10 @@ has 'results' => (
     Dict [
       date         => $DateTime,
       bugs_by_team => HashRef [
-        Dict [open => ArrayRef [Int], closed => ArrayRef [Int], median_age_open => Num]
+        Dict [open => ArrayRef [Int], closed => ArrayRef [Int], very_old_bugs => ArrayRef [Int]]
       ],
       bugs_by_sec_keyword => HashRef [
-        Dict [open => ArrayRef [Int], closed => ArrayRef [Int], median_age_open => Num]
+        Dict [open => ArrayRef [Int], closed => ArrayRef [Int], very_old_bugs => ArrayRef [Int]]
       ],
     ],
   ],
@@ -438,11 +440,11 @@ sub _build_graphs {
     {
       id    => 'bugs_by_sec_keyword_age',
       title => sprintf(
-        'Median age of open security bugs by severity (%s to %s)',
+        '# of open security bugs older than 45 days by severity (%s to %s)',
         $self->start_date->ymd,
         $self->end_date->ymd
       ),
-      range_label => 'Median Age (days)',
+      range_label => 'Bug Count',
       datasets    => [
         map {
           my $keyword = $_;
@@ -450,8 +452,9 @@ sub _build_graphs {
             name   => $_,
             keys   => [map { $_->{date}->epoch } @{$self->results}],
             values => [
-              map { $_->{bugs_by_sec_keyword}->{$keyword}->{median_age_open} }
-                @{$self->results}
+              map {
+                scalar @{$_->{bugs_by_sec_keyword}->{$keyword}->{very_old_bugs}}
+              } @{$self->results}
             ],
           }
         } @{$self->sec_keywords}
@@ -461,19 +464,22 @@ sub _build_graphs {
     {
       id    => 'bugs_by_team_age',
       title => sprintf(
-        'Median age of open security bugs by team (%s to %s)',
+        '# of open security bugs older than 45 days by team (%s to %s)',
         $self->start_date->ymd,
         $self->end_date->ymd
       ),
-      range_label => 'Median Age (days)',
+      range_label => 'Bug Count',
       datasets    => [
         map {
           my $team = $_;
           {
             name => $_,
             keys => [map { $_->{date}->epoch } @{$self->results}],
-            values =>
-              [map { $_->{bugs_by_team}->{$team}->{median_age_open} } @{$self->results}],
+            values => [
+              map {
+                scalar @{$_->{bugs_by_team}->{$team}->{very_old_bugs}}
+              }@{$self->results}
+            ],
           }
         } keys %{$self->teams}
       ],
@@ -562,13 +568,13 @@ sub _bugs_by_team {
   foreach my $team (keys %{$self->teams}) {
     my @open   = map { $_->{id} } grep { ($_->{is_open}) } @{$groups->{$team}};
     my @closed = map { $_->{id} } grep { !($_->{is_open}) } @{$groups->{$team}};
-    my @ages   = map {
-      $_->{created_at}->subtract_datetime_absolute($report_date)->seconds / 86_400;
+    my @very_old_bugs   = map { $_->{id} } grep {
+      $_->{created_at}->subtract_datetime_absolute($report_date)->seconds / 86_400 >= $self->very_old_days;
     } grep { ($_->{is_open}) } @{$groups->{$team}};
     $result->{$team} = {
       open            => \@open,
       closed          => \@closed,
-      median_age_open => @ages ? _median(@ages) : 0,
+      very_old_bugs   => \@very_old_bugs,
     };
   }
 
@@ -593,13 +599,13 @@ sub _bugs_by_sec_keyword {
     my @open = map { $_->{id} } grep { ($_->{is_open}) } @{$groups->{$sec_keyword}};
     my @closed
       = map { $_->{id} } grep { !($_->{is_open}) } @{$groups->{$sec_keyword}};
-    my @ages = map {
-      $_->{created_at}->subtract_datetime_absolute($report_date)->seconds / 86_400
+    my @very_old_bugs   = map { $_->{id} } grep {
+      $_->{created_at}->subtract_datetime_absolute($report_date)->seconds / 86_400 >= $self->very_old_days;
     } grep { ($_->{is_open}) } @{$groups->{$sec_keyword}};
     $result->{$sec_keyword} = {
       open            => \@open,
       closed          => \@closed,
-      median_age_open => @ages ? _median(@ages) : 0,
+      very_old_bugs   => \@very_old_bugs,
     };
   }
 
@@ -624,12 +630,6 @@ sub _find_team {
     }
   }
   return undef;
-}
-
-sub _median {
-
-  # From tlm @ https://www.perlmonks.org/?node_id=474564. Jul 14, 2005
-  return sum((sort { $a <=> $b } @_)[int($#_ / 2), ceil($#_ / 2)]) / 2;
 }
 
 

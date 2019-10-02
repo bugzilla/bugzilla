@@ -8,7 +8,7 @@
 # This module represents the SQL Injection tests that get run on a single
 # operator/field combination for Bugzilla::Test::Search.
 package Bugzilla::Test::Search::InjectionTest;
-use parent qw(Bugzilla::Test::Search::FieldTest);
+use base qw(Bugzilla::Test::Search::FieldTest);
 
 use strict;
 use warnings;

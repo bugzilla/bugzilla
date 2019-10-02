@@ -22,10 +22,9 @@ For interface details see L<Bugzilla::DB> and L<DBI>.
 package Bugzilla::DB::Mysql;
 
 use 5.10.1;
-use strict;
-use warnings;
+use Moo;
 
-use parent qw(Bugzilla::DB);
+extends qw(Bugzilla::DB);
 
 use Bugzilla::Constants;
 use Bugzilla::Install::Util qw(install_string);
@@ -33,8 +32,9 @@ use Bugzilla::Util;
 use Bugzilla::Error;
 use Bugzilla::DB::Schema::Mysql;
 
-use List::Util qw(max);
+use List::Util qw(max any);
 use Text::ParseWords;
+use Carp;
 
 # This is how many comments of MAX_COMMENT_LENGTH we expect on a single bug.
 # In reality, you could have a LOT more comments than this, because
@@ -43,7 +43,7 @@ use constant MAX_COMMENTS => 50;
 
 use constant FULLTEXT_OR => '|';
 
-sub new {
+sub BUILDARGS {
   my ($class, $params) = @_;
   my ($user, $pass, $host, $dbname, $port, $sock)
     = @$params{qw(db_user db_pass db_host db_name db_port db_sock)};
@@ -53,12 +53,7 @@ sub new {
   $dsn .= ";port=$port"         if $port;
   $dsn .= ";mysql_socket=$sock" if $sock;
 
-  my %attrs = (
-    mysql_enable_utf8 => Bugzilla->params->{'utf8'},
-
-    # Needs to be explicitly specified for command-line processes.
-    mysql_auto_reconnect => 1,
-  );
+  my %attrs = (mysql_enable_utf8 => 1);
 
   # MySQL SSL options
   my ($ssl_ca_file, $ssl_ca_path, $ssl_cert, $ssl_key) = @$params{
@@ -73,25 +68,21 @@ sub new {
     $attrs{'mysql_ssl_client_key'}  = $ssl_key if $ssl_key;
   }
 
-  my $self = $class->db_new(
-    {dsn => $dsn, user => $user, pass => $pass, attrs => \%attrs});
+  return {dsn => $dsn, user => $user, pass => $pass, attrs => \%attrs};
+}
+
+sub on_dbi_connected {
+  my ($class, $dbh) = @_;
 
   # This makes sure that if the tables are encoded as UTF-8, we
   # return their data correctly.
-  $self->do("SET NAMES utf8") if Bugzilla->params->{'utf8'};
-
-  # all class local variables stored in DBI derived class needs to have
-  # a prefix 'private_'. See DBI documentation.
-  $self->{private_bz_tables_locked} = "";
-
-  # Needed by TheSchwartz
-  $self->{private_bz_dsn} = $dsn;
-
-  bless($self, $class);
+  my $charset = $class->utf8_charset;
+  my $collate = $class->utf8_collate;
+  $dbh->do("SET NAMES $charset COLLATE $collate");
 
   # Check for MySQL modes.
   my ($var, $sql_mode)
-    = $self->selectrow_array("SHOW VARIABLES LIKE 'sql\\_mode'");
+    = $dbh->selectrow_array("SHOW VARIABLES LIKE 'sql\\_mode'");
 
   # Disable ANSI and strict modes, else Bugzilla will crash.
   if ($sql_mode) {
@@ -104,19 +95,17 @@ sub new {
         split(/,/, $sql_mode));
 
     if ($sql_mode ne $new_sql_mode) {
-      $self->do("SET SESSION sql_mode = ?", undef, $new_sql_mode);
+      $dbh->do("SET SESSION sql_mode = ?", undef, $new_sql_mode);
     }
   }
 
   # Allow large GROUP_CONCATs (largely for inserting comments
   # into bugs_fulltext).
-  $self->do('SET SESSION group_concat_max_len = 128000000');
+  $dbh->do('SET SESSION group_concat_max_len = 128000000');
 
   # MySQL 5.5.2 and older have this variable set to true, which causes
   # trouble, see bug 870369.
-  $self->do('SET SESSION sql_auto_is_null = 0');
-
-  return $self;
+  $dbh->do('SET SESSION sql_auto_is_null = 0');
 }
 
 # when last_insert_id() is supported on MySQL by lowest DBI/DBD version
@@ -346,6 +335,34 @@ sub bz_setup_database {
     die install_string('mysql_innodb_disabled');
   }
 
+  if ($self->utf8_charset eq 'utf8mb4') {
+    my %global = map {@$_}
+      @{$self->selectall_arrayref(q(SHOW GLOBAL VARIABLES LIKE 'innodb_%'))};
+    my $utf8mb4_supported
+      = $global{innodb_file_format} eq 'Barracuda'
+      && $global{innodb_file_per_table} eq 'ON'
+      && $global{innodb_large_prefix} eq 'ON';
+
+    die install_string('mysql_innodb_settings') unless $utf8mb4_supported;
+
+    my $tables = $self->selectall_arrayref('SHOW TABLE STATUS');
+    foreach my $table_status (@$tables) {
+      my ($table, undef, undef, $row_format) = @$table_status;
+      my $table_type = $table_status->[-1];
+      my $new_row_format = $self->default_row_format($table);
+      next if lc($table_type) eq 'view';
+      next if lc($new_row_format) eq 'compact';
+      next if lc($row_format) eq 'dynamic';
+      next if lc($row_format) eq 'compressed';
+      if (lc($new_row_format) ne lc($row_format)) {
+        print install_string(
+          'mysql_row_format_conversion', {table => $table, format => $new_row_format}
+          ),
+          "\n";
+        $self->do(sprintf 'ALTER TABLE %s ROW_FORMAT=%s', $table, $new_row_format);
+      }
+    }
+  }
 
   my ($sd_index_deleted, $longdescs_index_deleted);
   my @tables = $self->bz_table_list_real();
@@ -379,9 +396,6 @@ sub bz_setup_database {
     'SELECT TABLE_NAME FROM information_schema.TABLES 
           WHERE TABLE_SCHEMA = ? AND ENGINE = ?', undef, $db_name, 'MyISAM'
   );
-  foreach my $should_be_myisam (Bugzilla::DB::Schema::Mysql::MYISAM_TABLES) {
-    @$myisam_tables = grep { $_ ne $should_be_myisam } @$myisam_tables;
-  }
 
   if (scalar @$myisam_tables) {
     print "Bugzilla now uses the InnoDB storage engine in MySQL for",
@@ -564,10 +578,7 @@ sub bz_setup_database {
   # This kind of situation happens when people create the database
   # themselves, and if we don't do this they will get the big
   # scary WARNING statement about conversion to UTF8.
-  if ( !$self->bz_db_is_utf8
-    && !@tables
-    && (Bugzilla->params->{'utf8'} || !scalar keys %{Bugzilla->params}))
-  {
+  unless ($self->bz_db_is_utf8) {
     $self->_alter_db_charset_to_utf8();
   }
 
@@ -678,11 +689,13 @@ sub bz_setup_database {
   # the table charsets.
   #
   # TABLE_COLLATION IS NOT NULL prevents us from trying to convert views.
+  my $charset         = $self->utf8_charset;
+  my $collate         = $self->utf8_collate;
   my $non_utf8_tables = $self->selectrow_array(
     "SELECT 1 FROM information_schema.TABLES 
           WHERE TABLE_SCHEMA = ? AND TABLE_COLLATION IS NOT NULL 
-                AND TABLE_COLLATION NOT LIKE 'utf8%' 
-          LIMIT 1", undef, $db_name
+                AND TABLE_COLLATION != ?
+          LIMIT 1", undef, $db_name, $collate
   );
 
   if (Bugzilla->params->{'utf8'} && $non_utf8_tables) {
@@ -698,7 +711,8 @@ sub bz_setup_database {
       }
     }
 
-    print "Converting table storage format to UTF-8. This may take a", " while.\n";
+    print
+      "Converting table storage format to $charset (collate $collate). This may take a while.\n";
     foreach my $table ($self->bz_table_list_real) {
       my $info_sth = $self->prepare("SHOW FULL COLUMNS FROM $table");
       $info_sth->execute();
@@ -712,11 +726,11 @@ sub bz_setup_database {
         # If this particular column isn't stored in utf-8
         if ( $column->{Collation}
           && $column->{Collation} ne 'NULL'
-          && $column->{Collation} !~ /utf8/)
+          && $column->{Collation} ne $collate)
         {
           my $name = $column->{Field};
 
-          print "$table.$name needs to be converted to UTF-8...\n";
+          print "$table.$name needs to be converted to $charset (collate $collate)...\n";
 
           # These will be automatically re-created at the end
           # of checksetup.
@@ -737,7 +751,7 @@ sub bz_setup_database {
           my ($binary, $utf8) = ($sql_def, $sql_def);
           my $type = $self->_bz_schema->convert_type($col_info->{TYPE});
           $binary =~ s/(\Q$type\E)/$1 CHARACTER SET binary/;
-          $utf8   =~ s/(\Q$type\E)/$1 CHARACTER SET utf8/;
+          $utf8   =~ s/(\Q$type\E)/$1 CHARACTER SET $charset COLLATE $collate/;
           push(@binary_sql, "MODIFY COLUMN $name $binary");
           push(@utf8_sql,   "MODIFY COLUMN $name $utf8");
         }
@@ -757,8 +771,8 @@ sub bz_setup_database {
 
         print "Converting the $table table to UTF-8...\n";
         my $bin = "ALTER TABLE $table " . join(', ', @binary_sql);
-        my $utf
-          = "ALTER TABLE $table " . join(', ', @utf8_sql, 'DEFAULT CHARACTER SET utf8');
+        my $utf = "ALTER TABLE $table "
+          . join(', ', @utf8_sql, "DEFAULT CHARACTER SET $charset COLLATE $collate");
         $self->do($bin);
         $self->do($utf);
 
@@ -768,7 +782,7 @@ sub bz_setup_database {
         }
       }
       else {
-        $self->do("ALTER TABLE $table DEFAULT CHARACTER SET utf8");
+        $self->do("ALTER TABLE $table DEFAULT CHARACTER SET $charset COLLATE $collate");
       }
 
     }    # foreach my $table (@tables)
@@ -779,7 +793,7 @@ sub bz_setup_database {
   # a mysqldump.) So we have this change outside of the above block,
   # so that it just happens silently if no actual *table* conversion
   # needs to happen.
-  if (Bugzilla->params->{'utf8'} && !$self->bz_db_is_utf8) {
+  unless ($self->bz_db_is_utf8) {
     $self->_alter_db_charset_to_utf8();
   }
 
@@ -861,19 +875,70 @@ sub _fix_defaults {
   }
 }
 
+sub utf8_charset {
+  return 'utf8' unless Bugzilla->params->{'utf8'};
+  return Bugzilla->params->{'utf8'} eq 'utf8mb4' ? 'utf8mb4' : 'utf8';
+}
+
+sub utf8_collate {
+  my $charset = utf8_charset();
+  if ($charset eq 'utf8') {
+    return 'utf8_general_ci';
+  }
+  elsif ($charset eq 'utf8mb4') {
+    return 'utf8mb4_unicode_520_ci';
+  }
+  else {
+    croak "invalid charset: $charset";
+  }
+}
+
+sub default_row_format {
+  my ($class, $table) = @_;
+  my $charset = utf8_charset();
+  if ($charset eq 'utf8') {
+    return 'Compact';
+  }
+  elsif ($charset eq 'utf8mb4') {
+    my @no_compress = qw(
+      bug_user_last_visit
+      cc
+      email_rates
+      logincookies
+      token_data
+      tokens
+      ts_error
+      ts_exitstatus
+      ts_funcmap
+      ts_job
+      ts_note
+      user_request_log
+      votes
+    );
+    return 'Dynamic' if any { $table eq $_ } @no_compress;
+    return 'Compressed';
+  }
+  else {
+    croak "invalid charset: $charset";
+  }
+}
+
 sub _alter_db_charset_to_utf8 {
   my $self    = shift;
   my $db_name = Bugzilla->localconfig->{db_name};
-  $self->do("ALTER DATABASE $db_name CHARACTER SET utf8");
+  my $charset = $self->utf8_charset;
+  my $collate = $self->utf8_collate;
+  $self->do("ALTER DATABASE $db_name CHARACTER SET $charset COLLATE $collate");
 }
 
 sub bz_db_is_utf8 {
   my $self = shift;
-  my $db_collation
+  my $db_charset
     = $self->selectrow_arrayref("SHOW VARIABLES LIKE 'character_set_database'");
 
   # First column holds the variable name, second column holds the value.
-  return $db_collation->[1] =~ /utf8/ ? 1 : 0;
+  my $charset = $self->utf8_charset;
+  return $db_charset->[1] eq $charset ? 1 : 0;
 }
 
 

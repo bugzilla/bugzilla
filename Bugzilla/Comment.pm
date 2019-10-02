@@ -11,7 +11,7 @@ use 5.10.1;
 use strict;
 use warnings;
 
-use parent qw(Bugzilla::Object);
+use base qw(Bugzilla::Object);
 
 use Bugzilla::Attachment;
 use Bugzilla::Comment::TagWeights;
@@ -439,20 +439,6 @@ sub _check_thetext {
   # a valid part of the comment.
   $thetext =~ s/\s*$//s;
   $thetext =~ s/\r\n?/\n/g;    # Get rid of \r.
-
-  # Characters above U+FFFF cannot be stored by MySQL older than 5.5.3 as they
-  # require the new utf8mb4 character set. Other DB servers are handling them
-  # without any problem. So we need to replace these characters if we use MySQL,
-  # else the comment is truncated.
-  # XXX - Once we use utf8mb4 for comments, this hack for MySQL can go away.
-  state $is_mysql = Bugzilla->dbh->isa('Bugzilla::DB::Mysql') ? 1 : 0;
-  if ($is_mysql) {
-
-    # Perl 5.13.8 and older complain about non-characters.
-    no warnings 'utf8';
-    $thetext
-      =~ s/([\x{10000}-\x{10FFFF}])/"\x{FDD0}[" . uc(sprintf('U+%04x', ord($1))) . "]\x{FDD1}"/eg;
-  }
 
   ThrowUserError('comment_too_long') if length($thetext) > MAX_COMMENT_LENGTH;
   return $thetext;

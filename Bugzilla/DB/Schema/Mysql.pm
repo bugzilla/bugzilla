@@ -19,7 +19,7 @@ use warnings;
 
 use Bugzilla::Error;
 
-use parent qw(Bugzilla::DB::Schema);
+use base qw(Bugzilla::DB::Schema);
 
 # This is for column_info_to_column, to know when a tinyint is a
 # boolean and when it's really a tinyint. This only has to be accurate
@@ -85,8 +85,6 @@ use constant REVERSE_MAPPING => {
   # as in their db-specific version, so no reverse mapping is needed.
 };
 
-use constant MYISAM_TABLES => qw();
-
 #------------------------------------------------------------------------------
 sub _initialize {
 
@@ -128,20 +126,16 @@ sub _initialize {
 #------------------------------------------------------------------------------
 sub _get_create_table_ddl {
 
-  # Extend superclass method to specify the MYISAM storage engine.
   # Returns a "create table" SQL statement.
-
   my ($self, $table) = @_;
-
-  my $charset = Bugzilla->dbh->bz_db_is_utf8 ? "CHARACTER SET utf8" : '';
-  my $type = grep($_ eq $table, MYISAM_TABLES) ? 'MYISAM' : 'InnoDB';
-
-  my $ddl = $self->SUPER::_get_create_table_ddl($table);
-  $ddl =~ s/CREATE TABLE (.*) \(/CREATE TABLE `$1` (/;
-  $ddl .= " ENGINE = $type $charset";
-
-  return $ddl;
-
+  my $charset    = Bugzilla::DB::Mysql->utf8_charset;
+  my $collate    = Bugzilla::DB::Mysql->utf8_collate;
+  my $row_format = Bugzilla::DB::Mysql->default_row_format($table);
+  my @parts      = (
+    $self->SUPER::_get_create_table_ddl($table), 'ENGINE = InnoDB',
+    "CHARACTER SET $charset COLLATE $collate",   "ROW_FORMAT=$row_format",
+  );
+  return join(' ', @parts);
 }    #eosub--_get_create_table_ddl
 
 #------------------------------------------------------------------------------
@@ -155,7 +149,7 @@ sub _get_create_index_ddl {
   my $sql = "CREATE ";
   $sql .= "$index_type "
     if ($index_type eq 'UNIQUE' || $index_type eq 'FULLTEXT');
-  $sql .= "INDEX \`$index_name\` ON \`$table_name\` \("
+  $sql .= "INDEX \`$index_name\` ON $table_name \("
     . join(", ", @$index_fields) . "\)";
 
   return ($sql);
@@ -169,10 +163,9 @@ sub get_create_database_sql {
 
   # We only create as utf8 if we have no params (meaning we're doing
   # a new installation) or if the utf8 param is on.
-  my $create_utf8
-    = Bugzilla->params->{'utf8'} || !defined Bugzilla->params->{'utf8'};
-  my $charset = $create_utf8 ? "CHARACTER SET utf8" : '';
-  return ("CREATE DATABASE $name $charset");
+  my $charset = Bugzilla::DB::Mysql->utf8_charset;
+  my $collate = Bugzilla::DB::Mysql->utf8_collate;
+  return ("CREATE DATABASE $name CHARACTER SET $charset COLLATE $collate");
 }
 
 # MySQL has a simpler ALTER TABLE syntax than ANSI.

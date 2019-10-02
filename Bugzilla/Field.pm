@@ -61,7 +61,7 @@ use 5.10.1;
 use strict;
 use warnings;
 
-use parent qw(Exporter Bugzilla::Object);
+use base qw(Exporter Bugzilla::Object);
 @Bugzilla::Field::EXPORT = qw(check_field get_field_id get_legal_field_values);
 
 use Bugzilla::Constants;

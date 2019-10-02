@@ -11,7 +11,7 @@ use 5.10.1;
 use strict;
 use warnings;
 
-use parent qw(Email::Sender::Transport::Sendmail);
+use base qw(Email::Sender::Transport::Sendmail);
 
 use Email::Sender::Failure;
 

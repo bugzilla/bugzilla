@@ -11,7 +11,7 @@ use 5.10.1;
 use strict;
 use warnings;
 
-use parent qw(Bugzilla::Object Exporter);
+use base qw(Bugzilla::Object Exporter);
 
 @Bugzilla::Version::EXPORT = qw(vers_cmp);
 

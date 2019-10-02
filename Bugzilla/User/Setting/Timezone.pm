@@ -13,7 +13,7 @@ use warnings;
 
 use DateTime::TimeZone;
 
-use parent qw(Bugzilla::User::Setting);
+use base qw(Bugzilla::User::Setting);
 
 use Bugzilla::Constants;
 

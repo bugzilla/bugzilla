@@ -12,7 +12,7 @@ use strict;
 use warnings;
 
 use lib 't';
-use parent qw(Exporter);
+use base qw(Exporter);
 @Support::Templates::EXPORT
   = qw(@languages @include_paths @english_default_include_paths
   @referenced_files %actual_files $num_actual_files);

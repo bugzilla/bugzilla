@@ -12,7 +12,7 @@ use 5.10.1;
 use strict;
 use warnings;
 
-use parent qw(Exporter);
+use base qw(Exporter);
 
 
 # Module stuff

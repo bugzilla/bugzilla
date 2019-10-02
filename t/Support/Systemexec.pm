@@ -11,7 +11,7 @@ use 5.10.1;
 use strict;
 use warnings;
 
-use parent qw(Exporter);
+use base qw(Exporter);
 @Support::Systemexec::EXPORT = qw(system exec);
 
 sub system($$@) {

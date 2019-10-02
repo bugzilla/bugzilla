@@ -15,7 +15,7 @@ use warnings;
 # ChoiceInterface, because a bug status literally is a special type
 # of Field::Choice, not just an object that happens to have the same
 # methods.
-use parent qw(Bugzilla::Field::Choice Exporter);
+use base qw(Bugzilla::Field::Choice Exporter);
 @Bugzilla::Status::EXPORT = qw(
   BUG_STATE_OPEN
   SPECIAL_STATUS_WORKFLOW_ACTIONS

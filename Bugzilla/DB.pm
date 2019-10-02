@@ -8,13 +8,13 @@
 package Bugzilla::DB;
 
 use 5.10.1;
-use strict;
-use warnings;
+use Moo;
 
 use DBI;
+use DBIx::Connector;
+our %Connector;
 
-# Inherit the DB class from DBI::db.
-use parent -norequire, qw(DBI::db);
+has 'connector' => (is => 'lazy', handles => [qw( dbh )],);
 
 use Bugzilla::Constants;
 use Bugzilla::Mailer;
@@ -28,6 +28,32 @@ use Bugzilla::Version;
 
 use List::Util qw(max);
 use Storable qw(dclone);
+
+has [qw(dsn user pass attrs)] => (is => 'ro', required => 1,);
+
+
+# Install proxy methods to the DBI object.
+# We can't use handles() as DBIx::Connector->dbh has to be called each
+# time we need a DBI handle to ensure the connection is alive.
+{
+  my @DBI_METHODS = qw(
+    begin_work column_info commit disconnect do errstr get_info last_insert_id
+    ping prepare prepare_cached primary_key quote_identifier rollback
+    selectall_arrayref selectall_hashref selectcol_arrayref selectrow_array
+    selectrow_arrayref selectrow_hashref table_info
+  );
+  my $stash = Package::Stash->new(__PACKAGE__);
+
+  foreach my $method (@DBI_METHODS) {
+    my $symbol = '&' . $method;
+    $stash->add_symbol(
+      $symbol => sub {
+        my $self = shift;
+        return $self->dbh->$method(@_);
+      }
+    );
+  }
+}
 
 #####################################################################
 # Constants
@@ -88,7 +114,7 @@ use constant INDEX_DROPS_REQUIRE_FK_DROPS => 1;
 
 sub quote {
   my $self   = shift;
-  my $retval = $self->SUPER::quote(@_);
+  my $retval = $self->dbh->quote(@_);
   trick_taint($retval) if defined $retval;
   return $retval;
 }
@@ -130,9 +156,7 @@ sub _connect {
     "'$driver' is not a valid choice for \$db_driver in " . " localconfig: " . $@);
 
   # instantiate the correct DB specific module
-  my $dbh = $pkg_module->new($params);
-
-  return $dbh;
+  return $pkg_module->new($params);
 }
 
 sub _handle_error {
@@ -200,7 +224,6 @@ sub bz_check_server_version {
   my ($self, $db, $output) = @_;
 
   my $sql_vers = $self->bz_server_version;
-  $self->disconnect;
 
   my $sql_want   = $db->{db_version};
   my $version_ok = vers_cmp($sql_vers, $sql_want) > -1 ? 1 : 0;
@@ -261,7 +284,6 @@ sub bz_create_database {
     }
   }
 
-  $dbh->disconnect;
 }
 
 # A helper for bz_create_database and bz_check_requirements.
@@ -270,6 +292,7 @@ sub _get_no_db_connection {
   my $dbh;
   my %connect_params = %{Bugzilla->localconfig};
   $connect_params{db_name} = '';
+  local %Connector = ();
   my $conn_success = eval { $dbh = _connect(\%connect_params); };
   if (!$conn_success) {
     my $driver     = $connect_params{db_driver};
@@ -1299,14 +1322,15 @@ sub bz_rollback_transaction {
 # Subclass Helpers
 #####################################################################
 
-sub db_new {
-  my ($class, $params) = @_;
-  my ($dsn, $user, $pass, $override_attrs) = @$params{qw(dsn user pass attrs)};
+sub _build_connector {
+  my ($self) = @_;
+  my ($dsn, $user, $pass, $override_attrs)
+    = map { $self->$_ } qw(dsn user pass attrs);
 
   # set up default attributes used to connect to the database
   # (may be overridden by DB driver implementations)
   my $attributes = {
-    RaiseError         => 0,
+    RaiseError         => 1,
     AutoCommit         => 1,
     PrintError         => 0,
     ShowErrorStatement => 1,
@@ -1323,20 +1347,14 @@ sub db_new {
       $attributes->{$key} = $override_attrs->{$key};
     }
   }
+  my $class = ref $self;
+  if ($class->can('on_dbi_connected')) {
+    $attributes->{Callbacks}
+      = {connected => sub { $class->on_dbi_connected(@_); return },};
+  }
 
-  # connect using our known info to the specified db
-  my $self = DBI->connect($dsn, $user, $pass, $attributes)
-    or die "\nCan't connect to the database.\nError: $DBI::errstr\n"
-    . "  Is your database installed and up and running?\n  Do you have"
-    . " the correct username and password selected in localconfig?\n\n";
-
-  # RaiseError was only set to 0 so that we could catch the
-  # above "die" condition.
-  $self->{RaiseError} = 1;
-
-  bless($self, $class);
-
-  return $self;
+  return $Connector{"$user.$dsn"}
+    //= DBIx::Connector->new($dsn, $user, $pass, $attributes);
 }
 
 #####################################################################

@@ -28,7 +28,7 @@ use File::Basename qw(dirname);
 use Safe;
 use Term::ANSIColor;
 
-use parent qw(Exporter);
+use base qw(Exporter);
 
 our @EXPORT_OK = qw(
   read_localconfig

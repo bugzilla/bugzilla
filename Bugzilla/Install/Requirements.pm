@@ -23,7 +23,7 @@ use Bugzilla::Install::Util qw(install_string bin_loc
 use List::Util qw(max);
 use Term::ANSIColor;
 
-use parent qw(Exporter);
+use base qw(Exporter);
 our @EXPORT = qw(
   REQUIRED_MODULES
   OPTIONAL_MODULES
@@ -64,11 +64,11 @@ use constant APACHE => qw(apachectl httpd apache2 apache);
 # If we don't find any of the above binaries in the normal PATH,
 # these are extra places we look.
 use constant APACHE_PATH => [qw(
-    /usr/sbin
-    /usr/local/sbin
-    /usr/libexec
-    /usr/local/libexec
-    )];
+  /usr/sbin
+  /usr/local/sbin
+  /usr/libexec
+  /usr/local/libexec
+)];
 
 # The below two constants are subroutines so that they can implement
 # a hook. Other than that they are actually constants.
@@ -113,6 +113,10 @@ sub REQUIRED_MODULES {
       module  => 'DBI',
       version => ($^V >= v5.13.3) ? '1.614' : '1.54'
     },
+
+    {package => 'DBIx-Connector', module => 'DBIx::Connector', version => '0.56',},
+
+    {package => 'Moo', module => 'Moo', version => '2.003004',},
 
     # 2.24 contains several useful text virtual methods.
     {package => 'Template-Toolkit', module => 'Template', version => '2.24'},
@@ -747,7 +751,7 @@ sub have_vers {
   my $blacklisted;
   if ($vok && $params->{blacklist}) {
     $blacklisted = grep($vnum =~ /$_/, @{$params->{blacklist}});
-    $vok = 0 if $blacklisted;
+    $vok         = 0 if $blacklisted;
   }
 
   if ($output) {

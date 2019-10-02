@@ -24,7 +24,13 @@ use constant get_param_list => (
     checker  => \&check_email
   },
 
-  {name => 'utf8', type => 'b', default => '0', checker => \&check_utf8},
+  {
+    name    => 'utf8',
+    type    => 's',
+    choices => ['1', 'utf8', 'utf8mb4'],
+    default => 'utf8',
+    checker => \&check_utf8
+  },
 
   {name => 'shutdownhtml', type => 'l', default => ''},
 

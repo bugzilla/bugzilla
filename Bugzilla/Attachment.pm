@@ -48,7 +48,7 @@ use File::Copy;
 use List::Util qw(max);
 use Storable qw(dclone);
 
-use parent qw(Bugzilla::Object);
+use base qw(Bugzilla::Object);
 
 ###############################
 ####    Initialization     ####

@@ -11,7 +11,7 @@ use 5.10.1;
 use strict;
 use warnings;
 
-use parent qw(Exporter);
+use base qw(Exporter);
 use autodie qw(:default);
 
 use Bugzilla::Constants;
@@ -341,6 +341,8 @@ sub read_param_file {
     die "The $file file does not exist."
       . ' You probably need to run checksetup.pl.',;
   }
+  die "the param utf8 must be set to utf8mb4" unless $params{utf8} eq 'utf8mb4';
+  
   return \%params;
 }
 

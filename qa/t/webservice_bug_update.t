@@ -508,7 +508,7 @@ sub invalid_values {
         test  => 'non-numeric estimated_time fails'
       },
 
-      # We use PRIVATE_BUG_USER because he can modify the bug, but
+      # We use PRIVATE_BUG_USER because they can modify the bug, but
       # can't change time-tracking fields.
       {
         value => '100',
@@ -626,7 +626,7 @@ sub invalid_values {
         test  => 'non-numeric remaining_time fails'
       },
 
-      # We use PRIVATE_BUG_USER because he can modify the bug, but
+      # We use PRIVATE_BUG_USER because they can modify the bug, but
       # can't change time-tracking fields.
       {
         value => '100',
@@ -730,7 +730,7 @@ sub invalid_values {
         test  => 'non-numeric work_time fails'
       },
 
-      # We use PRIVATE_BUG_USER because he can modify the bug, but
+      # We use PRIVATE_BUG_USER because they can modify the bug, but
       # can't change time-tracking fields.
       {
         value => '10',

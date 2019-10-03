@@ -216,7 +216,7 @@ $sel->is_element_present_ok(
 );
 
 # File a bug in 'Another Product / c2' and assign it
-# to a powerless user, so that he can move it later.
+# to a powerless user, so that they can move it later.
 
 file_bug_in_product($sel, 'Another Product');
 $sel->select_ok("component", "label=c2");

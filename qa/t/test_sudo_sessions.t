@@ -22,7 +22,7 @@ set_parameters($sel, {"Group Security" => {"usevisibilitygroups-on" => undef}});
 
 # You can see all users from editusers.cgi, but once you leave this page,
 # usual group visibility restrictions apply and the "powerless" user cannot
-# be sudo'ed as he is in no group.
+# be sudo'ed as they’re in no group.
 
 go_to_admin($sel);
 $sel->click_ok("link=Users");
@@ -90,7 +90,7 @@ ok(
 );
 
 # Make sure this user is not an admin and has no privs at all, and that
-# he cannot access editusers.cgi (despite the sudoer can).
+# they cannot access editusers.cgi (despite the sudoer can).
 
 $sel->click_ok('header-account-menu-button');
 $sel->click_ok("link=Preferences");

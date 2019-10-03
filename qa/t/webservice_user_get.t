@@ -46,7 +46,7 @@ my @tests = (
   {
     user => 'unprivileged',
     args => {names => [$get_user]},
-    test => "Unprivileged user can get himself",
+    test => "Unprivileged user can get themselves",
   },
   {
     user => 'unprivileged',
@@ -130,7 +130,7 @@ my @tests = (
   {
     user => 'canconfirm',
     args => {names => [$canconfirm_user]},
-    test => 'Privileged user can get himself',
+    test => 'Privileged user can get themselves',
   },
   {
     user => 'editbugs',
@@ -180,7 +180,7 @@ sub post_success {
 
   # FIXME: We have no way to create a saved search or a saved report from
   #        the WebService, so we cannot test that the correct data is returned
-  #        if the user is accessing his own account.
+  #        if the user is accessing their own account.
   if ($username eq $item->{name}) {
     ok(exists $item->{saved_searches},
       'Users can get the list of saved searches and reports for their own account');
@@ -195,7 +195,7 @@ sub post_success {
   my @groups = map { $_->{name} } @{$item->{groups}};
 
   # Admins can see all groups a user belongs to (assuming they inherited
-  # membership for all groups). Same for a user querying his own account.
+  # membership for all groups). Same for a user querying their own account.
   if ($username eq $item->{name} || $user eq 'admin') {
     if ($username eq $get_user) {
       ok(!scalar @groups, "The unprivileged user doesn't belong to any group");

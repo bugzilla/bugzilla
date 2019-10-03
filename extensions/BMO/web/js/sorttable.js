@@ -302,7 +302,7 @@ sorttable = {
       /* and comment out this one */
       //rows.sort(cell.sorttable_sortfunction);
 
-      // Rebuild the table, using he sorted rows.
+      // Rebuild the table, using the sorted rows.
       tb = cell.table.sorttable_bodies[0];
       body_size = cell.table.sorttable_body_size;
       body_index = 0;

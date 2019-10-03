@@ -101,7 +101,7 @@ fields:
   checkboxes will appear here to allow you to add users to, or
   remove them from, these groups. The first checkbox gives the
   user the ability to add and remove other users as members of
-  this group. The second checkbox adds the user himself as a member
+  this group. The second checkbox adds the user themselves as a member
   of the group.
 
 - *canconfirm*:
@@ -193,7 +193,7 @@ can create user accounts for other users:
       addresses which are a mailing list), in general it is
       preferable to log out and use the ``New Account``
       button to create users, as it will pre-populate all the
-      required fields and also notify the user of her account name
+      required fields and also notify the user of their account name
       and password.
 
 .. _user-account-deletion:

@@ -114,7 +114,7 @@ set_parameters(
 );
 
 # By default, groups are not visible to themselves, so we have to enable this.
-# The tweakparams user has not enough privs to do it himself.
+# The tweakparams user has not enough privs to do it themselves.
 
 logout($sel);
 log_in($sel, $config, 'admin');
@@ -139,7 +139,7 @@ log_in($sel, $config, 'tweakparams');
 go_to_bug($sel, $test_bug_1);
 $sel->click_ok("add-cc-btn");
 
-# We are not in the same groups as the unprivileged user, so we cannot see him.
+# We are not in the same groups as the unprivileged user, so we cannot see them.
 
 $sel->type_ok("add-cc", $config->{unprivileged_user_login_truncated});
 $sel->click_ok('bottom-save-btn');

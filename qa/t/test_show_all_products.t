@@ -39,7 +39,7 @@ ok(
 logout($sel);
 
 # Same steps, but for a member of the "QA‑Selenium‑TEST" group.
-# The "QA‑Selenium‑TEST" product must be visible to him.
+# The "QA‑Selenium‑TEST" product must be visible to them.
 
 log_in($sel, $config, 'QA_Selenium_TEST');
 $sel->click_ok('//*[@class="link-file"]//a');

@@ -151,7 +151,7 @@ $sel->title_is("User Preferences");
 logout($sel);
 
 # Log in as admin again. The other user is not a blesser for the 'canconfirm'
-# group, and so his shared search must not be displayed by default. But it
+# group, and so their shared search must not be displayed by default. But it
 # must still be available and can be added to the Search Bar, if desired.
 
 log_in($sel, $config, 'admin');
@@ -211,7 +211,7 @@ ok(
 logout($sel);
 
 # Make sure that the 'helpwanted' query is not shared with the QA_Selenium_TEST
-# user as he doesn't belong to the 'canconfirm' group.
+# user as they don’t belong to the 'canconfirm' group.
 
 log_in($sel, $config, 'QA_Selenium_TEST');
 $sel->click_ok("quicksearch_top");

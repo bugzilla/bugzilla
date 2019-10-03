@@ -27,7 +27,7 @@ sub page_before_template {
   my $cgi      = Bugzilla->cgi;
   print $cgi->header;
 
-  # Needed to make sure he can access and edit bugs.
+  # Needed to make sure they can access and edit bugs.
   my $user = Bugzilla::User->check($cgi->param('sender'));
   Bugzilla->set_user($user);
 

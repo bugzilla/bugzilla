@@ -112,8 +112,8 @@ check_page_load($sel, qq{http://HOSTNAME/show_bug.cgi?id=$bug1_id});
 $sel->is_text_present_ok("Changes submitted for bug $bug1_id");
 logout($sel);
 
-# The admin is not in the mandatory group, but he has been CC'ed,
-# so he can view and edit the bug (as he has editbugs privs by inheritance).
+# The admin is not in the mandatory group, but they have been CC'ed,
+# so they can view and edit the bug (as they have editbugs privs by inheritance).
 
 log_in($sel, $config, 'admin');
 go_to_bug($sel, $bug1_id);
@@ -136,7 +136,7 @@ check_page_load($sel, qq{http://HOSTNAME/show_bug.cgi?id=$bug1_id});
 $sel->is_text_present_ok("Changes submitted for bug $bug1_id");
 logout($sel);
 
-# The powerless user can see the restricted bug, as he has been CC'ed.
+# The powerless user can see the restricted bug, as they have been CC'ed.
 
 log_in($sel, $config, 'unprivileged');
 go_to_bug($sel, $bug1_id);
@@ -269,7 +269,7 @@ $sel->click_ok("submit");
 check_page_load($sel, q{http://HOSTNAME/editproducts.cgi});
 $sel->title_is("Update group access controls for TestProduct");
 
-# The user is in the master group, so he can comment.
+# The user is in the master group, so they can comment.
 
 go_to_bug($sel, $bug1_id);
 $sel->type_ok("comment", "Do nothing except adding a comment...");
@@ -278,7 +278,7 @@ check_page_load($sel, qq{http://HOSTNAME/show_bug.cgi?id=$bug1_id});
 $sel->is_text_present_ok("Changes submitted for bug $bug1_id");
 logout($sel);
 
-# This user is not in the master group, so he cannot comment.
+# This user is not in the master group, so they cannot comment.
 
 log_in($sel, $config, 'QA_Selenium_TEST');
 go_to_bug($sel, $bug1_id);

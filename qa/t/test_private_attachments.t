@@ -101,7 +101,7 @@ foreach my $user (undef, 'unprivileged') {
   $sel->is_text_present_ok("this patch is public. Everyone can see it.");
 }
 
-# A powerless user can comment on attachments he doesn't own.
+# A powerless user can comment on attachments they don’t own.
 
 $sel->click_ok('//a[contains(@href,"/attachment.cgi?id='
     . $attachment1_id
@@ -177,7 +177,7 @@ $sel->is_text_present_ok("This is my patch!");
 ok(!$sel->is_text_present("Making the powerless user's patch private"),
   "Private comment not visible to logged out users");
 
-# A powerless user can only see private attachments he owns.
+# A powerless user can only see private attachments they own.
 
 log_in($sel, $config, 'unprivileged');
 go_to_bug($sel, $bug1_id);

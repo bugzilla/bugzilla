@@ -399,8 +399,8 @@ $sel->select_ok("flag_type-$aflagtype1_id", "label=?");
 $sel->type_ok("requestee_type-$aflagtype1_id", $config->{admin_user_login});
 $sel->select_ok("flag_type-$aflagtype2_id", "label=?");
 
-# The requestee is not in the Master group, and so he cannot view the bug.
-# He must be silently skipped from the requestee field.
+# The requestee is not in the Master group, and so they cannot view the bug.
+# They must be silently skipped from the requestee field.
 $sel->type_ok("requestee_type-$aflagtype2_id",
   $config->{unprivileged_user_login});
 $sel->type_ok("comment", "second patch, with requestee");
@@ -522,7 +522,7 @@ $sel->is_element_present_ok(
 );
 logout($sel);
 
-# Final tests as an admin. He has editbugs privs, so he can edit
+# Final tests as an admin. They have editbugs privs, so they can edit
 # someone else's patch.
 
 log_in($sel, $config, 'admin');

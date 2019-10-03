@@ -1217,7 +1217,7 @@ sub process_bug {
     if (!$attacher_id) {
       if ($att->{'attacher'}) {
         $err .= "The original submitter of attachment $att_id was\n   ";
-        $err .= $att->{'attacher'} . ", but he doesn't have an account here.\n";
+        $err .= $att->{'attacher'} . ", but they don’t have an account here.\n";
       }
       else {
         $err .= "The original submitter of attachment $att_id is unknown.\n";

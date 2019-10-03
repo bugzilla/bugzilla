@@ -627,7 +627,7 @@ use constant MAX_WEBDOT_BUGS => 2000;
 # This is the name of the algorithm used to hash passwords before storing
 # them in the database. This can be any string that is valid to pass to
 # Perl's "Digest" module. Note that if you change this, it won't take
-# effect until a user changes his password.
+# effect until a user changes their password.
 use constant PASSWORD_DIGEST_ALGORITHM => 'SHA-256';
 
 # How long of a salt should we use? Note that if you change this, none
@@ -639,7 +639,7 @@ use constant PASSWORD_SALT_LENGTH => 8;
 # can be safely done or not based on the web server's URI length setting.
 use constant CGI_URI_LIMIT => 8000;
 
-# If the user isn't allowed to change a field, we must tell him who can.
+# If the user isn't allowed to change a field, we must tell them who can.
 # We store the required permission set into the $PrivilegesRequired
 # variable which gets passed to the error template.
 

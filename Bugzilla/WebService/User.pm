@@ -245,7 +245,7 @@ sub get {
   my $obj_by_ids;
   $obj_by_ids = Bugzilla::User->new_from_list($params->{ids}) if $params->{ids};
 
-  # obj_by_ids are only visible to the user if he can see
+  # obj_by_ids are only visible to the user if they can see
   # the otheruser, for non visible otheruser throw an error
   foreach my $obj (@$obj_by_ids) {
     if (Bugzilla->user->can_see_user($obj)) {
@@ -587,7 +587,7 @@ error.
 =item 305 (New Password Required)
 
 The current password is correct, but the user is asked to change
-his password.
+their password.
 
 =item 50 (Param Required)
 
@@ -1218,7 +1218,7 @@ error.
 =item 305 (New Password Required)
 
 The current password is correct, but the user is asked to change
-his password.
+their password.
 
 =back
 

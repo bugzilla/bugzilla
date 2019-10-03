@@ -553,7 +553,7 @@ sub DoPermissions {
     }
   }
 
-  # If the user has product specific privileges, inform him about that.
+  # If the user has product specific privileges, inform them about that.
   foreach my $privs (PER_PRODUCT_PRIVILEGES) {
     next if $user->in_group($privs);
     $vars->{"local_$privs"} = $user->get_products_by_permission($privs);
@@ -630,7 +630,7 @@ sub SaveSavedSearches {
 
     if ($group_id) {
 
-      # Don't allow the user to share queries with groups he's not
+      # Don't allow the user to share queries with groups they’re not
       # allowed to.
       next unless grep($_ eq $group_id, @{$user->queryshare_groups});
 

@@ -74,7 +74,7 @@ if (my ($category_action)
   if ($category_action =~ /^(in|ex)clude$/) {
     if (!$user->in_group('editcomponents') && !$product) {
 
-      # The user can only add the flag type to products he can administrate.
+      # The user can only add the flag type to products they can administrate.
       foreach my $prod (@products) {
         push(@categories, $prod->id . ':0');
       }

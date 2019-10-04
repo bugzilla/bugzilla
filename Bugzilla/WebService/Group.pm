@@ -16,6 +16,10 @@ use Bugzilla::Constants;
 use Bugzilla::Error;
 use Bugzilla::WebService::Util qw(validate translate params_to_objects);
 
+use constant READ_ONLY => qw(
+  get
+);
+
 use constant PUBLIC_METHODS => qw(
   create
   get

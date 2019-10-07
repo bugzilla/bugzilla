@@ -65,7 +65,7 @@
           <th align="right">Current password:</th>
           <td>
             <input type="hidden" name="old_login" value="[% user.login FILTER html %]">
-            <input type="password" name="old_password" id="old_password">
+            <input autocomplete="current-password" type="password" name="old_password" id="old_password">
             <a href="#" id="forgot-password">I forgot my password</a>
           </td>
         </tr>
@@ -86,14 +86,14 @@
           <tr>
             <th align="right">New password:</th>
             <td>
-              <input type="password" name="new_password1" id="new_password1">
+              <input autocomplete="new-password" type="password" name="new_password1" id="new_password1">
               [% INCLUDE "mfa/protected.html.tmpl" %]
             </td>
           </tr>
           <tr>
             <th align="right">Confirm new password:</th>
             <td>
-              <input type="password" name="new_password2" id="new_password2">
+              <input autocomplete="new-password" type="password" name="new_password2" id="new_password2">
             </td>
           </tr>
         [% END %]

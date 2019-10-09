@@ -247,7 +247,6 @@ window.addEventListener('DOMContentLoaded', () => {
           addUpdateSFButton(statusFlagsSelects);
         }
       });
-      iframe.setAttribute("src", crashStopLink);
       iframe.setAttribute("id", "crash-stop-iframe");
       iframe.setAttribute("tabindex", "0");
       iframe.setAttribute("style", "display:block;width:100%;height:100%;margin-top:8px;border:0px;");
@@ -258,6 +257,23 @@ window.addEventListener('DOMContentLoaded', () => {
       spinner.setAttribute("role", "button");
       spinner.setAttribute("tabindex", "0");
       spinner.setAttribute("style", "padding-right:5px;cursor:pointer;");
+
+      const load_iframe = () => iframe.src = crashStopLink;
+
+      // Load the iframe once it becomes visible in the viewport, otherwise the height passed by
+      // *hidden* iframe through `postMessage()` will be 25px, hiding most of the content
+      if ('IntersectionObserver' in window) {
+        const observer = new IntersectionObserver(entries => entries.forEach(entry => {
+          if (entry.intersectionRatio > 0) {
+            observer.unobserve(iframe);
+            load_iframe();
+          }
+        }), { root: document.querySelector('#bugzilla-body') });
+
+        observer.observe(iframe);
+      } else {
+        load_iframe();
+      }
 
       function hide() {
         spinner.innerText = "▸";

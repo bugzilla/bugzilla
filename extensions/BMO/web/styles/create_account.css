@@ -30,13 +30,17 @@
   padding: 16px 16px 16px 32px;
 }
 
-#right-blurb {
+#left-blurb, #right-blurb {
   font-size: var(--font-size-x-large);
   line-height: var(--line-height-comfortable);
 }
 
 #right-blurb li {
   padding-bottom: 1em;
+}
+
+#create-account #product-list {
+  margin-bottom: 25px;
 }
 
 #create-account-form tr:last-child {

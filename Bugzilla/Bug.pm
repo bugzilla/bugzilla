@@ -4769,6 +4769,9 @@ sub _join_activity_entries {
 
   # Buglists and see_also need the comma restored
   if ($field =~ /^(?:dependson|blocked|regress(?:ed_by|es)|see_also)$/) {
+    if ($new_change eq '') {
+      return $current_change;
+    }
     if (substr($new_change, 0, 1) eq ',' || substr($new_change, 0, 1) eq ' ') {
       return $current_change . $new_change;
     }

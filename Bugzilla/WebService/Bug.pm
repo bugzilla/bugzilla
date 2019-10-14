@@ -1191,8 +1191,15 @@ sub add_comment {
   }
 
   # Append comment
-  $bug->add_comment($comment,
-    {isprivate => $params->{is_private}, work_time => $params->{work_time}});
+  $bug->add_comment(
+    $comment,
+    {
+      isprivate => $params->{is_private},
+      work_time => $params->{work_time},
+      is_markdown =>
+        ( defined $params->{is_markdown} ? $params->{is_markdown} : 0 )
+    }
+  );
 
   # Add comment tags
   $bug->set_all({comment_tags => $params->{comment_tags}})

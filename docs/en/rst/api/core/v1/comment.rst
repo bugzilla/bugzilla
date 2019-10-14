@@ -144,7 +144,8 @@ To create a comment on a current bug.
    {
      "ids" : [123,..],
      "comment" : "This is an additional comment",
-     "is_private" : false
+     "is_private" : false,
+     "is_markdown" : true
    }
 
 ``ids`` is optional in the data example above and can be used to specify adding
@@ -160,6 +161,8 @@ ids          array    List of integer bug IDs to add the comment to.
                       did not set the ``comment`` parameter.
 is_private   boolean  If set to true, the comment is private, otherwise it is
                       assumed to be public.
+is_markdown  boolean  If true, the comment will be rendered as markdown.
+                      (default: false)
 work_time    double   Adds this many hours to the "Hours Worked" on the bug.
                       If you are not in the time tracking group, this value will
                       be ignored.

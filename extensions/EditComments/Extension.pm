@@ -267,15 +267,24 @@ sub get_bug_activity {
 
   return unless $args->{include_comment_activity};
 
-  my $list = $args->{list};
+  my $list       = $args->{list};
+  my $starttime  = $args->{start_time};
   my $is_insider = Bugzilla->user->is_insider;
   my $hidden_placeholder = '(Hidden by Administrator)';
 
-  my $edited_comment_ids
-    = Bugzilla->dbh->selectcol_arrayref('
-      SELECT DISTINCT(c.comment_id) from longdescs_activity AS a
+  my $query = "SELECT DISTINCT(c.comment_id) from longdescs_activity AS a
       INNER JOIN longdescs AS c ON c.comment_id = a.comment_id AND c.bug_id = ?
-    ' . ($is_insider ? '' : 'AND c.isprivate = 0'), undef, $args->{bug_id});
+    " . ($is_insider ? '' : 'AND c.isprivate = 0');
+  my @args = ($args->{bug_id});
+
+  # Only consider changes since $starttime, if given.
+  if (defined $starttime) {
+    $query .= ' WHERE a.change_when > ?';
+    push(@args, $starttime);
+  }
+
+  my $edited_comment_ids
+    = Bugzilla->dbh->selectcol_arrayref($query, undef, @args);
 
   foreach my $comment_id (@$edited_comment_ids) {
     my $prev_rev = {};

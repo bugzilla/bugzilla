@@ -290,6 +290,20 @@
         no_label = 1
         hide_on_edit = 1
     %]
+      [%# non-public bug text for screen readers %]
+      [% IF bug.groups_in.size %]
+        [%
+          non_public_desc = "Confidential";
+          FOREACH group IN bug.groups_in;
+            IF group.secure_mail;
+              non_public_desc = "Security";
+              BREAK;
+            END;
+          END;
+        %]
+        <h1 class="offscreen">[% non_public_desc FILTER none %] [%+ terms.bug %]</h1>
+      [% END %]
+
       <h1 id="field-value-short_desc">[% bug.short_desc FILTER quoteUrls(bug) FILTER wbr %]</h1>
     [% END %]
 

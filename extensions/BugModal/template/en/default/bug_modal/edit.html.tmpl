@@ -418,6 +418,9 @@
             <div><a href="[% basepath FILTER none %]buglist.cgi?product=[% bug.product FILTER uri %]&amp;
                           [%~ %]component=[% bug.component FILTER uri %]&amp;bug_status=__open__"
                     target="_blank" role="menuitem" tabindex="-1">See Open [% terms.Bugs %] in This Component</a></div>
+            <div><a href="[% basepath FILTER none %]buglist.cgi?product=[% bug.product FILTER uri %]&amp;
+                          [%~ %]component=[% bug.component FILTER uri %]&amp;chfield=resolution&chfieldfrom=-6m&chfieldvalue=FIXED&bug_status=__closed__"
+                    target="_blank" role="menuitem" tabindex="-1">Recently Fixed [% terms.Bugs %] in This Component</a></div>
             <div><a href="[% basepath FILTER none %]enter_bug.cgi?product=[% bug.product FILTER uri %]&amp;
                           [%~ %]component=[% bug.component FILTER uri %]"
                     target="_blank" role="menuitem" tabindex="-1">File New [% terms.Bug %] in This Component</a></div>

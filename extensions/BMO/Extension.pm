@@ -349,7 +349,6 @@ sub _attachment_is_bounty_attachment {
   return 0 unless $attachment->filename eq 'bugbounty.data';
   return 0 unless $attachment->contenttype eq 'text/plain';
   return 0 unless $attachment->isprivate;
-  return 0 unless $attachment->attacher->in_group('bounty-team');
 
   return $attachment->description =~ /^(?:[^,]*,)+[^,]*$/;
 }

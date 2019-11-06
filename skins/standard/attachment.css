@@ -227,14 +227,16 @@ textarea.bz_private {
   border: 1px solid var(--accent-color-pink-1);
 }
 
-#update {
-  clear: both;
-  display: block;
-}
-
-div#update_container {
+#update_container {
+  display: flex;
+  align-items: center;
   clear: both;
   padding: 1.5em 0;
+}
+
+#update_container [role="status"] {
+  margin-left: 8px;
+  font-style: italic;
 }
 
 #attachment_flags p {

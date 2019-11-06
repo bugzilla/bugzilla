@@ -299,7 +299,7 @@
     --control-background-color: rgb(35, 36, 37);
     --control-border-color: rgb(60, 61, 62);
     --selected-control-background-color: rgb(60, 61, 62);
-    --disabled-control-foreground-color: rgb(90, 91, 92);
+    --disabled-control-foreground-color: rgb(110, 111, 112);
     --scrollbar-color: rgb(70, 71, 72) var(--application-background-color);
 
     /** Button */

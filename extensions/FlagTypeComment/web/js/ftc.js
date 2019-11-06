@@ -26,16 +26,21 @@ Bugzilla.FlagTypeComment = class FlagTypeComment {
     if (this.$flags && this.$comment) {
       const $extra_patch_types = document.querySelector('meta[name="extra-patch-types"]');
 
+      /** @type {HTMLFormElement} */
       this.$form = this.$comment.form;
+
       this.bug_id = Number(this.$form.bugid.value);
       this.attachment_id = Number(this.$form.id.value);
       this.extra_patch_types = $extra_patch_types ? $extra_patch_types.content.split(' ') : [];
       this.selects = [...this.$flags.querySelectorAll('.flag_select')];
-      this.selects.forEach($select => $select.addEventListener('change', () => this.flag_onselect($select)));
       this.$fieldset_wrapper = this.$flags.parentElement.appendChild(document.createElement('div'));
       this.$fieldset_wrapper.id = 'approval-request-fieldset-wrapper';
       this.$comment_wrapper = document.querySelector('#smallCommentFrame') || this.$comment.parentElement;
+      this.$submit = this.$form.querySelector('input[type="submit"]');
+      this.$status = this.$form.querySelector('#update_container [role="status"]');
+
       this.$form.addEventListener('submit', event => this.form_onsubmit(event));
+      this.selects.forEach($select => $select.addEventListener('change', () => this.flag_onselect($select)));
     }
   }
 
@@ -237,11 +242,17 @@ Bugzilla.FlagTypeComment = class FlagTypeComment {
   }
 
   /**
-   * Convert the input values into comment text and remove the temporary fieldset before submitting the form.
+   * Called when the user tries to submit the form. Convert the input values to comment text, and send it in background
+   * along with other flag updates.
    * @param {Event} event `submit` event.
    * @returns {Boolean} `true` when submitting the form normally if no fieldset has been inserted, `false` otherwise.
    */
   async form_onsubmit(event) {
+    if (this.submitting) {
+      return false;
+    }
+
+    // Submit the form normally if no fieldsets can be found
     if (!this.inserted_fieldsets.length) {
       return true;
     }
@@ -249,6 +260,11 @@ Bugzilla.FlagTypeComment = class FlagTypeComment {
     // Prevent auto-submission
     event.preventDefault();
 
+    // Update the button
+    this.$submit.disabled = this.submitting = true;
+    this.$status.textContent = 'Sending form data…';
+
+    const requests = [];
     const $markdown_off = this.$form.querySelector('input[name="markdown_off"]');
 
     // Enable Markdown for any regular patches. Phabricator requests don't come with this hidden `<input>`
@@ -259,44 +275,58 @@ Bugzilla.FlagTypeComment = class FlagTypeComment {
     // Convert the form values to Markdown comment
     this.inserted_fieldsets.forEach($fieldset => this.add_comment(this.create_comment($fieldset)));
 
-    // Submit the form via XHR before API requests to make sure the change is notified via email
-    await new Promise(resolve => {
-      const request = new XMLHttpRequest();
+    try {
+      // Submit the form data via XHR before API requests to make sure the change is notified via email
+      await new Promise((resolve, reject) => {
+        const request = new XMLHttpRequest();
 
-      request.open('POST', `${BUGZILLA.config.basepath}attachment.cgi`);
-      request.addEventListener('loadend', () => resolve());
-      request.send(new FormData(this.$form));
-    });
+        request.open('POST', `${BUGZILLA.config.basepath}attachment.cgi`);
+        request.addEventListener('load', () => resolve());
+        request.addEventListener('error', () => reject());
+        request.send(new FormData(this.$form));
+      });
+    } catch (ex) {
+      alert('The form could not be submitted. Please try again later.');
+
+      // Restore the Submit button
+      this.$submit.disabled = this.submitting = false;
+      this.$status.textContent = '';
+
+      // Stay on the same page for recovery
+      return false;
+    }
+
+    this.$status.textContent = 'Updating flags…';
 
     // Request approval for other patches if any
-    await Promise.all([...this.inserted_fieldsets].map($fieldset => new Promise(async resolve => {
+    for (const $fieldset of this.inserted_fieldsets) {
       const ids = [...$fieldset.querySelectorAll('tr.other-patches input:checked')]
         .map($input => Number($input.dataset.id));
       const flags = this.find_selectors($fieldset).map($select => ({ name: $select.dataset.name, status: '?' }));
 
       if (ids.length && flags.length) {
-        try {
-          await Bugzilla.API.put(`bug/attachment/${ids[0]}`, { ids, flags });
-        } catch (ex) {}
+        requests.push(Bugzilla.API.put(`bug/attachment/${ids[0]}`, { ids, flags }));
       }
-
-      resolve();
-    })));
+    }
 
     // Collect bug flags from checkboxes
-    const bug_flags = [...this.$fieldset_wrapper.querySelectorAll('input[data-bug-flag]:checked')]
+    const flags = [...this.$fieldset_wrapper.querySelectorAll('input[data-bug-flag]:checked')]
       .map($input => ({ name: $input.getAttribute('data-bug-flag'), status: '+' }));
 
     // Update bug flags if needed
-    if (bug_flags.length) {
-      await new Promise(async resolve => {
-        try {
-          await Bugzilla.API.put(`bug/${this.bug_id}`, { flags: bug_flags });
-        } catch (ex) {}
-
-        resolve();
-      });
+    if (flags.length) {
+      requests.push(Bugzilla.API.put(`bug/${this.bug_id}`, { flags }));
     }
+
+    try {
+      // Send all the API requests
+      await Promise.all(requests);
+    } catch (ex) {
+      // Just show an alert, because it's hard to only recover specific flags
+      alert('One or more flags could not be updated. Please try again later.');
+    }
+
+    this.$status.textContent = 'Redirecting to the bug…';
 
     // Redirect to the bug once everything is done
     location.href = `${BUGZILLA.config.basepath}show_bug.cgi?id=${this.bug_id}`;

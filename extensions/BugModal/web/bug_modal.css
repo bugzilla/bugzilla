@@ -650,6 +650,7 @@ td.flag-requestee {
   opacity: 1;
   font-size: var(--font-size-small);
   text-align: center;
+  cursor: pointer;
   transition: all .2s 2s;
   will-change: transform; /* for performance */
 }

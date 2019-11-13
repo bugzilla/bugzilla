@@ -90,6 +90,9 @@ sub create_revision_attachment {
   );
   delete $bug->{attachments};
 
+  # Assign the bug to the submitter if it isn't already owned.
+  $bug->set_assigned_to($submitter) unless is_bug_assigned($bug);
+
   return $attachment;
 }
 
@@ -104,8 +107,7 @@ sub get_bug_role_phids {
   my ($bug) = $check->(@_);
 
   my @bug_users = ($bug->reporter);
-  push(@bug_users, $bug->assigned_to)
-    if $bug->assigned_to->email !~ /^nobody\@mozilla\.org$/;
+  push(@bug_users, $bug->assigned_to) if is_bug_assigned($bug);
   push(@bug_users, $bug->qa_contact)  if $bug->qa_contact;
   push(@bug_users, @{$bug->cc_users}) if @{$bug->cc_users};
 
@@ -113,6 +115,10 @@ sub get_bug_role_phids {
     {ids => [map { $_->id } @bug_users]});
 
   return [map { $_->phid } @{$phab_users}];
+}
+
+sub is_bug_assigned {
+  return $_[0]->assigned_to->email ne 'nobody@mozilla.org';
 }
 
 sub is_attachment_phab_revision {

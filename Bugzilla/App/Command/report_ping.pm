@@ -66,7 +66,7 @@ sub run {
   };
 
   if ($since_db) {
-    my $current_ts = $dbh->selectrow_array('SELECT LOCALTIMESTAMP(0)');
+    $current_ts = $dbh->selectrow_array('SELECT LOCALTIMESTAMP(0)');
     $since
       = $dbh->selectrow_array(
       'SELECT last_ping_ts FROM report_ping WHERE class = ?',

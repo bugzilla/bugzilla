@@ -842,6 +842,10 @@ input[type="radio"]:checked {
   text-shadow: none !important;
 }
 
+.yui-skin-sam .yui-dt th a {
+  color: inherit !important;
+}
+
 .yui-skin-sam .yui-dt table tr,
 .yui3-skin-sam .yui3-datatable-table tr {
   border-bottom: 1px solid var(--grid-border-color) !important;

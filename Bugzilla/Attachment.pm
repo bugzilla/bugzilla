@@ -846,7 +846,7 @@ sub get_content_type {
   my $cgi = Bugzilla->cgi;
 
   return 'application/octet-stream' if ($cgi->param('hide_preview'));
-  return 'text/plain' if ($cgi->param('ispatch') || $cgi->param('attach_text'));
+  return 'text/plain' if ($cgi->param('ispatch'));
 
   my $content_type;
   my $method = $cgi->param('contenttypemethod');

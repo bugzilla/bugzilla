@@ -341,7 +341,6 @@ sub read_param_file {
     die "The $file file does not exist."
       . ' You probably need to run checksetup.pl.',;
   }
-  die "the param utf8 must be set to utf8mb4" unless $params{utf8} eq 'utf8mb4';
   
   return \%params;
 }

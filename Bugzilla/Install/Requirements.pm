@@ -64,11 +64,11 @@ use constant APACHE => qw(apachectl httpd apache2 apache);
 # If we don't find any of the above binaries in the normal PATH,
 # these are extra places we look.
 use constant APACHE_PATH => [qw(
-    /usr/sbin
-    /usr/local/sbin
-    /usr/libexec
-    /usr/local/libexec
-    )];
+  /usr/sbin
+  /usr/local/sbin
+  /usr/libexec
+  /usr/local/libexec
+)];
 
 # The below two constants are subroutines so that they can implement
 # a hook. Other than that they are actually constants.
@@ -747,7 +747,7 @@ sub have_vers {
   my $blacklisted;
   if ($vok && $params->{blacklist}) {
     $blacklisted = grep($vnum =~ /$_/, @{$params->{blacklist}});
-    $vok = 0 if $blacklisted;
+    $vok         = 0 if $blacklisted;
   }
 
   if ($output) {

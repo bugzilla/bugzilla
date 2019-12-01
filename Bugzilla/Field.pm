@@ -153,7 +153,7 @@ use constant SQL_DEFINITIONS => {
   {TYPE => 'varchar(64)', NOTNULL => 1, DEFAULT => "'---'"}, FIELD_TYPE_TEXTAREA,
   {TYPE => 'MEDIUMTEXT',  NOTNULL => 1, DEFAULT => "''"},    FIELD_TYPE_DATETIME,
   {TYPE => 'DATETIME'}, FIELD_TYPE_DATE, {TYPE => 'DATE'}, FIELD_TYPE_BUG_ID,
-  {TYPE => 'INT3'},     FIELD_TYPE_INTEGER,
+  {TYPE => 'INT3'}, FIELD_TYPE_INTEGER,
   {TYPE => 'INT4', NOTNULL => 1, DEFAULT => 0},
 };
 
@@ -1471,7 +1471,7 @@ sub check_field {
     return 0 if $no_warn;    # We don't want an error to be thrown; return.
     trick_taint($name);
 
-    my $field = new Bugzilla::Field({name => $name});
+    my $field      = new Bugzilla::Field({name => $name});
     my $field_desc = $field ? $field->description : $name;
     ThrowCodeError('illegal_field', {field => $field_desc});
   }

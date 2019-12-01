@@ -596,7 +596,7 @@ sub fields {
   my $fields = $cache->{fields};
   my %requested;
   if (my $types = delete $criteria->{type}) {
-    $types = ref($types) ? $types : [$types];
+    $types     = ref($types) ? $types : [$types];
     %requested = map { %{$fields->{by_type}->{$_} || {}} } @$types;
   }
   else {

@@ -221,7 +221,7 @@ use constant FIELD_TABLE_SCHEMA => {
   # to these index names.
   INDEXES => [
     value_idx               => {FIELDS => ['value'], TYPE => 'UNIQUE'},
-    sortkey_idx             => ['sortkey',           'value'],
+    sortkey_idx             => ['sortkey', 'value'],
     visibility_value_id_idx => ['visibility_value_id'],
   ],
 };
@@ -663,15 +663,15 @@ use constant ABSTRACT_SCHEMA => {
   flagtypes => {
     FIELDS => [
       id               => {TYPE => 'MEDIUMSERIAL', NOTNULL => 1, PRIMARYKEY => 1},
-      name             => {TYPE => 'varchar(50)', NOTNULL => 1},
-      description      => {TYPE => 'MEDIUMTEXT',  NOTNULL => 1},
+      name             => {TYPE => 'varchar(50)',  NOTNULL => 1},
+      description      => {TYPE => 'MEDIUMTEXT',   NOTNULL => 1},
       cc_list          => {TYPE => 'varchar(200)'},
-      target_type      => {TYPE => 'char(1)',     NOTNULL => 1, DEFAULT => "'b'"},
-      is_active        => {TYPE => 'BOOLEAN',     NOTNULL => 1, DEFAULT => 'TRUE'},
-      is_requestable   => {TYPE => 'BOOLEAN',     NOTNULL => 1, DEFAULT => 'FALSE'},
-      is_requesteeble  => {TYPE => 'BOOLEAN',     NOTNULL => 1, DEFAULT => 'FALSE'},
-      is_multiplicable => {TYPE => 'BOOLEAN',     NOTNULL => 1, DEFAULT => 'FALSE'},
-      sortkey          => {TYPE => 'INT2',        NOTNULL => 1, DEFAULT => '0'},
+      target_type      => {TYPE => 'char(1)',      NOTNULL => 1, DEFAULT => "'b'"},
+      is_active        => {TYPE => 'BOOLEAN',      NOTNULL => 1, DEFAULT => 'TRUE'},
+      is_requestable   => {TYPE => 'BOOLEAN',      NOTNULL => 1, DEFAULT => 'FALSE'},
+      is_requesteeble  => {TYPE => 'BOOLEAN',      NOTNULL => 1, DEFAULT => 'FALSE'},
+      is_multiplicable => {TYPE => 'BOOLEAN',      NOTNULL => 1, DEFAULT => 'FALSE'},
+      sortkey          => {TYPE => 'INT2',         NOTNULL => 1, DEFAULT => '0'},
       grant_group_id   => {
         TYPE       => 'INT3',
         REFERENCES => {TABLE => 'groups', COLUMN => 'id', DELETE => 'SET NULL'}
@@ -827,7 +827,7 @@ use constant ABSTRACT_SCHEMA => {
     ],
     INDEXES => [
       bug_status_value_idx               => {FIELDS => ['value'], TYPE => 'UNIQUE'},
-      bug_status_sortkey_idx             => ['sortkey',           'value'],
+      bug_status_sortkey_idx             => ['sortkey', 'value'],
       bug_status_visibility_value_id_idx => ['visibility_value_id'],
     ],
   },
@@ -836,7 +836,7 @@ use constant ABSTRACT_SCHEMA => {
     FIELDS  => dclone(FIELD_TABLE_SCHEMA->{FIELDS}),
     INDEXES => [
       resolution_value_idx               => {FIELDS => ['value'], TYPE => 'UNIQUE'},
-      resolution_sortkey_idx             => ['sortkey',           'value'],
+      resolution_sortkey_idx             => ['sortkey', 'value'],
       resolution_visibility_value_id_idx => ['visibility_value_id'],
     ],
   },
@@ -845,7 +845,7 @@ use constant ABSTRACT_SCHEMA => {
     FIELDS  => dclone(FIELD_TABLE_SCHEMA->{FIELDS}),
     INDEXES => [
       bug_severity_value_idx               => {FIELDS => ['value'], TYPE => 'UNIQUE'},
-      bug_severity_sortkey_idx             => ['sortkey',           'value'],
+      bug_severity_sortkey_idx             => ['sortkey', 'value'],
       bug_severity_visibility_value_id_idx => ['visibility_value_id'],
     ],
   },
@@ -854,7 +854,7 @@ use constant ABSTRACT_SCHEMA => {
     FIELDS  => dclone(FIELD_TABLE_SCHEMA->{FIELDS}),
     INDEXES => [
       priority_value_idx               => {FIELDS => ['value'], TYPE => 'UNIQUE'},
-      priority_sortkey_idx             => ['sortkey',           'value'],
+      priority_sortkey_idx             => ['sortkey', 'value'],
       priority_visibility_value_id_idx => ['visibility_value_id'],
     ],
   },
@@ -863,7 +863,7 @@ use constant ABSTRACT_SCHEMA => {
     FIELDS  => dclone(FIELD_TABLE_SCHEMA->{FIELDS}),
     INDEXES => [
       rep_platform_value_idx               => {FIELDS => ['value'], TYPE => 'UNIQUE'},
-      rep_platform_sortkey_idx             => ['sortkey',           'value'],
+      rep_platform_sortkey_idx             => ['sortkey', 'value'],
       rep_platform_visibility_value_id_idx => ['visibility_value_id'],
     ],
   },
@@ -872,7 +872,7 @@ use constant ABSTRACT_SCHEMA => {
     FIELDS  => dclone(FIELD_TABLE_SCHEMA->{FIELDS}),
     INDEXES => [
       op_sys_value_idx               => {FIELDS => ['value'], TYPE => 'UNIQUE'},
-      op_sys_sortkey_idx             => ['sortkey',           'value'],
+      op_sys_sortkey_idx             => ['sortkey', 'value'],
       op_sys_visibility_value_id_idx => ['visibility_value_id'],
     ],
   },

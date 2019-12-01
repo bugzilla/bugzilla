@@ -619,7 +619,7 @@ sub _check_is_private {
   if (
     (
          (!ref $invocant && $is_private)
-      || (ref $invocant && $invocant->isprivate != $is_private)
+      || (ref $invocant  && $invocant->isprivate != $is_private)
     )
     && !Bugzilla->user->is_insider
     )

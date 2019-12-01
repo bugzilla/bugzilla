@@ -546,7 +546,7 @@ sub bz_setup_foreign_keys {
   # so if it doesn't have them, then we're setting up FKs
   # for the first time, and should be quieter about it.
   my $activity_fk = $self->bz_fk_info('profiles_activity', 'userid');
-  my $any_fks = $activity_fk && $activity_fk->{created};
+  my $any_fks     = $activity_fk && $activity_fk->{created};
   if (!$any_fks) {
     say get_text('install_fk_setup');
   }

@@ -36,7 +36,7 @@ sub _init_bz_cgi_globals {
   # We don't precompile any functions here, that's done specially in
   # mod_perl code.
   $invocant->_setup_symbols(qw(:no_xhtml :oldstyle_urls :private_tempfiles
-      :unique_headers));
+  :unique_headers));
 }
 
 BEGIN { __PACKAGE__->_init_bz_cgi_globals() if i_am_cgi(); }

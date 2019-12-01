@@ -183,7 +183,7 @@ sub _move_bug {
   my @fieldlist = (Bugzilla::Bug->fields, 'group', 'long_desc', 'attachment',
     'attachmentdata');
   my %displayfields = map { $_ => 1 } @fieldlist;
-  my $vars = {bugs => [$export_me], displayfields => \%displayfields};
+  my $vars          = {bugs => [$export_me], displayfields => \%displayfields};
   $template->process("bug/show.xml.tmpl", $vars, \$msg)
     || ThrowTemplateError($template->error());
   $msg .= "\n";

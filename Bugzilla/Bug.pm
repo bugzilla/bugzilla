@@ -620,7 +620,7 @@ sub possible_duplicates {
     foreach my $word (@words) {
       my ($term, $rel_term)
         = $dbh->sql_fulltext_search('bugs_fulltext.short_desc', $word);
-      push(@where, $term);
+      push(@where,     $term);
       push(@relevance, $rel_term || $term);
     }
 
@@ -1554,8 +1554,8 @@ sub _check_bug_status {
     ThrowUserError(
       'comment_required',
       {
-        old => $old_status ? $old_status->name : undef,
-        new => $new_status->name,
+        old   => $old_status ? $old_status->name : undef,
+        new   => $new_status->name,
         field => 'bug_status'
       }
     );

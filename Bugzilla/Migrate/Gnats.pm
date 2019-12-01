@@ -552,9 +552,9 @@ sub _parse_audit_trail {
         $current_data{bug_when} = $self->parse_date($value);
       }
       if ($column eq 'Why') {
-        $value = '' if !defined $value;
+        $value                 = '' if !defined $value;
         $current_data{comment} = $value;
-        $on_why = 1;
+        $on_why                = 1;
       }
       else {
         $on_why = 0;

@@ -348,7 +348,7 @@ sub bz_setup_database {
     my $tables = $self->selectall_arrayref('SHOW TABLE STATUS');
     foreach my $table_status (@$tables) {
       my ($table, undef, undef, $row_format) = @$table_status;
-      my $table_type = $table_status->[-1];
+      my $table_type     = $table_status->[-1];
       my $new_row_format = $self->default_row_format($table);
       next if lc($table_type) eq 'view';
       next if lc($new_row_format) eq 'compact';

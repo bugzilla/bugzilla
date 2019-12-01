@@ -237,7 +237,7 @@ sub check_hash_token {
     $vars->{'script_name'} = basename($0);
     $vars->{'token'}       = issue_hash_token($data);
     $vars->{'reason'}
-      = (!$token) ? 'missing_token'
+      = (!$token)                   ? 'missing_token'
       : ($expected_token ne $token) ? 'invalid_token'
       :                               'expired_token';
     print Bugzilla->cgi->header();

@@ -331,7 +331,7 @@ sub set_password { $_[0]->set('cryptpassword', $_[1]); }
 
 sub set_disabledtext {
   $_[0]->set('disabledtext', $_[1]);
-  $_[0]->set('is_enabled', $_[1] ? 0 : 1);
+  $_[0]->set('is_enabled',   $_[1] ? 0 : 1);
 }
 
 sub set_groups {
@@ -425,7 +425,7 @@ sub _set_groups_to_object {
     # Go through the array, and turn items into group objects
     my @groups = ();
     foreach my $value (@{$changes->{$key}}) {
-      my $type = $value =~ /^\d+$/ ? 'id' : 'name';
+      my $type  = $value =~ /^\d+$/ ? 'id' : 'name';
       my $group = Bugzilla::Group->new({$type => $value});
 
       if (!$group || !$user->can_bless($group->id)) {
@@ -554,7 +554,7 @@ sub queries_subscribed {
   return [] unless $self->id;
 
   # Exclude the user's own queries.
-  my @my_query_ids = map($_->id, @{$self->queries});
+  my @my_query_ids    = map($_->id, @{$self->queries});
   my $query_id_string = join(',', @my_query_ids) || '-1';
 
   # Only show subscriptions that we can still actually see. If a
@@ -581,7 +581,7 @@ sub queries_available {
   return [] unless $self->id;
 
   # Exclude the user's own queries.
-  my @my_query_ids = map($_->id, @{$self->queries});
+  my @my_query_ids    = map($_->id, @{$self->queries});
   my $query_id_string = join(',', @my_query_ids) || '-1';
 
   my $avail_query_ids = Bugzilla->dbh->selectcol_arrayref(

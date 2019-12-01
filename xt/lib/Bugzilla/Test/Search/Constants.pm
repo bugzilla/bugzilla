@@ -958,10 +958,10 @@ use constant INJECTION_BROKEN_FIELD => {
     search      => 1,
     db_skip     => ['Pg'],
     operator_ok => [qw(allwords allwordssubstr anywordssubstr casesubstring
-        changedbefore changedafter greaterthan greaterthaneq
-        lessthan lessthaneq notregexp notsubstring
-        nowordssubstr regexp substring anywords
-        notequals nowords equals anyexact)],
+      changedbefore changedafter greaterthan greaterthaneq
+      lessthan lessthaneq notregexp notsubstring
+      nowordssubstr regexp substring anywords
+    notequals nowords equals anyexact)],
   },
 };
 
@@ -1115,7 +1115,7 @@ use constant CUSTOM_SEARCH_TESTS => (
     contains => [1],
     columns  => ['assigned_to'],
     params   => [
-      {f => 'bug_id', o => 'equals', v => '<1>'},
+      {f => 'bug_id',      o => 'equals', v => '<1>'},
       {f => 'OP'},
       {f => 'CP'},
       {f => 'assigned_to', o => 'substr', v => '@'},
@@ -1210,8 +1210,8 @@ use constant CUSTOM_SEARCH_TESTS => (
     params     => [
       {f => 'bug_id', o => 'equals', v => '<3>'},
       {f => 'OP'},
-      {f => 'OP', j => 'OR'},
-      {f => 'bug_id', o => 'equals', v => '<1>'},
+      {f => 'OP',          j => 'OR'},
+      {f => 'bug_id',      o => 'equals', v => '<1>'},
       {f => 'assigned_to', o => 'equals', v => '<2>'},
       {f => 'CP'},
       {f => 'OP', j => 'OR'},
@@ -1231,8 +1231,8 @@ use constant CUSTOM_SEARCH_TESTS => (
     params     => [
       {f => 'bug_id', o => 'equals', v => '<3>'},
       {f => 'OP'},
-      {f => 'OP', j => 'OR'},
-      {f => 'bug_id', o => 'equals', v => '<1>'},
+      {f => 'OP',          j => 'OR'},
+      {f => 'bug_id',      o => 'equals', v => '<1>'},
       {f => 'assigned_to', o => 'equals', v => '<2>'},
       {f => 'CP'},
       {f => 'OP', j => 'OR'},

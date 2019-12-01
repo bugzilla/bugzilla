@@ -75,7 +75,7 @@ sub set_description { $_[0]->set('description', $_[1]); }
 sub set_revoked     { $_[0]->set('revoked',     $_[1]); }
 
 # Validators
-sub _check_api_key { return generate_random_password(40); }
+sub _check_api_key     { return generate_random_password(40); }
 sub _check_description { return trim($_[1]) || ''; }
 1;
 

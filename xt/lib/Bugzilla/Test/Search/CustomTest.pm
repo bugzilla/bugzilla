@@ -55,7 +55,7 @@ sub debug_value {
 }
 
 # The tests we know are broken for this operator/field combination.
-sub _known_broken { return {} }
+sub _known_broken                      { return {} }
 sub contains_known_broken              { return undef }
 sub search_known_broken                { return undef }
 sub field_not_yet_implemented          { return undef }

@@ -1431,7 +1431,7 @@ sub _parse_basic_fields {
     my @values = $self->_param_array($param_name);
     next if !@values;
     my $default_op = $param_name eq 'content' ? 'matches' : 'anyexact';
-    my $operator = $params->{"${param_name}_type"} || $default_op;
+    my $operator   = $params->{"${param_name}_type"} || $default_op;
 
     # Fields that are displayed as multi-selects are passed as arrays,
     # so that they can properly search values that contain commas.
@@ -1685,19 +1685,19 @@ sub _boolean_charts {
   my @param_list = keys %$params;
 
   my @all_field_params = grep {/^field-?\d+/} @param_list;
-  my @chart_ids        = map { /^field(-?\d+)/; $1 } @all_field_params;
+  my @chart_ids        = map  { /^field(-?\d+)/; $1 } @all_field_params;
   @chart_ids = sort { $a <=> $b } uniq @chart_ids;
 
   my $clause = new Bugzilla::Search::Clause();
   foreach my $chart_id (@chart_ids) {
     my @all_and = grep {/^field$chart_id-\d+/} @param_list;
-    my @and_ids = map { /^field$chart_id-(\d+)/; $1 } @all_and;
+    my @and_ids = map  { /^field$chart_id-(\d+)/; $1 } @all_and;
     @and_ids = sort { $a <=> $b } uniq @and_ids;
 
     my $and_clause = new Bugzilla::Search::Clause();
     foreach my $and_id (@and_ids) {
       my @all_or = grep {/^field$chart_id-$and_id-\d+/} @param_list;
-      my @or_ids = map { /^field$chart_id-$and_id-(\d+)/; $1 } @all_or;
+      my @or_ids = map  { /^field$chart_id-$and_id-(\d+)/; $1 } @all_or;
       @or_ids = sort { $a <=> $b } uniq @or_ids;
 
       my $or_clause = new Bugzilla::Search::Clause('OR');
@@ -1776,7 +1776,7 @@ sub _field_ids {
   my @param_list = keys %$params;
 
   my @field_params = grep {/^f\d+$/} @param_list;
-  my @field_ids    = map { /(\d+)/; $1 } @field_params;
+  my @field_ids    = map  { /(\d+)/; $1 } @field_params;
   @field_ids = sort { $a <=> $b } @field_ids;
   return @field_ids;
 }
@@ -1794,15 +1794,15 @@ sub _handle_chart {
   if (ref $value eq 'ARRAY') {
 
     # Trim input and ignore blank values.
-    @$value = map { trim($_) } @$value;
+    @$value = map  { trim($_) } @$value;
     @$value = grep { defined $_ and $_ ne '' } @$value;
     return if !@$value;
-    $orig_value = join(',', @$value);
+    $orig_value   = join(',', @$value);
     $string_value = join(',', @$value);
   }
   else {
     return if $value eq '';
-    $orig_value = $value;
+    $orig_value   = $value;
     $string_value = $value;
   }
 
@@ -3007,7 +3007,7 @@ sub _multiselect_isempty {
     = @$args{qw(field operator joins chart_id)};
   my $dbh = Bugzilla->dbh;
   $operator = $self->_reverse_operator($operator) if $not;
-  $not = $operator eq 'isnotempty' ? 'NOT' : '';
+  $not      = $operator eq 'isnotempty' ? 'NOT' : '';
 
   if ($field eq 'keywords') {
     push @$joins,

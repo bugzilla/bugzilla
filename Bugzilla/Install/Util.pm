@@ -267,7 +267,7 @@ sub indicate_progress {
   my ($params) = @_;
   my $current  = $params->{current};
   my $total    = $params->{total};
-  my $every = $params->{every} || 1;
+  my $every    = $params->{every} || 1;
 
   print "." if !($current % $every);
   if ($current == $total || $current % ($every * 60) == 0) {

@@ -70,11 +70,11 @@ sub _classification_to_hash {
 
   return filter $params,
     {
-    id          => $self->type('int',    $classification->id),
-    name        => $self->type('string', $classification->name),
-    description => $self->type('string', $classification->description),
-    sort_key    => $self->type('int',    $classification->sortkey),
-    products => [map { $self->_product_to_hash($_, $params) } @$products],
+    id          => $self->type('int',                 $classification->id),
+    name        => $self->type('string',              $classification->name),
+    description => $self->type('string',              $classification->description),
+    sort_key    => $self->type('int',                 $classification->sortkey),
+    products    => [map { $self->_product_to_hash($_, $params) } @$products],
     };
 }
 

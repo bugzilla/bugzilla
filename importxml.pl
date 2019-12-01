@@ -595,10 +595,10 @@ sub process_bug {
     format_time($bug_fields{'delta_ts'}, "%Y-%m-%d %T") || $timestamp);
 
   # Bug Access
-  push(@query, "cclist_accessible");
+  push(@query,  "cclist_accessible");
   push(@values, $bug_fields{'cclist_accessible'} ? 1 : 0);
 
-  push(@query, "reporter_accessible");
+  push(@query,  "reporter_accessible");
   push(@values, $bug_fields{'reporter_accessible'} ? 1 : 0);
 
   my $product = new Bugzilla::Product({name => $bug_fields{'product'} || ''});

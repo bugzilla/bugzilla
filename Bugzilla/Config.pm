@@ -341,7 +341,7 @@ sub read_param_file {
     die "The $file file does not exist."
       . ' You probably need to run checksetup.pl.',;
   }
-  
+
   return \%params;
 }
 

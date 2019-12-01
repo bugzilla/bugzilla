@@ -150,14 +150,14 @@ sub fields {
     }
 
     my %field_data = (
-      id               => $self->type('int',     $field->id),
-      type             => $self->type('int',     $field->type),
-      is_custom        => $self->type('boolean', $field->custom),
-      name             => $self->type('string',  $field->name),
-      display_name     => $self->type('string',  $field->description),
-      is_mandatory     => $self->type('boolean', $field->is_mandatory),
-      is_on_bug_entry  => $self->type('boolean', $field->enter_bug),
-      visibility_field => $self->type('string',  $visibility_field),
+      id                => $self->type('int',           $field->id),
+      type              => $self->type('int',           $field->type),
+      is_custom         => $self->type('boolean',       $field->custom),
+      name              => $self->type('string',        $field->name),
+      display_name      => $self->type('string',        $field->description),
+      is_mandatory      => $self->type('boolean',       $field->is_mandatory),
+      is_on_bug_entry   => $self->type('boolean',       $field->enter_bug),
+      visibility_field  => $self->type('string',        $visibility_field),
       visibility_values => [map { $self->type('string', $_->name) } @$vis_values],
     );
     if ($has_values) {
@@ -527,7 +527,7 @@ sub search {
   my %options = (fields => ['bug_id']);
 
   # Find the highest custom field id
-  my @field_ids = grep(/^f(\d+)$/, keys %$match_params);
+  my @field_ids     = grep(/^f(\d+)$/, keys %$match_params);
   my $last_field_id = @field_ids ? max @field_ids + 1 : 1;
 
   # Do special search types for certain fields.

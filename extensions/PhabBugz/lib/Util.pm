@@ -91,7 +91,10 @@ sub create_revision_attachment {
   delete $bug->{attachments};
 
   # Assign the bug to the submitter if it isn't already owned.
-  $bug->set_assigned_to($submitter) unless is_bug_assigned($bug);
+  unless (is_bug_assigned($bug)) {
+    $bug->set_assigned_to($submitter);
+    $bug->set_bug_status('ASSIGNED') if $bug->status->name eq 'NEW';
+  }
 
   return $attachment;
 }

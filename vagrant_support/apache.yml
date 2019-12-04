@@ -10,6 +10,9 @@
   service: name=httpd enabled=no
   when: LAZY == 0
 
+- name: create logs directory
+  file: path=/vagrant/logs state=directory owner=vagrant group=apache mode=770
+
 - name: ensure bugzilla.log has right permissions
   file: path=/vagrant/logs/bugzilla.log state=touch owner=vagrant group=apache mode=0660
 

@@ -20,7 +20,7 @@
         - python2-ndg_httpsclient
 
     - name: link sphinx
-      command: ln -s /usr/bin/sphinx-1.0-{{ item }} /usr/bin/sphinx-{{ item }} creates=/usr/bin/sphinx-{{ item }}
+      file: src=/usr/bin/sphinx-1.0-{{ item }} dest=/usr/bin/sphinx-{{ item }} state=link force=true
       with_items:
         - autogen
         - build
@@ -129,7 +129,7 @@
       shell: |-
         mysqladmin -u root create bugs_bmo
         mysql -u root -e 'GRANT ALL ON bugs_bmo.* TO bugs@"{{WEB_IP}}" IDENTIFIED BY "bugs"'
-      when: bugs_bmo|failed
+      when: bugs_bmo is failed
 
 - hosts: web
   become: true

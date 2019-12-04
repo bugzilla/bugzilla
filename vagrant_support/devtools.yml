@@ -18,7 +18,10 @@
 - name: copy re.pl
   copy: src=re.pl dest=/usr/local/bin/re.pl mode=0755
 
-- name: copy start_morbo
+- name: fix start_morbo perms
+  file: path=/vagrant/scripts/start_morbo mode=0755
+
+- name: link start_morbo
   file: path=/usr/local/bin/start_morbo src=/vagrant/scripts/start_morbo state=link force=true
 
 - name: copy use-nytprof

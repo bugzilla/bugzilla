@@ -46,10 +46,12 @@ sub _initialize {
     INT2 => 'integer',
     INT3 => 'integer',
     INT4 => 'integer',
+    INT5 => 'integer',
 
     SMALLSERIAL  => 'integer',
     MEDIUMSERIAL => 'integer',
     INTSERIAL    => 'integer',
+    BIGSERIAL    => 'integer',
 
     TINYTEXT   => 'varchar(255)',
     MEDIUMTEXT => 'varchar(4000)',

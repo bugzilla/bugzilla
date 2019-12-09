@@ -874,7 +874,7 @@ sub db_schema_abstract_schema {
       },
 
       attachment_id => {
-        TYPE => 'INT3',
+        TYPE => 'INT5',
         REFERENCES =>
           {TABLE => 'attachments', COLUMN => 'attach_id', DELETE => 'CASCADE'}
       },
@@ -946,6 +946,9 @@ sub install_update_db {
     $field->set_in_new_bugmail(1);
     $field->update();
   }
+
+  # Bug 1588221 - dkl@mozilla.com
+  $dbh->bz_alter_column('flag_state_activity', 'attachment_id', {TYPE => 'INT5'});
 }
 
 sub install_filesystem {

@@ -47,5 +47,10 @@
     "must use <tt>scripts/migrate-attachments</tt> to migrate existing " _
     "attachments.",
 
+  attachment_s3_minsize =>
+    "When attachment_storage is set to S3, only attachments larger than this " _
+    "value will be uploaded to S3 for performance reasons. Smaller attachments " _
+    "will be stored in the database."
+
   }
 %]

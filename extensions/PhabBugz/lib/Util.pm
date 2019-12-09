@@ -54,44 +54,46 @@ sub create_revision_attachment {
   # BMO does not contain actual diff content.
   my @review_attachments
     = grep { is_attachment_phab_revision($_) } @{$bug->attachments};
-  my $review_attachment
+  my $attachment
     = first { trim($_->data) eq $revision_uri } @review_attachments;
-  return $review_attachment if defined $review_attachment;
 
-  # No attachment is present, so we can now create new one
+  if (!defined $attachment) {
+    # No attachment is present, so we can now create new one
 
-  if (!$timestamp) {
-    ($timestamp) = Bugzilla->dbh->selectrow_array("SELECT NOW()");
+    if (!$timestamp) {
+      ($timestamp) = Bugzilla->dbh->selectrow_array("SELECT NOW()");
+    }
+
+    # If submitter, then switch to that user when creating attachment
+    local $submitter->{groups} = [Bugzilla::Group->get_all]; # We need to always be able to add attachment
+    my $restore_prev_user = Bugzilla->set_user($submitter, scope_guard => 1);
+
+    $attachment = Bugzilla::Attachment->create({
+      bug         => $bug,
+      creation_ts => $timestamp,
+      data        => $revision_uri,
+      description => $revision->title,
+      filename    => 'phabricator-D' . $revision->id . '-url.txt',
+      ispatch     => 0,
+      isprivate   => 0,
+      mimetype    => PHAB_CONTENT_TYPE,
+    });
+
+    # Insert a comment about the new attachment into the database.
+    $bug->add_comment(
+      $revision->summary,
+      {
+        type        => CMT_ATTACHMENT_CREATED,
+        extra_data  => $attachment->id,
+        is_markdown => (Bugzilla->params->{use_markdown} ? 1 : 0)
+      }
+    );
+    delete $bug->{attachments};
   }
 
-  # If submitter, then switch to that user when creating attachment
-  local $submitter->{groups} = [Bugzilla::Group->get_all]; # We need to always be able to add attachment
-  my $restore_prev_user = Bugzilla->set_user($submitter, scope_guard => 1);
-
-  my $attachment = Bugzilla::Attachment->create({
-    bug         => $bug,
-    creation_ts => $timestamp,
-    data        => $revision_uri,
-    description => $revision->title,
-    filename    => 'phabricator-D' . $revision->id . '-url.txt',
-    ispatch     => 0,
-    isprivate   => 0,
-    mimetype    => PHAB_CONTENT_TYPE,
-  });
-
-  # Insert a comment about the new attachment into the database.
-  $bug->add_comment(
-    $revision->summary,
-    {
-      type        => CMT_ATTACHMENT_CREATED,
-      extra_data  => $attachment->id,
-      is_markdown => (Bugzilla->params->{use_markdown} ? 1 : 0)
-    }
-  );
-  delete $bug->{attachments};
-
-  # Assign the bug to the submitter if it isn't already owned.
-  unless (is_bug_assigned($bug)) {
+  # Assign the bug to the submitter if it isn't already owned and
+  # the revision has reviewers assigned to it.
+  if (!is_bug_assigned($bug) && @{$revision->reviews}) {
     $bug->set_assigned_to($submitter);
     $bug->set_bug_status('ASSIGNED') if $bug->status->name eq 'NEW';
   }

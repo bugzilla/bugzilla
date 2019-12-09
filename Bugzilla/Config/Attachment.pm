@@ -33,6 +33,12 @@ sub get_param_list {
       default => 'database',
       checker => \&check_storage
     },
+    {
+      name => 'attachment_s3_minsize',
+      type => 't',
+      default => '20000',
+      checker => \&check_numeric
+    },
     {name => 's3_bucket',             type => 't', default => '',},
     {name => 'aws_access_key_id',     type => 't', default => '',},
     {name => 'aws_secret_access_key', type => 't', default => '',},

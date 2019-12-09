@@ -538,6 +538,7 @@ use constant ABSTRACT_SCHEMA => {
       attachments_ispatch_idx           => ['ispatch'],
     ],
   },
+
   attach_data => {
     FIELDS => [
       id => {
@@ -548,6 +549,20 @@ use constant ABSTRACT_SCHEMA => {
           {TABLE => 'attachments', COLUMN => 'attach_id', DELETE => 'CASCADE'}
       },
       thedata => {TYPE => 'LONGBLOB', NOTNULL => 1},
+    ],
+  },
+
+  attachment_storage_class => {
+    FIELDS => [
+      id => {
+        TYPE       => 'INT3',
+        NOTNULL    => 1,
+        PRIMARYKEY => 1,
+        REFERENCES =>
+          {TABLE => 'attachments', COLUMN => 'attach_id', DELETE => 'CASCADE'}
+      },
+      storage_class => {TYPE => 'varchar(64)', NOTNULL => 1},
+      extra_data    => {TYPE => 'MEDIUMTEXT'}
     ],
   },
 

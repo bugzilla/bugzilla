@@ -23,7 +23,7 @@
 
 [role="tree"] {
   display: block;
-  margin: 16px 0;
+  margin: 16px 0 0 22px;
   padding: 0;
 }
 
@@ -45,6 +45,10 @@
   font-size: 18px;
   line-height: 100%;
   vertical-align: top;
+}
+
+[role="treeitem"][aria-expanded] {
+  margin-left: -22px;
 }
 
 [role="treeitem"][aria-expanded="true"] > .expander .icon {

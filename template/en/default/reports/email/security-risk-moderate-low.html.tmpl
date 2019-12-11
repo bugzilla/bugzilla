@@ -1,0 +1,249 @@
+[%# This Source Code Form is subject to the terms of the Mozilla Public
+  # License, v. 2.0. If a copy of the MPL was not distributed with this
+  # file, You can obtain one at http://mozilla.org/MPL/2.0/.
+  #
+  # This Source Code Form is "Incompatible With Secondary Licenses", as
+  # defined by the Mozilla Public License, v. 2.0.
+  #%]
+
+[% PROCESS global/variables.none.tmpl %]
+
+<!doctype html>
+<html>
+<head>
+  <title>Security [% terms.Bugs %] Report for the week of [% report_week FILTER html %]</title>
+  <base href="[% urlbase FILTER txt %]">
+</head>
+<body>
+
+<h3>Sec-Moderate by Team</h3>
+<table style="border-spacing: 0">
+  <tr>
+    <th style="padding: 0px 15px 10px 0px;">Team</th>
+    <th style="padding: 0px 15px 10px 0px; text-align: right;">
+        Open<br>[% results_moderate.reverse.0.date.strftime('%m/%d') FILTER html %]
+    </th>
+    <th style="padding: 0px 15px 10px 0px; text-align: right;">Closed<br />Last Week</th>
+    <th style="padding: 0px 15px 10px 0px; text-align: right; border-right: 1px solid grey;">Added<br />Last Week</th>
+    [% FOREACH result IN results_moderate.reverse %]
+      [% NEXT IF loop.count < 2 %]
+      [% LAST IF loop.count > 4 %]
+      <th style="padding: 0px 15px 10px [% IF loop.count == 2 %] 10px [% ELSE %] 0px [% END %]; text-align: right; [% IF loop.count == 1 %] border-right: 1px solid grey; [% END %]">
+        Open<br>[% result.date.strftime('%m/%d') FILTER html %]
+      </th>
+    [% END %]
+  </tr>
+  [% FOREACH team IN teams_moderate %]
+    <tr>
+      <td style="padding: 0px 15px 10px 0px;">[% team FILTER html %]</td>
+      <td style="padding: 0px 15px 10px 0px; text-align: right;">
+          [% IF results_moderate.reverse.0.bugs_by_team.$team.open.size %]
+            <a style="text-decoration: none;" href="[% build_bugs_link(results_moderate.reverse.0.bugs_by_team.$team.open) FILTER html %]">
+              [% results_moderate.reverse.0.bugs_by_team.$team.open.size FILTER html %]
+            </a>
+          [% ELSE %]
+            0
+          [% END %]
+        </td>
+      <td style="padding: 0px 15px 10px 0px; text-align: right;
+                [% IF deltas_moderate.by_team.$team.closed.size %] background-color: #e6ffe6 [% END %]">
+        [% IF deltas_moderate.by_team.$team.closed.size %]
+          <a style="text-decoration: none;"
+             href="[% build_bugs_link(deltas_moderate.by_team.$team.closed) FILTER html %]">
+            -[% deltas_moderate.by_team.$team.closed.size FILTER html %]
+          </a>
+        [% ELSE %]
+          0
+        [% END %]
+      </td>
+      <td style="padding: 0px 15px 10px 0px; text-align: right;  border-right: 1px solid grey;
+                [% IF deltas_moderate.by_team.$team.added.size %] background-color: #ffe6e6 [% END %]">
+        [% IF deltas_moderate.by_team.$team.added.size %]
+          <a style="text-decoration: none;" href="[% build_bugs_link(deltas_moderate.by_team.$team.added) FILTER html %]">
+            +[% deltas_moderate.by_team.$team.added.size FILTER html %]
+          </a>
+        [% ELSE %]
+          0
+        [% END %]
+      </td>
+      [% FOREACH result IN results_moderate.reverse %]
+        [% NEXT IF loop.count < 2 %]
+        [% LAST IF loop.count > 4 %]
+        <td style="padding: 0px 15px 10px [% IF loop.count == 2 %] 10px [% ELSE %] 0px [% END %]; text-align: right; [% IF loop.count == 1 %] border-right: 1px solid grey; [% END %]">
+          [% IF result.bugs_by_team.$team.open.size %]
+            <a style="text-decoration: none;" href="[% build_bugs_link(result.bugs_by_team.$team.open) FILTER html %]">
+              [% result.bugs_by_team.$team.open.size FILTER html %]
+            </a>
+          [% ELSE %]
+            0
+          [% END %]
+        </td>
+      [% END %]
+    </tr>
+  [% END %]
+</table>
+<br/>
+
+<h3>Sec-Low by Team</h3>
+<table style="border-spacing: 0">
+  <tr>
+    <th style="padding: 0px 15px 10px 0px;">Team</th>
+    <th style="padding: 0px 15px 10px 0px; text-align: right;">
+        Open<br>[% results_low.reverse.0.date.strftime('%m/%d') FILTER html %]
+    </th>
+    <th style="padding: 0px 15px 10px 0px; text-align: right;">Closed<br />Last Week</th>
+    <th style="padding: 0px 15px 10px 0px; text-align: right; border-right: 1px solid grey;">Added<br />Last Week</th>
+    [% FOREACH result IN results_low.reverse %]
+      [% NEXT IF loop.count < 2 %]
+      [% LAST IF loop.count > 4 %]
+      <th style="padding: 0px 15px 10px [% IF loop.count == 2 %] 10px [% ELSE %] 0px [% END %]; text-align: right; [% IF loop.count == 1 %] border-right: 1px solid grey; [% END %]">
+        Open<br>[% result.date.strftime('%m/%d') FILTER html %]
+      </th>
+    [% END %]
+  </tr>
+  [% FOREACH team IN teams_low %]
+    <tr>
+      <td style="padding: 0px 15px 10px 0px;">[% team FILTER html %]</td>
+      <td style="padding: 0px 15px 10px 0px; text-align: right;">
+          [% IF results_low.reverse.0.bugs_by_team.$team.open.size %]
+            <a style="text-decoration: none;" href="[% build_bugs_link(results_low.reverse.0.bugs_by_team.$team.open) FILTER html %]">
+              [% results_low.reverse.0.bugs_by_team.$team.open.size FILTER html %]
+            </a>
+          [% ELSE %]
+            0
+          [% END %]
+        </td>
+      <td style="padding: 0px 15px 10px 0px; text-align: right;
+                [% IF deltas_low.by_team.$team.closed.size %] background-color: #e6ffe6 [% END %]">
+        [% IF deltas_low.by_team.$team.closed.size %]
+          <a style="text-decoration: none;"
+             href="[% build_bugs_link(deltas_low.by_team.$team.closed) FILTER html %]">
+            -[% deltas_low.by_team.$team.closed.size FILTER html %]
+          </a>
+        [% ELSE %]
+          0
+        [% END %]
+      </td>
+      <td style="padding: 0px 15px 10px 0px; text-align: right;  border-right: 1px solid grey;
+                [% IF deltas_low.by_team.$team.added.size %] background-color: #ffe6e6 [% END %]">
+        [% IF deltas_low.by_team.$team.added.size %]
+          <a style="text-decoration: none;" href="[% build_bugs_link(deltas_low.by_team.$team.added) FILTER html %]">
+            +[% deltas_low.by_team.$team.added.size FILTER html %]
+          </a>
+        [% ELSE %]
+          0
+        [% END %]
+      </td>
+      [% FOREACH result IN results_low.reverse %]
+        [% NEXT IF loop.count < 2 %]
+        [% LAST IF loop.count > 4 %]
+        <td style="padding: 0px 15px 10px [% IF loop.count == 2 %] 10px [% ELSE %] 0px [% END %]; text-align: right; [% IF loop.count == 1 %] border-right: 1px solid grey; [% END %]">
+          [% IF result.bugs_by_team.$team.open.size %]
+            <a style="text-decoration: none;" href="[% build_bugs_link(result.bugs_by_team.$team.open) FILTER html %]">
+              [% result.bugs_by_team.$team.open.size FILTER html %]
+            </a>
+          [% ELSE %]
+            0
+          [% END %]
+        </td>
+      [% END %]
+    </tr>
+  [% END %]
+</table>
+<br/>
+
+<h3>[% terms.Bugs %] By Severity</h3>
+<table style="border-spacing: 0">
+  <tr>
+    <th style="padding: 0px 15px 10px 0px;">Category</th>
+    <th style="padding: 0px 15px 10px 0px; text-align: right;">
+        Open<br>[% results_moderate.reverse.0.date.strftime('%m/%d') FILTER html %]
+    </th>
+    <th style="padding: 0px 15px 10px 0px; text-align: right;">Closed<br />Last Week</th>
+    <th style="padding: 0px 15px 10px 0px; text-align: right;">Added<br />Last Week</th>
+    <th style="padding: 0px 15px 10px 0px; text-align: right; border-right: 1px solid grey;">
+      Older than <br> [% very_old_days FILTER html %] Days<br>
+    </th>
+    [% FOREACH result IN results_moderate.reverse %]
+      [% NEXT IF loop.count < 2 %]
+      [% LAST IF loop.count > 4 %]
+      <th style="padding: 0px 15px 10px [% IF loop.count == 2 %] 10px [% ELSE %] 0px [% END %]; text-align: right;  [% IF loop.count == 1 %] border-right: 1px solid grey; [% END %]">
+        Open<br>[% result.date.strftime('%m/%d') FILTER html %]
+      </th>
+    [% END %]
+  </tr>
+  [% FOREACH keyword IN sec_keywords %]
+    [% IF keyword == 'sec-moderate' %]
+      [% results = results_moderate %]
+    [% ELSIF keyword == 'sec-low' %]
+      [% results = results_low %]
+    [% END %]
+    <tr>
+      <td style="padding: 0px 15px 10px 0px;">[% keyword FILTER html %]</td>
+      <td style="padding: 0px 15px 10px 0px; text-align: right;">
+          [% IF results.reverse.0.bugs_by_sec_keyword.$keyword.open.size %]
+            <a style="text-decoration: none;" href="[% build_bugs_link(results.reverse.0.bugs_by_sec_keyword.$keyword.open) FILTER html %]">
+              [% results.reverse.0.bugs_by_sec_keyword.$keyword.open.size FILTER html %]
+            </a>
+          [% ELSE %]
+            0
+          [% END %]
+        </td>
+      <td style="padding: 0px 15px 10px 0px; text-align: right;
+                [% IF deltas.by_sec_keyword.$keyword.closed.size %] background-color: #e6ffe6 [% END %]">
+        [% IF deltas.by_sec_keyword.$keyword.closed.size %]
+          <a style="text-decoration: none;" href="[% build_bugs_link(deltas.by_sec_keyword.$keyword.closed) FILTER html %]">
+            -[% deltas.by_sec_keyword.$keyword.closed.size FILTER html %]
+          </a>
+        [% ELSE %]
+          0
+        [% END %]
+      </td>
+      <td style="padding: 0px 15px 10px 0px; text-align: right;
+                 [% IF deltas.by_sec_keyword.$keyword.added.size %] background-color: #ffe6e6 [% END %]">
+        [% IF deltas.by_sec_keyword.$keyword.added.size %]
+          <a style="text-decoration: none;" href="[% build_bugs_link(deltas.by_sec_keyword.$keyword.added) FILTER html %]">
+            +[% deltas.by_sec_keyword.$keyword.added.size FILTER html %]
+          </a>
+        [% ELSE %]
+          0
+        [% END %]
+      </td>
+      <td style="padding: 0px 15px 10px 0px; text-align: right; border-right: 1px solid grey; ">
+        [% IF results.reverse.0.bugs_by_sec_keyword.$keyword.very_old_bugs.size %]
+            <a style="text-decoration: none;" href="[% build_bugs_link(results.reverse.0.bugs_by_sec_keyword.$keyword.very_old_bugs) FILTER html %]">
+              [% results.reverse.0.bugs_by_sec_keyword.$keyword.very_old_bugs.size FILTER html %]
+            </a>
+          [% ELSE %]
+            0
+          [% END %]
+      </td>
+      [% FOREACH result IN results.reverse %]
+        [% NEXT IF loop.count < 2 %]
+        [% LAST IF loop.count > 4 %]
+        <td style="padding: 0px 15px 10px [% IF loop.count == 2 %] 10px [% ELSE %] 0px [% END %]; text-align: right;  [% IF loop.count == 1 %] border-right: 1px solid grey; [% END %]">
+          [% IF result.bugs_by_sec_keyword.$keyword.open.size %]
+            <a style="text-decoration: none;" href="[% build_bugs_link(result.bugs_by_sec_keyword.$keyword.open) FILTER html %]">
+              [% result.bugs_by_sec_keyword.$keyword.open.size FILTER html %]
+            </a>
+          [% ELSE %]
+            0
+          [% END %]
+        </td>
+      [% END %]
+    </tr>
+  [% END %]
+</table>
+
+<p>
+To narrow down open [% terms.bugs %] click on the link and at the bottom of the search results use the
+'Edit Search' functionality to filter by component and so on. This will filter only the open [% terms.bugs %]
+counted in the report (as long as you do not modify the '[% terms.Bugs %] numbered' section of the search).
+Keep in mind that you will only be able to see [% terms.bugs %] that you are allowed to see. Also keep in mind that
+this report treats marking a [% terms.bug %] as 'stalled' the same as closing it.
+</p>
+
+<p>This report was generated from the live Bugzilla instance. In rare cases, historical statistics may vary from prior reports if [% terms.bugs %] were reclassified after those reports were generated.</p>
+
+</body>
+</html>

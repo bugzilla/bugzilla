@@ -88,6 +88,20 @@
 - hosts: db
   become: true
   tasks:
+    - name: Add an Ethernet alias with static IP configuration (hyperv only)
+      template:
+        src: hyperv-static-ip-db.j2
+        dest: /etc/sysconfig/network-scripts/ifcfg-eth0:0
+        mode: 0644
+      when: HYPERV == 1
+
+    - name: Restart network service for interface eth0:0
+      service:
+        name: network
+        state: restarted
+        args: eth0:0
+      when: HYPERV == 1
+
     - name: fetch ius-release.rpm
       get_url:
         url: https://moz-devservices-bmocartons.s3.amazonaws.com/third-party/ius-release.rpm
@@ -128,12 +142,26 @@
     - name: create bugs_bmo
       shell: |-
         mysqladmin -u root create bugs_bmo
-        mysql -u root -e 'GRANT ALL ON bugs_bmo.* TO bugs@"{{WEB_IP}}" IDENTIFIED BY "bugs"'
+        mysql -u root -e "GRANT ALL ON bugs_bmo.* TO 'bugs'@'%' IDENTIFIED BY 'bugs'"
       when: bugs_bmo is failed
 
 - hosts: web
   become: true
   tasks:
+    - name: Add an Ethernet alias with static IP configuration (hyperv only)
+      template:
+        src: hyperv-static-ip-web.j2
+        dest: /etc/sysconfig/network-scripts/ifcfg-eth0:0
+        mode: 0644
+      when: HYPERV == 1
+
+    - name: Restart network service for interface eth0:0 (hyperv only)
+      service:
+        name: network
+        state: restarted
+        args: eth0:0
+      when: HYPERV == 1
+
     - name: install web-specific packages
       yum: name={{item}} state=present
       with_items:
@@ -189,11 +217,11 @@
         src: '{{VENDOR_BUNDLE_URL}}'
         dest: /opt
         remote_src: true
-      when: opt_bmo|failed
+      when: opt_bmo is failed
 
     - name: check /opt/bmo
       shell: test -d /opt/bmo && test -f /opt/bmo/local/lib/perl5/Plack.pm
-      when: opt_bmo|failed
+      when: opt_bmo is failed
 
     - name: add local symlink
       file: path=/vagrant/local src=/opt/bmo/local state=link force=true

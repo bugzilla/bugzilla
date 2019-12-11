@@ -3,14 +3,17 @@
 
 DB_IP        = ENV.fetch "BMO_DB_IP",    '192.168.3.42'
 WEB_IP       = ENV.fetch "BMO_WEB_IP",   '192.168.3.43'
+GATEWAY_IP   = ENV.fetch "GATEWAY_IP",   '192.168.3.1'
+DNS_IP       = ENV.fetch "DNS_IP",       '8.8.8.8'
 DB_HOSTNAME  = ENV.fetch "BMO_DB_HOST",  'bmo-db.vm'
 WEB_HOSTNAME = ENV.fetch "BMO_WEB_HOST", 'bmo-web.vm'
 DB_PORT      = ENV.fetch "BMO_DB_PORT",  2221
 WEB_PORT     = ENV.fetch "BMO_WEB_PORT", 2222
-DB_MEM      = ENV.fetch "BMO_DB_MEM",  512
+DB_MEM       = ENV.fetch "BMO_DB_MEM",   512
 WEB_MEM      = ENV.fetch "BMO_WEB_MEM",  2048
-DB_CPU      = ENV.fetch "BMO_DB_CPU",  1
+DB_CPU       = ENV.fetch "BMO_DB_CPU",   1
 WEB_CPU      = ENV.fetch "BMO_WEB_CPU",  2
+HYPERV       = ENV.fetch "HYPERV",       0
 
 # this is for centos 6 / el 6
 VENDOR_BUNDLE_URL = ENV.fetch "BMO_BUNDLE_URL",
@@ -66,6 +69,9 @@ Vagrant.configure('2') do |config|
       WEB_HOSTNAME:      WEB_HOSTNAME,
       DB_HOSTNAME:       DB_HOSTNAME,
       VENDOR_BUNDLE_URL: VENDOR_BUNDLE_URL,
+      GATEWAY_IP:        GATEWAY_IP,
+      DNS_IP:            DNS_IP,
+      HYPERV:            HYPERV
     }
   end
 
@@ -122,7 +128,6 @@ Vagrant.configure('2') do |config|
       host: WEB_PORT,
       guest: 22,
       auto_correct: true
-
 
     web.vm.synced_folder '.', '/vagrant', type: 'rsync', rsync__args: RSYNC_ARGS
 

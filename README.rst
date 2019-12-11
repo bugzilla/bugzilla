@@ -73,6 +73,65 @@ Run `vagrant ssh web`, that should put you in the `/vagrant` directory.
 While there run `openssl req -newkey rsa:2048 -sha256 -nodes -keyout bmo-web.vm-key.pem -x509 -days 365 -out bmo-web.vm.pem`.
 Restart morbo and you should now be able to visit https://bmo-web.vm.
 
+Vagrant and Windows Hyper-Vagrant
+---------------------------------
+
+Enable hyperv support in Windows 10
+
+- Right click on the Windows button and select ‘Apps and Features’.
+- Select Turn Windows Features on or off.
+- Select Hyper-V and click OK.
+- May need to reboot.
+
+Run PowerShell as Administrator
+
+- Press the Windows key.
+- Type `powershell` in the search field.
+- In the search results, select `Run as administrator`.
+
+Create NAT Switch with IP address of 192.168.3.1/24
+
+.. code-block:: powershell
+
+  New-VMSwitch -SwitchName “VagrantSwitch” -SwitchType Internal
+  New-NetIPAddress -IPAddress 192.168.3.1 -PrefixLength 24 -InterfaceAlias “vEthernet (VagrantSwitch)”
+  New-NetNAT -Name “NATNetwork” -InternalIPInterfaceAddressPrefix 192.168.3.0/24
+
+Install DHCP Servor for Windows
+
+- http://www.dhcpserver.de/cms/
+- Configure to serve IP addresses to the NAT Switch network above.
+- Set the IP range to be 100-254
+
+Install Vagrant for Windows
+
+Install Git for Windows
+
+Set some environment variables to use for Vagrant
+
+.. code-block:: powershell
+
+  [System.Environment]::SetEnvironmentVariable('HYPERV', '1')
+
+Update hosts file in Windows
+
+- Press the Windows key.
+- Type `notepad` in the search field.
+- In the search results, select `Run as administrator`.
+- From Notepad, open the following file: ``C:\Windows\System32\Drivers\etc\hosts``.
+- Add ``192.168.3.43 bmo-web.vm`` to the end of the file.
+- Select File > Save to save your changes.
+
+Git clone BMO repo ``git clone https://github.com/mozilla-bteam/bmo bmo``
+
+.. code-block:: bash
+
+  cd bmo
+  vagrant up --provider hyperv
+
+When requested (twice), select the NAT Switch that was created earlier. You will need to atart the mojo server to access BMO from the browser
+using ``vagrant ssh web -c 'start_morbo'``. In your browser go to: ``http://bmo-web.vm``.
+
 Making Changes and Seeing them
 ------------------------------
 
@@ -106,6 +165,7 @@ script that runs a webserver and implements the auth delegation protocol.
 Provided you have `Mojolicious`_ installed:
 
 .. code-block:: bash
+
   perl auth-test-app daemon
 
 Then just browse to `localhost:3000`_ to test creating API keys.
@@ -461,7 +521,7 @@ changing the mail_delivery_method to either 'Test' or 'Sendmail'. Afterwards res
 ``vagrant reload``. With docker, only the default 'Test' option is supported.
 
 'Test' option (Default for Docker)
-~~~~~~~~~~~~~~~~~~~~~~~
+----------------------------------
 
 With this option, all mail will be appended to a ``mailer.testfile``.
 
@@ -469,7 +529,7 @@ With this option, all mail will be appended to a ``mailer.testfile``.
 - Using vagrant, run ``vagrant ssh web`` and then navigate to ``/vagrant/data/mailer.testfile``.
 
 'Sendmail' option (Default for Vagrant)
-~~~~~~~~~~~~~~~~~
+---------------------------------------
 
 This option is useful if you want to preview email using a real mail client.
 An imap server is running on bmo-web.vm on port 143 and you can connect to it with

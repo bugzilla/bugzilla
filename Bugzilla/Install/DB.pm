@@ -805,9 +805,6 @@ sub update_table_definitions {
   # Bug 1576667 - dkl@mozilla.com
   _populate_api_keys_creation_ts();
 
-  # Bug 1588221 - dkl@mozilla.com
-  _populate_attachment_storage_class();
-
   ################################################################
   # New --TABLE-- changes should go *** A B O V E *** this point #
   ################################################################
@@ -4328,19 +4325,6 @@ sub _populate_api_keys_creation_ts {
   $dbh->bz_alter_column('user_api_keys', 'creation_ts',
     {TYPE => 'DATETIME', NOTNULL => 1});
 }
-
-sub _populate_attachment_storage_class {
-  my $dbh = Bugzilla->dbh;
-
-  # Return if we have already made these changes
-  if (!$dbh->selectrow_arrayref('SELECT COUNT(id) FROM attachment_storage_class'))
-  {
-    $dbh->do(
-      "INSERT INTO attachment_storage_class (id, storage_class) SELECT attachments.id, 'database' FROM attachments ORDER BY attachments.id"
-    );
-  }
-}
-
 
 1;
 

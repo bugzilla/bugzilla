@@ -62,7 +62,7 @@ elsif ($cmd eq 'import') {
     next unless $mem->{data_len};
     next unless check_attachment($attachment, $mem->{bug_id}, $mem->{data_len});
 
-    $attachment->current_storage->set_data($mem->{data})->set_class();
+    Bugzilla::Attachment::current_storage()->store($attachment->id, $mem->{data});
   }
 }
 elsif ($cmd eq 'check') {
@@ -79,8 +79,7 @@ elsif ($cmd eq 'remove') {
   while (my $mem = $archive->read_member) {
     warn "checking $mem->{attach_id}\n";
 
-    my $attachment
-      = Bugzilla::Attachment->new({id => $mem->{attach_id}, cache => 1});
+    my $attachment = Bugzilla::Attachment->new($mem->{attach_id});
     die "bad attachment\n"
       unless check_attachment($attachment, $mem->{bug_id}, $mem->{data_len});
     $remove_ok{$mem->{attach_id}} = 1;
@@ -89,8 +88,7 @@ elsif ($cmd eq 'remove') {
     chomp $attach_id;
     if ($remove_ok{$attach_id}) {
       warn "removing $attach_id\n";
-      my $attachment = Bugzilla::Attachment->new({id => $attach_id, cache => 1});
-      $attachment->current_storage->remove()->remove_class();
+      Bugzilla::Attachment::current_storage()->remove($attach_id);
     }
     else {
       warn "Unable to remove $attach_id, as it did not occur in the archive.\n";

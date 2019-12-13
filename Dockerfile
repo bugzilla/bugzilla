@@ -1,4 +1,6 @@
-FROM mozillabteam/bmo-slim:20190404.1
+FROM mozillabteam/bmo-perl-slim:20191209.1
+
+ENV DEBIAN_FRONTEND noninteractive
 
 ARG CI
 ARG CIRCLE_SHA1
@@ -10,19 +12,18 @@ ENV CIRCLE_SHA1=${CIRCLE_SHA1}
 
 ENV LOG4PERL_CONFIG_FILE=log4perl-json.conf
 
-ENV PORT=8000
-
 # we run a loopback logging server on this TCP port.
 ENV LOGGING_PORT=5880
 
-WORKDIR /app
-COPY . .
+ENV LOCALCONFIG_ENV=1
 
-RUN mv /opt/bmo/local /app && \
-    chown -R app:app /app && \
+WORKDIR /app
+
+COPY . /app
+
+RUN chown -R app.app /app && \
     perl -I/app -I/app/local/lib/perl5 -c -E 'use Bugzilla; BEGIN { Bugzilla->extensions }' && \
-    perl -c /app/scripts/entrypoint.pl && \
-    setcap 'cap_net_bind_service=+ep' /usr/bin/perl
+    perl -c /app/scripts/entrypoint.pl
 
 USER app
 
@@ -30,7 +31,7 @@ RUN perl checksetup.pl --no-database --default-localconfig && \
     rm -rf /app/data /app/localconfig && \
     mkdir /app/data
 
-EXPOSE $PORT
+EXPOSE 8000
 
 ENTRYPOINT ["/app/scripts/entrypoint.pl"]
 CMD ["httpd"]

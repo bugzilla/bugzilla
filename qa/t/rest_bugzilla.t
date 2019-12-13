@@ -14,7 +14,7 @@ use strict;
 use warnings;
 use lib qw(lib ../../lib ../../local/lib/perl5);
 
-use Test::More tests => 11;
+use Test::More tests => 8;
 use QA::REST;
 
 my $rest   = get_rest_client();
@@ -41,29 +41,7 @@ foreach my $type (qw(db_time web_time)) {
   ok($time->{$type}, "GET /rest/time returns $type = " . $time->{$type});
 }
 
-# Logged-out users can only access the maintainer and requirelogin parameters.
-my $params      = $rest->call('parameters')->{parameters};
-my @param_names = sort keys %$params;
-ok(
-  @param_names == 2
-    && defined $params->{maintainer}
-    && defined $params->{requirelogin},
-  'Only 2 parameters accessible to logged-out users: ' . join(', ', @param_names)
-);
-
-# Powerless users can access much more parameters.
-$params
-  = $rest->call('parameters', {api_key => $config->{unprivileged_user_api_key}})
-  ->{parameters};
-@param_names = sort keys %$params;
-ok(@param_names > 2,
-  scalar(@param_names) . ' parameters accessible to powerless users');
-
-# Admins can access all parameters.
-$params = $rest->call('parameters', {api_key => $config->{admin_user_api_key}})
-  ->{parameters};
-@param_names = sort keys %$params;
-ok(@param_names > 2, scalar(@param_names) . ' parameters accessible to admins');
-
-my $timestamp = $rest->call('last_audit_time')->{last_audit_time};
-ok($timestamp, "GET /rest/last_audit_time returns $timestamp");
+my $jobqueue_errors
+  = $rest->call('jobqueue_status', {api_key => $config->{admin_user_api_key}})
+  ->{errors};
+ok(!$jobqueue_errors, "GET /rest/jobqueue_status returns zero errors");

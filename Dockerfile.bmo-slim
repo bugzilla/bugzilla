@@ -1,0 +1,36 @@
+FROM perl:5.30.0-slim AS builder
+
+RUN apt-get update
+RUN apt-get install -y \
+    build-essential curl libssl-dev zlib1g-dev openssl \
+    libexpat-dev cmake git libcairo-dev libgd-dev \
+    default-libmysqlclient-dev unzip wget
+RUN cpanm --notest --quiet App::cpm Module::CPANfile Carton::Snapshot
+
+WORKDIR /app
+
+COPY cpanfile cpanfile.snapshot /app/
+
+RUN cpm install
+# secure mail loop fixes
+RUN cpm install http://s3.amazonaws.com/moz-devservices-bmocartons/third-party/Crypt-OpenPGP-1.15.tar.gz
+
+RUN apt-get install -y apt-file
+RUN apt-file update
+RUN find local -name '*.so' -exec ldd {} \; \
+    | egrep -v 'not.found|not.a.dynamic.executable' \
+    | awk '$3 {print $3}' \
+    | sort -u \
+    | xargs -IFILE apt-file search -l FILE \
+    | sort -u > PACKAGES
+
+FROM perl:5.30.0-slim
+
+ENV DEBIAN_FRONTEND noninteractive
+
+COPY --from=builder /app/local /app/local
+COPY --from=builder /app/PACKAGES /app/PACKAGES
+
+RUN apt-get update && apt-get upgrade -y && apt-get install -y curl git libcap2-bin xz-utils vim $(cat /app/PACKAGES)
+
+RUN useradd -u 10001 -U app -m && setcap 'cap_net_bind_service=+ep' /usr/local/bin/perl

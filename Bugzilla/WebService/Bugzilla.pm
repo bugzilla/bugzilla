@@ -101,7 +101,8 @@ sub jobqueue_status {
             , 0) AS errors
         FROM ts_job j
             INNER JOIN ts_funcmap f
-                ON f.funcid = j.funcid;
+                ON f.funcid = j.funcid
+        GROUP BY errors
     };
 
   my $status;

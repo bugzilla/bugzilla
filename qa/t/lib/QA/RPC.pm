@@ -17,7 +17,7 @@ use Test::More;
 
 sub bz_config {
   my $self = shift;
-  $self->{bz_config} ||= QA::Util::get_config();
+  $self->{bz_config} ||= get_config();
   return $self->{bz_config};
 }
 

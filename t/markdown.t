@@ -34,8 +34,8 @@ is(
 );
 
 is(
-  $parser->render_html('http://bmo-web.vm'),
-  "<p><a href=\"http://bmo-web.vm\" rel=\"nofollow\">http://bmo-web.vm</a></p>\n",
+  $parser->render_html('https://www.mozilla.org'),
+  "<p><a href=\"https://www.mozilla.org\" rel=\"nofollow\">https://www.mozilla.org</a></p>\n",
   'Autolink extension'
 );
 
@@ -79,13 +79,7 @@ HTML
 
 is($parser->render_html($table_markdown), $table_html, 'Table extension');
 
-{
-  no warnings 'utf8';
-  is($parser->render_html("\x{FDD4}"), "", "strips out PUA char");
-}
-
 my $angle_link =  $parser->render_html("<https://searchfox.org/mozilla-central/rev/76fe4bb385348d3f45bbebcf69ba8c7283dfcec7/mobile/android/base/java/org/mozilla/gecko/toolbar/SecurityModeUtil.java#101>");
-
 my $angle_link_dom = Mojo::DOM->new($angle_link);
 my $ahref = $angle_link_dom->at('a[href]');
 is($ahref->attr('href'), 'https://searchfox.org/mozilla-central/rev/76fe4bb385348d3f45bbebcf69ba8c7283dfcec7/mobile/android/base/java/org/mozilla/gecko/toolbar/SecurityModeUtil.java#101', 'angle links are parsed properly');

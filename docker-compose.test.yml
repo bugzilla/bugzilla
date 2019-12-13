@@ -1,0 +1,60 @@
+# This Source Code Form is subject to the terms of the Mozilla Public
+# License, v. 2.0. If a copy of the MPL was not distributed with this
+# file, You can obtain one at http://mozilla.org/MPL/2.0/.
+
+version: '3'
+
+services:
+  bmo-web.vm:
+    image: bmo
+    command: dev_httpd
+    tmpfs:
+      - /tmp
+      - /run
+    environment:
+      - 'BMO_inbound_proxies=*'
+      - BMO_db_host=bmo-db.vm
+      - BMO_db_name=bugs
+      - BMO_db_pass=bugs
+      - BMO_db_user=bugs
+      - BMO_memcached_namespace=bugzilla
+      - BMO_memcached_servers=memcached:11211
+      - BMO_urlbase=AUTOMATIC
+      - BUGZILLA_ALLOW_INSECURE_HTTP=1
+      - BZ_ANSWERS_FILE=/app/conf/checksetup_answers.txt
+      - BZ_QA_ANSWERS_FILE=/app/.circleci/checksetup_answers.txt
+      - BZ_QA_CONF_FILE=/app/.circleci/selenium_test.conf
+      - BZ_QA_CONFIG=1
+      - CI=${CI}
+      - CIRCLE_SHA1=${CIRCLE_SHA1}
+      - CIRCLE_BUILD_URL=${CIRCLE_BUILD_URL}
+      - LOCALCONFIG_ENV=1
+      - LOG4PERL_CONFIG_FILE=log4perl-test.conf
+      - LOGGING_PORT=5880
+      - PORT=8000
+      - TWD_BROWSER=firefox
+      - TWD_HOST=selenium
+      - TWD_PORT=4444
+    depends_on:
+      - bmo-db.vm
+      - memcached
+      - selenium
+
+  bmo-db.vm:
+    image: mozillabteam/bmo-mysql:5.7
+    logging:
+      driver: "none"
+    environment:
+      - MYSQL_DATABASE=bugs
+      - MYSQL_USER=bugs
+      - MYSQL_PASSWORD=bugs
+      - MYSQL_ALLOW_EMPTY_PASSWORD=1
+
+  memcached:
+    image: memcached:latest
+
+  selenium:
+    image: selenium/standalone-firefox:3.141.59
+    shm_size: '512m'
+    ports:
+      - "5900:5900"

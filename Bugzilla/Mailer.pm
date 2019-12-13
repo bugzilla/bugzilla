@@ -22,10 +22,11 @@ use Bugzilla::Util;
 
 use Date::Format qw(time2str);
 
-use Encode qw(encode);
-use Encode::MIME::Header;
 use Email::Address;
 use Email::MIME;
+use Encode qw(encode);
+use Encode::MIME::Header;
+use List::MoreUtils qw(none);
 use Try::Tiny;
 
 # Return::Value 1.666002 pollutes the error log with warnings about this
@@ -50,23 +51,7 @@ sub MessageToMTA {
 
   my $dbh = Bugzilla->dbh;
 
-  my $email;
-  if (ref $msg) {
-    $email = $msg;
-  }
-  else {
-    # RFC 2822 requires us to have CRLF for our line endings and
-    # Email::MIME doesn't do this for us until 1.911. We use \015 (CR) and \012 (LF)
-    # directly because Perl translates "\n" depending on what platform
-    # you're running on. See http://perldoc.perl.org/perlport.html#Newlines
-    # We check for multiple CRs because of this Template-Toolkit bug:
-    # https://rt.cpan.org/Ticket/Display.html?id=43345
-    if (vers_cmp($Email::MIME::VERSION, 1.911) == -1) {
-      $msg =~ s/(?:\015+)?\012/\015\012/msg;
-    }
-
-    $email = Email::MIME->new($msg);
-  }
+  my $email = ref $msg ? $msg : Email::MIME->new($msg);
 
   # Ensure that we are not sending emails too quickly to recipients.
   if (Bugzilla->get_param_with_override('use_mailer_queue')
@@ -113,25 +98,39 @@ sub MessageToMTA {
   $email->header_set('Auto-Submitted', 'auto-generated');
 
   # MIME-Version must be set otherwise some mailsystems ignore the charset
-  $email->header_set('MIME-Version', '1.0') if !$email->header('MIME-Version');
+  $email->header_set('MIME-Version', '1.0')
+    if !$email->header('MIME-Version');
+
+  # Certain headers should not be encoded
+  my @no_encode = qw(from sender reply-to to cc bcc);
+  push @no_encode, map { "resent-$_" } @no_encode;
+  push @no_encode, map { "downgraded-$_" } @no_encode; # RFC 5504
+  push @no_encode,
+    qw(original-from disposition-notification-to);     # RFC 5703 and RFC 3798
+  push @no_encode,
+    qw(mime-version auto-submitted date message-id references in-reply-to downgraded-message-id downgraded-references downgraded-in-reply-to);
 
   # Encode the headers correctly in quoted-printable
   foreach my $header ($email->header_names) {
-    my @values = $email->header($header);
+    $header = lc $header;
 
-    # We don't recode headers that happen multiple times.
-    next if scalar(@values) > 1;
-    if (my $value = $values[0]) {
+    my @values = $email->header($header);
+    my @encoded_values;
+    foreach my $value (@values) {
       if (Bugzilla->params->{'utf8'} && !utf8::is_utf8($value)) {
         utf8::decode($value);
       }
 
-      # avoid excessive line wrapping done by Encode.
-      local $Encode::Encoding{'MIME-Q'}->{'bpl'} = 998;
+      if (none { $_ eq $header } @no_encode) {
+        # avoid excessive line wrapping done by Encode.
+        local $Encode::Encoding{'MIME-Q'}->{'bpl'} = 998;
+        $value = encode('MIME-Q', $value);
+      }
 
-      my $encoded = encode('MIME-Q', $value);
-      $email->header_set($header, $encoded);
+      push @encoded_values, $value;
     }
+
+    $email->header_set($header, @encoded_values);
   }
 
   my $from = $email->header('From');
@@ -189,7 +188,7 @@ sub MessageToMTA {
     {email => $email, mailer_args => \@args});
 
   try {
-    my $to = $email->header('to') or die qq{Unable to find "To:" address\n};
+    my $to         = $email->header('to') or die qq{Unable to find "To:" address\n};
     my @recipients = Email::Address->parse($to);
     die qq{Unable to parse "To:" address - $to\n} unless @recipients;
     die qq{Did not expect more than one "To:" address in $to\n} if @recipients > 1;

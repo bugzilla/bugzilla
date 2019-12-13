@@ -65,19 +65,14 @@ sub render_html {
     return $html;
   }
 
-  no warnings 'utf8'; # this is needed because our Perl is so old.
-  # This is a bit faster since it doesn't engage the regex engine.
-  # Replace < with \x{FDD4}, and remove \x{FDD4}.
-  $markdown =~ tr/\x{FDD4}//d;
-  $markdown =~ s{<(?!https?://)}{\x{FDD4}}gs;
+  $markdown =~ s{<(?!https?://)}{&lt;}gs;
+
   my @valid_text_parent_tags = ('h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'p', 'li', 'td');
   my @bad_tags               = qw( img );
   my $bugzilla_shorthand     = $self->bugzilla_shorthand;
   my $html                   = decode('UTF-8', $parser->render_html($markdown));
 
-  $html =~ s/\x{FDD4}/&lt;/g;
   my $dom = Mojo::DOM->new($html);
-
   $dom->find(join(', ', @bad_tags))->map('remove');
 
   $dom->find("a[href]")->grep(\&_is_external_link)->map(attr => rel => 'nofollow');

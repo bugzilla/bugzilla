@@ -72,7 +72,6 @@ use constant LOCALCONFIG_VARS => (
   {name => 'cvsbin',       default => sub { bin_loc('cvs') },},
   {name => 'interdiffbin', default => sub { bin_loc('interdiff') },},
   {name => 'diffpath',     default => sub { dirname(bin_loc('diff')) },},
-  {name => 'tct_bin',      default => sub { bin_loc('tct') },},
   {
     name => 'site_wide_secret',
 

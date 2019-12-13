@@ -70,7 +70,7 @@ sub GLOBAL_GENERAL_FIELDS {
     remaining_time
     work_time
   );
-  push(@fields, 'votes') if QA::Util::get_config()->{test_extensions};
+  push(@fields, 'votes') if get_config()->{test_extensions};
 
   return @fields;
 }

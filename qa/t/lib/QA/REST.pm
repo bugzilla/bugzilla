@@ -45,7 +45,7 @@ sub call {
 
   my %args = %{$self->{bz_default_headers}};
 
-# We do not pass the API key in the URL, so that it's not logged by the web server.
+  # We do not pass the API key in the URL, so that it's not logged by the web server.
   if ($http_verb eq 'get' && $data->{api_key}) {
     $args{'X-BUGZILLA-API-KEY'} = $data->{api_key};
   }

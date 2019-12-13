@@ -183,7 +183,6 @@ For the "Difference Between Two Patches" feature to work, we need to know
 what directory the "diff" bin is in. (You only need to set this if you
 are using that feature of the Patch Viewer.)
 END
-  localconfig_tct_bin         => 'Path to tct (tocotrienol) a gpg replacement.',
   localconfig_inbound_proxies => <<'END',
 This is a list of IP addresses that we expect proxies to come from.
 This can be '*' if only the load balancer can connect.

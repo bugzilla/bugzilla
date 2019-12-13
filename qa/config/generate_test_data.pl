@@ -58,6 +58,7 @@ use Bugzilla::Version;
 use Bugzilla::Constants;
 use Bugzilla::Keyword;
 use Bugzilla::Config qw(:admin);
+use Bugzilla::User::APIKey;
 use Bugzilla::User::Setting;
 use Bugzilla::Util qw(generate_random_password);
 
@@ -164,7 +165,7 @@ foreach my $username (@usernames) {
       $extra_args{disabledtext} = '!!This is the text!!';
     }
 
-    Bugzilla::User->create({
+    my $new_user = Bugzilla::User->create({
       login_name    => $login,
       realname      => $realname,
       cryptpassword => $password,
@@ -172,8 +173,15 @@ foreach my $username (@usernames) {
     });
 
     if ($username eq 'admin' or $username eq 'permanent_user') {
-
       Bugzilla::Install::make_admin($login);
+    }
+
+    if (exists $config->{$username . '_user_api_key'}) {
+      Bugzilla::User::APIKey->create_special({
+        user_id     => $new_user->id,
+        description => 'API key for Test User',
+        api_key     => $config->{$username . '_user_api_key'}
+      });
     }
   }
 }

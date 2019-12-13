@@ -31,6 +31,8 @@ my $tag          = 'release-' . Bugzilla->VERSION;
 my $prod_tag     = "release-$version_info->{version}";
 my $tag_url      = "$github_repo/tree/$tag";
 
+runx('git', 'clone', '--single-branch', $github_repo, 'build_info');
+chdir '/app/build_info';
 my @log = capture(qw(git log --oneline), "$prod_tag..HEAD");
 chomp @log;
 
@@ -85,9 +87,6 @@ else {
 
 my $first_revision = $revisions[0]->{hash};
 my $last_revision  = $revisions[-1]->{hash};
-
-mkdir 'build_info' unless -d 'build_info';
-chdir 'build_info';
 
 say "write tag.txt";
 open my $tag_fh, '>', 'tag.txt';

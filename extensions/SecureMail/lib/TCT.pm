@@ -18,7 +18,7 @@ use IO::Async::Process;
 has 'public_key'      => (is => 'ro', required => 1);
 has 'public_key_file' => (is => 'lazy');
 has 'is_valid'        => (is => 'lazy');
-has 'command'         => (is => 'ro', default => 'tct');
+has 'command'         => (is => 'ro', default => '/app/extensions/SecureMail/bin/tct');
 
 sub _build_public_key_file {
   my ($self) = @_;

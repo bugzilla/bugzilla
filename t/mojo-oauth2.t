@@ -114,9 +114,9 @@ $t->post_ok(
     grant_type    => 'authorization_code',
     redirect_uri  => '/oauth/redirect',
   }
-)->status_is(200)->json_has('access_token', 'Has access token')
-  ->json_has('refresh_token', 'Has refresh token')
-  ->json_has('token_type',    'Has token type');
+)->status_is(200)->json_has('/access_token', 'Has access token')
+  ->json_has('/refresh_token', 'Has refresh token')
+  ->json_has('/token_type',    'Has token type');
 
 my $access_data = $t->tx->res->json;
 
@@ -140,9 +140,9 @@ $t->post_ok(
     grant_type    => 'refresh_token',
     redirect_uri  => '/oauth/redirect',
   }
-)->status_is(200)->json_has('access_token', 'Has access token')
-  ->json_has('refresh_token', 'Has refresh token')
-  ->json_has('token_type',    'Has token type');
+)->status_is(200)->json_has('/access_token', 'Has access token')
+  ->json_has('/refresh_token', 'Has refresh token')
+  ->json_has('/token_type',    'Has token type');
 
 $access_data = $t->tx->res->json;
 

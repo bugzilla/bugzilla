@@ -360,7 +360,7 @@ An incorrect username or password was given.
 The hashref may also contain a C<failure_count> element, which specifies
 how many times the account has failed to log in within the lockout
 period (see L</AUTH_LOCKOUT>). This is used to warn the user when
-they’re getting close to being locked out.
+they're getting close to being locked out.
 
 =head2 C<AUTH_NO_SUCH_USER>
 

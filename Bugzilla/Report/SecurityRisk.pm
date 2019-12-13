@@ -572,9 +572,9 @@ sub _bugs_by_team {
       $_->{created_at}->subtract_datetime_absolute($report_date)->seconds / 86_400 >= $self->very_old_days;
     } grep { ($_->{is_open}) } @{$groups->{$team}};
     $result->{$team} = {
-      open            => \@open,
-      closed          => \@closed,
-      very_old_bugs   => \@very_old_bugs,
+      open            => [ sort @open ],
+      closed          => [ sort @closed ],
+      very_old_bugs   => [ sort @very_old_bugs ],
     };
   }
 
@@ -603,9 +603,9 @@ sub _bugs_by_sec_keyword {
       $_->{created_at}->subtract_datetime_absolute($report_date)->seconds / 86_400 >= $self->very_old_days;
     } grep { ($_->{is_open}) } @{$groups->{$sec_keyword}};
     $result->{$sec_keyword} = {
-      open            => \@open,
-      closed          => \@closed,
-      very_old_bugs   => \@very_old_bugs,
+      open            => [ sort @open ],
+      closed          => [ sort @closed ],
+      very_old_bugs   => [ sort @very_old_bugs ],
     };
   }
 

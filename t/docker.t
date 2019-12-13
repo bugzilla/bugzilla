@@ -13,7 +13,7 @@ use lib qw(. lib local/lib/perl5);
 use IO::Handle;
 use Test::More;
 
-my $dockerfile = 'Dockerfile';
+my $dockerfile = 'Dockerfile.bmo-slim';
 my $ci_config  = '.circleci/config.yml';
 
 my $base;
@@ -28,8 +28,8 @@ while (my $line = readline $dockerfile_fh) {
 close $dockerfile_fh;
 
 my ($image, $version) = split(/:/ms, $base, 2);
-is($image, 'mozillabteam/bmo-slim', "base image is mozillabteam/bmo-slim");
-like($version, qr/\d{4}\d{2}\d{2}\.\d+/ms, "version is YYYYMMDD.x");
+is($image, 'perl', 'base image is Perl');
+like($version, qr/\d{1}\.\d{2}\.\d{1}-slim/ms, "version is x.xx.x-slim");
 
 my $regex = qr{
     \Q$image\E

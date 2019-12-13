@@ -6,15 +6,23 @@
 version: 2
 
 defaults:
-  bmo_slim_image: &bmo_slim_image
-    image: mozillabteam/bmo-slim:20190404.1
-    user: app
+  install_deps: &install_deps
+    run:
+      name: install dependencies
+      command: |
+        apk update && apk add py-pip
+        pip install "docker-compose==1.23.2"
 
-  selenium_firefox_image: &selenium_firefox_image
-    image: selenium/standalone-firefox:3.141.59
+  docker_image: &docker_image
+    image: docker:18.06.0-ce-git
 
-  mysql_image: &mysql_image
-    image: mozillabteam/bmo-mysql:5.6
+  build_image: &build_image
+    run: |
+      docker build \
+        --build-arg CI="$CI" \
+        --build-arg CIRCLE_SHA1="$CIRCLE_SHA1" \
+        --build-arg CIRCLE_BUILD_URL="$CIRCLE_BUILD_URL" \
+        -t bmo .
 
   store_log: &store_log
     store_artifacts:
@@ -28,70 +36,40 @@ defaults:
         - /\//
         - production
 
-  bmo_env: &bmo_env
-    PORT: 8000
-    LOGGING_PORT: 5880
-    LOCALCONFIG_ENV: 1
-    LOG4PERL_CONFIG_FILE: log4perl-test.conf
-    BMO_db_user: bugs
-    BMO_db_host: 127.0.0.1
-    BMO_db_pass: bugs
-    BMO_db_name: bugs
-    BMO_memcached_servers: localhost:11211
-    BMO_memcached_namespace: "bugzilla:"
-    BMO_urlbase: AUTOMATIC
-
-  mysql_env: &mysql_env
-    MYSQL_DATABASE: bugs
-    MYSQL_USER: bugs
-    MYSQL_PASSWORD: bugs
-    MYSQL_ALLOW_EMPTY_PASSWORD: 1
-
-  docker_oldtests: &docker_oldtests
-    - <<: *bmo_slim_image
-      environment:
-        <<: *bmo_env
-        BZ_QA_CONF_FILE: /app/.circleci/selenium_test.conf
-        BZ_QA_ANSWERS_FILE:  /app/.circleci/checksetup_answers.txt
-        BZ_QA_CONFIG: 1
-    - <<: *mysql_image
-      environment: *mysql_env
-    - <<: *selenium_firefox_image
-    - image: memcached:latest
-
-  default_qa_setup: &default_qa_setup
-    run:
-      name: default qa setup
-      command: |
-        [[ -f build_info/only_version_changed.txt ]] && exit 0
-        mv /opt/bmo/local /app/local
-        perl -MSys::Hostname -i -pE 's/bmo.test/hostname() . ":$ENV{PORT}"/ges' $BZ_QA_CONF_FILE
-        perl checksetup.pl --no-database --default-localconfig
-        mkdir artifacts
-
 jobs:
   build_info:
     parallelism: 1
     working_directory: /app
     docker:
-      - <<: *bmo_slim_image
-        environment:
-          <<: *bmo_env
+      - *docker_image
     steps:
+      - setup_remote_docker
       - checkout
+      - *build_image
+      - *install_deps
+      - run: |
+          [[ -d build_info ]] || mkdir build_info
+      - attach_workspace:
+          at: /app/build_info
+      - run: |
+          docker-compose -f docker-compose.test.yml run --name version_json --entrypoint true bmo-web.vm
+          docker cp version_json:/app/version.json build_info/version.json
+          docker rm version_json
       - run:
           name: build push data
           command: |
-            mv /opt/bmo/local /app/local
-            perl Makefile.PL
-            perl -I/app -I/app/local/lib/perl5 -MBugzilla -e 1
-            perl checksetup.pl --no-database --no-templates --no-permissions
-            perl scripts/build-bmo-push-data.pl
+            docker-compose -f docker-compose.test.yml run --name push_data bmo-web.vm push_data
+            docker cp push_data:/app/build_info/blog.push.txt build_info/blog.push.txt
+            docker cp push_data:/app/build_info/bug.push.txt build_info/bug.push.txt
+            docker cp push_data:/app/build_info/email.push.txt build_info/email.push.txt
+            docker cp push_data:/app/build_info/tag.txt build_info/tag.txt
+            docker cp push_data:/app/build_info/wiki.push.txt build_info/wiki.push.txt
+            docker rm push_data
       - run:
           name: only publish if tag exists
           command: |
-            tag="$(cat build_info/tag.txt)"
             git fetch --tags
+            tag="$(cat build_info/tag.txt)"
             if git tag | fgrep -q "$tag"; then
               echo "tag $tag exists!"
             else
@@ -122,34 +100,22 @@ jobs:
       - *store_log
 
   build:
+    parallelism: 1
     working_directory: /app
     docker:
-      - image: docker:17.06.1-ce
+      - *docker_image
     steps:
       - setup_remote_docker
-      - run:
-          name: install git and ssh
-          command: apk update && apk add git openssh-client
       - checkout
-      - run: |
-          docker build \
-            --build-arg CI="$CI" \
-            --build-arg CIRCLE_SHA1="$CIRCLE_SHA1" \
-            --build-arg CIRCLE_BUILD_URL="$CIRCLE_BUILD_URL" \
-            -t bmo .
+      - *build_image
       - attach_workspace:
           at: /app/build_info
-      - run: "docker run --name bmo --entrypoint true bmo"
-      - run: "docker cp bmo:/app/version.json build_info/version.json"
-      - store_artifacts:
-          path: /app/build_info
-      - *store_log
       - deploy:
           command: |
             [[ -n "$DOCKERHUB_REPO" && -n "$DOCKER_USER" && -n "$DOCKER_PASS" ]] || exit 0
             docker login -u "$DOCKER_USER" -p "$DOCKER_PASS"
             if [[ "$CIRCLE_BRANCH" == "master" ]]; then
-              TAG="$(cat /app/build_info/tag.txt)"
+              TAG="$(cat build_info/tag.txt)"
               if [[ -n "$TAG" && -f build_info/publish.txt ]]; then
                 [[ -n "$GITHUB_PERSONAL_TOKEN" ]] || exit 0
                 git config credential.helper "cache --timeout 120"
@@ -171,27 +137,23 @@ jobs:
     parallelism: 1
     working_directory: /app
     docker:
-      - <<: *bmo_slim_image
-        environment: *bmo_env
+      - *docker_image
     steps:
+      - setup_remote_docker
       - checkout
+      - *build_image
+      - *install_deps
+      - run: |
+          [[ -d artifacts ]] || mkdir artifacts
       - attach_workspace:
           at: /app/build_info
-      - run: |
-          [[ -f build_info/only_version_changed.txt ]] && exit 0
-          mv /opt/bmo/local /app/local
-          mkdir artifacts
-      - run: |
-          [[ -f build_info/only_version_changed.txt ]] && exit 0
-          perl -I/app -I/app/local/lib/perl5 -c -E 'use Bugzilla; BEGIN { Bugzilla->extensions }'
-      - run: |
-          [[ -f build_info/only_version_changed.txt ]] && exit 0
-          perl Makefile.PL
       - run:
           name: run sanity tests
           command: |
             [[ -f build_info/only_version_changed.txt ]] && exit 0
-            /app/scripts/entrypoint.pl prove -qf $(circleci tests glob 't/*.t' 'extensions/*/t/*.t' | circleci tests split) | tee artifacts/$CIRCLE_JOB.txt
+            docker-compose -f docker-compose.test.yml run --no-deps bmo-web.vm \
+              test_sanity $(circleci tests glob 't/*.t' 'extensions/*/t/*.t' | \
+              circleci tests split) | tee artifacts/$CIRCLE_JOB.txt
       - store_artifacts:
           path: /app/artifacts
       - *store_log
@@ -199,18 +161,21 @@ jobs:
   test_webservices:
     parallelism: 1
     working_directory: /app
-    docker: *docker_oldtests
+    docker:
+      - *docker_image
     steps:
+      - setup_remote_docker
       - checkout
+      - *build_image
+      - *install_deps
+      - run: |
+          [[ -d artifacts ]] || mkdir artifacts
       - attach_workspace:
           at: /app/build_info
-      - *default_qa_setup
       - run: |
           [[ -f build_info/only_version_changed.txt ]] && exit 0
-          /app/scripts/entrypoint.pl load_test_data
-      - run: |
-          [[ -f build_info/only_version_changed.txt ]] && exit 0
-          /app/scripts/entrypoint.pl test_webservices | tee artifacts/$CIRCLE_JOB.txt
+          docker-compose -f docker-compose.test.yml run bmo-web.vm test_webservices | \
+            tee artifacts/$CIRCLE_JOB.txt
       - store_artifacts:
           path: /app/artifacts
       - *store_log
@@ -218,18 +183,21 @@ jobs:
   test_selenium:
     parallelism: 1
     working_directory: /app
-    docker: *docker_oldtests
+    docker:
+      - *docker_image
     steps:
+      - setup_remote_docker
       - checkout
+      - *build_image
+      - *install_deps
+      - run: |
+          [[ -d artifacts ]] || mkdir artifacts
       - attach_workspace:
           at: /app/build_info
-      - *default_qa_setup
       - run: |
           [[ -f build_info/only_version_changed.txt ]] && exit 0
-          /app/scripts/entrypoint.pl load_test_data
-      - run: |
-          [[ -f build_info/only_version_changed.txt ]] && exit 0
-          /app/scripts/entrypoint.pl test_selenium | tee artifacts/$CIRCLE_JOB.txt
+          docker-compose -f docker-compose.test.yml run bmo-web.vm test_selenium | \
+            tee artifacts/$CIRCLE_JOB.txt
       - store_artifacts:
           path: /app/artifacts
       - *store_log
@@ -238,30 +206,19 @@ jobs:
     parallelism: 1
     working_directory: /app
     docker:
-      - <<: *bmo_slim_image
-        environment:
-          <<: *bmo_env
-          BZ_QA_ANSWERS_FILE:  /app/.circleci/checksetup_answers.txt
-          TWD_HOST: localhost
-          TWD_PORT: 4444
-          TWD_BROWSER: firefox
-      - <<: *mysql_image
-        environment: *mysql_env
-      - image: memcached:latest
-      - <<: *selenium_firefox_image
+      - *docker_image
     steps:
+      - setup_remote_docker
       - checkout
+      - *build_image
+      - *install_deps
+      - run: |
+          [[ -d artifacts ]] || mkdir artifacts
       - attach_workspace:
           at: /app/build_info
       - run: |
           [[ -f build_info/only_version_changed.txt ]] && exit 0
-          mv /opt/bmo/local /app/local
-          perl checksetup.pl --no-database
-          /app/scripts/entrypoint.pl load_test_data
-          mkdir artifacts
-      - run: |
-          [[ -f build_info/only_version_changed.txt ]] && exit 0
-          /app/scripts/entrypoint.pl test_bmo -q -f t/bmo/*.t
+          docker-compose -f docker-compose.test.yml run bmo-web.vm test_bmo -q -f t/bmo/*.t
       - *store_log
 
 workflows:

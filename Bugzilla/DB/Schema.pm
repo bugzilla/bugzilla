@@ -1759,10 +1759,7 @@ sub new {
 
  Description: Public constructor method used to instantiate objects of this
               class.
- Parameters:  $driver (optional) - Used to specify the type of database.
-              This routine C<die>s if no subclass is found for the specified
-              driver.
-              $schema (optional) - A reference to a hash. Callers external
+ Parameters:  $schema (optional) - A reference to a hash. Callers external
                   to this package should never use this parameter.
  Returns:     new instance of the Schema class or a database-specific subclass
 

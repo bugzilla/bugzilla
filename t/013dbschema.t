@@ -19,6 +19,7 @@ use warnings;
 use lib qw(. t lib);
 use Bugzilla;
 use Bugzilla::DB::Schema;
+use Bugzilla::DB::Schema::Mysql;
 
 
 # SQL reserved words
@@ -57,7 +58,7 @@ our $schema;
 our @tables;
 
 BEGIN {
-  $schema = Bugzilla::DB::Schema->new("Mysql");
+  $schema = Bugzilla::DB::Schema::Mysql->new;
   @tables = $schema->get_table_list();
 }
 

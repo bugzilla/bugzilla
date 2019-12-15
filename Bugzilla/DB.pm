@@ -26,6 +26,7 @@ use Bugzilla::Error;
 use Bugzilla::DB::Schema;
 use Bugzilla::Version;
 
+use Scalar::Util qw(blessed);
 use List::Util qw(max);
 use Storable qw(dclone);
 
@@ -1155,12 +1156,21 @@ sub bz_set_next_serial_value {
 # Schema Information Methods
 #####################################################################
 
+sub _bz_schema_class {
+  my ($self) = @_;
+  my $class = blessed($self) // $self;
+  my @class_parts = split(/::/, $class);
+  splice(@class_parts, -1, 0, 'Schema');
+
+  return join('::', @class_parts);
+}
+
 sub _bz_schema {
   my ($self) = @_;
   return $self->{private_bz_schema} if exists $self->{private_bz_schema};
-  my @module_parts = split('::', ref $self);
-  my $module_name  = pop @module_parts;
-  $self->{private_bz_schema} = Bugzilla::DB::Schema->new($module_name);
+  my $schema_class = $self->_bz_schema_class;
+  eval "require $schema_class";
+  $self->{private_bz_schema} = $schema_class->new();
   return $self->{private_bz_schema};
 }
 

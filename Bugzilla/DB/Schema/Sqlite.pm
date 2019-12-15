@@ -8,8 +8,7 @@
 package Bugzilla::DB::Schema::Sqlite;
 
 use 5.10.1;
-use strict;
-use warnings;
+use Moo;
 
 use base qw(Bugzilla::DB::Schema);
 
@@ -24,7 +23,7 @@ sub _initialize {
 
   my $self = shift;
 
-  $self = $self->SUPER::_initialize(@_);
+  $self = $self->SUPER::_initialize();
 
   $self->{db_specific} = {
     BOOLEAN => 'integer',

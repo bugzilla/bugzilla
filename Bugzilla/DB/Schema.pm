@@ -16,8 +16,7 @@ package Bugzilla::DB::Schema;
 ###########################################################################
 
 use 5.10.1;
-use strict;
-use warnings;
+use Moo;
 
 use Bugzilla::Error;
 use Bugzilla::Hook;
@@ -1751,33 +1750,29 @@ other modules should not invoke these methods directly.
 =cut
 
 #--------------------------------------------------------------------------
-sub new {
-
-=over
-
-=item C<new>
-
- Description: Public constructor method used to instantiate objects of this
-              class.
- Parameters:  $schema (optional) - A reference to a hash. Callers external
-                  to this package should never use this parameter.
- Returns:     new instance of the Schema class or a database-specific subclass
-
-=cut
-
-  my $this   = shift;
-  my $class  = ref($this) || $this;
+sub BUILD {
+  my $self   = shift;
+  my $class  = ref($self) || $self;
 
   die "$class is an abstract base class. Instantiate a subclass instead."
     if ($class eq __PACKAGE__);
 
-  my $self = {};
-  bless $self, $class;
-  $self = $self->_initialize(@_);
+  $self->_initialize();
+}    #eosub--BUILD
 
-  return ($self);
+# we declare attributes below, even though we access their slots directly.
+# This is because this code is evolving from the pre-Moo days of perl OO.
 
-}    #eosub--new
+# the init_arg begins with an underscore as this should only be passed in internally.
+# This should be a 'lazy' attribute, but to maintain the smallest diff we're
+# instead setting it in _initialize() if it isn't already passed in.
+has 'abstract_schema' => ( init_arg => '_abstract_schema', is => 'rw' );
+
+# this could also be lazy, but it is also set in _initialize()
+has 'schema' => (init_arg =>undef, is => 'rw');
+
+has 'db_specific' => (init_arg => undef, is => 'rw');
+
 
 #--------------------------------------------------------------------------
 sub _initialize {
@@ -1792,17 +1787,12 @@ sub _initialize {
               define the database-specific implementation of the all
               abstract data types), and then call the C<_adjust_schema>
               method.
- Parameters:  $abstract_schema (optional) - A reference to a hash. If 
-                  provided, this hash will be used as the internal
-                  representation of the abstract schema instead of our
-                  default abstract schema. This is intended for internal 
-                  use only by deserialize_abstract.
  Returns:     the instance of the Schema class
 
 =cut
 
   my $self            = shift;
-  my $abstract_schema = shift;
+  my $abstract_schema = $self->abstract_schema;
 
   if (!$abstract_schema) {
 
@@ -2970,7 +2960,7 @@ sub deserialize_abstract {
     }
   }
 
-  return $class->new($thawed_hash);
+  return $class->new(_abstract_schema => $thawed_hash);
 }
 
 #####################################################################

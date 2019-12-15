@@ -1180,7 +1180,7 @@ sub _bz_schema {
   return $self->{private_bz_schema} if exists $self->{private_bz_schema};
   my $schema_class = $self->_bz_schema_class;
   eval "require $schema_class";
-  $self->{private_bz_schema} = $schema_class->new();
+  $self->{private_bz_schema} = $schema_class->new(db => $self);
   return $self->{private_bz_schema};
 }
 

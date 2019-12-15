@@ -1773,6 +1773,8 @@ has 'schema' => (init_arg =>undef, is => 'rw');
 
 has 'db_specific' => (init_arg => undef, is => 'rw');
 
+has 'db' => (is => 'ro', weak_ref => 1, required => 1);
+
 
 #--------------------------------------------------------------------------
 sub _initialize {
@@ -2933,7 +2935,7 @@ sub serialize_abstract {
 =cut
 
 sub deserialize_abstract {
-  my ($class, $serialized, $version) = @_;
+  my ($self, $serialized, $version) = @_;
 
   my $thawed_hash;
   if ($version < 2) {
@@ -2947,7 +2949,7 @@ sub deserialize_abstract {
 
   # Version 2 didn't have the "created" key for REFERENCES items.
   if ($version < 3) {
-    my $standard = $class->new()->{abstract_schema};
+    my $standard = $self->new(db => $self->db)->{abstract_schema};
     foreach my $table_name (keys %$thawed_hash) {
       my %standard_fields = @{$standard->{$table_name}->{FIELDS} || []};
       my $table           = $thawed_hash->{$table_name};
@@ -2960,7 +2962,7 @@ sub deserialize_abstract {
     }
   }
 
-  return $class->new(_abstract_schema => $thawed_hash);
+  return $self->new(db => $self->db, _abstract_schema => $thawed_hash);
 }
 
 #####################################################################
@@ -2988,8 +2990,8 @@ object.
 =cut
 
 sub get_empty_schema {
-  my ($class) = @_;
-  return $class->deserialize_abstract(Dumper({}), SCHEMA_VERSION);
+  my ($self) = @_;
+  return $self->deserialize_abstract(Dumper({}), SCHEMA_VERSION);
 }
 
 1;

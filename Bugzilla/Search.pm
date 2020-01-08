@@ -936,7 +936,7 @@ sub _sql {
 
   # BMO allow fetching just the number of matching bugs
   if ($self->_params->{count_only}) {
-    $select   = 'COUNT(*) AS count';
+    $select   = 'COUNT(DISTINCT bugs.bug_id) AS count';
     $group_by = '';
     $order_by = '';
     $limit    = '';

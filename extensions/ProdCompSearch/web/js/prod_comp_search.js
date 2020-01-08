@@ -176,8 +176,8 @@ Bugzilla.FrequentComponents = class FrequentComponents {
       const links = (await this.fetch()).map(({ product, component }) => {
         const params = new URLSearchParams(current_params);
 
-        params.append('product', product);
-        params.append('component', component);
+        params.set('product', product);
+        params.set('component', component);
 
         return {
           href: `${BUGZILLA.config.basepath}enter_bug.cgi?${params.toString()}`,

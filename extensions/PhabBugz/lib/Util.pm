@@ -14,6 +14,7 @@ use warnings;
 use Bugzilla::Bug;
 use Bugzilla::Constants;
 use Bugzilla::Error;
+use Bugzilla::Logging;
 use Bugzilla::User;
 use Bugzilla::Types qw(:types);
 use Bugzilla::Util qw(trim);
@@ -93,7 +94,12 @@ sub create_revision_attachment {
 
   # Assign the bug to the submitter if it isn't already owned and
   # the revision has reviewers assigned to it.
-  if (!is_bug_assigned($bug) && @{$revision->reviews}) {
+  if (
+    !is_bug_assigned($bug)
+    && $revision->status ne 'abandoned'
+    && @{$revision->reviews}
+  ) {
+    INFO('Assigning bug ' . $bug->id . ' to ' . $submitter->email);
     $bug->set_assigned_to($submitter);
     $bug->set_bug_status('ASSIGNED') if $bug->status->name eq 'NEW';
   }

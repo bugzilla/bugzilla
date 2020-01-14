@@ -112,6 +112,10 @@ Vagrant.configure('2') do |config|
       v.vmx['numvcpus'] = DB_CPU
       v.linked_clone = false
     end
+
+    db.vm.provider "hyperv" do |hv|
+      db.vm.network "private_network", bridge: "VagrantNAT"
+    end
   end
 
   config.vm.define 'web', primary: true do |web|
@@ -147,6 +151,10 @@ Vagrant.configure('2') do |config|
     web.vm.provider 'vmware_fusion' do |v|
       v.vmx['memsize'] = WEB_MEM
       v.vmx['numvcpus'] = WEB_CPU
+    end
+
+    web.vm.provider "hyperv" do |hv|
+      web.vm.network "private_network", bridge: "VagrantNAT"
     end
   end
 end

@@ -76,61 +76,76 @@ Restart morbo and you should now be able to visit https://bmo-web.vm.
 Vagrant and Windows Hyper-Vagrant
 ---------------------------------
 
-Enable hyperv support in Windows 10
-
-- Right click on the Windows button and select ‘Apps and Features’.
-- Select Turn Windows Features on or off.
-- Select Hyper-V and click OK.
-- May need to reboot.
-
 Run PowerShell as Administrator
 
 - Press the Windows key.
 - Type `powershell` in the search field.
-- In the search results, select `Run as administrator`.
+- RIght click on the Powershell icon and choose `Run as administrator`.
+
+Enable hyperv support in Windows 10
+
+.. code-block:: powershell
+
+  Enable-WindowsOptionalFeature -Online -FeatureName Microsoft-Hyper-V -All
+
+- You may need to reboot to finish the installation.
 
 Create NAT Switch with IP address of 192.168.3.1/24
 
 .. code-block:: powershell
 
-  New-VMSwitch -SwitchName “VagrantSwitch” -SwitchType Internal
-  New-NetIPAddress -IPAddress 192.168.3.1 -PrefixLength 24 -InterfaceAlias “vEthernet (VagrantSwitch)”
-  New-NetNAT -Name “NATNetwork” -InternalIPInterfaceAddressPrefix 192.168.3.0/24
+  New-VMSwitch -SwitchName “VagrantNAT” -SwitchType Internal
+  New-NetIPAddress -IPAddress 192.168.3.1 -PrefixLength 24 -InterfaceAlias “vEthernet (VagrantNAT)”
+  New-NetNAT -Name “VagrantNAT” -InternalIPInterfaceAddressPrefix 192.168.3.0/24
 
-Install DHCP Servor for Windows
+Install DHCP Server for Windows
 
-- http://www.dhcpserver.de/cms/
-- Configure to serve IP addresses to the NAT Switch network above.
-- Set the IP range to be 100-254
+- http://www.dhcpserver.de/cms/download
+- Download and extract the latest version of DHCP Server.
+- Double-click  ``dhcpwiz.exe`` to start the configuration utility.
+- Select ``VagrantNAT`` that was created above as the network interface.
+- Click Next and Skip configuring File and Name Service protocols.
+- Set the IP-Pool range to be 100-254.
+- Select the Advanced button to configure extra settings.
+- Add ``8.8.8.8`` as a DNS Server.
+- Add ``192.168.3.1`` as a Gateway and Select OK.
+- Click Next.
+- Make sure Overwrite existing file is checked and click Write INI file.
+- Click Next and then Finish.
+- Double-click  ``dhcpsrv.exe`` to start the DHCP server.
+- Continue to run as a system tray appliction.
 
 Install Vagrant for Windows
 
-Install Git for Windows
+- Install version 2.2.6 or higher due to bugs in older versions.
+- https://www.vagrantup.com/downloads.html
 
-Set some environment variables to use for Vagrant
+Install Git for Windows if not already installed.
 
-.. code-block:: powershell
+- https://git-scm.com/download/win
 
-  [System.Environment]::SetEnvironmentVariable('HYPERV', '1')
-
-Update hosts file in Windows
+Update hosts file in Windows to allow accessing the webserver by hostname.
 
 - Press the Windows key.
 - Type `notepad` in the search field.
-- In the search results, select `Run as administrator`.
+- Right click the Notepad icon and choose `Run as administrator`.
 - From Notepad, open the following file: ``C:\Windows\System32\Drivers\etc\hosts``.
 - Add ``192.168.3.43 bmo-web.vm`` to the end of the file.
 - Select File > Save to save your changes.
 
-Git clone BMO repo ``git clone https://github.com/mozilla-bteam/bmo bmo``
+Still in Powershell as Administrator, set an environment variable to use for Vagrantfile.
+Then clone the BMO Github repo and start the Vagrant instances.
 
-.. code-block:: bash
+.. code-block:: powershell
 
+  [System.Environment]::SetEnvironmentVariable('HYPERV', '1')
+  git clone https://github.com/mozilla-bteam/bmo bmo
   cd bmo
   vagrant up --provider hyperv
 
-When requested (twice), select the NAT Switch that was created earlier. You will need to atart the mojo server to access BMO from the browser
+You will need to atart the mojo server to access BMO from the browser
 using ``vagrant ssh web -c 'start_morbo'``. In your browser go to: ``http://bmo-web.vm``.
+
 
 Making Changes and Seeing them
 ------------------------------

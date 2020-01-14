@@ -28,6 +28,24 @@
 - name: fix owner of /data
   file: path=/data state=directory owner=vagrant group=apache recurse=yes
 
+- name: Force Mojolicious (FIXME)
+  cpanm:
+    executable: /usr/local/bin/cpanm
+    locallib: /vagrant/local
+    name: https://cpan.metacpan.org/authors/id/S/SR/SRI/Mojolicious-8.23.tar.gz
+    notest: True
+
+- name: Update a few CPAN Modules (FIXME)
+  cpanm:
+    executable: /usr/local/bin/cpanm
+    locallib: /vagrant/local
+    name: "{{ item.name }}"
+    version: "{{ item.version }}"
+    notest: True
+  with_items:
+    - { name: 'Mojolicious::Plugin::OAuth2::Server', version: '0.44' }
+    - { name: 'Type::Tiny', version: '1.004004' }
+
 - name: run checksetup
   become: false
   shell: sg apache -c '/usr/local/bin/bmo-checksetup --no-templates'

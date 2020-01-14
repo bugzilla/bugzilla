@@ -93,14 +93,14 @@
         src: hyperv-static-ip-db.j2
         dest: /etc/sysconfig/network-scripts/ifcfg-eth0:0
         mode: 0644
-      when: HYPERV == 1
+      when: HYPERV == '1'
 
     - name: Restart network service for interface eth0:0
       service:
         name: network
         state: restarted
         args: eth0:0
-      when: HYPERV == 1
+      when: HYPERV == '1'
 
     - name: fetch ius-release.rpm
       get_url:
@@ -153,14 +153,14 @@
         src: hyperv-static-ip-web.j2
         dest: /etc/sysconfig/network-scripts/ifcfg-eth0:0
         mode: 0644
-      when: HYPERV == 1
+      when: HYPERV == '1'
 
     - name: Restart network service for interface eth0:0 (hyperv only)
       service:
         name: network
         state: restarted
         args: eth0:0
-      when: HYPERV == 1
+      when: HYPERV == '1'
 
     - name: install web-specific packages
       yum: name={{item}} state=present

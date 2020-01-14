@@ -874,7 +874,7 @@ sub db_schema_abstract_schema {
       },
 
       attachment_id => {
-        TYPE => 'INT3',
+        TYPE => 'INT5',
         REFERENCES =>
           {TABLE => 'attachments', COLUMN => 'attach_id', DELETE => 'CASCADE'}
       },

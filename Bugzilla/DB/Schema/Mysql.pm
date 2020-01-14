@@ -103,10 +103,12 @@ sub _initialize {
     INT2 => 'smallint',
     INT3 => 'mediumint',
     INT4 => 'integer',
+    INT5 => 'bigint(20)',
 
     SMALLSERIAL  => 'smallint auto_increment',
     MEDIUMSERIAL => 'mediumint auto_increment',
     INTSERIAL    => 'integer auto_increment',
+    BIGSERIAL    => 'bigint(20) auto_increment',
 
     TINYTEXT   => 'tinytext',
     MEDIUMTEXT => 'mediumtext',

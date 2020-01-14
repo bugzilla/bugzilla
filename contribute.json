@@ -18,13 +18,7 @@
     ],
     "participate": {
         "home": "https://wiki.mozilla.org/BMO",
-        "docs": "https://bmo.readthedocs.io",
-        "irc": "irc://irc.mozilla.org/#bmo",
-        "irc-contacts": [
-            "dkl",
-            "dylan",
-            "mcote"
-        ]
+        "docs": "https://bmo.readthedocs.io"
     },
     "bugs": {
         "list": "https://bugzilla.mozilla.org/buglist.cgi?bug_status=NEW&product=bugzilla.mozilla.org",

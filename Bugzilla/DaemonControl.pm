@@ -46,6 +46,7 @@ my $JOBQUEUE_BIN  = catfile($BUGZILLA_DIR, 'jobqueue.pl');
 my $CEREAL_BIN    = catfile($BUGZILLA_DIR, 'scripts', 'cereal.pl');
 my $BUGZILLA_BIN  = catfile($BUGZILLA_DIR, 'bugzilla.pl');
 my $HYPNOTOAD_BIN = catfile($BUGZILLA_DIR, 'local', 'bin', 'hypnotoad');
+my $MORBO_BIN     = catfile($BUGZILLA_DIR, 'scripts', 'start_morbo');
 my @PERL5LIB      = (
   $BUGZILLA_DIR,
   catdir($BUGZILLA_DIR, 'lib'),
@@ -55,6 +56,7 @@ my @PERL5LIB      = (
 my %HTTP_BACKENDS = (
   hypnotoad => [$HYPNOTOAD_BIN, $BUGZILLA_BIN, '-f'],
   simple    => [$BUGZILLA_BIN,  'daemon'],
+  morbo     => [$MORBO_BIN]
 );
 
 sub catch_signal {

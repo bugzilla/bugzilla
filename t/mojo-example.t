@@ -20,7 +20,7 @@ BEGIN {
 
 # this provides a default urlbase.
 # Most localconfig options the other Bugzilla::Test::Mock* modules take care for us.
-use Bugzilla::Test::MockLocalconfig (urlbase => 'http://bmo-web.vm');
+use Bugzilla::Test::MockLocalconfig (urlbase => 'http://bmo.test');
 
 # This configures an in-memory SQLite database.
 use Bugzilla::Test::MockDB;

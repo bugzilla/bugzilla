@@ -9,6 +9,8 @@ data
 localconfig
 pm_to_blib
 template_cache
+Vagrantfile
+vagrant_support
 \#*\#
 */\#*\#
 */*/\#*\#

@@ -1,4 +1,4 @@
-$answer{'ADMIN_EMAIL'}          = 'vagrant@bmo-web.vm';
+$answer{'ADMIN_EMAIL'}          = 'vagrant@bmo.test';
 $answer{'ADMIN_OK'}             = 'Y';
 $answer{'ADMIN_PASSWORD'}       = 'vagrant01!';
 $answer{'passwdqc_min'}         = '8, 8, 8, 8, 8';

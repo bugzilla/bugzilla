@@ -25,8 +25,8 @@ use Env qw(
 
 chdir $BUGZILLA_DIR;
 
-my $cert_file = catfile($BUGZILLA_DIR, 'bmo-web.vm.pem');
-my $key_file  = catfile($BUGZILLA_DIR, 'bmo-web.vm-key.pem');
+my $cert_file = catfile($BUGZILLA_DIR, 'bmo.test.pem');
+my $key_file  = catfile($BUGZILLA_DIR, 'bmo.test-key.pem');
 
 if ($MOJO_LISTEN && -f $cert_file && -f $key_file) {
   $MOJO_LISTEN .= ",https://*:443?cert=$cert_file&key=$key_file";

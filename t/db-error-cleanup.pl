@@ -17,7 +17,7 @@ BEGIN {
 
 END { unlink('data/db/db_errors') }
 
-use Bugzilla::Test::MockLocalconfig (urlbase => 'http://bmo-web.vm');
+use Bugzilla::Test::MockLocalconfig (urlbase => 'http://bmo.test');
 use Bugzilla::Test::MockDB;
 use Test2::V0;
 use Test2::Tools::Exception qw(dies lives);

@@ -52,13 +52,13 @@ jobs:
       - attach_workspace:
           at: /app/build_info
       - run: |
-          docker-compose -f docker-compose.test.yml run --name version_json --entrypoint true bmo-web.vm
+          docker-compose -f docker-compose.test.yml run --name version_json --entrypoint true bmo.test
           docker cp version_json:/app/version.json build_info/version.json
           docker rm version_json
       - run:
           name: build push data
           command: |
-            docker-compose -f docker-compose.test.yml run --name push_data bmo-web.vm push_data
+            docker-compose -f docker-compose.test.yml run --name push_data bmo.test push_data
             docker cp push_data:/app/build_info/blog.push.txt build_info/blog.push.txt
             docker cp push_data:/app/build_info/bug.push.txt build_info/bug.push.txt
             docker cp push_data:/app/build_info/email.push.txt build_info/email.push.txt
@@ -151,7 +151,7 @@ jobs:
           name: run sanity tests
           command: |
             [[ -f build_info/only_version_changed.txt ]] && exit 0
-            docker-compose -f docker-compose.test.yml run --no-deps bmo-web.vm \
+            docker-compose -f docker-compose.test.yml run --no-deps bmo.test \
               test_sanity $(circleci tests glob 't/*.t' 'extensions/*/t/*.t' | \
               circleci tests split) | tee artifacts/$CIRCLE_JOB.txt
       - store_artifacts:
@@ -174,7 +174,7 @@ jobs:
           at: /app/build_info
       - run: |
           [[ -f build_info/only_version_changed.txt ]] && exit 0
-          docker-compose -f docker-compose.test.yml run bmo-web.vm test_webservices | \
+          docker-compose -f docker-compose.test.yml run bmo.test test_webservices | \
             tee artifacts/$CIRCLE_JOB.txt
       - store_artifacts:
           path: /app/artifacts
@@ -196,7 +196,7 @@ jobs:
           at: /app/build_info
       - run: |
           [[ -f build_info/only_version_changed.txt ]] && exit 0
-          docker-compose -f docker-compose.test.yml run bmo-web.vm test_selenium | \
+          docker-compose -f docker-compose.test.yml run bmo.test test_selenium | \
             tee artifacts/$CIRCLE_JOB.txt
       - store_artifacts:
           path: /app/artifacts
@@ -218,7 +218,7 @@ jobs:
           at: /app/build_info
       - run: |
           [[ -f build_info/only_version_changed.txt ]] && exit 0
-          docker-compose -f docker-compose.test.yml run bmo-web.vm test_bmo -q -f t/bmo/*.t
+          docker-compose -f docker-compose.test.yml run bmo.test test_bmo -q -f t/bmo/*.t
       - *store_log
 
 workflows:

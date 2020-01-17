@@ -58,20 +58,20 @@ If this fails, please file a bug `using this link <https://bugzilla.mozilla.org/
 
 Otherwise, you should have a working BMO developer machine!
 
-To test it, you'll want to add an entry to /etc/hosts for bmo-web.vm pointing
+To test it, you'll want to add an entry to /etc/hosts for bmo.test pointing
 to 192.168.3.43.
 
 Then you must start the development webserver with ``vagrant ssh web -c 'start_morbo'``.
 
-After that, you should be able to visit http://bmo-web.vm/ from your browser.
-You can login as vagrant@bmo-web.vm with the password "vagrant01!" (without
+After that, you should be able to visit http://bmo.test/ from your browser.
+You can login as vagrant@bmo.test with the password "vagrant01!" (without
 quotes).
 
 The development server (morbo) can also serve the site via HTTPS.
 
 Run `vagrant ssh web`, that should put you in the `/vagrant` directory.
-While there run `openssl req -newkey rsa:2048 -sha256 -nodes -keyout bmo-web.vm-key.pem -x509 -days 365 -out bmo-web.vm.pem`.
-Restart morbo and you should now be able to visit https://bmo-web.vm.
+While there run `openssl req -newkey rsa:2048 -sha256 -nodes -keyout bmo.test-key.pem -x509 -days 365 -out bmo.test.pem`.
+Restart morbo and you should now be able to visit https://bmo.test.
 
 Vagrant and Windows Hyper-Vagrant
 ---------------------------------
@@ -130,7 +130,7 @@ Update hosts file in Windows to allow accessing the webserver by hostname.
 - Type `notepad` in the search field.
 - Right click the Notepad icon and choose `Run as administrator`.
 - From Notepad, open the following file: ``C:\Windows\System32\Drivers\etc\hosts``.
-- Add ``192.168.3.43 bmo-web.vm`` to the end of the file.
+- Add ``192.168.3.43 bmo.test`` to the end of the file.
 - Select File > Save to save your changes.
 
 Still in Powershell as Administrator, set an environment variable to use for Vagrantfile.
@@ -278,8 +278,8 @@ The procedure should be similar for other browsers.
 
 .. _`Firefox Connection Settings`: https://support.mozilla.org/en-US/kb/connection-settings-firefox
 
-After that, you should be able to visit http://bmo-web.vm/ from your browser.
-You can login as vagrant@bmo-web.vm with the password "vagrant01!" (without
+After that, you should be able to visit http://bmo.test/ from your browser.
+You can login as vagrant@bmo.test with the password "vagrant01!" (without
 quotes).
 
 Ensuring your Docker setup on Ubuntu 16.04
@@ -531,7 +531,7 @@ Testing Emails
 --------------
 
 With vagrant have two options to test emails sent by a local Bugzilla instance. You can configure
-which setting you want to use by going to http://bmo-web.vm/editparams.cgi?section=mta and
+which setting you want to use by going to http://bmo.test/editparams.cgi?section=mta and
 changing the mail_delivery_method to either 'Test' or 'Sendmail'. Afterwards restart BMO with
 ``vagrant reload``. With docker, only the default 'Test' option is supported.
 
@@ -540,17 +540,17 @@ changing the mail_delivery_method to either 'Test' or 'Sendmail'. Afterwards res
 
 With this option, all mail will be appended to a ``mailer.testfile``.
 
-- Using docker, run ``docker-compose run bmo-web.vm cat /app/data/mailer.testfile``.
+- Using docker, run ``docker-compose run bmo.test cat /app/data/mailer.testfile``.
 - Using vagrant, run ``vagrant ssh web`` and then navigate to ``/vagrant/data/mailer.testfile``.
 
 'Sendmail' option (Default for Vagrant)
 ---------------------------------------
 
 This option is useful if you want to preview email using a real mail client.
-An imap server is running on bmo-web.vm on port 143 and you can connect to it with
+An imap server is running on bmo.test on port 143 and you can connect to it with
 the following settings:
 
-- host: bmo-web.vm
+- host: bmo.test
 - port: 143
 - encryption: No SSL, Plaintext password
 - username: vagrant
@@ -561,10 +561,10 @@ multiple imap accounts.
 
 `Thunderbird's`_ wizard to add a new "Existing Mail Account" doesn't work with bmo-web. It
 fails because it wants to create a mail account with both incoming mail (IMAP) and outgoing
-mail (SMTP, which bmo-web.vm doesn't provide). To work around this, using a regular email
+mail (SMTP, which bmo.test doesn't provide). To work around this, using a regular email
 account to first setup, then modify the settings of that account: Right Click the account in
 the left side bar > Settings > Server Settings. Update the server settings to match those
-listed above. Afterwards, you may update the account name to be vagrant@bmo-web.vm. Thunderbird
+listed above. Afterwards, you may update the account name to be vagrant@bmo.test. Thunderbird
 will now pull email from BMO. You can try it out by commenting on a bug.
 
 .. _`Thunderbird's`: https://www.mozilla.org/en-US/thunderbird/

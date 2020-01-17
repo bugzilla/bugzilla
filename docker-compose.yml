@@ -2,39 +2,41 @@
 # License, v. 2.0. If a copy of the MPL was not distributed with this
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
-version: '2'
+version: '3.4'
 
 services:
-  bmo-web.vm:
+  bmo.test:
     build: &bmo_build
       context: .
       dockerfile: Dockerfile
     command: dev_httpd
     volumes:
       - bmo-data-dir:/app/data
+      - .:/mnt/sync
     tmpfs:
       - /tmp
       - /run
     environment: &bmo_env
-      - LOCALCONFIG_ENV=1
-      - LOG4PERL_CONFIG_FILE=log4perl-docker.conf
-      - BUGZILLA_ALLOW_INSECURE_HTTP=1
-      - HTTP_BACKEND=simple
-      - PORT=80
-      - BMO_db_host=bmo-db.vm
+      - 'BMO_inbound_proxies=*'
+      - BMO_db_host=bmo.db
       - BMO_db_name=bugs
-      - BMO_db_user=bugs
       - BMO_db_pass=bugs
-      - BMO_urlbase=http://bmo-web.vm/
+      - BMO_db_user=bugs
       - BMO_memcached_namespace=bugzilla
       - BMO_memcached_servers=memcached:11211
-      - 'BMO_inbound_proxies=*'
+      - BMO_urlbase=http://bmo.test/
+      - BUGZILLA_ALLOW_INSECURE_HTTP=1
       - BZ_ANSWERS_FILE=/app/conf/checksetup_answers.txt
+      - HTTP_BACKEND=morbo
+      - LOCALCONFIG_ENV=1
+      - LOG4PERL_CONFIG_FILE=log4perl-docker.conf
+      - MOJO_LISTEN=http://*:80
+      - PORT=80
     depends_on:
-      - bmo-db.vm
+      - bmo.db
       - memcached
 
-  bmo-jobqueue.vm:
+  bmo.jobqueue:
     build: *bmo_build
     command: jobqueue
     volumes:
@@ -45,13 +47,52 @@ services:
     environment: *bmo_env
     restart: always
     depends_on:
-      - bmo-db.vm
+      - bmo.db
       - memcached
 
-  bmo-db.vm:
-    image: mozillabteam/bmo-mysql:5.7
+  bmo.feed:
+    build: *bmo_build
+    command:
+      - perl
+      - extensions/PhabBugz/bin/phabbugz_feed.pl
+      - start
+      - '-d'
+      - '-f'
+    volumes:
+      - bmo-data-dir:/app/data
+    tmpfs:
+      - /tmp
+      - /run
+    environment: *bmo_env
+    restart: always
+    depends_on:
+      - bmo.db
+      - memcached
+
+  bmo.pushd:
+    build: *bmo_build
+    command:
+      - perl
+      - extensions/Push/bin/bugzilla-pushd.pl
+      - start
+      - '-d'
+      - '-f'
+    volumes:
+      - bmo-data-dir:/app/data
+    tmpfs:
+      - /tmp
+      - /run
+    environment: *bmo_env
+    restart: always
+    depends_on:
+      - bmo.db
+      - memcached
+
+  bmo.db:
+    image: mysql:5.7
     volumes:
       - bmo-mysql-db:/var/lib/mysql
+      - ./docker/mysql:/etc/mysql/conf.d
     logging:
       driver: "none"
     environment:
@@ -64,9 +105,11 @@ services:
     image: memcached:latest
 
   tinyproxy:
-    image: mozillabteam/tinyproxy
+    build:
+      context: docker/tinyproxy
+      dockerfile: ./Dockerfile
     ports:
-      - "1091:1090"
+      - "1080:1080"
 
 volumes:
   bmo-mysql-db:

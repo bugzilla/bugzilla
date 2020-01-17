@@ -12,7 +12,7 @@ use warnings;
 use Mojolicious::Lite;
 use Digest::SHA qw(sha256_hex);
 
-my $BUGZILLA_URL = $ENV{AUTH_TEST_BUGZILLA_URL} // 'http://bmo-web.vm/auth.cgi';
+my $BUGZILLA_URL = $ENV{AUTH_TEST_BUGZILLA_URL} // 'http://bmo.test/auth.cgi';
 my $APP_DESC     = $ENV{AUTH_TEST_APP_DESC} // 'AuthTest';
 my %SECRETS;
 

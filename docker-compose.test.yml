@@ -5,7 +5,7 @@
 version: '3'
 
 services:
-  bmo-web.vm:
+  bmo.test:
     image: bmo
     command: dev_httpd
     tmpfs:
@@ -13,7 +13,7 @@ services:
       - /run
     environment:
       - 'BMO_inbound_proxies=*'
-      - BMO_db_host=bmo-db.vm
+      - BMO_db_host=bmo.db
       - BMO_db_name=bugs
       - BMO_db_pass=bugs
       - BMO_db_user=bugs
@@ -36,11 +36,11 @@ services:
       - TWD_HOST=selenium
       - TWD_PORT=4444
     depends_on:
-      - bmo-db.vm
+      - bmo.db
       - memcached
       - selenium
 
-  bmo-db.vm:
+  bmo.db:
     image: mozillabteam/bmo-mysql:5.7
     logging:
       driver: "none"

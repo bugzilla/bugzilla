@@ -356,7 +356,7 @@ WARNING: We are about to convert your table storage format to UTF-8. This
          it ***WILL BE DELETED*** by this process. So, before
          you continue with checksetup.pl, if you have any non-UTF-8
          data (or even if you're not sure) you should press Ctrl-C now
-         to interrupt checksetup.pl, and run contrib/recode.pl to make all
+         to interrupt checksetup.pl, and run contrib/recode.pl to convert 
          the data in your database into UTF-8. You should also back up your
          database before continuing. This will affect every single table
          in the database, even non-Bugzilla tables.

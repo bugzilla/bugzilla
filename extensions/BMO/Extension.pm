@@ -50,7 +50,7 @@ use Bugzilla::Util;
 use Date::Parse;
 use DateTime;
 use Email::MIME::ContentType qw(parse_content_type);
-use Encode qw(find_encoding encode_utf8);
+use Encode qw(find_encoding encode_utf8 decode);
 use File::MimeInfo::Magic;
 use List::MoreUtils qw(natatime any last_value);
 use List::Util qw(first);
@@ -1771,6 +1771,11 @@ sub _inject_headers_into_body {
     my $it = natatime(2, $email->header_pairs);
     while (my ($name, $value) = $it->()) {
       next unless $name =~ /^X-Bugzilla-(.+)/;
+
+      # Remove special encoding since these values
+      # will become part of the email body itself.
+      $value = decode('MIME-Q', $value);
+
       if ($name eq 'X-Bugzilla-Flags' || $name eq 'X-Bugzilla-Changed-Field-Names') {
 
         # these are multi-value fields, split on space

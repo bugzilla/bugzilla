@@ -24,6 +24,7 @@ use Bugzilla::Install::Localconfig;
 use Bugzilla::Util;
 use Bugzilla::Error;
 use Bugzilla::DB::Schema;
+use Bugzilla::DB::QuoteIdentifier;
 use Bugzilla::Version;
 
 use Scalar::Util qw(blessed);
@@ -32,6 +33,15 @@ use Storable qw(dclone);
 
 has [qw(dsn user pass attrs)] => (is => 'ro', required => 1,);
 
+has 'qi' => (is => 'lazy');
+
+sub _build_qi {
+  my ($self) = @_;
+  my %q;
+  tie %q, 'Bugzilla::DB::QuoteIdentifier', db => $self;
+
+  return \%q;
+}
 
 # Install proxy methods to the DBI object.
 # We can't use handles() as DBIx::Connector->dbh has to be called each

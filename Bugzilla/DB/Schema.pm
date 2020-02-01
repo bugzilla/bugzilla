@@ -1758,13 +1758,8 @@ sub new {
 =item C<new>
 
  Description: Public constructor method used to instantiate objects of this
-              class. However, it also can be used as a factory method to
-              instantiate database-specific subclasses when an optional
-              driver argument is supplied.
- Parameters:  $driver (optional) - Used to specify the type of database.
-              This routine C<die>s if no subclass is found for the specified
-              driver.
-              $schema (optional) - A reference to a hash. Callers external
+              class.
+ Parameters:  $schema (optional) - A reference to a hash. Callers external
                   to this package should never use this parameter.
  Returns:     new instance of the Schema class or a database-specific subclass
 
@@ -1772,15 +1767,7 @@ sub new {
 
   my $this   = shift;
   my $class  = ref($this) || $this;
-  my $driver = shift;
 
-  if ($driver) {
-    (my $subclass = $driver) =~ s/^(\S)/\U$1/;
-    $class .= '::' . $subclass;
-    eval "require $class;";
-    die "The $class class could not be found ($subclass " . "not supported?): $@"
-      if ($@);
-  }
   die "$class is an abstract base class. Instantiate a subclass instead."
     if ($class eq __PACKAGE__);
 
@@ -2983,7 +2970,7 @@ sub deserialize_abstract {
     }
   }
 
-  return $class->new(undef, $thawed_hash);
+  return $class->new($thawed_hash);
 }
 
 #####################################################################

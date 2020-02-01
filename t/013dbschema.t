@@ -58,7 +58,8 @@ our $schema;
 our @tables;
 
 BEGIN {
-  $schema = Bugzilla::DB::Schema::Mysql->new;
+  our $fake_db = bless {}, 'Bugzilla::DB';
+  $schema = Bugzilla::DB::Schema::Mysql->new(db => $fake_db);
   @tables = $schema->get_table_list();
 }
 

@@ -14,12 +14,11 @@ package Bugzilla::DB::Schema::Mysql;
 ###############################################################################
 
 use 5.10.1;
-use strict;
-use warnings;
+use Moo;
 
 use Bugzilla::Error;
 
-use base qw(Bugzilla::DB::Schema);
+extends qw(Bugzilla::DB::Schema);
 
 # This is for column_info_to_column, to know when a tinyint is a
 # boolean and when it's really a tinyint. This only has to be accurate
@@ -90,7 +89,7 @@ sub _initialize {
 
   my $self = shift;
 
-  $self = $self->SUPER::_initialize(@_);
+  $self = $self->SUPER::_initialize();
 
   $self->{db_specific} = {
 

@@ -10,11 +10,7 @@ package Bugzilla::DB::QuoteIdentifier;
 use 5.10.1;
 use Moo;
 
-has 'db' => (
-  is       => 'ro',
-  weak_ref => 1,
-  required => 1,
-);
+has 'db' => (is => 'ro', weak_ref => 1, required => 1,);
 
 sub TIEHASH {
   my ($class, @args) = @_;
@@ -37,11 +33,11 @@ sub FIRSTVALUE {
 }
 
 sub EXISTS {
-  return 1
+  return 1;
 }
 
 sub DELETE {
-  return 1
+  return 1;
 }
 
 1;

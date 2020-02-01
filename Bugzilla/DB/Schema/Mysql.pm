@@ -145,11 +145,12 @@ sub _get_create_index_ddl {
 
   my ($self, $table_name, $index_name, $index_fields, $index_type) = @_;
 
+  my $q = $self->db->qi;
   my $sql = "CREATE ";
   $sql .= "$index_type "
     if ($index_type eq 'UNIQUE' || $index_type eq 'FULLTEXT');
-  $sql .= "INDEX \`$index_name\` ON $table_name \("
-    . join(", ", @$index_fields) . "\)";
+  $sql .= "INDEX $q->{$index_name} ON $q->{$table_name} \("
+    . join(", ", map { $q->{$_} } @$index_fields) . "\)";
 
   return ($sql);
 
@@ -180,11 +181,12 @@ sub get_alter_column_ddl {
     delete $new_def_copy{PRIMARYKEY};
   }
 
+  my $q = $self->db->qi;
   my @statements;
 
   push(
-    @statements, "UPDATE $table SET $column = $set_nulls_to
-                        WHERE $column IS NULL"
+    @statements, "UPDATE $q->{$table} SET $q->{$column} = $set_nulls_to
+                        WHERE $q->{$column} IS NULL"
   ) if defined $set_nulls_to;
 
   # Calling SET DEFAULT or DROP DEFAULT is *way* faster than calling
@@ -197,11 +199,11 @@ sub get_alter_column_ddl {
     && $self->columns_equal(\%new_defaultless, \%old_defaultless))
   {
     if (!defined $new_def->{DEFAULT}) {
-      push(@statements, "ALTER TABLE $table ALTER COLUMN $column DROP DEFAULT");
+      push(@statements, "ALTER TABLE $q->{$table} ALTER COLUMN $q->{$column} DROP DEFAULT");
     }
     else {
       push(
-        @statements, "ALTER TABLE $table ALTER COLUMN $column
+        @statements, "ALTER TABLE $q->{$table} ALTER COLUMN $q->{$column}
                                SET DEFAULT " . $new_def->{DEFAULT}
       );
     }
@@ -209,15 +211,15 @@ sub get_alter_column_ddl {
   else {
     my $new_ddl = $self->get_type_ddl(\%new_def_copy);
     push(
-      @statements, "ALTER TABLE $table CHANGE COLUMN 
-                       $column $column $new_ddl"
+      @statements, "ALTER TABLE $q->{$table} CHANGE COLUMN 
+                       $q->{$column} $q->{$column} $new_ddl"
     );
   }
 
   if ($old_def->{PRIMARYKEY} && !$new_def->{PRIMARYKEY}) {
 
     # Dropping a PRIMARY KEY needs an explicit DROP PRIMARY KEY
-    push(@statements, "ALTER TABLE $table DROP PRIMARY KEY");
+    push(@statements, "ALTER TABLE $q->{$table} DROP PRIMARY KEY");
   }
 
   return @statements;
@@ -226,7 +228,8 @@ sub get_alter_column_ddl {
 sub get_drop_fk_sql {
   my ($self, $table, $column, $references) = @_;
   my $fk_name = $self->_get_fk_name($table, $column, $references);
-  my @sql     = ("ALTER TABLE $table DROP FOREIGN KEY $fk_name");
+  my $q       = $self->db->qi;
+  my @sql     = ("ALTER TABLE $a->{$table} DROP FOREIGN KEY $fk_name");
   my $dbh     = Bugzilla->dbh;
 
   # MySQL requires, and will create, an index on any column with
@@ -241,7 +244,8 @@ sub get_drop_fk_sql {
 
 sub get_drop_index_ddl {
   my ($self, $table, $name) = @_;
-  return ("DROP INDEX \`$name\` ON $table");
+  my $q = $self->db->qi;
+  return ("DROP INDEX $q->{$name} ON $q->{$table}");
 }
 
 # A special function for MySQL, for renaming a lot of indexes.
@@ -254,18 +258,16 @@ sub get_rename_indexes_ddl {
   my ($self, $table, %indexes) = @_;
   my @keys = keys %indexes or return ();
 
-  my $sql = "ALTER TABLE $table ";
+  my $q = $self->db->qi;
+  my $sql = "ALTER TABLE $q->{$table} ";
 
   foreach my $old_name (@keys) {
     my $name = $indexes{$old_name}->{NAME};
     my $type = $indexes{$old_name}->{TYPE};
     $type ||= 'INDEX';
-    my $fields = join(',', @{$indexes{$old_name}->{FIELDS}});
+    my $fields = join(',', map { $q->{$_} } @{$indexes{$old_name}->{FIELDS}});
 
-    # $old_name needs to be escaped, sometimes, because it was
-    # a reserved word.
-    $old_name = '`' . $old_name . '`';
-    $sql .= " ADD $type $name ($fields), DROP INDEX $old_name,";
+    $sql .= " ADD $type $q->{$name} ($fields), DROP INDEX $q->{$old_name},";
   }
 
   # Remove the last comma.
@@ -275,7 +277,9 @@ sub get_rename_indexes_ddl {
 
 sub get_set_serial_sql {
   my ($self, $table, $column, $value) = @_;
-  return ("ALTER TABLE $table AUTO_INCREMENT = $value");
+  
+  my $q = $self->db->qi;
+  return ("ALTER TABLE $q->{$table} AUTO_INCREMENT = $value");
 }
 
 # Converts a DBI column_info output to an abstract column definition.
@@ -413,7 +417,9 @@ sub get_rename_column_ddl {
 
   # MySQL doesn't like having the PRIMARY KEY statement in a rename.
   $def =~ s/PRIMARY KEY//i;
-  return ("ALTER TABLE $table CHANGE COLUMN $old_name $new_name $def");
+
+  my $q = $self->db->qi;
+  return ("ALTER TABLE $q->{$table} CHANGE COLUMN $q->{$old_name} $q->{$new_name} $def");
 }
 
 1;

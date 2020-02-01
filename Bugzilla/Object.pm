@@ -104,7 +104,8 @@ sub _load_from_db {
   my $class      = shift;
   my ($param)    = @_;
   my $dbh        = Bugzilla->dbh;
-  my $columns    = join(',', $class->_get_db_columns);
+  my $q          = $dbh->qi;
+  my $columns    = $dbh->quote_columns($class->_get_db_columns);
   my $table      = $class->DB_TABLE;
   my $name_field = $class->NAME_FIELD;
   my $id_field   = $class->ID_FIELD;
@@ -128,7 +129,7 @@ sub _load_from_db {
 
     $object_data = $dbh->selectrow_hashref(
       qq{
-            SELECT $columns FROM $table
+            SELECT $columns FROM $q->{$table}
              WHERE $id_field = ?}, undef, $id
     );
   }
@@ -159,7 +160,8 @@ sub _load_from_db {
 
     map { trick_taint($_) } @values;
     $object_data
-      = $dbh->selectrow_hashref("SELECT $columns FROM $table WHERE $condition",
+      = $dbh->selectrow_hashref(
+      "SELECT $columns FROM $q->{$table} WHERE $condition",
       undef, @values);
   }
   return $object_data;
@@ -374,7 +376,9 @@ sub match {
 sub _do_list_select {
   my ($class, $where, $values, $postamble) = @_;
   my $table = $class->DB_TABLE;
-  my $cols  = join(',', $class->_get_db_columns);
+  my $dbh   = Bugzilla->dbh;
+  my $q     = $dbh->qi;
+  my $cols  = $dbh->quote_columns($class->_get_db_columns);
   my $order = $class->LIST_ORDER;
 
   # Unconditional requests for configuration data are cacheable.
@@ -386,14 +390,12 @@ sub _do_list_select {
   }
 
   if (!$objects) {
-    my $sql = "SELECT $cols FROM $table";
+    my $sql = "SELECT $cols FROM $q->{$table}";
     if (defined $where) {
       $sql .= " WHERE $where ";
     }
     $sql .= " ORDER BY $order";
     $sql .= " $postamble" if $postamble;
-
-    my $dbh = Bugzilla->dbh;
 
     # Sometimes the values are tainted, but we don't want to untaint them
     # for the caller. So we copy the array. It's safe to untaint because
@@ -531,7 +533,8 @@ sub update {
     $changes{$column} = [$old, $self->{$column}];
   }
 
-  my $columns = join(', ', map {"$_ = ?"} @update_columns);
+  my $columns
+    = join(', ', map { $dbh->quote_identifier($_) . " = ?" } @update_columns);
 
   $dbh->do("UPDATE $table SET $columns WHERE $id_field = ?",
     undef, @values, $self->id)
@@ -732,6 +735,7 @@ sub run_create_validators {
 sub insert_create_data {
   my ($class, $field_values) = @_;
   my $dbh = Bugzilla->dbh;
+  my $q   = $dbh->qi;
 
   my (@field_names, @values);
   while (my ($field, $value) = each %$field_values) {
@@ -744,8 +748,11 @@ sub insert_create_data {
   chop($qmarks);
   my $table = $class->DB_TABLE;
   $dbh->do(
-    "INSERT INTO $table (" . join(', ', @field_names) . ") VALUES ($qmarks)",
-    undef, @values);
+    "INSERT INTO $q->{$table} ("
+      . $dbh->quote_columns(@field_names)
+      . ") VALUES ($qmarks)",
+    undef, @values
+  );
   my $id = $dbh->bz_last_key($table, $class->ID_FIELD);
 
   my $object = $class->new($id);

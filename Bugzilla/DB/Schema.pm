@@ -1973,10 +1973,10 @@ is undefined.
   my $to_table  = $references->{TABLE}  || confess "No table in reference";
   my $to_column = $references->{COLUMN} || confess "No column in reference";
   my $fk_name = $self->_get_fk_name($table, $column, $references);
-
+  my $q = $self->db->qi;
   return
-      "\n     CONSTRAINT $fk_name FOREIGN KEY ($column)\n"
-    . "     REFERENCES $to_table($to_column)\n"
+      "\n     CONSTRAINT $fk_name FOREIGN KEY ($q->{$column})\n"
+    . "     REFERENCES $q->{$to_table}($q->{$to_column})\n"
     . "      ON UPDATE $update ON DELETE $delete";
 }
 
@@ -2010,14 +2010,15 @@ sub get_add_fks_sql {
 
   my @add = $self->_column_fks_to_ddl($table, $column_fks);
 
+  my $q = $self->db->qi;
   my @sql;
   if ($self->MULTIPLE_FKS_IN_ALTER) {
-    my $alter = "ALTER TABLE $table ADD " . join(', ADD ', @add);
+    my $alter = "ALTER TABLE $q->{$table} ADD " . join(', ADD ', @add);
     push(@sql, $alter);
   }
   else {
     foreach my $fk_string (@add) {
-      push(@sql, "ALTER TABLE $table ADD $fk_string");
+      push(@sql, "ALTER TABLE $q->{$table} ADD $fk_string");
     }
   }
   return @sql;
@@ -2038,7 +2039,8 @@ sub get_drop_fk_sql {
   my ($self, $table, $column, $references) = @_;
   my $fk_name = $self->_get_fk_name($table, $column, $references);
 
-  return ("ALTER TABLE $table DROP CONSTRAINT $fk_name");
+  my $q = $self->db->qi;
+  return ("ALTER TABLE $q->{$table} DROP CONSTRAINT $fk_name");
 }
 
 sub convert_type {
@@ -2132,7 +2134,8 @@ sub get_table_indexes_abstract {
 
 sub get_create_database_sql {
   my ($self, $name) = @_;
-  return ("CREATE DATABASE $name");
+  my $q = $self->db->qi;
+  return ("CREATE DATABASE $q->{$name}");
 }
 
 sub get_table_ddl {
@@ -2191,10 +2194,11 @@ sub _get_create_table_ddl {
 
   my (@col_lines, @fk_lines);
   my @fields = @{$thash->{FIELDS}};
+  my $q = $self->db->qi;
   while (@fields) {
     my $field = shift(@fields);
     my $finfo = shift(@fields);
-    push(@col_lines, "\t$field\t" . $self->get_type_ddl($finfo));
+    push(@col_lines, "\t$q->{$field}\t" . $self->get_type_ddl($finfo));
     if ($self->FK_ON_CREATE and $finfo->{REFERENCES}) {
       my $fk     = $finfo->{REFERENCES};
       my $fk_ddl = $self->get_fk_ddl($table, $field, $fk);
@@ -2203,7 +2207,7 @@ sub _get_create_table_ddl {
   }
 
   my $sql
-    = "CREATE TABLE $table (\n" . join(",\n", @col_lines, @fk_lines) . "\n)";
+    = "CREATE TABLE $q->{$table} (\n" . join(",\n", @col_lines, @fk_lines) . "\n)";
   return $sql;
 
 }
@@ -2224,10 +2228,11 @@ sub _get_create_index_ddl {
 
   my ($self, $table_name, $index_name, $index_fields, $index_type) = @_;
 
+  my $q = $self->db->qi;
   my $sql = "CREATE ";
   $sql .= "$index_type " if ($index_type && $index_type eq 'UNIQUE');
   $sql
-    .= "INDEX $index_name ON $table_name \(" . join(", ", @$index_fields) . "\)";
+    .= "INDEX $q->{$index_name} ON $q->{$table_name} \(" . join(", ", map { $q->{$_} } @$index_fields) . "\)";
 
   return ($sql);
 
@@ -2253,15 +2258,16 @@ sub get_add_column_ddl {
 
   my ($self, $table, $column, $definition, $init_value) = @_;
   my @statements;
+  my $q = $self->db->qi;
   push(@statements,
-        "ALTER TABLE $table "
+        "ALTER TABLE $q->{$table} "
       . $self->ADD_COLUMN
-      . " $column "
+      . " $q->{$column} "
       . $self->get_type_ddl($definition));
 
   # XXX - Note that although this works for MySQL, most databases will fail
   # before this point, if we haven't set a default.
-  (push(@statements, "UPDATE $table SET $column = $init_value"))
+  (push(@statements, "UPDATE $q->{$table} SET $q->{$column} = $init_value"))
     if defined $init_value;
 
   if (defined $definition->{REFERENCES}) {
@@ -2329,6 +2335,7 @@ sub get_alter_column_ddl {
 
   my $self = shift;
   my ($table, $column, $new_def, $set_nulls_to) = @_;
+  my $q = $self->db->qi;
 
   my @statements;
   my $old_def  = $self->get_column_abstract($table, $column);
@@ -2355,7 +2362,7 @@ sub get_alter_column_ddl {
 
   # If we went from having a default to not having one
   elsif (!defined $default && defined $default_old) {
-    push(@statements, "ALTER TABLE $table ALTER COLUMN $column" . " DROP DEFAULT");
+    push(@statements, "ALTER TABLE $q->{$table} ALTER COLUMN $q->{$column}" . " DROP DEFAULT");
   }
 
   # If we went from no default to a default, or we changed the default.
@@ -2363,28 +2370,28 @@ sub get_alter_column_ddl {
     || ($default ne $default_old))
   {
     push(@statements,
-      "ALTER TABLE $table ALTER COLUMN $column " . " SET DEFAULT $default");
+      "ALTER TABLE $q->{$table} ALTER COLUMN $q->{$column} " . " SET DEFAULT $default");
   }
 
   # If we went from NULL to NOT NULL.
   if (!$old_def->{NOTNULL} && $new_def->{NOTNULL}) {
     push(@statements, $self->_set_nulls_sql(@_));
-    push(@statements, "ALTER TABLE $table ALTER COLUMN $column" . " SET NOT NULL");
+    push(@statements, "ALTER TABLE $q->{$table} ALTER COLUMN $q->{$column}" . " SET NOT NULL");
   }
 
   # If we went from NOT NULL to NULL
   elsif ($old_def->{NOTNULL} && !$new_def->{NOTNULL}) {
-    push(@statements, "ALTER TABLE $table ALTER COLUMN $column" . " DROP NOT NULL");
+    push(@statements, "ALTER TABLE $q->{$table} ALTER COLUMN $q->{$column}" . " DROP NOT NULL");
   }
 
   # If we went from not being a PRIMARY KEY to being a PRIMARY KEY.
   if (!$old_def->{PRIMARYKEY} && $new_def->{PRIMARYKEY}) {
-    push(@statements, "ALTER TABLE $table ADD PRIMARY KEY ($column)");
+    push(@statements, "ALTER TABLE $q->{$table} ADD PRIMARY KEY ($q->{$column})");
   }
 
   # If we went from being a PK to not being a PK
   elsif ($old_def->{PRIMARYKEY} && !$new_def->{PRIMARYKEY}) {
-    push(@statements, "ALTER TABLE $table DROP PRIMARY KEY");
+    push(@statements, "ALTER TABLE $q->{$table} DROP PRIMARY KEY");
   }
 
   return @statements;
@@ -2395,6 +2402,7 @@ sub get_alter_column_ddl {
 sub _set_nulls_sql {
   my ($self, $table, $column, $new_def, $set_nulls_to) = @_;
   my $default = $new_def->{DEFAULT};
+  my $q = $self->db->qi;
 
   # If we have a set_nulls_to, that overrides the DEFAULT
   # (although nobody would usually specify both a default and
@@ -2406,7 +2414,7 @@ sub _set_nulls_sql {
   }
   my @sql;
   if (defined $default) {
-    push(@sql, "UPDATE $table SET $column = $default" . "  WHERE $column IS NULL");
+    push(@sql, "UPDATE $q->{$table} SET $q->{$column} = $default" . "  WHERE $column IS NULL");
   }
   return @sql;
 }
@@ -2441,7 +2449,9 @@ sub get_drop_column_ddl {
 =cut
 
   my ($self, $table, $column) = @_;
-  return ("ALTER TABLE $table DROP COLUMN $column");
+
+  my $q = $self->db->qi;
+  return ("ALTER TABLE $q->{$table} DROP COLUMN $q->{$column}");
 }
 
 =item C<get_drop_table_ddl($table)>
@@ -2454,7 +2464,9 @@ sub get_drop_column_ddl {
 
 sub get_drop_table_ddl {
   my ($self, $table) = @_;
-  return ("DROP TABLE $table");
+
+  my $q = $self->db->qi;
+  return ("DROP TABLE $q->{$table}");
 }
 
 sub get_rename_column_ddl {
@@ -2504,7 +2516,8 @@ Gets SQL to rename a table in the database.
 =cut
 
   my ($self, $old_name, $new_name) = @_;
-  return ("ALTER TABLE $old_name RENAME TO $new_name");
+  my $q = $self->db->qi;
+  return ("ALTER TABLE $q->{$old_name} RENAME TO $q->{$new_name}");
 }
 
 =item C<delete_table($name)>

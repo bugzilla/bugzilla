@@ -1687,6 +1687,7 @@ sub derive_regexp_groups {
   return unless $id;
 
   my $dbh = Bugzilla->dbh;
+  my $q   = $dbh->qi;
 
   my $sth;
 
@@ -1694,7 +1695,7 @@ sub derive_regexp_groups {
 
   $sth = $dbh->prepare(
     "SELECT id, userregexp, user_group_map.group_id
-                            FROM groups
+                            FROM $q->{groups}
                        LEFT JOIN user_group_map
                               ON groups.id = user_group_map.group_id
                              AND user_group_map.user_id = ?

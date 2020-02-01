@@ -30,6 +30,9 @@ use Bugzilla::Version;
 use Scalar::Util qw(blessed);
 use List::Util qw(max);
 use Storable qw(dclone);
+use Carp;
+
+our @CARP_NOT = qw(Bugzilla::DB::QuoteIdentifier);
 
 has [qw(dsn user pass attrs)] => (is => 'ro', required => 1,);
 
@@ -49,7 +52,7 @@ sub _build_qi {
 {
   my @DBI_METHODS = qw(
     begin_work column_info commit disconnect do errstr get_info last_insert_id
-    ping prepare prepare_cached primary_key quote_identifier rollback
+    ping prepare prepare_cached primary_key rollback
     selectall_arrayref selectall_hashref selectcol_arrayref selectrow_array
     selectrow_arrayref selectrow_hashref table_info
   );
@@ -60,6 +63,7 @@ sub _build_qi {
     $stash->add_symbol(
       $symbol => sub {
         my $self = shift;
+        local $Carp::CarpLevel = $Carp::CarpLevel + 1;
         return $self->dbh->$method(@_);
       }
     );
@@ -128,6 +132,51 @@ sub quote {
   my $retval = $self->dbh->quote(@_);
   trick_taint($retval) if defined $retval;
   return $retval;
+}
+
+sub quote_identifier {
+  my ($self, $ident) = @_;
+  unless ($ident =~ /^\w+$/) {
+    carp
+      "Quoted identifier $ident is possible a mistake: generally you don't want to quote punctuation or spaces";
+    return $ident;
+  }
+
+  return $self->dbh->quote_identifier($ident);
+}
+
+sub quote_columns {
+  my ($self, @columns) = @_;
+  my @quoted_columns = ();
+  state $sql_date_re = do {
+    my $format = quotemeta(quotemeta($self->quote('__FORMAT__')));
+    my $sql    = quotemeta($self->sql_date_format('__COLUMN__', '__FORMAT__'));
+    $sql =~ s/__COLUMN__/(.+)/;
+    $sql =~ s/$format/(.+)/;
+    $sql;
+  };
+
+  foreach (@columns) {
+    if (/^\w+$/) {
+      push @quoted_columns, $self->quote_identifier($_);
+    }
+    elsif (my ($t, $c) = /^(\w+)\.(\w+)$/) {
+      push @quoted_columns,
+        $self->quote_identifier($t) . "." . $self->quote_identifier($c);
+    }
+    elsif (my ($expr, $alias) = /^\s*(.+?)\s+AS\s+(\w+)\s*$/i) {
+      push @quoted_columns,
+        $self->quote_columns($expr) . " AS " . $self->quote_identifier($alias);
+    }
+    elsif (my ($column, $format) = /$sql_date_re/) {
+      push @quoted_columns,
+        $self->sql_date_format($self->quote_columns($column), $format);
+    }
+    else {
+      die "unable to quote column: $_";
+    }
+  }
+  return join(", ", @quoted_columns);
 }
 
 #####################################################################
@@ -1551,24 +1600,26 @@ sub _check_references {
   my ($self, $table, $column, $fk) = @_;
   my $foreign_table  = $fk->{TABLE};
   my $foreign_column = $fk->{COLUMN};
+  my $q              = $self->qi;
 
   # We use table aliases because sometimes we join a table to itself,
   # and we can't use the same table name on both sides of the join.
   # We also can't use the words "table" or "foreign" because those are
   # reserved words.
   my $bad_values = $self->selectcol_arrayref(
-    "SELECT DISTINCT tabl.$column 
-           FROM $table AS tabl LEFT JOIN $foreign_table AS forn
-                ON tabl.$column = forn.$foreign_column
-          WHERE forn.$foreign_column IS NULL
-                AND tabl.$column IS NOT NULL"
+    "SELECT DISTINCT tabl.$q->{$column}
+           FROM $q->{$table} AS tabl LEFT JOIN $q->{$foreign_table} AS forn
+                ON tabl.$q->{$column} = forn.$q->{$foreign_column}
+          WHERE forn.$q->{$foreign_column} IS NULL
+                AND tabl.$q->{$column} IS NOT NULL"
   );
 
   if (@$bad_values) {
     my $delete_action = $fk->{DELETE} || '';
     if ($delete_action eq 'CASCADE') {
       $self->do(
-        "DELETE FROM $table WHERE $column IN (" . join(',', ('?') x @$bad_values) . ")",
+        "DELETE FROM $q->{$table} WHERE $q->{$column} IN ("
+          . join(',', ('?') x @$bad_values) . ")",
         undef, @$bad_values
       );
       if (Bugzilla->usage_mode == USAGE_MODE_CMDLINE) {
@@ -1589,8 +1640,8 @@ sub _check_references {
     }
     elsif ($delete_action eq 'SET NULL') {
       $self->do(
-        "UPDATE $table SET $column = NULL
-                        WHERE $column IN ("
+        "UPDATE $q->{$table} SET $q->{$column} = NULL
+                        WHERE $q->{$column} IN ("
           . join(',', ('?') x @$bad_values) . ")", undef, @$bad_values
       );
       if (Bugzilla->usage_mode == USAGE_MODE_CMDLINE) {

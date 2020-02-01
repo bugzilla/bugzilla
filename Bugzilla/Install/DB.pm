@@ -1617,6 +1617,7 @@ sub _list_bits {
 
 sub _convert_groups_system_from_groupset {
   my $dbh = Bugzilla->dbh;
+  my $q   = $dbh->qi;
 
   # 2002-09-22 - bugreport@peshkin.net - bug 157756
   #
@@ -1640,7 +1641,7 @@ sub _convert_groups_system_from_groupset {
     $dbh->bz_drop_index('groups', 'groups_name_idx');
     my @primary_key = $dbh->primary_key(undef, undef, 'groups');
     if (@primary_key) {
-      $dbh->do("ALTER TABLE groups DROP PRIMARY KEY");
+      $dbh->do("ALTER TABLE $q->{groups} DROP PRIMARY KEY");
     }
 
     $dbh->bz_add_column('groups', 'id',
@@ -1651,7 +1652,7 @@ sub _convert_groups_system_from_groupset {
 
     # Convert all existing groupset records to map entries before removing
     # groupset fields or removing "bit" from groups.
-    my $sth = $dbh->prepare("SELECT bit, id FROM groups WHERE bit > 0");
+    my $sth = $dbh->prepare("SELECT bit, id FROM $q->{groups} WHERE bit > 0");
     $sth->execute();
     while (my ($bit, $gid) = $sth->fetchrow_array) {
 
@@ -1746,7 +1747,7 @@ sub _convert_groups_system_from_groupset {
 
         # Get names of groups added.
         my $sth2 = $dbh->prepare(
-          "SELECT name FROM groups
+          "SELECT name FROM $q->{groups}
                                            WHERE (bit & $added) != 0
                                                  AND (bit & $removed) = 0"
         );
@@ -1758,7 +1759,7 @@ sub _convert_groups_system_from_groupset {
 
         # Get names of groups removed.
         $sth2 = $dbh->prepare(
-          "SELECT name FROM groups
+          "SELECT name FROM $q->{groups}
                                         WHERE (bit & $removed) != 0
                                               AND (bit & $added) = 0"
         );
@@ -1772,7 +1773,7 @@ sub _convert_groups_system_from_groupset {
         # missing groups.
         $sth2 = $dbh->prepare(
           "SELECT ($added & ~BIT_OR(bit)) 
-                                         FROM groups"
+                                         FROM $q->{groups}"
         );
         $sth2->execute();
         my ($miss) = $sth2->fetchrow_array;
@@ -1786,7 +1787,7 @@ sub _convert_groups_system_from_groupset {
         # missing groups.
         $sth2 = $dbh->prepare(
           "SELECT ($removed & ~BIT_OR(bit)) 
-                                         FROM groups"
+                                         FROM $q->{groups}"
         );
         $sth2->execute();
         ($miss) = $sth2->fetchrow_array;
@@ -1823,7 +1824,7 @@ sub _convert_groups_system_from_groupset {
 
         # Get names of groups added.
         my $sth2 = $dbh->prepare(
-          "SELECT name FROM groups
+          "SELECT name FROM $q->{groups}
                                            WHERE (bit & $added) != 0
                                                  AND (bit & $removed) = 0"
         );
@@ -1835,7 +1836,7 @@ sub _convert_groups_system_from_groupset {
 
         # Get names of groups removed.
         $sth2 = $dbh->prepare(
-          "SELECT name FROM groups
+          "SELECT name FROM $q->{groups}
                                         WHERE (bit & $removed) != 0
                                               AND (bit & $added) = 0"
         );
@@ -1864,9 +1865,9 @@ sub _convert_groups_system_from_groupset {
 
     # Identify admin group.
     my ($admin_gid)
-      = $dbh->selectrow_array("SELECT id FROM groups WHERE name = 'admin'");
+      = $dbh->selectrow_array("SELECT id FROM $q->{groups} WHERE name = 'admin'");
     if (!$admin_gid) {
-      $dbh->do(q{INSERT INTO groups (name, description)
+      $dbh->do(qq{INSERT INTO $q->{groups} (name, description)
                                    VALUES ('admin', 'Administrators')}
       );
       $admin_gid = $dbh->bz_last_key('groups', 'id');
@@ -1910,6 +1911,7 @@ sub _convert_groups_system_from_groupset {
 
 sub _convert_attachment_statuses_to_flags {
   my $dbh = Bugzilla->dbh;
+  my $q   = $dbh->qi;
 
   # September 2002 myk@mozilla.org bug 98801
   # Convert the attachment statuses tables into flags tables.
@@ -2063,6 +2065,7 @@ sub _convert_attachment_statuses_to_flags {
 
 sub _remove_spaces_and_commas_from_flagtypes {
   my $dbh = Bugzilla->dbh;
+  my $q   = $dbh->qi;
 
   # Get all names and IDs, to find broken ones and to
   # check for collisions when renaming.
@@ -2114,6 +2117,7 @@ sub _remove_spaces_and_commas_from_flagtypes {
 
 sub _setup_usebuggroups_backward_compatibility {
   my $dbh = Bugzilla->dbh;
+  my $q   = $dbh->qi;
 
   # Don't run this on newer Bugzillas. This is a reliable test because
   # the longdescs table existed in 2.16 (which had usebuggroups)
@@ -2132,9 +2136,9 @@ sub _setup_usebuggroups_backward_compatibility {
     # Initially populate group_control_map.
     # First, get all the existing products and their groups.
     my $sth = $dbh->prepare(
-      "SELECT groups.id, products.id, groups.name,
+      "SELECT $q->{groups}.id, products.id, $q->{groups}.name,
                                         products.name 
-                                  FROM groups, products
+                                  FROM $q->{groups}, products
                                  WHERE isbuggroup != 0"
     );
     $sth->execute();
@@ -2489,13 +2493,14 @@ sub _rename_votes_count_and_force_group_refresh {
 
 sub _fix_group_with_empty_name {
   my $dbh = Bugzilla->dbh;
+  my $q   = $dbh->qi;
 
   # 2005-01-12 Nick Barnes <nb@ravenbrook.com> bug 278010
   # Rename any group which has an empty name.
   # Note that there can be at most one such group (because of
   # the SQL index on the name column).
   my ($emptygroupid)
-    = $dbh->selectrow_array("SELECT id FROM groups where name = ''");
+    = $dbh->selectrow_array("SELECT id FROM $q->{groups} where name = ''");
   if ($emptygroupid) {
 
     # There is a group with an empty name; find a name to rename it
@@ -2503,7 +2508,7 @@ sub _fix_group_with_empty_name {
     # group_$gid and add _<n> if necessary.
     my $trycount = 0;
     my $trygroupname;
-    my $sth         = $dbh->prepare("SELECT 1 FROM groups where name = ?");
+    my $sth         = $dbh->prepare("SELECT 1 FROM $q->{groups} where name = ?");
     my $name_exists = 1;
 
     while ($name_exists) {
@@ -2514,7 +2519,7 @@ sub _fix_group_with_empty_name {
       $name_exists = $dbh->selectrow_array($sth, undef, $trygroupname);
       $trycount++;
     }
-    $dbh->do("UPDATE groups SET name = ? WHERE id = ?",
+    $dbh->do("UPDATE $q->{groups} SET name = ? WHERE id = ?",
       undef, $trygroupname, $emptygroupid);
     print "Group $emptygroupid had an empty name; renamed as",
       " '$trygroupname'.\n";
@@ -2946,9 +2951,10 @@ EOT
 # user_group_map), and when we kill derived gruops in the DB.
 sub _rederive_regex_groups {
   my $dbh = Bugzilla->dbh;
+  my $q   = $dbh->qi;
 
   my $regex_groups_exist = $dbh->selectrow_array(
-    "SELECT 1 FROM groups WHERE userregexp = '' " . $dbh->sql_limit(1));
+    "SELECT 1 FROM $q->{groups} WHERE userregexp = '' " . $dbh->sql_limit(1));
   return if !$regex_groups_exist;
 
   my $regex_derivations
@@ -2961,12 +2967,12 @@ sub _rederive_regex_groups {
 
   # Re-evaluate all regexps, to keep them up-to-date.
   my $sth = $dbh->prepare(
-    "SELECT profiles.userid, profiles.login_name, groups.id, 
-                groups.userregexp, user_group_map.group_id
-           FROM (profiles CROSS JOIN groups)
+    "SELECT profiles.userid, profiles.login_name, $q->{groups}.id,
+                $q->{groups}.userregexp, user_group_map.group_id
+           FROM (profiles CROSS JOIN $q->{groups})
                 LEFT JOIN user_group_map
                        ON user_group_map.user_id = profiles.userid
-                          AND user_group_map.group_id = groups.id
+                          AND user_group_map.group_id = $q->{groups}.id
                           AND user_group_map.grant_type = ?
           WHERE userregexp != '' OR user_group_map.group_id IS NOT NULL"
   );

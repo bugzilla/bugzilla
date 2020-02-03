@@ -137,8 +137,7 @@ sub quote {
 sub quote_identifier {
   my ($self, $ident) = @_;
   unless ($ident =~ /^\w+$/) {
-    carp
-      "Quoted identifier $ident is possible a mistake: generally you don't want to quote punctuation or spaces";
+    carp "Quoting identifier $ident is possibly a mistake, it will not be quoted.";
     return $ident;
   }
 

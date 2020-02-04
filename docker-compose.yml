@@ -35,6 +35,7 @@ services:
     depends_on:
       - bmo.db
       - memcached
+      - tinyproxy
 
   bmo.jobqueue:
     build: *bmo_build
@@ -93,6 +94,8 @@ services:
     volumes:
       - bmo-mysql-db:/var/lib/mysql
       - ./docker/mysql:/etc/mysql/conf.d
+    tmpfs:
+      - /tmp
     logging:
       driver: "none"
     environment:

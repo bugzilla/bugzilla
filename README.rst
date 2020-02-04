@@ -272,7 +272,7 @@ to ensure that you have the correct docker setup.
     docker-compose up --build
 
 
-Then, you must configure your browser to use http://localhost:1091 as an HTTP proxy.
+Then, you must configure your browser to use localhost and port 1080 as an HTTP proxy.
 For setting a proxy in Firefox, see `Firefox Connection Settings`_.
 The procedure should be similar for other browsers.
 
@@ -281,6 +281,17 @@ The procedure should be similar for other browsers.
 After that, you should be able to visit http://bmo.test/ from your browser.
 You can login as vagrant@bmo.test with the password "vagrant01!" (without
 quotes).
+
+If you want to update the code running in the web container, you do not need to restart everything.
+You can run the following command:
+
+.. code-block:: bash
+
+    docker-compose exec bmo.test rsync -avz --exclude .git --exclude local /mnt/sync/ /app/
+
+The Mojolicious morbo development server, used by the web container, will notice any code changes and
+restart itself.
+
 
 Ensuring your Docker setup on Ubuntu 16.04
 ==========================================

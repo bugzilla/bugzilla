@@ -102,7 +102,7 @@ sub MessageToMTA {
     if !$email->header('MIME-Version');
 
   # Certain headers should not be encoded
-  my @no_encode = qw(from sender reply-to to cc bcc);
+  my @no_encode = qw(from sender reply-to to cc bcc content-type content-transfer-encoding);
   push @no_encode, map { "resent-$_" } @no_encode;
   push @no_encode, map { "downgraded-$_" } @no_encode; # RFC 5504
   push @no_encode,

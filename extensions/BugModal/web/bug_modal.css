@@ -1279,6 +1279,14 @@ a.lightbox-icon.markdown {
 }
 
 /**
+ * verbose change summary
+ */
+
+.change-summary {
+  display: none;
+}
+
+/**
  * search navigation
  */
 

@@ -29,8 +29,7 @@ $sel->type_ok("comment", "bp-63f096f7-253b-4ee2-ae3d-8bb782090824");
 $sel->click_ok("bottom-save-btn");
 $sel->wait_for_page_to_load_ok(WAIT_TIME);
 $sel->title_like(qr/\d+ \S $bug_summary/, "crash report added");
-$sel->click_ok("link=bug $bug_id");
-$sel->wait_for_page_to_load_ok(WAIT_TIME);
+go_to_bug($sel, $bug_id);
 attribute_is($sel, 'bp-63f096f7-253b-4ee2-ae3d-8bb782090824',
   'https://crash-stats.mozilla.org/report/index/63f096f7-253b-4ee2-ae3d-8bb782090824'
 );
@@ -39,9 +38,7 @@ $sel->type_ok("comment", "CVE-2010-2884");
 $sel->click_ok("bottom-save-btn");
 $sel->wait_for_page_to_load_ok(WAIT_TIME);
 $sel->title_like(qr/\d+ \S $bug_summary/, "cve added");
-$sel->click_ok("link=bug $bug_id");
-$sel->wait_for_page_to_load_ok(WAIT_TIME);
-
+go_to_bug($sel, $bug_id);
 attribute_is($sel, 'CVE-2010-2884',
   'https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2010-2884');
 
@@ -49,9 +46,7 @@ $sel->type_ok("comment", "r12345");
 $sel->click_ok("bottom-save-btn");
 $sel->wait_for_page_to_load_ok(WAIT_TIME);
 $sel->title_like(qr/\d+ \S $bug_summary/, "svn revision added");
-$sel->click_ok("link=bug $bug_id");
-$sel->wait_for_page_to_load_ok(WAIT_TIME);
-
+go_to_bug($sel, $bug_id);
 attribute_is($sel, 'r12345',
   'https://viewvc.svn.mozilla.org/vc?view=rev&revision=12345');
 

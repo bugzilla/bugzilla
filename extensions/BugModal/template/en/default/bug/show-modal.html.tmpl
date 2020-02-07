@@ -13,7 +13,10 @@
   [% header_done = 1 %]
 [% END %]
 
-[%# Display changes to bugs that happened in the last request #%]
+[%# Display a short summary of the change when a bug or attachment is created or updated.
+  # The user will see a toast notification, and verbose messages are hidden by default. #%]
+[% change_short_summary = '' %]
+
 [% sentmail = c.flash("last_sent_changes") %]
 [% FOREACH item = sentmail %]
   [% INCLUDE bug/process/results.html.tmpl
@@ -21,6 +24,16 @@
      type = item.type
      recipient_count = item.recipient_count
    %]
+  [% IF loop.first %]
+    [% change_short_summary = BLOCK %]
+      [% IF item.type == 'created' %]
+        [% terms.Bug %] created.
+      [% ELSE %]
+        Changes submitted.
+      [% END %]
+      [%+ PROCESS "bug/process/bugmail.html.tmpl" recipient_count = item.recipient_count %]
+    [% END %]
+  [% END %]
 [% END %]
 
 [% sentattachmentmail = c.flash("last_sent_attachment_changes") %]
@@ -31,6 +44,16 @@
      recipient_count = item.recipient_count
      content_type_method = item.content_type_method
    %]
+  [% IF loop.first %]
+    [% change_short_summary = BLOCK %]
+      [% IF item.type == 'created' %]
+        Attachment created.
+      [% ELSE %]
+        Attachment updated.
+      [% END %]
+      [%+ PROCESS "bug/process/bugmail.html.tmpl" recipient_count = item.recipient_count %]
+    [% END %]
+  [% END %]
 [% END %]
 
 [% INCLUDE bug_modal/edit.html.tmpl %]

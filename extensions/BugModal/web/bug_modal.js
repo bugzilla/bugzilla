@@ -206,6 +206,11 @@ $(function() {
             $.scrollTo($('#bottom-actions'));
         });
 
+    // show floating message after creating/updating a bug/attachment
+    if ($('#floating-message-text').text()) {
+        $('#floating-message').fadeIn(250).delay(4000).fadeOut();
+    }
+
     // hide floating message when clicked
     $('#floating-message')
         .click(function(event) {

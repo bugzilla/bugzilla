@@ -27,10 +27,10 @@
 [% USE Bugzilla %]
 [% PROCESS global/variables.none.tmpl %]
 
-<div id="bugmail_summary_[% mailing_bugid FILTER none %]_short">
-  [% IF recipient_count > 0 %]
-    Email sent to [% recipient_count FILTER html %] recipient[% 's' UNLESS recipient_count == 1 %].
-  [% ELSE %]
-    No emails were sent.
-  [% END %]
-</div>
+[% IF recipient_count > 1 %]
+  Email sent to [% recipient_count FILTER none %] recipients.
+[% ELSIF recipient_count == 1 %]
+  Email sent to 1 recipient.
+[% ELSE %]
+  No emails sent.
+[% END %]

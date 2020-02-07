@@ -91,7 +91,9 @@ sub is_text_present {
   my ($self, $text) = @_;
   TRACE("is_text_present: $text");
   return 0 unless $text;
-  my $body = $self->driver->get_body();
+  # Execute script directly because `get_body()` doesn't contain hidden text
+  my $body = $self->driver->execute_script(
+    "return document.body.textContent.replace(/\\s+/g, ' ')");
   if ($text =~ /^regexp:(.*)$/) {
     return $body =~ /$1/ ? 1 : 0;
   }

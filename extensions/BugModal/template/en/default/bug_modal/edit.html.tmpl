@@ -251,7 +251,7 @@
 
 <div role="status" id="io-error" style="display:none"></div>
 <div role="status" id="floating-message" style="display:none">
-  <div id="floating-message-text"></div>
+  <div id="floating-message-text">[% change_short_summary FILTER html %]</div>
 </div>
 
 [% WRAPPER bug_modal/module.html.tmpl

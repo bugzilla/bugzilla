@@ -39,8 +39,7 @@ $sel->wait_for_page_to_load_ok(WAIT_TIME);
 $sel->is_text_present_ok("Changes submitted for bug $test_bug_1");
 
 # Make sure the correct bug is redisplayed.
-$sel->click_ok("link=bug $test_bug_1");
-$sel->wait_for_page_to_load_ok(WAIT_TIME);
+go_to_bug($sel, $test_bug_1);
 $sel->title_like(qr/^$test_bug_1/, "Display bug $test_bug_1");
 $sel->is_text_present_ok("I did some work");
 $sel->is_text_present_ok("Hours Worked: 2.6");

@@ -385,7 +385,7 @@ my $attachment1_id = $1;
 
 # Now create another attachment, and set requestees.
 
-$sel->click_ok("link=Attach File");
+$sel->click_ok("attachments-add-link");
 $sel->wait_for_page_to_load_ok(WAIT_TIME);
 $sel->title_is("Create New Attachment for Bug #$bug1_id");
 $sel->attach_file('//input[@name="data"]', $config->{attachment_file});
@@ -412,7 +412,7 @@ my $attachment2_id = $1;
 
 # Create a third attachment, but we now set the MIME type manually.
 
-$sel->click_ok("link=Attach File");
+$sel->click_ok("attachments-add-link");
 $sel->wait_for_page_to_load_ok(WAIT_TIME);
 $sel->title_is("Create New Attachment for Bug #$bug1_id");
 $sel->attach_file('//input[@name="data"]', $config->{attachment_file});

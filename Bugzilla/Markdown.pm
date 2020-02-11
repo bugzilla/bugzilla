@@ -65,13 +65,17 @@ sub render_html {
     return $html;
   }
 
-  $markdown =~ s{<(?!https?://)}{&lt;}gs;
+  # Replace < with \x{FFFD} (special unicode replacement character),
+  # and remove \x{FFFD} later.
+  $markdown =~ tr/\x{FFFD}//d;
+  $markdown =~ s{<(?!https?://)}{\x{FFFD}}gs;
 
   my @valid_text_parent_tags = ('h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'p', 'li', 'td');
   my @bad_tags               = qw( img );
   my $bugzilla_shorthand     = $self->bugzilla_shorthand;
   my $html                   = decode('UTF-8', $parser->render_html($markdown));
 
+  $html =~ s/\x{FFFD}/&lt;/g;
   my $dom = Mojo::DOM->new($html);
   $dom->find(join(', ', @bad_tags))->map('remove');
 

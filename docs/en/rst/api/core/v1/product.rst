@@ -266,6 +266,13 @@ request_group     int      The group ID that is allowed to request the flag if
                            flagtype.
 ================  =======  ======================================================
 
+To return information about components in products, you can use the 
+``.`` property accesssor in your request: 
+
+.. code-block:: text
+
+   /rest/product?type=enterable&include_fields=id,name,components.name,components.id,components.is_active,components.description
+
 .. _rest_product_create:
 
 Create Product

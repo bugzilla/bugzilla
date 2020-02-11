@@ -101,36 +101,20 @@ sub MessageToMTA {
   $email->header_set('MIME-Version', '1.0')
     if !$email->header('MIME-Version');
 
-  # Certain headers should not be encoded
-  my @no_encode = qw(from sender reply-to to cc bcc content-type content-transfer-encoding);
-  push @no_encode, map { "resent-$_" } @no_encode;
-  push @no_encode, map { "downgraded-$_" } @no_encode; # RFC 5504
-  push @no_encode,
-    qw(original-from disposition-notification-to);     # RFC 5703 and RFC 3798
-  push @no_encode,
-    qw(mime-version auto-submitted date message-id references in-reply-to downgraded-message-id downgraded-references downgraded-in-reply-to);
-
   # Encode the headers correctly in quoted-printable
   foreach my $header ($email->header_names) {
     $header = lc $header;
-
     my @values = $email->header($header);
-    my @encoded_values;
+    my @new_values;
     foreach my $value (@values) {
       if (Bugzilla->params->{'utf8'} && !utf8::is_utf8($value)) {
         utf8::decode($value);
       }
-
-      if (none { $_ eq $header } @no_encode) {
-        # avoid excessive line wrapping done by Encode.
-        local $Encode::Encoding{'MIME-Q'}->{'bpl'} = 998;
-        $value = encode('MIME-Q', $value);
-      }
-
-      push @encoded_values, $value;
+      push @new_values, $value;
     }
 
-    $email->header_set($header, @encoded_values);
+    # header_str_set will handle encoding of values if needed.
+    $email->header_str_set($header, @new_values);
   }
 
   my $from = $email->header('From');

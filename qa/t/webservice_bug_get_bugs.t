@@ -16,12 +16,12 @@ use Data::Dumper;
 use DateTime;
 use QA::Util;
 use QA::Tests qw(bug_tests PRIVATE_BUG_USER);
-use Test::More tests => 1036;
+use Test::More tests => 1009;
 my ($config, @clients) = get_rpc_clients();
 
 my $xmlrpc = $clients[0];
 our $creation_time = DateTime->now();
-our ($public_bug, $private_bug) = $xmlrpc->bz_create_test_bugs('private');
+our ($public_bug, $private_bug) = $xmlrpc->bz_create_test_bugs('private', 'no_cc');
 my $private_id = $private_bug->{id};
 my $public_id  = $public_bug->{id};
 
@@ -59,7 +59,6 @@ $private_bug->{see_also}         = ["${base_url}show_bug.cgi?id=$public_id"];
 $private_bug->{cf_qa_status}     = ['in progress', 'verified'];
 $private_bug->{cf_single_select} = 'two';
 
-$public_bug->{depends_on}            = [$private_id];
 $public_bug->{dupe_of}               = undef;
 $public_bug->{resolution}            = '';
 $public_bug->{is_open}               = 1;
@@ -98,6 +97,8 @@ sub post_success {
 
   is(scalar @{$call->result->{bugs}}, 1, "Got exactly one bug");
   my $bug = $call->result->{bugs}->[0];
+  my $is_private_bug  = $bug->{id} == $private_bug->{id};
+  my $is_private_user = $t->{user} && $t->{user} eq PRIVATE_BUG_USER;
 
   if ($t->{user} && $t->{user} eq 'admin') {
     ok(
@@ -120,6 +121,18 @@ sub post_success {
     );
   }
 
+  if (exists $bug->{depends_on}) {
+    is_deeply(
+      $bug->{depends_on},
+      $is_private_bug ? [] : $is_private_user ? [$private_id] : [],
+      $is_private_bug
+        ? 'depends_on value is correct'
+        : $is_private_user
+        ? 'Private bug ID in depends_on is returned to private bug user'
+        : 'Private bug ID in depends_on is not returned to non-private bug user (' . $t->{user} . ')'
+    );
+  }
+
   if ($t->{user}) {
     ok($bug->{update_token}, 'Update token returned for logged-in user');
   }
@@ -128,7 +141,7 @@ sub post_success {
       'Update token not returned for logged-out users');
   }
 
-  my $expect = $bug->{id} == $private_bug->{id} ? $private_bug : $public_bug;
+  my $expect = $is_private_bug ? $private_bug : $public_bug;
 
   my @fields = sort keys %$expect;
   push(@fields, 'creation_time', 'last_change_time');

@@ -4514,9 +4514,12 @@ sub list_relationship {
             ORDER BY is_open DESC, $target_field"
   );
 
-  return $dbh->selectcol_arrayref(
+  my $bug_ids = $dbh->selectcol_arrayref(
     $cache->{"${target_field}_sth_$exclude_resolved"},
     undef, $bug_id);
+
+  # List only bugs visible to the user
+  return Bugzilla->user->visible_bugs(\@$bug_ids);
 }
 
 # Creates a lot of bug objects in the same order as the input array.
@@ -4546,7 +4549,8 @@ sub _bugs_in_order {
 # This routine assumes Bugzilla::Bug->check has been previously called.
 sub GetBugActivity {
   my ($bug_id, $attach_id, $starttime, $include_comment_activity) = @_;
-  my $dbh = Bugzilla->dbh;
+  my $dbh  = Bugzilla->dbh;
+  my $user = Bugzilla->user;
 
   # Arguments passed to the SQL query.
   my @args = ($bug_id);
@@ -4560,7 +4564,7 @@ sub GetBugActivity {
   # Only includes attachments the user is allowed to see.
   my $suppjoins = "";
   my $suppwhere = "";
-  if (!Bugzilla->user->is_insider) {
+  if (!$user->is_insider) {
     $suppjoins = "LEFT JOIN attachments
                    ON attachments.attach_id = bugs_activity.attach_id";
     $suppwhere = "AND COALESCE(attachments.isprivate, 0) = 0";
@@ -4601,7 +4605,7 @@ sub GetBugActivity {
     # Only includes comment tag activity for comments the user is allowed to see.
     $suppjoins = "";
     $suppwhere = "";
-    if (!Bugzilla->user->is_insider) {
+    if (!$user->is_insider) {
       $suppjoins = "INNER JOIN longdescs
                           ON longdescs.comment_id = longdescs_tags_activity.comment_id";
       $suppwhere = "AND longdescs.isprivate = 0";
@@ -4683,10 +4687,10 @@ sub GetBugActivity {
       || $fieldname eq 'work_time'
       || $fieldname eq 'deadline')
     {
-      $activity_visible = Bugzilla->user->is_timetracker;
+      $activity_visible = $user->is_timetracker;
     }
     elsif ($fieldname eq 'longdescs.isprivate'
-      && !Bugzilla->user->is_insider
+      && !$user->is_insider
       && $added)
     {
       $activity_visible = 0;
@@ -4732,6 +4736,13 @@ sub GetBugActivity {
         $removed
           = _join_activity_entries($fieldname, $old_change->{'removed'}, $removed);
         $added = _join_activity_entries($fieldname, $old_change->{'added'}, $added);
+      }
+
+      # List only bugs visible to the user
+      if ($fieldname =~ /^(?:dependson|blocked|regress(?:ed_by|es))$/) {
+        $removed = join(', ', @{$user->visible_bugs([split(/,\s*/, $removed)])});
+        $added   = join(', ', @{$user->visible_bugs([split(/,\s*/, $added)])});
+        next if !$removed && !$added;
       }
 
       $operation->{'who'}       = $who;

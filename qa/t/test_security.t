@@ -139,13 +139,15 @@ log_in($sel, $config, 'editbugs');
 go_to_bug($sel, $bug1_id);
 ok(!$sel->is_text_present("secret_qa_bug_$bug2_id"),
   "The alias 'secret_qa_bug_$bug2_id' is not visible for unauthorized users");
-$sel->is_text_present_ok($bug2_id);
+ok(!$sel->is_text_present($bug2_id),
+  "Even the bug ID is not visible for unauthorized users");
 logout($sel);
 
 go_to_bug($sel, $bug1_id, 1);
 ok(!$sel->is_text_present("secret_qa_bug_$bug2_id"),
   "The alias 'secret_qa_bug_$bug2_id' is not visible for logged out users");
-$sel->is_text_present_ok($bug2_id);
+ok(!$sel->is_text_present($bug2_id),
+  "Even the bug ID is not visible for logged out users");
 
 #######################################################################
 # Security bug 472206.

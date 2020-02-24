@@ -149,13 +149,14 @@ sub _string_array {
 }
 
 sub bz_create_test_bugs {
-  my ($self, $second_private) = @_;
+  my ($self, $second_private, $no_cc) = @_;
   my $config = $self->bz_config;
 
   my @whiteboard_strings = _string_array(3);
   my @summary_strings    = _string_array(3);
 
   my $public_bug = create_bug_fields($config);
+  delete $public_bug->{cc} if $no_cc;
   $public_bug->{alias}      = random_string(40);
   $public_bug->{whiteboard} = join(' ', @whiteboard_strings);
   $public_bug->{summary}    = join(' ', @summary_strings);

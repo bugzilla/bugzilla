@@ -74,6 +74,8 @@
               [% ELSE %]
                 [% terms.Bug %]mail has been enabled.
               [% END %]
+            [% ELSIF field == 'bounce_count' %]
+              Bounced email count has been reset.
             [% ELSIF field == 'password_change_required' %]
               The user [% otheruser.password_change_required ? "must" : "no longer needs to" %] update their password.
             [% ELSIF field == 'password_change_reason' %]

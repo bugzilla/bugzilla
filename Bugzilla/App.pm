@@ -21,11 +21,12 @@ use Bugzilla::Constants qw(bz_locations MAX_STS_AGE);
 use Bugzilla::Extension             ();
 use Bugzilla::Install::Requirements ();
 use Bugzilla::Logging;
+use Bugzilla::App::API;
+use Bugzilla::App::BouncedEmails;
 use Bugzilla::App::CGI;
+use Bugzilla::App::Main;
 use Bugzilla::App::OAuth2::Clients;
 use Bugzilla::App::SES;
-use Bugzilla::App::Main;
-use Bugzilla::App::API;
 use Bugzilla::App::Static;
 use Mojo::Loader qw( find_modules );
 use Module::Runtime qw( require_module );
@@ -192,11 +193,12 @@ sub setup_routes {
   my ($self) = @_;
 
   my $r = $self->routes;
+  Bugzilla::App::API->setup_routes($r);
+  Bugzilla::App::BouncedEmails->setup_routes($r);
   Bugzilla::App::CGI->setup_routes($r);
   Bugzilla::App::Main->setup_routes($r);
-  Bugzilla::App::API->setup_routes($r);
-  Bugzilla::App::SES->setup_routes($r);
   Bugzilla::App::OAuth2::Clients->setup_routes($r);
+  Bugzilla::App::SES->setup_routes($r);
 
   $r->static_file('/__lbheartbeat__');
   $r->static_file(

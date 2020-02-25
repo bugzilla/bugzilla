@@ -108,6 +108,16 @@
       </label>
     </td>
   </tr>
+  [% IF otheruser.bounce_count %]
+  <tr>
+    <th><label for="reset_bounce">Reset Bounce Count</label></th>
+    <td>
+      <input type="checkbox" name="reset_bounce" id="reset_bounce" value="1">
+      (<a href="/bounced_emails/[% otheruser.id FILTER uri %]" title="View bounce email history">
+        [% otheruser.bounce_count FILTER html %]</a>)
+    </td>
+  </tr>
+  [% END %]
   <tr>
     <th><label for="disabledtext">Disable text:</label></th>
     <td>

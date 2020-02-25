@@ -44,6 +44,14 @@
 <!--
 
 function init() {
+  const $comment = document.querySelector('#comment');
+
+  // Change the description edit state if the comment text is already entered. This could happen if the `comment` URL
+  // param is passed, the user has cloned other b[%%]ug, or the page is loaded during session restore or from BFCache.
+  if ($comment.value.match(/\S/)) {
+    desc_edited = true;
+  }
+
   set_assign_to();
   hideElementById('attachment_true');
   showElementById('attachment_false');
@@ -56,7 +64,7 @@ function init() {
     bug_type_specified = true;
   }, { once: true });
 
-  document.querySelector('#comment').addEventListener('input', () => {
+  $comment.addEventListener('input', () => {
     desc_edited = true;
   }, { once: true });
 }
@@ -74,7 +82,7 @@ function initCrashSignatureField() {
 
 const params = new URLSearchParams(location.search);
 let bug_type_specified = params.has('bug_type') || params.has('cloned_bug_id') || params.has('regressed_by');
-let desc_edited = params.has('comment') || params.has('cloned_bug_id');
+let desc_edited = false;
 
 var initialowners = new Array([% product.components.size %]);
 var last_initialowner;

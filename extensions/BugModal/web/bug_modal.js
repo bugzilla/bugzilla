@@ -119,6 +119,11 @@ $(function() {
         localStorage.removeItem(key);
     }
 
+    // Clear saved comment once the bug is successfully updated
+    if (document.querySelector('.change-summary[data-type="bug"]')) {
+        clearSavedBugComment();
+    }
+
     function restoreSavedBugComment() {
         expireSavedComments();
         let key = `bug-modal-saved-comment-${BUGZILLA.bug_id}`;
@@ -701,8 +706,6 @@ $(function() {
                     .toArray()
                     .join(' ')
             );
-
-            clearSavedBugComment();
         })
         .attr('disabled', false);
 

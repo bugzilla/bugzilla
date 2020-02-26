@@ -19,8 +19,6 @@ services:
       - BMO_db_user=bugs
       - BMO_memcached_namespace=bugzilla
       - BMO_memcached_servers=memcached:11211
-      - BMO_ses_username=ses@mozilla.bugs
-      - BMO_ses_password=password123456789!
       - BMO_urlbase=AUTOMATIC
       - BUGZILLA_ALLOW_INSECURE_HTTP=1
       - BZ_ANSWERS_FILE=/app/conf/checksetup_answers.txt
@@ -44,8 +42,6 @@ services:
 
   bmo.db:
     image: mozillabteam/bmo-mysql:5.7
-    tmpfs:
-      - /tmp
     logging:
       driver: "none"
     environment:

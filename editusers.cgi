@@ -285,7 +285,6 @@ elsif ($action eq 'update') {
     $otherUser->set_name($cgi->param('name'));
     $otherUser->set_disabledtext($cgi->param('disabledtext'));
     $otherUser->set_disable_mail($cgi->param('disable_mail'));
-    $otherUser->set_bounce_count(0) if $cgi->param('reset_bounce');
   }
 
   $changes = $otherUser->update();

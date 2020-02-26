@@ -805,9 +805,6 @@ sub update_table_definitions {
   # Bug 1576667 - dkl@mozilla.com
   _populate_api_keys_creation_ts();
 
-  # Bug XXX - dkl@mozilla.com
-  $dbh->bz_add_column('profiles', 'bounce_count', {TYPE => 'INT1', NOTNULL => 1, DEFAULT => 0});
-
   ################################################################
   # New --TABLE-- changes should go *** A B O V E *** this point #
   ################################################################

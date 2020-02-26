@@ -438,14 +438,6 @@
   <h2>[% header FILTER none %]</h2>
 [% END %]
 
-[%# Show banner for users who have email disabled due to bounces %]
-[% IF user.bounce_count AND user.email_disabled %]
-  <div id="message">
-    Change notification emails have been disabled for your account due to issues delivering to your address.
-    <a href="/bounced_emails/[% user.id FILTER uri %]" id="bounced_emails_link">View recent errors and reactivate email</a>.
-  </div>
-[% END %]
-
 [% IF message %]
   <div id="message">[% message %]</div>
 [% END %]

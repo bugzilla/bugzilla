@@ -85,8 +85,7 @@ sub DB_COLUMNS {
     'profiles.password_change_reason',
     'profiles.mfa',
     'profiles.mfa_required_date',
-    'profiles.nickname',
-    'profiles.bounce_count'
+    'profiles.nickname'
     ),
     ;
 }
@@ -107,7 +106,6 @@ use constant VALIDATORS => {
   password_change_required => \&Bugzilla::Object::check_boolean,
   password_change_reason   => \&_check_password_change_reason,
   mfa                      => \&_check_mfa,
-  bounce_count             => \&_check_numeric,
 };
 
 sub UPDATE_COLUMNS {
@@ -124,7 +122,6 @@ sub UPDATE_COLUMNS {
     mfa
     mfa_required_date
     nickname
-    bounce_count
   );
   push(@cols, 'cryptpassword') if exists $self->{cryptpassword};
   return @cols;
@@ -474,16 +471,6 @@ sub _check_mfa {
   }
 
   return '';
-}
-
-sub _check_numeric {
-  my ($self, $value) = (@_);
-  if ($value !~ /^[0-9]+$/) {
-    ThrowCodeError('param_must_be_numeric',
-        {param => $value, function => 'Bugzilla::User::_check_numeric'});
-    return "must be a numeric value";
-  }
-  return $value;
 }
 
 ################################################################################
@@ -2765,33 +2752,6 @@ sub account_ip_login_failures {
   );
   return $self->{account_ip_login_failures};
 }
-
-#################
-# Email Bounces #
-#################
-
-sub bounce_count { $_[0]->{bounce_count}; }
-
-sub bounce_messages {
-  my ($self)       = @_;
-  my $dbh          = Bugzilla->dbh;
-  my $bounce_count = $self->bounce_count;
-  return $self->{bounce_messages} ||= $dbh->selectall_arrayref(
-    "SELECT " . $dbh->sql_date_format('at_time', '%Y-%m-%d %H:%i') . "
-     AS bounce_when, added AS bounce_message FROM audit_log
-     WHERE object_id = ? AND class = 'Bugzilla::User' AND field = 'bounce_message'
-     ORDER BY at_time DESC LIMIT $bounce_count",
-    {Slice => {}},
-    $self->id
-  );
-}
-
-sub set_bounce_count {
-  my ($self, $count) = @_;
-  $self->set('bounce_count', $count);
-  $self->{bounce_count} = $count;
-}
-
 
 ###############
 # Subroutines #

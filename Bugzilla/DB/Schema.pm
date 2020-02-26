@@ -948,7 +948,6 @@ use constant ABSTRACT_SCHEMA => {
       mfa                    => {TYPE => 'varchar(8)', DEFAULT => "''"},
       mfa_required_date      => {TYPE => 'DATETIME'},
       forget_after_date      => {TYPE => 'DATETIME'},
-      bounce_count           => {TYPE => 'INT1', NOTNULL => 1, DEFAULT => 0},
     ],
     INDEXES => [
       profiles_login_name_idx  => {FIELDS => ['login_name'], TYPE => 'UNIQUE'},

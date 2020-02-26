@@ -203,8 +203,6 @@ use Memoize;
   EMAIL_LIMIT_EXCEPTION
 
   JOB_QUEUE_VIEW_MAX_JOBS
-
-  BOUNCE_COUNT_MAX
 );
 
 @Bugzilla::Constants::EXPORT_OK = qw(contenttypes);
@@ -667,10 +665,6 @@ use constant EMAIL_LIMIT_EXCEPTION => "email_limit_exceeded\n";
 # The maximum number of jobs to show when viewing the job queue
 # (view_job_queue.cgi).
 use constant JOB_QUEUE_VIEW_MAX_JOBS => 2500;
-
-# Maximum number of times an email can bounce for an account
-# before the account is completely disabled.
-use constant BOUNCE_COUNT_MAX => 5;
 
 sub bz_locations {
 

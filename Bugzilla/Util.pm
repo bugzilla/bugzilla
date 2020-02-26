@@ -655,16 +655,16 @@ sub time_ago {
   my $yy = round($mo / 12);
 
   return 'Just now'           if $ss < 10;
-  return $ss . ' seconds ago' if $mm < 1;
-  return '1 minute ago'       if $mm < 2;
-  return $mm . ' minutes ago' if $hh < 1;
-  return '1 hour ago'         if $hh < 2;
-  return $hh . ' hours ago'   if $dd < 1;
-  return '1 day ago'          if $dd < 2;
-  return $dd . ' days ago'    if $mo < 1;
-  return '1 month ago'        if $mo < 2;
-  return $mo . ' months ago'  if $yy < 1;
-  return '1 year ago'         if $yy < 2;
+  return $ss . ' seconds ago' if $ss < 45;
+  return '1 minute ago'       if $ss < 90;
+  return $mm . ' minutes ago' if $mm < 45;
+  return '1 hour ago'         if $mm < 90;
+  return $hh . ' hours ago'   if $hh < 24;
+  return '1 day ago'          if $hh < 36;
+  return $dd . ' days ago'    if $dd < 30;
+  return '1 month ago'        if $dd < 45;
+  return $mo . ' months ago'  if $mo < 12;
+  return '1 year ago'         if $mo < 18;
   return $yy . ' years ago';
 }
 

@@ -25,7 +25,7 @@
 }
 
 #reps-form textarea {
-  width: 590px;
+  width: 100%;
 }
 
 #reps-form textarea.small {
@@ -57,4 +57,10 @@ label.required:before {
 
 .yui-calcontainer {
   z-index: 2;
+}
+
+#age_warning,
+#vouched_warning,
+#information_warning {
+  color: var(--error-message-foreground-color);
 }

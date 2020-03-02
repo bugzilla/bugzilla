@@ -18,17 +18,12 @@
   #%]
 [% USE Bugzilla %]
 [% cgi = Bugzilla.cgi %]
+
 First Name:
 [%+ cgi.param('first_name') %]
 
 Last Name:
 [%+ cgi.param('last_name') %]
-
-Under 18 years old:
-[%+ IF cgi.param('underage') %]Yes[% ELSE %]No[% END %]
-
-Gender:
-[%+ cgi.param('gender') %]
 
 City:
 [%+ cgi.param('city') %]
@@ -36,56 +31,38 @@ City:
 Country:
 [%+ cgi.param('country') %]
 
-Local Community:
-[% IF cgi.param('community') %]
-[%+ cgi.param('community') %]
-[% ELSE %]
--
-[% END %]
-
-IM:
-[% IF cgi.param('im') %]
-[%+ cgi.param('im') %]
-[% ELSE %]
--
-[% END %]
-
-Mozillians.org Account URL:
-[% IF cgi.param('mozillian') %]
-[%+ cgi.param('mozillian') %]
-[% ELSE %]
--
-[% END %]
-
-References:
-[% IF cgi.param('cc') %]
-[%+ cgi.param('cc').join(", ") %]
-[% END %]
-
-What are you currently doing at Mozilla?
-[% IF cgi.param('involved') %]
-[%+ cgi.param('involved') %]
-[% END %]
-
-When First Contributed:
-[% IF cgi.param('firstcontribute') %]
-[%+ cgi.param('firstcontribute') %]
-[% ELSE %]
--
-[% END %]
-
-Languages Spoken:
+[% IF cgi.param('languages') %]
+Languages:
 [%+ cgi.param('languages') %]
 
-How did you learn about Mozilla Reps:
+[% END %]
+Mozillians.org Account URL:
+[%+ cgi.param('mozillian') %]
+
+References:
+[%+ cgi.param('cc').join(", ") %]
+
+First contributed to Mozilla:
+[%+ cgi.param('firstcontribute') %]
+
+In which area are you active in Mozilla?
+[%+ cgi.param('involved') %]
+
+How did you learn about Mozilla Reps?
 [%+ cgi.param('learn') %]
 
-What motivates you most about joining Mozilla Reps:
+What motivates you most about joining Mozilla Reps?
 [%+ cgi.param('motivation') %]
 
-Comments:
+[% IF cgi.param('languages') %]
+Mission Driven Mozillians:
+[%+ cgi.param('mdm') %]
+
+[% END %]
+Activity:
+[%+ cgi.param('activity') %]
+
 [% IF cgi.param('comments') %]
+Comments:
 [%+ cgi.param('comments') %]
-[% ELSE %]
--
 [% END %]

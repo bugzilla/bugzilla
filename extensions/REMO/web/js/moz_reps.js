@@ -9,9 +9,8 @@ $(document).ready(function() {
     'use strict';
 
     var first_time = $("#first_time");
-    first_time.prop("checked", true);
     first_time.change(function(evt) {
-        if (!this.checked) {
+        if (this.value !== 'Yes') {
             $("#prior_bug").show();
             $("#prior_bug label").addClass("required");
         }
@@ -21,14 +20,36 @@ $(document).ready(function() {
         }
     }).change();
 
-    $("#underage").change(function(evt) {
-        if (this.checked) {
-            $('#underage_warning').show();
-            $('#submit').prop("disabled", true);
+    $("#age").change(function(evt) {
+        if (this.value === 'Yes') {
+            $('#age_warning').hide();
+            $('#submit').prop("disabled", false);
         }
         else {
-            $('#underage_warning').hide();
+            $('#age_warning').show();
+            $('#submit').prop("disabled", true);
+        }
+    }).change();
+
+    $("#vouched").change(function(evt) {
+        if (this.value === 'Yes') {
+            $('#vouched_warning').hide();
             $('#submit').prop("disabled", false);
+        }
+        else {
+            $('#vouched_warning').show();
+            $('#submit').prop("disabled", true);
+        }
+    }).change();
+
+    $("#information").change(function(evt) {
+        if (this.value === 'Yes') {
+            $('#information_warning').hide();
+            $('#submit').prop("disabled", false);
+        }
+        else {
+            $('#information_warning').show();
+            $('#submit').prop("disabled", true);
         }
     }).change();
 

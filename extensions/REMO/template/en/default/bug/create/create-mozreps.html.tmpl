@@ -35,7 +35,7 @@
 
 <p>
   If you have questions while completing this form, please contact the
-  <a href="mailto:reps-council@mozilla.org">Reps Council</a> for assistance.
+  <a href="mailto:reps-council@mozilla.com">Reps Council</a> for assistance.
 </p>
 
 <form method="post" action="[% basepath FILTER none %]post_bug.cgi" id="tmRequestForm">
@@ -58,79 +58,116 @@
   <input type="hidden" name="token" value="[% token FILTER html %]">
 
   <table id="reps-form">
-    <tr class="odd">
-      <th><label class="required" for="first_name">First Name:</label></th>
-      <td><input requuired id="first_name" name="first_name" size="40" placeholder="John"></td>
-    </tr>
-
-    <tr class="even">
-      <th><label class="required" for="last_name">Last Name:</label></th>
-      <td><input id="last_name" name="last_name" size="40" placeholder="Doe"></td>
-    </tr>
-
-    <tr class="odd">
-      <th><label for="underage">Are you under 18 years old?:</label></th>
+    <tr>
+      <th><label for="first_time">Is this the first time you have applied for Reps?</label></th>
       <td>
-        <input type="checkbox" id="underage" name="underage" value="1"><br>
-      </td>
-    </tr>
-
-    <tr id="underage_warning" class="odd" style="display: none">
-      <td colspan="2">
-        Mozilla Reps program is not currently accepting people under 18 years old.
-        Sorry for the inconvenience. In the meantime please check with your local Mozilla
-        group for other contribution opportunities
-      </td>
-    </tr>
-
-    <tr class="even">
-      <th><label class="required" for="gender">Gender:</label></th>
-      <td>
-        <select id="gender" name="gender">
-          <option value=""></option>
-          <option value="Male">Male</option>
-          <option value="Female">Female</option>
-          <option value="Other">Other</option>
+        <select id="first_time">
+          <option value="Yes">Yes</option>
+          <option value="No">No</option>
         </select>
       </td>
     </tr>
 
-    <tr class="odd">
+    <tr id="prior_bug" style="display: none">
+      <th><label for="dependson">Please reference the previous [% terms.bug %] number: </label></th>
+      <td><input id="dependson" name="dependson" type="text" value=""></td>
+    </tr>
+
+    <tr>
+      <th><label class="required" for="first_name">First Name:</label></th>
+      <td><input id="first_name" name="first_name" size="40" placeholder="John"></td>
+    </tr>
+
+    <tr>
+      <th><label class="required" for="last_name">Last Name:</label></th>
+      <td><input id="last_name" name="last_name" size="40" placeholder="Doe"></td>
+    </tr>
+
+    <tr>
+      <th><label for="age">Are you 18 years or older?</label></th>
+      <td>
+        <select id="age">
+          <option value="No">No</option>
+          <option value="Yes">Yes</option>
+        </select>
+      </td>
+    </tr>
+
+    <tr id="age_warning" style="display: none">
+      <td colspan="2">
+        Mozilla Reps program is not currently accepting people under 18 years old.
+        Sorry for the inconvenience. In the meantime please check with your local Mozilla
+        group for other contribution opportunities.
+      </td>
+    </tr>
+
+    <tr>
       <th><label class="required" for="city">City:</label></th>
       <td><input id="city" name="city" size="40" placeholder="Your city"></td>
     </tr>
 
-    <tr class="even">
+    <tr>
       <th><label class="required" for="country">Country:</label></th>
       <td><input id="country" name="country" size="40" placeholder="Your country"></td>
     </tr>
 
-    <tr class="odd">
-      <th><label for="community">Local Community you participate in:</label></th>
-      <td><input id="community" name="community" size="40" placeholder="Name of your community"></td>
+    <tr>
+      <th><label for="languages">Languages spoken:</label></th>
+      <td><input id="languages" name="languages" size="40"></td>
     </tr>
 
-    <tr class="even">
-      <th><label for="im">IM (specify service):</label></th>
-      <td><input id="im" name="im" size="40"></td>
+    <tr>
+      <th><label for="vouched" class="required">Do you have a vouched Mozillian account?</label></th>
+      <td>
+        <select id="vouched">
+          <option value="Yes">Yes</option>
+          <option value="No">No</option>
+        </select>
+      </td>
     </tr>
 
-    <tr class="odd">
+    <tr id="vouched_warning" style="display: none">
+      <td colspan="2">
+        You require a vouched Mozillians account to apply to the Reps Program.
+      </td>
+    </tr>
+
+    <tr>
       <th><label class="required" for="mozillian">Mozillians.org Account URL:</label></th>
       <td>
         <input type="url" id="mozillian" name="mozillian" size="40" placeholder="https://mozillians.org/u/name">
       </td>
     </tr>
 
-    <tr class="even">
+    <tr>
+      <th>
+        <label for="information">
+          Is your Mozillians account filled with the <a href="https://wiki.mozilla.org/Reps/Application_Process/Selection_Criteria" target="_blank">required information</a>?
+        </label>
+      </th>
+      <td>
+        <select id="information">
+          <option value="Yes">Yes</option>
+          <option value="No">No</option>
+        </select>
+      </td>
+    </tr>
+
+    <tr id="information_warning" style="display: none">
+      <td colspan="2">
+        Please fill out your Mozillians account according to the <a href="https://wiki.mozilla.org/Reps/Application_Process/Selection_Criteria" target="_blank">Selection Criteria</a>.
+      </td>
+    </tr>
+
+    <tr>
       <th colspan="2">
         <label class="required" for="cc">
-          Mozilla contributors who vouch your application:
+          Mozillians who vouch for your application. They need to add a comment to your application [% terms.bug %] why they endorse your application.
         </label>
       </th>
     </tr>
 
-    <tr class="even">
+    <tr>
       <td colspan="2">
         [% INCLUDE global/userselect.html.tmpl
            id       => "cc"
@@ -143,50 +180,47 @@
       </td>
     </tr>
 
-    <tr class="odd">
-      <th colspan="2">
-        <label class="required" for="involved">
-          What are you currently doing at Mozilla?
-        </label>
-      </th>
-    </tr>
-
-    <tr class="odd">
-      <td colspan="2">
-        <textarea id="involved" name="involved" rows="4" placeholder="Add-ons,  l10n,  SUMO,  QA,  ..."></textarea>
-      </td>
-    </tr>
-
-    <tr class="even">
+    <tr>
       <th>
         <label class="required" for="firstcontribute">
           When did you first start contributing to Mozilla?
         </label>
       </th>
-      <td><input id="firstcontribute" name="firstcontribute" size="40"></td>
+      <td>
+        <input name="firstcontribute" size="20" id="firstcontribute" value=""
+              onchange="updateCalendarFromField(this)">
+        <button type="button" class="calendar_button"
+                id="button_calendar_firstcontribute"
+                onclick="showCalendar('firstcontribute')">
+          <span>Calendar</span>
+        </button>
+        <div id="con_calendar_firstcontribute"></div>
+        <script [% script_nonce FILTER none %]>
+          createCalendar('firstcontribute')
+        </script>
+      </td>
     </tr>
 
-    <tr class="odd">
-      <th><label class="required" for="languages">Languages Spoken:</label></th>
-      <td><input id="languages" name="languages" size="40"></td>
+    <tr>
+      <th colspan="2">
+        <label class="required" for="involved">
+          In which area are you active in Mozilla?
+        </label>
+      </th>
     </tr>
 
-    <tr class="even">
+    <tr>
+      <td colspan="2">
+        <textarea id="involved" name="involved" rows="4" placeholder="Add-ons, Localization,  SUMO, QA, etc."></textarea>
+      </td>
+    </tr>
+
+    <tr>
       <th><label class="required" for="learn">How did you learn about Mozilla Reps?</label></th>
       <td><input id="learn" name="learn" size="40"></td>
     </tr>
 
-    <tr class="odd">
-      <th><label for="first_time">Is this the first time you have applied for Reps?</label></th>
-      <td><input type="checkbox" id="first_time" name="first_time" value="1" checked></td>
-    </tr>
-
-    <tr id="prior_bug" class="odd" style="display: none">
-      <th><label for="dependson">If you have already applied to the program in the past, please reference the [% terms.bug %] number: </label></th>
-      <td><input id="dependson" name="dependson" type="text" value=""></td>
-    </tr>
-
-    <tr class="even">
+    <tr>
       <th colspan="2">
         <label class="required" for="motivation">
           What motivates you most about joining Mozilla Reps?
@@ -194,7 +228,7 @@
       </th>
     </tr>
 
-    <tr class="even">
+    <tr>
       <td colspan="2">
         <textarea id="motivation" name="motivation" rows="4"
                   placeholder="[% INCLUDE motivation_placeholder FILTER html %]"></textarea>
@@ -205,19 +239,52 @@
       Tell us your goals and what you would be able to do as a Rep that you can't do right now
     [%- END %]
 
-    <tr class="odd">
+    <tr>
       <th colspan="2">
-        <label for="comments">
-          Comments:
+        <label for="mdm">
+          What are Mission Driven Mozillans?
         </label>
       </th>
     </tr>
 
-    <tr class="odd">
+    <tr>
+      <td colspan="2">
+        <textarea id="mdm" name="mdm" rows="4"></textarea>
+      </td>
+    </tr>
+
+    <tr>
+      <th colspan="2">
+        <label class="required" for="activity">
+          What have you done in the last 6 months for Mozilla?
+        </label>
+      </th>
+    </tr>
+
+    <tr>
+      <td colspan="2">
+        <textarea id="activity" name="activity" rows="8"
+                  placeholder="[% INCLUDE activity_placeholder FILTER html %]"></textarea>
+      </td>
+    </tr>
+
+    [% BLOCK activity_placeholder -%]
+      List some activities you organized or participated in and support this with links to blogposts/articles/events/etc
+    [%- END %]
+
+    <tr>
+      <th colspan="2">
+        <label for="comments">
+          Do you want to add something we need to know?
+        </label>
+      </th>
+    </tr>
+
+    <tr>
       <td colspan="2"><textarea id="comments" name="comments" rows="4"></textarea></td>
     </tr>
 
-    <tr class="even">
+    <tr>
       <th>
         <label class="required" for="privacy">
           I have read the
@@ -227,7 +294,7 @@
       <td><input id="privacy" name="privacy" type="checkbox" value="1"></td>
     </tr>
 
-    <tr class="odd">
+    <tr>
       <td>&nbsp;</td>
       <td align="right">
         <button id="submit">Submit</button>

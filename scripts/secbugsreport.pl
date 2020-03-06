@@ -20,6 +20,7 @@ use Bugzilla;
 use Bugzilla::Component;
 use Bugzilla::Constants;
 use Bugzilla::Error;
+use Bugzilla::Logging;
 use Bugzilla::Mailer;
 use Bugzilla::Report::SecurityRisk;
 
@@ -35,8 +36,9 @@ Bugzilla->usage_mode(USAGE_MODE_CMDLINE);
 
 my ($year, $month, $day, $hours, $minutes, $seconds, $time_zone_offset) = @ARGV;
 
-exit 0 unless Bugzilla->params->{report_secbugs_active};
-exit 0
+die 'secbugsreport.pl: report not active'
+  unless Bugzilla->params->{report_secbugs_active};
+die 'secbugsreport.pl: improper date format'
   unless Int->check($year)
   && Int->check($month)
   && Int->check($day)
@@ -157,10 +159,16 @@ my @parts_crit_high = (
   } sort { $a cmp $b } keys %{$report_crit_high->graphs}
 );
 
+my @recipients = split /[\s,]+/, Bugzilla->params->{report_secbugs_emails};
+DEBUG('recipients: ' . join ', ', @recipients);
+my $to_address   = shift @recipients;
+my $cc_addresses = @recipients ? join ', ', @recipients : '';
+
 my $email_crit_high = Email::MIME->create(
   header_str => [
     From              => Bugzilla->params->{'mailfrom'},
-    To                => Bugzilla->params->{report_secbugs_emails},
+    To                => $to_address,
+    Cc                => $cc_addresses,
     Subject           => "Security Bugs Report for $report_week",
     'X-Bugzilla-Type' => 'admin',
   ],
@@ -184,7 +192,8 @@ my @parts_moderate_low = (
 my $email_moderate_low = Email::MIME->create(
   header_str => [
     From              => Bugzilla->params->{'mailfrom'},
-    To                => Bugzilla->params->{report_secbugs_emails},
+    To                => $to_address,
+    Cc                => $cc_addresses,
     Subject           => "Security Bugs Report (moderate & low) for $report_week",
     'X-Bugzilla-Type' => 'admin',
   ],

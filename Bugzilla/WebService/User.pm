@@ -17,13 +17,16 @@ use Bugzilla;
 use Bugzilla::Constants;
 use Bugzilla::Error;
 use Bugzilla::Group;
+use Bugzilla::Logging;
 use Bugzilla::User;
 use Bugzilla::Util qw(trim detaint_natural);
 use Bugzilla::WebService::Util qw(filter filter_wants validate
   translate params_to_objects);
 use Bugzilla::Hook;
 
+use Mojo::UserAgent ();
 use List::Util qw(first);
+use Try::Tiny;
 
 # Don't need auth to login
 use constant LOGIN_EXEMPT => {login => 1, offer_account_by_email => 1,};
@@ -489,7 +492,7 @@ sub mfa_enroll {
 
 sub whoami {
   my ($self, $params) = @_;
-  my $user = Bugzilla->login(LOGIN_REQUIRED);
+  my $user = _user_from_phab_token() || Bugzilla->login(LOGIN_REQUIRED);
   return filter(
     $params,
     {
@@ -498,8 +501,54 @@ sub whoami {
       nick       => $self->type('string',  $user->nick),
       name       => $self->type('email',   $user->login),
       mfa_status => $self->type('boolean', !!$user->mfa),
+      groups     => [map { $_->name } @{$user->groups}],
     }
   );
+}
+
+sub _user_from_phab_token {
+
+  # BMO - If a token is provided in the X-PHABRICATOR-TOKEN header, we use that
+  # to request the associated email address from Phabricator via its
+  # `user.whoami` endpoint.
+
+  # only if PhabBugz is configure and X-PHABRICATOR-TOKEN is provided
+  (my $phab_url = Bugzilla->params->{phabricator_base_uri}) =~ s{/$}{};
+  my $phab_token = Bugzilla->input_params->{Phabricator_token};
+  return undef unless $phab_url && $phab_token;
+
+  try {
+    # query phabricator's whoami endpoint
+    my $res = _ua()
+      ->get("$phab_url/api/user.whoami" => form => {'api.token' => $phab_token});
+    my $ph_whoami = $res->result->json;
+
+    # treat any phabricator generated error as an invalid api-key
+    if (my $error = $ph_whoami->{error_info}) {
+      ThrowUserError("api_key_not_valid");
+    }
+
+    # load user from primaryEmail
+    return Bugzilla::User->new(
+      {name => $ph_whoami->{result}->{primaryEmail}, cache => 1})
+      || ThrowUserError("api_key_not_valid");
+  }
+  catch {
+    WARN("Request to $phab_url failed: $_");
+    ThrowUserError("api_key_not_valid");
+  };
+}
+
+sub _ua {
+  my $ua = Mojo::UserAgent->new(request_timeout => 10);
+  $ua->transactor->name('BMO user.whoami shim');
+  if (my $proxy = Bugzilla->params->{proxy_url}) {
+    $ua->proxy->http($proxy)->https($proxy);
+  }
+  else {
+    $ua->proxy->detect();
+  }
+  return $ua;
 }
 
 1;

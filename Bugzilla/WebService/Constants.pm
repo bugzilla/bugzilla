@@ -330,6 +330,7 @@ use constant API_AUTH_HEADERS => {
   X_BUGZILLA_PASSWORD => 'Bugzilla_password',
   X_BUGZILLA_API_KEY  => 'Bugzilla_api_key',
   X_BUGZILLA_TOKEN    => 'Bugzilla_token',
+  X_PHABRICATOR_TOKEN => 'Phabricator_token',  # 'whoami' only
 };
 
 1;

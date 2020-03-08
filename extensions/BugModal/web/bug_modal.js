@@ -114,14 +114,20 @@ $(function() {
         localStorage.setItem(key, JSON.stringify(value));
     }
 
-    function clearSavedBugComment() {
-        let key = `bug-modal-saved-comment-${BUGZILLA.bug_id}`;
-        localStorage.removeItem(key);
-    }
+    /**
+     * Clear comment cache once the comment field is emptied or the bug is successfully updated.
+     * @param {Number} [bug_id] Bug ID to be used for the cache key. The updated bug will be different from the current
+     * bug when the user has changed the “after changing a bug” preference to “show next bug in my list.” Pass a bug ID
+     * to take such special cases into account. Otherwise the current bug’s comment cache will be removed.
+     */
+    const clearSavedBugComment = (bug_id = BUGZILLA.bug_id) => {
+        localStorage.removeItem(`bug-modal-saved-comment-${bug_id}`);
+    };
 
-    // Clear saved comment once the bug is successfully updated
-    if (document.querySelector('.change-summary[data-type="bug"]')) {
-        clearSavedBugComment();
+    const $change_summary = document.querySelector('.change-summary[data-type="bug"]');
+
+    if ($change_summary) {
+        clearSavedBugComment(Number($change_summary.dataset.id));
     }
 
     function restoreSavedBugComment() {

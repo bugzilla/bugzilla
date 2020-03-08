@@ -49,7 +49,7 @@
 
 [% Hook.process('title') %]
 
-<dl class="change-summary bug" data-type="[% type FILTER html %]">
+<dl class="change-summary bug" data-type="[% type FILTER html %]" data-id="[% id FILTER html %]">
   <dt>[% title.$type %]</dt>
   <dd>
     [% PROCESS "bug/process/bugmail.html.tmpl" mailing_bugid = id %]

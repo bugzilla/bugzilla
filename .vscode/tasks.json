@@ -4,6 +4,23 @@
   "version": "2.0.0",
   "tasks": [
     {
+      "label": "Docker: Start Web Server",
+      "type": "shell",
+      "command": "docker-compose up --build",
+      "group": "none",
+      "problemMatcher": []
+    },
+    {
+      "label": "Docker: Update Web Server",
+      "type": "shell",
+      "command": "docker-compose exec bmo.test rsync -avz --exclude .git --exclude local /mnt/sync/ /app/",
+      "group": {
+        "kind": "build",
+        "isDefault": true
+      },
+      "problemMatcher": []
+    },
+    {
       "label": "Vagrant: Start VM",
       "type": "shell",
       "command": "vagrant up",
@@ -18,20 +35,17 @@
       "problemMatcher": []
     },
     {
-        "label": "Vagrant: Start Web Server",
-        "type": "shell",
-        "command": "vagrant ssh web -c 'start_morbo'",
-        "group": "none",
-        "problemMatcher": []
+      "label": "Vagrant: Start Web Server",
+      "type": "shell",
+      "command": "vagrant ssh web -c 'start_morbo'",
+      "group": "none",
+      "problemMatcher": []
     },
     {
       "label": "Vagrant: Update Web Server",
       "type": "shell",
       "command": "vagrant rsync web",
-      "group": {
-        "kind": "build",
-        "isDefault": true
-      },
+      "group": "build",
       "problemMatcher": []
     },
     {

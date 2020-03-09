@@ -163,14 +163,6 @@ or db is changed, do a full provision:
 
     vagrant rsync && vagrant provision
 
-If you are using Visual Studio Code, these commands will come in handy as the
-editor's `tasks`_ that can be found under the Terminal menu. The update command
-can be executed by simply hitting `Ctrl+Shift+B` on Windows/Linux or
-`Command+Shift+B` on macOS. An `extension bundle`_ for VS Code is also available.
-
-.. _`tasks`: https://code.visualstudio.com/docs/editor/tasks
-.. _`extension bundle`: https://marketplace.visualstudio.com/items?itemName=dylanwh.bugzilla
-
 Testing Auth delegation
 -----------------------
 
@@ -291,6 +283,14 @@ You can run the following command:
 
 The Mojolicious morbo development server, used by the web container, will notice any code changes and
 restart itself.
+
+If you are using Visual Studio Code, these ``docker-compose`` commands will come in handy as the
+editor's `tasks`_ that can be found under the Terminal menu. The update command is assigned to the
+default build task so it can be executed by simply hitting Ctrl+Shift+B on Windows/Linux or
+Command+Shift+B on macOS. An `extension bundle`_ for VS Code is also available.
+
+.. _`tasks`: https://code.visualstudio.com/docs/editor/tasks
+.. _`extension bundle`: https://marketplace.visualstudio.com/items?itemName=dylanwh.bugzilla
 
 
 Ensuring your Docker setup on Ubuntu 16.04

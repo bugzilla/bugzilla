@@ -823,6 +823,13 @@ h3.change-name a {
   cursor: pointer;
 }
 
+.comment-tags .remove[role="button"],
+.comment-tags .close-btn {
+  font-size: 1.8em;
+  line-height: .7em;
+  vertical-align: top;
+}
+
 #ctag {
   margin-bottom: 4px;
 }

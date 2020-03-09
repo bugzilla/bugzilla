@@ -305,7 +305,7 @@ $(function() {
         $.each(tags, function() {
             var span = $('<span/>').addClass('comment-tag').text(this);
             if (BUGZILLA.user.can_tag) {
-                span.prepend($('<a role="button" aria-label="Remove">x</a>').click(deleteTag));
+                span.prepend($('<a role="button" aria-label="Remove" class="remove">×</a>').click(deleteTag));
             }
             root.append(span);
         });
@@ -343,6 +343,55 @@ $(function() {
         }
     }
 
+    const saveTag = async () => {
+        hideTaggingUI();
+        $('#ctag-error').hide();
+
+        const $comment = $('#ctag').parents('.comment');
+        const commentNo = $comment.data('no');
+        const commentID = $comment.data('id');
+        const tags = $comment.data('tags').split(/[ ,]/);
+        const newTags = $('#ctag-add').val().trim().split(/[ ,]/).filter(tag => !tags.includes(tag));
+        const { min_comment_tag_length: min, max_comment_tag_length: max } = BUGZILLA.constant;
+
+        if (!newTags.length) {
+            return;
+        }
+
+        // validate
+        try {
+            newTags.forEach(tag => {
+                if (tag.length < min) {
+                    throw `Comment tags must be at least ${min} characters.`;
+                }
+                if (tag.length > max) {
+                    throw `Comment tags cannot be longer than ${max} characters.`;
+                }
+            });
+        } catch(ex) {
+            taggingError(commentNo, ex);
+            return;
+        }
+
+        // update ui
+        tags.push(...newTags);
+        tags.sort();
+        renderTags(commentNo, tags);
+
+        // update Bugzilla
+        try {
+            renderTags(commentNo, await Bugzilla.API.put(`bug/comment/${commentID}/tags`, { add: newTags }));
+            updateTagsMenu();
+        } catch ({ message }) {
+            taggingError(commentNo, message);
+            refreshTags(commentNo, commentID);
+        }
+    };
+
+    const hideTaggingUI = () => {
+        $('#ctag').hide().data('commentNo', '');
+    };
+
     $('#ctag-add')
         .devbridgeAutocomplete({
             appendTo: $('#main-inner'),
@@ -364,69 +413,27 @@ $(function() {
                 return suggestion.value.htmlEncode();
             }
         })
-        .keydown(async event => {
+        .keydown(event => {
             if (event.which === 27) {
                 event.preventDefault();
-                $('#ctag-close').click();
+                hideTaggingUI();
             }
             else if (event.which === 13) {
                 event.preventDefault();
-                $('#ctag-error').hide();
-
-                var ctag = $('#ctag');
-                var newTags = $('#ctag-add').val().trim().split(/[ ,]/);
-                var commentNo = ctag.data('commentNo');
-                var commentID = ctag.data('commentID');
-
-                $('#ctag-close').click();
-
-                // update ui
-                var tags = tagsFromDom($(this).parents('.comment-tags'));
-                var dirty = false;
-                var addTags = [];
-                $.each(newTags, function(index, value) {
-                    if ($.inArrayIn(value, tags) == -1)
-                        addTags.push(value);
-                });
-                if (addTags.length === 0)
-                    return;
-
-                // validate
-                try {
-                    $.each(addTags, function(index, value) {
-                        if (value.length < BUGZILLA.constant.min_comment_tag_length) {
-                            throw 'Comment tags must be at least ' +
-                                BUGZILLA.constant.min_comment_tag_length + ' characters.';
-                        }
-                        if (value.length > BUGZILLA.constant.max_comment_tag_length) {
-                            throw 'Comment tags cannot be longer than ' +
-                                BUGZILLA.constant.min_comment_tag_length + ' characters.';
-                        }
-                    });
-                } catch(ex) {
-                    taggingError(commentNo, ex);
-                    return;
-                }
-
-                Array.prototype.push.apply(tags, addTags);
-                tags.sort();
-                renderTags(commentNo, tags);
-
-                // update Bugzilla
-                try {
-                    renderTags(commentNo, await Bugzilla.API.put(`bug/comment/${commentID}/tags`, { add: addTags }));
-                    updateTagsMenu();
-                } catch ({ message }) {
-                    taggingError(commentNo, message);
-                    refreshTags(commentNo, commentID);
-                }
+                saveTag();
             }
         });
 
-    $('#ctag-close')
-        .click(function(event) {
+    $('#ctag-save')
+        .click(event => {
             event.preventDefault();
-            $('#ctag').hide().data('commentNo', '');
+            saveTag();
+        });
+
+    $('#ctag-cancel')
+        .click(event => {
+            event.preventDefault();
+            hideTaggingUI();
         });
 
     $('.tag-btn')

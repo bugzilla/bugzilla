@@ -1,6 +1,6 @@
-$answer{'ADMIN_EMAIL'}          = 'vagrant@bmo.test';
+$answer{'ADMIN_EMAIL'}          = 'admin@bmo.test';
 $answer{'ADMIN_OK'}             = 'Y';
-$answer{'ADMIN_PASSWORD'}       = 'vagrant01!';
+$answer{'ADMIN_PASSWORD'}       = 'password01!';
 $answer{'passwdqc_min'}         = '8, 8, 8, 8, 8';
 $answer{'ADMIN_REALNAME'}       = 'Vagrant User';
 $answer{'NO_PAUSE'}             = 1;

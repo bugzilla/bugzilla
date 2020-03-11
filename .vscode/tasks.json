@@ -19,55 +19,6 @@
         "isDefault": true
       },
       "problemMatcher": []
-    },
-    {
-      "label": "Vagrant: Start VM",
-      "type": "shell",
-      "command": "vagrant up",
-      "group": "none",
-      "problemMatcher": []
-    },
-    {
-      "label": "Vagrant: Suspend VM",
-      "type": "shell",
-      "command": "vagrant suspend",
-      "group": "none",
-      "problemMatcher": []
-    },
-    {
-      "label": "Vagrant: Start Web Server",
-      "type": "shell",
-      "command": "vagrant ssh web -c 'start_morbo'",
-      "group": "none",
-      "problemMatcher": []
-    },
-    {
-      "label": "Vagrant: Update Web Server",
-      "type": "shell",
-      "command": "vagrant rsync web",
-      "group": "build",
-      "problemMatcher": []
-    },
-    {
-      "label": "Vagrant: Force Update VM",
-      "type": "shell",
-      "command": "vagrant rsync && vagrant provision",
-      "group": "build",
-      "problemMatcher": []
-    },
-    {
-      "label": "Vagrant: Connect to Database",
-      "type": "shell",
-      "command": "vagrant ssh db -c 'mysql -u root -p bugs_bmo'",
-      "group": "none",
-      "problemMatcher": []
-    },
-    {
-      "label": "Vagrant: Update Perl Dependencies",
-      "type": "shell",
-      "command": "vagrant ssh web -c bmo-refresh-bundle",
-      "group": "none",
-      "problemMatcher": []
     }
   ]
 }

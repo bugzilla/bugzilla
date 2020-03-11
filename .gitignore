@@ -26,7 +26,6 @@
 /blib
 /Bugzilla-*.*/
 /local
-.vagrant/
 .vscode/perl-lang
 version.json
 __lbheartbeat__

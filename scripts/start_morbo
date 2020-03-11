@@ -35,7 +35,7 @@ if ($MOJO_LISTEN && -f $cert_file && -f $key_file) {
 push @PERL5LIB, catdir($BUGZILLA_DIR, qw(local lib perl5));
 unshift @PATH, catdir($BUGZILLA_DIR, qw(local bin));
 $BUGZILLA_ALLOW_INSECURE_HTTP = 1;
-$MOJO_REVERSE_PROXY           = 1 if $BUGZILLA_DIR ne '/vagrant';
+$MOJO_REVERSE_PROXY           = 1;
 $LOG4PERL_CONFIG_FILE //= 'log4perl-morbo.conf';
 
 my @files

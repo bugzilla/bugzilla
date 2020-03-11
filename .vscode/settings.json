@@ -9,7 +9,6 @@
     },
     "gitlens.blame.ignoreWhitespace": true,
     "files.exclude": {
-        ".vagrant": true,
         ".vscode/perl-lang": true,
         "template_cache": true
     },
@@ -18,5 +17,6 @@
     },
     "search.exclude": {
         "**/local": true
-    }
+    },
+    "restructuredtext.confPath": "${workspaceFolder}/docs/en/rst/conf.py"
 }

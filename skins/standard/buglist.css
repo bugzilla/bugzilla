@@ -55,7 +55,7 @@
   box-shadow: var(--primary-region-box-shadow);
 }
 
-.bz_buglist_header {
+.bz_buglist thead {
   position: sticky;
   top: 0;
   background: var(--grid-header-background-color);

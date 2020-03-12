@@ -209,12 +209,13 @@
     </td>
     [% END %]
     <td class="first-child bz_id_column">
-      <a href="[% basepath FILTER none %]show_bug.cgi?id=[% bug.bug_id %]">[% bug.bug_id %]</a>
+      [% bug.bug_id FILTER bug_link(bug.bug_id) FILTER none %]
       <span style="display: none">[%+ '[SEC]' IF bug.secure_mode %]</span>
     </td>
 
     [% FOREACH column = displaycolumns %]
     [% col_abbrev = abbrev.$column %]
+    [% col_type = bug_fields.$column.type %]
     <td [% 'style="white-space: nowrap"' IF NOT col_abbrev.wrap %]
         class="bz_[% column FILTER css_class_quote %]_column"
         [% SWITCH column %]
@@ -250,10 +251,10 @@
         <a href="[% basepath FILTER none %]show_bug.cgi?id=[% bug.bug_id FILTER html %]">
           [%- bug.$column.truncate(col_abbrev.maxlength, col_abbrev.ellipsis) FILTER html FILTER wbr -%]
         </a>
-      [% ELSIF bug_fields.$column.type == constants.FIELD_TYPE_BUG_ID %]
-        <a href="[% basepath FILTER none %]show_bug.cgi?id=[% bug.$column FILTER html %]">
-          [%- bug.$column.truncate(col_abbrev.maxlength, col_abbrev.ellipsis) FILTER html -%]
-        </a>
+      [% ELSIF col_type == constants.FIELD_TYPE_BUG_ID || col_type == constants.FIELD_TYPE_BUG_LIST %]
+        [% FOREACH id = bug.$column.split(', ') %]
+          [% id FILTER bug_link(id) FILTER none %][% ', ' UNLESS loop.last() %]
+        [% END %]
       [% ELSE %]
         [%- display_value(column, bug.$column).truncate(col_abbrev.maxlength, col_abbrev.ellipsis) FILTER html -%]
       [% END %]

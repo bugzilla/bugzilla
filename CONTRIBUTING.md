@@ -45,11 +45,12 @@ For specific git instructions, see [GitHub workflow 101](https://github.com/serv
 
 In all Bugzilla-related forums, we follow the
 [Mozilla Community Participation Guidelines](https://www.mozilla.org/en-US/about/governance/policies/participation/).
- For escalation or moderation issues, please contact inclusion@bugzilla.org instead of inclusion@mozilla.com.
+ For escalation or moderation issues, please contact us on Matrix or email bmo-mods@mozilla.com.
+ To report incidents use [our online reporting tool](https://app.convercent.com/en-us/Anonymous/IssueIntake/Survey?organizationId=11885ec6-e5a6-e811-80e6-000d3ab6ebad&intakeChannelId=2d885ec6-e5a6-e811-80e6-000d3ab6ebad).
  We will respond within 24 hours.
 
 ## Communication
 
-Bugzilla contributors frequent the `#bugzilla` channel on [`irc.mozilla.org`](https://wiki.mozilla.org/IRC).
+Bugzilla contributors frequent the `#bugzilla.mozilla.org` channel on [`chat.mozilla.org`](https://chat.mozilla.org/#/room/#bmo:mozilla.org).
 
 You can also join the [`bugzilla-dev` mailing list](developers@bugzilla.org).

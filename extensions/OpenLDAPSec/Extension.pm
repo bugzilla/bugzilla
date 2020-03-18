@@ -40,16 +40,16 @@ sub bugmail_recipients {
 
     if ( any { $_->id eq $insider_group->id } @{$bug->groups_in} ) {
         delete $recipients->{$public_list->id};
-        $recipients->{$insider_list->id}->{+REL_CC} = 2;
+        $recipients->{$insider_list->id}->{+REL_CC} = 1;
     } else {
         # It's a public bug, add public list, it still won't get private comments
-        $recipients->{$public_list->id}->{+REL_CC} = 2;
+        $recipients->{$public_list->id}->{+REL_CC} = 1;
 
         # Is there a private comment? If so, add insider_list on CC
         my $comments = $bug->comments({after => $bug->lastdiffed, to => $bug->delta_ts});
         @$comments = grep { $_->type || $_->body =~ /\S/ } @$comments;
         if ( any { $_->is_private } @$comments ) {
-            $recipients->{$insider_list->id}->{+REL_CC} = 2;
+            $recipients->{$insider_list->id}->{+REL_CC} = 1;
         }
     }
 }

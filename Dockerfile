@@ -1,4 +1,4 @@
-FROM mozillabteam/bmo-perl-slim:20200211.1
+FROM mozillabteam/bmo-perl-slim:20200320.1
 
 ENV DEBIAN_FRONTEND noninteractive
 

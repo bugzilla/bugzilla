@@ -156,6 +156,9 @@ $(function() {
         // Initial load
         Y.on("contentready", function (e) {
             updateQueryTable(default_query);
+            setInterval(function(e) {
+                updateQueryTable(default_query);
+            },1000*60*10);
         }, "#query_table");
 
         Y.one('#query').on('change', function(e) {

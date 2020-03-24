@@ -151,9 +151,15 @@ $(function () {
         // Initial load
         Y.on("contentready", function (e) {
             updateFlagTable("requestee");
+            setInterval(function(e) {
+                updateFlagTable("requestee");
+            },1000*60*10);
         }, "#requestee_table");
         Y.on("contentready", function (e) {
             updateFlagTable("requester");
+            setInterval(function(e) {
+                updateFlagTable("requester");
+            },1000*60*10);
         }, "#requester_table");
     });
 });

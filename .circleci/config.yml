@@ -3,7 +3,7 @@
 # 2. https://circleci.com/docs/2.0/building-docker-images/
 #
 
-version: 2
+version: 2.1
 
 defaults:
   install_deps: &install_deps

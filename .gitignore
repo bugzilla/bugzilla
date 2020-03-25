@@ -29,6 +29,7 @@
 .vscode/perl-lang
 version.json
 __lbheartbeat__
+.perl-version
 
 /skins/contrib/Dusk/admin.css
 /skins/contrib/Dusk/bug.css

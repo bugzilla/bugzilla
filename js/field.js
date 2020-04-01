@@ -716,14 +716,18 @@ $(function() {
                 lookup: function(query, done) {
                     var values = BUGZILLA.autocomplete_values[that.data('values')];
                     query = query.toLowerCase();
+                    var activeValues = document.querySelector('#keywords').value.split(',');
+                    activeValues.forEach((o,i,a) => a[i] = a[i].trim());
                     var matchStart =
                         $.grep(values, function(value) {
-                            return value.toLowerCase().substr(0, query.length) === query;
+                            if(!(activeValues.includes(value)))
+                                return value.toLowerCase().substr(0, query.length) === query;
                         });
                     var matchSub =
                         $.grep(values, function(value) {
-                            return value.toLowerCase().indexOf(query) !== -1 &&
-                                $.inArray(value, matchStart) === -1;
+                            if(!(activeValues.includes(value)))
+                                return value.toLowerCase().indexOf(query) !== -1 &&
+                                    $.inArray(value, matchStart) === -1;
                         });
                     var suggestions =
                         $.map($.merge(matchStart, matchSub), function(suggestion) {

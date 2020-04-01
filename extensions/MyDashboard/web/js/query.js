@@ -106,6 +106,7 @@ $(function() {
                 { key: "bug_id", label: "Bug", sortable: true, allowHTML: true, formatter: link_formatter },
                 { key: "changeddate", label: "Updated", formatter: updatedFormatter,
                 allowHTML: true, sortable: true },
+                { key: "priority", label: "Pri", sortable: true, allowHTML: true},
                 { key: "bug_status", label: "Status", sortable: true },
                 { key: "short_desc", label: "Summary", sortable: true, allowHTML: true, formatter: link_formatter },
             ],

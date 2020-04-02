@@ -424,7 +424,13 @@
 %]
   <div id="private-bug-banner" class="[% IF is_security_bug %]security[% ELSE %]confidential[% END %]">
     <span class="icon" aria-hidden="true"></span>
-    <strong>[% IF is_security_bug %]Security Issue[% ELSE %]Confidential[% END %]</strong>
+    <strong>
+      [% IF is_security_bug %]
+        Security Issue - <a href="https://wiki.mozilla.org/Security/Bug_Approval_Process">Approval Process</a>
+      [% ELSE %]
+        Confidential
+      [% END %]
+    </strong>
   </div>
 [% END %]
 

@@ -35,11 +35,15 @@
   # defaultcontent: (optional) Default content for the textarea.
   # mandatory:      (optional) Boolean specifying whether or not the textarea
   #                 is mandatory.
+  # aria_label      (optional) Accessible label for the textarea.
+  # aria_description (optional) Accessible description for the textarea.
   #%]
 
 <textarea [% IF name %]name="[% name FILTER html %]"[% END %]
           [% IF id %] id="[% id FILTER html %]"[% END %]
           [% IF accesskey %] accesskey="[% accesskey FILTER html %]"[% END %]
+          [% IF aria_label %] aria-label="[% aria_label FILTER html %]" [% END %]
+          [% IF aria_description %] aria-description="[% aria_description FILTER html %]" [% END %]
           [% IF style %] style="[% style FILTER html %]"[% END %]
           [% IF classes %] class="[% classes FILTER html %]"[% END %]
           [% IF wrap %] wrap="[% wrap FILTER html %]"[% END %]

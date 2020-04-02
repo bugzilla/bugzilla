@@ -129,6 +129,7 @@
                   disabled="disabled"
                 [% END %]
                 title="[% type.description FILTER html %]"
+                aria-label="[% type.name FILTER html %] Flag Value"
                 onchange="toggleRequesteeField(this);"
                 class="flag_select flag_type-[% type.id %]"
                 data-id="[% type.id %]" data-name="[% type.name FILTER html %]"
@@ -140,18 +141,18 @@
         [% IF !flag
               || (can_edit_flag && user.can_unset_flag(type, flag.status) && user.can_request_flag(type))
               || flag.setter_id == user.id %]
-          <option value="X"></option>
+          <option value="X" aria-label="None"></option>
         [% END %]
         [% IF type.is_active && can_edit_flag %]
           [% IF (!flag && type.is_requestable && user.can_request_flag(type))
                  || (flag && (user.can_unset_flag(type, flag.status) || flag.status == "?")) %]
-            <option value="?" [% "selected" IF flag && flag.status == "?" %]>?</option>
+            <option value="?" [% "selected" IF flag && flag.status == "?" %] aria-label="Requested">?</option>
           [% END %]
           [% IF user.can_set_flag(type) || (flag && flag.status == "+") %]
-            <option value="+" [% "selected" IF flag && flag.status == "+" %]>+</option>
+            <option value="+" [% "selected" IF flag && flag.status == "+" %] aria-label="Accepted">+</option>
           [% END %]
           [% IF user.can_set_flag(type) || (flag && flag.status == "-") %]
-            <option value="-" [% "selected" IF flag && flag.status == "-" %]>-</option>
+            <option value="-" [% "selected" IF flag && flag.status == "-" %] aria-label="Rejected">-</option>
           [% END %]
         [% ELSE %]
           <option value="[% flag.status %]" selected="selected">[% flag.status %]</option>
@@ -187,6 +188,7 @@
                          custom_userlist => grant_list
                          disabled => !can_edit_flag
                          request_type => type.name
+                         aria_label => type.name _ " Flag Requestee"
               %]
               [% Hook.process("requestee", "flag/list.html.tmpl") %]
             </span>

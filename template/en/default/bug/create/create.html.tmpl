@@ -236,7 +236,7 @@ TUI_hide_default('expert_fields');
 <input type="hidden" name="token" value="[% token FILTER html %]">
 <input type="hidden" name="bug_ignored" value="[% bug_ignored ? "1" : "0" %]">
 
-<table>
+<table role="none">
 <tbody>
   <tr>
     <td colspan="4">
@@ -281,6 +281,7 @@ TUI_hide_default('expert_fields');
     %]
     <td id="field_container_component">
       <select name="component" id="component" onchange="set_assign_to();"
+              aria-description="[% help_html.component FILTER txt FILTER collapse FILTER html %]"
               size="7" aria-required="true" class="required">
         [%# Build the lists of assignees and QA contacts if "usemenuforusers" is enabled. %]
         [% IF Param("usemenuforusers") %]
@@ -320,7 +321,7 @@ TUI_hide_default('expert_fields');
     <td colspan="2" id="comp_desc_container">
       [%# Enclose the fieldset in a nested table so that its width changes based
         # on the length on the component description. %]
-      <table>
+      <table role="none">
         <tr>
           <td>
             <fieldset>
@@ -338,7 +339,8 @@ TUI_hide_default('expert_fields');
       field = bug_fields.version editable = 1 rowspan = 3
     %]
     <td rowspan="3">
-      <select name="version" id="version" size="5">
+      <select name="version" id="version" size="5"
+          aria-description="[% help_html.version FILTER txt FILTER collapse FILTER html %]">
         [%- FOREACH v = version %]
           [% NEXT IF NOT v.is_active %]
           <option value="[% v.name FILTER html %]"
@@ -363,22 +365,22 @@ TUI_hide_default('expert_fields');
         <span title="Hardware">
           [% INCLUDE bug/field.html.tmpl
             no_tds = 1, bug = default, field = bug_fields.rep_platform, editable = 1,
-            value = default.rep_platform %]
+            value = default.rep_platform, aria_label = field_descs.rep_platform %]
         </span>
         <span title="Operating System">
           [% INCLUDE bug/field.html.tmpl
             no_tds = 1, bug = default, field = bug_fields.op_sys, editable = 1,
-            value = default.op_sys %]
+            value = default.op_sys, aria_label = field_descs.op_sys %]
         </span>
       </div>
       [% IF !cloned_bug_id %]
         <div class="comment">
           Update the <i>platform</i> field if this [% terms.bug %] is applicable to specific platforms.<br>
           <span id="rep_hw_os">
-            (<a href="javascript:void(0)"
+            (<a href="javascript:void(0)" role="button" aria-controls="rep_platform op_sys"
                 onclick="$('#rep_platform').val('[% rep_platform FILTER js FILTER html %]');
                          $('#op_sys').val('[% rep_op_sys FILTER js FILTER html %]')">use my platform</a>)
-            (<a href="javascript:void(0)"
+            (<a href="javascript:void(0)" role="button" aria-controls="rep_platform op_sys"
                 onclick="$('#rep_platform').val('All');
                          $('#op_sys').val('All')">applies to all platforms</a>)
           </span>
@@ -427,6 +429,7 @@ TUI_hide_default('expert_fields');
       field = bug_fields.assigned_to editable = 1
     %]
     <td>
+      [% assigned_to_desc = help_html.assigned_to FILTER txt FILTER collapse %]
       [% INCLUDE global/userselect.html.tmpl
          id       => "assigned_to"
          name     => "assigned_to"
@@ -435,11 +438,12 @@ TUI_hide_default('expert_fields');
          size     => 30
          emptyok  => 1
          custom_userlist => assignees_list
+         aria_description => assigned_to_desc
       %]
       [% UNLESS assigned_to_disabled %]
         <span id="take_bug">
           <button title="Assign to yourself"
-                  type="button" class="minor"
+                  type="button" class="minor" aria-controls="assigned_to"
                   onclick="return take_bug('[% user.login FILTER js %]')">Take</button>
         </span>
       [% END %]
@@ -451,6 +455,7 @@ TUI_hide_default('expert_fields');
       field = bug_fields.qa_contact editable = 1
     %]
     <td>
+    [% qa_contact_desc = help_html.qa_contact FILTER txt FILTER collapse %]
     [% INCLUDE global/userselect.html.tmpl
        id       => "qa_contact"
        name     => "qa_contact"
@@ -459,6 +464,7 @@ TUI_hide_default('expert_fields');
        size     => 30
        emptyok  => 1
        custom_userlist => qa_contacts_list
+       aria_description => qa_contact_desc
      %]
       <noscript>(Leave blank to assign to default qa contact)</noscript>
     </td>
@@ -470,6 +476,7 @@ TUI_hide_default('expert_fields');
       field = bug_fields.cc editable = 1
     %]
     <td>
+      [% cc_desc = help_html.cc FILTER txt FILTER collapse %]
       [% INCLUDE global/userselect.html.tmpl
          id       => "cc"
          name     => "cc"
@@ -477,6 +484,7 @@ TUI_hide_default('expert_fields');
          disabled => cc_disabled
          size     => 30
          multiple => 5
+         aria_description => cc_desc
        %]
      </td>
      <th>
@@ -499,7 +507,8 @@ TUI_hide_default('expert_fields');
       field = bug_fields.alias editable = 1
     %]
     <td colspan="2">
-      <input name="alias" size="30" maxlength="40" value="[% alias FILTER html %]">
+      <input id="alias" name="alias" size="30" maxlength="40" value="[% alias FILTER html %]"
+             aria-description="[% help_html.alias FILTER txt FILTER collapse FILTER html %]">
     </td>
   </tr>
 [% END %]
@@ -513,6 +522,7 @@ TUI_hide_default('expert_fields');
     <td colspan="3" class="field_value">
       <input name="short_desc" size="70" value="[% short_desc FILTER html %]"
              maxlength="255" spellcheck="true" aria-required="true"
+             aria-description="[% help_html.short_desc FILTER txt FILTER collapse FILTER html %]"
              class="required text_input" id="short_desc">
     </td>
   </tr>
@@ -554,7 +564,7 @@ TUI_hide_default('expert_fields');
   [% END %]
 
   <tr>
-    <th>Description:</th>
+    <th><label for="comment">Description</label>:</th>
     <td colspan="3">
 
       [% defaultcontent = BLOCK %]
@@ -584,6 +594,7 @@ TUI_hide_default('expert_fields');
     %]
     <td colspan="3" class="field_value">
       <input name="bug_file_loc" id="bug_file_loc" class="text_input"
+             aria-description="[% help_html.bug_file_loc FILTER txt FILTER collapse FILTER html %]"
              size="40" value="[% bug_file_loc FILTER html %]" placeholder="https://">
     </td>
   </tr>
@@ -601,7 +612,7 @@ TUI_hide_default('expert_fields');
                class="bz_default_hidden"  onClick="handleWantsAttachment(false)">
         <fieldset>
           <legend>Add an attachment</legend>
-          <table class="attachment_entry">
+          <table role="none" class="attachment_entry">
             [% PROCESS attachment/createformcontents.html.tmpl
                        flag_types = product.flag_types.attachment
                        any_flags_requesteeble = 1
@@ -630,13 +641,15 @@ TUI_hide_default('expert_fields');
         field = bug_fields.dependson editable = 1
       %]
       <td>
-        <input name="dependson" accesskey="d" value="[% dependson FILTER html %]" size="30">
+        <input id="dependson" name="dependson" accesskey="d" value="[% dependson FILTER html %]" size="30"
+               aria-description="[% help_html.dependson FILTER txt FILTER collapse FILTER html %]">
       </td>
       [% INCLUDE "bug/field-label.html.tmpl"
         field = bug_fields.blocked editable = 1
       %]
       <td>
-        <input name="blocked" accesskey="b" value="[% blocked FILTER html %]" size="30">
+        <input id="blocked" name="blocked" accesskey="b" value="[% blocked FILTER html %]" size="30"
+               aria-description="[% help_html.blocked FILTER txt FILTER collapse FILTER html %]">
       </td>
     </tr>
 
@@ -647,7 +660,8 @@ TUI_hide_default('expert_fields');
           editable = 1
         %]
         <td>
-          <input name="regressed_by" value="[% regressed_by FILTER html %]" size="30">
+          <input id="regressed_by" name="regressed_by" value="[% regressed_by FILTER html %]" size="30"
+                 aria-description="[% help_html.regressed_by FILTER txt FILTER collapse FILTER html %]">
         </td>
         <td colspan="2">
           [%~# Regressions field is hidden from new bugs ~%]
@@ -666,7 +680,7 @@ TUI_hide_default('expert_fields');
     [% END %]
 
     <tr>
-      <th>Whiteboard:</th>
+      <th><label for="status_whiteboard">Whiteboard</label>:</th>
       <td colspan="3" class="field_value">
         <input id="status_whiteboard" name="status_whiteboard" size="70"
                value="[% status_whiteboard FILTER html %]" class="text_input">
@@ -828,10 +842,10 @@ TUI_hide_default('expert_fields');
 [% Hook.process("end") %]
 
 <div id="guided">
-  <a id="guided_img" href="[% basepath FILTER none %]enter_bug.cgi?format=guided&amp;product=[% product.name FILTER uri %]"><img
-   src="[% basepath FILTER none %]extensions/BMO/web/images/guided.png" width="16" height="16" border="0" align="absmiddle"></a>
-  <a id="guided_link" href="[% basepath FILTER none %]enter_bug.cgi?format=guided&amp;product=[% product.name FILTER uri %]"
-   >Switch to the [% terms.Bugzilla %] Helper</a>
+  <a id="guided_img" href="[% basepath FILTER none %]enter_bug.cgi?format=guided&amp;product=[% product.name FILTER uri %]">
+    <img src="[% basepath FILTER none %]extensions/BMO/web/images/guided.png" width="16" height="16" alt="">
+    Switch to the [% terms.Bugzilla %] Helper
+  </a>
   | <a href="[% basepath FILTER none %]page.cgi?id=custom_forms.html">Custom [% terms.bug %] entry forms</a>
 </div>
 
@@ -847,8 +861,8 @@ TUI_hide_default('expert_fields');
     field = field editable = 1
   %]
   <td>
-    <select name="[% field.name FILTER html %]"
-            id="[% field.name FILTER html %]">
+    <select name="[% field.name FILTER html %]" id="[% field.name FILTER html %]"
+            aria-description="[% help_html.${field.name} FILTER txt FILTER collapse FILTER html %]">
     [%- FOREACH x = ${field.name} %]
       [% NEXT IF NOT x.is_active %]
       <option value="[% x.name FILTER html %]"

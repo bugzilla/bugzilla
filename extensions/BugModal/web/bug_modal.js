@@ -404,7 +404,7 @@ $(function() {
         if (hasExecCopy) {
             const url = BUGZILLA.bug_url;
             const text = `Bug ${BUGZILLA.bug_id} - ${BUGZILLA.bug_summary}`;
-            const html = `<a href="${url}">${text}</a>`;
+            const html = `<a href="${url}">${text.htmlEncode()}</a>`;
 
             document.addEventListener('copy', event => {
                 if (event.target.nodeType === 1 && event.target.matches('#clip')) {

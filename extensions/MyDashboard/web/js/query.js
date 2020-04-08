@@ -157,9 +157,6 @@ $(function() {
         // Initial load
         Y.on("contentready", function (e) {
             updateQueryTable(default_query);
-            setInterval(function(e) {
-                updateQueryTable(default_query);
-            },1000*60*10);
         }, "#query_table");
 
         Y.one('#query').on('change', function(e) {
@@ -174,6 +171,17 @@ $(function() {
             var index = query_select.get('selectedIndex');
             var selected_value = query_select.get("options").item(index).getAttribute('value');
             updateQueryTable(selected_value);
+        });
+
+        var refresh_interval;
+        Y.one('#auto_refresh').on('click', function(e) {
+            if(auto_refresh.checked == true){
+                refresh_interval = setInterval(function(e) {
+                    updateQueryTable(default_query);
+                },1000*60*10);
+            }else if(auto_refresh.checked == false){
+                clearInterval(refresh_interval);
+            }
         });
 
         Y.one('#query_markread').on('click', function(e) {

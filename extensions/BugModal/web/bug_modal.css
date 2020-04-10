@@ -301,10 +301,6 @@ input[type="number"] {
   display: flex;
 }
 
-#field-bug_severity[style="display:none"] {
-  display: none !important; /* Override `inline` */
-}
-
 #field-resolution {
   padding: 0;
 }

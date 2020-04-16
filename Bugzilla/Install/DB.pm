@@ -4347,7 +4347,7 @@ sub _populate_attachment_storage_class {
   my $count = $dbh->selectrow_array('SELECT COUNT(id) FROM attachment_storage_class');
   if (!$count) {
     $dbh->do(
-      "INSERT INTO attachment_storage_class (id, storage_class) SELECT attachments.id, 'database' FROM attachments ORDER BY attachments.id"
+      "INSERT INTO attachment_storage_class (id, storage_class) SELECT attachments.attach_id, 'database' FROM attachments ORDER BY attachments.attach_id"
     );
   }
 }

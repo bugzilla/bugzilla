@@ -11,12 +11,23 @@ $(function () {
     YUI({
         base: 'js/yui3/',
         combine: false
-    }).use('node', 'datatable', 'datatable-sort', 'escape', function(Y) {
+    }).use('node', 'datatable', 'datatable-sort', 'escape', 'cookie', function(Y) {
         // Common
         var dataTable = {
             requestee: null,
             requester: null
         };
+
+        var button_state = false,
+            refresh_interval = null;
+
+        // Grab last used auto-refresh configuration from cookie or use default
+        var autorefresh_cookie = Y.Cookie.get("my_dashboard_autorefresh");
+        if (autorefresh_cookie) {
+            if ("true" == autorefresh_cookie) {
+                button_state = true;
+            }
+        }
 
         var updateFlagTable = async type => {
             if (!type) return;
@@ -97,6 +108,17 @@ $(function () {
             }
         };
 
+        var auto_updateFlagTable = function(o) {
+            if (button_state == true) {
+                refresh_interval = setInterval(function(e) {
+                    updateFlagTable('requestee');
+                    updateFlagTable('requester');
+                }, 1000*60*10);
+            } else {
+                clearInterval(refresh_interval);
+            }
+        };
+
         // Requestee
         dataTable.requestee = new Y.DataTable({
             columns: [
@@ -148,21 +170,15 @@ $(function () {
             loadBugList('requester');
         });
 
-        var refresh_interval;
         Y.one('#auto_refresh').on('click', function(e) {
-            if(auto_refresh.checked == true){
-                refresh_interval = setInterval(function(e) {
-                    updateFlagTable("requester");
-                    updateFlagTable("requestee");
-                },1000*60*10);
-            }else if(auto_refresh.checked == false){
-                clearInterval(refresh_interval);
-            }
+            button_state = auto_refresh.checked;
+            auto_updateFlagTable();
         });
 
         // Initial load
         Y.on("contentready", function (e) {
             updateFlagTable("requestee");
+            auto_updateFlagTable();
         }, "#requestee_table");
         Y.on("contentready", function (e) {
             updateFlagTable("requester");

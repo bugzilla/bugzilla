@@ -31,7 +31,6 @@
       [% ELSE %]
         Changes submitted.
       [% END %]
-      [%+ PROCESS "bug/process/bugmail.html.tmpl" recipient_count = item.recipient_count %]
     [% END %]
   [% END %]
 [% END %]
@@ -51,7 +50,6 @@
       [% ELSE %]
         Attachment updated.
       [% END %]
-      [%+ PROCESS "bug/process/bugmail.html.tmpl" recipient_count = item.recipient_count %]
     [% END %]
   [% END %]
 [% END %]

@@ -20,6 +20,7 @@ BMO is Mozilla's highly customized version of Bugzilla.
     4. Administrative Tasks
       4.1  Generating cpanfile and cpanfile.snapshot files
       4.2  Generating a new mozillabteam/bmo-perl-slim base image
+    5. Support
 
 If you want to contribute to BMO, you can fork this repo and get a local copy
 of BMO running in a few minutes using Docker.
@@ -390,3 +391,9 @@ format with X being the current iteration value. For example, ``20191209.1``.
 
 After pushing to Docker Hub, you will need to update ``Dockerfile`` to include the new
 built image with correct date. Create a PR, review and commit the new change.
+
+
+Support
+==============================
+
+You can chat with the BMO team on `Matrix <https://chat.mozilla.org/#/room/#bmo:mozilla.org>`_.

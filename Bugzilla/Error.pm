@@ -27,6 +27,7 @@ use Bugzilla::Error::Code;
 use Carp;
 use Data::Dumper;
 use Date::Format;
+use Mojo::JSON qw(encode_json);
 use Scalar::Util qw(blessed);
 
 # We cannot use $^S to detect if we are in an eval(), because mod_perl
@@ -153,14 +154,6 @@ sub _throw_error {
   exit;
 }
 
-sub _add_vars_to_logging_fields {
-  my ($vars) = @_;
-
-  foreach my $key (keys %$vars) {
-    Bugzilla::Logging->fields->{"var_$key"} = $vars->{$key};
-  }
-}
-
 sub _make_logfunc {
   my ($type) = @_;
   my $logger = Log::Log4perl->get_logger("Bugzilla.Error.$type");
@@ -179,7 +172,7 @@ sub _make_logfunc {
 sub ThrowUserError {
   my ($error, $vars) = @_;
   my $logfunc = _make_logfunc('User');
-  _add_vars_to_logging_fields($vars);
+  Bugzilla::Logging->fields->{vars} = encode_json($vars);
 
   _throw_error('global/user-error.html.tmpl', $error, $vars, $logfunc);
 }
@@ -187,7 +180,7 @@ sub ThrowUserError {
 sub ThrowCodeError {
   my ($error, $vars) = @_;
   my $logfunc = _make_logfunc('Code');
-  _add_vars_to_logging_fields($vars);
+  Bugzilla::Logging->fields->{vars} = encode_json($vars);
 
   _throw_error('global/code-error.html.tmpl', $error, $vars, $logfunc);
 }

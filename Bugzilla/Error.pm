@@ -195,7 +195,8 @@ sub ThrowTemplateError {
   if (blessed($template_err) && $template_err->isa('Template::Exception')) {
     my $type = $template_err->type;
     if ($type =~ /^bugzilla\.(code|user)\.(.+)/) {
-      _throw_error("global/$1-error.html.tmpl", $2, $template_err->info);
+      my $logfunc = _make_logfunc(ucfirst(lc($1)));
+      _throw_error("global/$1-error.html.tmpl", $2, $template_err->info, $logfunc);
       return;
     }
   }

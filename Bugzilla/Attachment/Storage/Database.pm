@@ -21,7 +21,7 @@ sub set_data {
     = $dbh->prepare(
     "REPLACE INTO attach_data (id, thedata) VALUES (?, ?)"
     );
-  $sth->bind_param(1, $self->attachment->id);
+  $sth->bind_param(1, $self->attach_id);
   $sth->bind_param(2, $data, $dbh->BLOB_TYPE);
   $sth->execute();
   return $self;
@@ -32,14 +32,14 @@ sub get_data {
   my $dbh = Bugzilla->dbh;
   my ($data)
     = $dbh->selectrow_array("SELECT thedata FROM attach_data WHERE id = ?",
-    undef, $self->attachment->id);
+    undef, $self->attach_id);
   return $data;
 }
 
 sub remove_data {
   my ($self) = @_;
   my $dbh = Bugzilla->dbh;
-  $dbh->do("DELETE FROM attach_data WHERE id = ?", undef, $self->attachment->id);
+  $dbh->do("DELETE FROM attach_data WHERE id = ?", undef, $self->attach_id);
   return $self;
 }
 
@@ -47,7 +47,7 @@ sub data_exists {
   my ($self)   = @_;
   my $dbh      = Bugzilla->dbh;
   my ($exists) = $dbh->selectrow_array("SELECT 1 FROM attach_data WHERE id = ?",
-    undef, $self->attachment->id);
+    undef, $self->attach_id);
   return !!$exists;
 }
 

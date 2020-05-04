@@ -51,13 +51,13 @@ sub data_exists {
 
 sub _local_path {
   my ($self) = @_;
-  my $hash = sprintf 'group.%03d', $self->attachment->id % 1000;
+  my $hash = sprintf 'group.%03d', $self->attach_id % 1000;
   return bz_locations()->{attachdir} . '/' . $hash;
 }
 
 sub _local_file {
   my ($self) = @_;
-  return $self->_local_path() . '/attachment.' . $self->attachment->id;
+  return $self->_local_path() . '/attachment.' . $self->attach_id;
 }
 
 1;

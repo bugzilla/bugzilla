@@ -10,28 +10,28 @@ package Bugzilla::Attachment::Storage::Base;
 use 5.10.1;
 use Moo::Role;
 
-use Type::Utils qw(class_type);
+use Types::Standard qw(Int);
 
 requires qw(set_data get_data remove_data data_exists data_type);
 
-has 'attachment' => (
+has 'attach_id' => (
   is       => 'ro',
   required => 1,
-  isa      => class_type({class => 'Bugzilla::Attachment'})
+  isa      => Int
 );
 
 sub set_class {
   my ($self) = @_;
   Bugzilla->dbh->do(
     "REPLACE INTO attachment_storage_class (id, storage_class) VALUES (?, ?)",
-    undef, $self->attachment->id, $self->data_type);
+    undef, $self->attach_id, $self->data_type);
   return $self;
 }
 
 sub remove_class {
   my ($self) = @_;
   Bugzilla->dbh->do("DELETE FROM attachment_storage_class WHERE id = ?",
-    undef, $self->attachment->id);
+    undef, $self->attach_id);
   return $self;
 }
 

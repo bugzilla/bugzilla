@@ -936,15 +936,15 @@ sub get_storage_by_name {
   # all options for attachment_storage need to be handled here
   if ($name eq 'database') {
     require Bugzilla::Attachment::Storage::Database;
-    return Bugzilla::Attachment::Storage::Database->new({attachment => $self});
+    return Bugzilla::Attachment::Storage::Database->new({attach_id => $self->id});
   }
   elsif ($name eq 'filesystem') {
     require Bugzilla::Attachment::Storage::FileSystem;
-    return Bugzilla::Attachment::Storage::FileSystem->new({attachment => $self});
+    return Bugzilla::Attachment::Storage::FileSystem->new({attach_id => $self->id});
   }
   elsif ($name eq 's3') {
     require Bugzilla::Attachment::Storage::S3;
-    return Bugzilla::Attachment::Storage::S3->new({attachment => $self});
+    return Bugzilla::Attachment::Storage::S3->new({attach_id => $self->id, datasize => $self->datasize});
   }
   else {
     return undef;

@@ -13,10 +13,17 @@ use Moo;
 use Bugzilla::Error;
 use Bugzilla::S3;
 
+use Types::Standard qw(Int);
+
 with 'Bugzilla::Attachment::Storage::Base';
 
 has 's3'     => (is => 'lazy');
 has 'bucket' => (is => 'lazy');
+has 'datasize' => (
+  is       => 'ro',
+  required => 1,
+  isa      => Int
+);
 
 sub _build_s3 {
   my $self = shift;
@@ -38,15 +45,15 @@ sub data_type { return 's3'; }
 
 sub set_data {
   my ($self, $data) = @_;
-  my $attach_id = $self->attachment->id;
+  my $attach_id = $self->attach_id;
 
   # If the attachment is larger than attachment_s3_minsize,
   # we instead store it in the database.
   if (Bugzilla->params->{attachment_s3_minsize}
-    && $self->attachment->datasize < Bugzilla->params->{attachment_s3_minsize})
+    && $self->datasize < Bugzilla->params->{attachment_s3_minsize})
   {
     require Bugzilla::Attachment::Storage::Database;
-    return Bugzilla::Attachment::Storage::Database->new({attachment => $self->attachment})
+    return Bugzilla::Attachment::Storage::Database->new({attach_id => $self->attach_id})
       ->set_data($data);
   }
 
@@ -62,7 +69,7 @@ sub set_data {
 
 sub get_data {
   my ($self)    = @_;
-  my $attach_id = $self->attachment->id;
+  my $attach_id = $self->attach_id;
   my $response  = $self->bucket->get_key($attach_id);
   if (!$response) {
     warn "Failed to retrieve attachment $attach_id from S3: "
@@ -75,7 +82,7 @@ sub get_data {
 
 sub remove_data {
   my ($self) = @_;
-  my $attach_id = $self->attachment->id;
+  my $attach_id = $self->attach_id;
   $self->bucket->delete_key($attach_id)
     or warn "Failed to remove attachment $attach_id from S3: "
     . $self->bucket->errstr . "\n";
@@ -84,7 +91,7 @@ sub remove_data {
 
 sub data_exists {
   my ($self) = @_;
-  return !!$self->bucket->head_key($self->attachment->id);
+  return !!$self->bucket->head_key($self->attach_id);
 }
 
 1;

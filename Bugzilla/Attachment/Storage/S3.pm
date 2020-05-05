@@ -31,6 +31,7 @@ sub _build_s3 {
     aws_access_key_id     => Bugzilla->params->{aws_access_key_id},
     aws_secret_access_key => Bugzilla->params->{aws_secret_access_key},
     secure                => 1,
+    retry                 => 1,
   });
   return $self->{s3};
 }

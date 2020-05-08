@@ -1026,7 +1026,7 @@ sub _bug_has_current_patch {
 sub _bug_missing_sec_approval {
   my ($self) = @_;
 
-  # see https://wiki.mozilla.org/Security/Bug_Approval_Process for the rules
+  # see https://firefox-source-docs.mozilla.org/bug-mgmt/processes/security-approval.html for the rules
 
   # no need to alert once a bug is closed
   return 0 if $self->resolution;

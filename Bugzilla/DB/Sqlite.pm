@@ -138,15 +138,12 @@ sub on_dbi_connected {
   # SQLite has a "substr" function, but other DBs call it "SUBSTRING"
   # so that's what we use, and I don't know of any way in SQLite to
   # alias the SQL "substr" function to be called "SUBSTRING".
-  $self->sqlite_create_function('substring',      3, \&CORE::substr);
-  $self->sqlite_create_function('char_length',    1, sub { length($_[0]) });
-  $self->sqlite_create_function('mod',            2, \&_sqlite_mod);
-  $self->sqlite_create_function('now',            0, \&_sqlite_now);
-  $self->sqlite_create_function('localtimestamp', 1, \&_sqlite_now);
-  $self->sqlite_create_function('floor',          1, \&POSIX::floor);
-
-  bless($self, $class);
-  return $self;
+  $dbh->sqlite_create_function('substring',      3, \&CORE::substr);
+  $dbh->sqlite_create_function('char_length',    1, sub { length($_[0]) });
+  $dbh->sqlite_create_function('mod',            2, \&_sqlite_mod);
+  $dbh->sqlite_create_function('now',            0, \&_sqlite_now);
+  $dbh->sqlite_create_function('localtimestamp', 1, \&_sqlite_now);
+  $dbh->sqlite_create_function('floor',          1, \&POSIX::floor);
 }
 
 ###############

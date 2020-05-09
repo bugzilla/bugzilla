@@ -11,6 +11,8 @@ use 5.10.1;
 use strict;
 use warnings;
 
+BEGIN { eval { utf8->import; require 'utf8_heavy.pl' }; }
+
 # We want any compile errors to get to the browser, if possible.
 BEGIN {
     # This makes sure we're in a CGI.

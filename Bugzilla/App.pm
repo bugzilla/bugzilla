@@ -32,7 +32,7 @@ use Mojo::Loader qw( find_modules );
 use Module::Runtime qw( require_module );
 use Bugzilla::Util ();
 use Cwd qw(realpath);
-use MojoX::Log::Log4perl::Tiny;
+use MojoX::Log::Log4perl;
 use Bugzilla::WebService::Server::REST;
 use Try::Tiny;
 
@@ -40,6 +40,7 @@ has 'static' => sub { Bugzilla::App::Static->new };
 
 sub startup {
   my ($self) = @_;
+  $self->log(MojoX::Log::Log4perl->new);
 
   TRACE('Starting up');
   $self->plugin('Bugzilla::App::Plugin::BlockIP');

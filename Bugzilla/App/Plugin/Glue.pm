@@ -210,9 +210,6 @@ sub register {
       return Mojo::ByteStream->new($buffer);
     }
   );
-
-  $app->log(MojoX::Log::Log4perl::Tiny->new(
-    logger => Log::Log4perl->get_logger(ref $app)));
 }
 
 1;

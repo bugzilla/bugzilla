@@ -520,12 +520,14 @@ sub process_revision_change {
   }
 
   # Set status to request-review if revision is new and
-  # in draft state and not changes-planned
+  # in draft state and not changes-planned, closed, or abandoned.
   if ($is_new
       && $revision->status ne 'changes-planned'
+      && $revision->status ne 'closed'
+      && $revision->status ne 'abandoned'
       && ($revision->is_draft && !$revision->hold_as_draft))
   {
-    INFO("Moving from draft to needs-review");
+    INFO('Moving from draft to needs-review');
     $revision->set_status('request-review');
   }
 

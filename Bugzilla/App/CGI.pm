@@ -78,6 +78,7 @@ sub load_one {
     Bugzilla->usage_mode(USAGE_MODE_BROWSER);
     try {
       Bugzilla->init_page();
+      $c->res->headers->cache_control('private, no-cache');
       $inner->();
     }
     catch {

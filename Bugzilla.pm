@@ -390,12 +390,6 @@ sub login {
 
   # If Mojo native app is requesting login, we need to possibly redirect
   my $C = $Bugzilla::App::CGI::C;
-  if ($class->user->id) {
-    $C->res->headers->cache_control('private, max-age=60');
-  }
-  else {
-    $C->res->headers->cache_control('public, max-age=300');
-  }
   my $session = $C->session;
   if (!$on_token_page && $session->{override_login_target}) {
     my $override_login_target = delete $session->{override_login_target};

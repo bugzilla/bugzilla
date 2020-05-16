@@ -158,7 +158,8 @@ sub input_params {
 }
 
 sub localconfig {
-  return $_[0]->process_cache->{localconfig} ||= Bugzilla::Localconfig->new(read_localconfig());
+  return $_[0]->process_cache->{localconfig}
+    ||= Bugzilla::Localconfig->new(read_localconfig());
 }
 
 
@@ -327,7 +328,7 @@ sub login {
       }
     }
     else {
-      my $dbh = Bugzilla->dbh_main;
+      my $dbh  = Bugzilla->dbh_main;
       my $date = $dbh->sql_date_math('NOW()', '+', '?', 'DAY');
       my ($mfa_required_date)
         = $dbh->selectrow_array("SELECT $date", undef, $grace_period);
@@ -389,6 +390,12 @@ sub login {
 
   # If Mojo native app is requesting login, we need to possibly redirect
   my $C = $Bugzilla::App::CGI::C;
+  if ($class->user->id) {
+    $C->res->headers->cache_control('private, max-age=60');
+  }
+  else {
+    $C->res->headers->cache_control('public, max-age=300');
+  }
   my $session = $C->session;
   if (!$on_token_page && $session->{override_login_target}) {
     my $override_login_target = delete $session->{override_login_target};
@@ -643,7 +650,7 @@ sub fields {
   my $fields = $cache->{fields};
   my %requested;
   if (my $types = delete $criteria->{type}) {
-    $types = ref($types) ? $types : [$types];
+    $types     = ref($types) ? $types : [$types];
     %requested = map { %{$fields->{by_type}->{$_} || {}} } @$types;
   }
   else {
@@ -670,7 +677,7 @@ sub fields {
 
 sub active_custom_fields {
   my (undef, $params, $wants) = @_;
-  my $cache_id = 'active_custom_fields';
+  my $cache_id  = 'active_custom_fields';
   my $can_cache = !exists $params->{bug_id} && !$wants;
   if ($can_cache && $params) {
     $cache_id .= ($params->{product} ? '_p' . $params->{product}->id : '')
@@ -724,7 +731,7 @@ sub audit {
 sub clear_request_cache {
   my (undef, %option) = @_;
   my $request_cache = request_cache();
-  my @except = $option{except} ? @{$option{except}} : ();
+  my @except        = $option{except} ? @{$option{except}} : ();
 
   %{$request_cache} = map { $_ => $request_cache->{$_} } @except;
 }
@@ -820,7 +827,7 @@ sub _cleanup {
   my $main   = Bugzilla->request_cache->{dbh_main};
   my $shadow = Bugzilla->request_cache->{dbh_shadow};
   foreach my $dbh ($main, $shadow) {
-    next if !$dbh;
+    next                            if !$dbh;
     $dbh->bz_rollback_transaction() if $dbh->bz_in_transaction;
   }
   clear_request_cache();

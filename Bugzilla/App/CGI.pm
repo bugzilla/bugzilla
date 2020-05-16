@@ -9,6 +9,7 @@ package Bugzilla::App::CGI;
 use Mojo::Base 'Mojolicious::Controller';
 
 use CGI::Compile;
+use Bugzilla::Logging;
 use Try::Tiny;
 use Sys::Hostname;
 use Sub::Quote 2.005000;

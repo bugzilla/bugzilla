@@ -37,6 +37,8 @@ sub _before_routes {
   state $attachment_base       = Bugzilla->localconfig->attachment_base;
   state $attachment_root       = _attachment_root($attachment_base);
   state $attachment_host_regex = _attachment_host_regex($attachment_base);
+  state $urlbase_is_https      = $urlbase =~ /^https/;
+  state $behind_proxy          = Bugzilla->localconfig->inbound_proxies;
 
   my $stash = $c->stash;
   my $req   = $c->req;
@@ -51,6 +53,22 @@ sub _before_routes {
   }
 
   return if $stash->{'mojo.static'};
+
+  if ($urlbase_is_https && $behind_proxy && !$req->is_secure) {
+    my $error = "Reverse Proxy is Misconfigured";
+    $c->render(text => $error, status => 500);
+    unless ($ENV{MOJO_REVERSE_PROXY}) {
+      ERROR(
+        "$error: The environmental variable MOJO_REVERSE_PROXY should be set if operating Bugzilla behind a reverse proxy"
+      );
+    }
+    else {
+      ERROR(
+        "$error: Check that X-Forwarded-Proto and similar headers are being sent.");
+    }
+    return;
+  }
+
   return if $hostname eq $urlbase_host;
 
   my $path = $url->path;

@@ -42,11 +42,11 @@
       [% Hook.process('field') %]
 
       [% SET can_change = [] %]
-      [% IF user.authorizer.can_change_password %]
-        [% can_change.push('password') %]
-      [% END %]
       [% IF user.authorizer.can_change_email && Param('allowemailchange') %]
         [% can_change.push('email address') %]
+      [% END %]
+      [% IF user.authorizer.can_change_password %]
+        [% can_change.push('password') %]
       [% END %]
 
       [% IF can_change.size %]
@@ -61,42 +61,6 @@
             changes.
           </td>
         </tr>
-        <tr>
-          <th align="right">Current password:</th>
-          <td>
-            <input type="hidden" name="old_login" value="[% user.login FILTER html %]">
-            <input autocomplete="current-password" type="password" name="old_password" id="old_password">
-            <a href="#" id="forgot-password">I forgot my password</a>
-          </td>
-        </tr>
-        [% IF user.authorizer.can_change_password %]
-          <tr>
-          <td>&nbsp;</td>
-          <td>
-            [% Param('passwdqc_desc') FILTER html_light %]
-          </td>
-          </tr>
-          <tr>
-          <td>&nbsp;</td>
-          <td>
-            <em>Warning:</em> Changing your password will automatically log out
-            other login sessions except for the current one.
-          </td>
-          </tr>
-          <tr>
-            <th align="right">New password:</th>
-            <td>
-              <input autocomplete="new-password" type="password" name="new_password1" id="new_password1">
-              [% INCLUDE "mfa/protected.html.tmpl" %]
-            </td>
-          </tr>
-          <tr>
-            <th align="right">Confirm new password:</th>
-            <td>
-              <input autocomplete="new-password" type="password" name="new_password2" id="new_password2">
-            </td>
-          </tr>
-        [% END %]
 
         [% IF user.authorizer.can_change_email && Param('allowemailchange') %]
           [% IF login_change_date %]
@@ -128,6 +92,43 @@
               </td>
             </tr>
           [% END %]
+        [% END %]
+
+        <tr>
+          <th align="right">Current password:</th>
+          <td>
+            <input type="hidden" name="old_login" value="[% user.login FILTER html %]">
+            <input autocomplete="current-password" type="password" name="old_password" id="old_password">
+            <a href="#" id="forgot-password">I forgot my password</a>
+          </td>
+        </tr>
+        [% IF user.authorizer.can_change_password %]
+          <tr>
+          <td>&nbsp;</td>
+          <td>
+            <em>Warning:</em> Changing your password will automatically log out
+            other login sessions except for the current one.
+          </td>
+          </tr>
+          <tr>
+            <th align="right">New password:</th>
+            <td>
+              <input autocomplete="new-password" type="password" name="new_password1" id="new_password1">
+              [% INCLUDE "mfa/protected.html.tmpl" %]
+            </td>
+          </tr>
+          <tr>
+          <td>&nbsp;</td>
+          <td>
+            [% Param('passwdqc_desc') FILTER html_light %]
+          </td>
+          </tr>
+          <tr>
+            <th align="right">Confirm new password:</th>
+            <td>
+              <input autocomplete="new-password" type="password" name="new_password2" id="new_password2">
+            </td>
+          </tr>
         [% END %]
         <tr>
           <td></td>

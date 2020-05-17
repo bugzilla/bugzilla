@@ -39,11 +39,17 @@
   #           wrapping <td> for the field.
   #   bug (optional): The current Bugzilla::Bug being displayed, or a hash
   #                   with default field values being displayed on a page.
+  #   aria_label (optional): Accessible label for the form widget.
   #%]
 
 [% SET hidden = 0 %]
 [% IF bug AND !field.is_visible_on_bug(bug) %]
   [% SET hidden = 1 %]
+[% END %]
+
+[% SET aria_description = '' %]
+[% IF help_html.${field.name}.defined %]
+  [% SET aria_description = help_html.${field.name} FILTER txt FILTER collapse %]
 [% END %]
 
 [% IF NOT no_tds %]
@@ -61,6 +67,8 @@
                name="[% field.name FILTER html %]"
                value="[% value FILTER html %]" size="40"
                maxlength="[% constants.MAX_FREETEXT_LENGTH FILTER none %]"
+               [% IF aria_label %] aria-label="[% aria_label FILTER html %]" [% END %]
+               [% IF aria_description %] aria-description="[% aria_description FILTER html %]" [% END %]
                [% IF field.type == constants.FIELD_TYPE_INTEGER %] pattern="\d+[% IF dontchange %]|[% dontchange FILTER html %][% END %]" [% END %]
                [% ' aria-required="true"' IF (field.is_mandatory || required) %]>
     [% CASE [constants.FIELD_TYPE_DATETIME, constants.FIELD_TYPE_DATE] %]
@@ -68,6 +76,8 @@
       <input name="[% field.name FILTER html %]" size="[% size FILTER none %]"
              id="[% field.name FILTER html %]"
              value="[% value FILTER html %]"
+             [% IF aria_label %] aria-label="[% aria_label FILTER html %]" [% END %]
+             [% IF aria_description %] aria-description="[% aria_description FILTER html %]" [% END %]
              [% ' aria-required="true"' IF (field.is_mandatory || required) %]
              onchange="updateCalendarFromField(this)">
       <button type="button" class="calendar_button"
@@ -85,6 +95,8 @@
         <span id="[% field.name FILTER html %]_input_area">
           <input name="[% field.name FILTER html %]" id="[% field.name FILTER html %]"
                  value="[% value FILTER html %]" size="7"
+                 [% IF aria_label %] aria-label="[% aria_label FILTER html %]" [% END %]
+                 [% IF aria_description %] aria-description="[% aria_description FILTER html %]" [% END %]
                  [% ' aria-required="true"' IF (field.is_mandatory || required) %]>
 
         </span>
@@ -108,10 +120,14 @@
         <input type="hidden" id="[% field.name FILTER html %]_dirty">
         [% IF use_buttons %]
         <div role="radiogroup" class="buttons toggle" id="[% field.name FILTER html %]"
+             [% IF aria_label %] aria-label="[% aria_label FILTER html %]" [% END %]
+             [% IF aria_description %] aria-description="[% aria_description FILTER html %]" [% END %]
              [% ' aria-required="true"' IF (field.is_mandatory || required) %]>
         [% ELSE %]
         <select id="[% field.name FILTER html %]"
                 name="[% field.name FILTER html %]"
+                [% IF aria_label %] aria-label="[% aria_label FILTER html %]" [% END %]
+                [% IF aria_description %] aria-description="[% aria_description FILTER html %]" [% END %]
                 [% IF field.type == constants.FIELD_TYPE_MULTI_SELECT %]
                     [% SET field_size = 5 %]
                     [% IF field.legal_values.size < 5 %]
@@ -219,6 +235,7 @@
        <div id="[% field.name FILTER html %]_input">
          [% INCLUDE global/textarea.html.tmpl
             id = field.name name = field.name minrows = 4 maxrows = 8
+            aria_label = aria_label aria_description = aria_description
             cols = 60 defaultcontent = value mandatory = (field.is_mandatory || required) %]
        </div>
        <script [% script_nonce FILTER none %]>
@@ -237,6 +254,8 @@
            <li>
              [% PROCESS bug_url_link bug_url = bug_url %]
              <label><input type="checkbox" value="[% bug_url.name FILTER html %]"
+                           [% IF aria_label %] aria-label="[% aria_label FILTER html %]" [% END %]
+                           [% IF aria_description %] aria-description="[% aria_description FILTER html %]" [% END %]
                            name="remove_[% field.name FILTER html %]">
                Remove</label>
            </li>
@@ -251,7 +270,7 @@
          <div id="container_[% field.name FILTER html %]">
            <input type="text" id="[% field.name FILTER html %]" size="40"
                   class="text_input" name="[% field.name FILTER html %]"
-                  [% IF !bug.id %]value="[% value FILTER html %]"[% END %]>
+                  [% IF !bug.id %] value="[% value FILTER html %]"[% END %]>
          </div>
          [% IF bug.id %]
            <script [% script_nonce FILTER none %]>
@@ -264,6 +283,8 @@
               class="text_input bz_autocomplete_values"
               name="[% field.name FILTER html %]"
               data-values="[% field.name FILTER html %]"
+              [% IF aria_label %] aria-label="[% aria_label FILTER html %]" [% END %]
+              [% IF aria_description %] aria-description="[% aria_description FILTER html %]" [% END %]
               value="[% value FILTER html %]">
        <script [% script_nonce FILTER none %]>
           if (typeof BUGZILLA.autocomplete_values === 'undefined')

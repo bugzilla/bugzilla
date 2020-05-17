@@ -21,7 +21,9 @@
   # field_title: optional, extra information to display as a tooltip
   # placeholder: optional, input only; placeholder attribute value
   # mandatory: optional; if true, the field cannot be empty.
-  # aria_labelledby: optional; extra information to use for WAI-ARIA labels
+  # aria_label: optional; accessible label for the form widget
+  # aria_labelledby: optional; element ID that has accessible label for the form widget
+  # aria_description: optional; accessible description for the form widget
   # request_type: optional; one of the request flag types: "review", "feedback" or "needinfo"
   #%]
 
@@ -36,7 +38,9 @@
   [% IF multiple %] multiple="multiple" size="[% multiple FILTER html %]" [% END %]
   [% IF field_title %] title="[% field_title FILTER html %]" [% END %]
   [% IF mandatory %] required [% END %]
-  [% IF aria_labelledby %]aria-labelledby="[% aria_labelledby FILTER html %]"[% END %]
+  [% IF aria_label %] aria-label="[% aria_label FILTER html %]" [% END %]
+  [% IF aria_labelledby %] aria-labelledby="[% aria_labelledby FILTER html %]" [% END %]
+  [% IF aria_description %] aria-description="[% aria_description FILTER html %]" [% END %]
 >
   [% IF emptyok %]
     <option value=""></option>
@@ -98,6 +102,8 @@
     [% IF mandatory %] required [% END %]
     [% IF multiple %] data-multiple="1" [% END %]
     [% IF request_type %] data-request-type="[% request_type FILTER html %]" [% END %]
+    [% IF aria_label %] aria-label="[% aria_label FILTER html %]" [% END %]
     [% IF aria_labelledby %] aria-labelledby="[% aria_labelledby FILTER html %]" [% END %]
+    [% IF aria_description %] aria-description="[% aria_description FILTER html %]" [% END %]
   >
 [% END %]

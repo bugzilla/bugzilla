@@ -42,6 +42,7 @@ use constant SELECT_COLUMNS => qw(
   bug_id
   bug_type
   bug_status
+  priority
   short_desc
   changeddate
 );

@@ -13,7 +13,7 @@
   #%]
 
 <div id="bugzilla-etiquette">
-  <a href="[% basepath FILTER none %]page.cgi?id=etiquette.html" target="_blank" tabindex="-1">
+  <a href="[% basepath FILTER none %]page.cgi?id=etiquette.html" target="_blank">
     Comments Subject to Etiquette and Contributor Guidelines</a>
 </div>
 
@@ -48,7 +48,7 @@
 
 [% IF Param('use_markdown') %]
   <div id="comment-markdown-tip">
-    <img src="extensions/BMO/web/images/notice.png" width="16" height="16">
+    <img src="extensions/BMO/web/images/notice.png" width="16" height="16" alt="">
     <a href="https://guides.github.com/features/mastering-markdown/" target="_blank">Markdown styling now supported</a>
   </div>
 [% END %]

@@ -130,6 +130,7 @@ Bugzilla.CustomSearch = class CustomSearch {
   update_input_names() {
     let index = 1;
     let cp_index = 0;
+    const cp_indexes = [];
 
     // Cache radio button states, which can be reset while renaming
     const radio_states =
@@ -141,6 +142,7 @@ Bugzilla.CustomSearch = class CustomSearch {
         // CP needs to be added after all the rows and nested subgroups within the current group.
         // Example: f1=OP, f2=product, f3=component, f4=OP, f5=reporter, f6=assignee, f7=CP, f8=CP
         cp_index = index + $item.querySelectorAll('.row').length + ($item.querySelectorAll('.group').length * 2) + 1;
+        cp_indexes.push(cp_index);
       }
 
       [...$item.querySelectorAll('[name]')].filter($input => $input.closest('.condition') === $item).forEach($input => {
@@ -149,7 +151,7 @@ Bugzilla.CustomSearch = class CustomSearch {
 
       index++;
 
-      if (index === cp_index) {
+      while (cp_indexes.includes(index)) {
         index++;
       }
     });

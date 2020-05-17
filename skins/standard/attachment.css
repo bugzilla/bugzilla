@@ -407,10 +407,6 @@ textarea#viewFrame {
   resize: none;
 }
 
-#att-data:invalid {
-  display: block; /* To display the validation message */
-}
-
 #att-textarea {
   margin: 0;
   border: 0;

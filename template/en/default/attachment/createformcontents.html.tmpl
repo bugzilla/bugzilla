@@ -37,10 +37,10 @@
         </span>
       </header>
       <div>
-        <textarea hidden id="att-data" name="data_base64"
-                  aria-errormessage="data-error" aria-invalid="false"></textarea>
+        <textarea hidden id="att-data" name="data_base64" aria-hidden="true"></textarea>
         <textarea id="att-textarea" name="attach_text" cols="80" rows="10"
-                  aria-label="Paste the text, link or image to be added as an attachment"></textarea>
+                  aria-label="Attachment Content" aria-invalid="false" aria-errormessage="att-error-message"
+                  aria-description="Paste text, link or image to be added as an attachment"></textarea>
         <div hidden id="att-preview">
           <figure role="img" aria-labelledby="att-preview-name" itemscope itemtype="http://schema.org/MediaObject">
             <meta itemprop="encodingFormat">
@@ -79,12 +79,15 @@
       <div>
         <input id="att-type-list" type="radio" name="contenttypemethod" value="list" checked>
         <label for="att-type-list">select from list</label>:
-        <select id="att-type-select" name="contenttypeselection">[% PROCESS content_types %]</select>
+        <select id="att-type-select" name="contenttypeselection" aria-label="Select Content Type">
+          [% PROCESS content_types %]
+        </select>
       </div>
       <div>
       <input id="att-type-manual" type="radio" name="contenttypemethod" value="manual">
         <label for="att-type-manual">enter manually</label>:
-        <input id="att-type-input" type="text" name="contenttypeentry" size="30" maxlength="200">
+        <input id="att-type-input" type="text" name="contenttypeentry" size="30" maxlength="200"
+               aria-label="Enter Content Type">
       </div>
     </div>
   </td>

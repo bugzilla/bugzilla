@@ -680,6 +680,10 @@ sub file_mod_time {
 sub bz_crypt {
   my ($password, $salt) = @_;
 
+  # We shorten the password to protect against system
+  # resource exhaustion attacks
+  $password = substr $password, 0, USER_PASSWORD_MAX_LENGTH;
+
   my $algorithm;
   if (!defined $salt) {
 

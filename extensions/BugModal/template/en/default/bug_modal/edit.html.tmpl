@@ -325,7 +325,6 @@
   sub.push(bug.product _ " :: " _ bug.component);
   sub.push(bug.bug_type);
   sub.push(bug.priority) IF bug.priority != "--";
-  sub.push(bug.bug_severity) IF bug.bug_severity != "normal";
 %]
 [% WRAPPER bug_modal/module.html.tmpl
   title = "Categories"
@@ -514,7 +513,6 @@
           aria_label = bug_fields.bug_severity.description
           inline = 1
           label = "Severity"
-          hide_on_view = bug.bug_severity == "normal"
           help = "https://wiki.mozilla.org/BMO/UserGuide/BugFields#bug_severity"
       %]
       [% UNLESS cf_hidden_in_product('cf_rank', bug.product, bug.component, bug) %]

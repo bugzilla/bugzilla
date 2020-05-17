@@ -27,6 +27,7 @@ $(function() {
         var bugQueryTable    = null,
             lastChangesCache = {},
             default_query    = "assignedbugs";
+            refresh_interval = null;
 
         // Grab last used query name from cookie or use default
         var query_cookie = Y.Cookie.get("my_dashboard_query");
@@ -41,6 +42,16 @@ $(function() {
             });
             if (!cookie_value_found) {
                 Y.Cookie.set("my_dashboard_query", "");
+            }
+        }
+
+        // Grab last used auto-refresh configuration from cookie or use default
+        var autorefresh_cookie = Y.Cookie.get("my_dashboard_autorefresh");
+        if (autorefresh_cookie) {
+            if (autorefresh_cookie == 'true') {
+                Y.one("#auto_refresh").set('checked', true);
+            } else {
+                Y.Cookie.set("my_dashboard_autorefresh", "false");
             }
         }
 
@@ -106,6 +117,7 @@ $(function() {
                 { key: "bug_id", label: "Bug", sortable: true, allowHTML: true, formatter: link_formatter },
                 { key: "changeddate", label: "Updated", formatter: updatedFormatter,
                 allowHTML: true, sortable: true },
+                { key: "priority", label: "Pri", sortable: true, allowHTML: true},
                 { key: "bug_status", label: "Status", sortable: true },
                 { key: "short_desc", label: "Summary", sortable: true, allowHTML: true, formatter: link_formatter },
             ],
@@ -153,12 +165,20 @@ $(function() {
 
         bugQueryTable.plug(Y.Plugin.DataTableSort);
 
+        var auto_updateQueryTable = function(o) {
+            if (auto_refresh.checked == true) {
+                refresh_interval = setInterval(function(e) {
+                    updateQueryTable(default_query);
+                }, 1000*60*10);
+            } else {
+                clearInterval(refresh_interval);
+            }
+        };
+
         // Initial load
         Y.on("contentready", function (e) {
             updateQueryTable(default_query);
-            setInterval(function(e) {
-                updateQueryTable(default_query);
-            },1000*60*10);
+            auto_updateQueryTable();
         }, "#query_table");
 
         Y.one('#query').on('change', function(e) {
@@ -173,6 +193,11 @@ $(function() {
             var index = query_select.get('selectedIndex');
             var selected_value = query_select.get("options").item(index).getAttribute('value');
             updateQueryTable(selected_value);
+        });
+
+        Y.one('#auto_refresh').on('click', function(e) {
+            auto_updateQueryTable();
+            Y.Cookie.set("my_dashboard_autorefresh", auto_refresh.checked, { expires: new Date("January 12, 2030") });
         });
 
         Y.one('#query_markread').on('click', function(e) {

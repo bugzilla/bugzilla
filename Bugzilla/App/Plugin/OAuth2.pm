@@ -82,6 +82,8 @@ sub _resource_owner_confirm_scopes {
   my ($c, $client_id, $scopes_ref)
     = @args{qw/ mojo_controller client_id scopes /};
 
+  $c->bugzilla->login(LOGIN_REQUIRED) || return undef;
+
   my $is_allowed = $c->param("oauth_confirm_${client_id}");
 
   # if user hasn't yet allowed the client access, or if they denied

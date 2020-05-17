@@ -35,10 +35,12 @@ sub _initialize {
     INT2 => 'integer',
     INT3 => 'integer',
     INT4 => 'integer',
+    INT5 => 'integer',
 
     SMALLSERIAL  => 'SERIAL',
     MEDIUMSERIAL => 'SERIAL',
     INTSERIAL    => 'SERIAL',
+    BIGSERIAL    => 'SERIAL',
 
     TINYTEXT   => 'text',
     MEDIUMTEXT => 'text',

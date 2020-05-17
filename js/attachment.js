@@ -452,7 +452,6 @@ Bugzilla.AttachmentForm = class AttachmentForm {
       this.$description.value = file.name;
     }
 
-    this.$textarea.hidden = true;
     this.$description.select();
     this.$description.focus();
   }
@@ -473,8 +472,8 @@ Bugzilla.AttachmentForm = class AttachmentForm {
     const message_short = invalid ? 'File too large' : '';
 
     this.$error_message.innerHTML = message;
-    this.$data.setCustomValidity(message_short);
-    this.$data.setAttribute('aria-invalid', invalid);
+    this.$textarea.setCustomValidity(message_short);
+    this.$textarea.setAttribute('aria-invalid', invalid);
     this.$dropbox.classList.toggle('invalid', invalid);
 
     return !invalid;

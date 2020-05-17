@@ -46,6 +46,7 @@ use Memoize;
   AUTH_LOCKOUT
 
   USER_PASSWORD_MIN_LENGTH
+  USER_PASSWORD_MAX_LENGTH
 
   LOGIN_OPTIONAL
   LOGIN_NORMAL
@@ -277,9 +278,10 @@ use constant AUTH_DISABLED     => 4;
 use constant AUTH_NO_SUCH_USER => 5;
 use constant AUTH_LOCKOUT      => 6;
 
-# The minimum length a password must have.
+# The minimum and maximum length a password will have.
 # BMO uses 8 characters.
 use constant USER_PASSWORD_MIN_LENGTH => 8;
+use constant USER_PASSWORD_MAX_LENGTH => 4096;
 
 use constant LOGIN_OPTIONAL => 0;
 use constant LOGIN_NORMAL   => 1;

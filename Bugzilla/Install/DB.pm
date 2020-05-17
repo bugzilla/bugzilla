@@ -808,6 +808,17 @@ sub update_table_definitions {
   # Bug 1612290 - dkl@mozilla.com
   $dbh->bz_add_column('profiles', 'bounce_count', {TYPE => 'INT1', NOTNULL => 1, DEFAULT => 0});
 
+  # Bug 1588221 - dkl@mozilla.com
+  $dbh->bz_alter_column('bugs_activity', 'attach_id', {TYPE => 'INT5'});
+  $dbh->bz_alter_column('attachments', 'attach_id',
+    {TYPE => 'BIGSERIAL', NOTNULL => 1, PRIMARYKEY => 1});
+  $dbh->bz_alter_column('attach_data', 'id',
+    {TYPE => 'INT5', NOTNULL => 1, PRIMARYKEY => 1});
+  $dbh->bz_alter_column('flags',            'attach_id', {TYPE => 'INT5'});
+  $dbh->bz_alter_column('user_request_log', 'attach_id', {TYPE => 'INT5', NOTNULL => 0});
+  _populate_attachment_storage_class();
+
+
   ################################################################
   # New --TABLE-- changes should go *** A B O V E *** this point #
   ################################################################
@@ -4328,6 +4339,19 @@ sub _populate_api_keys_creation_ts {
   $dbh->bz_alter_column('user_api_keys', 'creation_ts',
     {TYPE => 'DATETIME', NOTNULL => 1});
 }
+
+sub _populate_attachment_storage_class {
+  my $dbh = Bugzilla->dbh;
+
+  # Return if we have already made these changes
+  my $count = $dbh->selectrow_array('SELECT COUNT(id) FROM attachment_storage_class');
+  if (!$count) {
+    $dbh->do(
+      "INSERT INTO attachment_storage_class (id, storage_class) SELECT attachments.attach_id, 'database' FROM attachments ORDER BY attachments.attach_id"
+    );
+  }
+}
+
 
 1;
 

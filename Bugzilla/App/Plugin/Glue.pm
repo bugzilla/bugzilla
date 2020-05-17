@@ -40,6 +40,13 @@ sub register {
       my ($c) = @_;
       Log::Log4perl::MDC->put(request_id => $c->req->request_id);
       $c->stash->{cleanup_guard} = Scope::Guard->new(\&Bugzilla::cleanup);
+
+      # Ensure the request_cache is always cleared prior to every request,
+      # regardless of routing or Bugzilla::App wrapping.
+      # This is not an expensive operation.
+      Bugzilla->clear_request_cache();
+      # We also need to clear CGI's globals.
+      CGI::initialize_globals();
       Bugzilla->usage_mode(USAGE_MODE_MOJO);
     }
   );

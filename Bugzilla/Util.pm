@@ -920,7 +920,7 @@ sub detect_encoding {
   # Encode::Detect sometimes mis-detects UTF-8 as Windows-1252
   if ($encoding && $encoding eq 'cp1252') {
     my $decoder = guess_encoding($data, ('utf8', 'cp1252'));
-    $encoding = $decoder->name if ref $decoder;
+    $encoding = ref $decoder ? $decoder->name : 'utf8'; # Fall back to utf8 if guess_encoding fails
   }
 
   return $encoding;

@@ -68,7 +68,8 @@ sub startup {
       # If that is the case, we just log the error and continue on.
       try {
         my $regexp = Bugzilla->params->{block_user_agent};
-        if ($regexp && $c->req->headers->user_agent =~ /$regexp/) {
+        my $user_agent = $c->req->headers->user_agent // '';
+        if ($regexp && $user_agent =~ /$regexp/) {
           my $msg = "Contact " . Bugzilla->params->{maintainer};
           $c->respond_to(
             json => {json => {error => $msg}, status => 400},

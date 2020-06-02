@@ -74,7 +74,7 @@ sub load_one {
     tie *STDOUT, 'Bugzilla::App::Stdout', controller => $c;   ## no critic (tie)
 
     # the finally block calls cleanup.
-    $c->stash->{cleanup_guard}->dismiss;
+    $Bugzilla::App::Plugin::Glue::cleanup_guard->dismiss if $Bugzilla::App::Plugin::Glue::cleanup_guard;
     Bugzilla->usage_mode(USAGE_MODE_BROWSER);
     try {
       Bugzilla->init_page();

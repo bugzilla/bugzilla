@@ -4115,7 +4115,7 @@ sub _add_password_salt_separator {
   my $profiles
     = $dbh->selectall_arrayref(
         "SELECT userid, cryptpassword FROM profiles WHERE ("
-      . $dbh->sql_regexp("cryptpassword", "'^[^,]+{'")
+      . $dbh->sql_regexp("cryptpassword", "'^[^,]+\\\\{'")
       . ")");
 
   if (@$profiles) {

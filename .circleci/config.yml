@@ -14,7 +14,7 @@ defaults:
         pip install "docker-compose==1.23.2"
 
   docker_image: &docker_image
-    image: docker:18.06.0-ce-git
+    image: docker:19.03.8-git
 
   build_image: &build_image
     run:
@@ -47,7 +47,8 @@ jobs:
     docker:
       - *docker_image
     steps:
-      - setup_remote_docker
+      - setup_remote_docker:
+          docker_layer_caching: true
       - checkout
       - *build_image
       - *install_deps
@@ -109,7 +110,8 @@ jobs:
     docker:
       - *docker_image
     steps:
-      - setup_remote_docker
+      - setup_remote_docker:
+          docker_layer_caching: true
       - checkout
       - *build_image
       - attach_workspace:
@@ -143,7 +145,8 @@ jobs:
     docker:
       - *docker_image
     steps:
-      - setup_remote_docker
+      - setup_remote_docker:
+          docker_layer_caching: true
       - checkout
       - *build_image
       - *install_deps
@@ -168,7 +171,8 @@ jobs:
     docker:
       - *docker_image
     steps:
-      - setup_remote_docker
+      - setup_remote_docker:
+          docker_layer_caching: true
       - checkout
       - *build_image
       - *install_deps
@@ -190,7 +194,8 @@ jobs:
     docker:
       - *docker_image
     steps:
-      - setup_remote_docker
+      - setup_remote_docker:
+          docker_layer_caching: true
       - checkout
       - *build_image
       - *install_deps
@@ -212,7 +217,8 @@ jobs:
     docker:
       - *docker_image
     steps:
-      - setup_remote_docker
+      - setup_remote_docker:
+          docker_layer_caching: true
       - checkout
       - *build_image
       - *install_deps

@@ -17,12 +17,16 @@ defaults:
     image: docker:18.06.0-ce-git
 
   build_image: &build_image
-    run: |
-      docker build \
-        --build-arg CI="$CI" \
-        --build-arg CIRCLE_SHA1="$CIRCLE_SHA1" \
-        --build-arg CIRCLE_BUILD_URL="$CIRCLE_BUILD_URL" \
-        -t bmo .
+    run:
+      name: Build Docker BMO image
+      command: |
+        docker build \
+          --build-arg CI="$CI" \
+          --build-arg CIRCLE_SHA1="$CIRCLE_SHA1" \
+          --build-arg CIRCLE_BUILD_URL="$CIRCLE_BUILD_URL" \
+          -t bmo .
+      environment:
+        DOCKER_BUILDKIT: 1
 
   store_log: &store_log
     store_artifacts:

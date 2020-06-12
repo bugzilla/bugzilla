@@ -128,6 +128,12 @@ sub _make_request {
   }
 
   my $request = HTTP::Request->new($method, $url, $http_headers);
+
+  # works only with bytes, not with UTF-8 strings.
+  if (utf8::is_utf8($data)) {
+    utf8::encode($data);
+  }
+
   $request->content($data);
 
   # my $req_as = $request->as_string;

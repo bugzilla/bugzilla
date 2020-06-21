@@ -28,7 +28,7 @@ sub fields {
 }
 
 BEGIN {
-  my $file = $ENV{LOG4PERL_CONFIG_FILE} // 'log4perl-syslog.conf';
+  my $file = $ENV{LOG4PERL_CONFIG_FILE} // 'log4perl-default.conf';
   Log::Log4perl::Logger::create_custom_level('NOTICE', 'WARN', 5, 2);
   Log::Log4perl->init(rel2abs($file, bz_locations->{confdir}));
   TRACE("logging enabled in $PROGRAM_NAME");

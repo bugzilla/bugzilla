@@ -5,6 +5,7 @@
 /js/yui3.js
 /lib/*
 /local/*
+/logs
 /template/en/custom
 /docs/en/rst/extensions/*
 /docs/en/rst/api/extensions/*

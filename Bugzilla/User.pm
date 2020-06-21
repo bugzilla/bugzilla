@@ -536,9 +536,15 @@ sub set_nick {
 
 sub set_password {
   my ($self, $password) = @_;
+  # Reactivate account if user was disabled due to inactivity
+  if ($self->password_change_reason eq 'Inactive Account') {
+    $self->set_disabledtext('');
+    $self->set_disable_mail(0);
+  }
   $self->set('cryptpassword',            $password);
   $self->set('password_change_required', 0);
   $self->set('password_change_reason',   '');
+
 }
 
 sub set_disabledtext {

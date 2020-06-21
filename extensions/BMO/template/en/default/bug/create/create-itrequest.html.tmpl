@@ -98,32 +98,9 @@
   <input type="hidden" name="rep_platform" value="All">
   <input type="hidden" name="op_sys" value="Other">
   <input type="hidden" name="bug_type" value="task">
-  <input type="hidden" name="priority" value="--">
   <input type="hidden" name="version" value="other">
   <input type="hidden" name="token" value="[% token FILTER html %]">
   <table>
-    <tr>
-
-  <td align="right">
-    <strong>Urgency:</strong>
-  </td>
-
-  <td>
-    <select id="bug_severity" name="bug_severity" onchange="setsevdesc(this)">
-      <option value="blocker">All work for IT stops until this is done</option>
-      <option value="critical">IT should work on it soon as possible (urgent)</option>
-      <option value="major">IT should get to it within 24 hours</option>
-      <option value="normal">IT should get to it within the next week</option>
-      <option value="minor" selected="selected">No rush, but hopefully IT can get to it soon</option>
-      <option value="trivial">Whenever IT can get around to it</option>
-    </select>
-  </td>
-  <td>
-   <div id="blockerdesc" style="color:red;display:none">This will page the on-call sysadmin if not handled within 30 minutes.</div>
-   <div id="critdesc" style="color:red;display:none">This will page the on-call sysadmin if not handled within 8 hours.</div>
-  </td>
-
-    </tr>
     <tr>
       <td style="white-space: nowrap; vertical-align: top" align="right"><strong>Request Type:</strong></td>
       <td style="white-space: nowrap; vertical-align: top">

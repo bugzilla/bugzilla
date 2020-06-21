@@ -48,30 +48,31 @@
       "This field describes the impact of ${terms.abug}.
        <table>
         <tr>
-          <th>blocker</th>
-          <td>Blocks development and/or testing work</td>
+          <th>S1</th>
+          <td>Blocks development/testing, may impact more than 25% of users,
+            causes data loss, potential chemspill, and no workaround available.
         </tr>
         <tr>
-          <th>critical</th>
-          <td>crashes, loss of data, severe memory leak</td>
+          <th>S2</th>
+          <td>Major functionality/product severely impaired and a satisfactory
+            workaround doesn't exist.</td>
         </tr>
         <tr>
-          <th>major</th>
-          <td>major loss of function</td>
+          <th>S3</th>
+          <td>Blocks non-critical functionality and a work around exists.</td>
         </tr>
         <tr>
-          <th>normal</th>
-          <td>regular issue, some loss of functionality under specific circumstances</td>
+          <th>S4</th>
+          <td>Minor significance, cosmetic issues, low or no impact to users.</td>
         </tr>
         <tr>
-          <th>minor</th>
-          <td>minor loss of function, or other problem where easy
-          workaround is present</td>
+          <th>N/A</th>
+          <td>The above definitions do not apply to this bug; this value is
+            reserved for bugs of type Task or Enhancement.</td>
         </tr>
         <tr>
-          <th>trivial</th>
-          <td>cosmetic problem like misspelled words or misaligned
-          text</td>
+          <th>--</th>
+          <td>No severity has been set yet.</td>
         </tr>
       </table>"
 

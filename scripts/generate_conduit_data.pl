@@ -177,6 +177,32 @@ set_params(
 );
 set_push_connector_options();
 
+##########################################################################
+# Create Phabricator OAuth2 Client
+##########################################################################
+
+my $oauth_id     = $ENV{PHABRICATOR_OAUTH_ID}     || '';
+my $oauth_secret = $ENV{PHABRICATOR_OAUTH_SECRET} || '';
+
+if ($oauth_id && $oauth_secret) {
+  print "creating phabricator oauth2 client...\n";
+
+  $dbh->do(
+    'REPLACE INTO oauth2_client (client_id, description, secret) VALUES (?, \'Phabricator\', ?)',
+    undef, $oauth_id, $oauth_secret
+  );
+
+  my $client_data
+    = $dbh->selectrow_hashref('SELECT * FROM oauth2_client WHERE client_id = ?',
+    undef, $oauth_id);
+
+  my $scope_id = $dbh->selectrow_array(
+    'SELECT id FROM oauth2_scope WHERE description = \'user:read\'', undef);
+
+  $dbh->do('REPLACE INTO oauth2_client_scope (client_id, scope_id) VALUES (?, ?)',
+    undef, $client_data->{id}, $scope_id);
+}
+
 print "installation and configuration complete!\n";
 
 sub set_push_connector_options {

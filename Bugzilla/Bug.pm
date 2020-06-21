@@ -4671,7 +4671,7 @@ sub GetBugActivity {
     my $last_change = @$changes[-1] || {};
 
     # Suppress any mid-air collision or duplicated change
-    if (( $when eq $operation->{'when'}
+    if (( (exists $operation->{'when'} && $when eq $operation->{'when'})
       && $fieldname eq $last_change->{'fieldname'}
       && $removed eq $last_change->{'removed'}
       && $added eq $last_change->{'added'}

@@ -14,15 +14,19 @@ defaults:
         pip install "docker-compose==1.23.2"
 
   docker_image: &docker_image
-    image: docker:18.06.0-ce-git
+    image: docker:18.09.3-git
 
   build_image: &build_image
-    run: |
-      docker build \
-        --build-arg CI="$CI" \
-        --build-arg CIRCLE_SHA1="$CIRCLE_SHA1" \
-        --build-arg CIRCLE_BUILD_URL="$CIRCLE_BUILD_URL" \
-        -t bmo .
+    run:
+      name: Build Docker BMO image
+      command: |
+        docker build \
+          --build-arg CI="$CI" \
+          --build-arg CIRCLE_SHA1="$CIRCLE_SHA1" \
+          --build-arg CIRCLE_BUILD_URL="$CIRCLE_BUILD_URL" \
+          -t bmo .
+      environment:
+        DOCKER_BUILDKIT: 1
 
   store_log: &store_log
     store_artifacts:
@@ -43,7 +47,9 @@ jobs:
     docker:
       - *docker_image
     steps:
-      - setup_remote_docker
+      - setup_remote_docker:
+          version: 18.09.3
+          docker_layer_caching: true
       - checkout
       - *build_image
       - *install_deps
@@ -105,7 +111,9 @@ jobs:
     docker:
       - *docker_image
     steps:
-      - setup_remote_docker
+      - setup_remote_docker:
+          version: 18.09.3
+          docker_layer_caching: true
       - checkout
       - *build_image
       - attach_workspace:
@@ -139,7 +147,9 @@ jobs:
     docker:
       - *docker_image
     steps:
-      - setup_remote_docker
+      - setup_remote_docker:
+          version: 18.09.3
+          docker_layer_caching: true
       - checkout
       - *build_image
       - *install_deps
@@ -164,7 +174,9 @@ jobs:
     docker:
       - *docker_image
     steps:
-      - setup_remote_docker
+      - setup_remote_docker:
+          version: 18.09.3
+          docker_layer_caching: true
       - checkout
       - *build_image
       - *install_deps
@@ -186,7 +198,9 @@ jobs:
     docker:
       - *docker_image
     steps:
-      - setup_remote_docker
+      - setup_remote_docker:
+          version: 18.09.3
+          docker_layer_caching: true
       - checkout
       - *build_image
       - *install_deps
@@ -208,7 +222,9 @@ jobs:
     docker:
       - *docker_image
     steps:
-      - setup_remote_docker
+      - setup_remote_docker:
+          version: 18.09.3
+          docker_layer_caching: true
       - checkout
       - *build_image
       - *install_deps

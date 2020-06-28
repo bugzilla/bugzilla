@@ -85,6 +85,16 @@ sub register {
 
       my $name = sprintf '%s.%s.tmpl', $options->{template}, $options->{format};
       my $template = Bugzilla->template;
+      if ($options->{variant}) {
+        my $name_variant = sprintf '%s.%s+%s.tmpl', $options->{template}, $options->{format}, $options->{variant};
+        WARN("loading $name_variant");
+        my $rendered = $template->process($name_variant, \%params, $output);
+        return if $rendered;
+
+        my $error = $template->error;
+        die $error unless $error->type eq 'file' && $error->info =~ /not found/;
+      }
+      WARN("loading $name");
       $template->process($name, \%params, $output) or die $template->error;
     }
   );

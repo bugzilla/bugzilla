@@ -403,9 +403,7 @@
       </div>
     [% ELSE %]
       <ul id="header-login" class="links">
-        [% IF Param('createemailregexp') && user.authorizer.user_can_create_account %]
-          <li id="moz_new_account_container_top"><a href="[% basepath FILTER none %]createaccount.cgi">New Account</a></li>
-        [% END %]
+          [% PROCESS "account/auth/signup-small.html.tmpl" qs_suffix = "_top" %]
         [% IF user.authorizer.can_login %]
           [% PROCESS "account/auth/login-small.html.tmpl" qs_suffix = "_top" %]
         [% END %]

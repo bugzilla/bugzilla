@@ -1,0 +1,51 @@
+.signup, .fresh-signup {
+    max-width: 1023px;
+    min-width: 600px;
+    margin-left: auto;
+    margin-right: auto;
+    display: grid;
+    grid-template-columns: 1fr 4fr;
+    grid-gap: 16px;
+}
+
+@media screen and (max-width: 790px) {
+    .signup, .fresh-signup {
+        max-width: 600px;
+    }
+}
+
+.signup label {
+    grid-column: 1 / 2;
+}
+
+.signup input {
+    grid-column: 2 / 3;
+}
+
+
+.signup .notes {
+    text-align: left;
+    grid-column: 2 / 3;
+}
+
+.signup .buttons {
+    text-align: right;
+    grid-column: 2 / 3;
+}
+
+.fresh-signup {
+    grid-template-columns: 4fr 1fr;
+}
+
+.fresh-signup .notes {
+    text-align: left;
+    grid-column: 1 / 2;
+}
+
+.fresh-signup input {
+    grid-column: 1 / 2;
+}
+
+.fresh-signup button {
+    grid-column: 2 / 2;
+}

@@ -1,0 +1,14 @@
+[% title = BLOCK %]New user account for '[% email FILTER html %]'[% END %]
+[% PROCESS "global/header.html.tmpl"
+   title = title
+   style_urls      = ['skins/standard/admin.css']
+   javascript_urls = ['js/account.js']
+%]
+
+<p>
+    We've sent a confirmation message to [% email FILTER html %]. When you recieve
+    it, you'll be able to finish creating your account.
+</p>
+
+
+[% PROCESS global/footer.html.tmpl %]

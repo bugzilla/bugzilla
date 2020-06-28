@@ -26,6 +26,12 @@ $(function () {
   $('.hide_mini_login_form').on("click", function (event) {
     return hide_mini_login_form($(this).data('qs-suffix'));
   });
+  $('.show_mini_signup_form').on("click", function (event) {
+    return show_mini_signup_form($(this).data('qs-suffix'));
+  });
+  $('.hide_mini_signup_form').on("click", function (event) {
+    return hide_mini_signup_form($(this).data('qs-suffix'));
+  });
   $('.show_forgot_form').on("click", function (event) {
     return show_forgot_form($(this).data('qs-suffix'));
   });
@@ -86,16 +92,28 @@ function manage_old_lists() {
 
 function show_mini_login_form( suffix ) {
     hide_forgot_form(suffix);
+    hide_mini_signup_form(suffix);
     $('#mini_login' + suffix).removeClass('bz_default_hidden').find('input[required]:first').focus();
-    $('#new_account_container' + suffix).addClass('bz_default_hidden');
     return false;
 }
 
 function hide_mini_login_form( suffix ) {
     $('#mini_login' + suffix).addClass('bz_default_hidden');
-    $('#new_account_container' + suffix).removeClass('bz_default_hidden');
     return false;
 }
+
+function show_mini_signup_form( suffix ) {
+    hide_forgot_form(suffix);
+    hide_mini_login_form(suffix);
+    $('#mini_signup' + suffix).removeClass('bz_default_hidden').find('input[required]:first').focus();
+    return false;
+}
+
+function hide_mini_signup_form( suffix ) {
+    $('#mini_signup' + suffix).addClass('bz_default_hidden');
+    return false;
+}
+
 
 function show_forgot_form( suffix ) {
     hide_mini_login_form(suffix);

@@ -42,6 +42,13 @@ use constant get_param_list => (
   {name => 'announcehtml', type => 'l', default => ''},
 
   {
+    name => 'etiquettehtml',
+    type => 'l',
+    default =>
+      'I have read <a href="/page.cgi?id=etiquette.html">Bugzilla Etiquette</a> and agree to abide by it.'
+  },
+
+  {
     name    => 'upgrade_notification',
     type    => 's',
     choices => [

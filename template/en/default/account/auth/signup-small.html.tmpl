@@ -1,0 +1,56 @@
+[%# The contents of this file are subject to the Mozilla Public
+  # License Version 1.1 (the "License"); you may not use this file
+  # except in compliance with the License. You may obtain a copy of
+  # the License at http://www.mozilla.org/MPL/
+  #
+  # Software distributed under the License is distributed on an "AS
+  # IS" basis, WITHOUT WARRANTY OF ANY KIND, either express or
+  # implied. See the License for the specific language governing
+  # rights and limitations under the License.
+  #
+  # The Original Code is the Bugzilla Bug Tracking System.
+  #
+  # The Initial Developer of the Original Code is Netscape Communications
+  # Corporation. Portions created by Netscape are
+  # Copyright (C) 1998 Netscape Communications Corporation. All
+  # Rights Reserved.
+  #
+  # Contributor(s): Jacob Steenhagen <jake@bugzilla.org>
+  #%]
+
+[% PROCESS global/variables.none.tmpl %]
+
+[%# Use the current script name. If an empty name is returned,
+  # then we are accessing the home page. %]
+
+<li id="mini_signup_container[% qs_suffix %]">
+  <a id="signup_link[% qs_suffix %]" href="#"
+     class='show_mini_signup_form' data-qs-suffix="[% qs_suffix FILTER html %]">Sign Up</a>
+
+  <div id="mini_signup[% qs_suffix FILTER html %]" class="mini-popup mini_signup bz_default_hidden">
+  [% Hook.process('additional_methods') %]
+
+  <form action="[% c.url_for('signup_email') FILTER html %]" method="post"
+        data-qs-suffix="[% qs_suffix FILTER html %]">
+
+    <input id="signup_email[% qs_suffix FILTER html %]"
+           class="bz_signup"
+           name="email"
+           title="Email"
+           placeholder="Email"
+           aria-label="Email"
+           type="email"
+           required
+    >
+    <input type="hidden" name="csrf_token"
+           value="[% c.csrf_token %]">
+    <input type="submit" value="Sign up"
+           class="check_mini_signup_fields"
+            id="signup_[% qs_suffix %]">
+    <a href="#" id="hide_mini_signup[% qs_suffix FILTER html %]" aria-label="Close"
+       class="close-button hide_mini_signup_form" data-qs-suffix="[% qs_suffix FILTER html %]">
+      <span class="icon" aria-hidden="true"></span>
+    </a>
+  </form>
+  </div>
+</li>

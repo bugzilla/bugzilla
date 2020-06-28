@@ -1,0 +1,51 @@
+[% title = BLOCK %]Create a new user account for '[% email FILTER html %]'[% END %]
+[% PROCESS "global/header.html.tmpl"
+   title           = title
+   style_urls      = ['skins/standard/signup.css']
+   javascript_urls      = ['js/signup.js']
+%]
+
+[% IF signup_token %]
+  <form class="signup" method="post" action="[% c.url_for('signup_email_finish') %]">
+    <p class="notes">
+      This account will not be created if this form is not completed by
+      <u>[% expires FILTER time("%B %e, %Y at %H:%M %Z") %]</u>.
+    </p>
+    <input type="hidden" name="csrf_token" value="[% c.csrf_token FILTER html %]">
+    <input type="hidden" name="signup_token" value="[% signup_token FILTER html %]">
+
+    <label for="email">Email Address:</label>
+    <input type="text" id="email" readonly value="[% email FILTER html %]">
+
+    <label for="realname">Display Name</label>
+    <input type="text" id="realname" name="realname" value="" placeholder="Long Name :shortname (pronouns)">
+
+    <label for="password">Type your password</label>
+    <input type="password" id="password" name="password" value="" required>
+
+    <label for="passwd2">Confirm your password</label>
+    <input type="password" id="password_confirm" name="password_confirm" value="" required>
+
+    <div class="buttons">
+      <input type="checkbox" id="etiquette" name='etiquette' value="agreed" required>
+      <label for="etiquette"> [% Param('etiquettehtml') FILTER html_light %]</label>
+    </div>
+
+    <div class="buttons">
+      <button class="secondary" type="submit" id="signup_cancel" name="cancel" value="cancel">Cancel</button>
+      <button type="submit" id="signup_create" name="create" value="create">Create</button>
+    </div>
+  </form>
+[% ELSE %]
+  <form class="fresh-signup" method="post" action="[% c.url_for('signup_email') %]">
+    <p class="notes">
+      It seems we can't verify your email address because the signup token is expired.
+      Fill in the email below and we'll try this again.
+    </p>
+    <input type="hidden" name="csrf_token" value="[% c.csrf_token %]">
+    <input type="text" placeholder="Email Address" id="email">
+    <button type="submit" id="confirm" name="submit" value="create">Sign up</button>
+  </form>
+[% END %]
+
+[% PROCESS global/footer.html.tmpl %]

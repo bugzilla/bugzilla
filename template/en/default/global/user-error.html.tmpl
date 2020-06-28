@@ -1857,6 +1857,14 @@
     [% title = "Unknown Tab" %]
     <code>[% current_tab_name FILTER html %]</code> is not a legal tab name.
 
+  [% ELSIF error == "validation" %]
+    <p>Some fields failed validation.</p>
+    <ul>
+        [% FOREACH f IN v.failed %]
+        <li>[% f FILTER html %]: [% v.error(f).join(", ") FILTER html %]</li>
+        [% END %]
+    </ul>
+
   [% ELSIF error == "value_inactive" %]
     [% title = "Value is Not Active" %]
     [% type = BLOCK %][% INCLUDE object_name class = class %][% END %]

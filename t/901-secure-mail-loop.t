@@ -16,7 +16,7 @@ my $pubring = new Crypt::OpenPGP::KeyRing(Data => PUBLIC_KEY());
 my $pgp = new Crypt::OpenPGP(PubRing => $pubring);
 {
   local $SIG{ALRM} = sub { fail("stuck in a loop"); exit; };
-  alarm(120);
+  alarm(10);
   my $encrypted = $pgp->encrypt(
     Data       => "hello, world",
     Recipients => "@",

@@ -52,7 +52,7 @@ sub isTestingFile {
     return undef if $ignore eq $file;
   }
 
-  if ($file =~ /\.psgi$|\.cgi$|\.pl$|\.pm$/) {
+  if ($file =~ /\.pl$|\.pm$/) {
     return 1;
   }
   my $additional;

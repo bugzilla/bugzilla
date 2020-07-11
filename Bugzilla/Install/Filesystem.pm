@@ -329,6 +329,8 @@ sub FILESYSTEM {
   # The name of each file, pointing at its default permissions and
   # default contents.
   my %create_files = (
+    "__lbheartbeat__" => {perms => CGI_READ, contents => 'httpd OK'},
+
     "$datadir/extensions/additional" => {perms => CGI_READ, contents => ''},
 
     # We create this file so that it always has the right owner

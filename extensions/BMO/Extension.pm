@@ -2524,12 +2524,6 @@ sub install_filesystem {
   my $files          = $args->{files};
   my $create_files   = $args->{create_files};
   my $extensions_dir = bz_locations()->{extensionsdir};
-  $create_files->{__lbheartbeat__} = {
-    perms => Bugzilla::Install::Filesystem::WS_SERVE,
-    overwrite => 1,            # the original value for this was wrong, overwrite it
-    contents  => 'httpd OK',
-  };
-
 
   # version.json needs to have a source attribute pointing to
   # our repository. We already have this information in the (static)

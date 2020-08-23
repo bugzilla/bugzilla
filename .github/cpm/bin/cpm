@@ -1,0 +1,122 @@
+#!/usr/bin/perl
+use strict;
+use warnings;
+
+use App::cpm::CLI;
+exit App::cpm::CLI->new->run(@ARGV);
+
+__END__
+
+=head1 NAME
+
+cpm - a fast CPAN module installer
+
+=head1 SYNOPSIS
+
+  # install modules into local/
+  > cpm install Module1 Module2 ...
+
+  # install modules with verbose messages
+  > cpm install -v Module
+
+  # from cpanfile (with cpanfile.snapshot if any)
+  > cpm install
+
+  # install module into current @INC instead of local/
+  > cpm install -g Module
+
+  # read modules from STDIN by specifying "-" as an argument
+  > echo Module1 Module2 | cpm install -
+
+  # prefer TRIAL release
+  > cpm install --dev Moose
+
+  # install modules as if version of your perl is 5.8.5
+  # so that modules which are not core in 5.8.5 will be installed
+  > cpm install --target-perl 5.8.5
+
+  # resolve distribution names from DARKPAN/modules/02packages.details.txt.gz
+  # and fetch distibutions from DARKPAN/authors/id/...
+  > cpm install --resolver 02packages,http://example.com/darkpan Your::Module
+  > cpm install --resolver 02packages,file:///path/to/darkpan    Your::Module
+
+  # use darkpan first, and if it fails, use metadb and normal CPAN
+  > cpm install --resolver 02packages,http://example.com/darkpan --resolver metadb Your::Module
+
+  # specify types/phases in cpanfile by "--with-*" and "--without-*" options
+  > cpm install --with-recommends --without-test
+
+=head1 OPTIONS
+
+  -w, --workers=N
+        number of workers, default: 5
+  -L, --local-lib-contained=DIR
+        directory to install modules into, default: local/
+  -g, --global
+        install modules into current @INC instead of local/
+  -v, --verbose
+        verbose mode; you can see what is going on
+      --prebuilt, --no-prebuilt
+        save builds for CPAN distributions; and later, install the prebuilts if available
+        default: on; you can also set $ENV{PERL_CPM_PREBUILT} false to disable this option
+      --target-perl=VERSION  (EXPERIMENTAL)
+        install modules as if verison is your perl is VERSION
+      --mirror=URL
+        base url for the CPAN mirror to use, cannot be used multiple times. Use --resolver instead.
+        default: https://cpan.metacpan.org
+      --pp, --pureperl-only
+        prefer pureperl only build
+      --static-install, --no-static-install
+        enable/disable the static install, default: enable
+  -r, --resolver=class,args (EXPERIMENTAL, will be removed or renamed)
+        specify resolvers, you can use --resolver multiple times
+        available classes: metadb/metacpan/02packages/snapshot
+      --reinstall
+        reinstall the distribution even if you already have the latest version installed
+      --dev (EXPERIMENTAL)
+        resolve TRIAL distributions too
+      --color, --no-color
+        turn on/off color output, default: on
+      --test, --no-test
+        run test cases, default: no
+      --man-pages
+        generate man pages
+      --retry, --no-retry
+        retry configure/build/test/install if fails, default: retry
+      --show-build-log-on-failure
+        show build.log on failure, default: off
+      --configure-timeout=sec, --build-timeout=sec, --test-timeout=sec
+        specify configure/build/test timeout second, default: 60sec, 3600sec, 1800sec
+      --show-progress, --no-show-progress
+        show progress, default: on
+      --cpanfile=path
+        specify cpanfile path, default: ./cpanfile
+      --snapshot=path
+        specify cpanfile.snapshot path, default: ./cpanfile.snapshot
+  -V, --version
+        show version
+  -h, --help
+        show this help
+      --feature=identifier
+        specify the feature to enable in cpanfile; you can use --feature multiple times
+      --with-requires,   --without-requires   (default: with)
+      --with-recommends, --without-recommends (default: without)
+      --with-suggests,   --without-suggests   (default: without)
+      --with-configure,  --without-configure  (default: without)
+      --with-build,      --without-build      (default: with)
+      --with-test,       --without-test       (default: with)
+      --with-runtime,    --without-runtime    (default: with)
+      --with-develop,    --without-develop    (default: without)
+        specify types/phases of dependencies in cpanfile to be installed
+      --with-all
+        shortcut for --with-requires, --with-recommends, --with-suggests,
+        --with-configure, --with-build, --with-test, --with-runtime and --with-develop
+
+=head1 COPYRIGHT AND LICENSE
+
+Copyright 2015 Shoichi Kaji E<lt>skaji@cpan.orgE<gt>
+
+This library is free software; you can redistribute it and/or modify
+it under the same terms as Perl itself.
+
+=cut

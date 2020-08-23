@@ -12,7 +12,7 @@ severity = 2
 functions = :builtins
 exclude_functions = print say sleep binmode
 
-[ValuesAndExpressions::ProhibitInterpolationOfLiterals]
+[-ValuesAndExpressions::ProhibitInterpolationOfLiterals]
 severity = 2
 
 [Freenode::EmptyReturn]

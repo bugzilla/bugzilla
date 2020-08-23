@@ -987,7 +987,7 @@ sub object_end_of_create {
     # Log real IP addresses for auditing
     Bugzilla->audit(sprintf(
       '%s <%s> created bug %s',
-      Bugzilla->user->login, remote_ip(), $args->{object}->id
+      Bugzilla->user->login, remote_ip() // '[undef]', $args->{object}->id
     ));
   }
 }

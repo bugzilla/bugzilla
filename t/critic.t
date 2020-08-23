@@ -13,5 +13,6 @@ use Test::More;
 
 my $ok = eval { require Test::Perl::Critic::Progressive };
 plan skip_all => 'T::P::C::Progressive required for this test' unless $ok;
+plan skip_all => 'Disabled until we can make this only check our code and not local-lib';
 
 Test::Perl::Critic::Progressive::progressive_critic_ok();

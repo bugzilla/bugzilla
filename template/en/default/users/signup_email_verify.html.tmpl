@@ -6,7 +6,7 @@
 %]
 
 [% IF signup_token %]
-  <form class="signup" method="post" action="[% c.url_for('signup_email_finish') %]">
+  <form class="signup" method="post" action="[% c.url_for('signup_email_finish') FILTER html %]">
     <p class="notes">
       This account will not be created if this form is not completed by
       <u>[% expires FILTER time("%B %e, %Y at %H:%M %Z") %]</u>.
@@ -37,12 +37,12 @@
     </div>
   </form>
 [% ELSE %]
-  <form class="fresh-signup" method="post" action="[% c.url_for('signup_email') %]">
+  <form class="fresh-signup" method="post" action="[% c.url_for('signup_email') FILTER html %]">
     <p class="notes">
       It seems we can't verify your email address because the signup token is expired.
       Fill in the email below and we'll try this again.
     </p>
-    <input type="hidden" name="csrf_token" value="[% c.csrf_token %]">
+    <input type="hidden" name="csrf_token" value="[% c.csrf_token FILTER html %]">
     <input type="text" placeholder="Email Address" id="email">
     <button type="submit" id="confirm" name="submit" value="create">Sign up</button>
   </form>

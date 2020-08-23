@@ -9,8 +9,8 @@ use strict;
 use warnings;
 use lib qw( . lib local/lib/perl5 );
 
-use Bugzilla::Test::MockDB;
 use Bugzilla::Test::MockLocalconfig urlbase => 'http://bmo.test/';
+use Bugzilla::Test::MockDB;
 use Bugzilla::Test::MockParams (password_complexity => 'no_constraints');
 use Mojo::DOM;
 use Bugzilla;

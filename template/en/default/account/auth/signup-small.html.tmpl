@@ -23,8 +23,8 @@
 [%# Use the current script name. If an empty name is returned,
   # then we are accessing the home page. %]
 
-<li id="mini_signup_container[% qs_suffix %]">
-  <a id="signup_link[% qs_suffix %]" href="#"
+<li id="mini_signup_container[% qs_suffix FILTER html %]">
+  <a id="signup_link[% qs_suffix FILTER html %]" href="#"
      class='show_mini_signup_form' data-qs-suffix="[% qs_suffix FILTER html %]">Sign Up</a>
 
   <div id="mini_signup[% qs_suffix FILTER html %]" class="mini-popup mini_signup bz_default_hidden">
@@ -43,10 +43,10 @@
            required
     >
     <input type="hidden" name="csrf_token"
-           value="[% c.csrf_token %]">
+           value="[% c.csrf_token FILTER html %]">
     <input type="submit" value="Sign up"
            class="check_mini_signup_fields"
-            id="signup_[% qs_suffix %]">
+            id="signup_[% qs_suffix FILTER html %]">
     <a href="#" id="hide_mini_signup[% qs_suffix FILTER html %]" aria-label="Close"
        class="close-button hide_mini_signup_form" data-qs-suffix="[% qs_suffix FILTER html %]">
       <span class="icon" aria-hidden="true"></span>

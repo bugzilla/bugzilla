@@ -7,17 +7,17 @@
 [% PROCESS global/variables.none.tmpl %]
 
 From: [% Param('mailfrom') %]
-To: [% email %]
+To: [% email FILTER none %]
 Subject: [% terms.Bugzilla %]: complete account signup
 X-Bugzilla-Type: admin
 
 [%+ terms.Bugzilla %] has received a request to create a user account
-using your email address ([% email %]).
+using your email address ([% email FILTER none %]).
 
 To continue creating an account using this email address, visit the
 following link by [% expiration_ts FILTER time("%B %e, %Y at %H:%M %Z") %]:
 
-[%+ verify_url %]
+[%+ verify_url FILTER none %]
 
 [% IF Param('createemailregexp') == '.*' && Param('emailsuffix') == '' %]
 PRIVACY NOTICE: [% terms.Bugzilla %] is an open [% terms.bug %] tracking system. Activity on most

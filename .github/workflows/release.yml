@@ -1,0 +1,55 @@
+# This is a basic workflow to help you get started with Actions
+
+name: Release Tests
+
+# Controls when the action will run. Triggers the workflow on push or pull request
+# events but only for the master branch
+on:
+  push:
+    branches: [ master, devel ]
+  pull_request:
+    branches: [ master, devel ]
+
+# A workflow run is made up of one or more jobs that can run sequentially or in parallel
+jobs:
+  ubuntu:
+    name: Release Tests on Ubuntu 20.04
+    runs-on: ubuntu-20.04
+    steps:
+      - name: Checkout the repository
+        uses: actions/checkout@v2
+      - name: Cache CPAN packages
+        uses: actions/cache@v2
+        with:
+          path: |
+            ~/.perl-cpm/cache
+            ~/.perl-cpm/builds
+            **/local/
+          key: ${{ runner.os }}-ubuntu-20.04
+          restore-keys: |
+            ${{ runner.os }}-ubuntu-20.04
+      - name: apt-get install
+        run: |
+          sudo apt-get install --ignore-hold --allow-downgrades -y \
+              build-essential curl libssl-dev zlib1g-dev openssl \
+              libexpat-dev cmake git libcairo-dev libgd-dev \
+              default-libmysqlclient-dev unzip wget libgd3=2.2.5-5.2ubuntu2
+      - name: cpm install
+        run: |
+          perl -I$GITHUB_WORKSPACE/.github/cpm/lib/perl5 $GITHUB_WORKSPACE/.github/cpm/bin/cpm install \
+          && tar -C $GITHUB_WORKSPACE \
+              --exclude 'local/cache/*' \
+              --exclude 'local/man/*' \
+              --exclude '*.pod' \
+              -zcvf local-lib.tar.gz local
+      - name: Save dependencies
+        uses: actions/upload-artifact@v2
+        with:
+          name: ubuntu-20.04-local-lib.tar.gz
+          path: local-lib.tar.gz
+      - name: Run Makefile.PL
+        run: 'perl Makefile.PL'
+      - name: Run checksetup
+        run: 'perl checksetup.pl --no-database --default-localconfig --no-templates'
+      - name: Run tests
+        run: 'prove -Ilocal/lib/perl5 t'

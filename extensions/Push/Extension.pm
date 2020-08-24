@@ -461,6 +461,16 @@ sub page_before_template {
       {group => 'admin', action => 'access', object => 'administrative_pages'});
     admin_log($vars);
   }
+  elsif ($page eq 'webhooks_config.html') {
+    if (Bugzilla->params->{webhooks_enabled}){
+      Bugzilla->user->in_group('admin')
+        || ThrowUserError('auth_failure',
+        {group => 'admin', action => 'access', object => 'administrative_pages'});
+      admin_webhooks($vars);
+    }else{
+      ThrowUserError('webhooks_disabled');
+    }
+  }
 }
 
 #

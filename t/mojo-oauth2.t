@@ -77,7 +77,7 @@ $t->post_ok(
     scope                  => 'user:read',
     redirect_uri           => '/oauth/redirect'
   }
-)->status_is(200)->text_is('title' => 'Confirm OAuth2 Scopes');
+)->status_is(200)->text_is('title' => 'Request for access to your account');
 
 # Get the csrf token to allow submitting the scope confirmation form
 my $csrf_token = $t->tx->res->dom->at('input[name=token]')->val;

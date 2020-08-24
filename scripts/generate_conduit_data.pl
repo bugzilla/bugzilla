@@ -197,7 +197,7 @@ if ($oauth_id && $oauth_secret) {
     undef, $oauth_id);
 
   my $scope_id = $dbh->selectrow_array(
-    'SELECT id FROM oauth2_scope WHERE description = \'user:read\'', undef);
+    'SELECT id FROM oauth2_scope WHERE name = \'user:read\'', undef);
 
   $dbh->do('REPLACE INTO oauth2_client_scope (client_id, scope_id) VALUES (?, ?)',
     undef, $client_data->{id}, $scope_id);

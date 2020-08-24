@@ -14,6 +14,7 @@ use warnings;
 use Bugzilla;
 use Bugzilla::Error;
 use Bugzilla::Extension::Push::Util;
+use Bugzilla::Extension::Webhooks::Webhook;
 use Bugzilla::Token qw(check_hash_token);
 use Bugzilla::Util qw(trim detaint_natural );
 
@@ -22,6 +23,7 @@ our @EXPORT = qw(
   admin_config
   admin_queues
   admin_log
+  admin_webhooks
 );
 
 sub admin_config {
@@ -36,7 +38,9 @@ sub admin_config {
     $dbh->bz_start_transaction();
     _update_config_from_form('global', $push->config);
     foreach my $connector ($push->connectors->list) {
-      _update_config_from_form($connector->name, $connector->config);
+      if ($connector->name !~ /\QWebhook\E/) {
+        _update_config_from_form($connector->name, $connector->config);
+      }
     }
     $push->set_config_last_modified();
     $dbh->bz_commit_transaction();
@@ -121,6 +125,39 @@ sub admin_log {
   my $input  = Bugzilla->input_params;
 
   $vars->{push} = $push;
+}
+
+sub admin_webhooks {
+  my ($vars)   = @_;
+  my $push     = Bugzilla->push_ext;
+  my $input    = Bugzilla->input_params;
+  my @webhooks = Bugzilla::Extension::Webhooks::Webhook->get_all;
+
+  if ($input->{save}) {
+    my $token = $input->{token};
+    check_hash_token($token, ['webhooks_config']);
+    my $dbh = Bugzilla->dbh;
+    $dbh->bz_start_transaction();
+    foreach my $connector ($push->connectors->list) {
+      if ($connector->name =~ /\QWebhook\E/) {
+        _update_webhook_status($connector->name, $connector->config);
+      }
+    }
+    $push->set_config_last_modified();
+    $dbh->bz_commit_transaction();
+    $vars->{message} = 'push_config_updated';
+  }
+
+  $vars->{push}       = $push;
+  $vars->{connectors} = $push->connectors;
+  $vars->{webhooks}   = \@webhooks;
+}
+
+sub _update_webhook_status {
+  my ($name, $config) = @_;
+  my $input = Bugzilla->input_params;
+  $config->{enabled} = trim($input->{$name . ".enabled"});
+  $config->update();
 }
 
 1;

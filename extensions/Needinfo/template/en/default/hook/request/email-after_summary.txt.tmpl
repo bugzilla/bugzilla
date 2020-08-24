@@ -8,6 +8,28 @@
 
 [% RETURN UNLESS flag && flag.type.name == 'needinfo' && flag.status == '?' %]
 ---
---- This request has set a needinfo flag on the [% terms.bug %].
---- You can clear it by logging in and replying in a comment.
+--- Hello from [% terms.Bugzilla %], the [% terms.bug %] tracker for Mozilla and Firefox:
+---
+--- Someone has asked you for information about this [% terms.bug %].
+---
+--- Please go to [% urlbase %]show_bug.cgi?id=[% bug.bug_id %] to respond
+--- to the question below.
+[% IF flag.requestee.login_name == bug.reporter.login_name %]
+---
+--- Since you reported this [% terms.bug %], then the person asking the
+--- question needs more information from you to understand it.
+---
+--- Responding to the question will enable developers to take further
+--- action on this [% terms.bug %].
+[% ELSE %]
+---
+--- Please log into [% terms.Bugzilla %] and respond as soon as possible
+--- so developers may take action on this [% terms.bug %].
+[% END %]
+---
+--- If you have questions about responding to needinfo requests, please
+--- see https://wiki.mozilla.org/BMO/UserGuide#Needinfo_Flag.
+---
+--- Thank you
+---
 ---

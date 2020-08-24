@@ -36,7 +36,7 @@
                  [% ' checked="checked"' IF client.scopes.contains(scope.id) %]>
             </td>
             <td>
-              [% scope.description FILTER html %]
+              [% scope.description FILTER html +%] ([%+ scope.name FILTER html %])
             </td>
           </tr>
         [% END %]

@@ -41,6 +41,7 @@ var push_defaults = new Array();
 %]
 
 [% FOREACH connector = connectors.list %]
+  [% NEXT IF connector.webhook_id %]
   [% PROCESS options
              name = connector.name
              config = connector.config
@@ -66,6 +67,15 @@ var push_defaults = new Array();
   <td>&nbsp;</td>
   <td width="100%">&nbsp;</td>
 </tr>
+
+[% IF Bugzilla.params.${'webhooks_enabled'} %]
+  <tr>
+    <td>&nbsp;</td>
+    <td colspan="2">
+      <a href="page.cgi?id=webhooks_config.html">See webhooks configurations</a>
+    </td>
+  </tr>
+[% END %]
 
 </table>
 
@@ -106,7 +116,7 @@ var push_defaults = new Array();
             [% END %]
           >
             [% IF option.name != 'enabled' && !option.required %]
-              <option value="""
+              <option value=""
                [% ' selected' IF config.${option.name} == "" %]></option>
             [% END %]
             [% FOREACH value = option.values %]

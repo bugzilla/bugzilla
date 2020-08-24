@@ -16,7 +16,10 @@
 <table role="table" class="layout-table" id="attachments">
   [% FOREACH attachment IN bug.attachments %]
     [%
-      NEXT IF attachment.isprivate && !(user.is_insider || attachment.attacher.id == user.id);
+      NEXT IF attachment.isprivate
+        && !(user.is_insider
+              || attachment.attacher.id == user.id
+              || (attachment.is_bounty_attachment && user.id == bug.reporter.id));
       attachment_rendered = 0;
       Hook.process("row");
       NEXT IF attachment_rendered;

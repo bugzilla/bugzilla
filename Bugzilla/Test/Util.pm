@@ -59,7 +59,7 @@ sub create_oauth_client {
 
   foreach my $scope (@{$scopes}) {
     my $scope_id
-      = $dbh->selectrow_array('SELECT id FROM oauth2_scope WHERE description = ?',
+      = $dbh->selectrow_array('SELECT id FROM oauth2_scope WHERE name = ?',
       undef, $scope);
     if (!$scope_id) {
       die "Scope $scope not found";

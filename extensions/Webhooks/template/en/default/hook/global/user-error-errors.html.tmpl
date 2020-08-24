@@ -1,0 +1,25 @@
+[%# This Source Code Form is subject to the terms of the Mozilla Public
+  # License, v. 2.0. If a copy of the MPL was not distributed with this
+  # file, You can obtain one at http://mozilla.org/MPL/2.0/.
+  #
+  # This Source Code Form is "Incompatible With Secondary Licenses", as
+  # defined by the Mozilla Public License, v. 2.0.
+  #%]
+
+[% IF error == "webhooks_select_event" %]
+  [% title = "Select at least one event" %]
+  You didn't select any event. Select at least one.
+
+[% ELSIF error == "webhooks_define_name" %]
+  [% title = "Define a name" %]
+  You didn't define a name for your webhook. Define a name to identify your webhook.
+
+[% ELSIF error == "webhooks_define_url" %]
+  [% title = "Define a URL" %]
+  You didn't define a URL for your webhook. Define one.
+
+[% ELSIF error == "webhooks_invalid_option" %]
+  [% title = "Invalid option" %]
+  The option value specified is invalid.
+
+[% END %]

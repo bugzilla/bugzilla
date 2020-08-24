@@ -292,11 +292,11 @@
   [% IF comment.body || comment.count == 0 %]
     <[% comment_tag FILTER none %]
         class="comment-text [%= "markdown-body" IF comment.is_markdown %] [%= "bz_private" IF comment.is_private %]
-               [% "empty" IF !comment.body %]"
+               [% "empty" IF comment.body == "" %]"
         id="ct-[% comment.count FILTER none %]" data-comment-id="[% comment.id FILTER none %]"
         [% IF comment.is_markdown +%] data-ismarkdown="true" [% END ~%]
         [% IF comment.collapsed +%] style="display:none"[% END ~%]>
-      [%~ IF comment.body ~%]
+      [%~ IF comment.body != "" ~%]
         [%~ comment.body_full({ exclude_attachment => 1 }) FILTER renderMarkdown(bug, comment) ~%]
       [%~ ELSE ~%]
         <em>No description provided.</em>

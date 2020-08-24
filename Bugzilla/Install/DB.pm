@@ -4262,8 +4262,19 @@ sub _populate_oauth2_scopes {
 
   # if there are no scopes, then we're creating a database from scratch
   my ($scope_count) = $dbh->selectrow_array('SELECT COUNT(*) FROM oauth2_scope');
-  return if $scope_count;
-  $dbh->do("INSERT INTO oauth2_scope (id, description) VALUES (1, 'user:read')");
+    if (!$scope_count) {
+    $dbh->do(
+      "INSERT INTO oauth2_scope (id, name, description) VALUES " .
+      "(1, 'user:read', 'View basic account information such as email address.')"
+    );
+  }
+
+  # Bug 1658317 - dkl@mozilla - Update column names if this is an existing DB
+  if (!$dbh->bz_column_info('oauth2_scope', 'name')) {
+    $dbh->bz_rename_column("oauth2_scope", "description", "name");
+    $dbh->bz_add_column('oauth2_scope', 'description',
+      {TYPE => 'TINYTEXT', NOTNULL => 1, DEFAULT => "'Needs Description'"});
+  }
 }
 
 sub _add_oauth2_jwt_support {

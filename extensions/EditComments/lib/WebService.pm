@@ -68,14 +68,7 @@ sub comments {
 # This should be migrated to the standard API method at /rest/bug/comment/(comment_id)
 sub update_comment {
   my ($self, $params) = @_;
-  my $user                = Bugzilla->login(LOGIN_REQUIRED);
-  my $edit_comments_group = Bugzilla->params->{edit_comments_group};
-
-  # Validate group membership
-  ThrowUserError('auth_failure',
-    {group => $edit_comments_group, action => 'view', object => 'editcomments'})
-    unless $user->is_insider
-    || $edit_comments_group && $user->in_group($edit_comments_group);
+  my $user = Bugzilla->login(LOGIN_REQUIRED);
 
   my $comment_id
     = (defined $params->{comment_id} && $params->{comment_id} =~ /^(\d+)$/)
@@ -97,17 +90,17 @@ sub update_comment {
   ThrowUserError('comment_is_private', {id => $comment->id})
     unless $user->is_insider || !$comment->is_private;
 
-# Insiders can edit any comment while unprivileged users can only edit their own comments
-  ThrowUserError('auth_failure',
-    {group => 'insidergroup', action => 'view', object => 'editcomments'})
-    unless $user->is_insider || $comment->author->id == $user->id;
-
-  my $bug         = $comment->bug;
-  my $old_comment = $comment->body;
-  my $new_comment = $comment->_check_thetext($params->{new_comment});
+  my $bug = $comment->bug;
 
   # Validate bug visibility
   $bug->check_is_visible();
+
+  # Check if user can edit this comment.
+  ThrowUserError('auth_failure', {action => 'view', object => 'editcomments'})
+    unless $comment->is_editable_by($user);
+
+  my $old_comment = $comment->body;
+  my $new_comment = $comment->_check_thetext($params->{new_comment});
 
   # Make sure there is any change in the comment
   ThrowCodeError('param_no_changes',
@@ -117,9 +110,9 @@ sub update_comment {
   my $dbh         = Bugzilla->dbh;
   my $change_when = $dbh->selectrow_array('SELECT NOW()');
 
-  # Insiders can hide comment revisions where needed
+  # edit_comments_admins_group members can hide comment revisions where needed
   my $is_hidden
-    = (  $user->is_insider
+    = (  $user->is_edit_comments_admin
       && defined $params->{is_hidden}
       && $params->{is_hidden} == 1) ? 1 : 0;
 
@@ -164,10 +157,10 @@ sub modify_revision {
   my ($self, $params) = @_;
   my $user = Bugzilla->login(LOGIN_REQUIRED);
 
-  # Only allow insiders to modify revisions
+  # Only allow edit_comments_admins_group members to modify revisions
   ThrowUserError('auth_failure',
-    {group => 'insidergroup', action => 'view', object => 'editcomments'})
-    unless $user->is_insider;
+    {group => 'edit_comments_admins_group', action => 'view', object => 'editcomments'})
+    unless $user->is_edit_comments_admin;
 
   my $comment_id
     = (defined $params->{comment_id} && $params->{comment_id} =~ /^(\d+)$/)

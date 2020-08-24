@@ -8,7 +8,14 @@
 
 [% IF panel.name == "groupsecurity" %]
   [% panel.param_descs.edit_comments_group =
-    'The name of the group of users who can edit their own comments. Leave it blank to disable comment editing. ' _
-    'Insiders can always edit any comment and hide revisions where needed.'
+    'The name of the group of users who can edit their own comments. ' _
+    'Leave it blank to disable comment editing.'
+  %]
+  [% panel.param_descs.edit_comments_admins_group =
+    'The name of the group of users who can edit any comments, and hide revisions where needed. ' _
+    'Leave it blank to disable comment editing administrators.'
+  %]
+  [% panel.param_descs.allow_global_initial_comment_editing =
+    'Allow anyone with the ability to edit comments to edit the description (comment 0) of any bug.'
   %]
 [% END -%]

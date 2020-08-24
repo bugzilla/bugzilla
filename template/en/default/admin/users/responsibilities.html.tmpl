@@ -29,6 +29,7 @@
       <th>Component</th>
       <th>Default Assignee</th>
       <th>Default QA Contact</th>
+      <th>Triage Owner</th>
       <th>Default CC</th>
     </tr>
     [% FOREACH component = item.components %]
@@ -44,7 +45,7 @@
             </a>
           [% END %]
         </td>
-        [% FOREACH responsibility = ['default_assignee', 'default_qa_contact'] %]
+        [% FOREACH responsibility = ['default_assignee', 'default_qa_contact', 'triage_owner'] %]
           <td class="center">
             [% component.$responsibility.id == otheruser.id ? "X" : "&nbsp;" %]
           </td>

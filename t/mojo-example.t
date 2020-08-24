@@ -26,8 +26,7 @@ use Bugzilla::Test::MockLocalconfig (urlbase => 'http://bmo.test');
 use Bugzilla::Test::MockDB;
 
 # This redirects reads and writes from the config file (data/params)
-use Bugzilla::Test::MockParams (phabricator_enabled => 1,
-  announcehtml => 'Mojo::Test is awesome',);
+use Bugzilla::Test::MockParams (announcehtml => 'Mojo::Test is awesome');
 
 # Util provides a few functions more making mock data in the DB.
 use Bugzilla::Test::Util qw(create_user issue_api_key);

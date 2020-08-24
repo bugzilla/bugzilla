@@ -789,6 +789,11 @@ sub DEFAULT_CSP {
       'https://github.com/login';
   }
 
+  # This is for Mozilla Phabricator and authentication
+  if (Bugzilla->params->{phabricator_enabled}) {
+    push @{$policy{form_action}}, Bugzilla->params->{phabricator_base_uri};
+  }
+
   return %policy;
 }
 

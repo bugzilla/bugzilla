@@ -180,7 +180,7 @@
           [% Hook.process('view') %]
           [% UNLESS custom_attachment_viewer %]
             <div>
-              <input type="hidden" name="markdown_off" value="1">
+              <input type="hidden" name="markdown_off" value="0">
               [% INCLUDE global/textarea.html.tmpl
                 id      = 'editFrame'
                 name    = 'comment'

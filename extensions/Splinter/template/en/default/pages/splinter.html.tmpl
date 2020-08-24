@@ -218,7 +218,9 @@
           [% any_flags_requesteeble = 0 %]
           [% FOREACH flag_type = flag_types %]
             [% NEXT UNLESS flag_type.is_active %]
-            [% SET any_flags_requesteeble = 1 IF flag_type.is_requestable && flag_type.is_requesteeble %]
+            [% IF flag_type.is_requestable && flag_type.is_requesteeble %]
+              [% SET any_flags_requesteeble = 1 %]
+            [% END %]
           [% END %]
           [% IF flag_types.size > 0 %]
             [% PROCESS "flag/list.html.tmpl" bug_id = bug_id

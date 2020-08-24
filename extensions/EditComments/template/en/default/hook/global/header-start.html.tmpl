@@ -8,8 +8,7 @@
 
 [%
   RETURN UNLESS bug.defined;
-  RETURN UNLESS user.is_insider
-    || Param('edit_comments_group') && user.in_group(Param('edit_comments_group'));
+  RETURN UNLESS user.can_edit_comments();
 
   # Expose strings used in JavaScript
   js_BUGZILLA.string.InlineCommentEditor = {
@@ -24,7 +23,7 @@
     preview_error = 'Preview could not be loaded. Please try again later.',
     revision_count => [ '%d revision', '%d revisions' ],
     save => 'Update Comment',
-    save_error => 'Updated comment could not be saved. Please try again later.',
+    save_error => 'Updated comment could not be saved.',
     save_tooltip => 'Save the changes',
     saving => 'Saving…',
     toolbar => 'Comment Editor Toolbar',

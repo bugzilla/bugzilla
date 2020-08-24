@@ -177,6 +177,7 @@ function switchToMode(mode, patchviewerinstalled)
     if (current_mode == 'edit') {
       hideElementById('editFrame');
       hideElementById('undoEditButton');
+      document.querySelector('input[name="markdown_off"]').value = 0;
     } else if (current_mode == 'raw') {
       hideElementById('viewFrame');
       if (patchviewerinstalled)
@@ -195,6 +196,7 @@ function switchToMode(mode, patchviewerinstalled)
     if (mode == 'edit') {
       showElementById('editFrame');
       showElementById('undoEditButton');
+      document.querySelector('input[name="markdown_off"]').value = 1;
     } else if (mode == 'raw') {
       showElementById('viewFrame');
       if (patchviewerinstalled)

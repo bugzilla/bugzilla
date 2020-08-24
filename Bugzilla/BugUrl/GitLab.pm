@@ -20,9 +20,9 @@ use base qw(Bugzilla::BugUrl);
 sub should_handle {
   my ($class, $uri) = @_;
 
-# GitLab issue URLs can have the form:
-# https://gitlab.com/projectA/subprojectB/subprojectC/../issues/53
-  return ($uri->path =~ m!^/.*/issues/\d+$!) ? 1 : 0;
+  # GitLab issue and merge request URLs can have the form:
+  # https://gitlab.com/projectA/subprojectB/subprojectC/../(issues|merge_requests)/53
+  return ($uri->path =~ m!^/.*/(issues|merge_requests)/\d+$!) ? 1 : 0;
 }
 
 sub _check_value {

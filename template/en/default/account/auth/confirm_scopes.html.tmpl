@@ -7,7 +7,7 @@
   #%]
 
 [% PROCESS global/header.html.tmpl
-   title = "Confirm OAuth2 Scopes" %]
+   title = "Request for access to your account" %]
 
 <h1>[% title FILTER html %] </h1>
 <p>
@@ -16,14 +16,13 @@
 </p>
 
 <p>
-Scopes:
-<ul>
-  [% FOREACH scope = scopes %]
-    <li>
-      [% scope FILTER html %]
-    </li>
-  [% END %]
-</ul>
+  <ul>
+    [% FOREACH scope = scopes %]
+      <li>
+        [% scope.description FILTER html %]
+      </li>
+    [% END %]
+  </ul>
 </p>
 
 <p>Do you want this website to have the above access to your [% terms.Bugzilla %]
@@ -33,7 +32,7 @@ Scopes:
   <form action="/oauth/authorize" method="get">
     <input type="hidden" name="oauth_confirm_[% client.client_id FILTER html %]" value="1">
     <input type="hidden" name="token" value="[% token FILTER html %]">
-    <input type="submit" name="submit" value="Accept">
+    <input type="submit" name="submit" value="Allow">
     [% FOREACH field = c.req.params.names %]
       <input type="hidden" name="[% field FILTER html %]"
              value="[% c.param(field) FILTER html_linebreak %]">

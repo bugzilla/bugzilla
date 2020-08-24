@@ -13,6 +13,7 @@ use warnings;
 
 use Bugzilla::Logging;
 use Bugzilla::Constants;
+use Bugzilla::Extension::Webhooks::Webhook;
 use Bugzilla::Extension::Push::Option;
 use Crypt::CBC;
 
@@ -188,7 +189,8 @@ sub _validate_config {
   die join("\n", @errors) if @errors;
 
   if ($self->{_name} ne 'global') {
-    my $class = 'Bugzilla::Extension::Push::Connector::' . $self->{_name};
+    my $name = $self->{_name} =~ /\QWebhook\E/ ? 'Webhook' : $self->{_name};
+    my $class = 'Bugzilla::Extension::Push::Connector::' . $name;
     $class->options_validate($config);
   }
 }

@@ -8,4 +8,11 @@
 
 [% IF error == "push_error" %]
   [% error_message FILTER html %]
+
+[% ELSIF error == "webhooks_disabled" %]
+    The webhooks feature is not available.
+    [% IF user.in_group('admin') %]
+      If you would like to enable this feature, please go to webhooks section in parameters panel.
+    [% END %]
+
 [% END %]

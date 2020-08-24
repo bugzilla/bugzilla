@@ -40,6 +40,7 @@ sub register {
     if (!$args->{user_id}) {
       return (user_id => Bugzilla->user->id);
     }
+    return;
   };
 
   $app->helper(
@@ -81,6 +82,7 @@ sub _resource_owner_confirm_scopes {
   my (%args) = @_;
   my ($c, $client_id, $scopes_ref)
     = @args{qw/ mojo_controller client_id scopes /};
+  my $dbh = Bugzilla->dbh;
 
   $c->bugzilla->login(LOGIN_REQUIRED) || return undef;
 
@@ -90,12 +92,18 @@ sub _resource_owner_confirm_scopes {
   # access last time, we check [again] with the user for access
   if (!defined $is_allowed) {
     my $client
-      = Bugzilla->dbh->selectrow_hashref(
-      'SELECT * FROM oauth2_client WHERE client_id = ?',
+      = $dbh->selectrow_hashref('SELECT * FROM oauth2_client WHERE client_id = ?',
       undef, $client_id);
+    my $scopes = $dbh->selectall_arrayref(
+      'SELECT * FROM oauth2_scope WHERE name IN ('
+        . join(',', map { $dbh->quote($_) } @{$scopes_ref}) . ')',
+      {Slice => {}}
+    );
+
+
     my $vars = {
       client => $client,
-      scopes => $scopes_ref,
+      scopes => $scopes,
       token  => scalar issue_session_token('oauth_confirm_scopes')
     };
     $c->stash(%{$vars});

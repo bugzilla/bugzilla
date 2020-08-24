@@ -43,7 +43,7 @@ services:
       - selenium
 
   bmo.db:
-    image: mozillabteam/bmo-mysql:5.7
+    image: mysql:5.7
     tmpfs:
       - /tmp
     logging:
@@ -62,3 +62,6 @@ services:
     shm_size: '512m'
     ports:
       - "5900:5900"
+
+volumes:
+  bmo-mysql-db:

@@ -21,6 +21,7 @@ use IPC::System::Simple qw(runx capture);
 use JSON::MaybeXS qw(decode_json);
 use LWP::Simple qw(get);
 use LWP::UserAgent;
+use Mozilla::CA;
 use MIME::Base64 qw(decode_base64);
 use URI::QueryParam;
 use URI;
@@ -45,48 +46,46 @@ foreach my $line (@log) {
     next;
   }
 
-  my @bug_ids;
+  my $bug_id;
   if ($message =~ /\bBug (\d+)/i) {
-    push @bug_ids, $1;
+    $bug_id = $1;
   }
-
-  if (!@bug_ids) {
+  else {
     warn "skipping $line (no bug)\n";
     next;
   }
 
-  foreach my $bug_id (@bug_ids) {
-    my $duplicate = 0;
-    foreach my $revisions (@revisions) {
-      if ($revisions->{bug_id} == $bug_id) {
-        $duplicate = 1;
-        last;
-      }
+  my $duplicate = 0;
+  foreach my $revisions (@revisions) {
+    if ($revisions->{bug_id} == $bug_id) {
+      $duplicate = 1;
+      last;
     }
-    next if $duplicate;
-
-    my $bug = fetch_bug($bug_id);
-    if ($bug->{status} eq 'RESOLVED' && $bug->{resolution} ne 'FIXED') {
-      next;
-    }
-    if ($bug->{summary} =~ /\bbackport\s+(?:upstream\s+)?bug\s+(\d+)/i) {
-      my $upstream = $1;
-      $bug->{summary} = fetch_bug($upstream)->{summary};
-    }
-    push @revisions,
-      {hash => $revision, bug_id => $bug_id, summary => $bug->{summary},};
   }
+  next if $duplicate;
+
+  my $bug = fetch_bug($bug_id);
+  if ($bug->{status} eq 'RESOLVED' && $bug->{resolution} ne 'FIXED') {
+    next;
+  }
+  if ($bug->{summary} =~ /\bbackport\s+(?:upstream\s+)?bug\s+(\d+)/i) {
+    my $upstream = $1;
+    $bug->{summary} = fetch_bug($upstream)->{summary};
+  }
+  push @revisions,
+    {hash => $revision, bug_id => $bug_id, summary => $bug->{summary},};
 }
+
 if (!@revisions) {
-  die
-    "no new revisions.  make sure you run this script before production is updated.\n";
+  warn
+    "no new revisions. make sure you run this script before deployment to production.\n";
 }
 else {
   @revisions = reverse @revisions;
 }
 
-my $first_revision = $revisions[0]->{hash};
-my $last_revision  = $revisions[-1]->{hash};
+my $first_revision = @revisions ? $revisions[0]->{hash} : $prod_tag;
+my $last_revision  = @revisions ? $revisions[-1]->{hash} : 'HEAD';
 
 say "write tag.txt";
 open my $tag_fh, '>', 'tag.txt';
@@ -99,6 +98,7 @@ open my $bug_fh, '>', 'bug.push.txt';
 say $bug_fh
   'https://bugzilla.mozilla.org/enter_bug.cgi?product=bugzilla.mozilla.org&component=Infrastructure&short_desc=push+updated+bugzilla.mozilla.org+live';
 say $bug_fh "revisions: $first_revision - $last_revision";
+say $bug_fh 'no bugs' if !@revisions;
 foreach my $revision (@revisions) {
   say $bug_fh "bug $revision->{bug_id} : $revision->{summary}";
 }
@@ -110,6 +110,7 @@ open my $blog_fh, '>', 'blog.push.txt';
 say $blog_fh "[release tag]($tag_url)\n";
 say $blog_fh
   "the following changes have been pushed to bugzilla.mozilla.org:\n<ul>";
+say $blog_fh '<li>no bugs</li>' if !@revisions;
 foreach my $revision (@revisions) {
   printf $blog_fh
     '<li>[<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=%s" target="_blank">%s</a>] %s</li>%s',
@@ -127,6 +128,7 @@ open my $email_fh, '>', 'email.push.txt';
 say $email_fh
   "the following changes have been pushed to bugzilla.mozilla.org:\n";
 say $email_fh "(tag: $tag_url)\n";
+say $email_fh 'no bugs' if !@revisions;
 foreach my $revision (@revisions) {
   printf $email_fh "https://bugzil.la/%s : %s\n", $revision->{bug_id},
     $revision->{summary};
@@ -139,6 +141,7 @@ open my $wiki_fh, '>', 'wiki.push.txt';
 say $wiki_fh 'https://wiki.mozilla.org/BMO/Recent_Changes';
 say $wiki_fh '== ' . DateTime->now->set_time_zone('UTC')->ymd('-') . " ==\n";
 say $wiki_fh "[$tag_url $tag]";
+say $wiki_fh '* no bugs' if !@revisions;
 foreach my $revision (@revisions) {
   printf $wiki_fh "* {{bug|%s}} %s\n", $revision->{bug_id}, $revision->{summary};
 }
@@ -176,6 +179,7 @@ sub fetch_bug {
 sub _get {
   my ($endpoint, $args) = @_;
   my $ua = LWP::UserAgent->new(agent => $PROGRAM_NAME);
+  $ua->ssl_opts(SSL_ca_file => Mozilla::CA::SSL_ca_file());
   $args //= {};
 
   if (exists $args->{include_fields} && ref($args->{include_fields})) {

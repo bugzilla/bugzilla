@@ -450,11 +450,9 @@ Bugzilla.API = class API {
         reject(new Bugzilla.Error({ name: 'TimeoutError', message: 'Request Timeout' }));
       }, 30000);
 
-      /** @throws {AbortError} */
-      fetch(request, init).then(response => {
-        /** @throws {SyntaxError} */
-        return response.ok ? response.json() : { error: true };
-      }).then(result => {
+      fetch(request, init)
+      .then(response => response.json())
+      .then(result => {
         const { error, code, message } = result;
 
         if (error) {

@@ -66,7 +66,7 @@ function toggle_display(link) {
 
   [% FOREACH attachment = attachments %]
     [% count = count + 1 %]
-    [% IF !attachment.isprivate || user.is_insider || attachment.attacher.id == user.id %]
+    [% IF !attachment.isprivate || user.is_insider || attachment.attacher.id == user.id || (attachment.is_bounty_attachment && user.id == bug.reporter.id) %]
       [% IF attachment.isobsolete %]
         [% obsolete_attachments = obsolete_attachments + 1 %]
       [% END %]

@@ -736,7 +736,9 @@ TUI_hide_default('expert_fields');
 [% any_flags_requesteeble = 0 %]
 [% FOREACH flag_type = product.flag_types.bug %]
   [% display_flags = 1 %]
-  [% SET any_flags_requesteeble = 1 IF flag_type.is_requestable && flag_type.is_requesteeble %]
+  [% IF flag_type.is_requestable && flag_type.is_requesteeble %]
+    [% SET any_flags_requesteeble = 1 %]
+  [% END %]
   [% LAST IF display_flags && any_flags_requesteeable %]
 [% END %]
 

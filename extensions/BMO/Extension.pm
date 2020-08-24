@@ -344,6 +344,7 @@ sub bounty_attachment {
 }
 
 sub _attachment_is_bounty_attachment {
+  # Keep this in sync with Bugzilla/Attachment.pm
   my ($attachment) = @_;
 
   return 0 unless $attachment->filename eq 'bugbounty.data';
@@ -2236,18 +2237,6 @@ sub _file_child_bug {
   Bugzilla->error_mode($old_error_mode);
 }
 
-sub _pre_fxos_feature {
-  my ($self, $args) = @_;
-  my $cgi    = Bugzilla->cgi;
-  my $user   = Bugzilla->user;
-  my $params = $args->{params};
-
-  $params->{keywords} = 'foxfood';
-  $params->{keywords} .= ',feature'
-    if ($cgi->param('feature_type') // '') eq 'new';
-  $params->{bug_status} = $user->in_group('canconfirm') ? 'NEW' : 'UNCONFIRMED';
-}
-
 sub _add_attachment {
   my ($self, $args, $attachment_args) = @_;
 
@@ -2367,9 +2356,6 @@ sub bug_before_create {
 
     # map renamed groups
     $params->{groups} = [_map_groups($params->{groups})];
-  }
-  if ((Bugzilla->cgi->param('format') // '') eq 'fxos-feature') {
-    $self->_pre_fxos_feature($args);
   }
 }
 
@@ -2639,19 +2625,6 @@ sub _split_crash_signature {
   my $crash_signature = $bug->cf_crash_signature // return;
   return [grep {/\S/}
       extract_multiple($crash_signature, [sub { extract_bracketed($_[0], '[]') }])];
-}
-
-sub enter_bug_entrydefaultvars {
-  my ($self, $args) = @_;
-  my $vars = $args->{vars};
-  my $cgi  = Bugzilla->cgi;
-  return unless my $format = $cgi->param('format');
-
-  if ($format eq 'fxos-feature') {
-    $vars->{feature_type} = $cgi->param('feature_type');
-    $vars->{description}  = $cgi->param('description');
-    $vars->{discussion}   = $cgi->param('discussion');
-  }
 }
 
 sub _fetch_product_version_file {

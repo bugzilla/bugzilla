@@ -78,6 +78,11 @@ sub list {
   return @result;
 }
 
+sub delete {
+  my ($self) = @_;
+  Bugzilla->dbh->do("DELETE FROM push_backlog WHERE connector = ?",undef, $self->{connector});
+}
+
 #
 # backoff
 #

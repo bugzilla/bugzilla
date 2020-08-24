@@ -19,6 +19,20 @@
         "isDefault": true
       },
       "problemMatcher": []
-    }
+    },
+    {
+      "label": "Docker: Generate new cpanfile and cpanfile.snapshot",
+      "type": "shell",
+      "command": "docker build -t bmo-cpanfile -f Dockerfile.cpanfile . ; docker run -it -v $(pwd):/app/result bmo-cpanfile cp cpanfile cpanfile.snapshot /app/result",
+      "group": "none",
+      "problemMatcher": []
+    },
+    {
+      "label": "Docker: Generate mozillabteam/bmo-perl-slim image",
+      "type": "shell",
+      "command": "docker build -t mozillabteam/bmo-perl-slim:$(date +%Y%m%d.1) -f Dockerfile.bmo-slim .",
+      "group": "none",
+      "problemMatcher": []
+    },
   ]
 }

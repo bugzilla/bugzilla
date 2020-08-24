@@ -2032,8 +2032,9 @@ sub product_responsibilities {
                                            ON components.id = component_cc.component_id
                                           WHERE components.initialowner = ?
                                              OR components.initialqacontact = ?
+                                             OR components.triage_owner_id = ?
                                              OR component_cc.user_id = ?',
-    {Slice => {}}, ($self->id, $self->id, $self->id)
+    {Slice => {}}, ($self->id, $self->id, $self->id, $self->id)
   );
 
   unless ($list) {

@@ -1,0 +1,80 @@
+[%# This Source Code Form is subject to the terms of the Mozilla Public
+  # License, v. 2.0. If a copy of the MPL was not distributed with this
+  # file, You can obtain one at http://mozilla.org/MPL/2.0/.
+  #
+  # This Source Code Form is "Incompatible With Secondary Licenses", as
+  # defined by the Mozilla Public License, v. 2.0.
+  #%]
+
+[% PROCESS global/header.html.tmpl
+  title = "Push Administration: Configuration: Webhoooks"
+  javascript_urls = [ 'extensions/Push/web/admin.js' ]
+  style_urls = [ 'extensions/Push/web/admin.css' ]
+%]
+
+<form method="POST" action="[% basepath FILTER none %]page.cgi">
+<input type="hidden" name="id" value="webhooks_config.html">
+<input type="hidden" name="save" value="1">
+<input type="hidden" id="token" name="token" value="[% issue_hash_token(['webhooks_config']) FILTER html %]">
+
+[% IF webhooks.size %]
+
+  <h3>
+    Current webhooks:
+  </h3>
+
+  <table id="webhooks_table" class="standard">
+  <thead>
+    <tr>
+      <th>Status</th>
+      <th>ID</th>
+      <th>User</th>
+      <th>Name</th>
+      <th>URL</th>
+      <th>Events</th>
+      <th>Product</th>
+      <th>Component</th>
+    </tr>
+  </thead>
+  <tbody>
+  [% FOREACH webhook IN webhooks %]
+    <tr>
+      <td>
+        [% connector = connectors.by_name('Webhook_' _ webhook.id)
+           config = connector.config
+        %]
+        <select name="[% connector.name FILTER html %].enabled"
+                id="[% connector.name FILTER html %]_enabled">
+          <option value="Enabled" [% 'selected' IF config.${'enabled'} == 'Enabled' %]>Enabled</option>
+          <option value="Disabled" [% 'selected' IF config.${'enabled'} == 'Disabled' %]>Disabled</option>
+        </select>
+      </td>
+      <td>[% webhook.id FILTER html %]</td>
+      <td>[% webhook.user.login_name FILTER html %]</td>
+      <td>[% webhook.name FILTER html %]</td>
+      <td>
+        <a href="[% webhook.url FILTER html %]">
+          [% webhook.url FILTER html %]
+        </a>
+      </td>
+      <td>[% webhook.event FILTER html %]</td>
+      <td>[% webhook.product.name FILTER html %]</td>
+      <td>[% webhook.component ? webhook.component.name : 'Any' FILTER html %]</td>
+    </tr>
+  [% END %]
+  </tbody>
+  </table>
+  <br>
+  <input id="submit" type="submit" value="Submit Changes">
+
+[% ELSE %]
+
+  <p>
+    <i>Do not exist any webhooks.</i>
+  </p>
+
+[% END %]
+
+</form>
+
+[% INCLUDE global/footer.html.tmpl %]

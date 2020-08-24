@@ -13,6 +13,7 @@ use warnings;
 
 use Bugzilla::Logging;
 use Bugzilla::Extension::Push::Util;
+use Bugzilla::Extension::Webhooks::Webhook;
 use Bugzilla::Constants;
 use File::Basename;
 use Try::Tiny;
@@ -53,15 +54,35 @@ sub _load {
     TRACE("Loading connector '$name'");
     my $old_error_mode = Bugzilla->error_mode;
     Bugzilla->error_mode(ERROR_MODE_DIE);
-    try {
-      my $connector = $package->new();
-      $connector->load_config();
-      $self->{objects}->{$name} = $connector;
+    if ($name eq 'Webhook' && Bugzilla->params->{webhooks_enabled}) {
+      my @webhooks = Bugzilla::Extension::Webhooks::Webhook->get_all;
+      if (@webhooks){
+        foreach my $webhook (@webhooks) {
+          my $webhook_name = $name . '_' . $webhook->{id};
+          next if exists $self->{objects}->{$webhook_name};
+          try {
+            TRACE("Loading connector '$webhook_name'");
+            my $connector = $package->new($webhook->{id});
+            $connector->load_config();
+            $self->{objects}->{$webhook_name} = $connector;
+          }
+          catch {
+            ERROR("Connector '$webhook_name' failed to load: " . clean_error($_));
+          };
+          Bugzilla->error_mode($old_error_mode);
+        }
+      }
+    }elsif ($name ne 'Webhook') {
+      try {
+        my $connector = $package->new();
+        $connector->load_config();
+        $self->{objects}->{$name} = $connector;
+      }
+      catch {
+        ERROR("Connector '$name' failed to load: " . clean_error($_));
+      };
+      Bugzilla->error_mode($old_error_mode);
     }
-    catch {
-      ERROR("Connector '$name' failed to load: " . clean_error($_));
-    };
-    Bugzilla->error_mode($old_error_mode);
   }
 }
 

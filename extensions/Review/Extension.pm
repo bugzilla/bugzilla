@@ -117,7 +117,7 @@ sub _user_review_count {
                     INNER JOIN flagtypes ON flagtypes.id = flags.type_id
               WHERE flags.requestee_id = ?
                     AND "
-        . $dbh->sql_in('flagtypes.name', ["'review'", "'feedback'"]), undef,
+        . $dbh->sql_in('flagtypes.name', ["'review'", "'feedback'", "'data-review'"]), undef,
       $self->id,
     );
   }
@@ -485,13 +485,17 @@ sub _is_countable_flag {
   my $type_name = $object->type->name;
   return
        $type_name eq 'review'
+    || $type_name eq 'data-review'
     || $type_name eq 'feedback'
     || $type_name eq 'needinfo';
 }
 
 sub _check_requestee {
   my ($flag) = @_;
-  return unless $flag->type->name eq 'review' || $flag->type->name eq 'feedback';
+  return
+       unless $flag->type->name eq 'review'
+    || $flag->type->name eq 'data-review'
+    || $flag->type->name eq 'feedback';
   if ($flag->requestee->reviews_blocked) {
     ThrowUserError('reviews_blocked',
       {requestee => $flag->requestee, flagtype => $flag->type->name});
@@ -518,7 +522,8 @@ sub _log_flag_state_activity {
 sub _adjust_request_count {
   my ($flag, $add) = @_;
   return unless my $requestee_id = $flag->requestee_id;
-  my $field = $flag->type->name . '_request_count';
+  my $field = $flag->type->name;
+  $field = ($field eq 'data-review' ? 'review' : $field) . '_request_count';
 
   # update the current user's object so things are display correctly on the
   # post-processing page

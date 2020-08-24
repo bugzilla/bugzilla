@@ -1,0 +1,181 @@
+[%# This Source Code Form is subject to the terms of the Mozilla Public
+  # License, v. 2.0. If a copy of the MPL was not distributed with this
+  # file, You can obtain one at http://mozilla.org/MPL/2.0/.
+  #
+  # This Source Code Form is  |  "Incompatible With Secondary Licenses", as
+  # defined by the Mozilla Public License, v. 2.0.
+  #%]
+
+[%# initialize product to component mapping #%]
+
+[% SET selectable_products = user.get_selectable_products %]
+[% SET dont_show_button = 1 %]
+
+<script [% script_nonce FILTER none %]>
+var useclassification = false;
+var first_load = true;
+var last_sel = [];
+var cpts = new Array();
+[% n = 0 %]
+[% FOREACH prod = selectable_products %]
+  cpts['[% n %]'] = [
+    [%- FOREACH comp = prod.components %]'[% comp.name FILTER js %]'[% ", " UNLESS loop.last %] [%- END -%] ];
+  [% n = n + 1 %]
+[% END %]
+</script>
+
+<script src="[% 'js/productform.js' FILTER version FILTER html %]"></script>
+
+<script [% script_nonce FILTER none %]>
+function onSelectProduct() {
+  var component = document.getElementById('component');
+  selectProduct(document.getElementById('product'), component);
+  // selectProduct only supports Any on both elements
+  // we only want it on component, so add it back in
+  try {
+    component.add(new Option('Any', ''), component.options[0]);
+  } catch(e) {
+    // support IE
+    component.add(new Option('Any', ''), 0);
+  }
+  document.getElementById('component').options[0].selected = true;
+}
+
+function onRemoveChange() {
+  var cbs = document.getElementById('webhooks_table').getElementsByTagName('input');
+  for (var i = 0, l = cbs.length; i < l; i++) {
+    if (cbs[i].checked) {
+      document.getElementById('remove').disabled = false;
+      return;
+    }
+  }
+  document.getElementById('remove').disabled = true;
+}
+
+window.onload = function() {
+  onSelectProduct();
+  onRemoveChange();
+};
+</script>
+
+<p>
+  It will be sent a POST request with the information of the [% terms.bugs %] that match with the events and filters selected to your URL.<br>
+  Documentation about webhooks is available <a href="page.cgi?id=webhooks.html">here</a>.
+</p>
+
+<table border="0" cellpadding="3" cellspacing="0">
+<tr>
+  <th align="right">Name:</th>
+  <td><input type="text" name="name" id="name" maxlength="64"></td>
+</tr>
+<tr>
+  <th align="right">URL:</th>
+  <td><input type="text" name="url" id="url" maxlength="64"></td>
+</tr>
+</table>
+<h4>Events</h4>
+<p>Select the events you want to receive.</p>
+<p>
+  <input type="checkbox" id="create_event" name="create_event" value="1">
+  <label for="create_event">When a new [% terms.bug %] is created</label>
+<br>
+  <input type="checkbox" id="change_event" name="change_event" value="1">
+  <label for="change_event">When an existing [% terms.bug %] is modified</label>
+</p>
+<h4>Filters</h4>
+<p>
+  To receive all components in a product, select "Any".
+</p>
+<table border="0" cellpadding="3" cellspacing="0">
+<tr>
+  <th align="right">Product:</th>
+  <td>
+    <select name="add_product" id="product" onChange="onSelectProduct()">
+    [% FOREACH product IN selectable_products %]
+      <option>[% product.name FILTER html %]</option>
+    [% END %]
+    </select>
+  </td>
+</tr>
+<tr>
+  <th align="right">Component:</th>
+  <td>
+    <select name="add_component" id="component">
+      <option value="">Any</option>
+    [% FOREACH product IN selectable_products %]
+      [% FOREACH component IN product.components %]
+        <option>[% component.name FILTER html %]</option>
+      [% END %]
+    [% END %]
+    </select>
+  </td>
+</tr>
+<br>
+<tr>
+  <td>&nbsp;</td>
+  <td><input type="submit" id="add_webhook" name="add_webhook" value="Add"></td>
+</tr>
+</table>
+
+<hr>
+
+[% IF webhooks.size %]
+
+  <h3>
+    Your webhooks:
+  </h3>
+
+  <table id="webhooks_table" class="standard">
+  <thead>
+    <tr>
+      <th>Remove</th>
+      <th>ID</th>
+      <th>Name</th>
+      <th>URL</th>
+      <th>Events</th>
+      <th>Product</th>
+      <th>Component</th>
+      <th>Status</th>
+    </tr>
+  </thead>
+  <tbody>
+  [% FOREACH webhook IN webhooks %]
+    <tr>
+      <td>
+        <input type="checkbox" onChange="onRemoveChange()"
+               name="remove" value="[% webhook.id FILTER none %]">
+      </td>
+      <td>[% webhook.id FILTER html %]</td>
+      <td>[% webhook.name FILTER html %]</td>
+      <td>
+        <a href="[% webhook.url FILTER html %]">
+          [% webhook.url FILTER html %]
+        </a>
+      </td>
+      <td>[% webhook.event FILTER html %]</td>
+      <td>[% webhook.product.name FILTER html %]</td>
+      <td>[% webhook.component ? webhook.component.name : 'Any' FILTER html %]</td>
+      <td>
+        [% connector = connectors.by_name('Webhook_' _ webhook.id)
+           config = connector.config
+        %]
+        <select name="[% connector.name FILTER html %].enabled"
+                id="[% connector.name FILTER html %]_enabled">
+          <option value="Enabled" [% 'selected' IF config.${'enabled'} == 'Enabled' %]>Enabled</option>
+          <option value="Disabled" [% 'selected' IF config.${'enabled'} == 'Disabled' %]>Disabled</option>
+        </select>
+      </td>
+    </tr>
+  [% END %]
+  </tbody>
+  </table>
+  <br>
+  <input id="save_changes" type="submit" value="Save Changes">
+
+[% ELSE %]
+
+  <p>
+    <i>You do not have any webhooks.</i>
+  </p>
+
+[% END %]

@@ -1,0 +1,190 @@
+[%# This Source Code Form is subject to the terms of the Mozilla Public
+  # License, v. 2.0. If a copy of the MPL was not distributed with this
+  # file, You can obtain one at http://mozilla.org/MPL/2.0/.
+  #
+  # This Source Code Form is  |  "Incompatible With Secondary Licenses", as
+  # defined by the Mozilla Public License, v. 2.0.
+  #%]
+
+[% PROCESS global/header.html.tmpl
+   title = "Webhooks Documentation"
+   style = "#bugzilla-body li {
+              margin: 5px
+            }
+            h4 {
+              margin-bottom: 0px
+            }
+            .heading {
+              font-weight: bold
+            }
+            #main-inner{
+              margin-left: 20%;
+              margin-right: 20%;
+              margin-bottom: 5%
+            }
+            "
+%]
+
+<h1>[% terms.Bugzilla %] Webhooks</h1>
+
+<p>A webhook is a custom callback defined by events. Is triggered when those events happen, and a POST
+request is sent to a defined URL.</p>
+
+<p>In the case of [% terms.Bugzilla %], a webhook can be triggered by a change to, or creation of a [% terms.bug %]. The
+parameters of the [% terms.bug %] are exposed to the webhook handler which makes a callback (over HTTP) to another
+web application.</p>
+
+<p>Examples of [% terms.Bugzilla %] webhooks could include:</p>
+<ul>
+  <li>Updating a copy of the [% terms.Bugzilla %] [% terms.bug %] in another system such as Jira</li>
+  <li>Sending a message to a chat server such as Matrix or Slack</li>
+</ul>
+
+<h2>Creating a webhook</h2>
+<p>To create a webhook follow the next steps:</p>
+<ol>
+  <li>Access to your [% terms.Bugzilla %] Account.</li>
+  <li>Go to your Preferences Panel > Webhooks.</li>
+  <li>Fill out all of the parameters:</li>
+    <h4>Name</h4>
+    <p>A name for the webhook, which should be descriptive (e.g. “Jira Webhook for New & Updated [% terms.Bugs %] in Core::Graphics”)</p>
+
+    <h4>URL</h4>
+    <p>The URL which will receive and process the webhook.</p>
+
+    <h4>Events</h4>
+    <p>The [% terms.bug %] events that will trigger your new webhook.</p>
+      <ul>
+        <li><b>When a new [% terms.bug %] is created</b></li>
+        <li><b>When an existing [% terms.bug %] is modified</b></li>
+      </ul>
+
+    <h4>Filters</h4>
+    <p>Properties of a [% terms.bug %] that specify which [% terms.bugs %] you will receive.</p>
+      <ul>
+        <li><b>Product</b>: name of the product of the [% terms.bugs %] that you want to receive.</li>
+        <li><b>Component</b>: name of the component of the [% terms.bugs %] that you want to receive.
+        If you want to receive the [% terms.bugs %] of all the components of a product, select <b>Any</b>.</li>
+      </ul>
+    <br>
+  <li>Add the webhook.</li>
+</ol>
+
+<p>You can see your registered webhooks in the same panel.</p>
+<p>If you want to delete a webhook, select the webhook in “Your webhooks” table and click remove
+selected. You can select more than one.</p>
+
+<h2>Delivered webhook</h2>
+<p>When a webhook is triggered the HTTP POST of a fixed JSON structure payload that is delivered
+contains the webhook_id, webhook_name and the information about the [% terms.bug %] that matches the event and filters.</p>
+
+<p>If the [% terms.bug %] is private, only the [% terms.bug %] id and some other basic information is sent and the external system will
+need to query BMO over the REST API to get the actual details of the [% terms.bug %].</p>
+
+<p>The webhooks will be called in the same order as the events triggering them and will be one request per new
+[% terms.bug %] and per changed [% terms.bug %]. The "changes" parameter will be sent only when the triggered event is changed and will
+content every change made in the [% terms.bug %].</p>
+
+<h4>Public [% terms.Bug %] Request</h4>
+<xmp>{
+"webhook_id": 23,
+"webhook_name": "Example webhook",
+"event": {
+      "action": "create",
+      "time": "2020-07-24T20:11:22",
+      "user": {
+          "id": 1,
+            "login": "admin@bmo.test",
+            "real_name": "Vagrant User"
+      },
+      "changes": [
+          {
+            "field": "priority",
+            "removed": "P3",
+            "added": "P1"
+            }
+        ],
+},
+"[% terms.bug %]": {
+      "version": {
+            "name": "unspecified",
+            "id": 1
+      },
+      "qa_contact": null,
+      "product": {
+            "id": 1,
+            "name": "TestProduct"
+      },
+      "creation_time": "2020-07-23T00:01:45",
+      "resolution": "",
+      "flags": [],
+      "classification": "Unclassified",
+      "url": "",
+      "type": "enhancement",
+      "operating_system": "Linux",
+      "keywords": [],
+      "status": {
+            "name": "CONFIRMED",
+            "id": 2
+      },
+      "last_change_time": "2020-07-23T00:01:45",
+      "is_private": false,
+      "severity": "normal",
+      "summary": "Test",
+      "alias": "",
+      "reporter": {
+            "id": 1,
+            "real_name": "Vagrant User",
+            "login": "admin@bmo.test"
+      },
+      "assigned_to": {
+          "id": 1,
+            "login": "admin@bmo.test",
+            "real_name": "Vagrant User"
+        },
+      "platform": "PC",
+      "id": 11,
+      "priority": "P1",
+      "target_milestone": null,
+      "cf_user_story": "",
+      "cf_last_resolved": null,
+      "whiteboard": "",
+      "component": {
+            "id": 2,
+            "name": "TestComponent"
+      }
+   }
+}</xmp>
+
+<h4>Private [% terms.Bug %] Request</h4>
+<xmp>{
+"webhook_id": 23,
+"webhook_name": "Example webhook",
+"event": {
+      "action": "change",
+      "time": "2020-07-24T20:11:22",
+      "user": {
+          "id": 1,
+            "login": "admin@bmo.test",
+            "real_name": "Vagrant User"
+      },
+},
+"[% terms.bug %]": {
+      "id": 2,
+      "is_private": true
+      }
+}</xmp>
+
+<h4>Response</h4>
+<p>HTTP 200 OK. The request has succeeded.</p>
+
+<h4>Errors</h4>
+<p>If the response is not 200, the [% terms.Bugzilla %] system will retry 4 attempts, waiting 5s, 10s, 15s and
+20s between each attempt. If none of those attempts is successful, the system will continue trying
+every 15 minutes.</p>
+
+<p>If a message is stuck without a successful attempt, the next messages that trigger the webhook
+will be stored in a queue in the order that were triggered and will be delivered in that order when
+the first message in the queue is delivered.</p>
+
+[% INCLUDE global/footer.html.tmpl %]

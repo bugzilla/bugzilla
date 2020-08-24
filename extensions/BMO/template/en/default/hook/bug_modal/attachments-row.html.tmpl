@@ -24,8 +24,10 @@
     [% END %]
   </td>
   <td class="attach-actions">
+    [% IF user.is_insider %]
     <a href="[% basepath FILTER none %]page.cgi?id=attachment_bounty_form.html&bug_id=[% bug.id FILTER none %]">
       Edit Bounty
     </a>
+    [% END %]
   </td>
 </tr>

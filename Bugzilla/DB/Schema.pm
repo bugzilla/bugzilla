@@ -1851,7 +1851,12 @@ use constant ABSTRACT_SCHEMA => {
   oauth2_scope => {
     FIELDS => [
       id          => {TYPE => 'INTSERIAL',    NOTNULL => 1, PRIMARYKEY => 1},
-      description => {TYPE => 'varchar(255)', NOTNULL => 1},
+      name        => {TYPE => 'varchar(255)', NOTNULL => 1},
+      description => {TYPE => 'TINYTEXT',     NOTNULL => 1},
+    ],
+    INDEXES => [
+      oauth2_scope_idx =>
+        {FIELDS => ['name'], TYPE => 'UNIQUE'},
     ],
   },
 

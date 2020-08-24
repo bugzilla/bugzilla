@@ -11,7 +11,7 @@
   PROCESS global/header.html.tmpl
     title           = "$terms.Bug $bug.id Comment $comment.count Edit History"
     style_urls      = ['extensions/EditComments/web/styles/revisions.css']
-    javascript_urls = (user.is_insider ? ['extensions/EditComments/web/js/revisions.js'] : [])
+    javascript_urls = (user.is_edit_comments_admin ? ['extensions/EditComments/web/js/revisions.js'] : [])
     generate_api_token = 1
 %]
 
@@ -27,11 +27,11 @@
   <article class="revision" data-comment-id="[% comment.id FILTER html %]" data-revised-time="[% a.revised_time FILTER html %]">
     <header>
       <div class="metadata">
-        [% a.old ? "Revision $rev_count" : "Original comment" FILTER html %]
+        [% rev_count == 0 ? "Original comment" : "Revision $rev_count" FILTER html %]
         by [% INCLUDE bug_modal/user.html.tmpl u=a.author %]
         on <time datetime="[% a.created_time FILTER html %]">[% a.created_time FILTER time %]</time>
       </div>
-      [% IF user.is_insider && a.revised_time %]
+      [% IF user.is_edit_comments_admin && a.revised_time %]
         <div class="actions">
           <label><input type="checkbox" name="is_hidden" [% "checked" IF a.is_hidden %]> Hide</label>
         </div>
@@ -40,7 +40,7 @@
     <div class="body">
       [% IF !user.is_insider && a.is_hidden %]
         <div class="hidden-comment">(Hidden by Administrator)</div>
-      [% ELSIF comment.count == 0 && !a.new %]
+      [% ELSIF comment.count == 0 && a.new == "" %]
         <div class="empty-comment">No description provided.</div>
       [% ELSE %]
         <pre class="bz_comment_text">[% a.new FILTER quoteUrls(bug) %]</pre>

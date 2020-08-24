@@ -14,15 +14,37 @@ For [% terms.bugs %] in Firefox, the Mozilla Foundation's web browser.
 
 (<a href="https://www.mozilla.org/en-US/firefox/desktop/">more info</a>)
 [% END %]
-[% INCLUDE product_block
+[% WRAPPER product_block
    name="Firefox for Android"
    icon="firefox_android.png"
+   onclick="document.location='https://github.com/mozilla-mobile/fenix/issues/'"
 %]
-[% INCLUDE product_block
+Firefox for Android is the Firefox mobile experience developed for Android. [% terms.Bugs %] for
+this product are tracked on GitHub.
+
+<i>If you are reporting a security issue that puts users at risk,
+<b><a href="/enter_bug.cgi?format=guided#h=dupes|Fenix|Security%3A%20Android">use
+this form</a>.</b></i>
+[% END %]
+[% WRAPPER product_block
    name="Firefox for iOS"
    icon="firefox_ios.png"
+   onclick="document.location='https://github.com/mozilla-mobile/firefox-ios/issues'"
 %]
+Firefox for iOS is the Firefox mobile experience developed for the iOS platform. [% terms.Bugs %] for
+this product are tracked on GitHub.
+
+<i>If you are reporting a security issue that puts users at risk,
+<b><a href="/enter_bug.cgi?format=guided#h=dupes|Focus|Security%3A iOS">use
+this form</a>.</b></i>
+[% END %]
 [% INCLUDE product_block
    name="Thunderbird"
    icon="thunderbird.png"
 %]
+[% WRAPPER product_block
+   name="Other Products"
+   icon="other.png"
+   onclick="guided.setStep('otherProducts')" %]
+Other Mozilla products which aren't listed here
+[% END %]

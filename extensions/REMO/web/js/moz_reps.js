@@ -31,13 +31,13 @@ $(document).ready(function() {
         }
     }).change();
 
-    $("#vouched").change(function(evt) {
+    $("#pmo_account").change(function(evt) {
         if (this.value === 'Yes') {
-            $('#vouched_warning').hide();
+            $('#pmo_warning').hide();
             $('#submit').prop("disabled", false);
         }
         else {
-            $('#vouched_warning').show();
+            $('#pmo_warning').show();
             $('#submit').prop("disabled", true);
         }
     }).change();
@@ -63,7 +63,7 @@ $(document).ready(function() {
     }).change();
 
     $('#tmRequestForm').submit(function (event) {
-        var mozillian_re = /^https?:\/\/(www\.)?mozillians.org\/([^\/]+\/)?u\/[^\/]+\/?$/i;
+        var mozillian_re = /^https?:\/\/people.mozilla.org\/([^\/]+\/)?p\/[^\/]+\/?$/i;
         var errors = [];
         var missing = false;
 
@@ -75,7 +75,7 @@ $(document).ready(function() {
             if (id == 'mozillian') {
                 if (!value.match(mozillian_re)) {
                     input.addClass("missing");
-                    errors.push("The Mozillian Account URL is invalid");
+                    errors.push("The people.mozilla.org Profile URL is invalid");
                     event.preventDefault();
                 }
                 else {

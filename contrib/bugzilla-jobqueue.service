@@ -1,0 +1,13 @@
+[Unit]
+Description=Bugzilla Daemon
+After=network.target
+
+[Service]
+Type=simple
+WorkingDirectory=/home/bugzilla/harmony/
+ExecStart=/usr/bin/perl jobqueue.pl start -d -f
+Environment="PERL5LIB=/home/bugzilla/harmony/local/lib/perl5"
+User=bugzilla
+
+[Install]
+WantedBy=multi-user.target

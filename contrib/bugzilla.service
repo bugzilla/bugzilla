@@ -1,0 +1,15 @@
+[Unit]
+Description=Bugzilla Daemon
+After=network.target
+
+[Service]
+Type=simple
+WorkingDirectory=/home/bugzilla/harmony/
+ExecStart=/usr/bin/perl local/bin/hypnotoad -f bugzilla.pl prefork
+Environment="PERL5LIB=/home/bugzilla/harmony/local/lib/perl5"
+Environment="MOJO_REVERSE_PROXY=2"
+Environment="LOG4PERL_CONFIG_FILE=log4perl-default.conf"
+User=bugzilla
+
+[Install]
+WantedBy=multi-user.target

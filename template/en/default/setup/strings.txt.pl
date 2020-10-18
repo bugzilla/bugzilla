@@ -240,6 +240,10 @@ END
 The URL that is the canonical initial leading part of all URLs.
 This will be the production URL for a dev site, for instance.
 END
+  localconfig_nobody_user => <<'END',
+This is the email address of the "nobody" user, which is used as e.g. the
+default user that bugs are assigned to.
+END
   localconfig_use_suexec => <<'END',
 Set this to 1 if Bugzilla runs in an Apache SuexecUserGroup environment.
 

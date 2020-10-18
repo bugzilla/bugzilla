@@ -23,7 +23,6 @@ use Bugzilla::Util qw(detaint_natural trim);
 our $VERSION = '2';
 
 use constant REQUIRE_WATCH_USER => 1;
-use constant DEFAULT_ASSIGNEE   => 'nobody@mozilla.org';
 
 use constant REL_COMPONENT_WATCHER => 15;
 
@@ -100,7 +99,7 @@ sub template_before_create {
 sub template_before_process {
   my ($self, $args) = @_;
   return unless $args->{file} eq 'admin/components/create.html.tmpl';
-  $args->{vars}{comp}{default_assignee}{login} = DEFAULT_ASSIGNEE;
+  $args->{vars}{comp}{default_assignee}{login} = Bugzilla->localconfig->nobody_user;
 }
 
 #

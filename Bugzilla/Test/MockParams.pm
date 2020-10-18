@@ -54,13 +54,14 @@ sub import {
   $answers{user_info_class}   //= 'GitHubAuth,CGI';
   $answers{user_verify_class} //= 'GitHubAuth,DB';
 
-  if ($first_time++) {
+  if ($first_time++ == 0) {
     capture_merged {
       Bugzilla::Config::update_params();
     };
   }
   else {
     Bugzilla::Config::SetParam($_, $answers{$_}) for keys %answers;
+    Bugzilla::Config::write_params();
   }
 }
 

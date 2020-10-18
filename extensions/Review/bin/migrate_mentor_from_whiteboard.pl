@@ -36,7 +36,7 @@ EOF
 <>;
 
 # we need to be logged in to do user searching and update bugs
-my $nobody = Bugzilla::User->check({name => 'nobody@mozilla.org'});
+my $nobody = Bugzilla::User->check({name => Bugzilla->localconfig->nobody_user});
 $nobody->{groups} = [Bugzilla::Group->get_all];
 Bugzilla->set_user($nobody);
 

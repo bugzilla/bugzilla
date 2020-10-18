@@ -129,7 +129,7 @@ sub get_bug_role_phids {
 }
 
 sub is_bug_assigned {
-  return $_[0]->assigned_to->email ne 'nobody@mozilla.org';
+  return $_[0]->assigned_to->email ne Bugzilla->localconfig->nobody_user;
 }
 
 sub is_attachment_phab_revision {

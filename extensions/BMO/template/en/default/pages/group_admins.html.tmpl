@@ -41,7 +41,7 @@
             [% group.name FILTER html %]</span>
         </td>
         <td nowrap>
-          [% IF group.owner.login == 'nobody@mozilla.org' %]
+          [% IF group.owner.login == Bugzilla.localconfig.nobody_user %]
             &ndash;
           [% ELSE %]
             [% INCLUDE global/user.html.tmpl who = group.owner %]

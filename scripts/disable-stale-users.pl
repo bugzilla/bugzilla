@@ -66,7 +66,7 @@ FROM
     components
     ON components.watch_user = profiles.userid
 WHERE
-  profiles.login_name != 'nobody@mozilla.org'
+  profiles.login_name != ?
   AND components.id IS NULL
   AND NOT profiles.login_name LIKE '%.bugs'
   AND NOT profiles.login_name LIKE '%.tld'
@@ -77,14 +77,16 @@ ORDER BY
   profiles.userid
 EOF
 
+my $nobody = Bugzilla->localconfig->nobody_user;
 if ($dump_sql) {
+  $sql =~ s/[?]/"$nobody"/;
   $sql =~ s/[?]/$date/g;
   print $sql;
   exit;
 }
 
 say STDERR "looking for users inactive since $date";
-my $users = $dbh->selectall_arrayref($sql, {Slice => {}}, $date, $date);
+my $users = $dbh->selectall_arrayref($sql, {Slice => {}}, $nobody, $date, $date);
 my $total = scalar @$users;
 die "no matching users found.\n" unless $total;
 

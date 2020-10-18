@@ -23,7 +23,7 @@ use Bugzilla::User;
 use Bugzilla::Util qw(trim);
 
 my $dbh    = Bugzilla->dbh;
-my $nobody = Bugzilla::User->check({name => 'nobody@mozilla.org'});
+my $nobody = Bugzilla::User->check({name => Bugzilla->localconfig->nobody_user});
 my $field  = Bugzilla::Field->check({name => 'attachments.mimetype'});
 
 # grab list of suitable attachments

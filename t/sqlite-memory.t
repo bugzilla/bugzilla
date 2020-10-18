@@ -12,7 +12,6 @@ use Test::More;
 use Test2::Tools::Mock;
 use Try::Tiny;
 use Capture::Tiny qw(capture_merged);
-use Bugzilla::Test::MockParams;
 
 BEGIN {
   $ENV{LOCALCONFIG_ENV} = 'BMO';
@@ -20,6 +19,7 @@ BEGIN {
   $ENV{BMO_db_name}     = ':memory:';
 }
 use Bugzilla;
+use Bugzilla::Test::MockParams;
 BEGIN { Bugzilla->extensions }
 
 

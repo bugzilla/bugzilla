@@ -36,7 +36,7 @@ my $bug_1 = Bugzilla::Bug->create({
   keywords     => [],
   cc           => [],
   comment      => 'This is a brand new bug',
-  assigned_to  => 'nobody@mozilla.org',
+  assigned_to  => Bugzilla->localconfig->nobody_user,
 });
 ok($bug_1->id, "got a new bug");
 
@@ -56,7 +56,7 @@ my $bug_2    = Bugzilla::Bug->create({
   keywords     => [],
   cc           => [],
   comment      => "This is related to ${urlbase}show_bug.cgi?id=$bug_1_id",
-  assigned_to  => 'nobody@mozilla.org',
+  assigned_to  => Bugzilla->localconfig->nobody_user,
 });
 
 my $bug_2_id = $bug_2->id;

@@ -19,7 +19,7 @@
 
   # these are used in a few places
   is_cced = bug.cc.contains(user.login);
-  unassigned = (bug.assigned_to.login == "nobody@mozilla.org")
+  unassigned = (bug.assigned_to.login == Bugzilla.localconfig.nobody_user)
                || (bug.assigned_to.login.search('@(?!invalid).+\.bugs$'));
 
   # custom fields that have custom rendering, or should not be rendered

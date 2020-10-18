@@ -29,7 +29,7 @@ my $config = {
   assignee   => '',
   product    => '',
   component  => '',
-  unassigned => 'nobody@mozilla.org',
+  unassigned => Bugzilla->localconfig->nobody_user,
 
   # severities
   severity => 'major,critical,blocker',

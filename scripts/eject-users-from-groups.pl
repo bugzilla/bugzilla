@@ -22,7 +22,7 @@ Bugzilla->usage_mode(USAGE_MODE_CMDLINE);
 
 my $dbh = Bugzilla->dbh;
 my @remove_group_names;
-my $nobody_name = 'nobody@mozilla.org';
+my $nobody_name = Bugzilla->localconfig->nobody_user;
 my $admin_name  = 'automation@bmo.tld';
 
 GetOptions(

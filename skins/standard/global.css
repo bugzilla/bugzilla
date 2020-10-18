@@ -978,8 +978,6 @@ input[type="radio"]:checked {
   }
 
   #header {
-    height: 48px;
-    position: fixed;
     width: 100%;
     z-index: 5;
   }

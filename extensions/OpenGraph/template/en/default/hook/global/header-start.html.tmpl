@@ -20,6 +20,6 @@
 [% ELSIF error_message %]
 <meta property="og:description" content="[% error_message FILTER txt FILTER html %]">
 [% END %]
-[% IF og_image %]
-<meta property="og:image" content="[% urlbase FILTER none %][% og_image FILTER html %]">
+[% IF Bugzilla.params.opengraph_image %]
+<meta property="og:image" content="[% Bugzilla.params.opengraph_image FILTER html %]">
 [% END %]

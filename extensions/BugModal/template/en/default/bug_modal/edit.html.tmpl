@@ -1180,7 +1180,6 @@
   [%
     FOREACH field IN custom_fields;
       NEXT IF field.type != constants.FIELD_TYPE_TEXTAREA;
-      NEXT IF field.name == "cf_crash_signature"; # Rendered below
       Hook.process('custom_field-' _ field.name);
       NEXT IF rendered_custom_fields.exists(field.name);
       INCLUDE bug_modal/field.html.tmpl
@@ -1189,16 +1188,6 @@
         hide_on_view = bug.${field.name} == "" || bug.${field.name} == "---";
     END;
   %]
-[% END %]
-
-[%# === Crash === %]
-
-[% WRAPPER bug_modal/module.html.tmpl
-  title = "Crash Data"
-  collapsed = 1
-  hide_on_view = bug.cf_crash_signature == ""
-%]
-  [% Hook.process('custom_field-cf_crash_signature'); %]
 [% END %]
 
 [%# === groups === %]

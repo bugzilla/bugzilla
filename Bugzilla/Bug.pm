@@ -412,9 +412,9 @@ sub ES_SELECT_UPDATED_SQL {
   my ($class, $mtime) = @_;
 
   my @fields = (
-    'keywords',           'short_desc', 'product',           'component',
-    'cf_crash_signature', 'alias',      'status_whiteboard', 'bug_status',
-    'resolution',         'priority',   'assigned_to',       'bug_type'
+    'keywords', 'short_desc',        'product',    'component',
+    'alias',    'status_whiteboard', 'bug_status', 'resolution',
+    'priority', 'assigned_to',       'bug_type'
   );
   my $fields = join(', ', ("?") x @fields);
 

@@ -641,9 +641,6 @@ sub _default_quicksearch_word {
     if $longdesc_initial || $ELASTIC;
   addChart('content', 'matches', _matches_phrase($word), $negate)
     if $fulltext && !$ELASTIC;
-
-# BMO Bug 664124 - Include the crash signature (sig:) field in default quicksearches
-  addChart('cf_crash_signature', 'substring', $word, $negate);
 }
 
 sub _handle_urls {

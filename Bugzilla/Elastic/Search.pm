@@ -37,7 +37,7 @@ my @SUPPORTED_FIELDS = qw(
   bug_id bug_type product component short_desc
   priority status_whiteboard bug_status resolution
   keywords alias assigned_to reporter delta_ts
-  longdesc cf_crash_signature classification bug_severity
+  longdesc classification bug_severity
   commenter
 );
 my %IS_SUPPORTED_FIELD = map { $_ => 1 } @SUPPORTED_FIELDS;

@@ -53,7 +53,7 @@ my %whitelist = (
       rep_platform reporter version component_id resolution
       target_milestone qa_contact status_whiteboard everconfirmed
       estimated_time remaining_time deadline alias cf_rank
-      cf_crash_signature cf_last_resolved cf_user_story votes
+      cf_last_resolved cf_user_story votes
       )
   ],
   bugs_activity => [

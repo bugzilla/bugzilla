@@ -56,7 +56,6 @@ function init() {
   hideElementById('attachment_true');
   showElementById('attachment_false');
   showElementById('btn_no_attachment');
-  initCrashSignatureField();
   init_take_handler('[% user.login FILTER js %]');
   bz_attachment_form.update_requirements(false);
 
@@ -67,17 +66,6 @@ function init() {
   $comment.addEventListener('input', () => {
     desc_edited = true;
   }, { once: true });
-}
-
-function initCrashSignatureField() {
-  var el = document.getElementById('cf_crash_signature');
-  if (!el) return;
-  [% IF cf_crash_signature.length %]
-    YAHOO.util.Dom.addClass('cf_crash_signature_container', 'bz_default_hidden');
-  [% ELSE %]
-    hideEditableField('cf_crash_signature_container','cf_crash_signature_input',
-                      'cf_crash_signature_action', 'cf_crash_signature');
-  [% END %]
 }
 
 const params = new URLSearchParams(location.search);

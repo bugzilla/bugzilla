@@ -54,9 +54,6 @@ YAHOO.util.Event.onDOMReady(function() {
   el = document.getElementById('comment');
   el.style.width = width;
 
-  el = document.getElementById('cf_crash_signature');
-  if (el) el.style.width = width;
-
   // show the bug flags if a flag is set
 
   var flag_set = false;

@@ -405,7 +405,7 @@
       <ul id="header-login" class="links">
           [% PROCESS "account/auth/signup-small.html.tmpl" qs_suffix = "_top" %]
         [% IF user.authorizer.can_login %]
-          [% PROCESS "account/auth/login-small.html.tmpl" qs_suffix = "_top" %]
+          [% PROCESS "account/auth/login-small.html.tmpl" qs_suffix = "_top" use_login_page = use_login_page %]
         [% END %]
       </ul>
     [% END %]

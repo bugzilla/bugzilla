@@ -3,6 +3,7 @@
 [% title = "Too Many Requests" %]
 
 [% PROCESS global/header.html.tmpl
+           use_login_page = 1
            robots = 'noindex' %]
 
 <h1>[% title FILTER html %]</h1>

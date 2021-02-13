@@ -90,8 +90,6 @@ else {
     $vars->{'release'} = Bugzilla::Update::get_notifications();
   }
 
-  $vars->{use_login_page} = 1;
-
   # Generate and return the UI (HTML page) from the appropriate template.
   $template->process("index.html.tmpl", $vars)
     or ThrowTemplateError($template->error());

@@ -37,8 +37,12 @@
   [% END %]
   [% script_url = login_target _ connector _ "GoAheadAndLogIn=1" %]
   <a id="login_link[% qs_suffix %]" href="[% script_url FILTER html %]"
-     class='show_mini_login_form' data-qs-suffix="[% qs_suffix FILTER html %]">Log In</a>
+     [% IF !use_login_page %]
+     class='show_mini_login_form'
+     [% END %]
+     data-qs-suffix="[% qs_suffix FILTER html %]">Log In</a>
 
+  [% IF !use_login_page %]
   <div id="mini_login[% qs_suffix FILTER html %]" class="mini-popup mini_login bz_default_hidden">
   [% Hook.process('additional_methods') %]
 
@@ -86,7 +90,9 @@
     </a>
   </form>
   </div>
+  [% END %]
 </li>
+[% IF !use_login_page %]
 <li id="forgot_container[% qs_suffix %]">
   <a id="forgot_link[% qs_suffix %]" href="[% script_url FILTER html %]#forgot"
      class='show_forgot_form'
@@ -104,3 +110,4 @@
   </form>
   </div>
 </li>
+[% END %]

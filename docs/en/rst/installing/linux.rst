@@ -87,6 +87,21 @@ graphviz python-sphinx`
 If you plan to use a database other than MySQL, you will need to also install
 the appropriate packages for that.
 
+Ubuntu 20.04 with MariaDB and Apache
+------------
+:command:`sudo apt install bugzilla-cli apache2`
+
+:command:`sudo a2enmod rewrite headers expires cgid`
+
+:command:`systemctl restart apache2`
+
+:command:`sudo apt install mariadb-server mariadb-client libdate-calc-perl libtemplate-perl libappconfig-perl build-essential libdatetime-timezone-perl libdatetime-perl libemail-sender-perl libemail-mime-perl libdbi-perl libdbd-mysql-perl libcgi-pm-perl libmath-random-isaac-perl libmath-random-isaac-xs-perl libapache2-mod-perl2 libapache2-mod-perl2-dev libchart-perl libxml-perl libxml-twig-perl perlmagick libgd-graph-perl libtemplate-plugin-gd-perl libsoap-lite-perl libhtml-scrubber-perl libjson-rpc-perl libdaemon-generic-perl libtheschwartz-perl libtest-taint-perl libauthen-radius-perl libfile-slurp-perl libencode-detect-perl libmodule-build-perl libnet-ldap-perl libauthen-sasl-perl libtemplate-perl libfile-mimeinfo-perl libhtml-formattext-withlinks-perl libgd-dev libmysqlclient-dev libmariadbclient-dev lynx-common graphviz libmemcached-libmemcached-perli libemail-address-perli libcache-memcached-perl libfile-which-perl libfile-copy-recursive-perl libemail-reply-perl`
+
+:command:`systemctl restart apache2`
+
+There is no Ubuntu package for PatchReader so you will have to install that module
+outside the package manager if you want it. 
+
 Gentoo
 ------
 

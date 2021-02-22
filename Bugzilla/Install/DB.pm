@@ -2490,12 +2490,14 @@ sub _rename_votes_count_and_force_group_refresh {
 sub _fix_group_with_empty_name {
   my $dbh = Bugzilla->dbh;
 
+  my $quoted_groups = $dbh->quote_identifier('groups');
+
   # 2005-01-12 Nick Barnes <nb@ravenbrook.com> bug 278010
   # Rename any group which has an empty name.
   # Note that there can be at most one such group (because of
   # the SQL index on the name column).
   my ($emptygroupid)
-    = $dbh->selectrow_array("SELECT id FROM groups where name = ''");
+    = $dbh->selectrow_array("SELECT id FROM $quoted_groups where name = ''");
   if ($emptygroupid) {
 
     # There is a group with an empty name; find a name to rename it
@@ -2503,7 +2505,7 @@ sub _fix_group_with_empty_name {
     # group_$gid and add _<n> if necessary.
     my $trycount = 0;
     my $trygroupname;
-    my $sth         = $dbh->prepare("SELECT 1 FROM groups where name = ?");
+    my $sth         = $dbh->prepare("SELECT 1 FROM $quoted_groups where name = ?");
     my $name_exists = 1;
 
     while ($name_exists) {
@@ -2514,7 +2516,7 @@ sub _fix_group_with_empty_name {
       $name_exists = $dbh->selectrow_array($sth, undef, $trygroupname);
       $trycount++;
     }
-    $dbh->do("UPDATE groups SET name = ? WHERE id = ?",
+    $dbh->do("UPDATE $quoted_groups SET name = ? WHERE id = ?",
       undef, $trygroupname, $emptygroupid);
     print "Group $emptygroupid had an empty name; renamed as",
       " '$trygroupname'.\n";
@@ -2947,8 +2949,10 @@ EOT
 sub _rederive_regex_groups {
   my $dbh = Bugzilla->dbh;
 
+  my $quoted_groups = $dbh->quote_identifier('groups');
+
   my $regex_groups_exist = $dbh->selectrow_array(
-    "SELECT 1 FROM groups WHERE userregexp = '' " . $dbh->sql_limit(1));
+    "SELECT 1 FROM $quoted_groups WHERE userregexp = '' " . $dbh->sql_limit(1));
   return if !$regex_groups_exist;
 
   my $regex_derivations

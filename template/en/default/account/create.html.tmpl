@@ -60,23 +60,7 @@
 </p>
 [% END %]
 
-<form id="account_creation_form" method="get" action="[% basepath FILTER none %]createaccount.cgi">
-  <table>
-    <tr>
-      <td align="right">
-        <b>Email address:</b>
-      </td>
-      <td>
-        <input size="35" id="login" name="login"
-          [%- ' type="email"' UNLESS Param('emailsuffix') %]>
-        [% Param('emailsuffix') FILTER html %]
-      </td>
-    </tr>
-  </table>
-  <br>
-  <input type="hidden" id="token" name="token" value="[% issue_hash_token(['create_account']) FILTER html %]">
-  <input type="submit" id="send" value="Send">
-</form>
+[% PROCESS "account/auth/signup-form.html.tmpl" %]
 
 [% Hook.process('additional_methods') %]
 

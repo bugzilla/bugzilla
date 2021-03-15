@@ -24,33 +24,12 @@
   # then we are accessing the home page. %]
 
 <li id="mini_signup_container[% qs_suffix FILTER html %]">
-  <a id="signup_link[% qs_suffix FILTER html %]" href="#"
+  <a id="signup_link[% qs_suffix FILTER html %]" href="[% urlbase FILTER html %]createaccount.cgi"
      class='show_mini_signup_form' data-qs-suffix="[% qs_suffix FILTER html %]">Sign Up</a>
 
   <div id="mini_signup[% qs_suffix FILTER html %]" class="mini-popup mini_signup bz_default_hidden">
   [% Hook.process('additional_methods') %]
 
-  <form action="[% c.url_for('signup_email') FILTER html %]" method="post"
-        data-qs-suffix="[% qs_suffix FILTER html %]">
-
-    <input id="signup_email[% qs_suffix FILTER html %]"
-           class="bz_signup"
-           name="email"
-           title="Email"
-           placeholder="Email"
-           aria-label="Email"
-           type="email"
-           required
-    >
-    <input type="hidden" name="csrf_token"
-           value="[% c.csrf_token FILTER html %]">
-    <input type="submit" value="Sign up"
-           class="check_mini_signup_fields"
-            id="signup_[% qs_suffix FILTER html %]">
-    <a href="#" id="hide_mini_signup[% qs_suffix FILTER html %]" aria-label="Close"
-       class="close-button hide_mini_signup_form" data-qs-suffix="[% qs_suffix FILTER html %]">
-      <span class="icon" aria-hidden="true"></span>
-    </a>
-  </form>
+  [% PROCESS "account/auth/signup-form.html.tmpl" %]
   </div>
 </li>

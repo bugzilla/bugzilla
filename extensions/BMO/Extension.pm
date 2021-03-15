@@ -2481,7 +2481,9 @@ sub _group_always_settable {
 }
 
 sub _default_security_group {
-  return $_[0]->default_security_group_obj->name;
+  my $security_group = $_[0]->default_security_group_obj;
+
+  return defined($security_group) ? $security_group->name : undef;
 }
 
 sub _default_security_group_obj {

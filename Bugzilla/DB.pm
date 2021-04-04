@@ -24,7 +24,7 @@ use Bugzilla::Install::Localconfig;
 use Bugzilla::Util;
 use Bugzilla::Error;
 use Bugzilla::DB::Schema;
-use Bugzilla::DB::QuoteIdentifier;
+use Bugzilla::DB::QuoteExpression;
 use Bugzilla::Version;
 
 use Scalar::Util qw(blessed);
@@ -33,14 +33,12 @@ use Storable qw(dclone);
 
 has [qw(dsn user pass attrs)] => (is => 'ro', required => 1,);
 
-has 'qi' => (is => 'lazy');
+has 'qe' => (is => 'lazy', handles => ['quote_expr']);
 
-sub _build_qi {
+sub _build_qe {
   my ($self) = @_;
-  my %q;
-  tie %q, 'Bugzilla::DB::QuoteIdentifier', db => $self;
 
-  return \%q;
+  return Bugzilla::DB::QuoteExpression->new(db => $self, sql_identifier_quote_char => $self->get_info(29));
 }
 
 # Install proxy methods to the DBI object.

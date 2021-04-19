@@ -115,10 +115,10 @@ sub create_or_update_user {
     }
   ) unless $user_id;
 
-  my $user = new Bugzilla::User($user_id);
+  my $user = new Bugzilla::User({ id => $user_id, cache => 1 });
 
   # Now that we have a valid User, we need to see if any data has to be updated.
-  my $changed = 0;
+  my $user_updated = 0;
 
   if ($username && lc($user->login) ne lc($username)) {
     validate_email_syntax($username) || return {
@@ -127,7 +127,7 @@ sub create_or_update_user {
       details => {addr => $username}
     };
     $user->set_login($username);
-    $changed = 1;
+    $user_updated = 1;
   }
   if ($real_name && $user->name ne $real_name) {
 
@@ -135,9 +135,9 @@ sub create_or_update_user {
     # in a placeholder and we never use it after this.
     trick_taint($real_name);
     $user->set_name($real_name);
-    $changed = 1;
+    $user_updated = 1;
   }
-  $user->update() if $changed;
+  $user->update() if $user_updated;
 
   return {user => $user};
 }

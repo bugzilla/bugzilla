@@ -20,7 +20,7 @@ Usage Notes
 -----------
 
 * Please constrain testing to your own installation of Bugzilla, or use
-* http://landfill.bugzilla.org/ for testing purposes -- opening test
+* https://bugzilla-dev.allizom.org/ for testing purposes -- opening test
 * bugs on production instances of Bugzilla is definitely not a good idea
 
 Run "bugzilla-submit --help" for a description of the possible options.

@@ -19,9 +19,8 @@ Its only requirement is Python 2.3 or higher; you should have the
 Usage Notes
 -----------
 
-* Please constrain testing to your own installation of Bugzilla, or use
-* https://bugzilla-dev.allizom.org/ for testing purposes -- opening test
-* bugs on production instances of Bugzilla is definitely not a good idea
+* Please constrain testing to your own installation of Bugzilla, opening test
+* bugs on production instances of Bugzilla is definitely not a good idea.
 
 Run "bugzilla-submit --help" for a description of the possible options.
 

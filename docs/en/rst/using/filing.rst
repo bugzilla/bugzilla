@@ -15,11 +15,6 @@ using, the Version of the Product, the Component which failed, the Hardware
 Platform, and Operating System you were using at the time of the failure go a
 long way toward ensuring accurate, responsible fixes for the bug that bit you.
 
-.. note:: If you want to file a test bug to see how Bugzilla works,
-   you can do it on one of our test installations on
-   `Landfill <https://bugzilla-dev.allizom.org/>`_. Please don't do it on anyone's
-   production Bugzilla installation.
-
 The procedure for filing a bug is as follows:
 
 #. Click the :guilabel:`New` link available in the header or footer

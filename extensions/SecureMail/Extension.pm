@@ -38,9 +38,6 @@ use Bugzilla::Error;
 use Bugzilla::Mailer;
 use Bugzilla::Extension::SecureMail::TCT;
 
-use Crypt::OpenPGP::Armour;
-use Crypt::OpenPGP::KeyRing;
-use Crypt::OpenPGP;
 use Crypt::SMIME;
 use Email::MIME::ContentType qw(parse_content_type);
 use Encode;

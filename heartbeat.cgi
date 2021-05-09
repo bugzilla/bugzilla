@@ -25,8 +25,16 @@ my $ok = eval {
   my $memcached    = Bugzilla->memcached;
   my $dbh          = Bugzilla->dbh;
   my $database_ok  = $dbh->ping;
-  my $versions     = $memcached->{memcached}->server_versions;
-  my $memcached_ok = keys %$versions;
+  my $memcached_ok = do {
+    my $memcached = $memcached->{memcached};
+    if ($memcached) {
+      my $versions = $memcached->server_versions;
+      keys %$versions;
+    }
+    else {
+      1
+    }
+  };
 
   die "database not available"            unless $database_ok;
   die "memcached server(s) not available" unless $memcached_ok;

@@ -695,45 +695,7 @@ my $fallback_search = Bugzilla::Search->new(
   sharer => $sharer_id
 );
 
-# Not-logged-in users get elasticsearch if possible
-my $elastic_default = !$user->id || $user->setting('use_elasticsearch') eq 'on';
-
-my $search;
-my $elastic = $cgi->param('elastic') // $elastic_default;
-if (defined $cgi->param('elastic')) {
-  $vars->{was_elastic} = $elastic;
-}
-
-# If turned off in the admin section, it is always off.
-$elastic = 0 unless Bugzilla->params->{elasticsearch};
-
-if ($elastic) {
-  local $SIG{__DIE__}  = undef;
-  local $SIG{__WARN__} = undef;
-  my $ok = eval {
-    my @args = (params => scalar $params->Vars);
-    if ($searchstring) {
-      @args = (quicksearch => $searchstring);
-    }
-    if (defined $params->param('limit')) {
-      push @args, limit => scalar $params->param('limit');
-    }
-    $search = Bugzilla::Elastic::Search->new(
-      fields => [@selectcolumns],
-      order  => [@order_columns],
-      @args,
-    );
-    $search->es_query;
-    1;
-  };
-  if (!$ok) {
-    warn "fallback from elasticsearch: $@\n";
-    $search = $fallback_search;
-  }
-}
-else {
-  $search = $fallback_search;
-}
+my $search = $fallback_search;
 
 $order = join(',', $search->order);
 
@@ -763,25 +725,13 @@ do {
   ($data, $extra_data) = eval { $search->data };
 };
 
-if ($elastic && not defined $data) {
-  warn "fallback from elasticsearch: $@\n";
-  $search = $fallback_search;
-  ($data, $extra_data) = $search->data;
-  $elastic = 0;
-}
-
-$fulltext = 1 if $elastic;
-
 $vars->{'search_description'} = $search->search_description;
 if ( $cgi->param('debug')
   && Bugzilla->params->{debug_group}
   && $user->in_group(Bugzilla->params->{debug_group}))
 {
   $vars->{'debug'} = 1;
-  if ($search->isa('Bugzilla::Elastic::Search')) {
-    $vars->{query_time} = $search->query_time;
-  }
-  else {
+
     $vars->{'queries'} = $extra_data;
     my $query_time = 0;
     $query_time += $_->{'time'} foreach @$extra_data;
@@ -796,7 +746,6 @@ if ( $cgi->param('debug')
         $query->{explain} = $dbh->bz_explain($query->{sql});
       }
     }
-  }
 }
 
 if (scalar @{$search->invalid_order_columns}) {
@@ -929,14 +878,9 @@ else {    # remaining_time <= 0
 
 # Define the variables and functions that will be passed to the UI template.
 
-if ($vars->{elastic} = $search->isa('Bugzilla::Elastic::Search')) {
-  $vars->{elastic_query_time} = $search->query_time;
-}
-else {
-  my $query_time = 0;
-  $query_time += $_->{'time'} foreach @$extra_data;
-  $vars->{'query_time'} = $query_time;
-}
+my $query_time = 0;
+$query_time += $_->{'time'} foreach @$extra_data;
+$vars->{'query_time'} = $query_time;
 
 $vars->{'bugs'}           = \@bugs;
 $vars->{'buglist'}        = \@bugidlist;

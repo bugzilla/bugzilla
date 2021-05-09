@@ -18,7 +18,6 @@ our $VERSION = '20200805.1';
 use Bugzilla::Auth;
 use Bugzilla::Auth::Persist::Cookie;
 use Bugzilla::CGI;
-use Bugzilla::Elastic;
 use Bugzilla::Config;
 use Bugzilla::Constants;
 use Bugzilla::DB;
@@ -218,33 +217,9 @@ sub github_secret {
   return $cache->{github_secret};
 }
 
-sub passwdqc {
-  my ($class) = @_;
-  require Data::Password::passwdqc;
-
-  my $cache  = request_cache;
-  my $params = $class->params;
-
-  return $cache->{passwdqc} if $cache->{passwdqc};
-
-  my @min = map { $_ eq 'undef' ? undef : $_ }
-    split(/\s*,\s*/, $params->{passwdqc_min});
-
-  return $cache->{passwdqc} = Data::Password::passwdqc->new(
-    min              => \@min,
-    max              => $params->{passwdqc_max},
-    passphrase_words => $params->{passwdqc_passphrase_words},
-    match_length     => $params->{passwdqc_match_length},
-    random_bits      => $params->{passwdqc_random_bits},
-  );
-}
-
 sub assert_password_is_secure {
   my ($class, $password1) = @_;
 
-  my $pwqc = $class->passwdqc;
-  ThrowUserError('password_insecure', {reason => $pwqc->reason})
-    unless $pwqc->validate_password($password1);
 }
 
 sub assert_passwords_match {
@@ -764,11 +739,6 @@ sub datadog {
   else {
     return undef;
   }
-}
-
-sub elastic {
-  my ($class) = @_;
-  $class->process_cache->{elastic} //= Bugzilla::Elastic->new();
 }
 
 sub check_rate_limit {

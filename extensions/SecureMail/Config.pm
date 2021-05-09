@@ -28,7 +28,6 @@ use warnings;
 use constant NAME => 'SecureMail';
 
 use constant REQUIRED_MODULES => [
-  {package => 'Crypt-OpenPGP', module => 'Crypt::OpenPGP', version => '1.12',},
   {package => 'Crypt-SMIME',   module => 'Crypt::SMIME',   version => 0,},
   {package => 'HTML-Tree',     module => 'HTML::Tree',     version => 0,},
   {

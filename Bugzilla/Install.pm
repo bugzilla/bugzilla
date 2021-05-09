@@ -512,13 +512,7 @@ sub _prompt_for_password {
     print "\n", get_text('install_confirm_password'), ' ';
     my $pass2 = <STDIN>;
     chomp $pass2;
-    my $pwqc = Bugzilla->passwdqc;
-    my $ok   = $pwqc->validate_password($password);
-    if (!$ok) {
-      print "\n", $pwqc->reason, "\n";
-      undef $password;
-    }
-    elsif ($password ne $pass2) {
+    if ($password ne $pass2) {
       print "\n", "passwords do not match\n";
       undef $password;
     }

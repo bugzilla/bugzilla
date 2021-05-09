@@ -58,23 +58,6 @@ sub check_credentials {
     };
   }
 
-  # Force the user to change their password if it does not meet the current
-  # criteria. This should usually only happen if the criteria has changed.
-  if ( Bugzilla->usage_mode == USAGE_MODE_BROWSER
-    && Bugzilla->params->{password_check_on_login})
-  {
-    my $pwqc = Bugzilla->passwdqc;
-    unless ($pwqc->validate_password($password)) {
-      my $reason = $pwqc->reason;
-      Bugzilla->audit(sprintf "%s logged in with a weak password (reason: %s)",
-        $user->login, $reason);
-      $user->set_password_change_required(1);
-      $user->set_password_change_reason(
-        "You must change your password for the following reason: $reason");
-      $user->update();
-    }
-  }
-
   # The user's credentials are okay, so delete any outstanding
   # password tokens or login failures they may have generated.
   Bugzilla::Token::DeletePasswordTokens($user->id, "user_logged_in");

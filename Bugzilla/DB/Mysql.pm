@@ -730,6 +730,18 @@ sub bz_setup_database {
   }
 }
 
+sub bz_server_version {
+  my ($self) = @_;
+  my $version = $self->SUPER::bz_server_version();
+
+  warn "VERSION: $version";
+  if ($version =~ /MariaDB/) {
+    (undef, $version) = split(/-/, $version);
+  }
+
+  return $version;
+}
+
 # When you import a MySQL 3/4 mysqldump into MySQL 5, columns that
 # aren't supposed to have defaults will have defaults. This is only
 # a minor issue, but it makes our tests fail, and it's good to keep

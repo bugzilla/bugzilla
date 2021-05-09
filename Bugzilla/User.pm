@@ -34,8 +34,7 @@ use Role::Tiny::With;
 
 use base qw(Bugzilla::Object Exporter);
 
-with 'Bugzilla::Elastic::Role::Object', 'Bugzilla::Role::Storable',
-  'Bugzilla::Role::FlattenToHash';
+with 'Bugzilla::Role::Storable', 'Bugzilla::Role::FlattenToHash';
 
 @Bugzilla::User::EXPORT = qw(is_available_username
   login_to_id user_id_to_login
@@ -136,105 +135,6 @@ use constant VALIDATOR_DEPENDENCIES => {
 };
 
 use constant EXTRA_REQUIRED_FIELDS => qw(is_enabled);
-
-sub ES_INDEX {
-  my ($class) = @_;
-  sprintf("%s_%s", Bugzilla->params->{elasticsearch_index}, $class->ES_TYPE);
-}
-
-sub ES_TYPE {'user'}
-
-sub ES_OBJECTS_AT_ONCE {5000}
-
-sub ES_SELECT_UPDATED_SQL {
-  my ($class, $mtime) = @_;
-
-  my $sql = q{
-        SELECT DISTINCT
-            object_id
-        FROM
-            audit_log
-        WHERE
-            class = 'Bugzilla::User' AND at_time > FROM_UNIXTIME(?)
-    };
-  return ($sql, [$mtime]);
-}
-
-sub ES_SELECT_ALL_SQL {
-  my ($class, $last_id) = @_;
-
-  my $id    = $class->ID_FIELD;
-  my $table = $class->DB_TABLE;
-
-  return (
-    "SELECT $id FROM $table WHERE $id > ? AND is_enabled AND NOT disabledtext ORDER BY $id",
-    [$last_id // 0]
-  );
-}
-
-sub ES_SETTINGS {
-  return {
-    number_of_shards => 2,
-    analysis         => {
-      filter => {
-        asciifolding_original => {type => "asciifolding", preserve_original => \1,},
-      },
-      analyzer => {
-        autocomplete => {
-          type      => 'custom',
-          tokenizer => 'keyword',
-          filter    => ['lowercase', 'asciifolding_original'],
-        },
-        folding => {
-          tokenizer => 'standard',
-          filter    => ['standard', 'lowercase', 'asciifolding_original'],
-        },
-      }
-    }
-  };
-}
-
-sub ES_PROPERTIES {
-  return {
-    suggest_user => {
-      type            => 'completion',
-      analyzer        => 'folding',
-      search_analyzer => 'folding',
-      payloads        => \1,
-    },
-    suggest_nick =>
-      {type => 'completion', analyzer => 'autocomplete', payloads => \1,},
-    login      => {type => 'string'},
-    name       => {type => 'string'},
-    is_enabled => {type => 'boolean'},
-  };
-}
-
-sub es_document {
-  my ($self, $timestamp) = @_;
-  my $doc = {
-    login        => $self->login,
-    name         => $self->name,
-    is_enabled   => $self->is_enabled,
-    suggest_user => {
-      input   => [$self->login, $self->name],
-      output  => $self->identity,
-      payload => {name => $self->login, real_name => $self->name},
-    },
-  };
-  my $name  = $self->name;
-  my @nicks = extract_nicks($name);
-
-  if (@nicks) {
-    $doc->{suggest_nick} = {
-      input   => \@nicks,
-      output  => $self->login,
-      payload => {name => $self->login, real_name => $self->name},
-    };
-  }
-
-  return $doc;
-}
 
 ################################################################################
 # Functions

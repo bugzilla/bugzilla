@@ -547,7 +547,7 @@ foreach my $product (@products) {
 
       Bugzilla::User->create({
         login_name    => $watch_user,
-        cryptpassword => Bugzilla->passwdqc->generate_password(),
+        cryptpassword => "password1",
         disable_mail  => 1,
       });
 

@@ -47,7 +47,7 @@ You can report bugs on the
 
 ## Community
 
-* [#bugzilla on Freenode](irc://irc.mozilla.org/bugzilla)
+* [#bugzilla on librachat](irc://irc.libra.chat/bugzilla)
 * [Matrix](https://matrix.to/#/#bugzilla:mozilla.org)
 * [Twitter](https://twitter.com/bugzilla)
 * [Development Forum](https://www.mozilla.org/en-US/about/forums/#dev-apps-bugzilla)

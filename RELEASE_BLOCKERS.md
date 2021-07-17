@@ -55,6 +55,6 @@ the container can be used as a drop in replacement for the bugzilla.pl executabl
 It would be good to add sub-commands for checksetup and the jobqueue to this.
 bugzilla.pl sub-commands can be defined in the Bugzilla::App::Cmd::* namespace.
 
-If we release harmony and it has a good (amd small!) container, it will look good.
+If we release harmony and it has a good (and small!) container, it will look good.
 
 

@@ -51,6 +51,7 @@ use constant LOCALCONFIG_VARS => (
   {name => 'db_mysql_ssl_ca_path',     default => '',},
   {name => 'db_mysql_ssl_client_cert', default => '',},
   {name => 'db_mysql_ssl_client_key',  default => '',},
+  {name => 'db_mysql_ssl_optional',    default => '',},
   {name => 'index_html',               default => 0,},
   {name => 'interdiffbin',             default => sub { bin_loc('interdiff') },},
   {name => 'diffpath', default => sub { dirname(bin_loc('diff')) },},

@@ -215,9 +215,9 @@ which don't do strict checking by default. This can be helpful with MySQL/MariaD
 systems using self-signed certificates or with Amazon RDS instances which don't have
 their Root CA's published in the OS supplied CA bundles.
 
-If this is set to 1 (which is default if left blank), strict SSL checking will be enabled.
+If this is set to 0 (which is default if left blank), strict SSL checking will be enabled.
 
-If this is set to 0, strict SSL checking will be disabled.
+If this is set to 1, strict SSL checking will be disabled.
 END
   localconfig_diffpath => <<'END',
 For the "Difference Between Two Patches" feature to work, we need to know

@@ -1,0 +1,60 @@
+FROM ubuntu:20.04
+
+ENV DEBIAN_FRONTEND noninteractive
+
+RUN apt-get update
+RUN apt-get -y install \
+ apache2 \
+ mysql-server \
+ libappconfig-perl \
+ libdate-calc-perl \
+ libtemplate-perl \
+ build-essential \
+ libdatetime-timezone-perl \
+ libdatetime-perl \
+ libemail-address-perl \
+ libemail-sender-perl \
+ libemail-mime-perl \
+ libemail-mime-modifier-perl \
+ libdbi-perl \
+ libdbix-connector-perl \
+ libdbd-mysql-perl \
+ libcgi-pm-perl \
+ libmath-random-isaac-perl \
+ libmath-random-isaac-xs-perl \
+ libapache2-mod-perl2 \
+ libapache2-mod-perl2-dev \
+ libchart-perl \
+ libxml-perl \
+ libxml-twig-perl \
+ perlmagick \
+ libgd-graph-perl \
+ libtemplate-plugin-gd-perl \
+ libsoap-lite-perl \
+ libhtml-scrubber-perl \
+ libjson-rpc-perl \
+ libdaemon-generic-perl \
+ libtheschwartz-perl \
+ libtest-taint-perl \
+ libauthen-radius-perl \
+ libfile-slurp-perl \
+ libencode-detect-perl \
+ libmodule-build-perl \
+ libnet-ldap-perl \
+ libauthen-sasl-perl \
+ libfile-mimeinfo-perl \
+ libhtml-formattext-withlinks-perl \
+ libgd-dev \
+ libmysqlclient-dev \
+ graphviz \
+ vim-common
+
+WORKDIR /var/www/html
+COPY --chown=root:www-data . /var/www/html
+COPY ./docker/000-default.conf /etc/apache2/sites-available/000-default.conf
+
+RUN rm -rf /var/www/html/data /var/www/html/localconfig /var/www/html/index.html && \
+    mkdir /var/www/html/data
+RUN a2enmod expires && a2enmod headers && a2enmod rewrite && a2dismod mpm_event && a2enmod mpm_prefork
+EXPOSE 80/tcp
+CMD docker/startup.sh

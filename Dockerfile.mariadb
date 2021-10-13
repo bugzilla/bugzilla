@@ -1,0 +1,3 @@
+FROM mariadb:10.5.12
+COPY docker/my.cnf /etc/my.cnf
+COPY docker/mysql /etc/mysql/conf.d

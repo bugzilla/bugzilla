@@ -1,0 +1,39 @@
+# This Source Code Form is subject to the terms of the Mozilla Public
+# License, v. 2.0. If a copy of the MPL was not distributed with this
+# file, You can obtain one at http://mozilla.org/MPL/2.0/.
+
+version: '3.4'
+
+services:
+  bugzilla5.web:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    command: docker/startup.sh
+    volumes:
+      - bugzilla5-data-dir:/var/www/data
+      - .:/mnt/sync
+    tmpfs:
+      - /tmp
+      - /run/lock
+    ports:
+      - 8080:80
+    depends_on:
+      - bugzilla5.db
+
+  bugzilla5.db:
+    build:
+      context: .
+      dockerfile: Dockerfile.mariadb
+    volumes:
+      - bugzilla5-mysql-db:/var/lib/mysql
+    tmpfs:
+      - /tmp
+      - /var/lock
+    environment:
+      - MARIADB_ROOT_HOST=%
+      - MARIADB_ROOT_PASSWORD=bugzilla
+
+volumes:
+  bugzilla5-mysql-db:
+  bugzilla5-data-dir:

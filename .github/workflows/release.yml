@@ -35,7 +35,7 @@ jobs:
           sudo apt-get install --ignore-hold --allow-downgrades -y \
               build-essential curl libssl-dev zlib1g-dev openssl \
               libexpat-dev cmake git libcairo-dev libgd-dev \
-              default-libmysqlclient-dev unzip wget libgd3=2.2.5-5.2ubuntu2
+              default-libmysqlclient-dev unzip wget libgd3
       - name: cpm install
         run: |
           perl Makefile.PL

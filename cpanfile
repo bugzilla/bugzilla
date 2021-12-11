@@ -14,7 +14,7 @@ requires 'Crypt::SMIME';
 requires 'DBD::mysql', '4.037';
 requires 'DBI', '1.614';
 requires 'DBIx::Class';
-requires 'DBIx::Class::Helpers', '== 2.034002';
+requires 'DBIx::Class::Helpers', '2.034002';
 requires 'DBIx::Connector';
 requires 'Daemon::Generic';
 requires 'Date::Format', '2.23';

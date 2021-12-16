@@ -387,9 +387,10 @@ sub _generate_bugmail {
 
     # TT trims the trailing newline, and threadingmarker may be ignored.
     my $email = new Email::MIME("$msg_header\n");
-    if (scalar(@parts) == 1) {
-        $email->content_type_set($parts[0]->content_type);
-    } else {
+
+    # If there's only one part, we don't need to set the overall content type
+    # because Email::MIME will automatically take it from that part (bug 1657496)
+    if (scalar(@parts) > 1) {
         $email->content_type_set('multipart/alternative');
         # Some mail clients need same encoding for each part, even empty ones.
         $email->charset_set('UTF-8') if Bugzilla->params->{'utf8'};

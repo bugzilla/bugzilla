@@ -538,10 +538,9 @@ sub _generate_bugmail {
   # For tracking/diagnostic purposes, add our hostname
   $email->header_set('X-Generated-By' => hostname());
 
-  if (scalar(@parts) == 1) {
-    $email->content_type_set($parts[0]->content_type);
-  }
-  else {
+  # If there's only one part, we don't need to set the overall content type
+  # because Email::MIME will automatically take it from that part (bug 1657496)
+  if (scalar(@parts) > 1) {
     $email->content_type_set('multipart/alternative');
   }
   $email->parts_set(\@parts);

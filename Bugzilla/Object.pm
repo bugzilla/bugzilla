@@ -104,10 +104,10 @@ sub _load_from_db {
   my $class      = shift;
   my ($param)    = @_;
   my $dbh        = Bugzilla->dbh;
-  my $columns    = join(',', $class->_get_db_columns);
-  my $table      = $class->DB_TABLE;
-  my $name_field = $class->NAME_FIELD;
-  my $id_field   = $class->ID_FIELD;
+  my $columns    = $dbh->quote_expr(join(',', $class->_get_db_columns));
+  my $table      = $dbh->quote_expr($class->DB_TABLE);
+  my $name_field = $dbh->quote_expr($class->NAME_FIELD);
+  my $id_field   = $dbh->quote_expr($class->ID_FIELD);
 
   my $id = $param;
   if (ref $param eq 'HASH') {
@@ -141,7 +141,7 @@ sub _load_from_db {
 
     my ($condition, @values);
     if (defined $param->{name}) {
-      $condition = $dbh->sql_istrcmp($name_field, '?');
+      $condition = $dbh->quote_expr($dbh->sql_istrcmp($name_field, '?'));
       push(@values, $param->{name});
     }
     elsif (defined $param->{'condition'} && defined $param->{'values'}) {
@@ -153,7 +153,7 @@ sub _load_from_db {
           argument => 'condition/values'
         }
       );
-      $condition = $param->{'condition'};
+      $condition = $dbh->quote_expr($param->{'condition'});
       push(@values, @{$param->{'values'}});
     }
 
@@ -373,8 +373,9 @@ sub match {
 
 sub _do_list_select {
   my ($class, $where, $values, $postamble) = @_;
-  my $table = $class->DB_TABLE;
-  my $cols  = join(',', $class->_get_db_columns);
+  my $dbh = Bugzilla->dbh;
+  my $table = $dbh->quote_expr($class->DB_TABLE);
+  my $cols  = $dbh->quote_expr(join(',', $class->_get_db_columns));
   my $order = $class->LIST_ORDER;
 
   # Unconditional requests for configuration data are cacheable.
@@ -388,12 +389,12 @@ sub _do_list_select {
   if (!$objects) {
     my $sql = "SELECT $cols FROM $table";
     if (defined $where) {
+      $where = $dbh->quote_expr($where);
       $sql .= " WHERE $where ";
     }
     $sql .= " ORDER BY $order";
     $sql .= " $postamble" if $postamble;
 
-    my $dbh = Bugzilla->dbh;
 
     # Sometimes the values are tainted, but we don't want to untaint them
     # for the caller. So we copy the array. It's safe to untaint because
@@ -642,8 +643,8 @@ sub flatten_to_hash {
 
 sub any_exist {
   my $class = shift;
-  my $table = $class->DB_TABLE;
   my $dbh   = Bugzilla->dbh;
+  my $table = $dbh->quote_expr($class->DB_TABLE);
   my $any_exist
     = $dbh->selectrow_array("SELECT 1 FROM $table " . $dbh->sql_limit(1));
   return $any_exist ? 1 : 0;

@@ -9,7 +9,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-    command: docker/startup.sh
+    command: /root/docker/startup.sh
     volumes:
       - bugzilla5-data-dir:/var/www/data
       - .:/mnt/sync
@@ -20,6 +20,14 @@ services:
       - 8080:80
     depends_on:
       - bugzilla5.db
+    environment: &bugzilla_env
+      - BZ_DB_HOST=bugzilla5.db
+      - BZ_DB_PORT=3306
+      - BZ_DB_USER=bugs
+      - BZ_DB_NAME=bugs
+      - BZ_DB_PASS=bugzilla
+      - MARIADB_ROOT_HOST=%
+      - MARIADB_ROOT_PASSWORD=bugzilla
 
   bugzilla5.db:
     build:
@@ -30,9 +38,7 @@ services:
     tmpfs:
       - /tmp
       - /var/lock
-    environment:
-      - MARIADB_ROOT_HOST=%
-      - MARIADB_ROOT_PASSWORD=bugzilla
+    environment: *bugzilla_env
 
 volumes:
   bugzilla5-mysql-db:

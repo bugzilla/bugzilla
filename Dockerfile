@@ -52,7 +52,11 @@ RUN apt-get -y install \
 WORKDIR /var/www/html
 COPY --chown=root:www-data . /var/www/html
 COPY ./docker/000-default.conf /etc/apache2/sites-available/000-default.conf
+COPY ./docker /root/docker
 
+# we don't want Docker droppings accessible by the web browser since they
+# might contain setup info you don't want public
+RUN rm -rf /var/www/html/docker* /var/www/html/Dockerfile
 RUN rm -rf /var/www/html/data /var/www/html/localconfig /var/www/html/index.html && \
     mkdir /var/www/html/data
 RUN a2enmod expires && a2enmod headers && a2enmod rewrite && a2dismod mpm_event && a2enmod mpm_prefork

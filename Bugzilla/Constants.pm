@@ -525,9 +525,8 @@ use constant DB_MODULE => {
       # Disallow development versions
       blacklist => ['_'],
 
-      # For UTF-8 support. 4.001 makes sure that blobs aren't
-      # marked as UTF-8.
-      version => '4.001',
+      # Only with 4.041 utf8mb4 will work.
+      version => '4.041',
     },
     name => 'MySQL'
   },

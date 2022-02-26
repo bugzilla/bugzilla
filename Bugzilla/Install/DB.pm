@@ -219,7 +219,7 @@ sub update_table_definitions {
     $dbh->bz_add_column('profiles', 'emailflags', {TYPE => 'MEDIUMTEXT'});
   }
 
-  $dbh->bz_add_column('`groups`', 'isactive',
+  $dbh->bz_add_column('groups', 'isactive',
     {TYPE => 'BOOLEAN', NOTNULL => 1, DEFAULT => 'TRUE'});
 
   $dbh->bz_add_column('attachments', 'isobsolete',
@@ -430,7 +430,7 @@ sub update_table_definitions {
   $dbh->bz_rename_column('series', 'public', 'is_public');
 
   # 2005-11-04 LpSolit@gmail.com - Bug 305927
-  $dbh->bz_alter_column('`groups`', 'userregexp',
+  $dbh->bz_alter_column('groups', 'userregexp',
     {TYPE => 'TINYTEXT', NOTNULL => 1, DEFAULT => "''"});
 
   # 2005-09-26 - olav@bkor.dhs.org - Bug 119524
@@ -473,7 +473,7 @@ sub update_table_definitions {
 
   # 2006-08-04 LpSolit@gmail.com - Bug 305941
   $dbh->bz_drop_column('profiles', 'refreshed_when');
-  $dbh->bz_drop_column('`groups`',   'last_changed');
+  $dbh->bz_drop_column('groups',   'last_changed');
 
   # 2019-01-31 dylan@hardison.net - Bug TODO
   _update_flagtypes_id();
@@ -524,7 +524,7 @@ sub update_table_definitions {
   _initialize_workflow_for_upgrade($old_params);
 
   # 2007-08-08 LpSolit@gmail.com - Bug 332149
-  $dbh->bz_add_column('`groups`', 'icon_url', {TYPE => 'TINYTEXT'});
+  $dbh->bz_add_column('groups', 'icon_url', {TYPE => 'TINYTEXT'});
 
   # 2007-08-21 wurblzap@gmail.com - Bug 365378
   _make_lang_setting_dynamic();
@@ -1218,7 +1218,7 @@ sub _populate_duplicates_table {
   my ($dups_exist) = $dbh->selectrow_array("SELECT DISTINCT 1 FROM duplicates");
 
   # We also check against a schema change that happened later.
-  if (!$dups_exist && !$dbh->bz_column_info('`groups`', 'isactive')) {
+  if (!$dups_exist && !$dbh->bz_column_info('groups', 'isactive')) {
 
     # populate table
     print "Populating duplicates table from comments...\n";
@@ -1636,17 +1636,17 @@ sub _convert_groups_system_from_groupset {
 
     # Some mysql versions will promote any unique key to primary key
     # so all unique keys are removed first and then added back in
-    $dbh->bz_drop_index('`groups`', 'groups_bit_idx');
-    $dbh->bz_drop_index('`groups`', 'groups_name_idx');
+    $dbh->bz_drop_index('groups', 'groups_bit_idx');
+    $dbh->bz_drop_index('groups', 'groups_name_idx');
     my @primary_key = $dbh->primary_key(undef, undef, '`groups`');
     if (@primary_key) {
       $dbh->do("ALTER TABLE `groups` DROP PRIMARY KEY");
     }
 
-    $dbh->bz_add_column('`groups`', 'id',
+    $dbh->bz_add_column('groups', 'id',
       {TYPE => 'MEDIUMSERIAL', NOTNULL => 1, PRIMARYKEY => 1});
 
-    $dbh->bz_add_index('`groups`', 'groups_name_idx',
+    $dbh->bz_add_index('groups', 'groups_name_idx',
       {TYPE => 'UNIQUE', FIELDS => [qw(name)]});
 
     # Convert all existing groupset records to map entries before removing

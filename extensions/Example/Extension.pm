@@ -496,7 +496,7 @@ sub error_catch {
   # "clas[s]" instead of "class". Stupid and ugly hack, but it works with
   # all Perl versions.
   $$page
-    =~ s/(?<=<div id="error_msg" clas[s]="throw_error">).*(?=<\/div>)/$new_error_msg/si;
+    =~ s/<div id="error_msg" clas[s]="throw_error">\K(.*?)(?=<\/div>)/$new_error_msg/si;
 }
 
 sub flag_end_of_update {

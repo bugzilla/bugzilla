@@ -2685,8 +2685,7 @@ sub _change_all_mysql_booleans_to_tinyint {
     my $quip_info_sth = $dbh->column_info(undef, undef, 'quips', '%');
     my $quips_cols    = $quip_info_sth->fetchall_hashref("COLUMN_NAME");
     my $approved_col  = $quips_cols->{'approved'};
-    if (  $approved_col->{TYPE_NAME} eq 'TINYINT'
-      and $approved_col->{COLUMN_SIZE} == 1)
+    if ($approved_col->{TYPE_NAME} eq 'TINYINT')
     {
       # series.public could have been renamed to series.is_public,
       # and so wouldn't need to be fixed manually.

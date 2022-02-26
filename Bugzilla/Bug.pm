@@ -3984,7 +3984,7 @@ sub groups {
       . " THEN 1 ELSE 0 END,"
       . " CASE WHEN groups.id IN($grouplist) THEN 1 ELSE 0 END,"
       . " isactive, membercontrol, othercontrol"
-      . " FROM groups"
+      . " FROM `groups`"
       . " LEFT JOIN bug_group_map"
       . " ON bug_group_map.group_id = groups.id"
       . " AND bug_id = ?"

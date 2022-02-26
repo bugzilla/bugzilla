@@ -48,7 +48,7 @@ sub CheckGroupID {
   ThrowUserError("group_not_specified") unless $group_id;
   (
     detaint_natural($group_id) && Bugzilla->dbh->selectrow_array(
-      "SELECT id FROM groups WHERE id = ?",
+      "SELECT id FROM `groups` WHERE id = ?",
       undef, $group_id
     )
   ) || ThrowUserError("invalid_group_ID");

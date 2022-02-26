@@ -717,7 +717,7 @@ sub userDataToVars {
                              ) THEN 1 ELSE 0 END) 
                       AS derivedmember,
                   COUNT(directbless.group_id) AS directbless
-           FROM groups
+           FROM `groups`
            LEFT JOIN user_group_map AS directmember
                   ON directmember.group_id = id
                  AND directmember.user_id = ?
@@ -743,7 +743,7 @@ sub userDataToVars {
 
   # Find indirect bless permission.
   $query = qq{SELECT groups.id
-                FROM groups, group_group_map AS ggm
+                FROM `groups`, group_group_map AS ggm
                 WHERE groups.id = ggm.grantor_id
                   AND ggm.member_id IN ($grouplist)
                   AND ggm.grant_type = ?

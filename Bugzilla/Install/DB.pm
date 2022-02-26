@@ -219,7 +219,7 @@ sub update_table_definitions {
     $dbh->bz_add_column('profiles', 'emailflags', {TYPE => 'MEDIUMTEXT'});
   }
 
-  $dbh->bz_add_column('groups', 'isactive',
+  $dbh->bz_add_column('`groups`', 'isactive',
     {TYPE => 'BOOLEAN', NOTNULL => 1, DEFAULT => 'TRUE'});
 
   $dbh->bz_add_column('attachments', 'isobsolete',
@@ -430,7 +430,7 @@ sub update_table_definitions {
   $dbh->bz_rename_column('series', 'public', 'is_public');
 
   # 2005-11-04 LpSolit@gmail.com - Bug 305927
-  $dbh->bz_alter_column('groups', 'userregexp',
+  $dbh->bz_alter_column('`groups`', 'userregexp',
     {TYPE => 'TINYTEXT', NOTNULL => 1, DEFAULT => "''"});
 
   # 2005-09-26 - olav@bkor.dhs.org - Bug 119524
@@ -473,7 +473,7 @@ sub update_table_definitions {
 
   # 2006-08-04 LpSolit@gmail.com - Bug 305941
   $dbh->bz_drop_column('profiles', 'refreshed_when');
-  $dbh->bz_drop_column('groups',   'last_changed');
+  $dbh->bz_drop_column('`groups`',   'last_changed');
 
   # 2019-01-31 dylan@hardison.net - Bug TODO
   _update_flagtypes_id();
@@ -524,7 +524,7 @@ sub update_table_definitions {
   _initialize_workflow_for_upgrade($old_params);
 
   # 2007-08-08 LpSolit@gmail.com - Bug 332149
-  $dbh->bz_add_column('groups', 'icon_url', {TYPE => 'TINYTEXT'});
+  $dbh->bz_add_column('`groups`', 'icon_url', {TYPE => 'TINYTEXT'});
 
   # 2007-08-21 wurblzap@gmail.com - Bug 365378
   _make_lang_setting_dynamic();
@@ -1218,7 +1218,7 @@ sub _populate_duplicates_table {
   my ($dups_exist) = $dbh->selectrow_array("SELECT DISTINCT 1 FROM duplicates");
 
   # We also check against a schema change that happened later.
-  if (!$dups_exist && !$dbh->bz_column_info('groups', 'isactive')) {
+  if (!$dups_exist && !$dbh->bz_column_info('`groups`', 'isactive')) {
 
     # populate table
     print "Populating duplicates table from comments...\n";
@@ -1636,22 +1636,22 @@ sub _convert_groups_system_from_groupset {
 
     # Some mysql versions will promote any unique key to primary key
     # so all unique keys are removed first and then added back in
-    $dbh->bz_drop_index('groups', 'groups_bit_idx');
-    $dbh->bz_drop_index('groups', 'groups_name_idx');
-    my @primary_key = $dbh->primary_key(undef, undef, 'groups');
+    $dbh->bz_drop_index('`groups`', 'groups_bit_idx');
+    $dbh->bz_drop_index('`groups`', 'groups_name_idx');
+    my @primary_key = $dbh->primary_key(undef, undef, '`groups`');
     if (@primary_key) {
-      $dbh->do("ALTER TABLE groups DROP PRIMARY KEY");
+      $dbh->do("ALTER TABLE `groups` DROP PRIMARY KEY");
     }
 
-    $dbh->bz_add_column('groups', 'id',
+    $dbh->bz_add_column('`groups`', 'id',
       {TYPE => 'MEDIUMSERIAL', NOTNULL => 1, PRIMARYKEY => 1});
 
-    $dbh->bz_add_index('groups', 'groups_name_idx',
+    $dbh->bz_add_index('`groups`', 'groups_name_idx',
       {TYPE => 'UNIQUE', FIELDS => [qw(name)]});
 
     # Convert all existing groupset records to map entries before removing
     # groupset fields or removing "bit" from groups.
-    my $sth = $dbh->prepare("SELECT bit, id FROM groups WHERE bit > 0");
+    my $sth = $dbh->prepare("SELECT bit, id FROM `groups` WHERE bit > 0");
     $sth->execute();
     while (my ($bit, $gid) = $sth->fetchrow_array) {
 
@@ -1746,7 +1746,7 @@ sub _convert_groups_system_from_groupset {
 
         # Get names of groups added.
         my $sth2 = $dbh->prepare(
-          "SELECT name FROM groups
+          "SELECT name FROM `groups`
                                            WHERE (bit & $added) != 0
                                                  AND (bit & $removed) = 0"
         );
@@ -1758,7 +1758,7 @@ sub _convert_groups_system_from_groupset {
 
         # Get names of groups removed.
         $sth2 = $dbh->prepare(
-          "SELECT name FROM groups
+          "SELECT name FROM `groups`
                                         WHERE (bit & $removed) != 0
                                               AND (bit & $added) = 0"
         );
@@ -1772,7 +1772,7 @@ sub _convert_groups_system_from_groupset {
         # missing groups.
         $sth2 = $dbh->prepare(
           "SELECT ($added & ~BIT_OR(bit)) 
-                                         FROM groups"
+                                         FROM `groups`"
         );
         $sth2->execute();
         my ($miss) = $sth2->fetchrow_array;
@@ -1786,7 +1786,7 @@ sub _convert_groups_system_from_groupset {
         # missing groups.
         $sth2 = $dbh->prepare(
           "SELECT ($removed & ~BIT_OR(bit)) 
-                                         FROM groups"
+                                         FROM `groups`"
         );
         $sth2->execute();
         ($miss) = $sth2->fetchrow_array;
@@ -1823,7 +1823,7 @@ sub _convert_groups_system_from_groupset {
 
         # Get names of groups added.
         my $sth2 = $dbh->prepare(
-          "SELECT name FROM groups
+          "SELECT name FROM `groups`
                                            WHERE (bit & $added) != 0
                                                  AND (bit & $removed) = 0"
         );
@@ -1835,7 +1835,7 @@ sub _convert_groups_system_from_groupset {
 
         # Get names of groups removed.
         $sth2 = $dbh->prepare(
-          "SELECT name FROM groups
+          "SELECT name FROM `groups`
                                         WHERE (bit & $removed) != 0
                                               AND (bit & $added) = 0"
         );
@@ -1864,12 +1864,12 @@ sub _convert_groups_system_from_groupset {
 
     # Identify admin group.
     my ($admin_gid)
-      = $dbh->selectrow_array("SELECT id FROM groups WHERE name = 'admin'");
+      = $dbh->selectrow_array("SELECT id FROM `groups` WHERE name = 'admin'");
     if (!$admin_gid) {
       $dbh->do(q{INSERT INTO groups (name, description)
                                    VALUES ('admin', 'Administrators')}
       );
-      $admin_gid = $dbh->bz_last_key('groups', 'id');
+      $admin_gid = $dbh->bz_last_key('`groups`', 'id');
     }
 
     # Find current admins
@@ -1903,7 +1903,7 @@ sub _convert_groups_system_from_groupset {
     $dbh->bz_drop_column('profiles', 'groupset');
     $dbh->bz_drop_column('profiles', 'blessgroupset');
     $dbh->bz_drop_column('bugs',     'groupset');
-    $dbh->bz_drop_column('groups',   'bit');
+    $dbh->bz_drop_column('`groups`', 'bit');
     $dbh->do("DELETE FROM fielddefs WHERE name = " . $dbh->quote('groupset'));
   }
 }
@@ -2132,9 +2132,9 @@ sub _setup_usebuggroups_backward_compatibility {
     # Initially populate group_control_map.
     # First, get all the existing products and their groups.
     my $sth = $dbh->prepare(
-      "SELECT groups.id, products.id, groups.name,
+      "SELECT `groups`.id, products.id, `groups`.name,
                                         products.name 
-                                  FROM groups, products
+                                  FROM `groups`, products
                                  WHERE isbuggroup != 0"
     );
     $sth->execute();
@@ -2495,7 +2495,7 @@ sub _fix_group_with_empty_name {
   # Note that there can be at most one such group (because of
   # the SQL index on the name column).
   my ($emptygroupid)
-    = $dbh->selectrow_array("SELECT id FROM groups where name = ''");
+    = $dbh->selectrow_array("SELECT id FROM `groups` where name = ''");
   if ($emptygroupid) {
 
     # There is a group with an empty name; find a name to rename it
@@ -2503,7 +2503,7 @@ sub _fix_group_with_empty_name {
     # group_$gid and add _<n> if necessary.
     my $trycount = 0;
     my $trygroupname;
-    my $sth         = $dbh->prepare("SELECT 1 FROM groups where name = ?");
+    my $sth         = $dbh->prepare("SELECT 1 FROM `groups` where name = ?");
     my $name_exists = 1;
 
     while ($name_exists) {
@@ -2948,7 +2948,7 @@ sub _rederive_regex_groups {
   my $dbh = Bugzilla->dbh;
 
   my $regex_groups_exist = $dbh->selectrow_array(
-    "SELECT 1 FROM groups WHERE userregexp = '' " . $dbh->sql_limit(1));
+    "SELECT 1 FROM `groups` WHERE userregexp = '' " . $dbh->sql_limit(1));
   return if !$regex_groups_exist;
 
   my $regex_derivations
@@ -2961,12 +2961,12 @@ sub _rederive_regex_groups {
 
   # Re-evaluate all regexps, to keep them up-to-date.
   my $sth = $dbh->prepare(
-    "SELECT profiles.userid, profiles.login_name, groups.id, 
-                groups.userregexp, user_group_map.group_id
-           FROM (profiles CROSS JOIN groups)
+    "SELECT profiles.userid, profiles.login_name, `groups`.id,
+                `groups`.userregexp, user_group_map.group_id
+           FROM (profiles CROSS JOIN `groups`)
                 LEFT JOIN user_group_map
                        ON user_group_map.user_id = profiles.userid
-                          AND user_group_map.group_id = groups.id
+                          AND user_group_map.group_id = `groups`.id
                           AND user_group_map.grant_type = ?
           WHERE userregexp != '' OR user_group_map.group_id IS NOT NULL"
   );
@@ -3448,7 +3448,7 @@ sub _change_text_types {
     {TYPE => 'MEDIUMTEXT', NOTNULL => 1}, '');
   $dbh->bz_alter_column('fielddefs', 'description',
     {TYPE => 'TINYTEXT', NOTNULL => 1});
-  $dbh->bz_alter_column('groups', 'description',
+  $dbh->bz_alter_column('`groups`', 'description',
     {TYPE => 'MEDIUMTEXT', NOTNULL => 1});
   $dbh->bz_alter_column('namedqueries', 'query',
     {TYPE => 'LONGTEXT', NOTNULL => 1});

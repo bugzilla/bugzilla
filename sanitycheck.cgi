@@ -122,13 +122,13 @@ if ($cgi->param('createmissinggroupcontrolmapentries')) {
     qq{    SELECT bugs.product_id,
                       bgm.group_id,
                       gcm.membercontrol,
-                      groups.name,
+                      `groups`.name,
                       products.name
                  FROM bugs
            INNER JOIN bug_group_map AS bgm
                    ON bugs.bug_id = bgm.bug_id
-           INNER JOIN groups
-                   ON bgm.group_id = groups.id
+           INNER JOIN `groups`
+                   ON bgm.group_id = `groups`.id
            INNER JOIN products
                    ON bugs.product_id = products.id
             LEFT JOIN group_control_map AS gcm
@@ -138,7 +138,7 @@ if ($cgi->param('createmissinggroupcontrolmapentries')) {
           }
       . $dbh->sql_group_by(
       'bugs.product_id, bgm.group_id',
-      'gcm.membercontrol, groups.name, products.name'
+      'gcm.membercontrol, `groups`.name, products.name'
       )
   );
 
@@ -359,7 +359,7 @@ if ($cgi->param('remove_old_whine_targets')) {
 
   $dbh->bz_start_transaction();
 
-  foreach my $target (['groups', 'id', MAILTO_GROUP],
+  foreach my $target (['`groups`', 'id', MAILTO_GROUP],
     ['profiles', 'userid', MAILTO_USER])
   {
     my ($table, $col, $type) = @$target;
@@ -514,7 +514,7 @@ CrossCheck(
 );
 
 CrossCheck(
-  "groups",
+  "`groups`",
   "id",
   ["bug_group_map",        "group_id"],
   ['category_group_map',   'group_id'],
@@ -973,14 +973,14 @@ BugCheck(
   "bugs
          INNER JOIN group_control_map
             ON bugs.product_id = group_control_map.product_id
-         INNER JOIN groups
-            ON group_control_map.group_id = groups.id
+         INNER JOIN `groups`
+            ON group_control_map.group_id = `groups`.id
           LEFT JOIN bug_group_map
             ON bugs.bug_id = bug_group_map.bug_id
            AND group_control_map.group_id = bug_group_map.group_id
          WHERE group_control_map.membercontrol = " . CONTROLMAPMANDATORY . "
            AND bug_group_map.group_id IS NULL
-           AND groups.isactive != 0", 'bug_check_control_values_error_text2'
+           AND `groups`.isactive != 0", 'bug_check_control_values_error_text2'
 );
 
 ###########################################################################
@@ -1011,7 +1011,7 @@ if (scalar(@$badbugs > 0)) {
 Status('whines_obsolete_target_start');
 
 my $display_repair_whines_link = 0;
-foreach my $target (['groups', 'id', MAILTO_GROUP],
+foreach my $target (['`groups`', 'id', MAILTO_GROUP],
   ['profiles', 'userid', MAILTO_USER])
 {
   my ($table, $col, $type) = @$target;

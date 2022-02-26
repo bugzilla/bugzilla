@@ -391,7 +391,7 @@ sub DoPermissions {
 
   my $groups
     = $dbh->selectall_arrayref(
-        "SELECT DISTINCT name, description FROM groups WHERE id IN ("
+        "SELECT DISTINCT name, description FROM `groups` WHERE id IN ("
       . $user->groups_as_string
       . ") ORDER BY name");
   foreach my $group (@$groups) {
@@ -400,7 +400,7 @@ sub DoPermissions {
   }
   $groups = $dbh->selectall_arrayref(
     'SELECT DISTINCT id, name, description
-                                          FROM groups
+                                          FROM `groups`
                                          ORDER BY name'
   );
   foreach my $group (@$groups) {

@@ -625,7 +625,7 @@ sub group_controls {
     # Include name to the list, to allow us sorting data more easily.
     my $query = qq{SELECT id, name, entry, membercontrol, othercontrol,
                               canedit, editcomponents, editbugs, canconfirm
-                         FROM groups
+                         FROM `groups`
                               LEFT JOIN group_control_map
                               ON id = group_id 
                 $where_or_and product_id = ?

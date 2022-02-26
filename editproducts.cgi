@@ -390,7 +390,7 @@ if ($action eq 'updategroupcontrols') {
                                 (SELECT bug_group_map.bug_id FROM bug_group_map
                                   WHERE bug_group_map.group_id = groups.id))
                            AS count
-                      FROM groups
+                      FROM `groups`
                      WHERE groups.id IN (' . join(', ', @now_mandatory) . ')
                      ORDER BY groups.name', {'Slice' => {}}, $product->id
       );

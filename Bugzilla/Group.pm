@@ -25,16 +25,16 @@ use Bugzilla::Config qw(:admin);
 use constant IS_CONFIG => 1;
 
 use constant DB_COLUMNS => qw(
-  groups.id
-  groups.name
-  groups.description
-  groups.isbuggroup
-  groups.userregexp
-  groups.isactive
-  groups.icon_url
+  `groups`.id
+  `groups`.name
+  `groups`.description
+  `groups`.isbuggroup
+  `groups`.userregexp
+  `groups`.isactive
+  `groups`.icon_url
 );
 
-use constant DB_TABLE => 'groups';
+use constant DB_TABLE => '`groups`';
 
 use constant LIST_ORDER => 'isbuggroup, name';
 
@@ -440,7 +440,7 @@ sub create {
 sub ValidateGroupName {
   my ($name, @users) = (@_);
   my $dbh   = Bugzilla->dbh;
-  my $query = "SELECT id FROM groups " . "WHERE name = ?";
+  my $query = "SELECT id FROM `groups` " . "WHERE name = ?";
   if (Bugzilla->params->{'usevisibilitygroups'}) {
     my @visible = (-1);
     foreach my $user (@users) {

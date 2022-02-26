@@ -673,11 +673,11 @@ use constant ABSTRACT_SCHEMA => {
       sortkey          => {TYPE => 'INT2',         NOTNULL => 1, DEFAULT => '0'},
       grant_group_id   => {
         TYPE       => 'INT3',
-        REFERENCES => {TABLE => 'groups', COLUMN => 'id', DELETE => 'SET NULL'}
+        REFERENCES => {TABLE => '`groups`', COLUMN => 'id', DELETE => 'SET NULL'}
       },
       request_group_id => {
         TYPE       => 'INT3',
-        REFERENCES => {TABLE => 'groups', COLUMN => 'id', DELETE => 'SET NULL'}
+        REFERENCES => {TABLE => '`groups`', COLUMN => 'id', DELETE => 'SET NULL'}
       },
     ],
   },
@@ -1196,7 +1196,7 @@ use constant ABSTRACT_SCHEMA => {
       group_id => {
         TYPE       => 'INT3',
         NOTNULL    => 1,
-        REFERENCES => {TABLE => 'groups', COLUMN => 'id', DELETE => 'CASCADE'}
+        REFERENCES => {TABLE => '`groups`', COLUMN => 'id', DELETE => 'CASCADE'}
       },
       product_id => {
         TYPE       => 'INT2',
@@ -1235,7 +1235,7 @@ use constant ABSTRACT_SCHEMA => {
       group_id => {
         TYPE       => 'INT3',
         NOTNULL    => 1,
-        REFERENCES => {TABLE => 'groups', COLUMN => 'id', DELETE => 'CASCADE'}
+        REFERENCES => {TABLE => '`groups`', COLUMN => 'id', DELETE => 'CASCADE'}
       },
       isbless    => {TYPE => 'BOOLEAN', NOTNULL => 1, DEFAULT => 'FALSE'},
       grant_type => {TYPE => 'INT1',    NOTNULL => 1, DEFAULT => GRANT_DIRECT},
@@ -1258,12 +1258,12 @@ use constant ABSTRACT_SCHEMA => {
       member_id => {
         TYPE       => 'INT3',
         NOTNULL    => 1,
-        REFERENCES => {TABLE => 'groups', COLUMN => 'id', DELETE => 'CASCADE'}
+        REFERENCES => {TABLE => '`groups`', COLUMN => 'id', DELETE => 'CASCADE'}
       },
       grantor_id => {
         TYPE       => 'INT3',
         NOTNULL    => 1,
-        REFERENCES => {TABLE => 'groups', COLUMN => 'id', DELETE => 'CASCADE'}
+        REFERENCES => {TABLE => '`groups`', COLUMN => 'id', DELETE => 'CASCADE'}
       },
       grant_type => {TYPE => 'INT1', NOTNULL => 1, DEFAULT => GROUP_MEMBERSHIP},
     ],
@@ -1285,7 +1285,7 @@ use constant ABSTRACT_SCHEMA => {
       group_id => {
         TYPE       => 'INT3',
         NOTNULL    => 1,
-        REFERENCES => {TABLE => 'groups', COLUMN => 'id', DELETE => 'CASCADE'}
+        REFERENCES => {TABLE => '`groups`', COLUMN => 'id', DELETE => 'CASCADE'}
       },
     ],
     INDEXES => [
@@ -1306,7 +1306,7 @@ use constant ABSTRACT_SCHEMA => {
       group_id => {
         TYPE       => 'INT3',
         NOTNULL    => 1,
-        REFERENCES => {TABLE => 'groups', COLUMN => 'id', DELETE => 'CASCADE'}
+        REFERENCES => {TABLE => '`groups`', COLUMN => 'id', DELETE => 'CASCADE'}
       },
     ],
     INDEXES => [
@@ -1327,7 +1327,7 @@ use constant ABSTRACT_SCHEMA => {
       group_id => {
         TYPE       => 'INT3',
         NOTNULL    => 1,
-        REFERENCES => {TABLE => 'groups', COLUMN => 'id', DELETE => 'CASCADE'}
+        REFERENCES => {TABLE => '`groups`', COLUMN => 'id', DELETE => 'CASCADE'}
       },
     ],
     INDEXES => [

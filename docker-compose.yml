@@ -11,7 +11,7 @@ services:
       dockerfile: Dockerfile
     command: /root/docker/startup.sh
     volumes:
-      - bugzilla5-data-dir:/var/www/data
+      - bugzilla5-data-dir:/var/www/html/data
       - .:/mnt/sync
     tmpfs:
       - /tmp

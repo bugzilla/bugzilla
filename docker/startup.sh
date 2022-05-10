@@ -57,6 +57,9 @@ printf "##%*s%*s##\n" $(( (${#LOGIN_USER} + 37) / 2)) "$LOGIN_USER" $(( 37 - (($
 printf "##%*s%*s##\n" $(( (${#LOGIN_PASS} + 37) / 2)) "$LOGIN_PASS" $(( 37 - ((${#LOGIN_PASS} + 37) / 2)  )) " "
 cat - <<EOF
 ##                                     ##
+##   user/password only valid if you   ##
+##    haven't already changed them.    ##
+##                                     ##
 #########################################
 EOF
 # don't exit docker

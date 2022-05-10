@@ -1,8 +1,15 @@
-#!/bin/sh
+#!/bin/bash
 
 [ -z "$BZ_DB_HOST" ] && echo "Missing Docker Environment, check docker-compose.yml" && exit -1
 cd /var/www/html
 apachectl start
+while :
+do
+  echo "Waiting for database to be available..."
+  nc -z $BZ_DB_HOST $BZ_DB_PORT
+  [ $? -eq 0 ] && break
+  sleep 2
+done
 echo "Checking database..."
 cat - >/root/docker/myclient-root.cnf <<EOF
 [client]
@@ -27,15 +34,15 @@ FLUSH PRIVILEGES;
 )
 echo "Beginning checksetup..."
 perl -pi -e "
-s/%%BZ_ADMIN_EMAIL%%/'$BZ_ADMIN_EMAIL'/;
-s/%%BZ_ADMIN_PASSWORD%%/'$BZ_ADMIN_PASSWORD'/;
-s/%%BZ_ADMIN_REALNAME%%/'$BZ_ADMIN_REALNAME'/;
+s/%%BZ_ADMIN_EMAIL%%/'${BZ_ADMIN_EMAIL//@/\\@}'/;
+s/%%BZ_ADMIN_PASSWORD%%/'${BZ_ADMIN_PASSWORD//@/\\@//$/\\$}'/;
+s/%%BZ_ADMIN_REALNAME%%/'${BZ_ADMIN_REALNAME//@/\\@//$/\\$}'/;
 s/%%BZ_DB_HOST%%/'$BZ_DB_HOST'/;
 s/%%BZ_DB_PORT%%/$BZ_DB_PORT/;
 s/%%BZ_DB_NAME%%/'$BZ_DB_NAME'/;
 s/%%BZ_DB_USER%%/'$BZ_DB_USER'/;
-s/%%BZ_DB_PASS%%/'$BZ_DB_PASS'/;
-s@%%BZ_URLBASE%%@'$BZ_URLBASE'@;
+s/%%BZ_DB_PASS%%/'${BZ_DB_PASS//@/\\@//$/\\$}'/;
+s@%%BZ_URLBASE%%@'${BZ_URLBASE//@/\\@}'@;
 " /root/docker/checksetup_answers.txt
 perl checksetup.pl /root/docker/checksetup_answers.txt
 echo "Checksetup completed."

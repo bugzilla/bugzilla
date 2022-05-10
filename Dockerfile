@@ -2,10 +2,11 @@ FROM ubuntu:20.04
 
 ENV DEBIAN_FRONTEND noninteractive
 
-RUN apt-get update
+RUN apt-get update && apt-get -y dist-upgrade
 RUN apt-get -y install \
  apache2 \
  mariadb-client \
+ netcat \
  libappconfig-perl \
  libdate-calc-perl \
  libtemplate-perl \

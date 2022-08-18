@@ -1333,12 +1333,6 @@ sub bz_rollback_transaction {
 # Subclass Helpers
 #####################################################################
 
-sub _build_model {
-  my ($self) = @_;
-  require Bugzilla::Model;
-  Bugzilla::Model->connect($self->dsn, $self->user, $self->pass, $self->attrs);
-}
-
 sub _build_connector {
   my ($self) = @_;
   my ($dsn, $user, $pass, $override_attrs)

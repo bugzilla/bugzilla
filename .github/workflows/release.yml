@@ -30,12 +30,22 @@ jobs:
           key: ${{ runner.os }}-ubuntu-20.04
           restore-keys: |
             ${{ runner.os }}-ubuntu-20.04
-      - name: apt-get install
+      - name: apt install
         run: |
+          sudo apt-get update
+          sudo apt-get -y dist-upgrade
           sudo apt-get install --ignore-hold --allow-downgrades -y \
-              build-essential curl libssl-dev zlib1g-dev openssl \
-              libexpat-dev cmake git libcairo-dev libgd-dev \
-              default-libmysqlclient-dev unzip wget libgd3
+           apache2 \
+           mariadb-client-10.3 \
+           netcat \
+           build-essential \
+           libapache2-mod-perl2 \
+           libapache2-mod-perl2-dev \
+           perlmagick \
+           graphviz \
+           curl libssl-dev zlib1g-dev openssl \
+           libexpat-dev cmake git libcairo-dev \
+           unzip wget 
       - name: cpm install
         run: |
           perl Makefile.PL

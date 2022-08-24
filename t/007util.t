@@ -9,7 +9,7 @@
 #Bugzilla Test 7#
 #####Util.pm#####
 
-use lib 't';
+use lib qw(. lib t);
 use Support::Files;
 use Test::More tests => 17;
 use DateTime;

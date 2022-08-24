@@ -17,7 +17,7 @@
 
 use strict;
 
-use lib 't';
+use lib qw(. t lib);
 
 use Support::Files;
 use Support::Templates;

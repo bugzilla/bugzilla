@@ -10,7 +10,7 @@
 #Bugzilla Test 6#
 ####Spelling#####
 
-use lib 't';
+use lib qw(. lib t);
 use Support::Files;
 
 BEGIN { # yes the indenting is off, deal with it

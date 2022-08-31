@@ -3,12 +3,13 @@
 MySQL
 #####
 
-We recommend MariaDB, since it's compatible with MySQL, and it's more
-compatible with Bugzilla. If you instead want to use MySQL, you will
-need MySQL version 5.0.15 or higher, but not MySQL 8 or higher.
+It is strongly advised to use MariaDB which is a drop-in replacement for
+MySQL and is fully compatible with Bugzilla.  If MySQL must be used, be
+aware that the minimum required version is MySQL 5.0.15 and that MySQL 8
+or higher cannot be used at this time.
 
-A large part of this page mentions MySQL, but it doesn't matter if you
-use MariaDB or MySQL, the commands are gonna be the same.
+All commands in this document work regardless of whether MySQL or
+MariaDB are used.
 
 It's possible to test which version of MySQL you have installed with:
 

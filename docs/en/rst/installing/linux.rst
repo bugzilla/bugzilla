@@ -18,7 +18,7 @@ Install Packages
 ================
 
 Use your distribution's package manager to install Perl, your preferred
-database engine (MySQL if in doubt), and a webserver (Apache if in doubt).
+database engine (MySQL or MariaDB if in doubt), and a webserver (Apache if in doubt).
 Some distributions even have a Bugzilla package, although that will vary
 in age.
 
@@ -88,7 +88,7 @@ missing, so use the following instead:
 'perl(SOAP::Lite)' 'perl(Test::Taint)' 'perl(XMLRPC::Lite)'
 'perl(XML::Twig)'`
 
-If you plan to use a database other than MySQL, you will need to also install
+If you plan to use a database other than MariaDB, you will need to also install
 the appropriate packages for that.
 
 Ubuntu and Debian
@@ -103,9 +103,9 @@ liblist-moreutils-perl libmath-random-isaac-perl libtemplate-perl
 libtimedate-perl liburi-perl libmariadb-dev-compat libdbd-mysql-perl
 mariadb-server`
 
-If you plan to use a database other than MySQL, you will need to also install
+If you plan to use a database other than MariaDB, you will need to also install
 the appropriate packages for that (in the command above, the packages required
-for MySQL are ``libdbd-mysql-perl``, ``libmariadb-dev-compat`` and ``mariadb-server``).
+for MariaDB are ``libdbd-mysql-perl``, ``libmariadb-dev-compat`` and ``mariadb-server``).
 
 You can install optional packages with:
 :command:`apt install graphviz libapache2-mod-perl2
@@ -231,10 +231,11 @@ We have specific configuration instructions for the following:
 Database Engine
 ===============
 
-Bugzilla supports MySQL, PostgreSQL, Oracle and SQLite as database servers.
-You only require one of these systems to make use of Bugzilla. MySQL is
-most commonly used. SQLite is good for trial installations as it requires no
-setup. Configure your server according to the instructions below:
+Bugzilla supports MySQL (or MariaDB, its compatible counterpart), PostgreSQL,
+Oracle and SQLite as database servers. You only require one of these systems
+to make use of Bugzilla. MySQL or MariaDB are most commonly used. SQLite is
+good for trial installations as it requires no setup. Configure your server
+according to the instructions below:
 
 * :ref:`mysql`
 * :ref:`postgresql`

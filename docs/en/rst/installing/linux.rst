@@ -70,11 +70,8 @@ On Fedora, all the optional dependencies are available:
 'perl(Test::Taint)' 'perl(TheSchwartz)' 'perl(XMLRPC::Lite)'
 'perl(XML::Twig)'`
 
-On CentOS Stream and RHEL with EPEL, ``perl(Chart::Lines)``,
-``perl(Daemon::Generic)``, ``perl(Email::Reply)``,
-``perl(HTML::FormatText::WithLinks)``, ``perl(PatchReader)``,
-``perl(Template::Plugin::GD::Image)`` and ``perl(TheSchwartz)`` are
-missing, so use the following instead:
+On CentOS Stream and RHEL with EPEL, some modules are missing in the
+repositories, so use the following instead:
 
 :command:`dnf install gd-devel graphviz patchutils
 'perl(Apache2::SizeLimit)' 'perl(Authen::Radius)' 'perl(Authen::SASL)'
@@ -86,6 +83,12 @@ missing, so use the following instead:
 'perl(mod_perl2)' 'perl(Net::LDAP)' 'perl(Net::SMTP::SSL)'
 'perl(SOAP::Lite)' 'perl(Test::Taint)' 'perl(XMLRPC::Lite)'
 'perl(XML::Twig)'`
+
+and install the missing optional modules with:
+
+:command:`cd /var/www/html/bugzilla/ && ./install-module.pl Chart::Lines
+Daemon::Generic Email::Reply HTML::FormatText::WithLinks PatchReader
+Template::Plugin::GD::Image TheSchwartz`
 
 If you plan to use a database other than MariaDB, you will need to also install
 the appropriate packages for that.

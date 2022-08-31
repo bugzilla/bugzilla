@@ -3,7 +3,8 @@
 MySQL
 #####
 
-You need MySQL version 5.0.15 or higher.
+You need MySQL version 5.0.15 or higher, but not MySQL 8 or higher.
+MariaDB should work just fine instead if you can't get a hold of older MySQL.
 
 It's possible to test which version of MySQL you have installed with:
 
@@ -15,11 +16,11 @@ Installing
 Windows
 -------
 
-Download the MySQL 32-bit or 64-bit MSI installer from the
-`MySQL website <http://www.mysql.com/downloads/mysql/>`_ (~28 MB).
+Download the MariaDB 32-bit or 64-bit MSI installer from the
+`MariaDB website <https://mariadb.org/download/?t=mariadb&os=windows>`_ (~66 MB).
 
-MySQL has a standard Windows installer. It's ok to select a Typical MySQL
-install (the default). The rest of this documentation assumes assume you
+MariaDB has a standard Windows installer. It's ok to select a the
+default install options. The rest of this documentation assumes assume you
 have installed MySQL into :file:`C:\\mysql`. Adjust paths appropriately if not.
 
 Linux/Mac OS X

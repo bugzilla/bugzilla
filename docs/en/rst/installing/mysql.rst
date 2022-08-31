@@ -3,8 +3,12 @@
 MySQL
 #####
 
-You need MySQL version 5.0.15 or higher, but not MySQL 8 or higher.
-MariaDB should work just fine instead if you can't get a hold of older MySQL.
+We recommend MariaDB, since it's compatible with MySQL, and it's more
+compatible with Bugzilla. If you instead want to use MySQL, you will
+need MySQL version 5.0.15 or higher, but not MySQL 8 or higher.
+
+A large part of this page mentions MySQL, but it doesn't matter if you
+use MariaDB or MySQL, the commands are gonna be the same.
 
 It's possible to test which version of MySQL you have installed with:
 
@@ -21,7 +25,7 @@ Download the MariaDB 32-bit or 64-bit MSI installer from the
 
 MariaDB has a standard Windows installer. It's ok to select a the
 default install options. The rest of this documentation assumes assume you
-have installed MySQL into :file:`C:\\mysql`. Adjust paths appropriately if not.
+have installed MariaDB into :file:`C:\\mysql`. Adjust paths appropriately if not.
 
 Linux/Mac OS X
 --------------

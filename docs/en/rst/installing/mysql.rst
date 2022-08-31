@@ -43,7 +43,7 @@ server is started when the machine boots.
 Create the Database
 ===================
 
-You need to create a database for Bugzilla to use. Again run the :file:`mysql`
+You need to create a database for Bugzilla to use. Run the :file:`mysql`
 command-line client and enter:
 
 ::

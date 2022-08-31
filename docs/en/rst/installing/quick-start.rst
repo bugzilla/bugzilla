@@ -84,6 +84,10 @@ make it possible to search for short words and terms:
 
 Save and exit.
 
+Create a database ``bugs`` for Bugzilla:
+
+:command:`mysql -u root -e "CREATE DATABASE IF NOT EXISTS bugs CHARACTER SET = 'utf8'"`
+
 Then, add a user to MariaDB for Bugzilla to use:
 
 :command:`mysql -u root -e "GRANT ALL PRIVILEGES ON bugs.* TO bugs@localhost IDENTIFIED BY '$db_pass'"`

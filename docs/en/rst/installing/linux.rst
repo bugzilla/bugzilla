@@ -50,8 +50,8 @@ Run the following to install the base Bugzilla dependencies:
 :command:`dnf install git httpd httpd-devel mariadb-devel gcc
 mariadb-server mod_perl mod_perl-devel 'perl(autodie)' 'perl(CGI)'
 'perl(Date::Format)' 'perl(DateTime)' 'perl(DateTime::TimeZone)'
-'perl(DBI)' 'perl(DBD::mysql)' 'perl(Digest::SHA)' 'perl(Email::MIME)'
-'perl(Email::Sender)' 'perl(fields)' 'perl(JSON::XS)'
+'perl(DBI)' 'perl(DBD::mysql)' 'perl(DBIx::Connector)' 'perl(Digest::SHA)'
+'perl(Email::MIME)' 'perl(Email::Sender)' 'perl(fields)' 'perl(JSON::XS)'
 'perl(List::MoreUtils)' 'perl(Math::Random::ISAAC)' 'perl(Memoize)'
 'perl(Safe)' 'perl(Template)' 'perl(URI)'`
 
@@ -62,7 +62,8 @@ On Fedora, all the optional dependencies are available:
 'perl(Cache::Memcached)' 'perl(Chart::Lines)' 'perl(Daemon::Generic)'
 'perl(Email::Reply)' 'perl(Encode)' 'perl(Encode::Detect)'
 'perl(File::Copy::Recursive)' 'perl(File::MimeInfo::Magic)'
-'perl(File::Which)' 'perl(GD)' 'perl(GD::Graph)' 'perl(GD::Text)' 'perl(HTML::FormatText::WithLinks)' 'perl(HTML::Parser)'
+'perl(File::Which)' 'perl(GD)' 'perl(GD::Graph)' 'perl(GD::Text)'
+'perl(HTML::FormatText::WithLinks)' 'perl(HTML::Parser)'
 'perl(HTML::Scrubber)' 'perl(IO::Scalar)' 'perl(JSON::RPC)'
 'perl(LWP::UserAgent)' 'perl(MIME::Parser)' 'perl(mod_perl2)'
 'perl(Net::LDAP)' 'perl(Net::SMTP::SSL)' 'perl(PatchReader)'
@@ -96,7 +97,7 @@ Ubuntu and Debian
 You can install required packages with:
 :command:`apt install apache2 build-essential git
 libcgi-pm-perl libdatetime-perl libdatetime-timezone-perl
-libdbi-perl libdigest-sha-perl libemail-address-perl
+libdbi-perl libdbix-connector-perl libdigest-sha-perl libemail-address-perl
 libemail-mime-perl libemail-sender-perl libjson-xs-perl
 liblist-moreutils-perl libmath-random-isaac-perl libtemplate-perl
 libtimedate-perl liburi-perl libmariadb-dev-compat libdbd-mysql-perl

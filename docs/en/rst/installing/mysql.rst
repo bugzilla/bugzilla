@@ -36,6 +36,17 @@ and follow its advice.
 If you did install MySQL manually rather than from a package, make sure the
 server is started when the machine boots.
 
+Create the Database
+===================
+
+You need to create a database for Bugzilla to use. Again run the :file:`mysql`
+command-line client and enter:
+
+::
+    CREATE DATABASE IF NOT EXISTS bugs CHARACTER SET = 'utf8';
+
+The above command makes sure a database like that doesn't exist already.
+
 .. _mysql-add-user:
 
 Add a User

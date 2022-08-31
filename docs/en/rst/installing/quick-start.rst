@@ -47,7 +47,7 @@ Install Prerequisites
 
 :command:`apt install apache2 build-essential mariadb-server
 libcgi-pm-perl libdigest-sha-perl libtimedate-perl libdatetime-perl
-libdatetime-timezone-perl libdbi-perl libtemplate-perl
+libdatetime-timezone-perl libdbi-perl libdbix-connector-perl libtemplate-perl
 libemail-address-perl libemail-sender-perl libemail-mime-perl
 liburi-perl liblist-moreutils-perl libmath-random-isaac-perl
 libjson-xs-perl libgd-perl libchart-perl libtemplate-plugin-gd-perl

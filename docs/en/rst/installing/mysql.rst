@@ -3,7 +3,13 @@
 MySQL
 #####
 
-You need MySQL version 5.0.15 or higher.
+It is strongly advised to use MariaDB which is a drop-in replacement for
+MySQL and is fully compatible with Bugzilla.  If MySQL must be used, be
+aware that the minimum required version is MySQL 5.0.15 and that MySQL 8
+or higher cannot be used at this time.
+
+All commands in this document work regardless of whether MySQL or
+MariaDB are used.
 
 It's possible to test which version of MySQL you have installed with:
 
@@ -15,12 +21,12 @@ Installing
 Windows
 -------
 
-Download the MySQL 32-bit or 64-bit MSI installer from the
-`MySQL website <http://www.mysql.com/downloads/mysql/>`_ (~28 MB).
+Download the MariaDB 32-bit or 64-bit MSI installer from the
+`MariaDB website <https://mariadb.org/download/?t=mariadb&os=windows>`_ (~66 MB).
 
-MySQL has a standard Windows installer. It's ok to select a Typical MySQL
-install (the default). The rest of this documentation assumes assume you
-have installed MySQL into :file:`C:\\mysql`. Adjust paths appropriately if not.
+MariaDB has a standard Windows installer. It's ok to select a the
+default install options. The rest of this documentation assumes assume you
+have installed MariaDB into :file:`C:\\mysql`. Adjust paths appropriately if not.
 
 Linux/Mac OS X
 --------------
@@ -34,6 +40,17 @@ and follow its advice.
 
 If you did install MySQL manually rather than from a package, make sure the
 server is started when the machine boots.
+
+Create the Database
+===================
+
+You need to create a database for Bugzilla to use. Run the :file:`mysql`
+command-line client and enter:
+
+::
+    CREATE DATABASE IF NOT EXISTS bugs CHARACTER SET = 'utf8';
+
+The above command makes sure a database like that doesn't exist already.
 
 .. _mysql-add-user:
 

@@ -1,3 +1,12 @@
+==============================================================================
+=                   The 5.0 branch is considered ABANDONED.                  =
+==============================================================================
+= If you came from version 5.0.4 or older please switch to the 5.0.4 branch. =
+= If you came from version 5.0.5 or newer, please switch to the 5.2 branch,  =
+= which actually continues where 5.0.6 left off.  Essentially 5.0.5 should   =
+= have been 5.2 and was misnumbered, so this is correcting that mistake.     =
+==============================================================================
+
 Bugzilla
 ========
 

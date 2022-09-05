@@ -1,0 +1,115 @@
+/*
+ * bugzilla.css_t
+ * ~~~~~~~~~~~~~~
+ *
+ * Sphinx stylesheet -- bugzilla theme.
+ *
+ * :copyright: Copyright 2007-2022 by the Sphinx team, see AUTHORS.
+ * :license: BSD, see LICENSE for details.
+ *
+ */
+
+@import url("classic.css");
+
+/* -- page layout ----------------------------------------------------------- */
+
+@font-face {
+    font-family: 'FiraGO Light';
+    font-style: normal;
+    font-weight: normal;
+    src: url('fonts/Roman/FiraGO-Light.eot');
+    src: url('fonts/Roman/FiraGO-Light.eot?#iefix') format('embedded-opentype'),
+         url('fonts/Roman/FiraGO-Light.woff2') format('woff2'), url('fonts/Roman/FiraGO-Light.woff') format('woff');
+}
+
+@font-face {
+    font-family: 'FiraGO Regular';
+    font-style: normal;
+    font-weight: normal;
+    src: url('fonts/Roman/FiraGO-Regular.eot');
+    src: url('fonts/Roman/FiraGO-Regular.eot?#iefix') format('embedded-opentype'),
+         url('fonts/Roman/FiraGO-Regular.woff2') format('woff2'), url('fonts/Roman/FiraGO-Regular.woff') format('woff');
+}
+
+@font-face {
+    font-family: 'FiraGO SemiBold';
+    font-style: normal;
+    font-weight: normal;
+    src: url('fonts/Roman/FiraGO-SemiBold.eot');
+    src: url('fonts/Roman/FiraGO-SemiBold.eot?#iefix') format('embedded-opentype'),
+         url('fonts/Roman/FiraGO-SemiBold.woff2') format('woff2'), url('fonts/Roman/FiraGO-SemiBold.woff') format('woff');
+}
+
+div.document {
+    min-height: 95vh;
+}
+
+div.document,
+div.body {
+    background-color: {{ theme_bgcolor }};
+}
+
+div.bodywrapper {
+    margin-left: 310px;
+}
+
+div.sphinxsidebar {
+    background-color: {{ theme_sidebarbgcolor }};
+    width: 280px;
+}
+
+div.sphinxsidebarwrapper {
+    padding: unset;
+}
+
+div.bugzillasidebartopwrapper {
+    background: rgb(124,75,193);
+    background: linear-gradient(90deg, rgba(124,75,193,1) 0%, rgba(23,89,160,1) 20%);
+    padding: 10px 10px 20px;
+}
+
+div.bugzillasidebarbottomwrapper {
+    padding: 20px 10px;
+}
+
+div.bugzillasidebarbottomwrapper ul li {
+    margin: 0.5rem 0;
+    letter-spacing: unset;
+}
+
+/* -- hyperlink styles ------------------------------------------------------ */
+
+/* -- body styles ----------------------------------------------------------- */
+div.body {
+    margin-top: 3.5rem;
+}
+
+div.body h1,
+div.body h2,
+div.body h3,
+div.body h4,
+div.body h5,
+div.body h6 {
+    border-bottom: unset;
+}
+
+div.highlight {
+    background-color: unset;
+}
+
+div.highlight pre {
+    background-color: {{ theme_codebgcolor }};
+    box-shadow: 0px 0px 1px {{ theme_relbarbgcolor }};
+    border-radius: 3px;
+    border: unset;
+}
+
+div#searchbox {
+    max-width: 95%;
+}
+
+div.searchformwrapper form.search {
+    border-radius: 5rem;
+}
+
+dt { font-weight: bold; }

@@ -32,21 +32,21 @@
 }
 
 @font-face {
-    font-family: 'FiraMono Bold';
+    font-family: 'NotoSansMono Bold';
     font-style: normal;
     font-weight: normal;
-    src: url('fonts/Mono/FiraMono-Bold.eot');
-    src: url('fonts/Mono/FiraMono-Bold.eot?#iefix') format('embedded-opentype'),
-         url('fonts/Mono/FiraMono-Bold.woff2') format('woff2'), url('fonts/Mono/FiraMono-Bold.woff') format('woff');
+    src: url('fonts/Mono/NotoSansMono-Bold.eot');
+    src: url('fonts/Mono/NotoSansMono-Bold.eot?#iefix') format('embedded-opentype'),
+         url('fonts/Mono/NotoSansMono-Bold.woff2') format('woff2'), url('fonts/Mono/NotoSansMono-Bold.woff') format('woff');
 }
 
 @font-face {
-    font-family: 'FiraMono Regular';
+    font-family: 'NotoSansMono Regular';
     font-style: normal;
     font-weight: normal;
-    src: url('fonts/Mono/FiraMono-Regular.eot');
-    src: url('fonts/Mono/FiraMono-Regular.eot?#iefix') format('embedded-opentype'),
-         url('fonts/Mono/FiraMono-Regular.woff2') format('woff2'), url('fonts/Mono/FiraMono-Regular.woff') format('woff');
+    src: url('fonts/Mono/NotoSansMono-Regular.eot');
+    src: url('fonts/Mono/NotoSansMono-Regular.eot?#iefix') format('embedded-opentype'),
+         url('fonts/Mono/NotoSansMono-Regular.woff2') format('woff2'), url('fonts/Mono/NotoSansMono-Regular.woff') format('woff');
 }
 
 div.document {
@@ -89,6 +89,11 @@ div.bugzillasidebarbottomwrapper ul li {
 /* -- hyperlink styles ------------------------------------------------------ */
 
 /* -- body styles ----------------------------------------------------------- */
+code.docutils {
+    background-color: #f4f4f8;
+    font-family: "NotoSansMono Regular", monospace;
+}
+
 div.body {
     margin-top: 3.5rem;
 }
@@ -108,11 +113,10 @@ div.highlight {
 
 div.highlight pre {
     background-color: {{ theme_codebgcolor }};
-    box-shadow: 0px 0px 1px {{ theme_relbarbgcolor }};
     border-radius: 3px;
-    border: unset;
+    border: 1px solid #c1c1c1;
     line-height: unset;
-    font-family: "FiraMono Regular", monospace;
+    font-family: "NotoSansMono Regular", monospace;
     font-size: 0.9rem;
 }
 
@@ -134,7 +138,7 @@ dt { font-weight: bold; }
 
 strong.command {
     line-height: unset;
-    font-family: "FiraMono Bold", monospace;
+    font-family: "NotoSansMono Bold", monospace;
     font-size: 0.9rem;
     font-weight: normal;
     text-align: left;

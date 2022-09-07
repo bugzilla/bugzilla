@@ -49,8 +49,14 @@
          url('fonts/Mono/NotoSansMono-Regular.woff2') format('woff2'), url('fonts/Mono/NotoSansMono-Regular.woff') format('woff');
 }
 
+body {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+}
+
 div.document {
-    min-height: 95vh;
+    flex: 1 0 auto;
 }
 
 div.document,
@@ -60,6 +66,11 @@ div.body {
 
 div.bodywrapper {
     margin-left: 310px;
+}
+
+div.footer,
+div.related {
+    flex: 0 0 auto;
 }
 
 div.sphinxsidebar {
@@ -90,12 +101,16 @@ div.bugzillasidebarbottomwrapper ul li {
 
 /* -- body styles ----------------------------------------------------------- */
 code.docutils {
-    background-color: #f4f4f8;
     font-family: "NotoSansMono Regular", monospace;
+    font-weight: normal;
 }
 
 div.body {
     margin-top: 3.5rem;
+}
+
+div.body code.docutils {
+    background-color: #f4f4f8;
 }
 
 div.body h1,

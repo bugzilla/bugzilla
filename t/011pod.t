@@ -12,7 +12,7 @@
 
 use strict;
 
-use lib 't';
+use lib qw(. lib t);
 
 use Support::Files;
 use Pod::Checker;

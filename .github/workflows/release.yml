@@ -1,0 +1,74 @@
+# This is a basic workflow to help you get started with Actions
+
+name: Release Tests
+
+# Controls when the action will run. Triggers the workflow on push or pull request
+# events but only for the main branch
+on:
+  push:
+    branches: [ 5.0.4 ]
+  pull_request:
+    branches: [ 5.0.4 ]
+  # Allows you to run this workflow manually from the Actions tab
+  workflow_dispatch:
+
+# A workflow run is made up of one or more jobs that can run sequentially or in parallel
+jobs:
+  ubuntu:
+    name: Release Tests on Ubuntu 20.04
+    runs-on: ubuntu-20.04
+    steps:
+      - name: Checkout the repository
+        uses: actions/checkout@v2
+      - name: apt install
+        run: |
+          sudo apt-get update
+          sudo apt-get -y dist-upgrade
+          sudo apt-get install --ignore-hold --allow-downgrades -y \
+          apache2 \
+          mariadb-client-10.3 \
+          netcat \
+          libappconfig-perl \
+          libdate-calc-perl \
+          libtemplate-perl \
+          build-essential \
+          libdatetime-timezone-perl \
+          libdatetime-perl \
+          libemail-address-perl \
+          libemail-sender-perl \
+          libemail-mime-perl \
+          libemail-mime-modifier-perl \
+          libdbi-perl \
+          libdbix-connector-perl \
+          libdbd-mysql-perl \
+          libcgi-pm-perl \
+          libmath-random-isaac-perl \
+          libmath-random-isaac-xs-perl \
+          libapache2-mod-perl2 \
+          libapache2-mod-perl2-dev \
+          libchart-perl \
+          libxml-perl \
+          libxml-twig-perl \
+          perlmagick \
+          libgd-graph-perl \
+          libtemplate-plugin-gd-perl \
+          libsoap-lite-perl \
+          libhtml-scrubber-perl \
+          libjson-rpc-perl \
+          libdaemon-generic-perl \
+          libtheschwartz-perl \
+          libtest-taint-perl \
+          libauthen-radius-perl \
+          libfile-slurp-perl \
+          libencode-detect-perl \
+          libmodule-build-perl \
+          libnet-ldap-perl \
+          libauthen-sasl-perl \
+          libfile-mimeinfo-perl \
+          libhtml-formattext-withlinks-perl \
+          libpod-coverage-perl \
+          graphviz
+      - name: Get Perl Version and debug info
+        run: '/usr/bin/perl -V'
+      - name: Run tests
+        run: '/usr/bin/perl runtests.pl'

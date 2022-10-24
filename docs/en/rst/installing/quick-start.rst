@@ -107,17 +107,16 @@ Configure Apache
 Paste in the following and save:
 
 .. code-block:: apache
-
- <VirtualHost \*:80>
-   ServerName localhost
-
    <Directory /var/www/html/bugzilla>
      AddHandler cgi-script .cgi
      Options +ExecCGI
      DirectoryIndex index.cgi index.html
      AllowOverride All
    </Directory>
- </VirtualHost>
+
+   <VirtualHost *:80>
+     ServerName localhost
+   </VirtualHost>
 
 :command:`a2ensite bugzilla`
 

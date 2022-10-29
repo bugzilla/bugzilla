@@ -114,9 +114,8 @@ Paste in the following and save:
    AllowOverride All
  </Directory>
 
- <VirtualHost *:80>
-   ServerName localhost
- </VirtualHost>
+This configuration sets up Bugzilla to be served on your server under ``/bugzilla`` path.
+For more in depth setup instructions, refer to :ref:`Apache section of this documentation <apache>`.
 
 :command:`a2ensite bugzilla`
 

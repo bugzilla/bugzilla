@@ -33,6 +33,7 @@ use Storable qw(dclone);
 
 has [qw(dsn user pass attrs)] => (is => 'ro', required => 1,);
 
+
 has 'qi' => (is => 'lazy');
 
 sub _build_qi {
@@ -2409,6 +2410,32 @@ Formatted SQL for the C<IN> operator.
 
 =back
 
+=head1 ATTRIBUTES
+
+=over 4
+
+=item C<dsn>
+
+The data source name for the database. This is a string that is passed to
+the DBI to connect to the database. It is usually of the form:
+
+  dbi:DriverName:database_name
+
+=item C<user>
+
+The user name to use when connecting to the database.
+
+=item C<pass>
+
+The password to use when connecting to the database.
+
+=item C<attrs>
+
+A hashref of attributes to pass to the DBI when connecting to the database.
+It is usually used to set the C<RaiseError> and C<PrintError> attributes,
+but can be used to set any attribute that the DBI supports.
+
+=back
 
 =head1 IMPLEMENTED METHODS
 

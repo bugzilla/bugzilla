@@ -344,4 +344,8 @@ For interface details see L<Bugzilla::DB> and L<DBI>.
 
 =item bz_setup_database
 
+=item BUILDARGS
+
+=item on_dbi_connected
+
 =back

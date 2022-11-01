@@ -1747,10 +1747,21 @@ DB-specific code in a subclass. Methods which are prefixed with C<_>
 are considered protected. Subclasses may override these methods, but
 other modules should not invoke these methods directly.
 
+=over 4
+
 =cut
 
 #--------------------------------------------------------------------------
 sub BUILD {
+
+=item C<BUILD>
+
+This method exists to bridge between the old way of doing things (calling C<_initialize>)
+and the Moo way of doing things. Moo will call this method when you call C<new> on a class,
+and it will throw an error if called on the base class. This is because the base class is abstract.
+
+=cut
+
   my $self   = shift;
   my $class  = ref($self) || $self;
 
@@ -1768,13 +1779,40 @@ sub BUILD {
 # instead setting it in _initialize() if it isn't already passed in.
 has 'abstract_schema' => ( init_arg => '_abstract_schema', is => 'rw' );
 
+=item C<abstract_schema>
+
+Returns the abstract schema for this database. It is initialized in C<_initialize>.
+
+=cut
+
 # this could also be lazy, but it is also set in _initialize()
 has 'schema' => (init_arg =>undef, is => 'rw');
 
+=item C<schema>
+
+Returns the schema for this database. It is initialized in C<_initialize>
+and cannot be passed in to C<new>.
+
+=cut
+
 has 'db_specific' => (init_arg => undef, is => 'rw');
+
+=item C<db_specific>
+
+Returns the DB-specific schema for this database. It is initialized in C<_initialize>
+and cannot be passed in to C<new>.
+
+=cut
 
 has 'db' => (is => 'ro', weak_ref => 1, required => 1);
 
+=item C<db>
+
+Returns the L<Bugzilla::DB> object that this schema is associated with.
+This is a weak reference, so it will be C<undef> if the L<Bugzilla::DB>
+object has been destroyed.
+
+=cut
 
 #--------------------------------------------------------------------------
 sub _initialize {

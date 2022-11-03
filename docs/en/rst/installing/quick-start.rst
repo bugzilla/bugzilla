@@ -107,7 +107,8 @@ Configure Apache
 Paste in the following and save:
 
 .. code-block:: apache
- <Directory /var/www/html/bugzilla>
+ Alias /bugzilla /var/www/webapps/bugzilla
+ <Directory /var/www/webapps/bugzilla>
    AddHandler cgi-script .cgi
    Options +ExecCGI
    DirectoryIndex index.cgi index.html
@@ -128,7 +129,9 @@ Download Bugzilla
 
 Get it from our Git repository:
 
-:command:`cd /var/www/html`
+:command:`mkdir -p /var/www/webapps`
+
+:command:`cd /var/www/webapps`
 
 :command:`git clone --branch release-X.X-stable https://github.com/bugzilla/bugzilla bugzilla`
 
@@ -144,7 +147,7 @@ generates a config file (called :file:`localconfig`) for the database
 access information, and the second time (step 10)
 it uses the info you put in the config file to set up the database.
 
-:command:`cd /var/www/html/bugzilla`
+:command:`cd /var/www/webapps/bugzilla`
 
 :command:`./checksetup.pl`
 

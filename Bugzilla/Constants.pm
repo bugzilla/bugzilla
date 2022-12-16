@@ -216,7 +216,7 @@ use Memoize;
 # BMO: we don't map exactly to a specific Bugzilla version, so override our
 # reported version with a parameter.
 sub BUGZILLA_VERSION {
-  my $bugzilla_version = '4.2';
+  my $bugzilla_version = '5.9+';
   eval { require Bugzilla }  || return $bugzilla_version;
   eval { Bugzilla->VERSION } || $bugzilla_version;
 }

@@ -18,9 +18,9 @@ For MySQL 8, either:
 The later option is not very pleasant. 
 I believe the code I wrote over a year ago could allow us to support mysql 8, and that's in [this branch](https://github.com/bugzilla/harmony/blob/dylan/mysql-8)
 
-# Upgrade Path from 4.4 & 5.0
+# Upgrade Path from 4.4, 5.0, 5.2, and 5.1
 
-Code must be added to Bugzilla::DB::Install to support upgrading existing schemas from 4.4 and 5.0 installs.
+Code must be added to Bugzilla::DB::Install to support upgrading existing schemas from 4.4, 5.0, and 5.2 installs. In addition, we should provide a way to migrate from the abandoned 5.1 development branch, which has some feature mis-match with harmony.
 
 Things to check:
 - Multiple aliases was reverted and we'll have to have code to handle that.

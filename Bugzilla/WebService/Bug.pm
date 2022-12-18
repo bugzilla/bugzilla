@@ -116,6 +116,7 @@ our %api_field_types = (
 );
 
 our %api_field_names = reverse %{Bugzilla::Bug::FIELD_MAP()};
+
 # This doesn't normally belong in FIELD_MAP, but we do want to translate
 # "bug_group" back into "groups".
 $api_field_names{'bug_group'} = 'groups';
@@ -171,7 +172,7 @@ sub fields {
   foreach my $field (@fields) {
     my $visibility_field
       = $field->visibility_field ? $field->visibility_field->name : undef;
-    my $vis_values = $field->visibility_values;
+    my $vis_values  = $field->visibility_values;
     my $value_field = $field->value_field ? $field->value_field->name : undef;
 
     my (@values, $has_values);
@@ -180,7 +181,7 @@ sub fields {
       or $field->name eq 'keywords')
     {
       $has_values = 1;
-      @values = @{$self->_legal_field_values({field => $field})};
+      @values     = @{$self->_legal_field_values({field => $field})};
     }
 
     if (grep($_ eq $field->name, PRODUCT_SPECIFIC_FIELDS)) {
@@ -188,19 +189,19 @@ sub fields {
     }
 
     my %field_data = (
-      id               => $self->type('int',     $field->id),
-      type             => $self->type('int',     $field->type),
-      is_custom        => $self->type('boolean', $field->custom),
-      name             => $self->type('string',  $field->name),
-      display_name     => $self->type('string',  $field->description),
-      is_mandatory     => $self->type('boolean', $field->is_mandatory),
-      is_on_bug_entry  => $self->type('boolean', $field->enter_bug),
-      visibility_field => $self->type('string',  $visibility_field),
+      id                => $self->type('int',           $field->id),
+      type              => $self->type('int',           $field->type),
+      is_custom         => $self->type('boolean',       $field->custom),
+      name              => $self->type('string',        $field->name),
+      display_name      => $self->type('string',        $field->description),
+      is_mandatory      => $self->type('boolean',       $field->is_mandatory),
+      is_on_bug_entry   => $self->type('boolean',       $field->enter_bug),
+      visibility_field  => $self->type('string',        $visibility_field),
       visibility_values => [map { $self->type('string', $_->name) } @$vis_values],
     );
     if ($has_values) {
       $field_data{value_field} = $self->type('string', $value_field);
-      $field_data{values} = \@values;
+      $field_data{values}      = \@values;
     }
     push(@fields_out, filter $params, \%field_data);
   }
@@ -318,8 +319,8 @@ sub comments {
       {function => 'Bug.comments', params => ['ids', 'comment_ids']});
   }
 
-  my $bug_ids      = $params->{ids}         || [];
-  my $comment_ids  = $params->{comment_ids} || [];
+  my $bug_ids     = $params->{ids}         || [];
+  my $comment_ids = $params->{comment_ids} || [];
   my $skip_private = $params->{skip_private} ? 1 : 0;
 
   my $dbh  = Bugzilla->switch_to_shadow_db();
@@ -330,6 +331,7 @@ sub comments {
   }
 
   if ($skip_private) {
+
     # Cache permissions for bugs. This highly reduces the number of calls to the DB.
     # visible_bugs() is only able to handle bug IDs, so we have to skip aliases.
     my @int = grep { $_ =~ /^\d+$/ } @$bug_ids;
@@ -343,7 +345,8 @@ sub comments {
     if ($skip_private) {
       $bug = Bugzilla::Bug->new({id => $bug_id, cache => 1});
       next if $bug->error || !$user->can_see_bug($bug->id);
-    } else {
+    }
+    else {
       $bug = Bugzilla::Bug->check($bug_id);
     }
 
@@ -362,7 +365,7 @@ sub comments {
 
   my %comments;
   if (scalar @$comment_ids) {
-    my @ids = map { trim($_) } @$comment_ids;
+    my @ids          = map { trim($_) } @$comment_ids;
     my $comment_data = Bugzilla::Comment->new_from_list(\@ids);
 
     # See if we were passed any invalid comment ids.
@@ -501,6 +504,7 @@ sub history {
   my $skip_private = $params->{skip_private} ? 1 : 0;
 
   if ($skip_private) {
+
     # Cache permissions for bugs. This highly reduces the number of calls to the DB.
     # visible_bugs() is only able to handle bug IDs, so we have to skip aliases.
     my @int = grep { $_ =~ /^\d+$/ } @$ids;
@@ -515,7 +519,8 @@ sub history {
     if ($skip_private) {
       $bug = Bugzilla::Bug->new({id => $bug_id, cache => 1});
       next if $bug->error || !$user->can_see_bug($bug->id);
-    } else {
+    }
+    else {
       $bug = Bugzilla::Bug->check($bug_id);
     }
 
@@ -586,7 +591,7 @@ sub search {
 
   # Allow to search only in bug description (initial comment)
   if (defined $match_params->{description}) {
-    $match_params->{longdesc} = delete $match_params->{description};
+    $match_params->{longdesc}         = delete $match_params->{description};
     $match_params->{longdesc_initial} = 1;
   }
 
@@ -595,7 +600,7 @@ sub search {
   my %options = (fields => ['bug_id']);
 
   # Find the highest custom field id
-  my @field_ids = grep(/^f(\d+)$/, keys %$match_params);
+  my @field_ids     = grep(/^f(\d+)$/, keys %$match_params);
   my $last_field_id = @field_ids ? max @field_ids + 1 : 1;
 
   # Do special search types for certain fields.
@@ -837,7 +842,7 @@ sub update {
 
     my %changes = %{$all_changes{$bug->id}};
     foreach my $field (keys %changes) {
-      my $change = $changes{$field};
+      my $change    = $changes{$field};
       my $api_field = $api_field_names{$field} || $field;
 
       # We normalize undef to an empty string, so that the API
@@ -1194,10 +1199,9 @@ sub add_comment {
   $bug->add_comment(
     $comment,
     {
-      isprivate => $params->{is_private},
-      work_time => $params->{work_time},
-      is_markdown =>
-        ( defined $params->{is_markdown} ? $params->{is_markdown} : 0 )
+      isprivate   => $params->{is_private},
+      work_time   => $params->{work_time},
+      is_markdown => (defined $params->{is_markdown} ? $params->{is_markdown} : 0)
     }
   );
 
@@ -1481,7 +1485,7 @@ sub _bug_to_hash {
     foreach my $attachment (@{$bug->attachments}) {
       next if $attachment->isprivate && !$user->is_insider;
       push(@result,
-           $self->_attachment_to_hash($attachment, $params, ['extra'], 'attachments'));
+        $self->_attachment_to_hash($attachment, $params, ['extra'], 'attachments'));
     }
     $item{'attachments'} = \@result;
   }
@@ -1494,12 +1498,12 @@ sub _bug_to_hash {
   }
   if (filter_wants $params, 'comments', ['extra']) {
     my @result;
-    my $comments
-      = $bug->comments({order => 'oldest_to_newest', after => $params->{new_since}});
+    my $comments = $bug->comments(
+      {order => 'oldest_to_newest', after => $params->{new_since}});
     foreach my $comment (@$comments) {
       next if $comment->is_private && !$user->is_insider;
       push(@result,
-           $self->_translate_comment($comment, $params, ['extra'], 'comments'));
+        $self->_translate_comment($comment, $params, ['extra'], 'comments'));
     }
     $item{'comments'} = \@result;
   }
@@ -1528,7 +1532,8 @@ sub _bug_to_hash {
     my $comment = Bugzilla::Comment->match({bug_id => $bug->id, LIMIT => 1})->[0];
     $item{'description'}
       = ($comment && (!$comment->is_private || Bugzilla->user->is_insider))
-      ? $comment->body : '';
+      ? $comment->body
+      : '';
   }
   if (filter_wants $params, 'dupe_of') {
     $item{'dupe_of'} = $self->type('int', $bug->dup_id);
@@ -1549,7 +1554,7 @@ sub _bug_to_hash {
       = Bugzilla::Bug::GetBugActivity($bug->id, undef, $params->{new_since}, 1);
     foreach my $changeset (@$activity) {
       push(@result,
-           $self->_changeset_to_hash($changeset, $params, ['extra'], 'history'));
+        $self->_changeset_to_hash($changeset, $params, ['extra'], 'history'));
     }
     $item{'history'} = \@result;
   }
@@ -1760,14 +1765,14 @@ sub _changeset_to_hash {
     my $attach_id      = delete $change->{attachid};
     my $comment        = delete $change->{comment};
 
-    $change->{field_name}    = $self->type('string',        $api_field_name);
-    $change->{removed}       = $self->type($api_field_type, $change->{removed});
-    $change->{added}         = $self->type($api_field_type, $change->{added});
+    $change->{field_name} = $self->type('string',        $api_field_name);
+    $change->{removed}    = $self->type($api_field_type, $change->{removed});
+    $change->{added}      = $self->type($api_field_type, $change->{added});
     $change->{attachment_id} = $self->type('int', $attach_id) if $attach_id;
     $change->{comment_id}    = $self->type('int', $comment->id) if $comment;
     $change->{comment_count} = $self->type('int', $comment->count) if $comment;
 
-    push (@{$item->{changes}}, $change);
+    push(@{$item->{changes}}, $change);
   }
 
   return filter($filters, $item, $types, $prefix);

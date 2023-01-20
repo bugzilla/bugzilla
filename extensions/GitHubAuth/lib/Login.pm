@@ -17,7 +17,7 @@ use fields qw(github_failure);
 use Scalar::Util qw(blessed);
 
 use Bugzilla::Constants qw(AUTH_NODATA AUTH_ERROR USAGE_MODE_BROWSER);
-use Bugzilla::Util qw(generate_random_password);
+use Bugzilla::Util qw(generate_random_password validate_email_syntax);
 use Bugzilla::Token qw(issue_short_lived_session_token set_token_extra_data);
 use List::MoreUtils qw(any);
 use Bugzilla::Extension::GitHubAuth::Client;
@@ -102,9 +102,15 @@ sub _get_login_info_from_github {
     grep { $_->{verified} && $_->{email} !~ /\@users\.noreply\.github\.com$/ }
     @$emails;
 
+  # Validate each email address similar to if we were creating the account locally
+  my @valid_emails;
+  foreach my $email (@emails) {
+    push @valid_emails, $email if validate_email_syntax($email);
+  }
+
   my @bugzilla_users;
   my @github_emails;
-  foreach my $email (@emails) {
+  foreach my $email (@valid_emails) {
     my $user = Bugzilla::User->new({name => $email, cache => 1});
     if ($user) {
       push @bugzilla_users, $user;

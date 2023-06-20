@@ -72,7 +72,7 @@ sub _set_ftc_states {
   my $dbh = Bugzilla->dbh;
 
   my $ftc_flags;
-  my $db_result;
+  my $db_result = [];
   if ($file =~ /^admin\//) {
 
     # admin
@@ -121,11 +121,13 @@ sub _set_ftc_states {
 
     my $types = join(',', map { $_->id } @$flag_types);
     my $states = "'" . join("','", FLAGTYPE_COMMENT_STATES) . "'";
-    $db_result = $dbh->selectall_arrayref(
-      "SELECT type_id AS flagtype, on_status AS state, comment AS text
-               FROM flagtype_comments
-              WHERE type_id IN ($types) AND on_status IN ($states)", {Slice => {}}
-    );
+    if ($types) {
+      $db_result = $dbh->selectall_arrayref(
+        "SELECT type_id AS flagtype, on_status AS state, comment AS text
+                 FROM flagtype_comments
+                WHERE type_id IN ($types) AND on_status IN ($states)", {Slice => {}}
+      );
+    }
   }
 
   foreach my $row (@$db_result) {

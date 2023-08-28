@@ -103,6 +103,7 @@ Configure Apache
 Paste in the following and save:
 
 .. code-block:: apache
+
  Alias /bugzilla /var/www/webapps/bugzilla
  <Directory /var/www/webapps/bugzilla>
    AddHandler cgi-script .cgi

@@ -6,6 +6,6 @@ build:
   apt_packages:
     - libfile-copy-recursive-perl
   jobs:
-    pre_build:
+    post_build:
       - mkdir -p "$READTHEDOCS_OUTPUT/html/integrating/api"
       - perl docs/makedocs.pl --pod-only && cp -rp docs/en/html/integrating/api/ "$READTHEDOCS_OUTPUT/html/integrating/api"

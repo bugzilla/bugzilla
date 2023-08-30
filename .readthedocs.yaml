@@ -3,6 +3,8 @@ build:
   os: "ubuntu-20.04"
   tools:
     python: "3.10"
+  apt_packages:
+    - libfile-copy-recursive-perl
   jobs:
     post_build:
       - perl docs/makedocs.pl --pod-only && cp -rp docs/en/html/api/ "$READTHEDOCS_OUTPUT/html/api"

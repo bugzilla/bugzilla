@@ -1,0 +1,5 @@
+version: 2
+build:
+  jobs:
+    post_build:
+      - perl docs/makedocs.pl --pod-only && cp -rp docs/en/html/api/ "$READTHEDOCS_OUTPUT/html/api"

@@ -86,6 +86,7 @@ END_HTML
   $converter->contents_page_end("</body></html>");
   if (exists($::ENV{'READTHEDOCS'})) {
     $converter->add_css('./style.css');
+    system('pwd');
     copy('../style.css', 'html/style.css') or die "Copy failed: $!";
   } else {
     $converter->add_css('./../../../../style.css');

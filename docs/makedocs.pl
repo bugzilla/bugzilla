@@ -86,8 +86,6 @@ END_HTML
   $converter->contents_page_end("</body></html>");
   if (exists($::ENV{'READTHEDOCS'})) {
     $converter->add_css('./style.css');
-    system('pwd');
-    copy('../style.css', 'html/style.css') or die "Copy failed: $!";
   } else {
     $converter->add_css('./../../../../style.css');
   }
@@ -96,6 +94,9 @@ END_HTML
   make_path('html/integrating/api');
   $converter->batch_convert(['../../'], 'html/integrating/api');
 
+  if (exists($::ENV{'READTHEDOCS'})) {
+    copy('../style.css', 'html/style.css') or die "Copy failed: $!";
+  }
   print "\n";
 }
 

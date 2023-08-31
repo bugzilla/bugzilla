@@ -7,4 +7,6 @@ build:
     - libfile-copy-recursive-perl
   jobs:
     post_build:
-      - perl docs/makedocs.pl --pod-only && cp -rp docs/en/html/integrating/api/ "$READTHEDOCS_OUTPUT/html/integrating/api"
+      - perl docs/makedocs.pl --pod-only
+      - cp -rp docs/en/html/integrating/api/ "$READTHEDOCS_OUTPUT/html/integrating/api"
+      - cp -p docs/en/html/style.css "$READTHEDOCS_OUTPUT/html/"

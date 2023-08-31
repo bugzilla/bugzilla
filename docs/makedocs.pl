@@ -85,7 +85,7 @@ END_HTML
   $converter->contents_page_start($contents_start);
   $converter->contents_page_end("</body></html>");
   if (exists($::ENV{'READTHEDOCS'})) {
-    $converter->add_css('./style.css');
+    $converter->add_css('./../../style.css');
   } else {
     $converter->add_css('./../../../../style.css');
   }

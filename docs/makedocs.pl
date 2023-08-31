@@ -33,6 +33,7 @@ BEGIN { chdir dirname($0); }
 use lib qw(.. ../lib lib);
 
 use Cwd;
+use File::Copy qw(copy);
 use File::Copy::Recursive qw(rcopy);
 use File::Find;
 use File::Path qw(rmtree make_path);
@@ -84,10 +85,10 @@ END_HTML
   $converter->contents_page_start($contents_start);
   $converter->contents_page_end("</body></html>");
   if (exists($::ENV{'READTHEDOCS'})) {
-      $converter->add_css('./style.css');
-      rcopy('style.css', 'en/html/style.css');
+    $converter->add_css('./style.css');
+    copy('../style.css', 'html/style.css') or die "Copy failed: $!";
   } else {
-      $converter->add_css('./../../../../style.css');
+    $converter->add_css('./../../../../style.css');
   }
   $converter->javascript_flurry(0);
   $converter->css_flurry(0);

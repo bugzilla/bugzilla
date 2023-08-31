@@ -83,7 +83,12 @@ END_HTML
 
   $converter->contents_page_start($contents_start);
   $converter->contents_page_end("</body></html>");
-  $converter->add_css('./../../../../style.css');
+  if (exists($::ENV{'READTHEDOCS'})) {
+      $converter->add_css('./style.css');
+      rcopy('style.css', 'en/html/style.css');
+  } else {
+      $converter->add_css('./../../../../style.css');
+  }
   $converter->javascript_flurry(0);
   $converter->css_flurry(0);
   make_path('html/integrating/api');

@@ -6,7 +6,7 @@
   # defined by the Mozilla Public License, v. 2.0.
   #%]
 
-[% SET title = "Bugzilla 5.0 Release Notes" %]
+[% SET title = "Bugzilla 5.2 Release Notes" %]
 [% INCLUDE global/header.html.tmpl
   title = title
   bodyclasses = ['narrow_page']
@@ -16,7 +16,7 @@
 
 <ul class="bz_toc">
   <li><a href="#introduction">Introduction</a></li>
-  <li><a href="#point">Updates in this 5.0.x Release</a></li>
+  <li><a href="#point">Updates in this 5.2 Release</a></li>
   <li><a href="#req">Minimum Requirements</a></li>
   <li><a href="#feat">New Features and Improvements</a></li>
   <li><a href="#issues">Outstanding Issues</a></li>
@@ -29,9 +29,15 @@
 
 <h2 id="introduction">Introduction</h2>
 
-<p>Welcome to Bugzilla 5.0! It has been slightly over two years since we released
-  Bugzilla 4.4 in May of 2013. This new major release comes with many new features
-  and improvements to WebServices and performance.</p>
+<p>Welcome to Bugzilla 5.2! This is kind of a weird release to explain. Back in
+early 2019, versions 5.0.5 and 5.0.6 were released for the 5.0.x branch,
+however, these releases contained invasive database schema and code
+reformatting changes that technically should not have been allowed to land on a
+stable branch. Some people noticed this, and never upgraded from 5.0.4 since
+5.0.5 and 5.0.6 did not contain any security fixes. To fix this situation, 5.2
+is picking up where 5.0.6 left off, since 5.0.5 technically should have been
+5.2. Those still on 5.0.4 can upgrade to 5.0.4.1 if they're not ready to go a
+full version release yet.  </p>
 
 <p>If you're upgrading, make sure to read
   <a href="https://bugzilla.readthedocs.org/en/latest/installing/upgrading.html">
@@ -41,7 +47,19 @@
   your version and this one, <strong>particularly the Upgrading section of each
   version's release notes</strong>.</p>
 
-<h2 id="point">Updates in this 5.0.x Release</h2>
+<h2 id="point">Updates in this 5.2.x Release</h2>
+
+<h3>5.2</h3>
+
+<p>This release fixes two security issues. See the
+  <a href="https://www.bugzilla.org/security/4.4.13/">Security Advisory</a>
+  for details.</p>
+
+<p>This release also contains the following [% terms.bug %] fixes:</p>
+
+<ul>
+<li>Added viewport meta to the HTML header to improve rendering on mobile devices. Without this meta Google Search tools would report Bugzilla pages as not suitable for mobile devices.</li>
+
 
 <h3>5.0.6</h3>
 <p>This release contains a schema change to the flagtypes table, allowing for many more flagtypes.</p>.
@@ -55,6 +73,11 @@ You may use whatever coding style you want, but all files commited to the repo m
 <p>Additionally, we no longer follow the same release process as before. Releases will be more frequent.</p>
 
 <p>As it is now 2019, the bugs_fulltext table is now InnoDB instead of MyISAM. This may cause upgrade headaches.</p>
+
+
+
+
+
 
 <h3>5.0.4</h3>
 

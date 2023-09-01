@@ -118,14 +118,8 @@ sub REQUIRED_MODULES {
 
     {package => 'Moo', module => 'Moo', version => '2.003004',},
 
-    # 2.24 contains several useful text virtual methods.
-    # 2.28-3.008 are broken, see https://bugzilla.mozilla.org/show_bug.cgi?id=1560873
-    {
-      package => 'Template-Toolkit',
-      module => 'Template',
-      version => '2.24',
-      blacklist => ['^2.2[89]$', '^3.00[0-8]$']
-    },
+    # versions prior to 3.008 are broken, see https://bugzilla.mozilla.org/show_bug.cgi?id=1560873
+    {package => 'Template-Toolkit', module => 'Template', version => '3.008'},
 
     # 1.300011 has a debug mode for SMTP and automatically pass -i to sendmail.
     {package => 'Email-Sender', module => 'Email::Sender', version => '1.300011',},

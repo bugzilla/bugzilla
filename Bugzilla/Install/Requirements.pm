@@ -129,12 +129,12 @@ sub REQUIRED_MODULES {
     },
     # 2.22 fixes various problems related to UTF8 strings in hash keys,
     # as well as line endings on Windows.
-    # 2.28-3.008 are broken, see https://bugzilla.mozilla.org/show_bug.cgi?id=1560873
+    # 2.28-3.007 are broken, see https://bugzilla.mozilla.org/show_bug.cgi?id=1560873
     {
         package => 'Template-Toolkit',
         module  => 'Template',
         version => '2.22',
-        blacklist => ['^2.2[89]$', '^3.00[0-8]$']
+        blacklist => ['^2.2[89]$', '^3.00[0-7]$']
     },
     # 2.04 implement the "Test" method (to write to data/mailer.testfile).
     {

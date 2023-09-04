@@ -187,7 +187,13 @@ sub bz_check_server_version {
   $self->disconnect;
 
   my $sql_want = $db->{db_version};
+  my $sql_dontwant = exists $db->{db_blacklist} ? $db->{db_blacklist} : [];
   my $version_ok = vers_cmp($sql_vers, $sql_want) > -1 ? 1 : 0;
+  my $blacklisted;
+  if ($version_ok) {
+    $blacklisted = grep($sql_vers =~ /$_/, @$sql_dontwant);
+    $version_ok = 0 if $blacklisted;
+  }
 
   my $sql_server = $db->{name};
   if ($output) {
@@ -195,12 +201,22 @@ sub bz_check_server_version {
       package => $sql_server,
       wanted  => $sql_want,
       found   => $sql_vers,
-      ok      => $version_ok
+      ok      => $version_ok,
+      blacklisted => $blacklisted
     });
   }
 
   # Check what version of the database server is installed and let
   # the user know if the version is too old to be used with Bugzilla.
+  if ($blacklisted) {
+    die <<EOT;
+
+Your $sql_server v$sql_vers is blacklisted. Please check the
+release notes for details or try a different database engine
+or version.
+
+EOT
+  }
   if (!$version_ok) {
     die <<EOT;
 

@@ -540,7 +540,16 @@ use constant INSTALLATION_MODE_NON_INTERACTIVE => 1;
 use constant DB_MODULE => {
 
   # MySQL 5.0.15 was the first production 5.0.x release.
-  mysql => {db => 'Bugzilla::DB::Mysql', db_version => '5.0.15', name => 'MySQL'},
+  # We blacklist MySQL 8.0 and newer, and explicitly list MariaDB as an
+  # alternative. The db_blklst_str is shown in the auto-generated release notes
+  # instead of the regexp. We can't tell Maria apart from MySQL in our check
+  # and MariaDB skipped versions from 5 to 10, so we'll blacklist 8 and 9 for
+  # MariaDB as well just in case someone configured for 'mariadb' but actually
+  # has MySQL installed. See https://bugzilla.mozilla.org/show_bug.cgi?id=1851354
+  mysql => {db => 'Bugzilla::DB::Mysql', db_version => '5.0.15', name => 'MySQL',
+            db_blacklist => ['^[89]\.'], db_blklst_str => '>= 8.0'},
+  mariadb => {db => 'Bugzilla::DB::Mysql', db_version => '5.1', name => 'MariaDB',
+            db_blacklist => ['^[89]\.']},
   pg =>
     {db => 'Bugzilla::DB::Pg', db_version => '9.00.0000', name => 'PostgreSQL'},
   oracle =>

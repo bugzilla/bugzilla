@@ -7,7 +7,7 @@
 
 package Bugzilla::WebService::Server::REST::Resources::Bug;
 
-use 5.10.1;
+use 5.14.0;
 use strict;
 use warnings;
 

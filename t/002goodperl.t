@@ -10,7 +10,7 @@
 #Bugzilla Test 2#
 ####GoodPerl#####
 
-use 5.10.1;
+use 5.14.0;
 use strict;
 use warnings;
 
@@ -99,17 +99,17 @@ foreach my $file (@testitems) {
     next;
   }
   while (my $file_line = <FILE>) {
-    $found_use_perl     = 1 if $file_line =~ m/^\s*use 5.10.1/;
+    $found_use_perl     = 1 if $file_line =~ m/^\s*use 5.14.0/;
     $found_use_strict   = 1 if $file_line =~ $enables_strict_re;
     $found_use_warnings = 1 if $file_line =~ $enables_warnings_re;
     last if ($found_use_perl && $found_use_strict && $found_use_warnings);
   }
   close(FILE);
   if ($found_use_perl) {
-    ok(1, "$file requires Perl 5.10.1");
+    ok(1, "$file requires Perl 5.14.0");
   }
   else {
-    ok(0, "$file DOES NOT require Perl 5.10.1 --WARNING");
+    ok(0, "$file DOES NOT require Perl 5.14.0 --WARNING");
   }
 
   if ($found_use_strict) {

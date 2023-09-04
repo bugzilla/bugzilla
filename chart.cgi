@@ -27,7 +27,7 @@
 # Bonus:
 # Offer subscription when you get a "series already exists" error?
 
-use 5.10.1;
+use 5.14.0;
 use strict;
 use warnings;
 

@@ -23,7 +23,7 @@
 # All these TeX packages together are close to a gig :-| But after you've
 # installed them, you can remove texlive-latex-extra-doc to save 400MB.
 
-use 5.10.1;
+use 5.14.0;
 use strict;
 use warnings;
 

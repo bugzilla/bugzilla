@@ -7,7 +7,7 @@
 
 package Bugzilla::DB::Sqlite;
 
-use 5.10.1;
+use 5.14.0;
 use Moo;
 
 extends qw(Bugzilla::DB);

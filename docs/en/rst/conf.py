@@ -391,5 +391,5 @@ if on_rtd:
 else:
     base_api_url = '../integrating/api/'
 
-extlinks = {'bug': ('https://bugzilla.mozilla.org/show_bug.cgi?id=%s', 'bug  '),
-            'api': (base_api_url + '%s', '')}
+extlinks = {'bug': ('https://bugzilla.mozilla.org/show_bug.cgi?id=%s', 'bug  %s'),
+            'api': (base_api_url + '%s', "%s")}

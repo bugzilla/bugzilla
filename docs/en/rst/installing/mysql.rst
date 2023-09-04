@@ -147,6 +147,7 @@ command-line client and enter the following, replacing ``$bugs_db``
 with your Bugzilla database name (which is ``bugs`` by default):
 
 .. code-block:: sql
+   :force:
 
     USE $bugs_db;
     

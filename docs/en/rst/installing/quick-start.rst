@@ -69,7 +69,7 @@ second command to finish. If you start another terminal, you will need to
 :command:`sudo su` again.
 
 Configure MariaDB
-===============
+=================
 
 The following instructions use the simple :file:`nano` editor, but feel
 free to use any text editor you are comfortable with.

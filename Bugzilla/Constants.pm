@@ -471,7 +471,11 @@ use constant INSTALLATION_MODE_NON_INTERACTIVE => 1;
 use constant DB_MODULE => {
     # MySQL 5.0.15 was the first production 5.0.x release.
     'mysql' => {db => 'Bugzilla::DB::Mysql', db_version => '5.0.15',
-                dbd => { 
+                db_blacklist => ['^[89]\.'],
+                # the following is a "human-readable" version to show in the
+                # release notes
+                db_blklst_str => '>= 8.0',
+                dbd => {
                     package => 'DBD-mysql',
                     module  => 'DBD::mysql',
                     # Disallow development versions
@@ -481,6 +485,28 @@ use constant DB_MODULE => {
                     version => '4.001',
                 },
                 name => 'MySQL'},
+
+    # MariaDB is a drop-in replacement for MySQL and works with Bugzilla
+    'mariadb' => {db => 'Bugzilla::DB::Mysql', db_version => '5.1',
+                  # MariaDB is indistinguishable from MySQL, but skipped 8 and
+                  # 9 so blacklist it anyway in case someone has the driver set
+                  # to mariadb but actually has MySQL.
+                  db_blacklist => ['^[89]\.'],
+                  # no string to show the user on the release notes though.
+                  dbd        => {
+                    package => 'DBD-mysql',
+                    module  => 'DBD::mysql',
+
+                    # Disallow development versions
+                    blacklist => ['_'],
+
+                    # For UTF-8 support. 4.001 makes sure that blobs aren't
+                    # marked as UTF-8.
+                    version => '4.001',
+                  },
+                  name => 'MariaDB'
+    },
+
     # Also see Bugzilla::DB::Pg::bz_check_server_version, which has special
     # code to require DBD::Pg 2.17.2 for PostgreSQL 9 and above.
     'pg'    => {db => 'Bugzilla::DB::Pg', db_version => '8.03.0000',

@@ -27,12 +27,14 @@ my $datadir = bz_locations()->{'datadir'};
 eval "require LWP; require LWP::UserAgent;";
 my $lwp = $@ ? 0 : 1;
 
-if ((@ARGV != 1) || ($ARGV[0] !~ /^https?:/i)) {
-  say "Usage: $0 <URL to this Bugzilla installation>";
+if ((@ARGV < 1) || (@ARGV > 2) || ($ARGV[0] !~ /^https?:/i) || (defined($ARGV[1]) && $ARGV[1] ne '--self-signed')) {
+  say "Usage: $0 <URL to this Bugzilla installation> [--self-signed]";
   say "e.g.:  $0 http://www.mycompany.com/bugzilla";
+  say "";
+  say "Pass --self-signed to prevent hostname verification of SSL certificates if needed.";
   exit(1);
 }
-
+my $selfsigned = defined($ARGV[1]) ? 1 : 0;
 
 # Try to determine the GID used by the web server.
 my @pscmds
@@ -215,7 +217,15 @@ sub fetch {
   if ($lwp) {
     my $req = HTTP::Request->new(GET => $url);
     my $ua  = LWP::UserAgent->new;
+    $ua->ssl_opts( verify_hostname => 0 ) if $selfsigned;
     my $res = $ua->request($req);
+    if (!$res->is_success) {
+      my $errstr = $res->status_line;
+      print $errstr . "\n";
+      if ($errstr =~ m/certificate/) {
+        say "Try passing --self-signed to skip certificate checks."
+      }
+    }
     $rtn = ($res->is_success ? $res->content : undef);
   }
   elsif ($url =~ /^https:/i) {

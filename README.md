@@ -14,7 +14,7 @@ For the full list of features, you can check the
 ## Demo
 
 You can try Bugzilla on the
-[test instance](https://harmony.bugzilla.ninja)
+[test instance](https://bugzilla-dev.allizom.org)
 
 ![Screengrab](images/bzgif.gif)
 
@@ -47,7 +47,7 @@ You can report bugs on the
 
 ## Community
 
-* [#bugzilla on librachat](irc://irc.libra.chat/bugzilla)
+* [#bugzilla on liberachat](irc://irc.libera.chat/bugzilla) [webchat](https://web.libera.chat/#bugzilla)
 * [Matrix](https://matrix.to/#/#bugzilla:mozilla.org)
 * [Twitter](https://twitter.com/bugzilla)
 * [Development Forum](https://www.mozilla.org/en-US/about/forums/#dev-apps-bugzilla)

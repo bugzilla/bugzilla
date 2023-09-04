@@ -538,7 +538,7 @@ use constant DB_MODULE => {
   # MariaDB needs version 10 for InnoDB fulltext support
   'mariadb' => {
     db         => 'Bugzilla::DB::Mysql',
-    db_version => '10.0',
+    db_version => '10.0.5',
     dbd        => {
       package => 'DBD-mysql',
       module  => 'DBD::mysql',

@@ -113,7 +113,7 @@ rst_prolog = """
 .. role:: field
     :class: field
 
-.. |min-perl-ver| replace:: 5.10.1
+.. |min-perl-ver| replace:: 5.14.0
 """
 
 rst_epilog = """

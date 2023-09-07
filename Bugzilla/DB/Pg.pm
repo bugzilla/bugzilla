@@ -21,7 +21,7 @@ For interface details see L<Bugzilla::DB> and L<DBI>.
 
 package Bugzilla::DB::Pg;
 
-use 5.10.1;
+use 5.14.0;
 use Moo;
 
 use Bugzilla::Error;

@@ -19,7 +19,7 @@ It takes no arguments and produces no output except in the case of errors.
 
 =cut
 
-use 5.10.1;
+use 5.14.0;
 use strict;
 use warnings;
 use lib qw(. lib);

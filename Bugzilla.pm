@@ -7,7 +7,7 @@
 
 package Bugzilla;
 
-use 5.10.1;
+use 5.14.0;
 use strict;
 use warnings;
 
@@ -461,7 +461,6 @@ sub error_mode {
     $class->request_cache->{error_mode} = $newval;
   }
 
-  # XXX - Once we require Perl 5.10.1, this test can be replaced by //.
   if (exists $class->request_cache->{error_mode}) {
     return $class->request_cache->{error_mode};
   }
@@ -509,7 +508,6 @@ sub usage_mode {
     $class->request_cache->{usage_mode} = $newval;
   }
 
-  # XXX - Once we require Perl 5.10.1, this test can be replaced by //.
   if (exists $class->request_cache->{usage_mode}) {
     return $class->request_cache->{usage_mode};
   }

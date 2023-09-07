@@ -7,7 +7,7 @@
 
 package Bugzilla::DB::QuoteIdentifier;
 
-use 5.10.1;
+use 5.14.0;
 use Moo;
 
 has 'db' => (

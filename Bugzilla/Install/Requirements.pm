@@ -13,7 +13,7 @@ package Bugzilla::Install::Requirements;
 # Subroutines may "require" and "import" from modules, but they
 # MUST NOT "use."
 
-use 5.10.1;
+use 5.14.0;
 use strict;
 use warnings;
 
@@ -745,7 +745,6 @@ sub have_vers {
   }
   $vnum ||= -1;
 
-  # Must do a string comparison as $vnum may be of the form 5.10.1.
   my $vok
     = ($vnum ne '-1' && version->new($vnum) >= version->new($wanted)) ? 1 : 0;
   my $blacklisted;

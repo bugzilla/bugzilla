@@ -10,7 +10,7 @@
 # a new bug into bugzilla. Everything before the beginning <?xml line
 # is removed so you can pipe in email messages.
 
-use 5.10.1;
+use 5.14.0;
 use strict;
 use warnings;
 

@@ -245,13 +245,13 @@ sub bz_check_server_version {
     # will immediately follow that.
     $db = DB_MODULE->{'mariadb'};
   }
-  my $sql_dontwant = exists $db->{db_blacklist} ? $db->{db_blacklist} : [];
+  my $sql_dontwant = exists $db->{db_blocklist} ? $db->{db_blocklist} : [];
   my $sql_want   = $db->{db_version};
   my $version_ok = vers_cmp($sql_vers, $sql_want) > -1 ? 1 : 0;
-  my $blacklisted;
+  my $blocklisted;
   if ($version_ok) {
-    $blacklisted = grep($sql_vers =~ /$_/, @$sql_dontwant);
-    $version_ok = 0 if $blacklisted;
+    $blocklisted = grep($sql_vers =~ /$_/, @$sql_dontwant);
+    $version_ok = 0 if $blocklisted;
   }
 
   my $sql_server = $db->{name};
@@ -261,16 +261,16 @@ sub bz_check_server_version {
       wanted  => $sql_want,
       found   => $sql_vers,
       ok      => $version_ok,
-      blacklisted => $blacklisted
+      blocklisted => $blocklisted
     });
   }
 
   # Check what version of the database server is installed and let
   # the user know if the version is too old to be used with Bugzilla.
-  if ($blacklisted) {
+  if ($blocklisted) {
     die <<EOT;
 
-Your $sql_server v$sql_vers is blacklisted. Please check the
+Your $sql_server v$sql_vers is blocklisted. Please check the
 release notes for details or try a different database engine
 or version.
 

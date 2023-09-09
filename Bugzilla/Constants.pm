@@ -518,7 +518,7 @@ use constant DB_MODULE => {
   'mysql' => {
     db         => 'Bugzilla::DB::Mysql',
     db_version => '5.6.12',
-    db_blacklist => ['^[89]\.'],
+    db_blocklist => ['^[89]\.'],
     # the following is a "human-readable" version to show in the release notes
     db_blklst_str => '>= 8.0',
     dbd        => {
@@ -526,7 +526,7 @@ use constant DB_MODULE => {
       module  => 'DBD::mysql',
 
       # Disallow development versions
-      blacklist => ['_'],
+      blocklist => ['_'],
 
       # For UTF-8 support. 4.001 makes sure that blobs aren't
       # marked as UTF-8.
@@ -544,7 +544,7 @@ use constant DB_MODULE => {
       module  => 'DBD::mysql',
 
       # Disallow development versions
-      blacklist => ['_'],
+      blocklist => ['_'],
 
       # For UTF-8 support. 4.001 makes sure that blobs aren't
       # marked as UTF-8.

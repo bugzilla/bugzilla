@@ -16,6 +16,14 @@
    header_addl_info = "version $constants.BUGZILLA_VERSION"
 %]
 
+[% IF user.in_group("admin") %]
+  <div id="dead_branch">
+    <p>This installation was git pulled from the 5.0 branch, which is no longer
+    supported. Please run <code>git checkout 5.2</code> to pick up where this branch left off.
+    Please see <a href="https://bugzilla.mozilla.org/show_bug.cgi?id=1850481">Bug 1850481</a> for details.</p>
+    <p class="notice">Only members of the 'admin' group can see this message.</p>
+  </div>
+[% END %]
 [% IF release %]
   <div id="new_release">
     [% IF release.data %]

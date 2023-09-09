@@ -26,6 +26,7 @@ use Safe;
 
 use Bugzilla::Constants;
 use Bugzilla::Install::Requirements;
+use Term::ANSIColor qw(colored);
 use Bugzilla::Install::Util qw(install_string get_version_and_os
   init_console success);
 
@@ -222,6 +223,15 @@ if (Bugzilla->params->{'urlbase'} eq '') {
 }
 if (!$silent) {
   success(get_text('install_success'));
+
+  print colored(<<EOF, COLOR_ERROR);
+
+NOTICE: This installation was git pulled from the 5.0 branch, which is no
+longer supported. Please run `git checkout 5.2` to pick up where this branch left
+off. Please see https://bugzilla.mozilla.org/show_bug.cgi?id=1850481 for details.
+
+EOF
+
 }
 
 __END__

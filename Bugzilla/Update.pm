@@ -74,7 +74,7 @@ sub get_notifications {
         # We want the latest stable version for the current branch.
         # If we are running a development snapshot, we won't match anything.
         # This is the 5.0.4 branch and it won't branch again so just hardcode this.
-        my $branch_version = '5.0.4'
+        my $branch_version = '5.0.4';
 
         # We do a string comparison instead of a numerical one, because
         # e.g. 2.2 == 2.20, but 2.2 ne 2.20 (and 2.2 is indeed much older).

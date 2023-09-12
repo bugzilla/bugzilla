@@ -5,13 +5,13 @@ build:
     python: "3.11"
   apt_packages:
     - libfile-copy-recursive-perl
-  sphinx:
-    configuration: docs/en/rst/conf.py
-  python:
-    install:
-      - requirements: docs/requirements.txt
   jobs:
     post_build:
       - perl docs/makedocs.pl --pod-only
       - cp -rp docs/en/html/integrating/api/ "$READTHEDOCS_OUTPUT/html/integrating/api"
       - cp -p docs/en/html/style.css "$READTHEDOCS_OUTPUT/html/"
+sphinx:
+  configuration: docs/en/rst/conf.py
+python:
+  install:
+    - requirements: docs/requirements.txt

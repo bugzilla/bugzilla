@@ -2,5 +2,12 @@ Due to some errors with the 5.0.5 and 5.0.6 releases, which contained
 intrusive commits that should not have been made on a stable branch,
 this branch has been retired.
 
-If you came from 5.0.4 or earlier, you can continue on the 5.0.4 branch to get releases 5.0.4.1 and later.
-If you came from 5.0.5 or 5.0.6, you can continue on the 5.2 branch and pick up where this branch left off.
+If you came from 5.0.4 or earlier, you can continue on the 5.0.4 branch to get
+releases 5.0.4.1 and later by using the following command:
+   git checkout 5.0.4
+
+If you came from 5.0.5 or 5.0.6 (the fact you're reading this means this is
+probably you), you can continue on the 5.2 branch and pick up where this
+branch left off by using the following command:
+   git checkout 5.2
+

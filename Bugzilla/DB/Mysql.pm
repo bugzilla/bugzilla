@@ -889,7 +889,7 @@ sub _fix_defaults {
   foreach my $table (reverse sort keys %fix_columns) {
     my @alters = map("ALTER COLUMN $_ DROP DEFAULT", @{$fix_columns{$table}});
     my $sql
-	= 'ALTER TABLE ' . $self->quote_identifier($table) . ' ' . join(',', @alters);
+        = 'ALTER TABLE ' . $self->quote_identifier($table) . ' ' . join(',', @alters);
     $self->do($sql);
   }
 }

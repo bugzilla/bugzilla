@@ -74,6 +74,7 @@ use constant DB_COLUMNS => qw(
   mimetype
   modification_time
   submitter_id
+  attach_size
 );
 
 use constant REQUIRED_FIELD_MAP    => {bug_id => 'bug',};
@@ -356,30 +357,7 @@ the length (in bytes) of the attachment content
 # LENGTH() function or stat()ing the file instead.  I've left it in for now.
 
 sub datasize {
-  my $self = shift;
-  return $self->{datasize} if defined $self->{datasize};
-
-  # If we have already retrieved the data, return its size.
-  return length($self->{data}) if exists $self->{data};
-
-  $self->{datasize} = Bugzilla->dbh->selectrow_array(
-    "SELECT LENGTH(thedata)
-                                        FROM attach_data
-                                        WHERE id = ?", undef, $self->id
-  ) || 0;
-
-  # If there's no attachment data in the database, either the attachment
-  # is stored in a local file, and so retrieve its size from the file,
-  # or the attachment has been deleted.
-  unless ($self->{datasize}) {
-    if (open(AH, '<', $self->_get_local_filename())) {
-      binmode AH;
-      $self->{datasize} = (stat(AH))[7];
-      close(AH);
-    }
-  }
-
-  return $self->{datasize};
+  return $_[0]->{attach_size};
 }
 
 sub _get_local_filename {
@@ -555,12 +533,12 @@ sub _check_data {
   my ($invocant, $params) = @_;
 
   my $data = $params->{data};
-  $params->{filesize} = ref $data ? -s $data : length($data);
+  $params->{attach_size} = ref $data ? -s $data : length($data);
 
   Bugzilla::Hook::process('attachment_process_data',
     {data => \$data, attributes => $params});
 
-  $params->{filesize} || ThrowUserError('zero_length_file');
+  $params->{attach_size} || ThrowUserError('zero_length_file');
 
   # Make sure the attachment does not exceed the maximum permitted size.
   my $max_size = max(
@@ -568,8 +546,8 @@ sub _check_data {
     Bugzilla->params->{'maxattachmentsize'} * 1024
   );
 
-  if ($params->{filesize} > $max_size) {
-    my $vars = {filesize => sprintf("%.0f", $params->{filesize} / 1024)};
+  if ($params->{attach_size} > $max_size) {
+    my $vars = {filesize => sprintf("%.0f", $params->{attach_size} / 1024)};
     ThrowUserError('file_too_large', $vars);
   }
   return $data;
@@ -703,16 +681,6 @@ sub get_attachments_by_bug {
     foreach my $attachment (@$attachments) {
       $attachment->{attacher} = $user_map{$attachment->{submitter_id}};
     }
-
-    # Preload datasizes.
-    my $sizes = $dbh->selectall_hashref(
-      'SELECT attach_id, LENGTH(thedata) AS datasize
-                                   FROM attachments LEFT JOIN attach_data ON attach_id = id
-                                   WHERE bug_id = ?', 'attach_id', undef, $bug->id
-    );
-
-    # Force the size of attachments not in the DB to be recalculated.
-    $_->{datasize} = $sizes->{$_->id}->{datasize} || undef foreach @$attachments;
   }
 
   return $attachments;
@@ -835,13 +803,12 @@ sub create {
   my $bug = delete $params->{bug};
   $params->{bug_id} = $bug->id;
   my $data = delete $params->{data};
-  my $size = delete $params->{filesize};
 
   my $attachment = $class->insert_create_data($params);
   my $attachid   = $attachment->id;
 
   # The file is too large to be stored in the DB, so we store it locally.
-  if ($size > Bugzilla->params->{'maxattachmentsize'} * 1024) {
+  if ($params->{attach_size} > Bugzilla->params->{'maxattachmentsize'} * 1024) {
     my $attachdir = bz_locations()->{'attachdir'};
     my $hash      = ($attachid % 100) + 100;
     $hash =~ s/.*(\d\d)$/group.$1/;
@@ -966,8 +933,8 @@ sub remove_from_db {
     if @$flag_ids;
   $dbh->do('DELETE FROM attach_data WHERE id = ?', undef, $self->id);
   $dbh->do(
-    'UPDATE attachments SET mimetype = ?, ispatch = ?, isobsolete = ?
-              WHERE attach_id = ?', undef, ('text/plain', 0, 1, $self->id)
+    'UPDATE attachments SET mimetype = ?, ispatch = ?, isobsolete = ?, attach_size = ?
+              WHERE attach_id = ?', undef, ('text/plain', 0, 1, 0, $self->id)
   );
   $dbh->bz_commit_transaction();
 

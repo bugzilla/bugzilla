@@ -1028,8 +1028,12 @@ function show_comment_preview(bug_id) {
     if (!comment || !preview) return;
     if (Dom.hasClass('comment_preview_tab', 'active_comment_tab')) return;
 
-    preview.style.width = (comment.clientWidth - 4) + 'px';
-    preview.style.height = comment.offsetHeight + 'px';
+    var preview_style = getComputedStyle(preview);
+    var preview_hpadding = parseInt(preview_style.paddingLeft) + parseInt(preview_style.paddingRight);
+    var preview_vpadding = parseInt(preview_style.paddingTop) + parseInt(preview_style.paddingBottom);
+
+    preview.style.width = comment.clientWidth - preview_hpadding + 'px';
+    preview.style.height = comment.clientHeight - preview_vpadding + 'px';
 
     var comment_tab = document.getElementById('comment_tab');
     Dom.addClass(comment, 'bz_default_hidden');

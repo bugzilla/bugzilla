@@ -377,7 +377,7 @@
             "Math::Random::ISAAC" : "v1.0.1",
             "Module::Runtime" : "0",
             "Moo" : "2",
-            "Template" : "2.24",
+            "Template" : "3.008",
             "Test::Taint" : "1.06",
             "URI" : "1.55",
             "perl" : "5.014000"

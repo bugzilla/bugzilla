@@ -69,7 +69,7 @@ my %requires = (
     'Math::Random::ISAAC' => '1.0.1',
     'Moo'                 => 2,
     'Module::Runtime'     => 0,
-    'Template'            => '2.24',
+    'Template'            => '3.008',
     'Test::Taint'         => '1.06',
     'URI'                 => '1.55',
 );

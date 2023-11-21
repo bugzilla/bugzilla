@@ -32,7 +32,7 @@ END
 The file ##file## must point to a TrueType or OpenType font file
 (its extension must be .ttf or .otf).
 END
-  blacklisted                 => '(blacklisted)',
+  blocklisted                 => '(blocklisted)',
   bz_schema_exists_before_220 => <<'END',
 You are upgrading from a version before 2.20, but the bz_schema table
 already exists. This means that you restored a mysqldump into the Bugzilla

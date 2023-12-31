@@ -952,8 +952,8 @@ if (scalar(@bugowners) > 1 && $user->in_group('editbugs')) {
 # the list more compact.
 	$vars->{'splitheader'} = (
 	$cgi->cookie('SPLITHEADER') ||
-	$params->param('splitheader') ||
-	$params->param('splitheader') eq '' ? 1 : 0 );
+	$cgi->param('splitheader') ||
+	$cgi->param('splitheader') eq '' ? 1 : 0 );
 
 if ($user->settings->{'display_quips'}->{'value'} eq 'on') {
   $vars->{'quip'} = GetQuip();

@@ -26,6 +26,8 @@ my $datadir = bz_locations()->{'datadir'};
 
 eval "require LWP; require LWP::UserAgent;";
 my $lwp = $@ ? 0 : 1;
+eval "require LWP::Protocol::https;";
+my $lwpssl = $@ ? 0 : 1;
 
 if ((@ARGV < 1) || (@ARGV > 2) || ($ARGV[0] !~ /^https?:/i) || (defined($ARGV[1]) && $ARGV[1] ne '--self-signed')) {
   say "Usage: $0 <URL to this Bugzilla installation> [--self-signed]";
@@ -215,21 +217,25 @@ sub fetch {
   my $url = shift;
   my $rtn;
   if ($lwp) {
-    my $req = HTTP::Request->new(GET => $url);
-    my $ua  = LWP::UserAgent->new;
-    $ua->ssl_opts( verify_hostname => 0 ) if $selfsigned;
-    my $res = $ua->request($req);
-    if (!$res->is_success) {
-      my $errstr = $res->status_line;
-      print $errstr . "\n";
-      if ($errstr =~ m/certificate/) {
-        say "Try passing --self-signed to skip certificate checks."
+    if ($url =~ /^https:/i && !$lwpssl) {
+      die ("You need LWP::Protocol::https installed to use https with testserver.pl");
+    } else {
+      my $req = HTTP::Request->new(GET => $url);
+      my $ua  = LWP::UserAgent->new;
+      $ua->ssl_opts( verify_hostname => 0 ) if $selfsigned;
+      my $res = $ua->request($req);
+      if (!$res->is_success) {
+        my $errstr = $res->status_line;
+        print $errstr . "\n";
+        if ($errstr =~ m/certificate/) {
+          say "Try passing --self-signed to skip certificate checks."
+        }
       }
+      $rtn = ($res->is_success ? $res->content : undef);
     }
-    $rtn = ($res->is_success ? $res->content : undef);
   }
   elsif ($url =~ /^https:/i) {
-    die("You need LWP installed to use https with testserver.pl");
+    die("You need LWP (and LWP::Protocol::https, for LWP 6.02 or newer) installed to use https with testserver.pl");
   }
   else {
     my ($host, $port, $file) = ('', 80, '');

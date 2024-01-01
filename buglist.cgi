@@ -684,17 +684,11 @@ ORDER: for ($order) {
   }
 }
 
-# DEFAULT when "@order_columns" is empty ("undef").
-	if ( ! @order_columns ) {
-	@order_columns = ( "changeddate DESC", "reporter", "short_desc" );
-	};
-#
-# 	`@order_columns //=` alike is quirky:
-# 	https://www.google.com/search?hl=en&gl=ca&num=100&filter=0&q=Perl+%22Can%27t+modify+array+dereference%22|%22Can%27t+modify+private+array%22+%22in+logical+or+assignment%22|%22in+defined+or+assignment%22
-#
-# 	`@order_columns = @order_columns || ...` won't work as intended:
-# 	"@order_columns" in which returns the number of elements.
-#
+if (!scalar @order_columns) {
+
+  # DEFAULT
+  @order_columns = ("bug_status", "priority", "assigned_to", "bug_id");
+}
 
 # In the HTML interface, by default, we limit the returned results,
 # which speeds up quite a few searches where people are really only looking

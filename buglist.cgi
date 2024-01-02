@@ -673,7 +673,7 @@ if ($order) {
 	$order =~ /^(?:(?:[Ll]ast[ _]?)?[Cc]hanged?(?:[ _]?[Dd]ate)?|lc)$/ ?
 	( "changeddate", "bug_status", "priority", "assigned_to", "bug_id" ) :
 
-	split( /\s*?,\s*?/, $order )
+	split( /\s*,\s*/, $order )
 	);
 }
 

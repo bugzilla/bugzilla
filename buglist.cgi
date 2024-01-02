@@ -670,7 +670,7 @@ if ($order) {
 	$order =~ /^[Aa]ssign(?:e[ed])?$/ ?
 	( "assigned_to", "bug_status", "priority", "bug_id" ) :
 
-	$order =~ /^(?:[Ll]ast[ _]?)?[Cc]hanged?$/ ?
+	$order =~ /^(?:(?:[Ll]ast[ _]?)?[Cc]hanged?(?:[ _]?[Dd]ate)?|lc)$/ ?
 	( "changeddate", "bug_status", "priority", "assigned_to", "bug_id" ) :
 
 	split( /\s*?,\s*?/, $order )

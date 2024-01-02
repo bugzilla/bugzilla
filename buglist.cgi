@@ -954,13 +954,22 @@ if (scalar(@bugowners) > 1 && $user->in_group('editbugs')) {
   $vars->{'bugowners'} = $bugowners;
 }
 
-# Whether or not to split the column titles across two rows to make
-# the list more compact.
-$vars->{'splitheader'} = $cgi->cookie('SPLITHEADER') ? 1 : 0;
+#
+# 	Whether to split the column header into 2 rows to reduce horizontal space waste.
+# 	Default on per [ https://github.com/bugzilla/bugzilla/pull/157 ].
+#
+	$vars->{splitheader} = (
+	! defined $cgi->param( "splitheader" ) &&
+	! defined $cgi->cookie( "SPLITHEADER" ) ? 1 :
 
-if ($user->settings->{'display_quips'}->{'value'} eq 'on') {
-  $vars->{'quip'} = GetQuip();
-}
+	$cgi->cookie( "SPLITHEADER" ) ||
+	$cgi->param( "splitheader" ) ||
+	$cgi->param( "splitheader" ) eq "" ? 1 : 0 );
+
+
+	if ( $user->settings()->{display_quips}{value} eq "on" ) {
+	$vars->{quip} = GetQuip();
+	};
 
 $vars->{'currenttime'} = localtime(time());
 

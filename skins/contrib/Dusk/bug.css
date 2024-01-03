@@ -6,10 +6,6 @@
  * defined by the Mozilla Public License, v. 2.0.
  */
 
-tr.bz_bugitem:hover {
-    background-color: #ccccff;
-}
-
-.bz_sort_order_secondary {
-  color: #555;
+.bz_short_desc_container {
+  background-color: #e0e0e0;
 }

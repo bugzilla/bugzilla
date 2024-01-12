@@ -121,8 +121,9 @@ sub REQUIRED_MODULES {
     # versions prior to 3.008 are broken, see https://bugzilla.mozilla.org/show_bug.cgi?id=1560873
     {package => 'Template-Toolkit', module => 'Template', version => '3.008'},
 
-    # 1.300011 has a debug mode for SMTP and automatically pass -i to sendmail.
-    {package => 'Email-Sender', module => 'Email::Sender', version => '1.300011',},
+    # versions prior to 2.600 pulled Email::Address, we now use Email::Address::XS
+    {package => 'Email-Sender', module => 'Email::Sender', version => '2.600',},
+
     {
       package => 'Email-MIME',
       module  => 'Email::MIME',

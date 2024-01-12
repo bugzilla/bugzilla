@@ -33,7 +33,7 @@ use Bugzilla::Error;
 use Date::Parse;
 use Date::Format;
 use Digest;
-use Email::Address;
+use Email::Address::XS;
 use List::Util qw(first);
 use Scalar::Util qw(tainted blessed);
 use Text::Wrap;
@@ -223,7 +223,7 @@ sub html_light_quote {
 sub email_filter {
   my ($toencode) = @_;
   if (!Bugzilla->user->id) {
-    my @emails = Email::Address->parse($toencode);
+    my @emails = Email::Address::XS->parse($toencode);
     if (scalar @emails) {
       my @hosts    = map { quotemeta($_->host) } @emails;
       my $hosts_re = join('|', @hosts);
@@ -740,17 +740,15 @@ sub validate_email_syntax {
   my $match  = Bugzilla->params->{'emailregexp'};
   my $email  = $addr . Bugzilla->params->{'emailsuffix'};
 
-  # This regexp follows RFC 2822 section 3.4.1.
-  my $addr_spec = $Email::Address::addr_spec;
-
   # RFC 2822 section 2.1 specifies that email addresses must
   # be made of US-ASCII characters only.
   # Email::Address::addr_spec doesn't enforce this.
   # We set the max length to 127 to ensure addresses aren't truncated when
   # inserted into the tokens.eventdata field.
+  my $address = Email::Address::XS->parse_bare_address($email);
   if ( $addr =~ /$match/
+    && $address->is_valid
     && $email !~ /\P{ASCII}/
-    && $email =~ /^$addr_spec$/
     && length($email) <= 127)
   {
     # We assume these checks to suffice to consider the address untainted.

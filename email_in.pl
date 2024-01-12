@@ -24,7 +24,7 @@ BEGIN {
 use lib qw(. lib);
 
 use Data::Dumper;
-use Email::Address;
+use Email::Address::XS;
 use Email::Reply qw(reply);
 use Email::MIME;
 use Getopt::Long qw(:config bundling);
@@ -129,7 +129,7 @@ sub parse_mail {
 
   %fields = %{Bugzilla::Bug::map_fields(\%fields)};
 
-  my ($reporter) = Email::Address->parse($input_email->header('From'));
+  my ($reporter) = Email::Address::XS->parse($input_email->header('From'));
   $fields{'reporter'} = $reporter->address;
 
   # The summary line only affects us if we're doing a post_bug.

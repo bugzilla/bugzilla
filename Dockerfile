@@ -21,6 +21,7 @@ RUN apt-get -y install \
  libdbix-connector-perl \
  libdbd-mysql-perl \
  libcgi-pm-perl \
+ liblocale-codes-perl \
  libmath-random-isaac-perl \
  libmath-random-isaac-xs-perl \
  libapache2-mod-perl2 \

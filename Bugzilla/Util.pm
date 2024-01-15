@@ -223,13 +223,19 @@ sub html_light_quote {
 sub email_filter {
   my ($toencode) = @_;
   if (!Bugzilla->user->id) {
-    my @emails = Email::Address::XS->parse($toencode);
-    if (scalar @emails) {
-      my @hosts    = map { quotemeta($_->host) } @emails;
-      my $hosts_re = join('|', @hosts);
-      $toencode =~ s/\@(?:$hosts_re)//g;
-      return $toencode;
+    my $email_re = qr/([a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,})/;
+    my @hosts;
+    while ($toencode =~ /$email_re/g) {
+      my @emails = Email::Address::XS->parse($1);
+      if (scalar @emails) {
+        my @these_hosts = map { quotemeta($_->host) } @emails;
+        push @hosts, @these_hosts;
+      }
     }
+    my $hosts_re = join('|', @hosts);
+
+    $toencode =~ s/\@(?:$hosts_re)//g;
+    return $toencode;
   }
   return $toencode;
 }

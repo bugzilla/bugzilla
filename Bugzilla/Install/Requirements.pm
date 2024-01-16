@@ -124,6 +124,13 @@ sub REQUIRED_MODULES {
     # versions prior to 2.600 pulled Email::Address, we now use Email::Address::XS
     {package => 'Email-Sender', module => 'Email::Sender', version => '2.600',},
 
+    # versions prior to 1.05 contain a security risk
+    {
+      package => 'Email-Address-XS',
+      module  => 'Email::Address::XS',
+      version => '1.05',
+    },
+
     {
       package => 'Email-MIME',
       module  => 'Email::MIME',

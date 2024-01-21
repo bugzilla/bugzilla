@@ -208,6 +208,17 @@ END
 Full path to the private key corresponding to the client SSL certificate.
 The file must not be password-protected and must be readable by web server user.
 END
+  localconfig_db_mysql_ssl_optional => <<'END',
+Allows relaxing of strict SSL enforcement for the server SSL certificate checks.
+This aligns more with the default behavior of the MySQL/MariaDB client applications
+which don't do strict checking by default. This can be helpful with MySQL/MariaDB 
+systems using self-signed certificates or with Amazon RDS instances which don't have
+their Root CA's published in the OS supplied CA bundles.
+
+If this is set to 0 (which is default if left blank), strict SSL checking will be enabled.
+
+If this is set to 1, strict SSL checking will be disabled.
+END
   localconfig_diffpath => <<'END',
 For the "Difference Between Two Patches" feature to work, we need to know
 what directory the "diff" bin is in. (You only need to set this if you

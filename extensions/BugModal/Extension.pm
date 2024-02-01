@@ -25,13 +25,6 @@ use JSON::XS qw(encode_json);
 
 our $VERSION = '1';
 
-use constant READABLE_BUG_STATUS_PRODUCTS => (
-  'Core',            'Toolkit',
-  'Firefox',         'Firefox for Android',
-  'Firefox for iOS', 'Bugzilla',
-  'bugzilla.mozilla.org'
-);
-
 sub show_bug_format {
   my ($self, $args) = @_;
   $args->{format} = _alternative_show_bug_format();
@@ -201,24 +194,24 @@ sub template_before_process {
     file => 'bug/edit.html.tmpl', vars => $vars,
   });
 
-  if (any { $bug->product eq $_ } READABLE_BUG_STATUS_PRODUCTS) {
-    my @flags = map { {name => $_->name, status => $_->status} } @{$bug->flags};
-    $vars->{readable_bug_status_json} = encode_json({
-      dupe_of          => $bug->dup_id,
-      id               => $bug->id,
-      keywords         => [map { $_->name } @{$bug->keyword_objects}],
-      priority         => $bug->priority,
-      resolution       => $bug->resolution,
-      status           => $bug->bug_status,
-      flags            => \@flags,
-      target_milestone => $bug->target_milestone,
-      map { $_->name => $_->bug_flag($bug->id)->value } @{$vars->{tracking_flags}},
-    });
-
-    # HTML4 attributes cannot be longer than this, so just skip it in this case.
-    if (length($vars->{readable_bug_status_json}) > 65536) {
-      delete $vars->{readable_bug_status_json};
-    }
+  # bugzilla-readable-status
+  my @flags = map { {name => $_->name, status => $_->status} } @{$bug->flags};
+  $vars->{readable_bug_status_json} = encode_json({
+    dupe_of          => $bug->dup_id,
+    id               => $bug->id,
+    keywords         => [map { $_->name } @{$bug->keyword_objects}],
+    priority         => $bug->priority,
+    resolution       => $bug->resolution,
+    status           => $bug->bug_status,
+    flags            => \@flags,
+    target_milestone => $bug->target_milestone,
+    Bugzilla->has_extension('TrackingFlags')
+    ? map { $_->name => $_->bug_flag($bug->id)->value } @{$vars->{tracking_flags}}
+    : {},
+  });
+  # HTML4 attributes cannot be longer than this, so just skip it in this case.
+  if (length($vars->{readable_bug_status_json}) > 65536) {
+    delete $vars->{readable_bug_status_json};
   }
 
   # bug->choices loads a lot of data that we want to lazy-load

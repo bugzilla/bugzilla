@@ -92,46 +92,6 @@
       END;
     END;
   END;
-
-  # build Firefox flags subtitle
-  firefox_flags = [];
-  firefox_fixed_versions = [];
-  # project flags
-  FOREACH row IN tracking_flags_table;
-    NEXT UNLESS row.type == "project";
-    status_value = row.status.bug_flag(bug.id).value;
-    NEXT IF status_value == "---";
-    firefox_flags.push(row.name _ ":" _ status_value);
-  END;
-  # tracking flags title and subtitle
-  FOREACH row IN tracking_flags_table;
-    NEXT UNLESS row.type == "tracking";
-    tracking_value = row.tracking ? row.tracking.bug_flag(bug.id).value : "---";
-    status_value = row.status.bug_flag(bug.id).value || "---";
-    NEXT IF tracking_value == "---" && status_value == "---";
-    blurb = row.name;
-    IF tracking_value != "---";
-      blurb = blurb _ tracking_value;
-    END;
-    IF status_value != "---";
-      blurb = blurb _ " " _ status_value;
-      IF status_value == "fixed" || status_value == "verified";
-        flag_name = row.name;
-        IF flag_name.substr(0, 7) == "firefox";
-          IF firefox_fixed_versions.0 == "";
-            firefox_fixed_versions.0 = "Firefox " _ flag_name.substr(7);
-          END;
-        END;
-      END;
-    END;
-    firefox_flags.push(blurb);
-  END;
-  firefox_fixed_version = firefox_fixed_versions.join(", ");
-  IF firefox_flags.size;
-    firefox_flags_subtitle = firefox_flags.join(", ");
-  ELSE;
-    firefox_flags_subtitle = "Not tracked";
-  END;
 %]
 
 [% IF user.id %]
@@ -550,7 +510,7 @@
   [% END %]
   [% sub = [{ unfiltered = readable_bug_status_span }] %]
 [% ELSE %]
-  [% sub = [firefox_flags_subtitle] %]
+  [% sub = ["Not tracked"] %]
 [% END %]
 [% WRAPPER bug_modal/module.html.tmpl
   title = "Tracking"

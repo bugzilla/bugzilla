@@ -6,15 +6,8 @@
 version: 2.1
 
 defaults:
-  install_deps: &install_deps
-    run:
-      name: install dependencies
-      command: |
-        apk update && apk add py-pip
-        pip install "docker-compose==1.23.2"
-
   docker_image: &docker_image
-    image: docker:18.09.3-git
+    image: cimg/base:current
 
   build_image: &build_image
     run:
@@ -30,7 +23,7 @@ defaults:
 
   store_log: &store_log
     store_artifacts:
-      path: /app/bugzilla.log
+      path: /tmp/bzbuild/bugzilla.log
       destination: bugzilla.log
 
   main_filters: &main_filters
@@ -43,28 +36,27 @@ defaults:
 jobs:
   build_info:
     parallelism: 1
-    working_directory: /app
+    working_directory: /tmp/bzbuild
     docker:
       - *docker_image
     steps:
       - setup_remote_docker:
-          version: 18.09.3
+          version: default
           docker_layer_caching: true
       - checkout
       - *build_image
-      - *install_deps
       - run: |
           [[ -d build_info ]] || mkdir build_info
       - attach_workspace:
-          at: /app/build_info
+          at: /tmp/bzbuild/build_info
       - run: |
-          docker-compose -f docker-compose.test.yml run --name version_json --entrypoint true bmo.test
+          docker compose -f docker-compose.test.yml run --name version_json --entrypoint true bmo.test
           docker cp version_json:/app/version.json build_info/version.json
           docker rm version_json
       - run:
           name: build push data
           command: |
-            docker-compose -f docker-compose.test.yml run --name push_data bmo.test push_data
+            docker compose -f docker-compose.test.yml run --name push_data bmo.test push_data
             docker cp push_data:/app/build_info/blog.push.txt build_info/blog.push.txt
             docker cp push_data:/app/build_info/bug.push.txt build_info/bug.push.txt
             docker cp push_data:/app/build_info/email.push.txt build_info/email.push.txt
@@ -99,25 +91,25 @@ jobs:
             fi
             echo yes > build_info/only_version_changed.txt
       - persist_to_workspace:
-          root: /app/build_info
+          root: /tmp/bzbuild/build_info
           paths: ["*.txt"]
       - store_artifacts:
-          path: /app/build_info
+          path: /tmp/bzbuild/build_info
       - *store_log
 
   build:
     parallelism: 1
-    working_directory: /app
+    working_directory: /tmp/bzbuild
     docker:
       - *docker_image
     steps:
       - setup_remote_docker:
-          version: 18.09.3
+          version: default
           docker_layer_caching: true
       - checkout
       - *build_image
       - attach_workspace:
-          at: /app/build_info
+          at: /tmp/bzbuild/build_info
       - deploy:
           command: |
             [[ -n "$DOCKERHUB_REPO" && -n "$DOCKER_USER" && -n "$DOCKER_PASS" ]] || exit 0
@@ -143,98 +135,94 @@ jobs:
 
   test_sanity:
     parallelism: 1
-    working_directory: /app
+    working_directory: /tmp/bzbuild
     docker:
       - *docker_image
     steps:
       - setup_remote_docker:
-          version: 18.09.3
+          version: default
           docker_layer_caching: true
       - checkout
       - *build_image
-      - *install_deps
       - run: |
           [[ -d artifacts ]] || mkdir artifacts
       - attach_workspace:
-          at: /app/build_info
+          at: /tmp/bzbuild/build_info
       - run:
           name: run sanity tests
           command: |
             [[ -f build_info/only_version_changed.txt ]] && exit 0
-            docker-compose -f docker-compose.test.yml run --no-deps bmo.test \
+            docker compose -f docker-compose.test.yml run --no-deps bmo.test \
               test_sanity $(circleci tests glob 't/*.t' 'extensions/*/t/*.t' | \
               circleci tests split) | tee artifacts/$CIRCLE_JOB.txt
       - store_artifacts:
-          path: /app/artifacts
+          path: /tmp/bzbuild/artifacts
       - *store_log
 
   test_webservices:
     parallelism: 1
-    working_directory: /app
+    working_directory: /tmp/bzbuild
     docker:
       - *docker_image
     steps:
       - setup_remote_docker:
-          version: 18.09.3
+          version: default
           docker_layer_caching: true
       - checkout
       - *build_image
-      - *install_deps
       - run: |
           [[ -d artifacts ]] || mkdir artifacts
       - attach_workspace:
-          at: /app/build_info
+          at: /tmp/bzbuild/build_info
       - run: |
           [[ -f build_info/only_version_changed.txt ]] && exit 0
-          docker-compose -f docker-compose.test.yml run bmo.test test_webservices | \
+          docker compose -f docker-compose.test.yml run bmo.test test_webservices | \
             tee artifacts/$CIRCLE_JOB.txt
       - store_artifacts:
-          path: /app/artifacts
+          path: /tmp/bzbuild/artifacts
       - *store_log
 
   test_selenium:
     parallelism: 1
-    working_directory: /app
+    working_directory: /tmp/bzbuild
     docker:
       - *docker_image
     steps:
       - setup_remote_docker:
-          version: 18.09.3
+          version: default
           docker_layer_caching: true
       - checkout
       - *build_image
-      - *install_deps
       - run: |
           [[ -d artifacts ]] || mkdir artifacts
       - attach_workspace:
-          at: /app/build_info
+          at: /tmp/bzbuild/build_info
       - run: |
           [[ -f build_info/only_version_changed.txt ]] && exit 0
-          docker-compose -f docker-compose.test.yml run bmo.test test_selenium | \
+          docker compose -f docker-compose.test.yml run bmo.test test_selenium | \
             tee artifacts/$CIRCLE_JOB.txt
       - store_artifacts:
-          path: /app/artifacts
+          path: /tmp/bzbuild/artifacts
       - *store_log
 
   test_bmo:
     parallelism: 1
-    working_directory: /app
+    working_directory: /tmp/bzbuild
     docker:
       - *docker_image
     steps:
       - setup_remote_docker:
-          version: 18.09.3
+          version: default
           docker_layer_caching: true
       - checkout
       - *build_image
-      - *install_deps
       - run: |
           [[ -d artifacts ]] || mkdir artifacts
       - attach_workspace:
-          at: /app/build_info
+          at: /tmp/bzbuild/build_info
       - run: |
           [[ -f build_info/only_version_changed.txt ]] && exit 0
-          docker-compose -f docker-compose.test.yml run bmo.test test_bmo -q -f t/bmo/*.t
+          docker compose -f docker-compose.test.yml run bmo.test test_bmo -q -f t/bmo/*.t
       - *store_log
 
 workflows:

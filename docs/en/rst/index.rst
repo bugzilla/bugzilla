@@ -1,5 +1,5 @@
 ========================================
-BMO Documentation (bugzilla.mozilla.org)
+Bugzilla Documentation (bugzilla.org)
 ========================================
 
 .. toctree::

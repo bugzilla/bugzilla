@@ -243,10 +243,10 @@ workflows:
           filters: *main_filters
           requires:
             - build_info
-#      - test_bmo:
-#          filters: *main_filters
-#          requires:
-#            - build_info
+      - test_bmo:
+          filters: *main_filters
+          requires:
+            - build_info
 #      - test_webservices:
 #          filters: *main_filters
 #          requires:

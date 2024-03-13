@@ -231,11 +231,11 @@ workflows:
     jobs:
       - build_info:
           filters: *main_filters
-      - build:
-          filters: *main_filters
-          requires:
-            - build_info
-            - test_sanity
+#      - build:
+#          filters: *main_filters
+#          requires:
+#            - build_info
+#            - test_sanity
 #            - test_bmo
 #            - test_webservices
 #            - test_selenium

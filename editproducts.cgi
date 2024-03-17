@@ -349,7 +349,7 @@ if ($action eq 'updategroupcontrols') {
                        FROM bugs
                  INNER JOIN bug_group_map
                          ON bug_group_map.bug_id = bugs.bug_id
-                 INNER JOIN groups
+                 INNER JOIN ' . $dbh->quote_identifier('groups') . '
                          ON bug_group_map.group_id = groups.id
                       WHERE groups.id IN (' . join(', ', @now_na) . ')
                         AND bugs.product_id = ? ' . $dbh->sql_group_by('groups.name'),
@@ -371,7 +371,7 @@ if ($action eq 'updategroupcontrols') {
                                 (SELECT bug_group_map.bug_id FROM bug_group_map
                                   WHERE bug_group_map.group_id = groups.id))
                            AS count
-                      FROM groups
+                      FROM ' . $dbh->quote_identifier('groups') . '
                      WHERE groups.id IN (' . join(', ', @now_mandatory) . ')
                      ORDER BY groups.name', {'Slice' => {}}, $product->id
       );

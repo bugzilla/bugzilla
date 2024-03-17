@@ -250,7 +250,8 @@ sub get_next_event {
           }
         }
         elsif ($mailto_type == MAILTO_GROUP) {
-          my $sth = $dbh->prepare("SELECT name FROM groups " . "WHERE id=?");
+          my $sth = $dbh->prepare(
+            'SELECT name FROM ' . $dbh->quote_identifier('groups') . ' WHERE id = ?');
           $sth->execute($mailto);
           my $groupname = $sth->fetch->[0];
           my $group_id = Bugzilla::Group::ValidateGroupName($groupname, $owner);

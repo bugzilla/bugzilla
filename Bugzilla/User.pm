@@ -1822,7 +1822,7 @@ sub visible_groups_direct {
   }
   else {
     # All groups are visible if usevisibilitygroups is off.
-    $sth = $dbh->prepare('SELECT id FROM groups');
+    $sth = $dbh->prepare('SELECT id FROM ' . $dbh->quote_identifier('groups'));
   }
   $sth->execute();
 
@@ -1886,7 +1886,7 @@ sub derive_regexp_groups {
 
   $sth = $dbh->prepare(
     "SELECT id, userregexp, user_group_map.group_id
-                            FROM groups
+                            FROM " . $dbh->quote_identifier('groups') . "
                        LEFT JOIN user_group_map
                               ON groups.id = user_group_map.group_id
                              AND user_group_map.user_id = ?

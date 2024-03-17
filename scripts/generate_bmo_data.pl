@@ -400,7 +400,9 @@ foreach my $group (@groups) {
     my $new_group;
     if (exists $group->{no_admin} && $group->{no_admin}) {
       $dbh->do(
-        'INSERT INTO groups (name, description, isbuggroup, isactive)
+            'INSERT INTO '
+          . $dbh->quote_identifier('groups')
+          . ' (name, description, isbuggroup, isactive)
                       VALUES (?, ?, 1, 1)', undef,
         ($group->{name}, $group->{description})
       );

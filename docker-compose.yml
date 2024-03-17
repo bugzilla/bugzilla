@@ -2,7 +2,7 @@
 # License, v. 2.0. If a copy of the MPL was not distributed with this
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
-version: '3.4'
+version: '3.6'
 
 services:
   bmo.test:
@@ -92,7 +92,7 @@ services:
       - memcached
 
   bmo.db:
-    image: mysql:5.7
+    image: mysql:8
     volumes:
       - bmo-mysql-db:/var/lib/mysql
       - ./docker/mysql:/etc/mysql/conf.d

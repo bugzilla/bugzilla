@@ -197,26 +197,34 @@ sub delete_security_groups {
 
   # Delete all security groups.
   print "Deleting " . ($keep_group_bugs ? 'non-' : '') . "security groups...\n";
-  $dbh->do(
-    "DELETE user_group_map FROM groups JOIN user_group_map ON groups.id = user_group_map.group_id WHERE groups.isbuggroup = 1"
+  $dbh->do("DELETE user_group_map FROM "
+      . $dbh->quote_identifier('groups')
+      . " JOIN user_group_map ON groups.id = user_group_map.group_id WHERE groups.isbuggroup = 1"
   );
-  $dbh->do(
-    "DELETE group_group_map FROM groups JOIN group_group_map ON (groups.id = group_group_map.member_id OR groups.id = group_group_map.grantor_id) WHERE groups.isbuggroup = 1"
+  $dbh->do("DELETE group_group_map FROM "
+      . $dbh->quote_identifier('groups')
+      . " JOIN group_group_map ON (groups.id = group_group_map.member_id OR groups.id = group_group_map.grantor_id) WHERE groups.isbuggroup = 1"
   );
-  $dbh->do(
-    "DELETE group_control_map FROM groups JOIN group_control_map ON groups.id = group_control_map.group_id WHERE groups.isbuggroup = 1"
+  $dbh->do("DELETE group_control_map FROM "
+      . $dbh->quote_identifier('groups')
+      . " JOIN group_control_map ON groups.id = group_control_map.group_id WHERE groups.isbuggroup = 1"
   );
-  $dbh->do(
-    "UPDATE flagtypes LEFT JOIN groups ON flagtypes.grant_group_id = groups.id SET grant_group_id = NULL WHERE groups.isbuggroup = 1"
+  $dbh->do("UPDATE flagtypes LEFT JOIN "
+      . $dbh->quote_identifier('groups')
+      . " ON flagtypes.grant_group_id = groups.id SET grant_group_id = NULL WHERE groups.isbuggroup = 1"
   );
-  $dbh->do(
-    "UPDATE flagtypes LEFT JOIN groups ON flagtypes.request_group_id = groups.id SET request_group_id = NULL WHERE groups.isbuggroup = 1"
+  $dbh->do("UPDATE flagtypes LEFT JOIN "
+      . $dbh->quote_identifier('groups')
+      . " ON flagtypes.request_group_id = groups.id SET request_group_id = NULL WHERE groups.isbuggroup = 1"
   );
   if ($keep_group_bugs) {
-    $dbh->do("DELETE FROM groups WHERE isbuggroup = 1 AND id $keep_group_bugs_sql");
+    $dbh->do("DELETE FROM "
+        . $dbh->quote_identifier('groups')
+        . " WHERE isbuggroup = 1 AND id $keep_group_bugs_sql");
   }
   else {
-    $dbh->do("DELETE FROM groups WHERE isbuggroup = 1");
+    $dbh->do(
+      "DELETE FROM " . $dbh->quote_identifier('groups') . " WHERE isbuggroup = 1");
   }
 }
 

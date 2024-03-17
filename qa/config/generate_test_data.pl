@@ -612,7 +612,9 @@ if (!Bugzilla::Group->new({name => $group_name})) {
 
 if (!Bugzilla::Group->new({name => $group_name})) {
   $dbh->do(
-    'INSERT INTO groups (name, description, isbuggroup, isactive)
+        'INSERT INTO '
+      . $dbh->quote_identifier('groups')
+      . ' (name, description, isbuggroup, isactive)
               VALUES (?, ?, 1, 1)', undef, ($group_name, $group_desc)
   );
 }

@@ -642,13 +642,13 @@ sub group_controls {
   if (!defined $self->{group_controls} || $full_data) {
 
     # Include name to the list, to allow us sorting data more easily.
-    my $query = qq{SELECT id, name, entry, membercontrol, othercontrol,
+    my $query = "SELECT id, name, entry, membercontrol, othercontrol,
                               canedit, editcomponents, editbugs, canconfirm
-                         FROM groups
+                         FROM " . $dbh->quote_identifier('groups') . "
                               LEFT JOIN group_control_map
                               ON id = group_id
                 $where_or_and product_id = ?
-                $and_or_where isbuggroup = 1};
+                $and_or_where isbuggroup = 1";
     $self->{group_controls}
       = $dbh->selectall_hashref($query, 'id', undef, $self->id);
 
@@ -685,7 +685,9 @@ sub groups_available {
     $dbh->selectcol_arrayref(
       "SELECT group_id, membercontrol
            FROM group_control_map
-                INNER JOIN groups ON group_control_map.group_id = groups.id
+                INNER JOIN "
+        . $dbh->quote_identifier('groups')
+        . " ON group_control_map.group_id = groups.id
           WHERE isbuggroup = 1 AND isactive = 1 AND product_id = ?
                 AND (membercontrol = $shown OR membercontrol = $default)
                 AND " . Bugzilla->user->groups_in_sql(), {Columns => [1, 2]},
@@ -700,7 +702,9 @@ sub groups_available {
     $dbh->selectcol_arrayref(
       "SELECT group_id, othercontrol
            FROM group_control_map
-                INNER JOIN groups ON group_control_map.group_id = groups.id
+                INNER JOIN "
+        . $dbh->quote_identifier('groups')
+        . " ON group_control_map.group_id = groups.id
           WHERE isbuggroup = 1 AND isactive = 1 AND product_id = ?
                 AND (othercontrol = $shown OR othercontrol = $default)",
       {Columns => [1, 2]}, $self->id
@@ -734,10 +738,13 @@ sub groups_mandatory {
   # For membercontrol we don't check group_id IN, because if membercontrol
   # is Mandatory, the group is Mandatory for everybody, regardless of their
   # group membership.
-  my $ids = Bugzilla->dbh->selectcol_arrayref(
+  my $dbh = Bugzilla->dbh;
+  my $ids = $dbh->selectcol_arrayref(
     "SELECT group_id
            FROM group_control_map
-                INNER JOIN groups ON group_control_map.group_id = groups.id
+                INNER JOIN "
+      . $dbh->quote_identifier('groups')
+      . " ON group_control_map.group_id = groups.id
           WHERE product_id = ? AND isactive = 1
                 AND (membercontrol = $mandatory
                      OR (othercontrol = $mandatory
@@ -770,10 +777,13 @@ sub groups_valid {
 
   # Note that we don't check OtherControl below, because there is no
   # valid NA/* combination.
-  my $ids = Bugzilla->dbh->selectcol_arrayref(
+  my $dbh = Bugzilla->dbh;
+  my $ids = $dbh->selectcol_arrayref(
     "SELECT DISTINCT group_id
           FROM group_control_map AS gcm
-               INNER JOIN groups ON gcm.group_id = groups.id
+               INNER JOIN "
+      . $dbh->quote_identifier('groups')
+      . " ON gcm.group_id = groups.id
          WHERE product_id = ? AND isbuggroup = 1
                AND membercontrol != " . CONTROLMAPNA, undef, $self->id
   );

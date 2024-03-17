@@ -2,11 +2,13 @@
 # License, v. 2.0. If a copy of the MPL was not distributed with this
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
-version: '3'
+version: '3.6'
 
 services:
   bmo.test:
-    image: bmo
+    build: &bmo_build
+      context: .
+      dockerfile: Dockerfile
     command: dev_httpd
     tmpfs:
       - /tmp
@@ -17,6 +19,7 @@ services:
       - BMO_db_name=bugs
       - BMO_db_pass=bugs
       - BMO_db_user=bugs
+      - BMO_db_mysql_ssl_get_pubkey=1
       - BMO_memcached_namespace=bugzilla
       - BMO_memcached_servers=memcached:11211
       - BMO_ses_username=ses@mozilla.bugs
@@ -43,7 +46,7 @@ services:
       - selenium
 
   bmo.db:
-    image: mysql:5.7
+    image: mysql:8
     tmpfs:
       - /tmp
     logging:

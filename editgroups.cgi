@@ -48,10 +48,11 @@ my $token = $cgi->param('token');
 sub CheckGroupID {
   my ($group_id) = @_;
   $group_id = trim($group_id || 0);
+  my $dbh = Bugzilla->dbh;
   ThrowUserError("group_not_specified") unless $group_id;
   (
-    detaint_natural($group_id) && Bugzilla->dbh->selectrow_array(
-      "SELECT id FROM groups WHERE id = ?",
+    detaint_natural($group_id) && $dbh->selectrow_array(
+      'SELECT id FROM ' . $dbh->quote_identifier('groups') . ' WHERE id = ?',
       undef, $group_id
     )
   ) || ThrowUserError("invalid_group_ID");

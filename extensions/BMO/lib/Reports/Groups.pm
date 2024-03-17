@@ -37,7 +37,7 @@ sub admins_report {
   my $query = "
         SELECT groups.id, "
     . $dbh->sql_group_concat('profiles.userid', "','", 1) . "
-          FROM groups
+          FROM " . $dbh->quote_identifier('groups') . "
                LEFT JOIN user_group_map
                     ON user_group_map.group_id = groups.id
                     AND user_group_map.isbless = 1

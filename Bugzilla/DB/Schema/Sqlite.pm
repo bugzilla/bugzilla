@@ -112,7 +112,7 @@ sub _sqlite_alter_schema {
   my $insert_str = join(',', @insert_cols);
   my $select_str = join(',', @select_cols);
   my $copy_sql
-    = "INSERT INTO $table ($insert_str)" . " SELECT $select_str FROM $rename_to";
+    = "INSERT INTO " . $dbh->quote_identifier($table) . " ($insert_str)" . " SELECT $select_str FROM " . $dbh->quote_identifier($rename_to);
 
   # We have to turn FKs off before doing this. Otherwise, when we rename
   # the table, all of the FKs in the other tables will be automatically
@@ -125,7 +125,10 @@ sub _sqlite_alter_schema {
     'PRAGMA foreign_keys = OFF',
     'BEGIN EXCLUSIVE TRANSACTION',
     @{$options->{pre_sql} || []},
-    "ALTER TABLE $table RENAME TO $rename_to",
+    'ALTER TABLE '
+      . Bugzilla->dbh->quote_identifier($table)
+      . ' RENAME TO '
+      . Bugzilla->dbh->quote_identifier($rename_to),
     $create_table,
     $copy_sql,
     "DROP TABLE $rename_to",

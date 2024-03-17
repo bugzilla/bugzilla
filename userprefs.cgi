@@ -533,18 +533,19 @@ sub DoPermissions {
   my (@has_bits, @set_bits);
 
   my $groups
-    = $dbh->selectall_arrayref(
-        "SELECT DISTINCT name, description FROM groups WHERE id IN ("
+    = $dbh->selectall_arrayref('SELECT DISTINCT name, description FROM '
+      . $dbh->quote_identifier('groups')
+      . ' WHERE id IN ('
       . $user->groups_as_string
-      . ") ORDER BY name");
+      . ') ORDER BY name');
   foreach my $group (@$groups) {
     my ($nam, $desc) = @$group;
     push(@has_bits, {"desc" => $desc, "name" => $nam});
   }
   $groups = $dbh->selectall_arrayref(
     'SELECT DISTINCT id, name, description
-                                          FROM groups
-                                         ORDER BY name'
+       FROM ' . $dbh->quote_identifier('groups') . '
+      ORDER BY name'
   );
   foreach my $group (@$groups) {
     my ($group_id, $nam, $desc) = @$group;

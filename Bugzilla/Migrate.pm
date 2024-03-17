@@ -891,8 +891,13 @@ sub _do_table_insert {
   my @values       = map { $hash->{$_} } @fields;
   my $field_sql    = join(',', @fields);
   my $question_sql = join(',', @questions);
-  Bugzilla->dbh->do("INSERT INTO $table ($field_sql) VALUES ($question_sql)",
-    undef, @values);
+  my $dbh          = Bugzilla->dbh;
+  $dbh->do(
+    "INSERT INTO "
+      . $dbh->quote_identifier($table)
+      . " ($field_sql) VALUES ($question_sql)",
+    undef, @values
+  );
 }
 
 ######################

@@ -112,7 +112,9 @@ foreach my $row (@$rows) {
     $bugs_dbh->bz_add_column($table, $column, $column_info);
 
     # Migrate the PST value to UTC
-    $bugs_dbh->do("UPDATE $table SET $column = CONVERT_TZ("
+    $bugs_dbh->do("UPDATE "
+        . $bugs_dbh->quote_identifier($table)
+        . " SET $column = CONVERT_TZ("
         . $column . '_pst'
         . ", 'America/Los_Angeles', 'UTC')");
 

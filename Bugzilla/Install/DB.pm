@@ -1703,7 +1703,8 @@ sub _convert_groups_system_from_groupset {
     $dbh->bz_drop_index('groups', 'groups_name_idx');
     my @primary_key = $dbh->primary_key(undef, undef, 'groups');
     if (@primary_key) {
-      $dbh->do("ALTER TABLE groups DROP PRIMARY KEY");
+      $dbh->do(
+        'ALTER TABLE ' . $dbh->quote_identifier('groups') . ' DROP PRIMARY KEY');
     }
 
     $dbh->bz_add_column('groups', 'id',
@@ -1714,7 +1715,8 @@ sub _convert_groups_system_from_groupset {
 
     # Convert all existing groupset records to map entries before removing
     # groupset fields or removing "bit" from groups.
-    my $sth = $dbh->prepare("SELECT bit, id FROM groups WHERE bit > 0");
+    my $sth = $dbh->prepare(
+      'SELECT bit, id FROM ' . $dbh->quote_identifier('groups') . ' WHERE bit > 0');
     $sth->execute();
     while (my ($bit, $gid) = $sth->fetchrow_array) {
 
@@ -1809,7 +1811,7 @@ sub _convert_groups_system_from_groupset {
 
         # Get names of groups added.
         my $sth2 = $dbh->prepare(
-          "SELECT name FROM groups
+          "SELECT name FROM " . $dbh->quote_identifier('groups') . "
                                            WHERE (bit & $added) != 0
                                                  AND (bit & $removed) = 0"
         );
@@ -1821,7 +1823,7 @@ sub _convert_groups_system_from_groupset {
 
         # Get names of groups removed.
         $sth2 = $dbh->prepare(
-          "SELECT name FROM groups
+          "SELECT name FROM " . $dbh->quote_identifier('groups') . "
                                         WHERE (bit & $removed) != 0
                                               AND (bit & $added) = 0"
         );
@@ -1834,9 +1836,7 @@ sub _convert_groups_system_from_groupset {
         # Get list of group bits added that correspond to
         # missing groups.
         $sth2 = $dbh->prepare(
-          "SELECT ($added & ~BIT_OR(bit))
-                                         FROM groups"
-        );
+          "SELECT ($added & ~BIT_OR(bit)) FROM " . $dbh->quote_identifier('groups'));
         $sth2->execute();
         my ($miss) = $sth2->fetchrow_array;
         if ($miss) {
@@ -1848,9 +1848,7 @@ sub _convert_groups_system_from_groupset {
         # Get list of group bits deleted that correspond to
         # missing groups.
         $sth2 = $dbh->prepare(
-          "SELECT ($removed & ~BIT_OR(bit))
-                                         FROM groups"
-        );
+          "SELECT ($removed & ~BIT_OR(bit)) FROM " . $dbh->quote_identifier('groups'));
         $sth2->execute();
         ($miss) = $sth2->fetchrow_array;
         if ($miss) {
@@ -1886,7 +1884,7 @@ sub _convert_groups_system_from_groupset {
 
         # Get names of groups added.
         my $sth2 = $dbh->prepare(
-          "SELECT name FROM groups
+          "SELECT name FROM " . $dbh->quote_identifier('groups') . "
                                            WHERE (bit & $added) != 0
                                                  AND (bit & $removed) = 0"
         );
@@ -1898,7 +1896,7 @@ sub _convert_groups_system_from_groupset {
 
         # Get names of groups removed.
         $sth2 = $dbh->prepare(
-          "SELECT name FROM groups
+          "SELECT name FROM " . $dbh->quote_identifier('groups') . "
                                         WHERE (bit & $removed) != 0
                                               AND (bit & $added) = 0"
         );
@@ -1927,12 +1925,12 @@ sub _convert_groups_system_from_groupset {
 
     # Identify admin group.
     my ($admin_gid)
-      = $dbh->selectrow_array("SELECT id FROM groups WHERE name = 'admin'");
+      = $dbh->selectrow_array(
+      "SELECT id FROM " . $dbh->quote_identifier('groups') . " WHERE name = 'admin'");
     if (!$admin_gid) {
-      $dbh->do(
-        q{INSERT INTO groups (name, description)
-                                   VALUES ('admin', 'Administrators')}
-      );
+      $dbh->do("INSERT INTO "
+          . $dbh->quote_identifier('groups')
+          . " (name, description) VALUES ('admin', 'Administrators')");
       $admin_gid = $dbh->bz_last_key('groups', 'id');
     }
 
@@ -2559,7 +2557,8 @@ sub _fix_group_with_empty_name {
   # Note that there can be at most one such group (because of
   # the SQL index on the name column).
   my ($emptygroupid)
-    = $dbh->selectrow_array("SELECT id FROM groups where name = ''");
+    = $dbh->selectrow_array(
+    "SELECT id FROM " . $dbh->quote_identifier('groups') . " where name = ''");
   if ($emptygroupid) {
 
     # There is a group with an empty name; find a name to rename it
@@ -2567,7 +2566,8 @@ sub _fix_group_with_empty_name {
     # group_$gid and add _<n> if necessary.
     my $trycount = 0;
     my $trygroupname;
-    my $sth         = $dbh->prepare("SELECT 1 FROM groups where name = ?");
+    my $sth = $dbh->prepare(
+      'SELECT 1 FROM ' . $dbh->quote_identifier('groups') . ' where name = ?');
     my $name_exists = 1;
 
     while ($name_exists) {
@@ -2578,7 +2578,8 @@ sub _fix_group_with_empty_name {
       $name_exists = $dbh->selectrow_array($sth, undef, $trygroupname);
       $trycount++;
     }
-    $dbh->do("UPDATE groups SET name = ? WHERE id = ?",
+    $dbh->do(
+      'UPDATE ' . $dbh->quote_identifier('groups') . ' SET name = ? WHERE id = ?',
       undef, $trygroupname, $emptygroupid);
     print "Group $emptygroupid had an empty name; renamed as",
       " '$trygroupname'.\n";
@@ -2749,7 +2750,8 @@ sub _change_all_mysql_booleans_to_tinyint {
     my $quip_info_sth = $dbh->column_info(undef, undef, 'quips', '%');
     my $quips_cols    = $quip_info_sth->fetchall_hashref("COLUMN_NAME");
     my $approved_col  = $quips_cols->{'approved'};
-    if (  $approved_col->{TYPE_NAME} eq 'TINYINT'
+    if ($approved_col->{TYPE_NAME} eq 'TINYINT'
+      and defined $approved_col->{COLUMN_SIZE}
       and $approved_col->{COLUMN_SIZE} == 1)
     {
       # series.public could have been renamed to series.is_public,
@@ -3011,8 +3013,11 @@ EOT
 sub _rederive_regex_groups {
   my $dbh = Bugzilla->dbh;
 
-  my $regex_groups_exist = $dbh->selectrow_array(
-    "SELECT 1 FROM groups WHERE userregexp = '' " . $dbh->sql_limit(1));
+  my $regex_groups_exist
+    = $dbh->selectrow_array("SELECT 1 FROM "
+      . $dbh->quote_identifier('groups')
+      . " WHERE userregexp = '' "
+      . $dbh->sql_limit(1));
   return if !$regex_groups_exist;
 
   my $regex_derivations
@@ -3027,7 +3032,7 @@ sub _rederive_regex_groups {
   my $sth = $dbh->prepare(
     "SELECT profiles.userid, profiles.login_name, groups.id,
                 groups.userregexp, user_group_map.group_id
-           FROM (profiles CROSS JOIN groups)
+           FROM (profiles CROSS JOIN " . $dbh->quote_identifier('groups') . ")
                 LEFT JOIN user_group_map
                        ON user_group_map.user_id = profiles.userid
                           AND user_group_map.group_id = groups.id
@@ -4228,7 +4233,9 @@ sub _migrate_group_owners {
   return if $dbh->bz_column_info('groups', 'owner_user_id');
   $dbh->bz_add_column('groups', 'owner_user_id', {TYPE => 'INT3'});
   my $nobody = Bugzilla::User->check(Bugzilla->localconfig->nobody_user);
-  $dbh->do('UPDATE groups SET owner_user_id = ?', undef, $nobody->id);
+  $dbh->do(
+    'UPDATE ' . $dbh->quote_identifier('groups') . ' SET owner_user_id = ?',
+    undef, $nobody->id);
 }
 
 sub _migrate_nicknames {

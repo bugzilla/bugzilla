@@ -284,10 +284,16 @@ sub fix_flags {
     = $dbh->selectcol_arrayref(
     "SELECT DISTINCT type_id FROM $table WHERE component_id = ?",
     undef, $component_obj->id);
-  $dbh->do("DELETE FROM $table WHERE component_id = ?", undef, $component_obj->id);
+  $dbh->do(
+    'DELETE FROM ' . $dbh->quote_identifier($table) . ' WHERE component_id = ?',
+    undef, $component_obj->id);
   foreach my $type_id (@$type_ids) {
     $dbh->do(
-      "INSERT INTO $table (type_id, product_id, component_id) VALUES (?, ?, ?)",
-      undef, ($type_id, $new_product_obj->id, $component_obj->id));
+      'INSERT INTO '
+        . $dbh->quote_identifier($table)
+        . ' (type_id, product_id, component_id) VALUES (?, ?, ?)',
+      undef,
+      ($type_id, $new_product_obj->id, $component_obj->id)
+    );
   }
 }

@@ -236,7 +236,7 @@ my %optional_features = (
     description => 'MySQL database support',
     prereqs     => {
       runtime =>
-        {requires => {'DBD::mysql' => '4.037', 'DateTime::Format::MySQL' => '0.06'}}
+        {requires => {'DBD::mysql' => '5.003', 'DateTime::Format::MySQL' => '0.06'}}
     }
   },
   new_charts => {
@@ -386,7 +386,7 @@ WriteMakefile(
 
 sub MY::postamble {
   return <<"MAKE";
-GEN_CPANFILE_ARGS = -D better_xff -D mysql -D jsonrpc -D xmlrpc
+GEN_CPANFILE_ARGS = -D better_xff -D mysql -D jsonrpc -D xmlrpc -D documentation
 cpanfile: MYMETA.json
 \t\$(PERLRUN) gen-cpanfile.pl \$(GEN_CPANFILE_ARGS)
 

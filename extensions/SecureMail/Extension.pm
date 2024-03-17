@@ -77,8 +77,10 @@ BEGIN {
 sub _group_secure_mail { return $_[0]->{'secure_mail'}; }
 
 sub _securemail_groups {
-  return Bugzilla->dbh->selectcol_arrayref(
-    "SELECT name FROM groups WHERE secure_mail = 1") // [];
+  my $dbh = Bugzilla->dbh;
+  return $dbh->selectcol_arrayref('SELECT name FROM '
+      . $dbh->quote_identifier('groups')
+      . ' WHERE secure_mail = 1') // [];
 }
 
 # We want to lazy-load the public_key.

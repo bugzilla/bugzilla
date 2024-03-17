@@ -234,7 +234,9 @@ foreach my $table (@tables) {
     }
     if (@drop_columns) {
       print "dropping columns from $table\n";
-      $dbh->do("ALTER TABLE $table " . join(", ", @drop_columns));
+      $dbh->do('ALTER TABLE '
+          . $dbh->quote_identifier($table) . ' '
+          . join(", ", @drop_columns));
     }
   }
   else {
@@ -280,7 +282,9 @@ sub drop_referencing {
   }
   foreach my $fk (@{$dbh->selectall_arrayref($sql, {Slice => {}}, @values)}) {
     print "  dropping fk $fk->{table}.$fk->{name}\n";
-    $dbh->do("ALTER TABLE $fk->{table} DROP FOREIGN KEY $fk->{name}");
+    $dbh->do("ALTER TABLE "
+        . $dbh->quote_identifier($fk->{table})
+        . " DROP FOREIGN KEY $fk->{name}");
   }
 
   # drop indexes
@@ -296,11 +300,15 @@ sub drop_referencing {
     foreach my $fk (@{$dbh->selectall_arrayref($sql, {Slice => {}}, @values)}) {
       if ($fk->{ref}) {
         print "  dropping fk $fk->{table}.$fk->{name}\n";
-        $dbh->do("ALTER TABLE $fk->{table} DROP FOREIGN KEY $fk->{name}");
+        $dbh->do("ALTER TABLE "
+            . $dbh->quote_identifier($fk->{table})
+            . " DROP FOREIGN KEY $fk->{name}");
       }
       else {
         print "  dropping index $fk->{table}.$fk->{name}\n";
-        $dbh->do("ALTER TABLE $fk->{table} DROP INDEX $fk->{name}");
+        $dbh->do("ALTER TABLE "
+            . $dbh->quote_identifier($fk->{table})
+            . " DROP INDEX $fk->{name}");
       }
     }
 
@@ -310,7 +318,9 @@ sub drop_referencing {
       {Slice => {}}, $column);
     foreach my $fk (@$rows) {
       print "  dropping index $fk->{Table}.$fk->{Key_name}\n";
-      $dbh->do("ALTER TABLE $fk->{Table} DROP INDEX $fk->{Key_name}");
+      $dbh->do("ALTER TABLE "
+          . $dbh->quote_identifier($fk->{table})
+          . " DROP INDEX $fk->{Key_name}");
     }
   }
 

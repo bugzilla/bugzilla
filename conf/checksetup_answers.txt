@@ -27,3 +27,4 @@ $answer{'defaultpriority'}      = '--';
 $answer{'defaultseverity'}      = 'normal';
 $answer{'skin'}                 = 'Mozilla';
 $answer{'docs_urlbase'}         = 'https://bmo.readthedocs.io/en/latest/';
+$answer{'db_mysql_ssl_get_pubkey'} = 1;

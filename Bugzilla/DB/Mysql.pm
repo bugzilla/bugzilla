@@ -55,6 +55,19 @@ sub BUILDARGS {
 
   my %attrs = (mysql_enable_utf8 => 1);
 
+  # MySQL SSL options
+  my ($ssl_ca_file, $ssl_ca_path, $ssl_cert, $ssl_key, $ssl_pubkey) =
+    @$params{qw(db_mysql_ssl_ca_file db_mysql_ssl_ca_path
+                db_mysql_ssl_client_cert db_mysql_ssl_client_key db_mysql_ssl_get_pubkey)};
+  if ($ssl_ca_file || $ssl_ca_path || $ssl_cert || $ssl_key || $ssl_pubkey) {
+    $attrs{'mysql_ssl'}               = 1;
+    $attrs{'mysql_ssl_ca_file'}       = $ssl_ca_file if $ssl_ca_file;
+    $attrs{'mysql_ssl_ca_path'}       = $ssl_ca_path if $ssl_ca_path;
+    $attrs{'mysql_ssl_client_cert'}   = $ssl_cert    if $ssl_cert;
+    $attrs{'mysql_ssl_client_key'}    = $ssl_key     if $ssl_key;
+    $attrs{'mysql_get_server_pubkey'} = $ssl_pubkey  if $ssl_pubkey;
+  }
+
   return {dsn => $dsn, user => $user, pass => $pass, attrs => \%attrs};
 }
 

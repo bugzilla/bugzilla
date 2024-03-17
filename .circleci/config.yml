@@ -13,11 +13,7 @@ defaults:
     run:
       name: Build Docker BMO image
       command: |
-        docker build \
-          --build-arg CI="$CI" \
-          --build-arg CIRCLE_SHA1="$CIRCLE_SHA1" \
-          --build-arg CIRCLE_BUILD_URL="$CIRCLE_BUILD_URL" \
-          -t bmo .
+        docker compose -f docker-compose.test.yml build
       environment:
         DOCKER_BUILDKIT: 1
 

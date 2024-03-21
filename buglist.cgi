@@ -950,7 +950,10 @@ if (scalar(@bugowners) > 1 && $user->in_group('editbugs')) {
 
 # Whether or not to split the column titles across two rows to make
 # the list more compact.
-$vars->{'splitheader'} = $cgi->cookie('SPLITHEADER') ? 1 : 0;
+	$vars->{'splitheader'} = (
+	$cgi->cookie('SPLITHEADER') ||
+	$cgi->param('splitheader') ||
+	$cgi->param('splitheader') eq '' ? 1 : 0 );
 
 if ($user->settings->{'display_quips'}->{'value'} eq 'on') {
   $vars->{'quip'} = GetQuip();

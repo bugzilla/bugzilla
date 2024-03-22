@@ -1,0 +1,39 @@
+name: Bugzilla Test Suite
+
+on:
+  pull_request
+
+jobs:
+  test_sanity:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Install docker-compose
+        run: sudo apt update && sudo apt install -y docker-compose
+      - name: Build the Docker images
+        run: docker compose -f docker-compose.test.yml build
+      - name: Run sanity tests
+        run: docker-compose -f docker-compose.test.yml run --no-deps bmo.test test_sanity t/*.t extensions/*/t/*.t
+
+#  test_webservices:
+#    runs-on: ubuntu-latest
+#    steps:
+#      - uses: actions/checkout@v3
+#      - name: Install docker-compose
+#        run: sudo apt update && sudo apt install -y docker-compose
+#      - name: Build the Docker images
+#        run: docker compose -f docker-compose.test.yml build
+#      - name: Run webservice tests
+#        run: docker-compose -f docker-compose.test.yml run bmo.test test_webservices
+
+  test_bmo:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Install docker-compose
+        run: sudo apt update && sudo apt install -y docker-compose
+      - name: Build the Docker images
+        run: docker compose -f docker-compose.test.yml build
+      - name: Run bmo specific tests
+        run: docker-compose -f docker-compose.test.yml run -e CI=1 bmo.test test_bmo -q -f t/bmo/*.t
+

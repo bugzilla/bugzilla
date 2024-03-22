@@ -11,7 +11,7 @@ use strict;
 use warnings;
 
 use Bugzilla::Logging;
-use Bugzilla::Constants qw(bz_locations);
+use Bugzilla::Constants qw(bz_locations DB_MODULE);
 use Cwd qw(realpath);
 use English qw(-no_match_vars $PROGRAM_NAME);
 use File::Spec::Functions qw(catfile catdir);
@@ -226,24 +226,27 @@ sub assert_database {
   my $loop = IO::Async::Loop->new;
   my $lc   = Bugzilla::Install::Localconfig::read_localconfig();
 
-  for my $var (qw(db_name db_host db_user db_pass)) {
+  for my $var (qw(db_driver db_name db_host db_user db_pass)) {
     return $loop->new_future->die("$var is not set!") unless $lc->{$var};
   }
+  my ($db_driver) = (DB_MODULE->{$lc->{db_driver}}->{dbd}->{module} =~ m/::([^:]+)$/);
 
-  my $dsn    = "dbi:mysql:database=$lc->{db_name};host=$lc->{db_host}";
+  my $dsn    = "dbi:$db_driver:database=$lc->{db_name};host=$lc->{db_host}";
   my $repeat = try_repeat_until_success {
     $loop->delay_future(after => 0.25)->then(sub {
       my $attrs = {RaiseError => 1, PrintError => 1};
-      my ($ssl_ca_file, $ssl_ca_path, $ssl_cert, $ssl_key, $ssl_pubkey) =
-        @$lc{qw(db_mysql_ssl_ca_file db_mysql_ssl_ca_path
-                db_mysql_ssl_client_cert db_mysql_ssl_client_key db_mysql_ssl_get_pubkey)};
-      if ($ssl_ca_file || $ssl_ca_path || $ssl_cert || $ssl_key || $ssl_pubkey) {
-        $attrs->{'mysql_ssl'}               = 1;
-        $attrs->{'mysql_ssl_ca_file'}       = $ssl_ca_file if $ssl_ca_file;
-        $attrs->{'mysql_ssl_ca_path'}       = $ssl_ca_path if $ssl_ca_path;
-        $attrs->{'mysql_ssl_client_cert'}   = $ssl_cert    if $ssl_cert;
-        $attrs->{'mysql_ssl_client_key'}    = $ssl_key     if $ssl_key;
-        $attrs->{'mysql_get_server_pubkey'} = $ssl_pubkey  if $ssl_pubkey;
+      if ($lc->{db_driver} eq 'mysql') {
+        my ($ssl_ca_file, $ssl_ca_path, $ssl_cert, $ssl_key, $ssl_pubkey) =
+          @$lc{qw(db_mysql_ssl_ca_file db_mysql_ssl_ca_path
+                  db_mysql_ssl_client_cert db_mysql_ssl_client_key db_mysql_ssl_get_pubkey)};
+        if ($ssl_ca_file || $ssl_ca_path || $ssl_cert || $ssl_key || $ssl_pubkey) {
+          $attrs->{'mysql_ssl'}               = 1;
+          $attrs->{'mysql_ssl_ca_file'}       = $ssl_ca_file if $ssl_ca_file;
+          $attrs->{'mysql_ssl_ca_path'}       = $ssl_ca_path if $ssl_ca_path;
+          $attrs->{'mysql_ssl_client_cert'}   = $ssl_cert    if $ssl_cert;
+          $attrs->{'mysql_ssl_client_key'}    = $ssl_key     if $ssl_key;
+          $attrs->{'mysql_get_server_pubkey'} = $ssl_pubkey  if $ssl_pubkey;
+        }
       }
       my $dbh;
       eval {

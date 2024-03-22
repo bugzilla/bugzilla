@@ -15,7 +15,7 @@ RUN gpg --homedir /tmp --no-default-keyring --keyring /usr/share/keyrings/mysql-
  && gpg --homedir /tmp --no-default-keyring --keyring /usr/share/keyrings/mysql-8.0.gpg --keyserver hkp://keyserver.ubuntu.com:80 --recv-keys B7B3B788A8D3785C \
  && echo 'deb [arch=amd64 signed-by=/usr/share/keyrings/mysql-8.0.gpg] http://repo.mysql.com/apt/debian/ bookworm mysql-8.0' > /etc/apt/sources.list.d/mysql-8.0.list
 RUN apt-get update \
- && apt-get install -y libmysqlclient-dev
+ && apt-get install -y libmysqlclient-dev libpq-dev
 
 RUN cpanm --notest --quiet App::cpm Module::CPANfile Carton::Snapshot
 

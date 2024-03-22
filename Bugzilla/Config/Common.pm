@@ -11,7 +11,7 @@ use 5.10.1;
 use strict;
 use warnings;
 
-use Email::Address;
+use Email::Address::XS;
 use Socket;
 
 use Bugzilla::Util;
@@ -78,7 +78,8 @@ sub check_regexp {
 
 sub check_email {
   my ($value) = @_;
-  if ($value !~ $Email::Address::mailbox) {
+  my ($address) = Email::Address::XS->parse($value);
+  if (!$address->is_valid) {
     return "must be a valid email address.";
   }
   return "";

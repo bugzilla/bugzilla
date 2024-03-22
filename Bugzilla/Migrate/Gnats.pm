@@ -17,7 +17,7 @@ use Bugzilla::Constants;
 use Bugzilla::Install::Util qw(indicate_progress);
 use Bugzilla::Util qw(format_time trim generate_random_password);
 
-use Email::Address;
+use Email::Address::XS;
 use Email::MIME;
 use File::Basename;
 use IO::File;
@@ -396,10 +396,10 @@ sub _get_gnats_field_data {
   if ($originator !~ Bugzilla->params->{emailregexp}) {
 
     # We use the raw header sometimes, because it looks like "From: user"
-    # which Email::Address won't parse but we can still use.
+    # which Email::Address::XS won't parse but we can still use.
     my $address = $email->header('From');
-    my ($parsed) = Email::Address->parse($address);
-    if ($parsed) {
+    my ($parsed) = Email::Address::XS->parse($address);
+    if ($parsed->is_valid) {
       $address = $parsed->address;
     }
     if ($address) {

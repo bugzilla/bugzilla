@@ -16,7 +16,7 @@ use base qw(Bugzilla::Extension);
 use Bugzilla::Error;
 use Bugzilla::Group;
 use Bugzilla::Util qw(remote_ip);
-use Email::Address;
+use Email::Address::XS;
 use Socket;
 
 our $VERSION = '1';
@@ -80,7 +80,7 @@ sub _comment_blocking {
 
 sub _domain_blocking {
   my ($self, $login) = @_;
-  my $address = Email::Address->new(undef, $login);
+  my $address = Email::Address::XS->new(address => $login);
   my $blocked
     = Bugzilla->dbh->selectrow_array(
     "SELECT 1 FROM antispam_domain_blocklist WHERE domain=?",

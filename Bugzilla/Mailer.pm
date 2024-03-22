@@ -22,20 +22,16 @@ use Bugzilla::Util;
 
 use Date::Format qw(time2str);
 
-use Email::Address;
+use Email::Address::XS;
 use Email::MIME;
 use Encode qw(encode);
 use Encode::MIME::Header;
 use List::MoreUtils qw(none);
 use Try::Tiny;
 
-# Return::Value 1.666002 pollutes the error log with warnings about this
-# deprecated module. We have to set NO_CLUCK = 1 before loading Email::Send
-# to disable these warnings.
-BEGIN {
-  $Return::Value::NO_CLUCK = 1;
-}
-use Email::Send;
+use Email::Sender::Simple qw(sendmail);
+use Email::Sender::Transport::SMTP;
+use Bugzilla::Sender::Transport::Sendmail;
 use Sys::Hostname;
 use Bugzilla::Version qw(vers_cmp);
 
@@ -119,22 +115,14 @@ sub MessageToMTA {
 
   my $from = $email->header('From');
 
-  my ($hostname, @args);
-  my $mailer_class = $method;
+  my $hostname;
+  my $transport;
   if ($method eq "Sendmail") {
-    $mailer_class = 'Bugzilla::Send::Sendmail';
     if (ON_WINDOWS) {
-      $Email::Send::Sendmail::SENDMAIL = SENDMAIL_EXE;
+      $transport = Bugzilla::Sender::Transport::Sendmail->new({ sendmail => SENDMAIL_EXE });
     }
-    push @args, "-i";
-
-    # We want to make sure that we pass *only* an email address.
-    if ($from) {
-      my ($email_obj) = Email::Address->parse($from);
-      if ($email_obj) {
-        my $from_email = $email_obj->address;
-        push(@args, "-f$from_email") if $from_email;
-      }
+    else {
+      $transport = Bugzilla::Sender::Transport::Sendmail->new();
     }
   }
   else {
@@ -160,22 +148,26 @@ sub MessageToMTA {
   }
 
   if ($method eq "SMTP") {
-    push @args,
-      Host     => Bugzilla->params->{"smtpserver"},
-      username => Bugzilla->params->{"smtp_username"},
-      password => Bugzilla->params->{"smtp_password"},
-      Hello    => $hostname,
-      Debug    => Bugzilla->params->{'smtp_debug'};
+    my ($host, $port) = split(/:/, Bugzilla->params->{'smtpserver'}, 2);
+    $transport = Email::Sender::Transport::SMTP->new({
+      host => $host,
+      defined($port) ? (port => $port) : (),
+      sasl_username => Bugzilla->params->{'smtp_username'},
+      sasl_password => Bugzilla->params->{'smtp_password'},
+      helo          => $hostname,
+      ssl           => Bugzilla->params->{'smtp_ssl'},
+      debug         => Bugzilla->params->{'smtp_debug'}
+    });
   }
 
-  Bugzilla::Hook::process('mailer_before_send',
-    {email => $email, mailer_args => \@args});
+  Bugzilla::Hook::process('mailer_before_send', {email => $email});
 
   try {
     my $to         = $email->header('to') or die qq{Unable to find "To:" address\n};
-    my @recipients = Email::Address->parse($to);
+    my @recipients = Email::Address::XS->parse($to);
     die qq{Unable to parse "To:" address - $to\n} unless @recipients;
     die qq{Did not expect more than one "To:" address in $to\n} if @recipients > 1;
+    die qq{Invalid address in "To:" address - $to\n} if !$recipients[0]->is_valid;
     my $recipient = $recipients[0];
     my $badhosts  = Bugzilla::Bloomfilter->lookup("badhosts");
     if ($badhosts && $badhosts->test($recipient->host)) {
@@ -230,11 +222,12 @@ sub MessageToMTA {
     close TESTFILE;
   }
   else {
-    # This is useful for both Sendmail and Qmail, so we put it out here.
+    # This is useful for Sendmail, so we put it out here.
     local $ENV{PATH} = SENDMAIL_PATH;
-    my $mailer = Email::Send->new({mailer => $mailer_class, mailer_args => \@args});
-    my $retval = $mailer->send($email);
-    ThrowCodeError('mail_send_error', {msg => $retval, mail => $email}) if !$retval;
+    eval { sendmail($email, {transport => $transport}) };
+    if ($@) {
+      ThrowCodeError('mail_send_error', {msg => $@->message, mail => $email});
+    }
   }
 
   # insert into email_rates

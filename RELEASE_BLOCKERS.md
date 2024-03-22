@@ -35,6 +35,8 @@ their own bugfixes to those modules, but that’s not something we want to do
 upstream.  Version 5.0 rewrote the email code to use currently-supported Perl
 modules.  That needs to be ported into Harmony.
 
+**[COMPLETED]**
+
 # Postgresql Compatibility
 
 We suspect, but don’t know for certain, that BMO may have moved to using

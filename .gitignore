@@ -7,6 +7,7 @@
 /local/*
 /logs/*
 /template/en/custom
+/docs/doctrees
 /docs/en/rst/extensions/*
 /docs/en/rst/api/extensions/*
 /docs/en/html

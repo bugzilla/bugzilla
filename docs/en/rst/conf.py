@@ -120,8 +120,8 @@ rst_epilog = """
 
 ----------
 
-This documentation undoubtedly has bugs; if you find some, please file
-them `here <https://bugzilla.mozilla.org/enter_bug.cgi?product=bugzilla.mozilla.org&component=Documentation>`_.
+To report bugs in and suggest updates for this documentation, please file
+them `on our bug tracker <https://bugzilla.mozilla.org/enter_bug.cgi?product=Bugzilla&component=Documentation>`_.
 """
 
 # -- Options for HTML output ---------------------------------------------------

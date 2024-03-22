@@ -12,9 +12,7 @@ function in MySQL 8 due to the word "groups" becoming a reserved word.
 
 We need to make Bugzilla work on MySQL 8+.
 
-I believe the code I wrote over a year ago could allow us to support mysql 8,
-and that's in [this
-branch](https://github.com/bugzilla/harmony/blob/dylan/mysql-8)
+**[COMPLETED]**
 
 # Upgrade Path from 4.4, 5.0, 5.2, and 5.1
 
@@ -94,4 +92,5 @@ were dropped or new features being picked up when compared to version 5.2.
   - anything new/changed that is already on the list needs to be removed from
     the list (because 5.2 already had it, so it's not a change)
   - anything new/changed that is NOT already on your list needs to be added to
-    the list as a removed feature
+    the list as a removed feature. We need to make note of these in case of
+    anything important that should be backported to Harmony before release.

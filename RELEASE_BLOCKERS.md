@@ -85,12 +85,14 @@ were dropped or new features being picked up when compared to version 5.2.
 
 - Start with an empty list.
 - Go through [Harmony's commit
-  logs](https://github.com/bugzilla/harmony/commits/main) going all the way
-  back to Version 4.2, and make note of anything new/changed that's release-note
-  worthy.
+  logs](https://github.com/bugzilla/harmony/compare/3a0affd238cd65bc8c40e316ab20663f3110cee9...main)
+  going all the way back to Version 4.2 (the commit log at the link starts at
+  the diverging commit between the two branches), and make note of anything
+  new/changed that's release-note worthy.
 - Go through [5.2's commit
-  logs](https://github.com/bugzilla/bugzilla/commits/5.2) goinng all the way
-  back to Version 4.2
+  logs](https://github.com/bugzilla/bugzilla/compare/3a0affd238cd65bc8c40e316ab20663f3110cee9...5.2)
+  goinng all the way back to Version 4.2 (the commit log at the link starts at
+  the diverging commit between the two branches)
   - anything new/changed that is already on the list needs to be removed from
     the list (because 5.2 already had it, so it's not a change)
   - anything new/changed that is NOT already on your list needs to be added to

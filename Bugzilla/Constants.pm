@@ -514,22 +514,43 @@ use constant INSTALLATION_MODE_NON_INTERACTIVE => 1;
 # Data about what we require for different databases.
 use constant DB_MODULE => {
 
-  # MySQL 5.0.15 was the first production 5.0.x release.
+  # Require MySQL 5.6.x for InnoDB's fulltext support
   'mysql' => {
     db         => 'Bugzilla::DB::Mysql',
-    db_version => '5.0.15',
+    db_version => '5.6.12',
+    db_blocklist => ['^[89]\.'],
+    # the following is a "human-readable" version to show in the release notes
+    db_blklst_str => '>= 8.0',
     dbd        => {
       package => 'DBD-mysql',
       module  => 'DBD::mysql',
 
       # Disallow development versions
-      blacklist => ['_'],
+      blocklist => ['_'],
 
       # For UTF-8 support. 4.001 makes sure that blobs aren't
       # marked as UTF-8.
-      version => '4.001',
+      version => '4.032',
     },
     name => 'MySQL'
+  },
+
+  # MariaDB needs version 10 for InnoDB fulltext support
+  'mariadb' => {
+    db         => 'Bugzilla::DB::Mysql',
+    db_version => '10.0.5',
+    dbd        => {
+      package => 'DBD-mysql',
+      module  => 'DBD::mysql',
+
+      # Disallow development versions
+      blocklist => ['_'],
+
+      # For UTF-8 support. 4.001 makes sure that blobs aren't
+      # marked as UTF-8.
+      version => '4.032',
+    },
+    name => 'MariaDB'
   },
 
   # Also see Bugzilla::DB::Pg::bz_check_server_version, which has special

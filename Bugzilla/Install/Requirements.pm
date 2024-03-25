@@ -78,8 +78,8 @@ use constant APACHE_PATH => [qw(
 # installed or not. "version" is the version we need, or 0 if we'll accept
 # any version.
 #
-# "blacklist" is an arrayref of regular expressions that describe versions that
-# are 'blacklisted'--that is, even if the version is high enough, Bugzilla
+# "blocklist" is an arrayref of regular expressions that describe versions that
+# are 'blocklisted'--that is, even if the version is high enough, Bugzilla
 # will refuse to say that it's OK to run with that version.
 sub REQUIRED_MODULES {
   my @modules = (
@@ -296,7 +296,7 @@ sub OPTIONAL_MODULES {
       version => '0.712',
 
       # SOAP::Transport::HTTP 1.12 is bogus.
-      blacklist => ['^1\.12$'],
+      blocklist => ['^1\.12$'],
       feature   => ['xmlrpc'],
     },
 
@@ -755,10 +755,10 @@ sub have_vers {
 
   my $vok
     = ($vnum ne '-1' && version->new($vnum) >= version->new($wanted)) ? 1 : 0;
-  my $blacklisted;
-  if ($vok && $params->{blacklist}) {
-    $blacklisted = grep($vnum =~ /$_/, @{$params->{blacklist}});
-    $vok         = 0 if $blacklisted;
+  my $blocklisted;
+  if ($vok && $params->{blocklist}) {
+    $blocklisted = grep($vnum =~ /$_/, @{$params->{blocklist}});
+    $vok         = 0 if $blocklisted;
   }
 
   if ($output) {
@@ -767,7 +767,7 @@ sub have_vers {
       ok          => $vok,
       wanted      => $wanted,
       found       => $vnum,
-      blacklisted => $blacklisted
+      blocklisted => $blocklisted
     });
   }
 
@@ -776,8 +776,8 @@ sub have_vers {
 
 sub _checking_for {
   my ($params) = @_;
-  my ($package, $ok, $wanted, $blacklisted, $found)
-    = @$params{qw(package ok wanted blacklisted found)};
+  my ($package, $ok, $wanted, $blocklisted, $found)
+    = @$params{qw(package ok wanted blocklisted found)};
 
   my $ok_string = $ok ? install_string('module_ok') : '';
 
@@ -805,10 +805,10 @@ sub _checking_for {
     $ok_string = install_string('module_not_found');
   }
 
-  my $black_string = $blacklisted ? install_string('blacklisted') : '';
+  my $block_string = $blocklisted ? install_string('blocklisted') : '';
   my $want_string = $wanted ? "v$wanted" : install_string('any');
 
-  my $str = sprintf "%s %20s %-11s $ok_string $black_string\n",
+  my $str = sprintf "%s %20s %-11s $ok_string $block_string\n",
     install_string('checking_for'), $package, "($want_string)";
   print $ok ? $str : colored($str, COLOR_ERROR);
 }

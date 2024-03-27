@@ -51,6 +51,9 @@ RUN apt-get -y install \
  graphviz \
  vim-common
 
+# Ubuntu doesn't ship a new enough Template::Toolkit, so install this one manually
+RUN cpan install Template::Toolkit
+
 WORKDIR /var/www/html
 COPY --chown=root:www-data . /var/www/html
 COPY ./docker/000-default.conf /etc/apache2/sites-available/000-default.conf

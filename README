@@ -13,6 +13,15 @@ Bugzilla's comprehensive documentation, including installation instructions,
 can be found here:
 http://www.bugzilla.org/docs/
 
+Docker Quick Start
+==================
+
+If you have Docker installed and just want to take a quick look around Bugzilla
+you can cd into the bugzilla directory (same directory containing this README)
+and type `docker compose up`. The URL to access and the username and password
+for the default admin account will be shown on the console once it finishes
+setting it up.
+
 Reporting Bugs
 ==============
 

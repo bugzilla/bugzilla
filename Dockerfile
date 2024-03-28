@@ -1,4 +1,4 @@
-FROM ubuntu:20.04
+FROM ubuntu:22.04
 
 ENV DEBIAN_FRONTEND noninteractive
 
@@ -6,7 +6,7 @@ RUN apt-get update && apt-get -y dist-upgrade
 RUN apt-get -y install \
  apache2 \
  mariadb-client \
- netcat \
+ netcat-traditional \
  libappconfig-perl \
  libdate-calc-perl \
  libtemplate-perl \
@@ -51,7 +51,7 @@ RUN apt-get -y install \
  graphviz \
  vim-common
 
-# Ubuntu doesn't ship a new enough Template::Toolkit, so install this one manually
+# Ubuntu22 doesn't ship a new enough Template::Toolkit, so install this one manually
 RUN cpan install Template::Toolkit
 
 WORKDIR /var/www/html

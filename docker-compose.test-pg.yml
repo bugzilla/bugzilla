@@ -16,7 +16,7 @@ services:
     environment:
       - 'BMO_inbound_proxies=*'
       - BMO_db_driver=pg
-      - BMO_db_host=bugzilla6.db
+      - BMO_db_host=bugzilla6.pgsql9
       - BMO_db_name=bugs
       - BMO_db_pass=bugs
       - BMO_db_user=bugs
@@ -27,8 +27,8 @@ services:
       - BMO_urlbase=AUTOMATIC
       - BUGZILLA_ALLOW_INSECURE_HTTP=1
       - BZ_ANSWERS_FILE=/app/conf/checksetup_answers.txt
-      - BZ_QA_ANSWERS_FILE=/app/.circleci/checksetup_answers.txt
-      - BZ_QA_CONF_FILE=/app/.circleci/selenium_test.conf
+      - BZ_QA_ANSWERS_FILE=/app/.github/checksetup_answers.txt
+      - BZ_QA_CONF_FILE=/app/.github/selenium_test.conf
       - BZ_QA_CONFIG=1
       - LOCALCONFIG_ENV=1
       - LOG4PERL_CONFIG_FILE=log4perl-test.conf
@@ -38,11 +38,11 @@ services:
       - TWD_HOST=selenium
       - TWD_PORT=4444
     depends_on:
-      - bugzilla6.db
+      - bugzilla6.pgsql9
       - memcached
       - selenium
 
-  bugzilla6.db:
+  bugzilla6.pgsql9:
     image: postgres:9.0
     tmpfs:
       - /tmp

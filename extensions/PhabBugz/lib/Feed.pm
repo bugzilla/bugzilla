@@ -740,8 +740,15 @@ sub save_last_id {
   # Store the largest last key so we can start from there in the next session
   my $type_full = $type . "_last_id";
   TRACE("UPDATING " . uc($type_full) . ": $last_id");
-  Bugzilla->dbh->do("REPLACE INTO phabbugz (name, value) VALUES (?, ?)",
-    undef, $type_full, $last_id);
+  if (Bugzilla->dbh->selectrow_array("SELECT 1 FROM phabbugz WHERE name = ?",
+        undef, $type_full)) {
+    Bugzilla->dbh->do("UPDATE phabbugz SET value = ? WHERE name = ?",
+      undef, $last_id, $type_full);
+  }
+  else {
+    Bugzilla->dbh->do("INSERT INTO phabbugz (name, value) VALUES (?, ?)",
+      undef, $type_full, $last_id);
+  }
 }
 
 sub get_group_members {

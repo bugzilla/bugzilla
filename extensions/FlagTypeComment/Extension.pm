@@ -42,7 +42,7 @@ sub db_schema_abstract_schema {
   $args->{'schema'}->{'flagtype_comments'} = {
     FIELDS => [
       type_id => {
-        TYPE       => 'SMALLINT(6)',
+        TYPE       => 'INT2',
         NOTNULL    => 1,
         REFERENCES => {TABLE => 'flagtypes', COLUMN => 'id', DELETE => 'CASCADE'}
       },

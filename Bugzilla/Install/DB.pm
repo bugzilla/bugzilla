@@ -4242,7 +4242,7 @@ sub _migrate_nicknames {
   my $dbh = Bugzilla->dbh;
   my $sth
     = $dbh->prepare(
-    'SELECT userid FROM profiles WHERE realname LIKE "%:%" AND is_enabled = 1 AND NOT nickname'
+    "SELECT userid FROM profiles WHERE realname LIKE '%:%' AND is_enabled = 1 AND nickname = ''"
     );
   $sth->execute();
   while (my ($user_id) = $sth->fetchrow_array) {

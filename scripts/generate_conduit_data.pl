@@ -187,10 +187,19 @@ my $oauth_secret = $ENV{PHABRICATOR_OAUTH_SECRET} || '';
 if ($oauth_id && $oauth_secret) {
   print "creating phabricator oauth2 client...\n";
 
-  $dbh->do(
-    'REPLACE INTO oauth2_client (client_id, description, secret) VALUES (?, \'Phabricator\', ?)',
-    undef, $oauth_id, $oauth_secret
-  );
+  if ($dbh->selectrow_array("SELECT 1 FROM oauth2_client WHERE client_id = ?",
+        undef, $oauth_id)) {
+    $dbh->do(
+      "UPDATE oauth2_client SET description = 'Phabricator', secret = ? WHERE client_id = ?",
+      undef, $oauth_secret, $oauth_id
+    );
+  }
+  else {
+    $dbh->do(
+      'INSERT INTO oauth2_client (client_id, description, secret) VALUES (?, \'Phabricator\', ?)',
+      undef, $oauth_id, $oauth_secret
+    );
+  }
 
   my $client_data
     = $dbh->selectrow_hashref('SELECT * FROM oauth2_client WHERE client_id = ?',
@@ -199,8 +208,17 @@ if ($oauth_id && $oauth_secret) {
   my $scope_id = $dbh->selectrow_array(
     'SELECT id FROM oauth2_scope WHERE name = \'user:read\'', undef);
 
-  $dbh->do('REPLACE INTO oauth2_client_scope (client_id, scope_id) VALUES (?, ?)',
-    undef, $client_data->{id}, $scope_id);
+  if ($dbh->selectrow_array("SELECT 1 FROM oauth2_client_scope WHERE client_id = ?",
+      undef, $client_data->{id})) {
+    $dbh->do("UPDATE oauth2_client_scope SET scope_id = ? WHERE client_id = ?",
+      undef, $scope_id, $client_data->{id}
+    );
+  }
+  else {
+    $dbh->do('INSERT INTO oauth2_client_scope (client_id, scope_id) VALUES (?, ?)',
+      undef, $client_data->{id}, $scope_id
+    );
+  }
 }
 
 print "installation and configuration complete!\n";

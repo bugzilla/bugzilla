@@ -51,10 +51,14 @@ export DOCKER_CLI_HINTS=false
 export CI=""
 export CIRCLE_SHA1=""
 export CIRCLE_BUILD_URL=""
-$DOCKER compose -f docker-compose.test.yml build
+DOCKER_COMPOSE_FILE=docker-compose.test.yml
+if [ "$1" == "pg" ]; then
+    DOCKER_COMPOSE_FILE=docker-compose.test-pg.yml
+fi
+$DOCKER compose -f $DOCKER_COMPOSE_FILE build
 if [ $? == 0 ]; then
-    $DOCKER compose -f docker-compose.test.yml run --rm --name bugzilla6.test bugzilla6.test test_bmo -q -f t/bmo/*.t
-    $DOCKER compose -f docker-compose.test.yml stop
+    $DOCKER compose -f $DOCKER_COMPOSE_FILE run --rm --name bugzilla6.test bugzilla6.test test_bmo -q -f t/bmo/*.t
+    $DOCKER compose -f $DOCKER_COMPOSE_FILE down
 else
     echo "docker compose build failed."
 fi

@@ -18,7 +18,7 @@ services:
       - /run
     environment: &bz_env
       - 'BMO_inbound_proxies=*'
-      - BMO_db_host=bugzilla6.db
+      - BMO_db_host=bugzilla6.mysql8
       - BMO_db_name=bugs
       - BMO_db_pass=bugs
       - BMO_db_user=bugs
@@ -36,7 +36,7 @@ services:
       - MOJO_LISTEN=http://*:8000
       - PORT=8000
     depends_on:
-      - bugzilla6.db
+      - bugzilla6.mysql8
       - memcached
 #      - tinyproxy
     ports:
@@ -53,7 +53,7 @@ services:
 #    environment: *bz_env
 #    restart: always
 #    depends_on:
-#      - bugzilla6.db
+#      - bugzilla6.mysql8
 #      - memcached
 
 #  bugzilla6.feed:
@@ -72,7 +72,7 @@ services:
 #    environment: *bz_env
 #    restart: always
 #    depends_on:
-#      - bugzilla6.db
+#      - bugzilla6.mysql8
 #      - memcached
 
 #  bugzilla6.pushd:
@@ -91,10 +91,10 @@ services:
 #    environment: *bz_env
 #    restart: always
 #    depends_on:
-#      - bugzilla6.db
+#      - bugzilla6.mysql8
 #      - memcached
 
-  bugzilla6.db:
+  bugzilla6.mysql8:
     build:
       context: .
       dockerfile: Dockerfile.mysql8

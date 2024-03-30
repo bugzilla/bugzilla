@@ -47,6 +47,8 @@ they used for their local customizations instead of in the actual database
 abstraction modules. This code needs to be migrated back to the database
 abstraction modules so their extension can be disposed of.
 
+**[COMPLETED]**
+
 # Sensible, Default Logging Configuration
 
 Bugzilla::Logging controls how the application logs. It has support for

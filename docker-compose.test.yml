@@ -15,7 +15,7 @@ services:
       - /run
     environment:
       - 'BMO_inbound_proxies=*'
-      - BMO_db_host=bugzilla6.db
+      - BMO_db_host=bugzilla6.mysql8
       - BMO_db_name=bugs
       - BMO_db_pass=bugs
       - BMO_db_user=bugs
@@ -38,11 +38,11 @@ services:
       - TWD_HOST=selenium
       - TWD_PORT=4444
     depends_on:
-      - bugzilla6.db
+      - bugzilla6.mysql8
       - memcached
       - selenium
 
-  bugzilla6.db:
+  bugzilla6.mysql8:
     image: mysql:8
     tmpfs:
       - /tmp

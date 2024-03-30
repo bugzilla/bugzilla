@@ -22,9 +22,16 @@ has 'attach_id' => (
 
 sub set_class {
   my ($self) = @_;
-  Bugzilla->dbh->do(
-    "REPLACE INTO attachment_storage_class (id, storage_class) VALUES (?, ?)",
-    undef, $self->attach_id, $self->data_type);
+  if ($self->data_exists()) {
+    Bugzilla->dbh->do(
+      "UPDATE attachment_storage_class SET storage_class = ? WHERE id = ?",
+      undef, $self->data_type, $self->attach_id);
+  }
+  else {
+    Bugzilla->dbh->do(
+      "INSERT INTO attachment_storage_class (id, storage_class) VALUES (?, ?)",
+      undef, $self->attach_id, $self->data_type);
+  }
   return $self;
 }
 

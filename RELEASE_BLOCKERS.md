@@ -68,6 +68,8 @@ bugzilla.pl sub-commands can be defined in the Bugzilla::App::Cmd::* namespace.
 If we release harmony and it has a good (and small!) container, it will look
 good.
 
+**[COMPLETED]**
+
 # Documentation
 
 BMO gutted some of upstream's documentation about Bugzilla, so the entirety of

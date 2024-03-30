@@ -53,7 +53,8 @@ export CIRCLE_SHA1=""
 export CIRCLE_BUILD_URL=""
 $DOCKER compose -f docker-compose.test.yml build
 if [ $? == 0 ]; then
-    $DOCKER compose -f docker-compose.test.yml run bmo.test test_bmo -q -f t/bmo/*.t
+    $DOCKER compose -f docker-compose.test.yml run --rm --name bugzilla6.test bugzilla6.test test_bmo -q -f t/bmo/*.t
+    $DOCKER compose -f docker-compose.test.yml stop
 else
     echo "docker compose build failed."
 fi

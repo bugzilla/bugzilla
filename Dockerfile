@@ -2,14 +2,6 @@ FROM bugzilla/bugzilla-perl-slim:20240322.1
 
 ENV DEBIAN_FRONTEND noninteractive
 
-ARG CI
-ARG CIRCLE_SHA1
-ARG CIRCLE_BUILD_URL
-
-ENV CI=${CI}
-ENV CIRCLE_BUILD_URL=${CIRCLE_BUILD_URL}
-ENV CIRCLE_SHA1=${CIRCLE_SHA1}
-
 ENV LOG4PERL_CONFIG_FILE=log4perl-json.conf
 
 RUN apt-get install -y rsync

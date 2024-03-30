@@ -1,0 +1,3 @@
+FROM mysql:8
+# We do this because we don't want everything in the docker/mysql folder, just the one
+COPY docker/mysql/bugzilla-mysql8.cnf /etc/mysql/conf.d/

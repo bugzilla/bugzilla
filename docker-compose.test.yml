@@ -5,8 +5,8 @@
 version: '3.6'
 
 services:
-  bmo.test:
-    build: &bmo_build
+  bugzilla6.test:
+    build:
       context: .
       dockerfile: Dockerfile
     command: dev_httpd
@@ -15,7 +15,7 @@ services:
       - /run
     environment:
       - 'BMO_inbound_proxies=*'
-      - BMO_db_host=bmo.db
+      - BMO_db_host=bugzilla6.db
       - BMO_db_name=bugs
       - BMO_db_pass=bugs
       - BMO_db_user=bugs
@@ -30,9 +30,6 @@ services:
       - BZ_QA_ANSWERS_FILE=/app/.github/checksetup_answers.txt
       - BZ_QA_CONF_FILE=/app/.github/selenium_test.conf
       - BZ_QA_CONFIG=1
-      - CI=${CI}
-      - CIRCLE_SHA1=${CIRCLE_SHA1}
-      - CIRCLE_BUILD_URL=${CIRCLE_BUILD_URL}
       - LOCALCONFIG_ENV=1
       - LOG4PERL_CONFIG_FILE=log4perl-test.conf
       - LOGGING_PORT=5880
@@ -41,11 +38,11 @@ services:
       - TWD_HOST=selenium
       - TWD_PORT=4444
     depends_on:
-      - bmo.db
+      - bugzilla6.db
       - memcached
       - selenium
 
-  bmo.db:
+  bugzilla6.db:
     image: mysql:8
     tmpfs:
       - /tmp
@@ -65,6 +62,3 @@ services:
     shm_size: '512m'
     ports:
       - "5900:5900"
-
-volumes:
-  bmo-mysql-db:

@@ -38,6 +38,7 @@ BEGIN {
 use constant CI => $ENV{CI};
 
 my $cmd  = shift @ARGV;
+print "cmd = $cmd\n";
 my $opts = __PACKAGE__->can("opt_$cmd") // sub {@ARGV};
 my $func = __PACKAGE__->can("cmd_$cmd") // sub {
   check_data_dir();
@@ -126,6 +127,31 @@ sub cmd_dev_httpd {
     );
   }
 
+  require Bugzilla;
+  my $answers = Bugzilla->installation_answers($ENV{BZ_ANSWERS_FILE});
+  my $BZ_URLBASE = $::ENV{'BMO_urlbase'};
+  my $LOGIN_USER = "Admin user: $answers->{'ADMIN_EMAIL'}";
+  my $LOGIN_PASS = "Admin password: $answers->{'ADMIN_PASSWORD'}";
+  print <<EOF;
+#########################################
+##                                     ##
+##  Your Bugzilla installation should  ##
+##         now be reachable at:        ##
+##                                     ##
+EOF
+printf "##%s%s%s##\n", ' ' x int((37 - length($BZ_URLBASE)) / 2), $BZ_URLBASE, ' ' x (int((37 - length($BZ_URLBASE)) / 2) + (1 - length($BZ_URLBASE)%2));
+  print <<EOF;
+##                                     ##
+EOF
+printf "##%s%s%s##\n", ' ' x int((37 - length($LOGIN_USER)) / 2), $LOGIN_USER, ' ' x (int((37 - length($LOGIN_USER)) / 2) + (1 - length($LOGIN_USER)%2));
+printf "##%s%s%s##\n", ' ' x int((37 - length($LOGIN_PASS)) / 2), $LOGIN_PASS, ' ' x (int((37 - length($LOGIN_PASS)) / 2) + (1 - length($LOGIN_PASS)%2));
+print <<EOF;
+##                                     ##
+##   user/password only valid if you   ##
+##    haven't already changed them.    ##
+##                                     ##
+#########################################
+EOF
   my $httpd_exit_f = run_cereal_and_httpd('-DACCESS_LOGS');
   assert_httpd()->get;
   exit $httpd_exit_f->get;

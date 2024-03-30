@@ -66,7 +66,7 @@ while [ $? == 0 ]; do
     ((ITER++))
     $DOCKER pull bugzilla/bugzilla-perl-slim:${DATE}.${ITER} >/dev/null 2>/dev/null
 done
-$DOCKER build -t bugzilla/bugzilla-perl-slim:${DATE}.${ITER} -f Dockerfile.bmo-slim .
+$DOCKER build -t bugzilla/bugzilla-perl-slim:${DATE}.${ITER} -f Dockerfile.bugzilla-slim .
 if [ $? == 0 ]; then
     echo
     echo "The build appears to have succeeded. Don't forget to change the FROM line"

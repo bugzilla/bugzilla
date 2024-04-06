@@ -64,6 +64,7 @@ from those releases are included <a href="#point504">below</a> in case you're up
 <ul>
   <li><a href="#req_perl">Perl</a></li>
   <li><a href="#req_mysql">For MySQL Users</a></li>
+  <li><a href="#req_mariadb">For MariaDB Users</a></li>
   <li><a href="#req_pg">For PostgreSQL Users</a></li>
   <li><a href="#req_oracle">For Oracle Users</a></li>
   <li><a href="#req_sqlite">For SQLite Users</a></li>
@@ -227,7 +228,7 @@ the same conventions as the popular Mojolicious product and includes a
 <code>.perltidyrc</code> to do the same.  You may use whatever coding style you
 want, but all files commited to the repo must be reformatted according to those
 rules.</li>
-<li><strong>Developers:</strong> A new hook <code>template_after_create</code> was added, which can be used to manipulate the template object before it gets rendered. You can use this to define new Template Toolkit virtual methods or filters in extensions. <a href="https://github.com/bugzilla/bugzilla/pull/60">PR #60</a></li>
+<li><strong>Developers:</strong> A new hook <code>template_after_create</code> was added, which can be used to manipulate the template object before it gets rendered. You can use this to define new Template Toolkit virtual methods or filters in extensions. (<a href="https://github.com/bugzilla/bugzilla/pull/60">PR #60</a>)</li>
 </ul>
 
 <ul>[% INCLUDE global/footer.html.tmpl %]

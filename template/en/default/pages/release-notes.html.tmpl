@@ -49,32 +49,12 @@ full version release yet.</p>
 
 <h2 id="point">Updates in this 5.2.x Release</h2>
 
-<p>Because of the weird way we branched to fix the 5.0.5 numbering problem, the
-changes from 5.0.5 and 5.0.6 are included here in case you're upgrading from
-the 5.0.4.x branch.</p>
+<p>Future releases on this branch will contain a list of the updates since the
+last point release in this section.</p>
 
-<h3>5.0.6</h3>
-
-<ul>
-<li><strong>Adminstration:</strong> It is now possible to create more than 255 flags (up to 65535) [% INCLUDE buglink id=1526703 %]</li>
-</ul>
-
-<h3>5.0.5</h3>
-
-<ul>
-<li><strong>User Interface:</strong> Email addresses with apostrophes (yes,
-that's legal) no longer break the "Send Mail to Bug Assignees" button on bug
-lists. [% INCLUDE buglink id=1226123 %]</li>
-<li><strong>Installation/Upgrading:</strong> If using MySQL, the
-<code>bugs_fulltext</code> table is now InnoDB instead of MyISAM. This may
-cause your upgrade to take a while. [% INCLUDE buglink id=981487 %]</li>
-<li><strong>Developers:</strong> This release reformats the code according to
-the same conventions as the popular Mojolicious product and includes a
-<code>.perltidyrc</code> to do the same.  You may use whatever coding style you
-want, but all files commited to the repo must be reformatted according to those
-rules.</li>
-<li><strong>Developers:</strong> A new hook <code>template_after_create</code> was added, which can be used to manipulate the template object before it gets rendered. You can use this to define new Template Toolkit virtual methods or filters in extensions. <a href="https://github.com/bugzilla/bugzilla/pull/60">PR #60</a></li>
-</ul>
+<p>Because of the weird way versions 5.0.5 and 5.0.6 were released, changes
+from those releases are included below in case you're upgrading from the
+5.0.4.x branch.</p>
 
 <h2 id="req">Minimum Requirements</h2>
 
@@ -220,6 +200,33 @@ Requires that you have Docker already installed. [% INCLUDE buglink id=1888068
   </li>
   <li>Bugzilla now uses Email::Address::XS instead of Email::Address for managing email address parsing. If you made use of Email::Address directly you should update to use Email::Address::XS instead. [% INCLUDE buglink id=1853138 %]</li>
 
+</ul>
+
+<p>Because of the weird way we branched to fix the 5.0.5 numbering problem, the
+changes from 5.0.5 and 5.0.6 are included here in case you're upgrading from
+the 5.0.4.x branch.</p>
+
+<h3>5.0.6</h3>
+
+<ul>
+<li><strong>Adminstration:</strong> It is now possible to create more than 255 flags (up to 65535) [% INCLUDE buglink id=1526703 %]</li>
+</ul>
+
+<h3>5.0.5</h3>
+
+<ul>
+<li><strong>User Interface:</strong> Email addresses with apostrophes (yes,
+that's legal) no longer break the "Send Mail to Bug Assignees" button on bug
+lists. [% INCLUDE buglink id=1226123 %]</li>
+<li><strong>Installation/Upgrading:</strong> If using MySQL, the
+<code>bugs_fulltext</code> table is now InnoDB instead of MyISAM. This may
+cause your upgrade to take a while. [% INCLUDE buglink id=981487 %]</li>
+<li><strong>Developers:</strong> This release reformats the code according to
+the same conventions as the popular Mojolicious product and includes a
+<code>.perltidyrc</code> to do the same.  You may use whatever coding style you
+want, but all files commited to the repo must be reformatted according to those
+rules.</li>
+<li><strong>Developers:</strong> A new hook <code>template_after_create</code> was added, which can be used to manipulate the template object before it gets rendered. You can use this to define new Template Toolkit virtual methods or filters in extensions. <a href="https://github.com/bugzilla/bugzilla/pull/60">PR #60</a></li>
 </ul>
 
 <ul>[% INCLUDE global/footer.html.tmpl %]

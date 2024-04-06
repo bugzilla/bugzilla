@@ -199,7 +199,7 @@ Metadata to assist browsers in properly rendering Bugzilla on mobile browsers wa
 <ul>[% INCLUDE global/footer.html.tmpl %]
 
 [% BLOCK buglink %]
-(Bug <a href="https://bugzilla.mozilla.org?show_bug.cgi?id=[%- id -%]">[%- id -%]</a>)
+(<a href="https://bugzilla.mozilla.org?show_bug.cgi?id=[%- id -%]">Bug [% id -%]</a>)
 [% END %]
 
 [% BLOCK db_req %]

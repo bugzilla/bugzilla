@@ -173,7 +173,7 @@ Metadata to assist browsers in properly rendering Bugzilla on mobile browsers wa
     send email.</li>
   <li><strong>Installation:</strong> The <code>testserver.pl</code> script will
     now work with self-signed SSL certificates if you pass the
-    <code>--self-signed</code> option on the command line.</li>
+    <code>--self-signed</code> option on the command line. [% INCLUDE buglink id=1851398 %]</li>
 </ul>
 
 <h4 id="feat_webservices_other">WebService Changes</h4>
@@ -197,6 +197,10 @@ Metadata to assist browsers in properly rendering Bugzilla on mobile browsers wa
 </ul>
 
 <ul>[% INCLUDE global/footer.html.tmpl %]
+
+[% BLOCK buglink %]
+<a href="https://bugzilla.mozilla.org?show_bug.cgi?id=[%- id -%]">[%- id -%]</a>
+[% END %]
 
 [% BLOCK db_req %]
   [% SET m = DB_MODULE.$db %]

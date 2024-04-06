@@ -62,12 +62,18 @@ happened.</p>
 
 <h3>5.0.5</h3>
 
-<p>This release reformats the code according to the same conventions as the popular Mojolicious product and includes a <code>.perltidyrc</code> to do the same.
-You may use whatever coding style you want, but all files commited to the repo must be reformatted according to those rules.</p>
-
-<p>Additionally, we no longer follow the same release process as before. Releases will be more frequent.</p>
-
-<p>As it is now 2019, the bugs_fulltext table is now InnoDB instead of MyISAM. This may cause upgrade headaches.</p>
+<ul>
+<li><strong>User Interface:</strong> Email addresses with apostrophes (yes,
+that's legal) no longer break the "Send Mail to Bug Assignees" button on bug
+lists. [% INCLUDE buglink id=1226123 %]</li>
+<li><strong>Installation/Upgrading:</strong> If using MySQL, the
+<code>bugs_fulltext</code> table is now InnoDB instead of MyISAM. This may
+cause your upgrade to take a while. [% INCLUDE buglink id=981487 %]</li>
+<li><strong>Developers:</strong> This release reformats the code according to
+the same conventions as the popular Mojolicious product and includes a
+<code>.perltidyrc</code> to do the same.  You may use whatever coding style you
+want, but all files commited to the repo must be reformatted according to those
+rules.</li>
 
 <h2 id="req">Minimum Requirements</h2>
 

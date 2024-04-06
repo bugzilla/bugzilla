@@ -138,13 +138,28 @@ You may use whatever coding style you want, but all files commited to the repo m
 
 <ul>
   <li><a href="#feat_mobilerender">Improved Mobile Rendering</a></li>
+  <li><a href="#feat_mysql8">MySQL 8+ Support</a></li>
+  <li><a href="#feat_docker">Demo Docker Configuration</a></li>
+  <li><a href="#feat_other">Other Enhancements and Changes</a></li>
 </ul>
 
 <h3 id="feat_mobilerender">Improved Mobile Rendering</h3>
 
 <p>
-Metadata to assist browsers in properly rendering Bugzilla on mobile browsers was added. Without this metadata Google Search tools would report Bugzilla pages as not suitable for mobile devices. Bugzilla still needs work to actually look nice on mobile devices but this is a good start.
+Metadata to assist browsers in properly rendering Bugzilla on mobile browsers was added. Without this metadata Google Search tools would report Bugzilla pages as not suitable for mobile devices. Bugzilla still needs work to actually look nice on mobile devices but this is a good start. (<a href="https://github.com/bugzilla/bugzilla/pull/78">PR #78</a>)
 </p>
+
+<h3 id="feat_mysql8">MySQL 8+ Support</h3>
+
+<p>Bugzilla previously did not work on MySQL 8 or newer. Now it does. [% INCLUDE buglink id=1592129 %]</p>
+
+<h3 id="feat_docker">Demo Docker Configuration</h3>
+
+<p>Bugzilla now ships with a Docker Compose configuration which provides an
+out-of-the-box Bugzilla with a default configuration to test with. Type
+<code>docker compose up</code> in the root bugzilla directory to start it up.
+Requires that you have Docker already installed. [% INCLUDE buglink id=1888068
+%]</p>
 
 <h3 id="feat_other">Other Enhancements and Changes</h3>
 
@@ -153,6 +168,7 @@ Metadata to assist browsers in properly rendering Bugzilla on mobile browsers wa
 <ul>
   <li><strong>UI:</strong> WineHQ Forum links are now accepted in the See Also field on bugs. [% INCLUDE buglink id=1523814 %]</li>
   <li><strong>Accessibility:</strong> Color contrast in the default theme was adjusted to comply with WCAG AA 2.0 recommendations.[% INCLUDE buglink id=1798166 %]</li>
+  <li><strong>Email:</strong> Emails about bugs now include an <code>X-Bugzilla-ID</code> header which lists the Bug ID, for potential use in filtering. [% INCLUDE buglink id=1403169 %]<li>
 </ul>
 
 <h4>Enhancements for Administrators and Developers</h4>
@@ -171,7 +187,7 @@ Metadata to assist browsers in properly rendering Bugzilla on mobile browsers wa
     integrity.</li>
   <li><strong>Installation:</strong> Bugzilla now supports Email::MIME version
     1.949 and newer, which previously would crash Bugzilla when it tried to
-    send email.</li>
+    send email. [% INCLUDE buglink id=1657496 %]</li>
   <li><strong>Installation:</strong> The <code>testserver.pl</code> script will
     now work with self-signed SSL certificates if you pass the
     <code>--self-signed</code> option on the command line. [% INCLUDE buglink id=1851398 %]</li>
@@ -180,7 +196,7 @@ Metadata to assist browsers in properly rendering Bugzilla on mobile browsers wa
 <h4 id="feat_webservices_other">WebService Changes</h4>
 
 <ul>
-  <li><strong>Group.get</strong> method is now properly marked as Read Only.</li>
+  <li><strong>Group.get</strong> method is now properly marked as Read Only. [% INCLUDE buglink id=1584477 %]</li>
 </ul>
 
 <h2 id="code_changes">Code Changes Which May Affect Customizations and Extensions</h2>
@@ -192,8 +208,10 @@ Metadata to assist browsers in properly rendering Bugzilla on mobile browsers wa
     <code>
   my $q = Bugzilla-&gt;dbh-&gt;qi;
   Bugzilla-&gt;dbh-&gt;do("SELECT COUNT(*) FROM $q-&gt;{groups}");
-    </code>
+    </code><br>
+    [% INCLUDE buglink id=1592129 %]
   </li>
+  <li>Bugzilla now uses Email::Address::XS instead of Email::Address for managing email address parsing. If you made use of Email::Address directly you should update to use Email::Address::XS instead. [% INCLUDE buglink id=1853138 %]</li>
 
 </ul>
 

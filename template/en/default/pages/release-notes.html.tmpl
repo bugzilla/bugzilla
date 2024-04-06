@@ -53,7 +53,7 @@ full version release yet.</p>
 last point release in this section.</p>
 
 <p>Because of the weird way versions 5.0.5 and 5.0.6 were released, changes
-from those releases are included below in case you're upgrading from the
+from those releases are included <a href="#point504">below</a> in case you're upgrading from the
 5.0.4.x branch.</p>
 
 <h2 id="req">Minimum Requirements</h2>
@@ -199,8 +199,9 @@ Requires that you have Docker already installed. [% INCLUDE buglink id=1888068
     [% INCLUDE buglink id=1592129 %]
   </li>
   <li>Bugzilla now uses Email::Address::XS instead of Email::Address for managing email address parsing. If you made use of Email::Address directly you should update to use Email::Address::XS instead. [% INCLUDE buglink id=1853138 %]</li>
-
 </ul>
+
+<h3 id="point504">Changes since Version 5.0.4</h3>
 
 <p>Because of the weird way we branched to fix the 5.0.5 numbering problem, the
 changes from 5.0.5 and 5.0.6 are included here in case you're upgrading from

@@ -20,9 +20,9 @@ Evaluating Bugzilla
 If you want to try out Bugzilla to see if it meets your needs, you can do so on
 `Mozilla’s Bugzilla (BMO) test server <https://bugzilla-dev.allizom.org/>`_,
 though it comes with various Mozilla-specific customizations. The easiest way to
-explore the admin tools and more is `running a minimum local copy of BMO
-<https://github.com/mozilla-bteam/bmo/blob/master/README.rst>`_ using Vagrant or
-Docker. We are not offering any online vanilla test environment at this time.
+explore the admin tools and more is :ref:`running a minimum local copy of 
+BMO <docker>` using Vagrant or Docker. We are not offering a generic 
+test environment at this time.
 
 The `Bugzilla FAQ <https://wiki.mozilla.org/Bugzilla:FAQ>`_ may also be helpful,
 as it answers a number of questions people sometimes have about whether Bugzilla

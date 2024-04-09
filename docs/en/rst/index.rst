@@ -8,6 +8,7 @@ Bugzilla Documentation (bugzilla.org)
 
    about/index
    using/index
+   installing/index
    administering/index
    integrating/index
    api/index

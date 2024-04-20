@@ -536,6 +536,11 @@ sub bz_check_regexp {
 sub bz_setup_database {
   my ($self) = @_;
 
+  my $bz51install = $self->bz_index_info('bz_schema', 'bz_schema_version_idx');
+  if ($bz51install) {
+    ThrowCodeError("bz51_attempted_upgrade");
+  }
+
   # If we haven't ever stored a serialized schema,
   # set up the bz_schema table and store it.
   $self->_bz_init_schema_storage();

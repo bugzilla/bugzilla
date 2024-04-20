@@ -306,6 +306,16 @@ sub bz_check_server_version {
 sub bz_setup_database {
   my ($self) = @_;
 
+  # We want to catch if the user is trying to "upgrade" from 5.1 because
+  # that's actually a downgrade and you can't do that.
+  # This needs to happen here to prevent us from doing MySQL-specific
+  # stuff to the database before the global check is run in the call
+  # to SUPER->bz_setup_databae further down.
+  my $bz51install = $self->bz_index_info('bz_schema', 'bz_schema_version_idx');
+  if ($bz51install) {
+    ThrowCodeError("bz51_attempted_upgrade");
+  }
+
   # The "comments" field of the bugs_fulltext table could easily exceed
   # MySQL's default max_allowed_packet. Also, MySQL should never have
   # a max_allowed_packet smaller than our max_attachment_size. So, we

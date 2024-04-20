@@ -53,6 +53,8 @@ sub BUILDARGS {
   $dsn .= ";port=$port"         if $port;
   $dsn .= ";mariadb_socket=$sock" if $sock;
 
+  my %attrs = ();
+
   # MariaDB SSL options
   my ($ssl_ca_file, $ssl_ca_path, $ssl_cert, $ssl_key) = @$params{
     qw(db_mysql_ssl_ca_file db_mysql_ssl_ca_path
@@ -333,7 +335,7 @@ sub bz_setup_database {
     die install_string('mysql_innodb_disabled');
   }
 
-  if ($self->utf8_charset eq 'utf8mb4') {
+  if ($self->utf8_charset eq 'utf8mb3') {
     my %global = map {@$_}
       @{$self->selectall_arrayref(q(SHOW GLOBAL VARIABLES LIKE 'innodb_%'))};
 
@@ -894,13 +896,16 @@ sub _fix_defaults {
 
 sub utf8_charset {
   return 'utf8' unless Bugzilla->params->{'utf8'};
-  return Bugzilla->params->{'utf8'} eq 'utf8mb4' ? 'utf8mb4' : 'utf8';
+  return Bugzilla->params->{'utf8'} eq 'utf8mb4' ? 'utf8mb4' : 'utf8mb3';
 }
 
 sub utf8_collate {
   my $charset = utf8_charset();
   if ($charset eq 'utf8') {
     return 'utf8_general_ci';
+  }
+  elsif ($charset eq 'utf8mb3') {
+    return 'utf8mb3_general_ci';
   }
   elsif ($charset eq 'utf8mb4') {
     return 'utf8mb4_unicode_520_ci';
@@ -916,7 +921,7 @@ sub default_row_format {
   if ($charset eq 'utf8') {
     return 'Compact';
   }
-  elsif ($charset eq 'utf8mb4') {
+  elsif (($charset eq 'utf8mb4') || ($charset eq 'utf8mb3')) {
     my @no_compress = qw(
       bug_user_last_visit
       cc

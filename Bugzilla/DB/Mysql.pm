@@ -310,7 +310,7 @@ sub bz_setup_database {
   # that's actually a downgrade and you can't do that.
   # This needs to happen here to prevent us from doing MySQL-specific
   # stuff to the database before the global check is run in the call
-  # to SUPER->bz_setup_databae further down.
+  # to SUPER->bz_setup_database further down.
   my $bz51install = $self->bz_index_info('bz_schema', 'bz_schema_version_idx');
   if ($bz51install) {
     ThrowCodeError("bz51_attempted_upgrade");

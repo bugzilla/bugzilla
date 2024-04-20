@@ -265,6 +265,16 @@ sub bz_setup_database {
   my $self = shift;
   $self->SUPER::bz_setup_database(@_);
 
+  # We want to catch if the user is trying to "upgrade" from 5.1 because
+  # that's actually a downgrade and you can't do that.
+  # This needs to happen here to prevent us from doing Pg-specific
+  # stuff to the database before the global check is run in the call
+  # to SUPER->bz_setup_database further down.
+  my $bz51install = $self->bz_index_info('bz_schema', 'bz_schema_version_idx');
+  if ($bz51install) {
+    ThrowCodeError("bz51_attempted_upgrade");
+  }
+
   my ($has_plpgsql)
     = $self->selectrow_array(
     "SELECT COUNT(*) FROM pg_language WHERE lanname = 'plpgsql'");

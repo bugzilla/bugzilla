@@ -560,13 +560,6 @@ sub bz_check_regexp {
 sub bz_setup_database {
   my ($self) = @_;
 
-  # We want to catch if the user is trying to "upgrade" from 5.1 because
-  # that's actually a downgrade and you can't do that.
-  my $bz51install = $self->bz_index_info('bz_schema', 'bz_schema_version_idx');
-  if ($bz51install) {
-    ThrowCodeError("bz51_attempted_upgrade");
-  }
-
   # If we haven't ever stored a serialized schema,
   # set up the bz_schema table and store it.
   $self->_bz_init_schema_storage();

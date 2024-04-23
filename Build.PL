@@ -33,10 +33,10 @@ sub build_requires {
 
 sub recommends {
     my $recommends = OPTIONAL_MODULES();
-    my @blocklist = ('Apache-SizeLimit', 'mod_perl'); # Does not compile properly on Travis
+    my @blacklist = ('Apache-SizeLimit', 'mod_perl'); # Does not compile properly on Travis
     my $hrecommends = {};
     foreach my $module (@$recommends) {
-        next if grep($_ eq $module->{package}, @blocklist);
+        next if grep($_ eq $module->{package}, @blacklist);
         $hrecommends->{$module->{module}} = $module->{version};
     }
     return $hrecommends;

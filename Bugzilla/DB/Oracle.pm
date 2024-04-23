@@ -533,16 +533,6 @@ sub bz_table_list_real {
 sub bz_setup_database {
   my $self = shift;
 
-  # We want to catch if the user is trying to "upgrade" from 5.1 because
-  # that's actually a downgrade and you can't do that.
-  # This needs to happen here to prevent us from doing Oracle-specific
-  # stuff to the database before the global check is run in the call
-  # to SUPER->bz_setup_database further down.
-  my $bz51install = $self->bz_index_info('bz_schema', 'bz_schema_version_idx');
-  if ($bz51install) {
-    ThrowCodeError("bz51_attempted_upgrade");
-  }
-
   # Create a function that returns SYSDATE to emulate MySQL's "NOW()".
   # Function NOW() is used widely in Bugzilla SQLs, but Oracle does not
   # have that function, So we have to create one ourself.

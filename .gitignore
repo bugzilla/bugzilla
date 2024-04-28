@@ -20,7 +20,6 @@
 /localconfig.*
 /index.html
 /error_reports
-/.DS_Store
 /template_cache
 /Makefile
 /MYMETA.*
@@ -28,6 +27,7 @@
 /blib
 /Bugzilla-*.*/
 /local
+.DS_Store
 .vscode/perl-lang
 version.json
 __lbheartbeat__

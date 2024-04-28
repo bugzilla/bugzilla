@@ -58,6 +58,8 @@ app.
 The defaults need to be updated to log to a more generic location users are
 likely to have, or walk through setting it during the installation script.
 
+**[COMPLETED]**
+
 # Docker and Containerization
 
 I would like the Dockerfile to be rewritten such that the ENTRYPOINT is the

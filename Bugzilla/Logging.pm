@@ -14,6 +14,7 @@ use Log::Log4perl qw(:easy);
 use Log::Log4perl::MDC;
 use File::Spec::Functions qw(rel2abs catfile);
 use Bugzilla::Constants qw(bz_locations);
+use Bugzilla::Install::Localconfig;
 use English qw(-no_match_vars $PROGRAM_NAME);
 
 sub logfile {
@@ -28,7 +29,10 @@ sub fields {
 }
 
 BEGIN {
-  my $file = $ENV{LOG4PERL_CONFIG_FILE} // 'log4perl-default.conf';
+  my $lc = Bugzilla::Install::Localconfig::read_localconfig();
+  # Use the environment variable if it exists, otherwise use the value
+  # from localconfig, or if that's not set, use syslog.
+  my $file = $ENV{LOG4PERL_CONFIG_FILE} // ("log4perl-" . ($lc->{'logging_method'} // 'syslog') . ".conf");
   Log::Log4perl::Logger::create_custom_level('NOTICE', 'WARN', 5, 2);
   Log::Log4perl->init(rel2abs($file, bz_locations->{confdir}));
   TRACE("logging enabled in $PROGRAM_NAME");

@@ -102,6 +102,7 @@ use constant LOCALCONFIG_VARS => (
   {name => 'memcached_namespace', default => "bugzilla:",},
   {name => 'urlbase',             default => '',},
   {name => 'canonical_urlbase',   lazy => 1},
+  {name => 'logging_method',      default => 'syslog'},
   {name => 'nobody_user',         default => 'nobody@mozilla.org'},
   {name => 'attachment_base',     default => '',},
   {name => 'ses_username',        default => '',},

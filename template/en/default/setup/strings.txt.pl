@@ -223,6 +223,10 @@ If you want to use the "Difference Between Two Patches" feature of the
 Patch Viewer, please specify the full path to the "interdiff" executable
 here.
 END
+  localconfig_logging_method => <<'END',
+This option specifies the method to use to log any errors or debug messages
+create by Bugzilla. This will use the configuration found in conf/log4perl-{logging_method}.conf so anything listed there is valid. Examples are 'syslog', 'docker', 'file', and 'json'.
+END
   localconfig_memcached_servers => <<'END',
 If this option is set, Bugzilla will integrate with Memcached.
 Specify one or more servers, separated by spaces, using hostname:port

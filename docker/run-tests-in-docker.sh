@@ -56,6 +56,8 @@ if [ "$1" == "pg" ]; then
     DOCKER_COMPOSE_FILE=docker-compose.test-pg.yml
 elif [ "$1" == "sqlite" ]; then
     DOCKER_COMPOSE_FILE=docker-compose.test-sqlite.yml
+elif [ "$1" == "mariadb" ]; then
+    DOCKER_COMPOSE_FILE=docker-compose.test-mariadb.yml
 fi
 $DOCKER compose -f $DOCKER_COMPOSE_FILE build
 if [ $? == 0 ]; then

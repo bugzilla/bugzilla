@@ -276,22 +276,45 @@ sub bz_check_server_version {
   my ($self, $db, $output) = @_;
 
   my $sql_vers = $self->bz_server_version;
-
+  if (((lc($db->{name}) eq 'mysql') || (lc($db->{name}) eq "mariadb"))
+    && ($sql_vers =~ s/^5\.5\.5-//)) {
+    # Version 5.5.5 of MySQL never existed. MariaDB >= 10 always puts '5.5.5-'
+    # at the front of its version string to get around a limitation in the
+    # replication protocol it shares with MySQL.  So if the version starts with
+    # '5.5.5-' then we can assume this is MariaDB and the real version number
+    # will immediately follow that.
+    $db = DB_MODULE->{'mariadb'};
+  }
+  my $sql_dontwant = exists $db->{db_blocklist} ? $db->{db_blocklist} : [];
   my $sql_want   = $db->{db_version};
   my $version_ok = vers_cmp($sql_vers, $sql_want) > -1 ? 1 : 0;
-
+  my $blocklisted;
+  if ($version_ok) {
+    $blocklisted = grep($sql_vers =~ /$_/, @$sql_dontwant);
+    $version_ok = 0 if $blocklisted;
+  }
   my $sql_server = $db->{name};
   if ($output) {
     Bugzilla::Install::Requirements::_checking_for({
       package => $sql_server,
       wanted  => $sql_want,
       found   => $sql_vers,
-      ok      => $version_ok
+      ok      => $version_ok,
+      blocklisted => $blocklisted
     });
   }
 
   # Check what version of the database server is installed and let
   # the user know if the version is too old to be used with Bugzilla.
+  if ($blocklisted) {
+    die <<EOT;
+
+Your $sql_server v$sql_vers is blocklisted. Please check the
+release notes for details or try a different database engine
+or version.
+
+EOT
+  }
   if (!$version_ok) {
     die <<EOT;
 

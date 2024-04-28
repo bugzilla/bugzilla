@@ -270,8 +270,8 @@ OLDATTACH2NEW = {
       "description": "[% (field_descs.${item.name} OR
                           item.description) FILTER json %]",
       "is_active": [% field.obsolete ? "false" : "true" %],
-      [% blacklist = ["version", "group", "product", "component"] %]
-      [% IF ${newname} AND NOT blacklist.contains(newname) %]
+      [% blocklist = ["version", "group", "product", "component"] %]
+      [% IF ${newname} AND NOT blocklist.contains(newname) %]
         "values": [
         [% FOREACH value = ${newname} %]
           "[% value FILTER json %]"[% ',' UNLESS loop.last() %]

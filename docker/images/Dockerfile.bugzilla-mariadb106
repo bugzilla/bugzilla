@@ -1,0 +1,57 @@
+FROM bugzilla/bugzilla-perl-slim:20240410.1 AS builder
+
+RUN apt-get update \
+ && apt-get dist-upgrade -y \
+ && apt-get install -y \
+    libmariadb-dev \
+    apt-file \
+    build-essential \
+    cmake \
+    curl \
+    git \
+    libcairo-dev \
+    libexpat-dev \
+    libgd-dev \
+    libssl-dev \
+    openssl \
+    zlib1g-dev \
+    unzip \
+    wget
+
+WORKDIR /app
+
+COPY Makefile.PL Bugzilla.pm gen-cpanfile.pl /app/
+COPY extensions/ /app/extensions/
+
+RUN cpanm --notest --quiet App::cpm Module::CPANfile Carton::Snapshot
+
+RUN perl Makefile.PL
+RUN make cpanfile GEN_CPANFILE_ARGS="-D mariadb"
+
+RUN carton install
+
+RUN apt-file update
+RUN find local -name '*.so' -exec ldd {} \; \
+    | egrep -v 'not.found|not.a.dynamic.executable' \
+    | awk '$3 {print $3}' \
+    | sort -u \
+    | xargs -IFILE apt-file search -l FILE \
+    | sort -u > PACKAGES
+
+FROM bugzilla/bugzilla-perl-slim:20240410.1
+
+ENV DEBIAN_FRONTEND noninteractive
+
+COPY --from=builder /app/local /app/local
+COPY --from=builder /app/PACKAGES /app/PACKAGES
+
+RUN apt-get update \
+    && apt-get install -y \
+       gnupg
+
+RUN apt-get update \
+    && apt-get install -y \
+       mariadb-client \
+       $(cat /app/PACKAGES) \
+    && rm -rf /var/cache/apt/* /var/lib/apt/lists/*
+

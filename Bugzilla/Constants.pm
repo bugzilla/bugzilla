@@ -544,13 +544,28 @@ use constant DB_MODULE => {
       module  => 'DBD::mysql',
 
       # Disallow development versions
-      blacklist => ['_'],
+      blocklist => ['_'],
 
       # For UTF-8 support. 4.001 makes sure that blobs aren't
       # marked as UTF-8.
-      version => '4.001',
+      version => '4.032',
     },
     name => 'MySQL'
+  },
+
+  # MariaDB used to be a drop-in replacement for MySQL but now it
+  # isn't so we have a separate driver
+  'mariadb' => {
+    db         => 'Bugzilla::DB::MariaDB',
+    db_version => '10.0.5',
+    dbd        => {
+      package => 'DBD-MariaDB',
+      module  => 'DBD::MariaDB',
+
+      # Disallow development versions
+      blocklist => ['_'],
+    },
+    name => 'MariaDB'
   },
 
   # Also see Bugzilla::DB::Pg::bz_check_server_version, which has special

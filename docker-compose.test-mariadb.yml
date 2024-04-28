@@ -1,0 +1,68 @@
+# This Source Code Form is subject to the terms of the Mozilla Public
+# License, v. 2.0. If a copy of the MPL was not distributed with this
+# file, You can obtain one at http://mozilla.org/MPL/2.0/.
+
+version: '3.6'
+
+services:
+  bugzilla6.test:
+    build:
+      args:
+        - BZDB=-mariadb106
+      context: .
+      dockerfile: Dockerfile
+    command: dev_httpd
+    tmpfs:
+      - /tmp
+      - /run
+    environment:
+      - 'BMO_inbound_proxies=*'
+      - BMO_db_driver=mariadb
+      - BMO_db_host=bugzilla6.mariadb106
+      - BMO_db_name=bugs
+      - BMO_db_pass=bugs
+      - BMO_db_user=bugs
+      - BMO_db_mysql_ssl_get_pubkey=1
+      - BMO_memcached_namespace=bugzilla
+      - BMO_memcached_servers=memcached:11211
+      - BMO_ses_username=ses@mozilla.bugs
+      - BMO_ses_password=password123456789!
+      - BMO_urlbase=AUTOMATIC
+      - BUGZILLA_ALLOW_INSECURE_HTTP=1
+      - BZ_ANSWERS_FILE=/app/conf/checksetup_answers.txt
+      - BZ_QA_ANSWERS_FILE=/app/.github/checksetup_answers.txt
+      - BZ_QA_CONF_FILE=/app/.github/selenium_test.conf
+      - BZ_QA_CONFIG=1
+      - LOCALCONFIG_ENV=1
+      - LOG4PERL_CONFIG_FILE=log4perl-test.conf
+      - LOGGING_PORT=5880
+      - PORT=8000
+      - TWD_BROWSER=firefox
+      - TWD_HOST=selenium
+      - TWD_PORT=4444
+    depends_on:
+      - bugzilla6.mariadb106
+      - memcached
+      - selenium
+
+  bugzilla6.mariadb106:
+    image: mariadb:10.6
+    tmpfs:
+      - /tmp
+    logging:
+      driver: "none"
+    environment:
+      - MARIADB_DATABASE=bugs
+      - MARIADB_ROOT_PASSWORD=bugs
+      - MARIADB_USER=bugs
+      - MARIADB_PASSWORD=bugs
+      - MARIADB_ALLOW_EMPTY_PASSWORD=1
+
+  memcached:
+    image: memcached:latest
+
+  selenium:
+    image: selenium/standalone-firefox:3.141.59
+    shm_size: '512m'
+    #ports:
+    #  - "5900:5900"

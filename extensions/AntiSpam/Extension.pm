@@ -67,7 +67,7 @@ sub _comment_blocking {
   my $regex = '\b(?:' . join('|', map {quotemeta} @$blocklist) . ')\b';
   if ($params->{thetext} =~ /$regex/i) {
     Bugzilla->audit(sprintf(
-      "blocked <%s> %s from commenting, blacklisted phrase",
+      "blocked <%s> %s from commenting, blocklisted phrase",
       remote_ip(), $user->login
     ));
     ThrowUserError('antispam_comment_blocked');
@@ -87,7 +87,7 @@ sub _domain_blocking {
     undef, $address->host);
   if ($blocked) {
     Bugzilla->audit(sprintf(
-      "blocked <%s> from creating %s, blacklisted domain",
+      "blocked <%s> from creating %s, blocklisted domain",
       remote_ip(), $login
     ));
     ThrowUserError('account_creation_restricted');
@@ -107,7 +107,7 @@ sub _ip_blocking {
     undef, $ip);
   if ($blocked) {
     Bugzilla->audit(
-      sprintf("blocked <%s> from creating %s, blacklisted IP", $ip, $login));
+      sprintf("blocked <%s> from creating %s, blocklisted IP", $ip, $login));
     ThrowUserError('account_creation_restricted');
   }
 }

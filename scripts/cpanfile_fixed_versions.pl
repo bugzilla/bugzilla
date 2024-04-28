@@ -54,8 +54,8 @@ sub _check_vers {
   # Must do a string comparison as $vnum may be of the form 5.10.1.
   my $vok
     = ($vnum ne '-1' && version->new($vnum) >= version->new($wanted)) ? 1 : 0;
-  if ($vok && $params->{blacklist}) {
-    $vok = 0 if grep($vnum =~ /$_/, @{$params->{blacklist}});
+  if ($vok && $params->{blocklist}) {
+    $vok = 0 if grep($vnum =~ /$_/, @{$params->{blocklist}});
   }
 
   return {module => $module, ok => $vok, wanted => $wanted, found => $vnum,};

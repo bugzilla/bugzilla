@@ -123,10 +123,10 @@ foreach my $include_path (@include_paths) {
 
     # Forbid single quotes to delimit URLs, see bug 926085.
     if ($data =~ /href=\\?'/) {
-      ok(0, "$path contains blacklisted constructs: href='...'");
+      ok(0, "$path contains blocklisted constructs: href='...'");
     }
     else {
-      ok(1, "$path contains no blacklisted constructs");
+      ok(1, "$path contains no blocklisted constructs");
     }
   }
 }

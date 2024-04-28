@@ -37,6 +37,17 @@ jobs:
       - name: Run bmo specific tests
         run: docker compose -f docker-compose.test.yml run -e CI=1 bugzilla6.test test_bmo -q -f t/bmo/*.t
 
+  test_bugzilla6_mariadb:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install docker-compose
+        run: sudo apt update && sudo apt install -y docker-compose
+      - name: Build the Docker images
+        run: docker compose -f docker-compose.test-mariadb.yml build
+      - name: Run bmo specific tests
+        run: docker compose -f docker-compose.test-mariadb.yml run -e CI=1 bugzilla6.test test_bmo -q -f t/bmo/*.t
+
   test_bugzilla6_pg:
     runs-on: ubuntu-latest
     steps:

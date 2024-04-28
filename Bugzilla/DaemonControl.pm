@@ -260,7 +260,6 @@ sub assert_database {
         $dbh
         = DBI->connect($dsn, $lc->{db_user}, $lc->{db_pass}, $attrs);
       };
-      if ($!) { $assert_dbierrstr = $@; die $@; }
       $assert_dbierrstr = DBI->errstr() || '';
       die "$assert_dbierrstr" if $assert_dbierrstr;
       Future->wrap($dbh);

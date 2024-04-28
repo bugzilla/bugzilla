@@ -8,7 +8,7 @@ services:
   bugzilla6.test:
     build:
       args:
-        - BZDB=-pg9
+        - BZDB=
       context: .
       dockerfile: Dockerfile
     command: dev_httpd
@@ -17,8 +17,8 @@ services:
       - /run
     environment:
       - 'BMO_inbound_proxies=*'
-      - BMO_db_driver=pg
-      - BMO_db_host=bugzilla6.pgsql9
+      - BMO_db_driver=sqlite
+      - BMO_db_host=localhost
       - BMO_db_name=bugs
       - BMO_db_pass=bugs
       - BMO_db_user=bugs
@@ -40,20 +40,8 @@ services:
       - TWD_HOST=selenium
       - TWD_PORT=4444
     depends_on:
-      - bugzilla6.pgsql9
       - memcached
       - selenium
-
-  bugzilla6.pgsql9:
-    image: postgres:9.0
-    tmpfs:
-      - /tmp
-    logging:
-      driver: "none"
-    environment:
-      - POSTGRES_DB=bugs
-      - POSTGRES_USER=bugs
-      - POSTGRES_PASSWORD=bugs
 
   memcached:
     image: memcached:latest

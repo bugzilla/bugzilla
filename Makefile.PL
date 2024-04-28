@@ -159,6 +159,12 @@ my %optional_features = (
       runtime => {requires => {'File::Which' => 0, 'File::Copy::Recursive' => 0,}}
     },
   },
+  docker => {
+    description => 'Run Bugzilla inside Docker',
+    prereqs     => {
+      runtime => {requires => {'File::Copy::Recursive' => 0,}}
+    },
+  },
   graphical_reports => {
     description => 'Graphical Reports',
     prereqs     => {

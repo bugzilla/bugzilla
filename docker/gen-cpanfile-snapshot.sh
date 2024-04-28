@@ -40,8 +40,15 @@ if [ $? != 0 ]; then
     echo
     exit -1
 fi
+if [ ! -f "docker/images/Dockerfile.cpanfile" ]; then
+    echo
+    echo "Can't locate the Dockerfile, try running from the root of"
+    echo "your Bugzilla checkout."
+    echo
+    exit -1
+fi
 
 export DOCKER_CLI_HINTS=false
-$DOCKER build -t bugzilla-cpanfile -f Dockerfile.cpanfile .
+$DOCKER build -t bugzilla-cpanfile -f docker/images/Dockerfile.cpanfile .
 $DOCKER run -it -v "$(pwd):/app/result" bugzilla-cpanfile cp cpanfile cpanfile.snapshot /app/result
 

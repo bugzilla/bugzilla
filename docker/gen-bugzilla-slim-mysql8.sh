@@ -46,7 +46,7 @@ if [ $? != 0 ]; then
     echo
     exit -1
 fi
-if [ ! -f "docker/images/Dockerfile.bugzilla-slim" ]; then
+if [ ! -f "docker/images/Dockerfile.bugzilla-mysql8" ]; then
     echo
     echo "Can't locate the Dockerfile, try running from the root of"
     echo "your Bugzilla checkout."
@@ -58,8 +58,6 @@ export DOCKER_CLI_HINTS=false
 export CI=""
 export CIRCLE_SHA1=""
 export CIRCLE_BUILD_URL=""
-#$DOCKER build -t bugzilla-cpanfile -f Dockerfile.cpanfile .
-#$DOCKER run -it -v "$(pwd):/app/result" bugzilla-cpanfile cp cpanfile cpanfile.snapshot /app/result
 
 # Figure out the tag name to use for the image. We'll do this by generating
 # a code based on today's date, then attempt to pull it from DockerHub. If
@@ -67,18 +65,18 @@ export CIRCLE_BUILD_URL=""
 # number on the end.
 DATE=`date +"%Y%m%d"`
 ITER=1
-$DOCKER pull bugzilla/bugzilla-perl-slim:${DATE}.${ITER} >/dev/null 2>/dev/null
+$DOCKER pull bugzilla/bugzilla-perl-slim-mysql8:${DATE}.${ITER} >/dev/null 2>/dev/null
 while [ $? == 0 ]; do
     # as long as we succesfully pull, keep bumping the number on the end
     ((ITER++))
-    $DOCKER pull bugzilla/bugzilla-perl-slim:${DATE}.${ITER} >/dev/null 2>/dev/null
+    $DOCKER pull bugzilla/bugzilla-perl-slim-mysql8:${DATE}.${ITER} >/dev/null 2>/dev/null
 done
-$DOCKER build -t bugzilla/bugzilla-perl-slim:${DATE}.${ITER} -f docker/images/Dockerfile.bugzilla-slim .
+$DOCKER build -t bugzilla/bugzilla-perl-slim-mysql8:${DATE}.${ITER} -f docker/images/Dockerfile.bugzilla-mysql8 .
 if [ $? == 0 ]; then
     echo
     echo "The build appears to have succeeded. Don't forget to change the FROM line"
     echo "at the top of Dockerfile to use:"
-    echo "  bugzilla/bugzilla-perl-slim:${DATE}.${ITER}"
+    echo "  bugzilla/bugzilla-perl-slim-mysql8:${DATE}.${ITER}"
     echo "to make use of this image."
     echo
     # check if the user is logged in
@@ -99,7 +97,7 @@ if [ $? == 0 ]; then
         case $yesno in
             [Yy]*)
                 echo "Pushing..."
-                $DOCKER push bugzilla/bugzilla-perl-slim:${DATE}.${ITER}
+                $DOCKER push bugzilla/bugzilla-perl-slim-mysql8:${DATE}.${ITER}
                 ;;
             *)
                 echo "Not pushing. You can just run this script again when you're ready"

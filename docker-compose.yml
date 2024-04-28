@@ -97,7 +97,7 @@ services:
   bugzilla6.mysql8:
     build:
       context: .
-      dockerfile: Dockerfile.mysql8
+      dockerfile: docker/images/Dockerfile.mysql8
     volumes:
       - bugzilla6-mysql-db:/var/lib/mysql
     tmpfs:

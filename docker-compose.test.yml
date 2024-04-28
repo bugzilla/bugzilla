@@ -43,7 +43,9 @@ services:
       - selenium
 
   bugzilla6.mysql8:
-    image: mysql:8
+    build:
+      context: .
+      dockerfile: docker/images/Dockerfile.mysql8
     tmpfs:
       - /tmp
     logging:
@@ -60,5 +62,5 @@ services:
   selenium:
     image: selenium/standalone-firefox:3.141.59
     shm_size: '512m'
-    ports:
-      - "5900:5900"
+    #ports:
+    #  - "5900:5900"

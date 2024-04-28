@@ -54,6 +54,8 @@ export CIRCLE_BUILD_URL=""
 DOCKER_COMPOSE_FILE=docker-compose.test.yml
 if [ "$1" == "pg" ]; then
     DOCKER_COMPOSE_FILE=docker-compose.test-pg.yml
+elif [ "$1" == "sqlite" ]; then
+    DOCKER_COMPOSE_FILE=docker-compose.test-sqlite.yml
 fi
 $DOCKER compose -f $DOCKER_COMPOSE_FILE build
 if [ $? == 0 ]; then

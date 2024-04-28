@@ -1,0 +1,67 @@
+FROM bugzilla/bugzilla-perl-slim:20240410.1 AS builder
+
+# reinstall the build prereqs on the temporary image
+RUN apt-get update \
+ && apt-get dist-upgrade -y \
+ && apt-get install -y \
+    apt-file \
+    build-essential \
+    cmake \
+    curl \
+    git \
+    libcairo-dev \
+    libexpat-dev \
+    libgd-dev \
+    libssl-dev \
+    openssl \
+    zlib1g-dev \
+    unzip \
+    wget
+
+# install any custom build prereqs we need for this specific image
+# Postgres libraries in this case
+RUN apt-get install -y libpq-dev
+
+WORKDIR /app
+
+COPY Makefile.PL Bugzilla.pm gen-cpanfile.pl /app/
+COPY extensions/ /app/extensions/
+
+RUN cpanm --notest --quiet App::cpm Module::CPANfile Carton::Snapshot
+
+# GEN_CPANFILE_ARGS here needs to have the list of additional features
+# this images is supposed to contain
+# Postgres support in this case
+RUN perl Makefile.PL
+RUN make cpanfile GEN_CPANFILE_ARGS="-D pg"
+
+RUN carton install
+
+# make a list of all of the packages needed to run the libraries we've
+# installed
+RUN apt-file update
+RUN find local -name '*.so' -exec ldd {} \; \
+    | egrep -v 'not.found|not.a.dynamic.executable' \
+    | awk '$3 {print $3}' \
+    | sort -u \
+    | xargs -IFILE apt-file search -l FILE \
+    | sort -u > PACKAGES
+
+# now we start over with a new image so the final image doesn't contain
+# developer tools
+FROM bugzilla/bugzilla-perl-slim:20240410.1
+
+ENV DEBIAN_FRONTEND noninteractive
+
+# copy the stuff we built over from the temporary image
+COPY --from=builder /app/local /app/local
+COPY --from=builder /app/PACKAGES /app/PACKAGES
+
+# restore the package dependencies we saved earlier, and install any additional packages this image needs to contain.
+# The Postgres client libraries in this case.
+RUN apt-get update \
+    && apt-get install -y \
+       postgresql-client \
+       $(cat /app/PACKAGES) \
+    && rm -rf /var/cache/apt/* /var/lib/apt/lists/*
+

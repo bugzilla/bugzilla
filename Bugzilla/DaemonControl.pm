@@ -235,6 +235,13 @@ sub assert_database {
   my $repeat = try_repeat_until_success {
     $loop->delay_future(after => 0.25)->then(sub {
       my $attrs = {RaiseError => 1, PrintError => 1};
+      if ($lc->{db_driver} eq 'sqlite') {
+        # If we're using sqlite, just assume we're connected, since it's just a
+        # file on the local filesystem. The driver will automatically create
+        # the DB file if it doesn't exist yet when checksetup runs.
+        Future->wrap("done");
+        return;
+      }
       if ($lc->{db_driver} eq 'mysql') {
         my ($ssl_ca_file, $ssl_ca_path, $ssl_cert, $ssl_key, $ssl_pubkey) =
           @$lc{qw(db_mysql_ssl_ca_file db_mysql_ssl_ca_path

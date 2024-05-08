@@ -11,7 +11,9 @@ All commands in this document work regardless of whether MariaDB or MySQL are us
 
 It's possible to test which version of MariaDB you have installed with:
 
-:command:`mysql -V`
+:command:`mariadb -e 'select version()'`
+or
+:command:`mysql -e 'select version()'`
 
 Installing
 ==========

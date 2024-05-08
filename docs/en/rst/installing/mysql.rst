@@ -1,7 +1,7 @@
 .. _mysql:
 
 MariaDB
-#####
+#######
 
 It is strongly advised to use MariaDB which is a drop-in replacement for
 MySQL and is fully compatible with Bugzilla. 

@@ -237,12 +237,13 @@ sub bz_check_server_version {
 
   my $sql_vers = $self->bz_server_version;
   if (((lc($db->{name}) eq 'mysql') || (lc($db->{name}) eq "mariadb"))
-    && ($sql_vers =~ s/^5\.5\.5-//)) {
-    # Version 5.5.5 of MySQL never existed. MariaDB >= 10 always puts '5.5.5-'
+    && ($sql_vers =~ s/^5\.5\.5-// || $sql_vers =~ /-MariaDB/)) {
+    # Version 5.5.5 of MySQL never existed. MariaDB = 10 always puts '5.5.5-'
     # at the front of its version string to get around a limitation in the
     # replication protocol it shares with MySQL.  So if the version starts with
     # '5.5.5-' then we can assume this is MariaDB and the real version number
-    # will immediately follow that.
+    # will immediately follow that.  This was removed in MariaDB-11.0.  The
+    # version should always contain "MariaDB" if it is indeed MariaDB.
     $db = DB_MODULE->{'mariadb'};
   }
   my $sql_dontwant = exists $db->{db_blocklist} ? $db->{db_blocklist} : [];

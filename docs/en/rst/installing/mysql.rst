@@ -40,7 +40,7 @@ server is started when the machine boots.
 Create the Database
 ===================
 
-You need to create a database for Bugzilla to use. Run the :file:`mysql`
+You need to create a database for Bugzilla to use. Run the :file:`mariadb` (or :file:`mysql`)
 command-line client and enter:
 
 ::
@@ -53,7 +53,7 @@ The above command makes sure a database like that doesn't exist already.
 Add a User
 ==========
 
-You need to add a new MariaDB user for Bugzilla to use. Run the :file:`mysql`
+You need to add a new MariaDB user for Bugzilla to use. Run the :file:`mariadb`
 command-line client and enter:
 
 ::

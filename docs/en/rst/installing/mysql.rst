@@ -3,8 +3,7 @@
 MariaDB
 #######
 
-It is strongly advised to use MariaDB which is a drop-in replacement for
-MySQL and is fully compatible with Bugzilla. 
+It is strongly advised to use MariaDB which is fully compatible with Bugzilla.
 
 If MySQL is used, be aware that the minimum required version is MySQL 5.0.15.
 

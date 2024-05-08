@@ -127,29 +127,3 @@ MariaDB can be configured to index those words by setting the
     ft_min_word_len=2
 
 .. _mysql-attach-table-size:
-
-Permit Attachments Table to Grow Beyond 4GB
-===========================================
-
-This is optional configuration for Bugzillas which are expected to become
-very large, and needs to be done after Bugzilla is fully installed.
-
-By default, MariaDB will limit the size of a table to 4GB.
-This limit is present even if the underlying filesystem
-has no such limit.  To set a higher limit, run the :file:`mysql`
-command-line client and enter the following, replacing ``$bugs_db``
-with your Bugzilla database name (which is ``bugs`` by default):
-
-.. code-block:: sql
-   :force:
-
-    USE $bugs_db;
-    
-    ALTER TABLE attachments AVG_ROW_LENGTH=1000000, MAX_ROWS=20000;
-
-The above command will change the limit to 20GB. MariaDB will have
-to make a temporary copy of your entire table to do this, so ideally
-you should do this when your attachments table is still small.
-
-.. note:: If you have set the setting in Bugzilla which allows large
-   attachments to be stored on disk, the above change does not affect that.

@@ -1,17 +1,14 @@
 .. _mysql:
 
-MySQL
+MariaDB
 #####
 
 It is strongly advised to use MariaDB which is a drop-in replacement for
-MySQL and is fully compatible with Bugzilla.  If MySQL must be used, be
-aware that the minimum required version is MySQL 5.0.15 and that MySQL 8
-or higher cannot be used at this time.
+MySQL and is fully compatible with Bugzilla. 
 
-All commands in this document work regardless of whether MySQL or
-MariaDB are used.
+All commands in this document work regardless of whether MariaDB or MySQL are used.
 
-It's possible to test which version of MySQL you have installed with:
+It's possible to test which version of MariaDB you have installed with:
 
 :command:`mysql -V`
 
@@ -31,14 +28,14 @@ have installed MariaDB into :file:`C:\\mysql`. Adjust paths appropriately if not
 Linux/Mac OS X
 --------------
 
-The package install instructions given previously should have installed MySQL
+The package install instructions given previously should have installed MariaDB
 on your machine, if it didn't come with it already. Run:
 
 :command:`mysql_secure_installation`
 
 and follow its advice.
 
-If you did install MySQL manually rather than from a package, make sure the
+If you did install MariaDB manually rather than from a package, make sure the
 server is started when the machine boots.
 
 Create the Database
@@ -57,7 +54,7 @@ The above command makes sure a database like that doesn't exist already.
 Add a User
 ==========
 
-You need to add a new MySQL user for Bugzilla to use. Run the :file:`mysql`
+You need to add a new MariaDB user for Bugzilla to use. Run the :file:`mysql`
 command-line client and enter:
 
 ::
@@ -80,7 +77,7 @@ machine or as a different user.
 Change Configuration
 ====================
 
-To change MySQL's configuration, you need to edit your MySQL
+To change MariaDB's configuration, you need to edit your MariaDB
 configuration file, which is:
 
 * Red Hat/Fedora: :file:`/etc/my.cnf`
@@ -93,7 +90,7 @@ configuration file, which is:
 Allow Large Attachments and Many Comments
 -----------------------------------------
 
-By default on some systems, MySQL will only allow you to insert things
+By default on some systems, MariaDB will only allow you to insert things
 into the database that are smaller than 1MB.
 
 Bugzilla attachments
@@ -103,7 +100,7 @@ combination of all comments on a single bug could in some cases
 be larger than 1MB.
 
 We recommend that you allow at least 16MB packets by
-adding or altering the ``max_allowed_packet`` parameter in your MySQL
+adding or altering the ``max_allowed_packet`` parameter in your MariaDB
 configuration in the ``[mysqld]`` section, so that the number is at least
 16M, like this (note that it's ``M``, not ``MB``):
 
@@ -119,11 +116,11 @@ Allow Small Words in Full-Text Indexes
 --------------------------------------
 
 By default, words must be at least four characters in length
-in order to be indexed by MySQL's full-text indexes. This causes
+in order to be indexed by MariaDB's full-text indexes. This causes
 a lot of Bugzilla-specific words to be missed, including "cc",
 "ftp" and "uri".
 
-MySQL can be configured to index those words by setting the
+MariaDB can be configured to index those words by setting the
 ``ft_min_word_len`` param to the minimum size of the words to index.
 
 ::
@@ -140,7 +137,7 @@ Permit Attachments Table to Grow Beyond 4GB
 This is optional configuration for Bugzillas which are expected to become
 very large, and needs to be done after Bugzilla is fully installed.
 
-By default, MySQL will limit the size of a table to 4GB.
+By default, MariaDB will limit the size of a table to 4GB.
 This limit is present even if the underlying filesystem
 has no such limit.  To set a higher limit, run the :file:`mysql`
 command-line client and enter the following, replacing ``$bugs_db``
@@ -153,7 +150,7 @@ with your Bugzilla database name (which is ``bugs`` by default):
     
     ALTER TABLE attachments AVG_ROW_LENGTH=1000000, MAX_ROWS=20000;
 
-The above command will change the limit to 20GB. MySQL will have
+The above command will change the limit to 20GB. MariaDB will have
 to make a temporary copy of your entire table to do this, so ideally
 you should do this when your attachments table is still small.
 

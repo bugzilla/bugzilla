@@ -63,8 +63,6 @@ command-line client and enter:
     CREATE TEMPORARY TABLES, DROP, REFERENCES ON bugs.*
     TO bugs@localhost IDENTIFIED BY '$DB_PASS';
 
-    FLUSH PRIVILEGES;
-
 You need to replace ``$DB_PASS`` with a strong password you have chosen.
 Write that password down somewhere.
 

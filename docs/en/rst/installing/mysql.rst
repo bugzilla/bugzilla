@@ -32,11 +32,7 @@ Linux/Mac OS X
 --------------
 
 The package install instructions given previously should have installed MariaDB
-on your machine, if it didn't come with it already. Run:
-
-:command:`mysql_secure_installation`
-
-and follow its advice.
+on your machine, if it didn't come with it already. 
 
 If you did install MariaDB manually rather than from a package, make sure the
 server is started when the machine boots.

@@ -8,8 +8,8 @@ Bugzilla requires a database to store its data. We recommend MariaDB, MySQL or P
 .. toctree::
    :maxdepth: 1
 
-   mysql
    mariadb
+   mysql
    postgresql
    oracle
    sqlite

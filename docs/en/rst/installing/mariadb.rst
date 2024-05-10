@@ -5,9 +5,7 @@ MariaDB
 
 It is strongly advised to use MariaDB which is fully compatible with Bugzilla.
 
-If MySQL is used, be aware that the minimum required version is MySQL 5.0.15.
-
-All commands in this document work regardless of whether MariaDB or MySQL are used.
+The minimum required version is MariaDB 10.0.5.
 
 It's possible to test which version of MariaDB you have installed with:
 
@@ -38,8 +36,7 @@ server is started when the machine boots.
 Create the Database
 ===================
 
-You need to create a database for Bugzilla to use. Run the :file:`mariadb` (or :file:`mysql`)
-command-line client and enter:
+You need to create a database for Bugzilla to use. Run the :file:`mariadb` command-line client and enter:
 
 ::
     CREATE DATABASE IF NOT EXISTS bugs CHARACTER SET = 'utf8';

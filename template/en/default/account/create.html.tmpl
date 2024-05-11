@@ -64,13 +64,13 @@
 [% END %]
 
 <form id="account_creation_form" method="get" action="createaccount.cgi">
-  <span class="label">
+  <label for="login"><span class="label">
     [% IF Param('emailsuffix') %]
       Login:
     [% ELSE %]
       Email address:
     [% END %]
-  </span>
+  </span></label>
   <input size="35" id="login" name="login" autofocus
          [%- ' type="email"' UNLESS Param('emailsuffix') %] required>
   [% Param('emailsuffix') FILTER html %]

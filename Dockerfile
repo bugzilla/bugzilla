@@ -19,7 +19,6 @@ RUN apt-get -y install \
  libemail-mime-modifier-perl \
  libdbi-perl \
  libdbix-connector-perl \
- libdbd-mysql-perl \
  libcgi-pm-perl \
  liblocale-codes-perl \
  libmath-random-isaac-perl \
@@ -51,8 +50,8 @@ RUN apt-get -y install \
  graphviz \
  vim-common
 
-# Ubuntu22 doesn't ship a new enough Template::Toolkit, so install this one manually
-RUN cpan install Template::Toolkit
+# Ubuntu22 doesn't ship new enough versions of a few modules, so get them from CPAN
+RUN cpan install Template::Toolkit Email::Address::XS Email::Sender DBD::MariaDB
 
 WORKDIR /var/www/html
 COPY --chown=root:www-data . /var/www/html

@@ -138,10 +138,12 @@
         <a href="buglist.cgi?chfield=%5BBug%20creation%5D&amp;chfieldfrom=24h">last 24 hours</a>
         [% title = BLOCK %][% terms.Bugs %] reported in the last 24 hours[% END %]
         <a href="buglist.cgi?chfield=%5BBug%20creation%5D&amp;chfieldfrom=24h&amp;ctype=atom&amp;title=[% title FILTER uri %]"
+           aria-label="Bugs reported in the last 24 hours - RSS feed"
            class="rss">&nbsp;</a>
         | <a href="buglist.cgi?chfield=%5BBug%20creation%5D&amp;chfieldfrom=7d">last 7 days</a>
         [% title = BLOCK %][% terms.Bugs %] reported in the last 7 days[% END %]
         <a href="buglist.cgi?chfield=%5BBug%20creation%5D&amp;chfieldfrom=7d&amp;ctype=atom&amp;title=[% title FILTER uri %]"
+           aria-label="Bugs reported in the last 7 days - RSS feed"
            class="rss">&nbsp;</a>
       </li>
       <li>
@@ -149,10 +151,12 @@
         <a href="buglist.cgi?chfieldfrom=24h">last 24 hours</a>
         [% title = BLOCK %][% terms.Bugs %] changed in the last 24 hours[% END %]
         <a href="buglist.cgi?chfieldfrom=24h&amp;ctype=atom&amp;title=[% title FILTER uri %]"
+           aria-label="Bugs changed in the last 24 hours - RSS feed"
            class="rss">&nbsp;</a>
         | <a href="buglist.cgi?chfieldfrom=7d">last 7 days</a>
         [% title = BLOCK %][% terms.Bugs %] changed in the last 7 days[% END %]
         <a href="buglist.cgi?chfieldfrom=7d&amp;ctype=atom&amp;title=[% title FILTER uri %]"
+           aria-label="Bugs changed in the last 7 days - RSS feed"
            class="rss">&nbsp;</a>
       </li>
     </ul>

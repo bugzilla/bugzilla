@@ -121,7 +121,8 @@ my $dbh = Bugzilla->dbh;
 
 # We want to catch if the user is trying to "upgrade" from 5.1 because
 # that's actually a downgrade and you can't do that.
-my $bz51install = $dbh->bz_index_info('bz_schema', 'bz_schema_version_idx');
+my $bz51install;
+eval { $bz51install = $dbh->bz_index_info('bz_schema', 'bz_schema_version_idx'); };
 if ($bz51install) {
   require Bugzilla::Error;
   import Bugzilla::Error;

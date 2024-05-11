@@ -144,6 +144,11 @@ sub REQUIRED_MODULES {
         blacklist => ['^2\.196$']
     },
     {
+        package => 'Email-Address',
+        module  => 'Email::Address',
+        version => 0,
+    },
+    {
         package => 'Email-MIME',
         module  => 'Email::MIME',
         # This fixes a memory leak in walk_parts that affected jobqueue.pl.

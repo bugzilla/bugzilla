@@ -29,7 +29,7 @@
 
 <h2 id="introduction">Introduction</h2>
 
-<p>Welcome to Bugzilla 5.2! This is kind of a weird release to explain. Back in
+<p>Welcome to [% terms.Bugzilla %] 5.2! This is kind of a weird release to explain. Back in
 early 2019, versions 5.0.5 and 5.0.6 were released for the 5.0.x branch,
 however, these releases contained invasive database schema and code
 reformatting changes that technically should not have been allowed to land on a
@@ -97,7 +97,7 @@ from those releases are included <a href="#point504">below</a> in case you're up
 <h3 id="req_optional_mod">Optional Perl Modules</h3>
 
 <p>The following perl modules, if installed, enable various
-  features of Bugzilla:</p>
+  features of [% terms.Bugzilla %]:</p>
 
 [% INCLUDE req_table reqs = OPTIONAL_MODULES
                      new  = ['Cache-Memcached','File-Copy-Recursive']
@@ -106,7 +106,7 @@ from those releases are included <a href="#point504">below</a> in case you're up
 
 <h3 id="req_apache">Optional Apache Modules</h3>
 
-<p>If you are using Apache as your webserver, Bugzilla can
+<p>If you are using Apache as your webserver, [% terms.Bugzilla %] can
   take advantage of some Apache features if you have the below Apache
   modules installed and enabled.</p>
 
@@ -134,7 +134,7 @@ from those releases are included <a href="#point504">below</a> in case you're up
 <h3 id="feat_mobilerender">Improved Mobile Rendering</h3>
 
 <p>
-Metadata to assist browsers in properly rendering Bugzilla on mobile browsers was added. Without this metadata Google Search tools would report Bugzilla pages as not suitable for mobile devices. Bugzilla still needs work to actually look nice on mobile devices but this is a good start. (<a href="https://github.com/bugzilla/bugzilla/pull/78">PR #78</a>)
+Metadata to assist browsers in properly rendering [% terms.Bugzilla %] on mobile browsers was added. Without this metadata Google Search tools would report [% terms.Bugzilla %] pages as not suitable for mobile devices. [% terms.Bugzilla %] still needs work to actually look nice on mobile devices but this is a good start. (<a href="https://github.com/bugzilla/bugzilla/pull/78">PR #78</a>)
 </p>
 
 <h3 id="feat_mysql8">MySQL 8+ Support</h3>
@@ -143,29 +143,29 @@ Metadata to assist browsers in properly rendering Bugzilla on mobile browsers wa
 
 <h3 id="feat_docker">Demo Docker Configuration</h3>
 
-<p>Bugzilla now ships with a Docker Compose configuration which provides an
-out-of-the-box Bugzilla with a default configuration to test with. Type
-<code>docker compose up</code> in the root bugzilla directory to start it up.
-Requires that you have Docker already installed. [% INCLUDE buglink id=1888068
-%]</p>
+<p>[% terms.Bugzilla %] now ships with a Docker Compose configuration which
+provides an out-of-the-box [% terms.Bugzilla %] with a default configuration to
+test with. Type <code>docker compose up</code> in the root [% terms.bugzilla %]
+directory to start it up.  Requires that you have Docker already installed.
+[% INCLUDE buglink id=1888068 %]</p>
 
 <h3 id="feat_other">Other Enhancements and Changes</h3>
 
 <h4>Enhancements for Users</h4>
 
 <ul>
-  <li><strong>UI:</strong> WineHQ Forum links are now accepted in the See Also field on bugs. [% INCLUDE buglink id=1523814 %]</li>
+  <li><strong>UI:</strong> WineHQ Forum links are now accepted in the See Also field on [% terms.bugs %]. [% INCLUDE buglink id=1523814 %]</li>
   <li><strong>Accessibility:</strong> Color contrast in the default theme was adjusted to comply with WCAG AA 2.0 recommendations.[% INCLUDE buglink id=1798166 %]</li>
-  <li><strong>Email:</strong> Emails about bugs now include an <code>X-Bugzilla-ID</code> header which lists the Bug ID, for potential use in filtering. [% INCLUDE buglink id=1403169 %]</li>
+  <li><strong>Email:</strong> Emails about [% terms.bugs %] now include an <code>X-Bugzilla-ID</code> header which lists the [% terms.Bug %] ID, for potential use in filtering. [% INCLUDE buglink id=1403169 %]</li>
 </ul>
 
 <h4>Enhancements for Administrators and Developers</h4>
 
 <ul>
   <li><strong>Database:</strong> <strong>UTF8 data encoding is now
-    enforced.</strong> Older version of Bugzilla made the conversion of
-    older data to UTF8 optional. Converting your existing data to UTF8 is now
-    mandatory. Your data will be converted when you run
+    enforced.</strong> Older version of [% terms.Bugzilla %] made the
+    conversion of older data to UTF8 optional. Converting your existing data to
+    UTF8 is now mandatory. Your data will be converted when you run
     <kbd>checksetup.pl</kbd>. If you are not already encoding your data in UTF8
     you may want to verify that it will correctly convert on a backup copy of
     your database before upgrading.</li>
@@ -173,9 +173,10 @@ Requires that you have Docker already installed. [% INCLUDE buglink id=1888068
     database tables will also be converted to the InnoDB storage engine. This
     makes searching more efficent and allows for real referential
     integrity.</li>
-  <li><strong>Installation:</strong> Bugzilla now supports Email::MIME version
-    1.949 and newer, which previously would crash Bugzilla when it tried to
-    send email. [% INCLUDE buglink id=1657496 %]</li>
+  <li><strong>Installation:</strong> [% terms.Bugzilla %] now supports
+    Email::MIME version 1.949 and newer, which previously would crash
+    [% terms.Bugzilla %] when it tried to send email.
+    [% INCLUDE buglink id=1657496 %]</li>
   <li><strong>Installation:</strong> The <code>testserver.pl</code> script will
     now work with self-signed SSL certificates if you pass the
     <code>--self-signed</code> option on the command line. [% INCLUDE buglink id=1851398 %]</li>
@@ -199,7 +200,7 @@ Requires that you have Docker already installed. [% INCLUDE buglink id=1888068
     </code><br>
     [% INCLUDE buglink id=1592129 %]
   </li>
-  <li>Bugzilla now uses Email::Address::XS instead of Email::Address for managing email address parsing. If you made use of Email::Address directly you should update to use Email::Address::XS instead. [% INCLUDE buglink id=1853138 %]</li>
+  <li>[% terms.Bugzilla %] now uses Email::Address::XS instead of Email::Address for managing email address parsing. If you made use of Email::Address directly you should update to use Email::Address::XS instead. [% INCLUDE buglink id=1853138 %]</li>
 </ul>
 
 <h3 id="point504">Changes since Version 5.0.4</h3>
@@ -218,8 +219,8 @@ the 5.0.4.x branch.</p>
 
 <ul>
 <li><strong>User Interface:</strong> Email addresses with apostrophes (yes,
-that's legal) no longer break the "Send Mail to Bug Assignees" button on bug
-lists. [% INCLUDE buglink id=1226123 %]</li>
+that's legal) no longer break the "Send Mail to [% terms.Bug %] Assignees"
+button on [% terms.bug %] lists. [% INCLUDE buglink id=1226123 %]</li>
 <li><strong>Installation/Upgrading:</strong> If using MySQL, the
 <code>bugs_fulltext</code> table is now InnoDB instead of MyISAM. This may
 cause your upgrade to take a while. [% INCLUDE buglink id=981487 %]</li>
@@ -234,7 +235,7 @@ rules.</li>
 <ul>[% INCLUDE global/footer.html.tmpl %]
 
 [% BLOCK buglink %]
-(<a href="https://bugzilla.mozilla.org?show_bug.cgi?id=[%- id FILTER html -%]">Bug [% id FILTER html -%]</a>)
+(<a href="https://bugzilla.mozilla.org?show_bug.cgi?id=[%- id FILTER html -%]">[% terms.Bug %] [% id FILTER html -%]</a>)
 [% END %]
 
 [% BLOCK db_req %]

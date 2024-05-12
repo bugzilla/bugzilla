@@ -45,6 +45,30 @@
 
 <h2 id="v44_point">Updates in this 4.4.x Release</h2>
 
+<h3>4.4.14</h3>
+
+<p>This release fixes one security issue. See the
+  <a href="https://www.bugzilla.org/security/4.4.13/">Security Advisory</a>
+  for details.</p>
+
+<div style="border: 3px solid red; padding: 0.5em;">
+This will be the last release of the Bugzilla 4.4 branch unless further security issues are found before the EOL date passes.  Bugzilla 4.4 will reach end of life 4 months after the release of Version 4.4.14. Please take the opportunity to upgrade to version 5.2 or newer.
+</div>
+
+<p>This release also contains the following [% terms.bug %] fixes:</p>
+
+<ul>
+  <li>Fixes a compatibility issue with the Email::MIME Perl module versions 1.949 and later. 
+    (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=1657496">[% terms.Bug %] 1657496</a>)</li>
+
+  <li>Template Toolkit versions 2.28 through 3.007 are blacklisted due to a compatibility issue.  Versions 2.22 through 2.27 and 3.008 and later are still supported.
+    (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=1560873">[% terms.Bug %] 1560873</a>)</li>
+
+  <li>Bugzilla has a dependency on the Email::Address Perl module which was unstated in the dependency list because it was also a dependency of Email::Sender which Bugzilla also uses. Newer versions of Email::Sender stopped depending on Email::Address, so Bugzilla now needs to depend on it explicitly.
+    (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=1851352">[% terms.Bug %] 1851352</a>)</li>
+
+</ul>
+
 <h3>4.4.13</h3>
 
 <p>This release fixes one security issue. See the

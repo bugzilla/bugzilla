@@ -3,9 +3,12 @@
 MySQL
 #####
 
-It is strongly advised to use MariaDB which is fully compatible with Bugzilla.  If MySQL must be used, be aware that the minimum required version is MySQL 5.6.12.
+It is strongly advised to use MariaDB which is fully compatible with Bugzilla.  
+If MySQL must be used, be aware that the minimum required version is 
+MySQL 5.6.12.
 
-All commands in this document work regardless of whether MySQL or MariaDB are used.
+All commands in this document work regardless of whether MySQL or MariaDB are 
+used.
 
 It's possible to test which version of MySQL you have installed with:
 
@@ -22,7 +25,8 @@ Download the MariaDB 32-bit or 64-bit MSI installer from the
 
 MariaDB has a standard Windows installer. It's ok to select a the
 default install options. The rest of this documentation assumes assume you
-have installed MariaDB into :file:`C:\\mysql`. Adjust paths appropriately if not.
+have installed MariaDB into :file:`C:\\mysql`. Adjust paths appropriately if 
+not.
 
 Linux/Mac OS X
 --------------

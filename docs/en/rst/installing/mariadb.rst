@@ -11,7 +11,8 @@ It's possible to test which version of MariaDB you have installed with:
 
 :command:`mariadb -e 'select version()'`
 
-For MariaDB versions prior to 10.4.6, replace the mariadb command with mysql with the same arguments. 
+For MariaDB versions prior to 10.4.6, replace the mariadb command with mysql 
+with the same arguments. 
 
 Installing
 ==========
@@ -38,7 +39,8 @@ server is started when the machine boots.
 Create the Database
 ===================
 
-You need to create a database for Bugzilla to use. Run the :file:`mariadb` command-line client and enter:
+You need to create a database for Bugzilla to use. Run the :file:`mariadb` 
+command-line client and enter:
 
 ::
     CREATE DATABASE IF NOT EXISTS bugs CHARACTER SET = 'utf8';

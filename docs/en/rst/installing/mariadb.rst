@@ -11,8 +11,8 @@ It's possible to test which version of MariaDB you have installed with:
 
 :command:`mariadb -e 'select version()'`
 
-For MariaDB versions prior to 10.4.6, replace the mariadb command with mysql 
-with the same arguments. 
+For MariaDB versions prior to 10.4.6, replace the :command:`mariadb` command 
+with :command:`mysql` with the same arguments. 
 
 Installing
 ==========

@@ -3,13 +3,7 @@
 MySQL
 #####
 
-It is strongly advised to use MariaDB which is a drop-in replacement for
-MySQL and is fully compatible with Bugzilla.  If MySQL must be used, be
-aware that the minimum required version is MySQL 5.0.15 and that MySQL 8
-or higher cannot be used at this time.
-
-All commands in this document work regardless of whether MySQL or
-MariaDB are used.
+The minimum required version is MySQL 5.6.12.
 
 It's possible to test which version of MySQL you have installed with:
 
@@ -21,12 +15,14 @@ Installing
 Windows
 -------
 
-Download the MariaDB 32-bit or 64-bit MSI installer from the
-`MariaDB website <https://mariadb.org/download/?t=mariadb&os=windows>`_ (~66 MB).
+Download the MySQL Installer for Windows from the
+[MySQL website](https://dev.mysql.com/downloads/windows/installer/) 
+(sizes vary based on the installer version).
 
-MariaDB has a standard Windows installer. It's ok to select a the
-default install options. The rest of this documentation assumes assume you
-have installed MariaDB into :file:`C:\\mysql`. Adjust paths appropriately if not.
+MySQL provides a standard Windows installer. It is recommended to select the 
+default installation options unless you have specific requirements. This 
+documentation assumes that you have installed MySQL in `C:\mysql`. Adjust paths 
+appropriately if your installation directory differs.
 
 Linux/Mac OS X
 --------------
@@ -86,7 +82,7 @@ configuration file, which is:
 * Red Hat/Fedora: :file:`/etc/my.cnf`
 * Debian/Ubuntu: :file:`/etc/mysql/my.cnf`
 * Windows: :file:`C:\\mysql\\bin\\my.ini`
-* Mac OS X: :file:`/etc/my/cnf`
+* Mac OS X: :file:`/etc/my.cnf`
 
 .. _mysql-max-allowed-packet:
 

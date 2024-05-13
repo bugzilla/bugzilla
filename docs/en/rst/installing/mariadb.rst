@@ -9,7 +9,7 @@ The minimum required version is MariaDB 10.0.5.
 
 It's possible to test which version of MariaDB you have installed with:
 
-:command:`mariadb -e 'select version()'`
+:command:`mariadb -e 'select version()'` (available in MariaDB 10.4.6 and later) or :command:`mysql -V` ()
 
 Installing
 ==========

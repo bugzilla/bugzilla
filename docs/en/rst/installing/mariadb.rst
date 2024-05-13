@@ -3,8 +3,6 @@
 MariaDB
 #######
 
-It is strongly advised to use MariaDB which is fully compatible with Bugzilla.
-
 The minimum required version is MariaDB 10.0.5.
 
 It's possible to test which version of MariaDB you have installed with:

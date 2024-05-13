@@ -75,7 +75,7 @@ configuration file, which is:
 * Red Hat/Fedora: :file:`/etc/my.cnf`
 * Debian/Ubuntu: :file:`/etc/mysql/my.cnf`
 * Windows: :file:`C:\\mysql\\bin\\my.ini`
-* Mac OS X: :file:`/etc/my/cnf`
+* Mac OS X: :file:`/etc/my.cnf`
 
 .. _mysql-max-allowed-packet:
 

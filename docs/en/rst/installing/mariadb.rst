@@ -73,9 +73,11 @@ To change MariaDB's configuration, you need to edit your MariaDB
 configuration file, which is:
 
 * Red Hat/Fedora: :file:`/etc/my.cnf`
-* Debian/Ubuntu: :file:`/etc/mysql/my.cnf`
+* Debian/Ubuntu: :file:`/etc/mysql/my.cnf` 
 * Windows: :file:`C:\\mysql\\bin\\my.ini`
 * Mac OS X: :file:`/etc/my.cnf`
+
+Or :file:`mariadb.cnf` on Unix-like operating systems.
 
 .. _mysql-max-allowed-packet:
 

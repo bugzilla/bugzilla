@@ -80,7 +80,8 @@ Set the following values, which increase the maximum attachment size and
 make it possible to search for short words and terms:
 
 * Uncomment and alter on Line 34 to have a value of at least: ``max_allowed_packet=100M``
-* Add as new line 42, in the ``[mysqld]`` section: ``ft_min_word_len=2``
+* Add a new line 42, in the ``[mysqld]`` section: ``ft_min_word_len=2``
+* Immediately after that, add a new line ``innodb_file_format = Barracuda``
 
 Save and exit.
 

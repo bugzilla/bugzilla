@@ -337,7 +337,7 @@ sub bz_create_database {
   my $dbh;
 
   # See if we can connect to the actual Bugzilla database.
-  my $conn_success = eval { $dbh = connect_main() };
+  my $conn_success = eval { $dbh = connect_main(); $dbh->ping(); };
   my $db_name      = Bugzilla->localconfig->db_name;
 
   if (!$conn_success) {

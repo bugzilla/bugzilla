@@ -8,16 +8,22 @@ those who are able to choose their environment. It creates a system using
 Ubuntu Linux 22.04 LTS, Apache and MariaDB. It requires a little familiarity
 with Linux and the command line.
 
-Obtain Your Hardware
-====================
+.. note:: Harmony's dependencies have major changes from previous
+  versions of Bugzilla. The libraries are now installed as local 
+  Perl modules via ``carton`` instead as system-wide Debian packages.
+
+Running On Your Own Hardware
+============================
 
 Ubuntu 22.04 LTS Server requires a 64-bit processor.
 Bugzilla itself has no prerequisites beyond that, although you should pick
-reliable hardware. You can also probably use any 64-bit virtual machine
-or cloud instance that you have root access on.
+reliable hardware. 
+
+.. todo:: 
+  What is reliable hardware?
 
 Install the OS
-==============
+--------------
 
 Get `Ubuntu Server 22.04 LTS <https://www.ubuntu.com/download/server>`_
 and follow the `installation instructions 
@@ -35,45 +41,60 @@ Here are some tips:
 Reboot when the installer finishes.
 
 Become root
-===========
+-----------
 
 ssh to the machine as the 'bugzilla' user, or start a console. Then:
 
 :command:`sudo su`
 
+Running on a VPS (Virtual Private Server)
+=========================================
+
+.. todo::
+  Also need sizing for this
+
+Creating a VPS
+--------------
+
+Create a new VPS instance using Ubuntu 22.04 (LTS) for AMD64 architectures.
+
+Choose an instance of at least 1GB memory and sufficient disc for the MariaDB
+instance, an SSD is preferred.
+
+Root Access 
+-----------
+
+Depending on your provider, you may be creating a user in the ``sudoers`` group,
+or providing a public key to a SSH certificate you create on your computer which
+will you allow you to connect to the VPS as root, which you will need in the
+following steps.
+
+.. warning:: Do not set a password for root on your VPS server. Either use an SSH
+   key to connect as root, or log in as an unprivileged user in the ``sudoers`` 
+   group.
+
+Become root
+-----------
+
+Switch to the root user, either by logging in as an unprivileged user, and running
+the command:
+
+:command:`sudo su`
+
+or logging in as root using a SSH key.
+
 Install Prerequisites
 =====================
 
-:command:`apt install git nano`
+As root, run the following:
 
-:command:`apt install apache2 build-essential mariadb-server
-libcgi-pm-perl libdigest-sha-perl libtimedate-perl libdatetime-perl
-libdatetime-timezone-perl libdbi-perl libdbix-connector-perl libtemplate-perl
-libemail-address-perl libemail-sender-perl libemail-mime-perl
-liburi-perl liblist-moreutils-perl libmath-random-isaac-perl
-libjson-xs-perl libgd-perl libchart-perl libtemplate-plugin-gd-perl
-libgd-text-perl libgd-graph-perl libmime-tools-perl libwww-perl
-libxml-twig-perl libnet-ldap-perl libauthen-sasl-perl
-libnet-smtp-ssl-perl libauthen-radius-perl libsoap-lite-perl
-libxmlrpc-lite-perl libjson-rpc-perl libtest-taint-perl
-libhtml-parser-perl libhtml-scrubber-perl libencode-perl
-libencode-detect-perl libemail-reply-perl
-libhtml-formattext-withlinks-perl libtheschwartz-perl
-libdaemon-generic-perl libapache2-mod-perl2 libapache2-mod-perl2-dev
-libfile-mimeinfo-perl libio-stringy-perl libcache-memcached-perl
-libfile-copy-recursive-perl libfile-which-perl libdbd-mysql-perl
-perlmagick lynx graphviz python3-sphinx rst2pdf`
+:command:`apt install git nano build-essential mariadb-server libmariadb-dev perlmagick graphviz python3-sphinx rst2pdf carton`
 
-This will take a little while. It's split into two commands so you can do
-the next steps (up to step 7) in another terminal while you wait for the
-second command to finish. If you start another terminal, you will need to
-:command:`sudo su` again.
+Configure MySQL
+===============
 
-Configure MariaDB
-=================
-
-The following instructions use the simple :file:`nano` editor, but feel
-free to use any text editor you are comfortable with.
+The following instructions use the simple :file:`nano` editor you installed 
+in the previous step, but use any text editor you are comfortable with.
 
 :command:`nano /etc/mysql/mariadb.conf.d/50-server.cnf`
 
@@ -89,42 +110,16 @@ Create a database ``bugs`` for Bugzilla:
 
 :command:`mysql -u root -e "CREATE DATABASE IF NOT EXISTS bugs CHARACTER SET = 'utf8'"`
 
-Then, add a user to MariaDB for Bugzilla to use:
+Then, add a user to MySQL for Bugzilla to use:
 
 :command:`mysql -u root -e "GRANT ALL PRIVILEGES ON bugs.* TO bugs@localhost IDENTIFIED BY '$db_pass'"`
 
 Replace ``$db_pass`` with a strong password you have generated. Write it down.
 You should make ``$db_pass`` different to your password.
 
-Restart MariaDB:
+Restart MySQL:
 
-:command:`service mariadb restart`
-
-Configure Apache
-================
-
-:command:`nano /etc/apache2/sites-available/bugzilla.conf`
-
-Paste in the following and save:
-
-.. code-block:: apache
-
- Alias /bugzilla /var/www/webapps/bugzilla
- <Directory /var/www/webapps/bugzilla>
-   AddHandler cgi-script .cgi
-   Options +ExecCGI
-   DirectoryIndex index.cgi index.html
-   AllowOverride All
- </Directory>
-
-This configuration sets up Bugzilla to be served on your server under ``/bugzilla`` path.
-For more in depth setup instructions, refer to :ref:`Apache section of this documentation <apache>`.
-
-:command:`a2ensite bugzilla`
-
-:command:`a2enmod cgi headers expires rewrite`
-
-:command:`service apache2 restart`
+:command:`service mysql restart`
 
 Download Bugzilla
 =================
@@ -135,10 +130,20 @@ Get it from our Git repository:
 
 :command:`cd /var/www/webapps`
 
-:command:`git clone --branch release-X.X-stable https://github.com/bugzilla/bugzilla bugzilla`
+:command:`git clone https://github.com/bugzilla/harmony.git bugzilla`
 
-(where "X.X" is the 2-digit version number of the stable release of Bugzilla
-that you want - e.g. 5.0)
+Install Bugzilla
+================
+
+In the same directory you cloned Bugzilla to, run:
+
+:command:`perl Makefile.PL`
+
+:command:`make cpanfile GEN_CPANFILE_ARGS="-D better_xff -D jsonrpc -D xmlrpc -D mysql"`
+
+:command:`carton install`
+
+The ``carton`` command will take some time to run. 
 
 Check Setup
 ===========
@@ -146,23 +151,28 @@ Check Setup
 Bugzilla comes with a :file:`checksetup.pl` script which helps with the
 installation process. It will need to be run twice. The first time, it
 generates a config file (called :file:`localconfig`) for the database
-access information, and the second time (step 10)
-it uses the info you put in the config file to set up the database.
-
-:command:`cd /var/www/webapps/bugzilla`
+access information.
 
 :command:`./checksetup.pl`
 
 Edit :file:`localconfig`
 ========================
 
+Now you can edit the ``localconfig`` created in the previous step.
+
 :command:`nano localconfig`
 
 You will need to set the following values:
 
-* Line 29: set ``$webservergroup`` to ``www-data``
-* Line 67: set ``$db_pass`` to the password for the ``bugs`` user you created
-  in MariaDB a few steps ago
+.. todo:: 
+  is ``$webservergroup`` still needed?
+
+* :param:`$db_pass`:
+  :paramval:`the password for the bugs user you created in MariaDB a few steps ago`
+* :param:`$urlbase`:
+  :paramval:`http://localhost:3001/` or :paramval:`http://<ip address>:3001/`
+* :param:`$canonical_urlbase`:
+  :paramval:`the value you set in $urlbase`
 
 Check Setup (again)
 ===================
@@ -171,14 +181,31 @@ Run the :file:`checksetup.pl` script again to set up the database.
 
 :command:`./checksetup.pl`
 
-It will ask you to give an email address, real name and password for the
-first Bugzilla account to be created, which will be an administrator.
-Write down the email address and password you set.
+.. todo::
+  ./checksetup.pl does not ask for an admin account address and password.
+  There's an option to promote an existing account to an administrator, 
+  but it doesn't create an account. And you need an admin user to to able
+  to log in to set up email for account creation.
+
+Start Server
+============
+
+The server is started using the ``bugzilla.pl`` script.
+
+:command:`./bugzilla.pl daemon`
+
+Will start start Bugzilla as a web app on port 3001.
 
 Test Server
 ===========
 
-:command:`./testserver.pl http://localhost/bugzilla`
+.. todo::
+  Is this still relevant? I see errors for:
+  TEST-WARNING Failed to find the GID for the 'httpd' process, unable to validate webservergroup.
+  Use of uninitialized value $response in pattern match (m//) at ./testserver.pl line 105.
+  Use of uninitialized value $response in pattern match (m//) at ./testserver.pl line 108.
+
+:command:`./testserver.pl http://localhost:3001/bugzilla`
 
 All the tests should pass. You will get a warning about failing to run
 ``gdlib-config``; just ignore it.
@@ -190,7 +217,7 @@ Access Via Web Browser
 
 Access the front page:
 
-:command:`lynx http://localhost/bugzilla`
+:command:`lynx http://localhost:3001/`
 
 It's not really possible to use Bugzilla for real through Lynx, but you
 can view the front page to validate visually that it's up and running.
@@ -198,9 +225,9 @@ can view the front page to validate visually that it's up and running.
 You might well need to configure your DNS such that the server has, and
 is reachable by, a name rather than IP address. Doing so is out of scope
 of this document. In the mean time, it is available on your local network
-at ``http://<ip address>/bugzilla``, where ``<ip address>`` is (unless you
-have a complex network setup) the address starting with 192 displayed when
-you run :command:`hostname -I`.
+at ``http://<ip address>/``, where ``<ip address>`` is (unless you
+have a complex network setup) the address starting with 192 or 10 displayed 
+when you run :command:`hostname -I`.
 
 Accessing Bugzilla from the Internet
 ====================================
@@ -233,25 +260,34 @@ Click the :guilabel:`Parameters` link on the page it gives you, and set
 the following parameters in the :guilabel:`Required Settings` section:
 
 * :param:`urlbase`:
-  :paramval:`http://<servername>/bugzilla/` or :paramval:`http://<ip address>/bugzilla/`
+  :paramval:`http://<servername>/` or :paramval:`http://<ip address>/`
 * :param:`ssl_redirect`:
   :paramval:`on` if you set up an SSL certificate
 
 Click :guilabel:`Save Changes` at the bottom of the page.
 
-There are several ways to get Bugzilla to send email. The easiest is to
-use Gmail, so we do that here so you have it working. Visit
-https://gmail.com and create a new Gmail account for your Bugzilla to use.
-Then, open the :guilabel:`Email` section of the Parameters using the link
-in the left column, and set the following parameter values:
+In order to send bugmail and enable signups for users, you must have:
+
+* A domain that your Bugzilla instance will send mail from. 
+* An SMTP host
+
+The first is usually the domain or subdomain of your Bugzilla hostname. 
+You will need to set up MX records for the host or service
+at the domain name service provider for that domain, please check with
+your email provider's documentation.
+
+The second is a SMTP server you or your organization uses, or a mail
+delivery service such as SendGrid or MailGun.
+
+To configure your Bugzilla installation to send mail, open the Email section 
+of the Parameters using the link in the left column, and set the following values:
 
 * :param:`mail_delivery_method`: :paramval:`SMTP`
-* :param:`mailfrom`: :paramval:`new_gmail_address@gmail.com`
-* :param:`smtpserver`: :paramval:`smtp.gmail.com:465`
-* :param:`smtp_username`: :paramval:`new_gmail_address@gmail.com`
-* :param:`smtp_password`: :paramval:`new_gmail_password`
+* :param:`mailfrom`: :paramval:`user@domain`
+* :param:`smtpserver`: :paramval:`smtp.hostname:465`
+* :param:`smtp_username`: :paramval:`username`
+* :param:`smtp_password`: :paramval:`password`
 * :param:`smtp_ssl`: :paramval:`On`
 
 Click :guilabel:`Save Changes` at the bottom of the page.
 
-And you're all ready to go. :-)

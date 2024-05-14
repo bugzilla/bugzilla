@@ -856,7 +856,7 @@ sub db_schema_abstract_schema {
       flag_when => {TYPE => 'DATETIME', NOTNULL => 1,},
 
       type_id => {
-        TYPE       => 'INT2',
+        TYPE       => 'INT3',
         NOTNULL    => 1,
         REFERENCES => {TABLE => 'flagtypes', COLUMN => 'id', DELETE => 'CASCADE'}
       },
@@ -954,6 +954,15 @@ sub install_update_db {
 
   # Bug 1588221 - dkl@mozilla.com
   $dbh->bz_alter_column('flag_state_activity', 'attachment_id', {TYPE => 'INT5'});
+
+  # Bug 1634711 - justdave@bugzilla.org
+  my $def = $dbh->bz_column_info('flag_state_activity', 'type_id');
+  if ($def->{TYPE} eq 'INT2') {
+    warn "Dropping foreign keys on flag_state_activity\n";
+    $dbh->bz_drop_related_fks('flag_state_activity', 'type_id');
+    $def->{TYPE} = 'INT3';
+    $dbh->bz_alter_column('flag_state_activity', 'type_id', $def);
+  }
 }
 
 sub install_filesystem {

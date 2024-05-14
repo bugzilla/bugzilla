@@ -42,7 +42,7 @@ sub db_schema_abstract_schema {
   $args->{'schema'}->{'flagtype_comments'} = {
     FIELDS => [
       type_id => {
-        TYPE       => 'INT2',
+        TYPE       => 'INT3',
         NOTNULL    => 1,
         REFERENCES => {TABLE => 'flagtypes', COLUMN => 'id', DELETE => 'CASCADE'}
       },
@@ -51,6 +51,19 @@ sub db_schema_abstract_schema {
     ],
     INDEXES => [flagtype_comments_idx => ['type_id'],],
   };
+}
+
+sub install_update_db {
+  my $dbh   = Bugzilla->dbh;
+
+  # Bug 1634711 - justdave@bugzilla.org
+  my $def = $dbh->bz_column_info('flagtype_comments', 'type_id');
+  if ($def->{TYPE} eq 'INT2') {
+    warn "Dropping foreign keys on flagtype_comments\n";
+    $dbh->bz_drop_related_fks('flagtype_comments', 'type_id');
+    $def->{TYPE} = 'INT3';
+    $dbh->bz_alter_column('flagtype_comments', 'type_id', $def);
+  }
 }
 
 #############

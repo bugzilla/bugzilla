@@ -56,10 +56,35 @@ to continue.
 END
   cpanfile_created   => "##file## created",
   cpan_bugzilla_home => "WARNING: Using the Bugzilla directory as the CPAN home.",
+  db_blocklisted     => <<END,
+
+Your ##server## v##vers## is blocklisted. Please check the
+release notes for details or try a different database engine
+or version.
+END
   db_enum_setup      => "Setting up choices for standard drop-down fields:",
+  db_maria_on_mysql  => <<END,
+
+You appear to be using the 'mysql' database driver but the
+database engine Bugzilla connected to identifies as
+ MariaDB ##vers##
+MariaDB 10.6 and newer are no longer compatible with the mysql
+database driver. Bugzilla now uses a separate driver for all
+versions of MariaDB.
+
+Please edit localconfig and set:
+
+\$db_driver = 'mariadb';
+END
   db_schema_init     => "Initializing bz_schema...",
   db_table_new       => "Adding new table ##table##...",
   db_table_setup     => "Creating tables...",
+  db_too_old         => <<END,
+
+Your ##server## v##vers## is too old. Bugzilla requires version
+##want## or later of ##server##. Please download and install a
+newer version.
+END
   done               => 'done.',
   enter_or_ctrl_c    => "Press Enter to continue or Ctrl-C to exit...",
   error_localconfig_read => <<'END',

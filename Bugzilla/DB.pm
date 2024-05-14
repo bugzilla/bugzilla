@@ -277,13 +277,23 @@ sub bz_check_server_version {
 
   my $sql_vers = $self->bz_server_version;
   if (((lc($db->{name}) eq 'mysql') || (lc($db->{name}) eq "mariadb"))
-    && ($sql_vers =~ s/^5\.5\.5-//)) {
-    # Version 5.5.5 of MySQL never existed. MariaDB >= 10 always puts '5.5.5-'
+    && ($sql_vers =~ s/^5\.5\.5-// || $sql_vers =~ /-MariaDB/)) {
+    # Version 5.5.5 of MySQL never existed. MariaDB = 10 always puts '5.5.5-'
     # at the front of its version string to get around a limitation in the
     # replication protocol it shares with MySQL.  So if the version starts with
     # '5.5.5-' then we can assume this is MariaDB and the real version number
-    # will immediately follow that.
-    $db = DB_MODULE->{'mariadb'};
+    # will immediately follow that.  This was removed in MariaDB-11.0.  The
+    # version should always contain "MariaDB" if it is indeed MariaDB.
+    if (lc($db->{name}) eq 'mysql') {
+      if ($output) {
+        Bugzilla::Install::Requirements::_checking_for({
+          package => $db->{name},
+          wanted  => $db->{version},
+          ok      => 0,
+        });
+      }
+      die install_string('db_maria_on_mysql', {vers => $sql_vers});
+    }
   }
   my $sql_dontwant = exists $db->{db_blocklist} ? $db->{db_blocklist} : [];
   my $sql_want   = $db->{db_version};
@@ -307,22 +317,14 @@ sub bz_check_server_version {
   # Check what version of the database server is installed and let
   # the user know if the version is too old to be used with Bugzilla.
   if ($blocklisted) {
-    die <<EOT;
-
-Your $sql_server v$sql_vers is blocklisted. Please check the
-release notes for details or try a different database engine
-or version.
-
-EOT
+    die install_string('db_blocklisted', {server=>$sql_server, vers=>$sql_vers});
   }
   if (!$version_ok) {
-    die <<EOT;
-
-Your $sql_server v$sql_vers is too old. Bugzilla requires version
-$sql_want or later of $sql_server. Please download and install a
-newer version.
-
-EOT
+    die install_string('db_too_old', {
+      server => $sql_server,
+      vers   => $sql_vers,
+      want   => $sql_want,
+    });
   }
 
   # This is used by subclasses.

@@ -75,6 +75,8 @@ versions of MariaDB.
 Please edit localconfig and set:
 
 \$db_driver = 'mariadb';
+
+then re-run checksetup.pl.
 END
   db_schema_init     => "Initializing bz_schema...",
   db_table_new       => "Adding new table ##table##...",

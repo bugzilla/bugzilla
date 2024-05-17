@@ -60,7 +60,7 @@ libencode-detect-perl libemail-reply-perl
 libhtml-formattext-withlinks-perl libtheschwartz-perl
 libdaemon-generic-perl libapache2-mod-perl2 libapache2-mod-perl2-dev
 libfile-mimeinfo-perl libio-stringy-perl libcache-memcached-perl
-libfile-copy-recursive-perl libfile-which-perl libdbd-mysql-perl
+libfile-copy-recursive-perl libfile-which-perl libmariadb-dev
 perlmagick lynx graphviz python3-sphinx rst2pdf`
 
 This will take a little while. It's split into two commands so you can do
@@ -80,24 +80,24 @@ Set the following values, which increase the maximum attachment size and
 make it possible to search for short words and terms:
 
 * Uncomment and alter on Line 34 to have a value of at least: ``max_allowed_packet=100M``
-* Add as new line 42, in the ``[mysqld]`` section: ``ft_min_word_len=2``
+* Add a new line 42, in the ``[mysqld]`` section: ``ft_min_word_len=2``
 
 Save and exit.
 
-Create a database ``bugs`` for Bugzilla:
-
-:command:`mysql -u root -e "CREATE DATABASE IF NOT EXISTS bugs CHARACTER SET = 'utf8'"`
-
 Then, add a user to MariaDB for Bugzilla to use:
 
-:command:`mysql -u root -e "GRANT ALL PRIVILEGES ON bugs.* TO bugs@localhost IDENTIFIED BY '$db_pass'"`
+:command:`mariadb -u root -e "CREATE USER bugs@localhost IDENTIFIED BY '$db_pass'"`
 
 Replace ``$db_pass`` with a strong password you have generated. Write it down.
-You should make ``$db_pass`` different to your password.
+You should make ``$db_pass`` different than your login password.
+
+Next, give the Bugzilla user access to create and manage the Bugzilla database:
+
+:command:`mariadb -u root -e "GRANT ALL PRIVILEGES ON bugs.* TO bugs@localhost"`
 
 Restart MariaDB:
 
-:command:`service mariadb restart`
+:command:`systemctl restart mariadb`
 
 Configure Apache
 ================
@@ -121,7 +121,7 @@ For more in depth setup instructions, refer to :ref:`Apache section of this docu
 
 :command:`a2ensite bugzilla`
 
-:command:`a2enmod cgi headers expires rewrite`
+:command:`a2enmod cgid headers expires rewrite`
 
 :command:`service apache2 restart`
 
@@ -137,7 +137,19 @@ Get it from our Git repository:
 :command:`git clone --branch release-X.X-stable https://github.com/bugzilla/bugzilla bugzilla`
 
 (where "X.X" is the 2-digit version number of the stable release of Bugzilla
-that you want - e.g. 5.0)
+that you want - e.g. 5.2)
+
+Install Additional Perl Modules
+===============================
+
+Bugzilla requires newer versions than Ubuntu ships of a few Perl
+modules. Bugzilla includes a :file:`install-module.pl` script which
+will install them locally inside your Bugzilla directory without
+affecting your system-wide Perl installation.
+
+:command:`cd /var/www/webapps/bugzilla`
+
+:command:`./install-module.pl Template Email::Sender Email::Address::XS DBD::MariaDB`
 
 Check Setup
 ===========
@@ -147,8 +159,6 @@ installation process. It will need to be run twice. The first time, it
 generates a config file (called :file:`localconfig`) for the database
 access information, and the second time (step 10)
 it uses the info you put in the config file to set up the database.
-
-:command:`cd /var/www/webapps/bugzilla`
 
 :command:`./checksetup.pl`
 
@@ -160,6 +170,7 @@ Edit :file:`localconfig`
 You will need to set the following values:
 
 * Line 29: set ``$webservergroup`` to ``www-data``
+* Line 50: set ``db_driver`` to ``mariadb``
 * Line 67: set ``$db_pass`` to the password for the ``bugs`` user you created
   in MariaDB a few steps ago
 

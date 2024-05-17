@@ -268,6 +268,7 @@ sub _component_to_hash {
     sort_key =>    # sort_key is returned to match Bug.fields
       0,
     is_active => $self->type('boolean', $component->is_active),
+    default_cc => [map $self->type('string', $_->login), @{$component->initial_cc}],
     },
     undef, 'components';
 

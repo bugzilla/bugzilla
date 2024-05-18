@@ -684,11 +684,17 @@ ORDER: for ($order) {
   }
 }
 
-if (!scalar @order_columns) {
-
-  # DEFAULT
-  @order_columns = ("bug_status", "priority", "assigned_to", "bug_id");
-}
+# DEFAULT when "@order_columns" is empty ("undef").
+	if ( ! @order_columns ) {
+	@order_columns = ( "changeddate DESC", "reporter", "short_desc" );
+	};
+#
+# 	`@order_columns //=` alike is quirky:
+# 	https://www.google.com/search?hl=en&gl=ca&num=100&filter=0&q=Perl+%22Can%27t+modify+array+dereference%22|%22Can%27t+modify+private+array%22+%22in+logical+or+assignment%22|%22in+defined+or+assignment%22
+#
+# 	`@order_columns = @order_columns || ...` won't work as intended:
+# 	"@order_columns" in which returns the number of elements.
+#
 
 # In the HTML interface, by default, we limit the returned results,
 # which speeds up quite a few searches where people are really only looking
@@ -948,13 +954,22 @@ if (scalar(@bugowners) > 1 && $user->in_group('editbugs')) {
   $vars->{'bugowners'} = $bugowners;
 }
 
-# Whether or not to split the column titles across two rows to make
-# the list more compact.
-$vars->{'splitheader'} = $cgi->cookie('SPLITHEADER') ? 1 : 0;
+#
+# 	Whether to split the column header into 2 rows to reduce horizontal space waste.
+# 	Default on per [ https://github.com/bugzilla/bugzilla/pull/157 ].
+#
+	$vars->{splitheader} = (
+	! defined $cgi->param( "splitheader" ) &&
+	! defined $cgi->cookie( "SPLITHEADER" ) ? 1 :
 
-if ($user->settings->{'display_quips'}->{'value'} eq 'on') {
-  $vars->{'quip'} = GetQuip();
-}
+	$cgi->cookie( "SPLITHEADER" ) ||
+	$cgi->param( "splitheader" ) ||
+	$cgi->param( "splitheader" ) eq "" ? 1 : 0 );
+
+
+	if ( $user->settings()->{display_quips}{value} eq "on" ) {
+	$vars->{quip} = GetQuip();
+	};
 
 $vars->{'currenttime'} = localtime(time());
 

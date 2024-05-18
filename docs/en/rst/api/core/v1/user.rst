@@ -1,5 +1,3 @@
-Users
-=====
 
 This part of the Bugzilla API allows you to create user accounts, get information
 about user accounts and to log in or out using an existing account.
@@ -15,27 +13,20 @@ method allows you to retrieve a token that can be used as authentication for
 subsequent API calls. Otherwise yuou will need to pass your ``login`` and
 ``password`` with each call.
 
-This method will be going away in the future in favor of using *API keys*.
+This method will be going away in the future in f
+   /rest/login?login=foo@example.com&password=toosecrettoshow
 
-**Request**
+========================================================
+========================================================
 
-.. code-block:: text
+word.
 
-   GET /rest/login?login=foo@example.com&password=toosecrettoshow
-
-==============  =======  ========================================================
-name            type     description
-==============  =======  ========================================================
-**login**       string   The user's login name.
-**password**    string   The user's password.
-restrict_login  boolean  If set to a true value, the token returned by this
-                         method will only be valid from the IP address which
-                         called this method.
-==============  =======  ========================================================
-
+s
+                         h
+                      
 **Response**
 
-.. code-block:: js
+
 
    {
      "token": "786-OLaWfBisMY",
@@ -92,7 +83,7 @@ Valid Login
 -----------
 
 This method will verify whether a client's cookies or current login token is
-still valid or have expired. A valid username that matches must be provided as
+still valid or have expired. A valid username that ma
 well.
 
 **Request**
@@ -121,17 +112,15 @@ Create User
 
 Creates a user account directly in Bugzilla, password and all. Instead of this,
 you should use **Offer Account by Email** when possible because that makes sure
-that the email address specified can actually receive an email. This function
-does not check that. You must be authenticated and be in the *editusers* group
-to perform this action.
+function
+group
 
-**Request**
 
-.. code-block:: text
+.. code-blot
 
-   POST /rest/user
+   POrest/user
 
-.. code-block:: js
+js
 
    {
      "email" : "user@bugzilla.org",
@@ -146,18 +135,14 @@ name        type    description
                     *use_email_as_login* parameter is true.
 **email**   string  The email address for the new user.
 full_name   string  The user's full name. Will be set to empty if not specified.
-password    string  The password for the new user account, in plain text. It
-                    will be stripped of leading and trailing whitespace. If
-                    blank or not specified, the new created account will
-                    exist in Bugzilla but will not be allowed to log in
-                    using DB authentication until a password is set either
-                    by the user (through resetting their password) or by the
-                    administrator.
-==========  ======  =============================================================
 
-**Response**
 
-.. code-block:: js
+                    
+ n
+           
+                                administrator.
+=============================================================
+
 
    {
      "id": 58707
@@ -167,7 +152,7 @@ password    string  The password for the new user account, in plain text. It
 name  type  desciption
 ====  ====  ============================================
 id    int   The numeric ID of the user that was created.
-====  ====  ============================================
+====  ====  ================================
 
 **Errors**
 
@@ -271,33 +256,26 @@ changes  object  The changes that were actually done on this user. The keys
 * 51 (Bad Login Name)
   You passed an invalid login name in the "names" array.
 * 304 (Authorization Required)
-  Logged-in users are not authorized to edit other users.
+.
 
-.. _rest_user_get:
+_t:
 
-Get User
+User
 --------
 
-Gets information about user accounts in Bugzilla.
+Bugzilla.
 
 **Request**
 
-To get information about a single user in Bugzilla:
+Bugzilla:
 
-.. code-block:: text
+text
 
-   GET /rest/user/(id_or_name)
+   /rest/user/(id_or_name)
 
-To get multiple users by name or ID:
+ame=test@bugzilla.org
+   /rest/user?ids=123&ids=321
 
-.. code-block:: text
-
-   GET /rest/user?names=foo@bar.com&name=test@bugzilla.org
-   GET /rest/user?ids=123&ids=321
-
-To get user matching a search string:
-
-.. code-block:: text
 
    GET /rest/user?match=foo
 
@@ -366,10 +344,9 @@ name               string   The login name of the user.
 can_login          boolean  A boolean value to indicate if the user can login
                             into bugzilla.
 email_enabled      boolean  A boolean value to indicate if bug-related mail will
-                            be sent to the user or not.
-login_denied_text  string   A text field that holds the reason for disabling a
-                            user from logging into Bugzilla. If empty then the
-                            user account is enabled; otherwise it is
+         
+a
+                                             is
                             disabled/closed.
 groups             array    Groups the user is a member of. If the currently
                             logged in user is querying their own account or is a
@@ -391,76 +368,11 @@ Group object:
 name         type    description
 ===========  ======  ============================================================
 id           int     The group ID
-name         string  The name of the group
-description  string  The description for the group
-===========  ======  ============================================================
+group
+group
+============================================================
 
-Search object:
+object:
 
 =====  ======  ==================================================================
-name   type    description
-=====  ======  ==================================================================
-id     int     An integer ID uniquely identifying the saved report.
-name   string  The name of the saved report.
-query  string  The CGI parameters for the saved report.
-=====  ======  ==================================================================
-
-If you are not authenticated when you call this function, you will only be
-returned the ``id``, ``name``, and ``real_name`` items. If you are authenticated
-and not in 'editusers' group, you will only be returned the ``id``, ``name``,
-``real_name``, ``can_login``, and ``groups`` items. The groups
-returned are filtered based on your permission to bless each group. The
-``saved_searches`` and ``saved_reports`` items are only returned if you are
-querying your own account, even if you are in the editusers group.
-
-**Errors**
-
-* 51 (Bad Login Name or Group ID)
-  You passed an invalid login name in the "names" array or a bad
-  group ID in the "group_ids" argument.
-* 52 (Invalid Parameter)
-  The value used must be an integer greater than zero.
-* 304 (Authorization Required)
-  You are logged in, but you are not authorized to see one of the users you
-  wanted to get information about by user id.
-* 505 (User Access By Id or User-Matching Denied)
-  Logged-out users cannot use the "ids" or "match" arguments to this
-  function.
-* 804 (Invalid Group Name)
-  You passed a group name in the "groups" argument which either does not
-  exist or you do not belong to it.
-
-.. _rest_user_whoami:
-
-Who Am I
---------
-
-Allows for validating a user's API key, token, or username and password.
-If successfully authenticated, it returns simple information about the
-logged in user.
-
-**Request**
-
-.. code-block:: text
-
-   GET /rest/whoami
-
-**Response**
-
-.. code-block:: js
-
-   {
-     "id" : "1234",
-     "name" : "user@bugzulla.org",
-     "real_name" : "Test User",
-   }
-
-========== ======  =====================================================
-name       type    description
-========== ======  =====================================================
-id         int     The unique integer ID that Bugzilla uses to represent
-                   this user. Even if the user's login name changes,
-                   this will not change.
-real_name  string  The actual name of the user. May be blank.
-name       string  string  The login name of the user.
-========== ======  =====================================================
+description

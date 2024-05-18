@@ -39,6 +39,18 @@ is picking up where 5.0.6 left off, since 5.0.5 technically should have been
 5.2. Those still on 5.0.4 can upgrade to 5.0.4.1 if they're not ready to go a
 full version release yet.</p>
 
+<p><strong>NOTE:</strong> Because of the above situation, version 5.1.x
+(development release) is actually NEWER code than 5.2, and you cannot "upgrade"
+to 5.2 from 5.1.x. The 5.1.x series has been retroactively renamed to
+5.3.x.</p>
+
+<p>[% terms.Bugzilla %] is making an attempt to be 100% accessible. We're not
+there yet. We have made accessibilty improvements but we're quite sure that
+we've missed a lot. If you find any accessibility issues such as fields missing
+labels, poor contrast, or things that don't play well with screen readers,
+please file a new [% terms.bug %] which blocks our
+<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=bugzilla-section508">Section 508 Compliance [% terms.bug %]</a>.</p>
+
 <p>If you're upgrading, make sure to read
   <a href="https://bugzilla.readthedocs.org/en/latest/installing/upgrading.html">
   Notes On Upgrading From a Previous Version</a>. If you are upgrading from a
@@ -77,9 +89,9 @@ from those releases are included <a href="#point504">below</a> in case you're up
 
 <p>Perl <span class="req_new">v5.14</span></p>
 
-[% INCLUDE db_req db='mysql' %]
-
 [% INCLUDE db_req db='mariadb' %]
+
+[% INCLUDE db_req db='mysql' %]
 
 [% INCLUDE db_req db='pg' %]
 
@@ -126,6 +138,7 @@ from those releases are included <a href="#point504">below</a> in case you're up
 
 <ul>
   <li><a href="#feat_mobilerender">Improved Mobile Rendering</a></li>
+  <li><a href="#feat_mariadb">Explicit MariaDB Support</a></li>
   <li><a href="#feat_mysql8">MySQL 8+ Support</a></li>
   <li><a href="#feat_docker">Demo Docker Configuration</a></li>
   <li><a href="#feat_other">Other Enhancements and Changes</a></li>
@@ -137,17 +150,30 @@ from those releases are included <a href="#point504">below</a> in case you're up
 Metadata to assist browsers in properly rendering [% terms.Bugzilla %] on mobile browsers was added. Without this metadata Google Search tools would report [% terms.Bugzilla %] pages as not suitable for mobile devices. [% terms.Bugzilla %] still needs work to actually look nice on mobile devices but this is a good start. (<a href="https://github.com/bugzilla/bugzilla/pull/78">PR #78</a>)
 </p>
 
+<h3 id="feat_mariadb">Explicit MariaDB Support</h3>
+
+<p>Newer versions of MariaDB (10.6 and newer) have diverged from MySQL
+sufficiently that you can't really call it a drop-in replacement for MySQL
+anymore. We new have a 'mariadb' database driver for all versions of MariaDB.
+<code>checksetup.pl</code> will prompt you to switch to it if it detects that you are connected to a MariaDB database server.
+[%+ INCLUDE buglink id=1467006 %]</p> 
+
 <h3 id="feat_mysql8">MySQL 8+ Support</h3>
 
-<p>Bugzilla previously did not work on MySQL 8 or newer. Now it does. [% INCLUDE buglink id=1592129 %]</p>
+<p>Bugzilla previously did not work on MySQL 8 or newer. Now it does.
+[%+ INCLUDE buglink id=1592129 %]</p>
 
 <h3 id="feat_docker">Demo Docker Configuration</h3>
 
 <p>[% terms.Bugzilla %] now ships with a Docker Compose configuration which
 provides an out-of-the-box [% terms.Bugzilla %] with a default configuration to
 test with. Type <code>docker compose up</code> in the root [% terms.bugzilla %]
-directory to start it up.  Requires that you have Docker already installed.
-[% INCLUDE buglink id=1888068 %]</p>
+directory to start it up. You will be prompted on the console with how to
+connect to it once it comes up. Requires that you have Docker already
+installed. This configuration is not suitable for production use, and is just
+for playing around with it and testing it without needing to do a full
+installation.
+[%+ INCLUDE buglink id=1888068 %]</p>
 
 <h3 id="feat_other">Other Enhancements and Changes</h3>
 
@@ -155,7 +181,7 @@ directory to start it up.  Requires that you have Docker already installed.
 
 <ul>
   <li><strong>UI:</strong> WineHQ Forum links are now accepted in the See Also field on [% terms.bugs %]. [% INCLUDE buglink id=1523814 %]</li>
-  <li><strong>Accessibility:</strong> Color contrast in the default theme was adjusted to comply with WCAG AA 2.0 recommendations.[% INCLUDE buglink id=1798166 %]</li>
+  <li><strong>Accessibility:</strong> Color contrast in the default theme was adjusted to comply with WCAG AA 2.0 recommendations. [% INCLUDE buglink id=1798166 %]</li>
   <li><strong>Email:</strong> Emails about [% terms.bugs %] now include an <code>X-Bugzilla-ID</code> header which lists the [% terms.Bug %] ID, for potential use in filtering. [% INCLUDE buglink id=1403169 %]</li>
 </ul>
 
@@ -175,8 +201,8 @@ directory to start it up.  Requires that you have Docker already installed.
     integrity.</li>
   <li><strong>Installation:</strong> [% terms.Bugzilla %] now supports
     Email::MIME version 1.949 and newer, which previously would crash
-    [% terms.Bugzilla %] when it tried to send email.
-    [% INCLUDE buglink id=1657496 %]</li>
+    [%+ terms.Bugzilla %] when it tried to send email.
+    [%+ INCLUDE buglink id=1657496 %]</li>
   <li><strong>Installation:</strong> The <code>testserver.pl</code> script will
     now work with self-signed SSL certificates if you pass the
     <code>--self-signed</code> option on the command line. [% INCLUDE buglink id=1851398 %]</li>
@@ -212,7 +238,8 @@ the 5.0.4.x branch.</p>
 <h3>5.0.6</h3>
 
 <ul>
-<li><strong>Adminstration:</strong> It is now possible to create more than 255 flags (up to 65535) [% INCLUDE buglink id=1526703 %]</li>
+<li><strong>Adminstration:</strong> It is now possible to create more than 255
+flags (up to 65535) [% INCLUDE buglink id=1526703 %]</li>
 </ul>
 
 <h3>5.0.5</h3>
@@ -229,7 +256,11 @@ the same conventions as the popular Mojolicious product and includes a
 <code>.perltidyrc</code> to do the same.  You may use whatever coding style you
 want, but all files commited to the repo must be reformatted according to those
 rules.</li>
-<li><strong>Developers:</strong> A new hook <code>template_after_create</code> was added, which can be used to manipulate the template object before it gets rendered. You can use this to define new Template Toolkit virtual methods or filters in extensions. (<a href="https://github.com/bugzilla/bugzilla/pull/60">PR #60</a>)</li>
+<li><strong>Developers:</strong> A new hook <code>template_after_create</code>
+was added, which can be used to manipulate the template object before it gets
+rendered. You can use this to define new Template Toolkit virtual methods or
+filters in extensions.
+(<a href="https://github.com/bugzilla/bugzilla/pull/60">PR #60</a>)</li>
 </ul>
 
 <ul>[% INCLUDE global/footer.html.tmpl %]
@@ -252,7 +283,11 @@ rules.</li>
     [% END %]
     <li><strong>perl module:</strong>
       [%+ m.dbd.module FILTER html %]
-      [%+ '<span class="req_new">' IF dbd_new %]v[% m.dbd.version FILTER html %]
+      [%+ '<span class="req_new">' IF dbd_new %]
+        [% SWITCH m.dbd.version -%]
+        [%   CASE '' %]any version
+        [%   CASE DEFAULT %]v[% m.dbd.version FILTER html %]
+        [% END %]
       [% '</span>' IF dbd_new %]</li>
   </ul>
 [% END %]

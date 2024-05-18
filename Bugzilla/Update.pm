@@ -97,8 +97,8 @@ sub get_notifications {
             return {'data' => $release[0], 'deprecated' => $branch_version};
         }
 
-	# If we get here, then we want to recommend the lastest stable
-	# release without any other messages.
+        # If we get here, then we want to recommend the lastest stable
+        # release without any other messages.
         @release = grep {$_->{'status'} eq 'stable'} @releases;
     }
     elsif (Bugzilla->params->{'upgrade_notification'} eq 'stable_branch_release') {

@@ -655,7 +655,7 @@ sub bz_setup_database {
     print
       "Converting table storage format to $charset (collate $collate). This may take a while.\n";
     foreach my $table ($self->bz_table_list_real) {
-      my $info_sth = $self->prepare("SHOW FULL COLUMNS FROM $table");
+      my $info_sth = $self->prepare("SHOW FULL COLUMNS FROM " . $self->quote_identifier($table));
       $info_sth->execute();
       my (@binary_sql, @utf8_sql);
       while (my $column = $info_sth->fetchrow_hashref) {

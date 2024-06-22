@@ -266,7 +266,7 @@ filters in extensions.
 <ul>[% INCLUDE global/footer.html.tmpl %]
 
 [% BLOCK buglink %]
-(<a href="https://bugzilla.mozilla.org?show_bug.cgi?id=[%- id FILTER html -%]">[% terms.Bug %] [% id FILTER html -%]</a>)
+(<a href="https://bugzilla.mozilla.org?show_bug.cgi?id=[%- id FILTER html -%]">[% terms.Bug %] [%+ id FILTER html -%]</a>)
 [% END %]
 
 [% BLOCK db_req %]

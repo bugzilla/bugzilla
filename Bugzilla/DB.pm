@@ -527,6 +527,13 @@ sub sql_fulltext_search {
     "CASE WHEN (" . join(" AND ", @words) . ") THEN 1 ELSE 0 END";
 }
 
+sub sql_upsert {
+  my ($self, $table, $hash) = @_;
+
+  ThrowCodeError('method_not_implemented',
+    {class => blessed($self), method => 'sql_upsert'});
+}
+
 #####################################################################
 # General Info Methods
 #####################################################################
@@ -1271,6 +1278,13 @@ sub bz_table_indexes {
 sub bz_table_list {
   my ($self) = @_;
   return $self->_bz_real_schema->get_table_list();
+}
+
+sub bz_do_upsert {
+  my ($self, $table, $hash) = @_;
+  my ($sql, $bind) = $self->sql_upsert($table, $hash);
+
+  $self->do($sql, undef, @$bind);
 }
 
 #####################################################################

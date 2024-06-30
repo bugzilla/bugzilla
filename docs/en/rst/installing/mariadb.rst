@@ -34,17 +34,6 @@ on your machine, if it didn't come with it already.
 If you did install MariaDB manually rather than from a package, make sure the
 server is started when the machine boots.
 
-Create the Database
-===================
-
-You need to create a database for Bugzilla to use. Run the :file:`mariadb` 
-command-line client and enter:
-
-::
-    CREATE DATABASE IF NOT EXISTS bugs CHARACTER SET = 'utf8';
-
-The above command makes sure a database like that doesn't exist already.
-
 .. _mysql-add-user:
 
 Add a User
@@ -55,10 +44,12 @@ command-line client and enter:
 
 ::
 
+    CREATE USER 'bugs'@'localhost' IDENTIFIED BY '$DB_PASS';
+
     GRANT SELECT, INSERT,
     UPDATE, DELETE, INDEX, ALTER, CREATE, LOCK TABLES,
     CREATE TEMPORARY TABLES, DROP, REFERENCES ON bugs.*
-    TO bugs@localhost IDENTIFIED BY '$DB_PASS';
+    TO 'bugs'@'localhost';
 
 You need to replace ``$DB_PASS`` with a strong password you have chosen.
 Write that password down somewhere.

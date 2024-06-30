@@ -71,18 +71,9 @@ second command to finish. If you start another terminal, you will need to
 Configure MariaDB
 =================
 
-The following instructions use the simple :file:`nano` editor, but feel
-free to use any text editor you are comfortable with.
+Put in the server settings that Bugzilla needs:
 
-:command:`nano /etc/mysql/mariadb.conf.d/50-server.cnf`
-
-Set the following values, which increase the maximum attachment size and
-make it possible to search for short words and terms:
-
-* Uncomment and alter on Line 34 to have a value of at least: ``max_allowed_packet=100M``
-* Add a new line 42, in the ``[mysqld]`` section: ``ft_min_word_len=2``
-
-Save and exit.
+:command:`cp docker/mysql/bugzilla.cnf /etc/mysql/conf.d/bugzilla.cnf`
 
 Then, add a user to MariaDB for Bugzilla to use:
 

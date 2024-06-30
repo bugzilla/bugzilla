@@ -52,7 +52,8 @@ sub get_notifications {
       'latest_ver' => $branch->{'att'}->{'vid'},
       'status'     => $branch->{'att'}->{'status'},
       'url'        => $branch->{'att'}->{'url'},
-      'date'       => $branch->{'att'}->{'date'}
+      'date'       => $branch->{'att'}->{'date'},
+      'eos_date'   => exists($branch->{'att'}->{'eos-date'}) ? $branch->{'att'}->{'eos-date'} : undef,
     };
     push(@releases, $release);
   }
@@ -72,6 +73,35 @@ sub get_notifications {
     }
   }
   elsif (Bugzilla->params->{'upgrade_notification'} eq 'latest_stable_release') {
+    # We want the latest stable version for the current branch.
+    # If we are running a development snapshot, we won't match anything.
+    my $branch_version = $current_version[0] . '.' . $current_version[1];
+
+    # We do a string comparison instead of a numerical one, because
+    # e.g. 2.2 == 2.20, but 2.2 ne 2.20 (and 2.2 is indeed much older).
+    @release = grep { $_->{'branch_ver'} eq $branch_version } @releases;
+
+    # If the branch has an end-of-support date listed, we should
+    # strongly suggest to upgrade to the latest stable release
+    # available.
+    if (scalar(@release) && $release[0]->{'status'} ne 'closed'
+      && defined($release[0]->{'eos_date'})) {
+      my $eos_date = $release[0]->{'eos_date'};
+      @release = grep {$_->{'status'} eq 'stable'} @releases;
+      return {'data' => $release[0],
+              'branch_version' => $branch_version,
+              'eos_date' => $eos_date}
+    };
+
+    # If the branch is now closed, we should strongly suggest
+    # to upgrade to the latest stable release available.
+    if (scalar(@release) && $release[0]->{'status'} eq 'closed') {
+      @release = grep { $_->{'status'} eq 'stable' } @releases;
+      return {'data' => $release[0], 'deprecated' => $branch_version};
+    }
+
+    # If we get here, then we want to recommend the lastest stable
+    # release without any other messages.
     @release = grep { $_->{'status'} eq 'stable' } @releases;
   }
   elsif (Bugzilla->params->{'upgrade_notification'} eq 'stable_branch_release') {
@@ -83,6 +113,18 @@ sub get_notifications {
     # We do a string comparison instead of a numerical one, because
     # e.g. 2.2 == 2.20, but 2.2 ne 2.20 (and 2.2 is indeed much older).
     @release = grep { $_->{'branch_ver'} eq $branch_version } @releases;
+
+    # If the branch has an end-of-support date listed, we should
+    # strongly suggest to upgrade to the latest stable release
+    # available.
+    if (scalar(@release) && $release[0]->{'status'} ne 'closed'
+      && defined($release[0]->{'eos_date'})) {
+      my $eos_date = $release[0]->{'eos_date'};
+      @release = grep {$_->{'status'} eq 'stable'} @releases;
+      return {'data' => $release[0],
+              'branch_version' => $branch_version,
+              'eos_date' => $eos_date}
+    };
 
     # If the branch is now closed, we should strongly suggest
     # to upgrade to the latest stable release available.

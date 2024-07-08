@@ -571,6 +571,7 @@ use constant ABSTRACT_SCHEMA => {
 
   audit_log => {
     FIELDS => [
+      id     => {TYPE => 'INTSERIAL', NOTNULL => 1, PRIMARYKEY => 1},
       user_id => {
         TYPE       => 'INT3',
         REFERENCES => {TABLE => 'profiles', COLUMN => 'userid', DELETE => 'SET NULL'}
@@ -1139,6 +1140,7 @@ use constant ABSTRACT_SCHEMA => {
 
   login_failure => {
     FIELDS => [
+      id     => {TYPE => 'INTSERIAL', NOTNULL => 1, PRIMARYKEY => 1},
       user_id => {
         TYPE       => 'INT3',
         NOTNULL    => 1,

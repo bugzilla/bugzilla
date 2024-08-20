@@ -310,7 +310,7 @@ sub column_info_to_column {
 
   ($column->{NOTNULL} = 1) if $column_info->{NULLABLE} == 0;
 
-  if ($column_info->{mysql_is_pri_key}) {
+  if ($column_info->{mariadb_is_pri_key}) {
 
     # In MySQL, if a table has no PK, but it has a UNIQUE index,
     # that index will show up as the PK. So we have to eliminate
@@ -370,7 +370,7 @@ sub column_info_to_column {
   if ($type =~ /CHAR$/ || $type eq 'DECIMAL') {
 
     # This is nicely lowercase and has the size/precision appended.
-    $type = $column_info->{mysql_type_name};
+    $type = $column_info->{mariadb_type_name};
   }
 
   # If we're a tinyint, we could be either a BOOLEAN or an INT1.
@@ -393,7 +393,7 @@ sub column_info_to_column {
     # doesn't touch the live DB.
     my $ref_sth = $dbh->prepare("SELECT $col_name FROM $table LIMIT 1");
     $ref_sth->execute;
-    if ($ref_sth->{mysql_is_auto_increment}->[0]) {
+    if ($ref_sth->{mariadb_is_auto_increment}->[0]) {
       if ($type eq 'MEDIUMINT') {
         $type = 'MEDIUMSERIAL';
       }

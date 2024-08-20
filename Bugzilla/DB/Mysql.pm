@@ -917,7 +917,9 @@ sub utf8_charset {
 }
 
 sub utf8_collate {
-  return 'utf8mb4_unicode_520_ci' unless Bugzilla->params->{'utf8_collate'};
+  my $charset = utf8_charset();
+  return $charset . '_unicode_520_ci' unless Bugzilla->params->{'utf8_collate'};
+  return $charset . '_unicode_520_ci' unless (Bugzilla->params->{'utf8_collate'} =~ /^${charset}_/);
   return Bugzilla->params->{'utf8_collate'};
 }
 

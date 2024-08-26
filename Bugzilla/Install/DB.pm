@@ -923,7 +923,7 @@ sub _update_flagtypes_id {
     }
   }
 
-  if ($flagtypes_def->{TYPE} eq 'SMALLSERIAL') {
+  if ($flagtypes_def->{TYPE} ne 'MEDIUMSERIAL') {
     $flagtypes_def->{TYPE} = 'MEDIUMSERIAL';
     $dbh->bz_alter_column('flagtypes', 'id', $flagtypes_def);
   }

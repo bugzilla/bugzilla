@@ -49,15 +49,15 @@ jobs:
         run: docker compose -f docker-compose.test-mariadb.yml run -e CI=1 bugzilla6.test test_bmo -q -f t/bmo/*.t
 
   test_bugzilla6_pg:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-20.04
     steps:
       - uses: actions/checkout@v4
       - name: Install docker-compose
-        run: sudo apt update && sudo apt install -y docker-compose
+        run: sudo apt update && sudo apt install -y docker-compose docker.io
       - name: Build the Docker images
-        run: docker compose -f docker-compose.test-pg.yml build
+        run: docker-compose -f docker-compose.test-pg.yml build
       - name: Run bmo specific tests
-        run: docker compose -f docker-compose.test-pg.yml run -e CI=1 bugzilla6.test test_bmo -q -f t/bmo/*.t
+        run: docker-compose -f docker-compose.test-pg.yml run -e CI=1 bugzilla6.test test_bmo -q -f t/bmo/*.t
 
   test_bugzilla6_sqlite:
     runs-on: ubuntu-latest

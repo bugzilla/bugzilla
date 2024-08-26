@@ -140,6 +140,7 @@ from those releases are included <a href="#point504">below</a> in case you're up
   <li><a href="#feat_mobilerender">Improved Mobile Rendering</a></li>
   <li><a href="#feat_mariadb">Explicit MariaDB Support</a></li>
   <li><a href="#feat_mysql8">MySQL 8+ Support</a></li>
+  <li><a href="#feat_utf8mb4">Better Unicode support on MySQL and MariaDB</a></li>
   <li><a href="#feat_docker">Demo Docker Configuration</a></li>
   <li><a href="#feat_other">Other Enhancements and Changes</a></li>
 </ul>
@@ -162,6 +163,11 @@ anymore. We new have a 'mariadb' database driver for all versions of MariaDB.
 
 <p>Bugzilla previously did not work on MySQL 8 or newer. Now it does.
 [%+ INCLUDE buglink id=1592129 %]</p>
+
+<h3 if="feat_utf8mb4">Better Unicode support on MySQL and MariaDB</h3>
+
+<p>The <b>utf8mb4</b> character set is now used by default on new installs making use of either MariaDB or MySQL. This should resolve many issues related to character encoding found in older versions.
+[%+ INCLUDE buglink id=1891882 %]</p>
 
 <h3 id="feat_docker">Demo Docker Configuration</h3>
 

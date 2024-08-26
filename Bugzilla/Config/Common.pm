@@ -88,12 +88,15 @@ sub check_email {
 
 sub check_utf8 {
   my ($utf8, $entry) = @_;
-
   # You cannot turn off the UTF-8 parameter.
+  my $current_utf8 = Bugzilla->params->{'utf8'};
   if (!$utf8) {
     return "You cannot disable UTF-8 support.";
   }
-  elsif ($entry eq 'utf8mb4' && $utf8 ne 'utf8mb4') {
+  elsif ($current_utf8 eq 'utf8mb3' && $utf8 ne 'utf8mb3' && $utf8 ne 'utf8mb4') {
+    return "You cannot downgrade from utf8mb3 support, only keep it or change to utf8mb4.";
+  }
+  elsif ($current_utf8 eq 'utf8mb4' && $utf8 ne 'utf8mb4') {
     return "You cannot disable UTF8-MB4 support.";
   }
 

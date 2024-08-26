@@ -28,6 +28,7 @@ extends qw(Bugzilla::DB);
 
 use Bugzilla::Constants;
 use Bugzilla::Install::Util qw(install_string);
+use Bugzilla::Config;
 use Bugzilla::Util;
 use Bugzilla::Error;
 use Bugzilla::DB::Schema::MariaDB;
@@ -312,6 +313,24 @@ sub bz_check_server_version {
 sub bz_setup_database {
   my ($self) = @_;
 
+  # Before touching anything else, find out whether this database server does
+  # any aliasing of the character set we plan to use so we can check for
+  # already converted tables properly. We do this by creating a table as our
+  # intended charset and then test how it reads back.
+  my $db_name = Bugzilla->localconfig->{db_name};
+  my $charset = $self->utf8_charset;
+  my $collate = $self->utf8_collate;
+  $self->do("CREATE TABLE `utf8_test` (id tinyint) CHARACTER SET ? COLLATE ?", undef, $charset, $collate);
+  my ($found_collate) = $self->selectrow_array("SELECT TABLE_COLLATION FROM information_schema.TABLES WHERE TABLE_SCHEMA=? AND TABLE_NAME='utf8_test'", undef, $db_name);
+  $self->do("DROP TABLE `utf8_test`");
+  my ($found_charset) = ($found_collate =~ m/^([a-z0-9]+)_/);
+  Bugzilla->params->{'utf8'} = $found_charset;
+  Bugzilla->params->{'utf8_collate'} = $found_collate;
+  Bugzilla::Config::write_params();
+  # reload these because they get used later.
+  $charset = $self->utf8_charset;
+  $collate = $self->utf8_collate;
+
   # The "comments" field of the bugs_fulltext table could easily exceed
   # MySQL's default max_allowed_packet. Also, MySQL should never have
   # a max_allowed_packet smaller than our max_attachment_size. So, we
@@ -404,7 +423,6 @@ sub bz_setup_database {
   }
 
   # Upgrade tables from MyISAM to InnoDB
-  my $db_name       = Bugzilla->localconfig->db_name;
   my $myisam_tables = $self->selectcol_arrayref(
     'SELECT TABLE_NAME FROM information_schema.TABLES
           WHERE TABLE_SCHEMA = ? AND ENGINE = ?', undef, $db_name, 'MyISAM'
@@ -629,8 +647,6 @@ sub bz_setup_database {
   # the table charsets.
   #
   # TABLE_COLLATION IS NOT NULL prevents us from trying to convert views.
-  my $charset         = $self->utf8_charset;
-  my $collate         = $self->utf8_collate;
   my $non_utf8_tables = $self->selectrow_array(
     "SELECT 1 FROM information_schema.TABLES
           WHERE TABLE_SCHEMA = ? AND TABLE_COLLATION IS NOT NULL
@@ -836,11 +852,16 @@ sub _fix_defaults {
 }
 
 sub utf8_charset {
-  return 'utf8mb4';
+  return 'utf8mb4' unless Bugzilla->params->{'utf8'};
+  return 'utf8mb4' if Bugzilla->params->{'utf8'} eq '1';
+  return Bugzilla->params->{'utf8'};
 }
 
 sub utf8_collate {
-  return 'utf8mb4_unicode_520_ci';
+  my $charset = utf8_charset();
+  return $charset . '_unicode_520_ci' unless Bugzilla->params->{'utf8_collate'};
+  return $charset . '_unicode_520_ci' unless (Bugzilla->params->{'utf8_collate'} =~ /^${charset}_/);
+  return Bugzilla->params->{'utf8_collate'};
 }
 
 sub default_row_format {

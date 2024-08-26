@@ -1,57 +1,64 @@
-FROM ubuntu:22.04
+FROM ubuntu:24.04
 
 ENV DEBIAN_FRONTEND noninteractive
 
 RUN apt-get update && apt-get -y dist-upgrade
 RUN apt-get -y install \
- apache2 \
- mariadb-client \
- netcat-traditional \
- libappconfig-perl \
- libdate-calc-perl \
- libtemplate-perl \
- build-essential \
- libdatetime-timezone-perl \
- libdatetime-perl \
- libemail-address-perl \
- libemail-sender-perl \
- libemail-mime-perl \
- libemail-mime-modifier-perl \
- libdbi-perl \
- libdbix-connector-perl \
- libcgi-pm-perl \
- liblocale-codes-perl \
- libmath-random-isaac-perl \
- libmath-random-isaac-xs-perl \
- libapache2-mod-perl2 \
- libapache2-mod-perl2-dev \
- libchart-perl \
- libxml-perl \
- libxml-twig-perl \
- perlmagick \
- libgd-graph-perl \
- libtemplate-plugin-gd-perl \
- libsoap-lite-perl \
- libhtml-scrubber-perl \
- libjson-rpc-perl \
- libdaemon-generic-perl \
- libtheschwartz-perl \
- libtest-taint-perl \
- libauthen-radius-perl \
- libfile-slurp-perl \
- libencode-detect-perl \
- libmodule-build-perl \
- libnet-ldap-perl \
- libauthen-sasl-perl \
- libfile-mimeinfo-perl \
- libhtml-formattext-withlinks-perl \
- libgd-dev \
- libmysqlclient-dev \
- graphviz \
- vim-common
+    apache2 \
+    graphviz \
+    libapache2-mod-perl2 \
+    libapache2-mod-perl2-dev \
+    libappconfig-perl \
+    libauthen-radius-perl \
+    libauthen-sasl-perl \
+    libcache-memcached-perl \
+    libcgi-pm-perl \
+    libchart-perl \
+    libdaemon-generic-perl \
+    libdate-calc-perl \
+    libdatetime-perl \
+    libdatetime-timezone-perl \
+    libdbi-perl \
+    libdbix-connector-perl \
+    libemail-address-perl \
+    libemail-address-xs-perl \
+    libemail-mime-modifier-perl \
+    libemail-mime-perl \
+    libemail-reply-perl \
+    libemail-sender-perl \
+    libencode-detect-perl \
+    libfile-copy-recursive-perl \
+    libfile-mimeinfo-perl \
+    libfile-slurp-perl \
+    libfile-which-perl \
+    libgd-dev \
+    libgd-graph-perl \
+    libhtml-formattext-withlinks-perl \
+    libhtml-scrubber-perl \
+    libjson-rpc-perl \
+    liblocale-codes-perl \
+    libmath-random-isaac-perl \
+    libmath-random-isaac-xs-perl \
+    libmodule-build-perl \
+    libmysqlclient-dev \
+    libnet-ldap-perl \
+    libsoap-lite-perl \
+    libtemplate-perl \
+    libtemplate-plugin-gd-perl \
+    libtest-taint-perl \
+    libtheschwartz-perl \
+    libxml-perl \
+    libxml-twig-perl \
+    mariadb-client \
+    netcat-traditional \
+    patchutils \
+    perlmagick \
+    vim-common
 
-# Ubuntu22 doesn't ship new enough versions of a few modules, so get them from CPAN
-RUN cpan install Template::Toolkit Email::Address::XS Email::Sender DBD::MariaDB
+# Ubuntu 24 doesn't ship new enough versions of a few modules or doesn't ship them at all, so get them from CPAN
+RUN apt-get -y install build-essential && \
+    cpan install Template::Toolkit DBD::MariaDB PatchReader && \
+    apt-get -y autoremove build-essential
 
 WORKDIR /var/www/html
 COPY --chown=root:www-data . /var/www/html

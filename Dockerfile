@@ -58,7 +58,8 @@ RUN apt-get -y install \
 # Ubuntu 24 doesn't ship new enough versions of a few modules or doesn't ship them at all, so get them from CPAN
 RUN apt-get -y install build-essential && \
     cpan install Template::Toolkit DBD::MariaDB PatchReader && \
-    apt-get -y autoremove build-essential
+    rm -rf /root/.cpan && \
+    apt-get purge -y --autoremove build-essential
 
 WORKDIR /var/www/html
 COPY --chown=root:www-data . /var/www/html

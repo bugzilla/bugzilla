@@ -20,6 +20,7 @@ use Bugzilla::Comment;
 use Bugzilla::Mailer;
 use Bugzilla::Hook;
 
+use Encode qw();
 use Date::Parse;
 use Date::Format;
 use Scalar::Util qw(blessed);
@@ -521,6 +522,7 @@ sub _generate_bugmail {
   my @parts = (Email::MIME->create(
     attributes => {content_type => "text/plain",},
     body       => $msg_text,
+    encode_check => Encode::FB_DEFAULT
   ));
   if ($user->setting('email_format') eq 'html') {
     $template->process("email/bugmail.html.tmpl", $vars, \$msg_html)
@@ -529,6 +531,7 @@ sub _generate_bugmail {
       Email::MIME->create(
       attributes => {content_type => "text/html",},
       body       => $msg_html,
+      encode_check => Encode::FB_DEFAULT
       );
   }
 

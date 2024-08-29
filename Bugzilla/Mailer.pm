@@ -48,6 +48,7 @@ sub MessageToMTA {
   my $dbh = Bugzilla->dbh;
 
   my $email = ref $msg ? $msg : Email::MIME->new($msg);
+  $email->encode_check_set(Encode::FB_DEFAULT);
 
   # Ensure that we are not sending emails too quickly to recipients.
   if (Bugzilla->get_param_with_override('use_mailer_queue')

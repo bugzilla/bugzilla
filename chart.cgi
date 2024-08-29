@@ -318,14 +318,10 @@ sub plot {
 
   my $format
     = $template->get_format("reports/chart", "", scalar($cgi->param('ctype')));
-  $format->{'ctype'} = 'text/html' if $cgi->param('debug');
 
   $cgi->set_dated_content_disp('inline', 'chart', $format->{extension});
   print $cgi->header($format->{'ctype'});
   disable_utf8() if ($format->{'ctype'} =~ /^image\//);
-
-  # Debugging PNGs is a pain; we need to be able to see the error messages
-  $vars->{'chart'}->dump() if $cgi->param('debug');
 
   $template->process($format->{'template'}, $vars)
     || ThrowTemplateError($template->error());
@@ -361,10 +357,6 @@ sub view {
   $vars->{'category'} = Bugzilla::Chart::getVisibleSeries();
 
   print $cgi->header();
-
-  # If we have having problems with bad data, we can set debug=1 to dump
-  # the data structure.
-  $chart->dump() if $cgi->param('debug');
 
   $template->process("reports/create-chart.html.tmpl", $vars)
     || ThrowTemplateError($template->error());

@@ -17,6 +17,13 @@
   title = "Create Chart"
 %]
 
+[% IF debug %]
+  <p>Bugzilla::Chart object:</p>
+  <pre>
+  [% debug_dump FILTER html %]
+  </pre>
+[% END %]
+
 [% PROCESS "reports/series-common.html.tmpl" 
   donames = 1 
 %]

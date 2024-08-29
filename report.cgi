@@ -312,13 +312,6 @@ $vars->{'height'}          = $height;
 $vars->{'queries'}         = $extra_data;
 $vars->{'saved_report_id'} = $cgi->param('saved_report_id');
 
-if ( $cgi->param('debug')
-  && Bugzilla->params->{debug_group}
-  && Bugzilla->user->in_group(Bugzilla->params->{debug_group}))
-{
-  $vars->{'debug'} = 1;
-}
-
 if ($action eq "wrap") {
 
   # So which template are we using? If action is "wrap", we will be using
@@ -367,23 +360,8 @@ else {
 my $format = $template->get_format("reports/report", $formatparam,
   scalar($cgi->param('ctype')));
 
-# If we get a template or CGI error, it comes out as HTML, which isn't valid
-# PNG data, and the browser just displays a "corrupt PNG" message. So, you can
-# set debug=1 to always get an HTML content-type, and view the error.
-$format->{'ctype'} = "text/html" if $cgi->param('debug');
-
 $cgi->set_dated_content_disp("inline", "report", $format->{extension});
 print $cgi->header($format->{'ctype'});
-
-# Problems with this CGI are often due to malformed data. Setting debug=1
-# prints out both data structures.
-if ($cgi->param('debug')) {
-  require Data::Dumper;
-  say "<pre>data hash:";
-  say html_quote(Data::Dumper::Dumper(%data));
-  say "\ndata array:";
-  say html_quote(Data::Dumper::Dumper(@image_data)) . "\n\n</pre>";
-}
 
 # All formats point to the same section of the documentation.
 $vars->{'doc_section'} = 'using/reports-and-charts.html#reports';

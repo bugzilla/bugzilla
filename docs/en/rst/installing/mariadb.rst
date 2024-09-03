@@ -34,7 +34,7 @@ on your machine, if it didn't come with it already.
 If you did install MariaDB manually rather than from a package, make sure the
 server is started when the machine boots.
 
-.. _mysql-add-user:
+.. _mariadb-add-user:
 
 Add a User
 ==========
@@ -72,7 +72,7 @@ configuration file, which is:
 
 Or :file:`mariadb.cnf` on Unix-like operating systems.
 
-.. _mysql-max-allowed-packet:
+.. _mariadb-max-allowed-packet:
 
 Allow Large Attachments and Many Comments
 -----------------------------------------
@@ -97,7 +97,7 @@ configuration in the ``[mysqld]`` section, so that the number is at least
     # Allow packets up to 16M
     max_allowed_packet=16M
 
-.. _mysql-small-words:
+.. _mariadb-small-words:
 
 Allow Small Words in Full-Text Indexes
 --------------------------------------
@@ -116,4 +116,4 @@ MariaDB can be configured to index those words by setting the
     # Allow small words in full-text indexes
     ft_min_word_len=2
 
-.. _mysql-attach-table-size:
+.. _mariadb-attach-table-size:

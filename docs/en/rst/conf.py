@@ -388,5 +388,5 @@ todo_include_todos = False
 # on RTD, but that's no longer the case.
 base_api_url = '../integrating/api/'
 
-extlinks = {'bug': ('https://bugzilla.mozilla.org/show_bug.cgi?id=%s', 'bug  '),
-            'api': (base_api_url + '%s', '')}
+extlinks = {'bug': ('https://bugzilla.mozilla.org/show_bug.cgi?id=%s', 'bug %s'),
+            'api': (base_api_url + '%s', '%s')}

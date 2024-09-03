@@ -29,7 +29,7 @@ want to use a different database or webserver, substitute the package
 names as appropriate.
 
 Fedora, CentOS Stream and RHEL
-------------------
+------------------------------
 
 The following command will install Fedora's packaged version of Bugzilla:
 

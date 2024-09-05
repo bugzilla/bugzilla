@@ -21,7 +21,7 @@ use Bugzilla::MIME;
 use Bugzilla::User;
 use Bugzilla::Util;
 
-use Encode qw()
+use Encode qw();
 use Date::Format qw(time2str);
 
 use Email::Sender::Simple qw(sendmail);

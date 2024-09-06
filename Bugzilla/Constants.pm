@@ -211,7 +211,7 @@ use File::Basename;
 # Bugzilla version
 # NOTE: 5.1.x and 5.3.x are the same lineage, due to 5.2 branching from
 # 5.0.6 instead of 5.1.x
-use constant BUGZILLA_VERSION => "5.3.3";
+use constant BUGZILLA_VERSION => "5.3.3+";
 
 # A base link to the current REST Documentation. We place it here
 # as it will need to be updated to whatever the current release is.

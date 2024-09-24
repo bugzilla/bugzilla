@@ -117,16 +117,16 @@ Examples:
 
 If using a GET request, make it a query param:
 
-   https://mysite/bug/1?api_key=MY_API_KEY
+   :samp:`https://mysite/bug/1?api_key={MY_API_KEY}`
 
 If using a POST request, put it in your JSON payload:
 
 .. code-block:: js
 
    {
-     'api_key': 'MY_API_KEY',
-     'status': 'RESOLVED',
-     'resolution': 'FIXED'
+     "api_key": "MY_API_KEY",
+     "status": "RESOLVED",
+     "resolution": "FIXED"
    }
 
 **Login and Password**

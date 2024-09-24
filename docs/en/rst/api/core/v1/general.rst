@@ -117,7 +117,7 @@ Examples:
 
 If using a GET request, make it a query param:
 
-   :samp:`https://mysite/bug/1?api_key={MY_API_KEY}`
+   :samp:`https://mysite/rest/bug/1?api_key={MY_API_KEY}`
 
 If using a POST request, put it in your JSON payload:
 

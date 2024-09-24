@@ -21,7 +21,7 @@ jobs:
       - name: Checkout the repository
         uses: actions/checkout@v4
       - name: Cache CPAN packages
-        uses: actions/cache@v2
+        uses: actions/cache@v4
         with:
           path: |
             ~/.perl-cpm/cache
@@ -57,7 +57,7 @@ jobs:
               --exclude '*.pod' \
               -zcvf local-lib.tar.gz local
       - name: Save dependencies
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v4
         with:
           name: ubuntu-20.04-local-lib.tar.gz
           path: local-lib.tar.gz

@@ -113,6 +113,22 @@ any call, and you will be logged in as that user if the key is correct and has
 not been revoked. You can set up an API key by using the 'API Key' tab in the
 Preferences pages.
 
+Examples:
+
+If using a GET request, make it a query param:
+
+   https://mysite/bug/1?api_key=MY_API_KEY
+
+If using a POST request, put it in your JSON payload:
+
+.. code-block:: js
+
+   {
+     'api_key': 'MY_API_KEY',
+     'status': 'RESOLVED',
+     'resolution': 'FIXED'
+   }
+
 **Login and Password**
 
 You can specify ``Bugzilla_login`` and ``Bugzilla_password`` or simply

@@ -129,6 +129,11 @@ If using a POST request, put it in your JSON payload:
      "resolution": "FIXED"
    }
 
+Note that it's generally not a good idea to put API keys in the query params,
+as that allows it to be recorded in server logs. API calls that would normally
+be sent as a GET request can also be sent as a POST request with the api_key
+being the only content in your JSON payload.
+
 **Login and Password**
 
 You can specify ``Bugzilla_login`` and ``Bugzilla_password`` or simply

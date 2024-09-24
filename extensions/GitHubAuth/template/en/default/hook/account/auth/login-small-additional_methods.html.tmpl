@@ -1,0 +1,19 @@
+[%# This Source Code Form is subject to the terms of the Mozilla Public
+  # License, v. 2.0. If a copy of the MPL was not distributed with this
+  # file, You can obtain one at http://mozilla.org/MPL/2.0/.
+  #
+  # This Source Code Form is "Incompatible With Secondary Licenses", as
+  # defined by the Mozilla Public License, v. 2.0.
+  #%]
+[% USE Bugzilla %]
+<li>
+  <span id="github_mini_login[% qs_suffix FILTER html %]" class="bz_default_hidden mini_login[% qs_suffix FILTER html %]">
+  </span>
+    <form method="post" action="[% urlbase FILTER html %]github.cgi">
+      <input type="hidden" name="github_secret" value="[% Bugzilla.github_secret FILTER html %]">
+      <input type="hidden" name="target_uri" value="[% Bugzilla.cgi.target_uri FILTER html %]">
+      <input type="image" src="extensions/GitHubAuth/web/images/sign_in.png" height="22" width="75" align="absmiddle"
+             alt="Sign in with GitHub"
+             title="Sign in with GitHub"> or
+    </form>
+</li>

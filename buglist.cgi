@@ -656,32 +656,25 @@ if (!$order || $order =~ /^reuse/i) {
 
 my @order_columns;
 if ($order) {
+#
+# 	Convert the value of the "order" form field (mostly affects Advanced Search) into a list of columns by which to sort the results.
+# 	Also as preparation for later calling in "Bugzilla/Search.pm": which expects "order" as array.
+#
+	@order_columns = (
+	$order =~ /^(?:[Bb]ug[ _]?(?:[Nn]umber|ID|id)|b?id|B?ID)$/ ?
+	"bug_id" :
 
-  # Convert the value of the "order" form field into a list of columns
-  # by which to sort the results.
-ORDER: for ($order) {
-    /^Bug Number$/ && do {
-      @order_columns = ("bug_id");
-      last ORDER;
-    };
-    /^Importance$/ && do {
-      @order_columns = ("priority", "bug_severity");
-      last ORDER;
-    };
-    /^Assignee$/ && do {
-      @order_columns = ("assigned_to", "bug_status", "priority", "bug_id");
-      last ORDER;
-    };
-    /^Last Changed$/ && do {
-      @order_columns
-        = ("changeddate", "bug_status", "priority", "assigned_to", "bug_id");
-      last ORDER;
-    };
-    do {
-      # A custom list of columns. Bugzilla::Search will validate items.
-      @order_columns = split(/\s*,\s*/, $order);
-    };
-  }
+	$order =~ /^(?:[Ii]mportance|(?:[Pp]rio|[Ss]eve)rity)$/ ?
+	( "priority", "bug_severity" ) :
+
+	$order =~ /^[Aa]ssign(?:e[ed])?$/ ?
+	( "assigned_to", "bug_status", "priority", "bug_id" ) :
+
+	$order =~ /^(?:(?:[Ll]ast[ _]?)?[Cc]hanged?(?:[ _]?[Dd]ate)?|lc)$/ ?
+	( "changeddate", "bug_status", "priority", "assigned_to", "bug_id" ) :
+
+	split( /\s*,\s*/, $order )
+	);
 }
 
 if (!scalar @order_columns) {

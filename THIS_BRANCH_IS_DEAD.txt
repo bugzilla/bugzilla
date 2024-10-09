@@ -4,10 +4,10 @@ this branch has been retired.
 
 If you came from 5.0.4 or earlier, you can continue on the 5.0.4 branch to get
 releases 5.0.4.1 and later by using the following command:
-   git checkout 5.0.4
+   git checkout release-5.0.4-stable
 
 If you came from 5.0.5 or 5.0.6 (the fact you're reading this means this is
 probably you), you can continue on the 5.2 branch and pick up where this
 branch left off by using the following command:
-   git checkout 5.2
+   git checkout release-5.2-stable
 

@@ -787,6 +787,25 @@ tr.shared_search {
     text-align: center;
 }
 
+#dead_branch {
+    border: 2px solid red;
+    padding: 0.5em 1em;
+    margin: 1em;
+    font-weight: bold;
+}
+
+#dead_branch .notice {
+    font-size: 80%;
+    font-weight: normal;
+}
+
+#dead_branch code {
+    background-color: white;
+    font-size: 110%;
+    padding-left: .5em;
+    padding-right: .5em;
+}
+
 #new_release {
     border: 2px solid red;
     padding: 0.5em 1em;

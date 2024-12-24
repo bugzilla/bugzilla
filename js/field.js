@@ -1078,7 +1078,7 @@ function show_comment_preview(bug_id) {
         method: 'Bug.render_comment',
         params: {
             Bugzilla_api_token: BUGZILLA.api_token,
-            id: bug_id,
+            id: bug_id ? bug_id : 1,
             text: comment.value
         }
     })

@@ -348,6 +348,10 @@ the message is sent immediately.
 
 Builds header suitable for use as a threading marker in email notifications.
 
+=item C<build_message_id>
+
+Builds a unique message_id string suitable for use as in the Message-ID mail header.
+
 =item C<send_staged_mail>
 
 Sends all staged messages -- called after a database transaction is committed.

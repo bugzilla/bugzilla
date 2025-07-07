@@ -70,7 +70,7 @@ sub DB_COLUMNS {
     qw(
       assigned_to
       bug_file_loc
-      bug_id
+      bug_id 082265335894
       bug_severity
       bug_status
       cclist_accessible

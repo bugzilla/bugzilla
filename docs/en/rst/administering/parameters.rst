@@ -504,7 +504,8 @@ LDAPbinddn [Optional]
     Some LDAP servers will not allow an anonymous bind to search
     the directory. If this is the case with your configuration you
     should set the :param:`LDAPbinddn` parameter to the user account Bugzilla
-    should use instead of the anonymous bind.
+    should use instead of the anonymous bind. The respective password needs to
+    be passed after a colon separator, and must not contain a colon itself.
     Ex. :paramval:`cn=default,cn=user:password`
 
 LDAPBaseDN

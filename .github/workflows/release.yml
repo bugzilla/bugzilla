@@ -26,7 +26,7 @@ jobs:
           sudo apt-get -y dist-upgrade
           sudo apt-get install --ignore-hold --allow-downgrades -y \
           apache2 \
-          mariadb-client-10.3 \
+          mariadb-client \
           netcat \
           libappconfig-perl \
           libdate-calc-perl \

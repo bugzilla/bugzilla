@@ -15,8 +15,8 @@ on:
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
   ubuntu:
-    name: Release Tests on Ubuntu 20.04
-    runs-on: ubuntu-20.04
+    name: Release Tests on Ubuntu 24.04
+    runs-on: ubuntu-24.04
     steps:
       - name: Checkout the repository
         uses: actions/checkout@v4

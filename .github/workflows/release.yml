@@ -27,7 +27,7 @@ jobs:
           sudo apt-get install --ignore-hold --allow-downgrades -y \
           apache2 \
           mariadb-client \
-          netcat \
+          netcat-traditional \
           libappconfig-perl \
           libdate-calc-perl \
           libtemplate-perl \

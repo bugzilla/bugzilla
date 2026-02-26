@@ -20,12 +20,14 @@ use fields qw(
 use Bugzilla::Constants;
 use Bugzilla::Error;
 use Bugzilla::Mailer;
-use Bugzilla::Util qw(datetime_from);
+use Bugzilla::Util qw(datetime_from i_am_webservice);
 use Bugzilla::User::Setting ();
 use Bugzilla::Auth::Login::Stack;
 use Bugzilla::Auth::Verify::Stack;
 use Bugzilla::Auth::Persist::Cookie;
 use Socket;
+use URI;
+use URI::QueryParam;
 
 sub new {
   my ($class, $params) = @_;
@@ -142,7 +144,6 @@ sub can_change_email {
 
 sub _handle_login_result {
   my ($self, $result, $login_type) = @_;
-  my $dbh = Bugzilla->dbh;
 
   my $user      = $result->{user};
   my $fail_code = $result->{failure};
@@ -179,7 +180,7 @@ sub _handle_login_result {
   # to find account names by brute force)
   elsif ($fail_code == AUTH_LOGINFAILED or $fail_code == AUTH_NO_SUCH_USER) {
     my $remaining_attempts = MAX_LOGIN_ATTEMPTS - ($result->{failure_count} || 0);
-    ThrowUserError("invalid_login_or_password", {remaining => $remaining_attempts});
+    ThrowUserError("invalid_username_or_password", {remaining => $remaining_attempts});
   }
 
   # The account may be disabled
@@ -220,7 +221,8 @@ sub _handle_login_result {
       # For IPv6 we'll need to use inet_pton which requires Perl 5.12.
       my $n = inet_aton($address);
       if ($n) {
-        $address = gethostbyaddr($n, AF_INET) . " ($address)";
+        my $host = gethostbyaddr($n, AF_INET);
+        $address = "$host ($address)" if $host;
       }
       my $vars = {
         locked_user => $user,
@@ -232,6 +234,10 @@ sub _handle_login_result {
       $template->process('email/lockout.txt.tmpl', $vars, \$message)
         || ThrowTemplateError($template->error);
       MessageToMTA($message);
+      Bugzilla->audit(sprintf(
+        '<%s> triggered lockout of %s after %s attempts',
+        $address, $user->login, scalar(@$attempts)
+      ));
     }
 
     $unlock_at->set_time_zone($user->timezone);

@@ -262,6 +262,9 @@
     There was an error sending mail from '[% mail.header('From') FILTER html %]'
     to '[% mail.header('To') FILTER html %]':
     [%+ msg FILTER html %]
+  [% ELSIF error == "method_not_implemented" %]
+    There was an error because '[% class FILTER html %]' does not implement the method
+    '[% method FILTER html %]'
 
   [% ELSIF error == "missing_series_id" %]
     Having inserted a series into the database, no series_id was returned for

@@ -4256,7 +4256,36 @@ sub _sanitize_audit_log_table {
 sub _add_missing_primary_keys {
   my $dbh = Bugzilla->dbh;
 
-  for my $table (qw( audit_log login_failure )) {
+  for my $table (qw(
+          audit_log
+          bug_group_map
+          bug_tag
+          bugs_aliases
+          bz_schema
+          category_group_map 
+          cc
+          component_cc
+          dependencies
+          email_bug_ignore
+          email_setting
+          field_visibility
+          flagexclusions
+          flaginclusions
+          group_control_map
+          group_group_map 
+          keywords
+          login_failure
+          namedqueries_link_in_footer
+          namedquery_group_map 
+          profile_setting 
+          series_data
+          setting_value
+          status_workflow
+          ts_error
+          ts_note
+          user_group_map
+          watch
+      )) {
       next if $dbh->bz_column_info($table, 'id');
       print "Adding primary key to $table\n";
       $dbh->bz_add_column(

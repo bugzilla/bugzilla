@@ -364,6 +364,7 @@ use constant ABSTRACT_SCHEMA => {
 
   bugs_aliases => {
     FIELDS => [
+      id     => {TYPE => 'INTSERIAL', NOTNULL => 1, PRIMARYKEY => 1},
       alias  => {TYPE => 'varchar(40)', NOTNULL => 1},
       bug_id => {
         TYPE       => 'INT3',
@@ -378,6 +379,7 @@ use constant ABSTRACT_SCHEMA => {
 
   cc => {
     FIELDS => [
+      id => {TYPE => 'INTSERIAL', NOTNULL => 1, PRIMARYKEY => 1},
       bug_id => {
         TYPE       => 'INT3',
         NOTNULL    => 1,
@@ -474,6 +476,7 @@ use constant ABSTRACT_SCHEMA => {
 
   dependencies => {
     FIELDS => [
+      id => {TYPE => 'INTSERIAL', NOTNULL => 1, PRIMARYKEY => 1},
       blocked => {
         TYPE       => 'INT3',
         NOTNULL    => 1,
@@ -600,6 +603,7 @@ use constant ABSTRACT_SCHEMA => {
 
   keywords => {
     FIELDS => [
+      id => {TYPE => 'INTSERIAL', NOTNULL => 1, PRIMARYKEY => 1},
       bug_id => {
         TYPE       => 'INT3',
         NOTNULL    => 1,
@@ -688,6 +692,7 @@ use constant ABSTRACT_SCHEMA => {
   #     to be set for them.
   flaginclusions => {
     FIELDS => [
+      id => {TYPE => 'INTSERIAL', NOTNULL => 1, PRIMARYKEY => 1},
       type_id => {
         TYPE       => 'INT3',
         NOTNULL    => 1,
@@ -710,6 +715,7 @@ use constant ABSTRACT_SCHEMA => {
 
   flagexclusions => {
     FIELDS => [
+      id => {TYPE => 'INTSERIAL', NOTNULL => 1, PRIMARYKEY => 1},
       type_id => {
         TYPE       => 'INT3',
         NOTNULL    => 1,
@@ -767,6 +773,7 @@ use constant ABSTRACT_SCHEMA => {
 
   field_visibility => {
     FIELDS => [
+      id => {TYPE => 'INTSERIAL', NOTNULL => 1, PRIMARYKEY => 1},
       field_id => {
         TYPE       => 'INT3',
         REFERENCES => {TABLE => 'fielddefs', COLUMN => 'id', DELETE => 'CASCADE'}
@@ -880,6 +887,7 @@ use constant ABSTRACT_SCHEMA => {
   status_workflow => {
     FIELDS => [
 
+      id => {TYPE => 'INTSERIAL', NOTNULL => 1, PRIMARYKEY => 1},
       # On bug creation, there is no old value.
       old_status => {
         TYPE       => 'INT2',
@@ -968,6 +976,7 @@ use constant ABSTRACT_SCHEMA => {
 
   email_setting => {
     FIELDS => [
+      id => {TYPE => 'INTSERIAL', NOTNULL => 1, PRIMARYKEY => 1},
       user_id => {
         TYPE       => 'INT3',
         NOTNULL    => 1,
@@ -984,6 +993,7 @@ use constant ABSTRACT_SCHEMA => {
 
   email_bug_ignore => {
     FIELDS => [
+      id => {TYPE => 'INTSERIAL', NOTNULL => 1, PRIMARYKEY => 1},
       user_id => {
         TYPE       => 'INT3',
         NOTNULL    => 1,
@@ -1003,6 +1013,7 @@ use constant ABSTRACT_SCHEMA => {
 
   watch => {
     FIELDS => [
+      id => {TYPE => 'INTSERIAL', NOTNULL => 1, PRIMARYKEY => 1},
       watcher => {
         TYPE       => 'INT3',
         NOTNULL    => 1,
@@ -1037,6 +1048,7 @@ use constant ABSTRACT_SCHEMA => {
 
   namedqueries_link_in_footer => {
     FIELDS => [
+      id => {TYPE => 'INTSERIAL', NOTNULL => 1, PRIMARYKEY => 1},
       namedquery_id => {
         TYPE       => 'INT3',
         NOTNULL    => 1,
@@ -1071,6 +1083,7 @@ use constant ABSTRACT_SCHEMA => {
 
   bug_tag => {
     FIELDS => [
+      id => {TYPE => 'INTSERIAL', NOTNULL => 1, PRIMARYKEY => 1},
       bug_id => {
         TYPE       => 'INT3',
         NOTNULL    => 1,
@@ -1102,8 +1115,8 @@ use constant ABSTRACT_SCHEMA => {
   },
 
   component_cc => {
-
     FIELDS => [
+      id => {TYPE => 'INTSERIAL', NOTNULL => 1, PRIMARYKEY => 1},
       user_id => {
         TYPE       => 'INT3',
         NOTNULL    => 1,
@@ -1195,6 +1208,7 @@ use constant ABSTRACT_SCHEMA => {
 
   group_control_map => {
     FIELDS => [
+      id => {TYPE => 'INTSERIAL', NOTNULL => 1, PRIMARYKEY => 1},
       group_id => {
         TYPE       => 'INT3',
         NOTNULL    => 1,
@@ -1229,6 +1243,7 @@ use constant ABSTRACT_SCHEMA => {
   # if GRANT_REGEXP - record was created by evaluating a regexp
   user_group_map => {
     FIELDS => [
+      id => {TYPE => 'INTSERIAL', NOTNULL => 1, PRIMARYKEY => 1},
       user_id => {
         TYPE       => 'INT3',
         NOTNULL    => 1,
@@ -1257,6 +1272,7 @@ use constant ABSTRACT_SCHEMA => {
   # if GROUP_VISIBLE - member groups may see grantor group
   group_group_map => {
     FIELDS => [
+      id => {TYPE => 'INTSERIAL', NOTNULL => 1, PRIMARYKEY => 1},
       member_id => {
         TYPE       => 'INT3',
         NOTNULL    => 1,
@@ -1279,6 +1295,7 @@ use constant ABSTRACT_SCHEMA => {
   # in order to see a bug.
   bug_group_map => {
     FIELDS => [
+      id => {TYPE => 'INTSERIAL', NOTNULL => 1, PRIMARYKEY => 1},
       bug_id => {
         TYPE       => 'INT3',
         NOTNULL    => 1,
@@ -1300,6 +1317,7 @@ use constant ABSTRACT_SCHEMA => {
   # in order to see a named query somebody else shares.
   namedquery_group_map => {
     FIELDS => [
+      id => {TYPE => 'INTSERIAL', NOTNULL => 1, PRIMARYKEY => 1},
       namedquery_id => {
         TYPE       => 'INT3',
         NOTNULL    => 1,
@@ -1320,6 +1338,7 @@ use constant ABSTRACT_SCHEMA => {
 
   category_group_map => {
     FIELDS => [
+      id => {TYPE => 'INTSERIAL', NOTNULL => 1, PRIMARYKEY => 1},
       category_id => {
         TYPE    => 'INT2',
         NOTNULL => 1,
@@ -1435,6 +1454,7 @@ use constant ABSTRACT_SCHEMA => {
 
   series_data => {
     FIELDS => [
+      id => {TYPE => 'INTSERIAL', NOTNULL => 1, PRIMARYKEY => 1},
       series_id => {
         TYPE       => 'INT3',
         NOTNULL    => 1,
@@ -1550,6 +1570,7 @@ use constant ABSTRACT_SCHEMA => {
 
   setting_value => {
     FIELDS => [
+      id => {TYPE => 'INTSERIAL', NOTNULL => 1, PRIMARYKEY => 1},
       name => {
         TYPE       => 'varchar(32)',
         NOTNULL    => 1,
@@ -1567,6 +1588,7 @@ use constant ABSTRACT_SCHEMA => {
 
   profile_setting => {
     FIELDS => [
+      id => {TYPE => 'INTSERIAL', NOTNULL => 1, PRIMARYKEY => 1},
       user_id => {
         TYPE       => 'INT3',
         NOTNULL    => 1,
@@ -1641,6 +1663,7 @@ use constant ABSTRACT_SCHEMA => {
 
   ts_note => {
     FIELDS => [
+      id => {TYPE => 'INTSERIAL', NOTNULL => 1, PRIMARYKEY => 1},
 
       # This is a BIGINT in standard TheSchwartz schemas.
       jobid   => {TYPE => 'INT4', NOTNULL => 1},
@@ -1653,6 +1676,7 @@ use constant ABSTRACT_SCHEMA => {
 
   ts_error => {
     FIELDS => [
+      id => {TYPE => 'INTSERIAL', NOTNULL => 1, PRIMARYKEY => 1},
       error_time => {TYPE => 'INT4',         NOTNULL => 1},
       jobid      => {TYPE => 'INT4',         NOTNULL => 1},
       message    => {TYPE => 'varchar(255)', NOTNULL => 1},
@@ -1684,6 +1708,7 @@ use constant ABSTRACT_SCHEMA => {
 
   bz_schema => {
     FIELDS => [
+      id => {TYPE => 'INTSERIAL', NOTNULL => 1, PRIMARYKEY => 1},
       schema_data => {TYPE => 'LONGBLOB',     NOTNULL => 1},
       version     => {TYPE => 'decimal(3,2)', NOTNULL => 1},
     ],

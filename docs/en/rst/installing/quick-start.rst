@@ -68,6 +68,22 @@ the next steps (up to step 7) in another terminal while you wait for the
 second command to finish. If you start another terminal, you will need to
 :command:`sudo su` again.
 
+Download Bugzilla
+=================
+
+Get it from our Git repository:
+
+:command:`mkdir -p /var/www/webapps`
+
+:command:`cd /var/www/webapps`
+
+:command:`git clone --branch release-X.X-stable https://github.com/bugzilla/bugzilla bugzilla`
+
+(where "X.X" is the 2-digit version number of the stable release of Bugzilla
+that you want - e.g. 5.2)
+
+:command:`cd bugzilla`
+
 Configure MariaDB
 =================
 
@@ -115,20 +131,6 @@ For more in depth setup instructions, refer to :ref:`Apache section of this docu
 :command:`a2enmod cgid headers expires rewrite`
 
 :command:`service apache2 restart`
-
-Download Bugzilla
-=================
-
-Get it from our Git repository:
-
-:command:`mkdir -p /var/www/webapps`
-
-:command:`cd /var/www/webapps`
-
-:command:`git clone --branch release-X.X-stable https://github.com/bugzilla/bugzilla bugzilla`
-
-(where "X.X" is the 2-digit version number of the stable release of Bugzilla
-that you want - e.g. 5.2)
 
 Install Additional Perl Modules
 ===============================

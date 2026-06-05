@@ -148,6 +148,38 @@ td.bz_total {
     color: inherit;
 }
 
+.bz_status_toggle {
+  margin: 0.5em 0;
+}
+
+.bz_status_toggle_label {
+  font-weight: bold;
+  margin-right: 0.4em;
+}
+
+.bz_status_toggle_btn {
+  display: inline-block;
+  padding: 0.2em 0.7em;
+  margin: 0 0.2em;
+  border: 1px solid #aaa;
+  border-radius: 3px;
+  text-decoration: none;
+  color: #333;
+  background: #f5f5f5;
+}
+
+.bz_status_toggle_btn:hover {
+  background: #e0e0e0;
+  border-color: #888;
+}
+
+.bz_status_toggle_btn.bz_status_toggle_active {
+  background: #336699;
+  color: #fff;
+  border-color: #336699;
+  font-weight: bold;
+}
+
 .buglist_menu {
     margin-top: 1em;
 }

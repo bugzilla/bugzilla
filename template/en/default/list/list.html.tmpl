@@ -136,6 +136,36 @@
 <hr>
 
 [%############################################################################%]
+[%# Status Toggle                                                            #%]
+[%############################################################################%]
+
+<div class="bz_status_toggle">
+  <span class="bz_status_toggle_label">Show:</span>
+  <a id="status_toggle_open"   class="bz_status_toggle_btn" href="#">Open</a>
+  <a id="status_toggle_closed" class="bz_status_toggle_btn" href="#">Closed</a>
+  <a id="status_toggle_all"    class="bz_status_toggle_btn" href="#">All</a>
+</div>
+<script type="text/javascript">
+(function() {
+  if (typeof URLSearchParams === 'undefined') return;
+  var params = new URLSearchParams(window.location.search);
+  var statuses = params.getAll('bug_status');
+  var statusMap = { '__open__': 'open', '__closed__': 'closed', '__all__': 'all' };
+  var current = (statuses.length === 1) ? (statusMap[statuses[0]] || '') : '';
+
+  ['open', 'closed', 'all'].forEach(function(s) {
+    var p = new URLSearchParams(window.location.search);
+    p.delete('bug_status');
+    p.append('bug_status', '__' + s + '__');
+    var el = document.getElementById('status_toggle_' + s);
+    if (!el) return;
+    el.href = 'buglist.cgi?' + p.toString();
+    if (s === current) el.className += ' bz_status_toggle_active';
+  });
+})();
+</script>
+
+[%############################################################################%]
 [%# Preceding Status Line                                                    #%]
 [%############################################################################%]
 

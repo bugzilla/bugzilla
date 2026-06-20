@@ -40,7 +40,11 @@ sub _mail_error_message {
     $message = "$error";
   }
 
+  # Keep only the primary error line and drop any stack trace frames.
+  ($message) = split /\n/, $message, 2;
+
   $message =~ s/\s+at\s+\S+\s+line\s+\d+\.?\s*$//s;
+  $message =~ s/\s+called\s+at\s+.*$//s;
   $message =~ s/\s+/ /g;
   $message =~ s/^\s+|\s+$//g;
   return $message || 'Unknown error while sending mail.';

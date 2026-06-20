@@ -28,7 +28,6 @@ extends qw(Bugzilla::DB);
 
 use Bugzilla::Constants;
 use Bugzilla::Install::Util qw(install_string);
-use Bugzilla::Config;
 use Bugzilla::Util;
 use Bugzilla::Error;
 use Bugzilla::DB::Schema::Mysql;
@@ -317,10 +316,10 @@ sub bz_setup_database {
   $self->do("CREATE TABLE `utf8_test` (id tinyint) CHARACTER SET ? COLLATE ?", undef, $charset, $collate);
   my ($found_collate) = $self->selectrow_array("SELECT TABLE_COLLATION FROM information_schema.TABLES WHERE TABLE_SCHEMA=? AND TABLE_NAME='utf8_test'", undef, $db_name);
   $self->do("DROP TABLE `utf8_test`");
-  my ($found_charset) = ($found_collate =~ m/^([a-z0-9]+)_/);
-  Bugzilla->params->{'utf8'} = $found_charset;
-  Bugzilla->params->{'utf8_collate'} = $found_collate;
-  Bugzilla::Config::write_params();
+  my ($found_charset)
+    = defined $found_collate ? ($found_collate =~ m/^([a-z0-9]+)_/) : ();
+  $self->{detected_utf8_charset} = $found_charset if defined $found_charset;
+  $self->{detected_utf8_collate} = $found_collate if defined $found_collate;
   # reload these because they get used later.
   $charset = $self->utf8_charset;
   $collate = $self->utf8_collate;
@@ -911,22 +910,34 @@ sub _fix_defaults {
 }
 
 sub utf8_charset {
-  return 'utf8mb4' unless Bugzilla->params->{'utf8'};
-  return 'utf8mb4' if Bugzilla->params->{'utf8'} eq '1';
-  return Bugzilla->params->{'utf8'};
+  my ($self) = @_;
+  if (ref $self && $self->{detected_utf8_charset}) {
+    return $self->{detected_utf8_charset};
+  }
+  my $param = Bugzilla->params->{'utf8'};
+  return 'utf8mb4' unless $param;
+  return 'utf8mb4' if $param eq '1';
+  return 'utf8mb3' if $param eq 'utf8';
+  return $param;
 }
 
 sub utf8_collate {
-  my $charset = utf8_charset();
+  my ($self) = @_;
+  my $charset = $self->utf8_charset;
+  if (ref $self && $self->{detected_utf8_collate}
+    && $self->{detected_utf8_collate} =~ /^${charset}_/)
+  {
+    return $self->{detected_utf8_collate};
+  }
   return $charset . '_unicode_520_ci' unless Bugzilla->params->{'utf8_collate'};
   return $charset . '_unicode_520_ci' unless (Bugzilla->params->{'utf8_collate'} =~ /^${charset}_/);
   return Bugzilla->params->{'utf8_collate'};
 }
 
 sub default_row_format {
-  my ($class, $table) = @_;
-  my $charset = utf8_charset();
-  if ($charset eq 'utf8') {
+  my ($self, $table) = @_;
+  my $charset = $self->utf8_charset;
+  if (($charset eq 'utf8') || ($charset eq 'utf8mb3')) {
     return 'Compact';
   }
   elsif ($charset eq 'utf8mb4') {
@@ -1201,13 +1212,13 @@ Undocumented methods: utf8_charset, utf8_collate, default_row_format'
 
 Returns the name of the charset to use for utf8 columns.
 This comes from the C<Bugzilla-E<gt>params-E<gt>{utf8}> parameter.
-It can be either true, false, or utf8mb4
+It should be either C<utf8mb3> or C<utf8mb4>. Legacy values are normalized.
 
 =head2 utf8_collate
 
 Returns the name of the collation to use for utf8 columns.
-When C<utf8_charset> is C<utf8mb4> this is C<utf8mb4_unicode_520_ci>.
-Otherwise it is C<utf8_general_ci>.
+By default this is C<< <charset>_unicode_520_ci >> for the selected charset,
+unless an explicit compatible value is configured.
 
 =head2 default_row_format
 

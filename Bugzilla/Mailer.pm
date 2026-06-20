@@ -23,10 +23,40 @@ use Bugzilla::User;
 
 use Encode qw();
 use Date::Format qw(time2str);
+use Scalar::Util qw(blessed);
 
 use Email::Sender::Simple qw(sendmail);
 use Email::Sender::Transport::SMTP::Persistent;
 use Bugzilla::Sender::Transport::Sendmail;
+
+sub _mail_error_message {
+  my ($error) = @_;
+  my $message = '';
+
+  if (blessed($error) && $error->can('message')) {
+    $message = $error->message;
+  }
+  else {
+    $message = "$error";
+  }
+
+  $message =~ s/\s+at\s+\S+\s+line\s+\d+\.?\s*$//s;
+  $message =~ s/\s+/ /g;
+  $message =~ s/^\s+|\s+$//g;
+  return $message || 'Unknown error while sending mail.';
+}
+
+sub _record_mail_warning {
+  my ($method, $error) = @_;
+  my $warnings = Bugzilla->request_cache->{mail_warnings} ||= [];
+
+  return if grep {
+       $_->{method} eq $method
+    && $_->{error}  eq $error
+  } @$warnings;
+
+  push @$warnings, {method => $method, error => $error};
+}
 
 sub generate_email {
   my ($vars, $templates) = @_;
@@ -95,16 +125,18 @@ sub generate_email {
 }
 
 sub MessageToMTA {
-  my ($msg, $send_now) = (@_);
+  my ($msg, $send_now, $options) = (@_);
+  $options ||= {};
+
   my $method = Bugzilla->params->{'mail_delivery_method'};
-  return if $method eq 'None';
+  return 1 if $method eq 'None';
 
   if ( Bugzilla->params->{'use_mailer_queue'}
     && !$send_now
     && !Bugzilla->dbh->bz_in_transaction())
   {
     Bugzilla->job_queue->insert('send_mail', {msg => $msg});
-    return;
+    return 1;
   }
 
   my $dbh = Bugzilla->dbh;
@@ -124,7 +156,7 @@ sub MessageToMTA {
     my $sth = $dbh->prepare("INSERT INTO mail_staging (message) VALUES (?)");
     $sth->bind_param(1, $string, $dbh->BLOB_TYPE);
     $sth->execute;
-    return;
+    return 1;
   }
 
   my $from = $email->header('From');
@@ -182,14 +214,21 @@ sub MessageToMTA {
       . $email->header('Date') . "\n"
       . $email->as_string;
     close TESTFILE;
+    return 1;
   }
   else {
     # This is useful for Sendmail, so we put it out here.
     local $ENV{PATH} = SENDMAIL_PATH;
     eval { sendmail($email, {transport => $transport}) };
     if ($@) {
-      ThrowCodeError('mail_send_error', {msg => $@->message, mail => $email});
+      my $error = _mail_error_message($@);
+      if ($options->{non_fatal}) {
+        _record_mail_warning($method, $error);
+        return;
+      }
+      ThrowCodeError('mail_send_error', {msg => $error, mail => $email});
     }
+    return 1;
   }
 }
 
@@ -231,7 +270,8 @@ sub send_staged_mail {
 
   foreach my $email (@$emails) {
     my ($id, $message) = @$email;
-    MessageToMTA($message);
+    my $sent = MessageToMTA($message, undef, {non_fatal => 1});
+    last if !$sent;
     $sth->execute($id);
   }
 }

@@ -464,6 +464,21 @@
     The cookie that was remembering your login is now gone. You will be
     prompted for a login the next time it is required.
 
+  [% ELSIF message_tag == "mail_delivery_warnings" %]
+    [% title = "Mail Delivery Problem" %]
+    [% IF mail_warnings.size == 1 %]
+      Bugzilla could not send queued email.
+    [% ELSE %]
+      Bugzilla could not send queued email for [% mail_warnings.size %] messages.
+    [% END %]
+    Please review your
+    <a href="editparams.cgi?section=mta#mail_delivery_method_desc">mail delivery settings</a>.
+    <ul>
+      [% FOREACH warning = mail_warnings %]
+        <li>[% warning.method FILTER html %]: [% warning.error FILTER html %]</li>
+      [% END %]
+    </ul>
+
   [% ELSIF message_tag == "login_changed" %]
     [% title = "$terms.Bugzilla Login Changed" %]
     Your [% terms.Bugzilla %] login has been changed.

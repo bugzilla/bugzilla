@@ -127,6 +127,7 @@ sub generate_email {
 sub MessageToMTA {
   my ($msg, $send_now, $options) = (@_);
   $options ||= {};
+  my $non_fatal = exists $options->{non_fatal} ? $options->{non_fatal} : !$send_now;
 
   my $method = Bugzilla->params->{'mail_delivery_method'};
   return 1 if $method eq 'None';
@@ -163,47 +164,60 @@ sub MessageToMTA {
 
   my $hostname;
   my $transport;
-  if ($method eq "Sendmail") {
-    if (ON_WINDOWS) {
-      $transport
-        = Bugzilla::Sender::Transport::Sendmail->new({sendmail => SENDMAIL_EXE});
+  my $setup_ok = eval {
+    if ($method eq "Sendmail") {
+      if (ON_WINDOWS) {
+        $transport
+          = Bugzilla::Sender::Transport::Sendmail->new({sendmail => SENDMAIL_EXE});
+      }
+      else {
+        $transport = Bugzilla::Sender::Transport::Sendmail->new();
+      }
     }
     else {
-      $transport = Bugzilla::Sender::Transport::Sendmail->new();
-    }
-  }
-  else {
-    # Sendmail will automatically append our hostname to the From
-    # address, but other mailers won't.
-    my $urlbase = Bugzilla->params->{'urlbase'};
-    $urlbase =~ m|//([^:/]+)[:/]?|;
-    $hostname = $1 || 'localhost';
-    $from .= "\@$hostname" if $from !~ /@/;
-    $email->header_set('From', $from);
+      # Sendmail will automatically append our hostname to the From
+      # address, but other mailers won't.
+      my $urlbase = Bugzilla->params->{'urlbase'};
+      $urlbase =~ m|//([^:/]+)[:/]?|;
+      $hostname = $1 || 'localhost';
+      $from .= "\@$hostname" if $from !~ /@/;
+      $email->header_set('From', $from);
 
-    # Sendmail adds a Date: header also, but others may not.
-    if (!defined $email->header('Date')) {
-      $email->header_set('Date', time2str("%a, %d %b %Y %T %z", time()));
+      # Sendmail adds a Date: header also, but others may not.
+      if (!defined $email->header('Date')) {
+        $email->header_set('Date', time2str("%a, %d %b %Y %T %z", time()));
+      }
     }
-  }
 
-  if ($method eq "SMTP") {
-    my ($host, $port) = split(/:/, Bugzilla->params->{'smtpserver'}, 2);
-    $transport = Bugzilla->request_cache->{smtp}
-      //= Email::Sender::Transport::SMTP::Persistent->new({
-      host => $host,
-      defined($port) ? (port => $port) : (),
-      sasl_username => Bugzilla->params->{'smtp_username'},
-      sasl_password => Bugzilla->params->{'smtp_password'},
-      helo          => $hostname,
-      ssl           => Bugzilla->params->{'smtp_ssl'},
-      debug         => Bugzilla->params->{'smtp_debug'}
-      });
+    if ($method eq "SMTP") {
+      my ($host, $port) = split(/:/, Bugzilla->params->{'smtpserver'}, 2);
+      $transport = Bugzilla->request_cache->{smtp}
+        //= Email::Sender::Transport::SMTP::Persistent->new({
+        host => $host,
+        defined($port) ? (port => $port) : (),
+        sasl_username => Bugzilla->params->{'smtp_username'},
+        sasl_password => Bugzilla->params->{'smtp_password'},
+        helo          => $hostname,
+        ssl           => Bugzilla->params->{'smtp_ssl'},
+        debug         => Bugzilla->params->{'smtp_debug'}
+        });
+    }
+
+    1;
+  };
+
+  if (!$setup_ok) {
+    my $error = _mail_error_message($@);
+    if ($non_fatal) {
+      _record_mail_warning($method, $error);
+      return;
+    }
+    ThrowCodeError('mail_send_error', {msg => $error, mail => $email});
   }
 
   Bugzilla::Hook::process('mailer_before_send', {email => $email});
 
-  return if $email->header('to') eq '';
+  return 1 if $email->header('to') eq '';
 
   if ($method eq "Test") {
     my $filename = bz_locations()->{'datadir'} . '/mailer.testfile';
@@ -222,7 +236,7 @@ sub MessageToMTA {
     eval { sendmail($email, {transport => $transport}) };
     if ($@) {
       my $error = _mail_error_message($@);
-      if ($options->{non_fatal}) {
+      if ($non_fatal) {
         _record_mail_warning($method, $error);
         return;
       }

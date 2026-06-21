@@ -1146,6 +1146,11 @@ sub create {
         return $cache;
       },
 
+      # Request-scoped non-fatal mail delivery warnings.
+      'mail_warnings' => sub {
+        return Bugzilla->request_cache->{mail_warnings} || [];
+      },
+
       'css_files'      => \&css_files,
       yui_resolve_deps => \&yui_resolve_deps,
       concatenate_js   => \&_concatenate_js,

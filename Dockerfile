@@ -29,6 +29,7 @@ RUN apt-get -y install \
  libxml-perl \
  libxml-twig-perl \
  perlmagick \
+ tzdata \
  libgd-graph-perl \
  libtemplate-plugin-gd-perl \
  libsoap-lite-perl \

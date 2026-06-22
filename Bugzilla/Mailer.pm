@@ -264,9 +264,9 @@ sub build_thread_marker {
 
   my $sitespec = '@' . Bugzilla->params->{'urlbase'};
   $sitespec =~ s/:\/\//\./;    # Make the protocol look like part of the domain
-  $sitespec =~ s/^([^:\/]+):(\d+)/$1/;    # Remove a port number, to relocate
-  if ($2) {
-    $sitespec = "-$2$sitespec";    # Put the port number back in, before the '@'
+  $sitespec =~ s/\/.*$//;      # Strip path component — / is illegal after @ in Message-ID
+  if ($sitespec =~ s/^([^:\/]+):(\d+)/$1/) {    # Remove port number, to relocate
+    $sitespec = "-$2$sitespec";                  # Put the port number back in, before the '@'
   }
 
   my $threadingmarker;
@@ -288,19 +288,19 @@ sub build_thread_marker {
 sub build_message_id {
   my ($user_id) = @_;
 
-  if (!defined $user_id) {
-    $user_id = Bugzilla->user->id;
-  }
+  # Don't fall back to current user: this is called from contexts with no logged-in
+  # user (job queue, email_in.pl). The random bits below ensure uniqueness anyway.
+  $user_id //= '';
 
   my $sitespec = '@' . Bugzilla->params->{'urlbase'};
-  $sitespec =~ s/:\/\//\./;               # Make the protocol look like part of the domain
-  $sitespec =~ s/^([^:\/]+):(\d+)/$1/;    # Remove a port number, to relocate
-  if ($2) {
-    $sitespec = "-$2$sitespec";           # Put the port number back in, before the '@'
+  $sitespec =~ s/:\/\//\./;    # Make the protocol look like part of the domain
+  $sitespec =~ s/\/.*$//;      # Strip path component — / is illegal after @ in Message-ID
+  if ($sitespec =~ s/^([^:\/]+):(\d+)/$1/) {    # Remove port number, to relocate
+    $sitespec = "-$2$sitespec";                  # Put the port number back in, before the '@'
   }
 
   my $rand_bits  = generate_random_password(10);
-  my $message_id = "<bugzilla-$user_id-$rand_bits$sitespec>";
+  my $message_id = '<bugzilla-' . ($user_id ne '' ? "$user_id-" : '') . "$rand_bits$sitespec>";
   return $message_id;
 }
 

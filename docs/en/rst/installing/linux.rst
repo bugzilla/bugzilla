@@ -42,7 +42,7 @@ It may be useful to know that Fedora stores the Bugzilla files in
 If you want to install a version of Bugzilla from the Bugzilla project
 or have it on RHEL or CentOS, you will need to do the following instead:
 
-On CentOS Stream and RHEl, add the Fedora EPEL repo, in the way described
+On CentOS Stream and RHEL, add the Fedora EPEL repo, in the way described
 in the `installation instructions <https://docs.fedoraproject.org/en-US/epel/>`_.
 
 Run the following to install the base Bugzilla dependencies:
@@ -109,6 +109,9 @@ mariadb-server`
 If you plan to use a database other than MariaDB, you will need to also install
 the appropriate packages for that (in the command above, the packages required
 for MariaDB are ``libdbd-mysql-perl``, ``libmariadb-dev-compat`` and ``mariadb-server``).
+
+Also, if you do not plan to use Apache, (``apache2`` package above), install the
+appropriate web server package.
 
 You can install optional packages with:
 :command:`apt install graphviz libapache2-mod-perl2
@@ -228,6 +231,7 @@ Any web server that is capable of running CGI scripts can be made to work.
 We have specific configuration instructions for the following:
 
 * :ref:`apache`
+* :ref:`nginx`
 
 .. _linux-config-database:
 

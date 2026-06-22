@@ -354,7 +354,7 @@ sub bz_setup_database {
     die install_string('mysql_innodb_disabled');
   }
 
-  if ($self->utf8_charset eq 'utf8mb3') {
+  if ($self->utf8_charset eq 'utf8mb4') {
     my %global = map {@$_}
       @{$self->selectall_arrayref(q(SHOW GLOBAL VARIABLES LIKE 'innodb_%'))};
 

@@ -732,6 +732,9 @@ sub update_table_definitions {
   # 2015-12-16 LpSolit@gmail.com - Bug 1232578
   _sanitize_audit_log_table();
 
+  # 2024-07-09 matthias@towiski.de - Bug 535821
+  _add_missing_primary_keys();
+
   ################################################################
   # New --TABLE-- changes should go *** A B O V E *** this point #
   ################################################################
@@ -4247,6 +4250,48 @@ sub _sanitize_audit_log_table {
         = Bugzilla::Object::_sanitize_audit_log($class, $field, [undef, $passwd]);
       $sth->execute($sanitized_passwd, $class, $field, $passwd);
     }
+  }
+}
+
+sub _add_missing_primary_keys {
+  my $dbh = Bugzilla->dbh;
+
+  for my $table (qw(
+          audit_log
+          bug_group_map
+          bug_tag
+          bugs_aliases
+          bz_schema
+          category_group_map 
+          cc
+          component_cc
+          dependencies
+          email_bug_ignore
+          email_setting
+          field_visibility
+          flagexclusions
+          flaginclusions
+          group_control_map
+          group_group_map 
+          keywords
+          login_failure
+          namedqueries_link_in_footer
+          namedquery_group_map 
+          profile_setting 
+          series_data
+          setting_value
+          status_workflow
+          ts_error
+          ts_note
+          user_group_map
+          watch
+      )) {
+      next if $dbh->bz_column_info($table, 'id');
+      print "Adding primary key to $table\n";
+      $dbh->bz_add_column(
+          $table, 'id',
+          { TYPE => 'INTSERIAL', NOTNULL => 1, PRIMARYKEY => 1 }
+      );
   }
 }
 

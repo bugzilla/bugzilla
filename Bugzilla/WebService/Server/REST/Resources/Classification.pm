@@ -25,7 +25,7 @@ sub _rest_resources {
       GET => {
         method => 'get',
         params => sub {
-          my $param = $_[0] =~ /^\d+$/ ? 'ids' : 'names';
+          my $param = $_[0] =~ /^\d+$/a ? 'ids' : 'names';
           return {$param => [$_[0]]};
         }
       }

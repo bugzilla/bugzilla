@@ -315,7 +315,7 @@ if (defined $cgi->param('id')) {
 
 my %is_private;
 foreach my $field (grep(/^defined_isprivate/, $cgi->param())) {
-  if ($field =~ /(\d+)$/) {
+  if ($field =~ /(\d+)$/a) {
     my $comment_id = $1;
     $is_private{$comment_id} = $cgi->param("isprivate_$comment_id");
   }

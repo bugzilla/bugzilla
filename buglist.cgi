@@ -152,7 +152,7 @@ if (my $last_list = $cgi->param('regetlastlist')) {
 # and order by, since relevance only exists when doing a fulltext search.
 my $fulltext = 0;
 if ($cgi->param('content')) { $fulltext = 1 }
-my @charts = map(/^field(\d-\d-\d)$/ ? $1 : (), $cgi->param());
+my @charts = map(/^field(\d-\d-\d)$/a ? $1 : (), $cgi->param());
 foreach my $chart (@charts) {
   if ($cgi->param("field$chart") eq 'content' && $cgi->param("value$chart")) {
     $fulltext = 1;
@@ -827,7 +827,7 @@ foreach my $row (@$data) {
   # Process certain values further (i.e. date format conversion).
   if ($bug->{'changeddate'}) {
     $bug->{'changeddate'}
-      =~ s/^(\d{4})(\d{2})(\d{2})(\d{2})(\d{2})(\d{2})$/$1-$2-$3 $4:$5:$6/;
+      =~ s/^(\d{4})(\d{2})(\d{2})(\d{2})(\d{2})(\d{2})$/$1-$2-$3 $4:$5:$6/a;
 
     $bug->{'changedtime'} = $bug->{'changeddate'};          # for iCalendar and Atom
     $bug->{'changeddate'} = DiffDate($bug->{'changeddate'});

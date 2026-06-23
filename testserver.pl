@@ -46,7 +46,7 @@ if (!ON_WINDOWS) {
   foreach my $pscmd (@pscmds) {
     open PH, '-|', "$pscmd 2>/dev/null";
     while (my $line = <PH>) {
-      if ($line =~ /^(?:\S*\/)?(?:httpd|apache?)2?\s+(\d+)$/) {
+      if ($line =~ /^(?:\S*\/)?(?:httpd|apache?)2?\s+(?a:(\d+))$/) {
         $sgid = $1 if $1 > $sgid;
       }
     }
@@ -57,7 +57,7 @@ if (!ON_WINDOWS) {
 # Determine the numeric GID of $webservergroup
 my $webgroupnum    = 0;
 my $webservergroup = Bugzilla->localconfig->{webservergroup};
-if ($webservergroup =~ /^(\d+)$/) {
+if ($webservergroup =~ /^(\d+)$/a) {
   $webgroupnum = $1;
 }
 else {
@@ -239,7 +239,7 @@ sub fetch {
   }
   else {
     my ($host, $port, $file) = ('', 80, '');
-    if ($url =~ m#^http://([^:]+):(\d+)(/.*)#i) {
+    if ($url =~ m#^http://([^:]+):(?a:(\d+))(/.*)#i) {
       ($host, $port, $file) = ($1, $2, $3);
     }
     elsif ($url =~ m#^http://([^/]+)(/.*)#i) {
@@ -268,8 +268,8 @@ sub fetch {
         $content .= $line;
       }
 
-      my ($status) = $header =~ m#^HTTP/\d+\.\d+ (\d+)#;
-      $rtn = (($status =~ /^2\d\d/) ? $content : undef);
+      my ($status) = $header =~ m#^HTTP/(?a:\d+\.\d+) (?a:(\d+))#;
+      $rtn = (($status =~ /^2\d\d/a) ? $content : undef);
     }
   }
   return ($rtn);

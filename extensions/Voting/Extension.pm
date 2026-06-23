@@ -508,7 +508,7 @@ sub _update_votes {
   # are submitted in form fields in which the field names are the bug
   # IDs and the field values are the number of votes.
 
-  my @buglist = grep {/^\d+$/} keys %$input;
+  my @buglist = grep {/^\d+$/a} keys %$input;
   my (%bugs, %votes);
 
   # If no bugs are in the buglist, let's make sure the user gets notified

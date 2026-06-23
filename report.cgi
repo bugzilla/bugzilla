@@ -219,7 +219,7 @@ foreach my $result (@$results) {
       for my $row (@rows) {
         $data{$tbl}{$col}{$row}++;
         $names{"row"}{$row}++;
-        $row_isnumeric &&= ($row =~ /^-?\d+(\.\d+)?$/o);
+        $row_isnumeric &&= ($row =~ /^-?\d+(\.\d+)?$/ao);
         if ($formatparam eq "table") {
           if (!$in_row_total{$row}) {
             $data{$tbl}{'-total-'}{$row}++;
@@ -239,10 +239,10 @@ foreach my $result (@$results) {
         }
       }
       $names{"col"}{$col}++;
-      $col_isnumeric &&= ($col =~ /^-?\d+(\.\d+)?$/o);
+      $col_isnumeric &&= ($col =~ /^-?\d+(\.\d+)?$/ao);
     }
     $names{"tbl"}{$tbl}++;
-    $tbl_isnumeric &&= ($tbl =~ /^-?\d+(\.\d+)?$/o);
+    $tbl_isnumeric &&= ($tbl =~ /^-?\d+(\.\d+)?$/ao);
     if ($formatparam eq "table") {
       $data{$tbl}{'-total-'}{'-total-'}++;
     }

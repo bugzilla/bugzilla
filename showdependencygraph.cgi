@@ -57,7 +57,7 @@ sub CreateImagemap {
     }
 
     if ($line
-      =~ /^rectangle \((\d+),(\d+)\) \((\d+),(\d+)\) (http[^ ]*) (\d+)(?:\\n.*)?$/)
+      =~ /^rectangle \((\d+),(\d+)\) \((\d+),(\d+)\) (http[^ ]*) (\d+)(?:\\n.*)?$/a)
     {
       my ($leftx, $rightx, $topy, $bottomy, $url, $bugid) = ($1, $3, $2, $4, $5, $6);
 

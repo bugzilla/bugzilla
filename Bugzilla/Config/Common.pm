@@ -97,7 +97,7 @@ sub check_sslbase {
 
     # Fall back to port 443 if for some reason getservbyname() fails.
     my $port = getservbyname('https', 'tcp') || 443;
-    if ($host =~ /^(.+):(\d+)$/) {
+    if ($host =~ /^(.+):(\d+)$/a) {
       $host = $1;
       $port = $2;
     }
@@ -346,7 +346,7 @@ sub check_maxattachmentsize {
 sub check_notification {
   my $option = shift;
   my @current_version
-    = (BUGZILLA_VERSION =~ m/^(\d+)\.(\d+)(?:(rc|\.)(\d+))?\+?$/);
+    = (BUGZILLA_VERSION =~ m/^(\d+)\.(\d+)(?:(rc|\.)(\d+))?\+?$/a);
   if ($current_version[1] % 2 && $option eq 'stable_branch_release') {
     return
         "You are currently running a development snapshot, and so your "

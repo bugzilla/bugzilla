@@ -20,7 +20,7 @@ use base qw(Bugzilla::BugUrl);
 sub should_handle {
   my ($class, $uri) = @_;
   return ($uri->authority =~ /\.appspot\.com$/i
-      and $uri->path =~ m#^/\d+(?:/|/show)?$#) ? 1 : 0;
+      and $uri->path =~ m#^/\d+(?:/|/show)?$#a) ? 1 : 0;
 }
 
 sub _check_value {
@@ -32,7 +32,7 @@ sub _check_value {
   #   http(s)://example.appspot.com/1234
   #   http(s)://example.appspot.com/1234/
   #   http(s)://example.appspot.com/1234/show
-  if ($uri->path =~ m#^/(\d+)(?:/|/show)$#) {
+  if ($uri->path =~ m#^/(\d+)(?:/|/show)$#a) {
 
     # This is the shortest standard URL form for Rietveld issues,
     # and so we reduce all URLs to this.

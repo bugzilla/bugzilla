@@ -130,7 +130,7 @@ sub _check_seed {
 
   # If it looks like we were seeded with a 32-bit integer, warn the
   # user that they are making a dangerous, easily-crackable mistake.
-  elsif (length($seed) <= 10 and $seed =~ /^\d+$/) {
+  elsif (length($seed) <= 10 and $seed =~ /^\d+$/a) {
     warn "RNG seeded with a 32-bit integer, this is easy to crack";
   }
 }

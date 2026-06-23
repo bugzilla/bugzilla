@@ -1417,7 +1417,7 @@ sub _check_alias {
     }
 
     # Make sure the alias isn't just a number.
-    if ($alias =~ /^\d+$/) {
+    if ($alias =~ /^\d+$/a) {
       ThrowUserError("alias_is_numeric", {alias => $alias});
     }
 
@@ -1758,7 +1758,7 @@ sub _check_dependencies {
 
     # Replace all aliases by their corresponding bug ID.
     @bug_ids
-      = map { $_ =~ /^(\d+)$/ ? $1 : $invocant->check($_, $type)->id } @bug_ids;
+      = map { $_ =~ /^(\d+)$/a ? $1 : $invocant->check($_, $type)->id } @bug_ids;
     $deps_in{$type} = \@bug_ids;
   }
 

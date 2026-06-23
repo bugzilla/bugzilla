@@ -115,7 +115,7 @@ sub PrefillForm {
   # search or from an old link on the web somewhere) then convert them
   # to the new "custom search" format so that the form is populated
   # properly.
-  my $any_boolean_charts = grep {/^field-?\d+/} $buf->param();
+  my $any_boolean_charts = grep {/^field-?\d+/a} $buf->param();
   if ($any_boolean_charts) {
     my $search = new Bugzilla::Search(params => scalar $buf->Vars);
     $search->boolean_charts_to_custom_search($buf);
@@ -132,14 +132,14 @@ sub PrefillForm {
 
     # If the name is a single letter followed by numbers, it's part
     # of Custom Search. We store these as an array of hashes.
-    if ($name =~ /^([[:lower:]])(\d+)$/) {
+    if ($name =~ /^([[:lower:]])(\d+)$/a) {
       $default{'custom_search'}->[$2]->{$1} = $values[0];
     }
 
     # If the name ends in a number (which it does for the fields which
     # are part of the email searching), we use the array
     # positions to show the defaults for that number field.
-    elsif ($name =~ /^(\w+)(\d)$/) {
+    elsif ($name =~ /^(\w+)(?a:(\d))$/) {
       $default{$1}->[$2] = $values[0];
     }
     else {

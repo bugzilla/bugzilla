@@ -321,7 +321,7 @@ sub _parse_project {
   $self->debug("Reading Project: $directory");
 
   # Sometimes other files get into gnats directories.
-  @files = grep { basename($_) =~ /^\d+$/ } @files;
+  @files = grep { basename($_) =~ /^\d+$/a } @files;
   my @bugs;
   my $count = 1;
   my $total = scalar @files;
@@ -699,7 +699,7 @@ sub translate_value {
     # is longer than 32 characters, pull out the first thing that looks
     # like a version number.
     elsif (length($value) > LONG_VERSION_LENGTH) {
-      $value =~ s/^.+?\b(\d[\w\.]+)\b.+$/$1/;
+      $value =~ s/^.+?\b((?a:\d)[\w\.]+)\b.+$/$1/;
     }
   }
 

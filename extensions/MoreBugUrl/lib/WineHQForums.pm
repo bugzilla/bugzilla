@@ -24,8 +24,8 @@ sub should_handle {
   #   http(s)://forum.winehq.org/viewtopic.php?f=1234&t=1234
   return (lc($uri->authority) eq 'forum.winehq.org'
     and $uri->path =~ m|^/viewtopic\.php$|
-    and $uri->query_param('f') =~ /^\d+$/
-    and $uri->query_param('t') =~ /^\d+$/) ? 1 : 0;
+    and $uri->query_param('f') =~ /^\d+$/a
+    and $uri->query_param('t') =~ /^\d+$/a) ? 1 : 0;
 }
 
 sub _check_value {

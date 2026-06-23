@@ -43,7 +43,7 @@ sub _mail_error_message {
   # Keep only the primary error line and drop any stack trace frames.
   ($message) = split /\n/, $message, 2;
 
-  $message =~ s/\s+at\s+\S+\s+line\s+\d+\.?\s*$//s;
+  $message =~ s/\s+at\s+\S+\s+line\s+(?a:\d+)\.?\s*$//s;
   $message =~ s/\s+called\s+at\s+.*$//s;
   $message =~ s/\s+/ /g;
   $message =~ s/^\s+|\s+$//g;
@@ -260,7 +260,7 @@ sub build_thread_marker {
 
   my $sitespec = '@' . Bugzilla->params->{'urlbase'};
   $sitespec =~ s/:\/\//\./;    # Make the protocol look like part of the domain
-  $sitespec =~ s/^([^:\/]+):(\d+)/$1/;    # Remove a port number, to relocate
+  $sitespec =~ s/^([^:\/]+):(\d+)/$1/a;    # Remove a port number, to relocate
   if ($2) {
     $sitespec = "-$2$sitespec";    # Put the port number back in, before the '@'
   }

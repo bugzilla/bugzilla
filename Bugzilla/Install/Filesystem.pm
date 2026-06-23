@@ -729,7 +729,7 @@ sub _update_old_charts {
         @declared_fields = map uc, (split /\||\r/, $1);
         print OUT "# fields: ", join('|', @out_fields), "\n";
       }
-      elsif (/^(\d+\|.*)/) {
+      elsif (/^(\d+\|.*)/a) {
         my @data = split(/\||\r/, $1);
         my %data;
         if (@data == @declared_fields) {

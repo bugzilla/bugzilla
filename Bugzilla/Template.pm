@@ -904,7 +904,7 @@ sub create {
        # so we do not allow it to happen. We only do this for logged-in users.
         $var =~ s/\\/\x{FF3C}/g if Bugzilla->user->id;
         $var =~ s/\"/\"\"/g;
-        if ($var !~ /^-?(\d+\.)?\d*$/) {
+        if ($var !~ /^-?(\d+\.)?\d*$/a) {
           $var = "\"$var\"";
         }
         return $var;
@@ -1086,7 +1086,7 @@ sub create {
           }
 
           my $version = BUGZILLA_VERSION;
-          $version =~ /^(\d+)\.(\d+)/;
+          $version =~ /^(\d+)\.(\d+)/a;
           if ($2 % 2 == 1) {
 
             # second number is odd; development version

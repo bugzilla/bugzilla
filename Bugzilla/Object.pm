@@ -803,7 +803,7 @@ sub _validate_time {
   # regexp verifies one or more digits, optionally followed by a period and
   # zero or more digits, OR we have a period followed by one or more digits
   # (allow negatives, though, so people can back out errors in time reporting)
-  if ($time !~ /^-?(?:\d+(?:\.\d*)?|\.\d+)$/) {
+  if ($time !~ /^-?(?:\d+(?:\.\d*)?|\.\d+)$/a) {
     ThrowUserError("number_not_numeric", {field => $field, num => "$time"});
   }
 

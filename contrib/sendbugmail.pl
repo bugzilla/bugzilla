@@ -33,7 +33,7 @@ my $bugnum  = $ARGV[0];
 my $changer = $ARGV[1];
 
 # Validate the bug number.
-if (!($bugnum =~ /^(\d+)$/)) {
+if (!($bugnum =~ /^(\d+)$/a)) {
   say STDERR "Bug number \"$bugnum\" not numeric.";
   usage();
 }

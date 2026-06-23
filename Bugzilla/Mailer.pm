@@ -148,6 +148,10 @@ sub MessageToMTA {
 
   my $email = ref($msg) ? $msg : Bugzilla::MIME->new($msg);
 
+  # Ensure that the message contains a Message-ID header
+  my $message_id = $email->header('Message-ID');
+  $email->header_set('Message-ID', build_message_id()) if (!$message_id);
+
   # If we're called from within a transaction, we don't want to send the
   # email immediately, in case the transaction is rolled back. Instead we
   # insert it into the mail_staging table, and bz_commit_transaction calls
@@ -260,9 +264,9 @@ sub build_thread_marker {
 
   my $sitespec = '@' . Bugzilla->params->{'urlbase'};
   $sitespec =~ s/:\/\//\./;    # Make the protocol look like part of the domain
-  $sitespec =~ s/^([^:\/]+):(\d+)/$1/;    # Remove a port number, to relocate
-  if ($2) {
-    $sitespec = "-$2$sitespec";    # Put the port number back in, before the '@'
+  $sitespec =~ s/\/.*$//;      # Strip path component — / is illegal after @ in Message-ID
+  if ($sitespec =~ s/^([^:\/]+):(\d+)/$1/) {    # Remove port number, to relocate
+    $sitespec = "-$2$sitespec";                  # Put the port number back in, before the '@'
   }
 
   my $threadingmarker;
@@ -278,6 +282,26 @@ sub build_thread_marker {
   }
 
   return $threadingmarker;
+}
+
+# Builds Message-ID header
+sub build_message_id {
+  my ($user_id) = @_;
+
+  # Don't fall back to current user: this is called from contexts with no logged-in
+  # user (job queue, email_in.pl). The random bits below ensure uniqueness anyway.
+  $user_id //= '';
+
+  my $sitespec = '@' . Bugzilla->params->{'urlbase'};
+  $sitespec =~ s/:\/\//\./;    # Make the protocol look like part of the domain
+  $sitespec =~ s/\/.*$//;      # Strip path component — / is illegal after @ in Message-ID
+  if ($sitespec =~ s/^([^:\/]+):(\d+)/$1/) {    # Remove port number, to relocate
+    $sitespec = "-$2$sitespec";                  # Put the port number back in, before the '@'
+  }
+
+  my $rand_bits  = generate_random_password(10);
+  my $message_id = '<bugzilla-' . ($user_id ne '' ? "$user_id-" : '') . "$rand_bits$sitespec>";
+  return $message_id;
 }
 
 sub send_staged_mail {
@@ -323,6 +347,10 @@ the message is sent immediately.
 =item C<build_thread_marker>
 
 Builds header suitable for use as a threading marker in email notifications.
+
+=item C<build_message_id>
+
+Builds a unique message_id string suitable for use as in the Message-ID mail header.
 
 =item C<send_staged_mail>
 

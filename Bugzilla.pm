@@ -83,34 +83,34 @@ sub init_page {
         binmode STDOUT, ':utf8';
     }
 
-  if (${^TAINT}) {
-    # PATH *MUST* contain SOMETHING or newer Perls will throw an error. Everything
-    # Bugzilla shells out to uses absolute paths, except for the 'hostname' command
-    # used by Email::Sender, which is in /bin on all supported platforms.
-    # see https://bugzilla.mozilla.org/show_bug.cgi?id=1923778
-    my $path = '/bin';
-    if (ON_WINDOWS) {
-      # On Windows, these paths are tainted, preventing
-      # File::Spec::Win32->tmpdir from using them. But we need
-      # a place to temporary store attachments which are uploaded.
-      foreach my $temp (qw(TMPDIR TMP TEMP WINDIR)) {
-        trick_taint($ENV{$temp}) if $ENV{$temp};
-      }
-      # Some DLLs used by Strawberry Perl are also in c\bin,
-      # see https://rt.cpan.org/Public/Bug/Display.html?id=99104
-      if (!ON_ACTIVESTATE) {
-        my $c_path = $path = dirname($^X);
-        $c_path =~ s/\bperl\b(?=\\bin)/c/;
-        $path .= ";$c_path";
-        trick_taint($path);
-      }
+    if (${^TAINT}) {
+        # PATH *MUST* contain SOMETHING or newer Perls will throw an error. Everything
+        # Bugzilla shells out to uses absolute paths, except for the 'hostname' command
+        # used by Email::Sender, which is in /bin on all supported platforms.
+        # see https://bugzilla.mozilla.org/show_bug.cgi?id=1923778
+        my $path = '/bin';
+        if (ON_WINDOWS) {
+            # On Windows, these paths are tainted, preventing
+            # File::Spec::Win32->tmpdir from using them. But we need
+            # a place to temporary store attachments which are uploaded.
+            foreach my $temp (qw(TMPDIR TMP TEMP WINDIR)) {
+                trick_taint($ENV{$temp}) if $ENV{$temp};
+            }
+            # Some DLLs used by Strawberry Perl are also in c\bin,
+            # see https://rt.cpan.org/Public/Bug/Display.html?id=99104
+            if (!ON_ACTIVESTATE) {
+                my $c_path = $path = dirname($^X);
+                $c_path =~ s/\bperl\b(?=\\bin)/c/;
+                $path .= ";$c_path";
+                trick_taint($path);
+            }
+        }
+        # Some environment variables are not taint safe
+        delete @::ENV{'PATH', 'IFS', 'CDPATH', 'ENV', 'BASH_ENV'};
+        # Some modules throw undefined errors (notably File::Spec::Win32) if
+        # PATH is undefined.
+        $ENV{'PATH'} = $path;
     }
-    # Some environment variables are not taint safe
-    delete @::ENV{'PATH', 'IFS', 'CDPATH', 'ENV', 'BASH_ENV'};
-    # Some modules throw undefined errors (notably File::Spec::Win32) if
-    # PATH is undefined.
-    $ENV{'PATH'} = $path;
-  }
 
     # Because this function is run live from perl "use" commands of
     # other scripts, we're skipping the rest of this function if we get here

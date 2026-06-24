@@ -1,11 +1,10 @@
 version: 2
 
 build:
-  os: ubuntu-latest
+  os: ubuntu-lts-latest
   tools:
     python: "3.11"
-  jobs:
-    - name: docs
-      commands:
-        - echo "Docs disabled for this branch"
+  commands:
+    - mkdir -p ${READTHEDOCS_OUTPUT}html
+    - echo "Docs disabled for this branch" > ${READTHEDOCS_OUTPUT}html/index.html
 

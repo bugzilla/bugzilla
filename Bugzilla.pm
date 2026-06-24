@@ -84,7 +84,11 @@ sub init_page {
     }
 
     if (${^TAINT}) {
-        my $path = '';
+        # PATH *MUST* contain SOMETHING or newer Perls will throw an error. Everything
+        # Bugzilla shells out to uses absolute paths, except for the 'hostname' command
+        # used by Email::Sender, which is in /bin on all supported platforms.
+        # see https://bugzilla.mozilla.org/show_bug.cgi?id=1923778
+        my $path = '/bin';
         if (ON_WINDOWS) {
             # On Windows, these paths are tainted, preventing
             # File::Spec::Win32->tmpdir from using them. But we need

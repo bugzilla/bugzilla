@@ -571,12 +571,6 @@ div.user_match {
     display: none;
 }
 
-#serverpush_msg {
-    margin-top: 20%;
-    text-align: center;
-    font-size: xx-large;
-}
-
 /* Rules specific for printing */
 @media print {
     #header, #footer {

@@ -1,0 +1,10 @@
+version: 2
+
+build:
+  os: ubuntu-lts-latest
+  tools:
+    python: "3.11"
+  commands:
+    - mkdir -p ${READTHEDOCS_OUTPUT}html
+    - echo "Docs disabled for this branch" > ${READTHEDOCS_OUTPUT}html/index.html
+

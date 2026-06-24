@@ -1,0 +1,11 @@
+version: 2
+
+build:
+  os: ubuntu-latest
+  tools:
+    python: "3.11"
+  jobs:
+    - name: docs
+      commands:
+        - echo "Docs disabled for this branch"
+

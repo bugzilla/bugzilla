@@ -135,21 +135,52 @@ sub DoSettings {
   my $user = Bugzilla->user;
 
   my $settings = $user->settings;
-  $vars->{'settings'} = $settings;
+  my %visible_settings = map { $_ => $settings->{$_} }
+    grep { $_ !~ /^donate_banner_/ } keys %$settings;
+  $vars->{'settings'} = \%visible_settings;
 
-  my @setting_list = sort keys %$settings;
+  my @setting_list = sort keys %visible_settings;
   $vars->{'setting_names'} = \@setting_list;
 
   $vars->{'has_settings_enabled'} = 0;
 
   # Is there at least one user setting enabled?
   foreach my $setting_name (@setting_list) {
-    if ($settings->{"$setting_name"}->{'is_enabled'}) {
+    if ($visible_settings{$setting_name}->{'is_enabled'}) {
       $vars->{'has_settings_enabled'} = 1;
       last;
     }
   }
   $vars->{'dont_show_button'} = !$vars->{'has_settings_enabled'};
+}
+
+sub DoDonate {
+  my $user = Bugzilla->user;
+
+  $vars->{'settings'} = $user->settings;
+}
+
+sub SaveDonate {
+  my $cgi  = Bugzilla->cgi;
+  my $user = Bugzilla->user;
+  my $settings = $user->settings;
+
+  my $pref = $cgi->param('donate_banner_pref') || 'next_upgrade';
+  my $date = $cgi->param('donate_banner_reminder_date') || '';
+
+  if ($pref eq 'specific_date') {
+    validate_date($date)
+      || ThrowUserError('illegal_date', {date => $date, format => 'YYYY-MM-DD'});
+    $settings->{'donate_banner_reminder_date'}->set($date);
+  }
+  elsif ($pref ne 'next_upgrade' && $pref ne 'never') {
+    ThrowCodeError('setting_value_invalid',
+      {name => 'donate_banner_pref', value => $pref});
+  }
+
+  $settings->{'donate_banner_pref'}->set($pref);
+  clear_settings_cache($user->id);
+  $vars->{'settings'} = $user->settings(1);
 }
 
 sub SaveSettings {
@@ -644,6 +675,14 @@ SWITCH: for ($current_tab_name) {
   /^settings$/ && do {
     SaveSettings() if $save_changes;
     DoSettings();
+    last SWITCH;
+  };
+  /^donate$/ && do {
+    if (Bugzilla->params->{'donation_banner_visibility'} eq 'disabled') {
+      last SWITCH;
+    }
+    SaveDonate() if $save_changes;
+    DoDonate();
     last SWITCH;
   };
   /^email$/ && do {

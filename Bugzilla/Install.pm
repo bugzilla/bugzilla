@@ -53,6 +53,21 @@ sub SETTINGS {
     # 2005-03-03 travis@sedsystems.ca -- Bug 41972
     display_quips => {options => ["on", "off"], default => "on"},
 
+    # 2026-07-01 bugzilla@mozilla.org -- Bug 1983391
+    donate_banner_pref => {
+      options  => ['next_upgrade', 'specific_date', 'never'],
+      default  => 'next_upgrade',
+      subclass => 'Donation',
+    },
+    donate_banner_last_version => {
+      default  => '0',
+      subclass => 'Donation',
+    },
+    donate_banner_reminder_date => {
+      default  => '1970-01-01',
+      subclass => 'Donation',
+    },
+
     # 2005-03-10 travis@sedsystems.ca -- Bug 199048
     comment_sort_order => {
       options =>

@@ -8,6 +8,7 @@
 
 [%# INTERFACE:
   # release: a hash containing data about new releases, if any.
+  # donation: a hash containing donation banner data, if any.
   #%]
 
 [% PROCESS global/header.html.tmpl
@@ -16,7 +17,48 @@
    header_addl_info = "version $constants.BUGZILLA_VERSION"
 %]
 
-[% IF release %]
+[% IF donation %]
+  <div id="new_release" class="donation_banner">
+    <div class="donation_banner_layout">
+      <img
+        src="images/donation-mascot-placeholder.svg"
+        alt="Buggie holding donation funds placeholder"
+        class="donation_banner_image">
+
+      <div class="donation_banner_content">
+        [% IF donation.show_thanks %]
+          <p class="donation_banner_thanks">Thanks for upgrading Bugzilla!</p>
+        [% END %]
+
+        <p class="donation_banner_message">[% donation.message FILTER html %]</p>
+
+        <p class="donation_banner_cta_row">
+          <a href="[% donation.url FILTER html %]" class="donation_banner_cta">Donate to Bugzilla</a>
+        </p>
+
+        <form method="post" action="index.cgi" class="donation_banner_form donation_banner_form_subtle">
+          <input type="hidden" name="token" value="[% donation.token FILTER html %]">
+          <label for="donate_action" class="donation_banner_label">Dismiss and:</label>
+          <select id="donate_action" name="donate_action" class="donation_banner_select" required>
+            <option value="" selected disabled>Select one</option>
+            <option value="next_upgrade">Remind me after the next Bugzilla upgrade</option>
+            <option value="week">Remind me in a week</option>
+            <option value="month">Remind me in a month</option>
+            <option value="date">Pick a date for my next reminder</option>
+            <option value="never">Never show this to me again</option>
+          </select>
+          <button type="submit" class="donation_banner_submit">Save</button>
+        </form>
+
+        [% IF donation.visibility_note %]
+          <p class="notice">[% donation.visibility_note FILTER html %]
+          You can configure this notification from the
+          <a href="[% donation.settings_link FILTER html %]">Parameters</a> page.</p>
+        [% END %]
+      </div>
+    </div>
+  </div>
+[% ELSIF release %]
   <div id="new_release">
     [% IF release.data %]
       [% IF release.eos_date %]

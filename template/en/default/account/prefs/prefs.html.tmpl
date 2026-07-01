@@ -43,6 +43,12 @@
               link => "userprefs.cgi?tab=permissions", saveable => "0",
               doc_section => "using/preferences.html#permissions" } ] %]
 
+[% IF Param('donation_banner_visibility') != 'disabled' %]
+  [% tabs = tabs.import([{ name => "donate", label => "Donate to Bugzilla",
+                           link => "userprefs.cgi?tab=donate", saveable => "1",
+                           doc_section => "using/preferences.html" }]) %]
+[% END %]
+
 [% Hook.process('tabs') %]
 
 [% FOREACH tab IN tabs %]

@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 240" role="img" aria-labelledby="title desc">
+  <title id="title">Buggie donation placeholder</title>
+  <desc id="desc">Placeholder artwork of the Bugzilla mascot with donation funds.</desc>
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#f8fff9"/>
+      <stop offset="1" stop-color="#d8f1df"/>
+    </linearGradient>
+  </defs>
+  <rect x="2" y="2" width="236" height="236" rx="20" fill="url(#bg)" stroke="#1f5f3a" stroke-width="4"/>
+  <ellipse cx="120" cy="90" rx="52" ry="34" fill="#f6d79c" stroke="#8a5e25" stroke-width="4"/>
+  <circle cx="102" cy="86" r="6" fill="#2a2116"/>
+  <circle cx="138" cy="86" r="6" fill="#2a2116"/>
+  <path d="M96 105 Q120 120 144 105" fill="none" stroke="#2a2116" stroke-width="4" stroke-linecap="round"/>
+  <rect x="78" y="132" width="84" height="50" rx="8" fill="#4da36a" stroke="#1f5f3a" stroke-width="3"/>
+  <circle cx="120" cy="157" r="16" fill="#f3d46b" stroke="#9c7b18" stroke-width="3"/>
+  <text x="120" y="163" text-anchor="middle" font-family="sans-serif" font-size="14" fill="#6d550e">$</text>
+  <text x="120" y="206" text-anchor="middle" font-family="sans-serif" font-size="14" fill="#1f5f3a">Placeholder Art</text>
+</svg>

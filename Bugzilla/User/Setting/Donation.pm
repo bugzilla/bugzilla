@@ -48,4 +48,13 @@ __END__
 
 Bugzilla::User::Setting::Donation - Donation banner user settings
 
+=head1 METHODS
+
+=head2 validate_value
+
+Validates setting values for donation-related user settings. Delegates to the
+base setting validator for C<donate_banner_pref>, validates version/date
+formats for companion settings, and throws C<setting_value_invalid> when a
+value is not accepted.
+
 =cut

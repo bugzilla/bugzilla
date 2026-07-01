@@ -123,4 +123,17 @@ __END__
 
 Bugzilla::Donation - Donation banner helpers
 
+=head1 METHODS
+
+=head2 get_banner
+
+Builds and returns donation banner data for the current user when the banner
+should be shown. Returns C<undef> when the user is not eligible or has deferred
+the banner.
+
+=head2 set_banner_preference
+
+Applies the user's donation banner action (for example C<week>, C<month>,
+C<next_upgrade>, C<never>, or C<date>) and returns the redirect target.
+
 =cut

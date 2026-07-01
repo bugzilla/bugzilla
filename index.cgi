@@ -15,6 +15,8 @@ use lib qw(. lib);
 use Bugzilla;
 use Bugzilla::Constants;
 use Bugzilla::Error;
+use Bugzilla::Token;
+use Bugzilla::Donation;
 use Bugzilla::Update;
 
 # Check whether or not the user is logged in
@@ -34,6 +36,20 @@ if ($cgi->param('logout')) {
   $cgi->delete('logout');
 }
 
+my $donate_action = $cgi->param('donate_action');
+if ($donate_action) {
+  Bugzilla->login(LOGIN_REQUIRED) unless Bugzilla->user->id;
+
+  my $token = $cgi->param('token');
+  check_token_data($token, 'edit_user_prefs');
+
+  my $redirect = Bugzilla::Donation::set_banner_preference($donate_action);
+  delete_token($token);
+
+  print $cgi->redirect(-uri => $redirect);
+  exit;
+}
+
 # Return the appropriate HTTP response headers.
 print $cgi->header();
 
@@ -49,6 +65,8 @@ if ($user->in_group('admin')) {
   # Inform the administrator about new releases, if any.
   $vars->{'release'} = Bugzilla::Update::get_notifications();
 }
+
+$vars->{'donation'} = Bugzilla::Donation::get_banner();
 
 if ($user->id) {
   my $dbh = Bugzilla->dbh;

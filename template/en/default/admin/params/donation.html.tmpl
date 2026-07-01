@@ -1,0 +1,23 @@
+[%# This Source Code Form is subject to the terms of the Mozilla Public
+  # License, v. 2.0. If a copy of the MPL was not distributed with this
+  # file, You can obtain one at http://mozilla.org/MPL/2.0/.
+  #
+  # This Source Code Form is "Incompatible With Secondary Licenses", as
+  # defined by the Mozilla Public License, v. 2.0.
+  #%]
+
+[%
+   title = "Donation"
+   desc = "Controls the donation banner shown on the Bugzilla homepage."
+%]
+
+[% param_descs = {
+  donation_banner_visibility =>
+    "Controls who can see the donation banner on the Bugzilla homepage."
+    _ " <ul>"
+    _ " <li><var>admins_only</var> shows the banner only to logged-in administrators.</li>"
+    _ " <li><var>end_users</var> shows the banner to all logged-in users.</li>"
+    _ " <li><var>disabled</var> hides the banner from everyone.</li>"
+    _ " </ul>"
+    _ " Administrators who can see the banner will also get a link to this page so they can change how it behaves.",
+} %]

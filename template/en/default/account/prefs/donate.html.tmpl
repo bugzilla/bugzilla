@@ -1,0 +1,52 @@
+[%# This Source Code Form is subject to the terms of the Mozilla Public
+  # License, v. 2.0. If a copy of the MPL was not distributed with this
+  # file, You can obtain one at http://mozilla.org/MPL/2.0/.
+  #
+  # This Source Code Form is "Incompatible With Secondary Licenses", as
+  # defined by the Mozilla Public License, v. 2.0.
+  #%]
+
+[% settings = user.settings %]
+[% pref = settings.donate_banner_pref.value %]
+[% next_date = (pref == 'specific_date' && !settings.donate_banner_reminder_date.is_default)
+    ? settings.donate_banner_reminder_date.value : '' %]
+
+<p>
+  Bugzilla is developed and maintained by volunteers.
+  If it helps your work, please consider supporting the project at
+  <a href="https://bugzilla.org/donate">bugzilla.org/donate</a>.
+</p>
+
+<p>
+  You can choose when we should remind you again about donating.
+</p>
+
+<table id="donation_prefs">
+  <tr>
+    <td class="right"><label for="donate_banner_pref">Reminder</label></td>
+    <td>
+      <select name="donate_banner_pref" id="donate_banner_pref">
+        <option value="next_upgrade" [% 'selected="selected"' IF pref == 'next_upgrade' %]>
+          Remind me after the next Bugzilla upgrade
+        </option>
+        <option value="specific_date" [% 'selected="selected"' IF pref == 'specific_date' %]>
+          Remind me on a specific date
+        </option>
+        <option value="never" [% 'selected="selected"' IF pref == 'never' %]>
+          Don't bother me again
+        </option>
+      </select>
+    </td>
+  </tr>
+  <tr>
+    <td class="right"><label for="donate_banner_reminder_date">Next reminder date</label></td>
+    <td>
+      <input type="date" id="donate_banner_reminder_date"
+             name="donate_banner_reminder_date"
+             value="[% next_date FILTER html %]">
+      <p class="note">
+        This is used only when you choose the specific date reminder.
+      </p>
+    </td>
+  </tr>
+</table>

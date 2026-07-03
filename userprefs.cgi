@@ -179,6 +179,12 @@ sub SaveDonate {
   }
 
   $settings->{'donate_banner_pref'}->set($pref);
+
+  # Stamp the current version so that the "next upgrade" reminder is dismissed
+  # until Bugzilla is actually upgraded, matching the home page banner. Without
+  # this, get_banner() still sees last_version != current and keeps showing.
+  $settings->{'donate_banner_last_version'}->set(BUGZILLA_VERSION);
+
   clear_settings_cache($user->id);
   $vars->{'settings'} = $user->settings(1);
 }

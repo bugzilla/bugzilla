@@ -24,6 +24,14 @@ use Bugzilla::User::APIKey;
 use Bugzilla::User::Setting qw(clear_settings_cache);
 use Bugzilla::Token;
 
+# Donation banner settings are managed from the dedicated "Donate" tab (and the
+# home page banner), not the generic Settings tab. Two of them hold internal
+# state (last shown version, reminder date) with no legal_values, so they would
+# otherwise render as empty dropdowns and be reset to their defaults whenever the
+# Settings tab is saved.
+use constant DONATION_SETTINGS =>
+  qw(donate_banner_pref donate_banner_last_version donate_banner_reminder_date);
+
 my $template = Bugzilla->template;
 local our $vars = {};
 
@@ -196,8 +204,11 @@ sub SaveSettings {
   my $settings     = $user->settings;
   my @setting_list = keys %$settings;
 
+  my %is_donation_setting = map { $_ => 1 } DONATION_SETTINGS;
+
   foreach my $name (@setting_list) {
     next if !($settings->{$name}->{'is_enabled'});
+    next if $is_donation_setting{$name};
     my $value = $cgi->param($name);
     next unless defined $value;
     my $setting = new Bugzilla::User::Setting($name);

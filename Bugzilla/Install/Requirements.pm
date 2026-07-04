@@ -122,11 +122,12 @@ sub REQUIRED_MODULES {
     },
     # 2.24 contains several useful text virtual methods.
     # 2.28-3.007 are broken, see https://bugzilla.mozilla.org/show_bug.cgi?id=1560873
+    # 3.008 is also broken, see https://bugzilla.mozilla.org/show_bug.cgi?id=1639128
     {
         package => 'Template-Toolkit',
         module  => 'Template',
         version => '2.24',
-        blacklist => ['^2.2[89]$', '^3.00[0-7]$']
+        blacklist => ['^2.2[89]$', '^3.00[0-8]$']
     },
     # 1.300011 has a debug mode for SMTP and automatically pass -i to sendmail.
     {

@@ -23,10 +23,44 @@ use Bugzilla::User;
 
 use Encode qw();
 use Date::Format qw(time2str);
+use Scalar::Util qw(blessed);
 
 use Email::Sender::Simple qw(sendmail);
 use Email::Sender::Transport::SMTP::Persistent;
 use Bugzilla::Sender::Transport::Sendmail;
+
+sub _mail_error_message {
+  my ($error) = @_;
+  my $message = '';
+
+  if (blessed($error) && $error->can('message')) {
+    $message = $error->message;
+  }
+  else {
+    $message = "$error";
+  }
+
+  # Keep only the primary error line and drop any stack trace frames.
+  ($message) = split /\n/, $message, 2;
+
+  $message =~ s/\s+at\s+\S+\s+line\s+\d+\.?\s*$//s;
+  $message =~ s/\s+called\s+at\s+.*$//s;
+  $message =~ s/\s+/ /g;
+  $message =~ s/^\s+|\s+$//g;
+  return $message || 'Unknown error while sending mail.';
+}
+
+sub _record_mail_warning {
+  my ($method, $error) = @_;
+  my $warnings = Bugzilla->request_cache->{mail_warnings} ||= [];
+
+  return if grep {
+       $_->{method} eq $method
+    && $_->{error}  eq $error
+  } @$warnings;
+
+  push @$warnings, {method => $method, error => $error};
+}
 
 sub generate_email {
   my ($vars, $templates) = @_;
@@ -95,16 +129,19 @@ sub generate_email {
 }
 
 sub MessageToMTA {
-  my ($msg, $send_now) = (@_);
+  my ($msg, $send_now, $options) = (@_);
+  $options ||= {};
+  my $non_fatal = exists $options->{non_fatal} ? $options->{non_fatal} : !$send_now;
+
   my $method = Bugzilla->params->{'mail_delivery_method'};
-  return if $method eq 'None';
+  return 1 if $method eq 'None';
 
   if ( Bugzilla->params->{'use_mailer_queue'}
     && !$send_now
     && !Bugzilla->dbh->bz_in_transaction())
   {
     Bugzilla->job_queue->insert('send_mail', {msg => $msg});
-    return;
+    return 1;
   }
 
   my $dbh = Bugzilla->dbh;
@@ -124,54 +161,67 @@ sub MessageToMTA {
     my $sth = $dbh->prepare("INSERT INTO mail_staging (message) VALUES (?)");
     $sth->bind_param(1, $string, $dbh->BLOB_TYPE);
     $sth->execute;
-    return;
+    return 1;
   }
 
   my $from = $email->header('From');
 
   my $hostname;
   my $transport;
-  if ($method eq "Sendmail") {
-    if (ON_WINDOWS) {
-      $transport
-        = Bugzilla::Sender::Transport::Sendmail->new({sendmail => SENDMAIL_EXE});
+  my $setup_ok = eval {
+    if ($method eq "Sendmail") {
+      if (ON_WINDOWS) {
+        $transport
+          = Bugzilla::Sender::Transport::Sendmail->new({sendmail => SENDMAIL_EXE});
+      }
+      else {
+        $transport = Bugzilla::Sender::Transport::Sendmail->new();
+      }
     }
     else {
-      $transport = Bugzilla::Sender::Transport::Sendmail->new();
-    }
-  }
-  else {
-    # Sendmail will automatically append our hostname to the From
-    # address, but other mailers won't.
-    my $urlbase = Bugzilla->params->{'urlbase'};
-    $urlbase =~ m|//([^:/]+)[:/]?|;
-    $hostname = $1 || 'localhost';
-    $from .= "\@$hostname" if $from !~ /@/;
-    $email->header_set('From', $from);
+      # Sendmail will automatically append our hostname to the From
+      # address, but other mailers won't.
+      my $urlbase = Bugzilla->params->{'urlbase'};
+      $urlbase =~ m|//([^:/]+)[:/]?|;
+      $hostname = $1 || 'localhost';
+      $from .= "\@$hostname" if $from !~ /@/;
+      $email->header_set('From', $from);
 
-    # Sendmail adds a Date: header also, but others may not.
-    if (!defined $email->header('Date')) {
-      $email->header_set('Date', time2str("%a, %d %b %Y %T %z", time()));
+      # Sendmail adds a Date: header also, but others may not.
+      if (!defined $email->header('Date')) {
+        $email->header_set('Date', time2str("%a, %d %b %Y %T %z", time()));
+      }
     }
-  }
 
-  if ($method eq "SMTP") {
-    my ($host, $port) = split(/:/, Bugzilla->params->{'smtpserver'}, 2);
-    $transport = Bugzilla->request_cache->{smtp}
-      //= Email::Sender::Transport::SMTP::Persistent->new({
-      host => $host,
-      defined($port) ? (port => $port) : (),
-      sasl_username => Bugzilla->params->{'smtp_username'},
-      sasl_password => Bugzilla->params->{'smtp_password'},
-      helo          => $hostname,
-      ssl           => Bugzilla->params->{'smtp_ssl'},
-      debug         => Bugzilla->params->{'smtp_debug'}
-      });
+    if ($method eq "SMTP") {
+      my ($host, $port) = split(/:/, Bugzilla->params->{'smtpserver'}, 2);
+      $transport = Bugzilla->request_cache->{smtp}
+        //= Email::Sender::Transport::SMTP::Persistent->new({
+        host => $host,
+        defined($port) ? (port => $port) : (),
+        sasl_username => Bugzilla->params->{'smtp_username'},
+        sasl_password => Bugzilla->params->{'smtp_password'},
+        helo          => $hostname,
+        ssl           => Bugzilla->params->{'smtp_ssl'},
+        debug         => Bugzilla->params->{'smtp_debug'}
+        });
+    }
+
+    1;
+  };
+
+  if (!$setup_ok) {
+    my $error = _mail_error_message($@);
+    if ($non_fatal) {
+      _record_mail_warning($method, $error);
+      return;
+    }
+    ThrowCodeError('mail_send_error', {msg => $error, mail => $email});
   }
 
   Bugzilla::Hook::process('mailer_before_send', {email => $email});
 
-  return if $email->header('to') eq '';
+  return 1 if $email->header('to') eq '';
 
   if ($method eq "Test") {
     my $filename = bz_locations()->{'datadir'} . '/mailer.testfile';
@@ -182,14 +232,21 @@ sub MessageToMTA {
       . $email->header('Date') . "\n"
       . $email->as_string;
     close TESTFILE;
+    return 1;
   }
   else {
     # This is useful for Sendmail, so we put it out here.
     local $ENV{PATH} = SENDMAIL_PATH;
     eval { sendmail($email, {transport => $transport}) };
     if ($@) {
-      ThrowCodeError('mail_send_error', {msg => $@->message, mail => $email});
+      my $error = _mail_error_message($@);
+      if ($non_fatal) {
+        _record_mail_warning($method, $error);
+        return;
+      }
+      ThrowCodeError('mail_send_error', {msg => $error, mail => $email});
     }
+    return 1;
   }
 }
 
@@ -231,7 +288,8 @@ sub send_staged_mail {
 
   foreach my $email (@$emails) {
     my ($id, $message) = @$email;
-    MessageToMTA($message);
+    my $sent = MessageToMTA($message, undef, {non_fatal => 1});
+    last if !$sent;
     $sth->execute($id);
   }
 }

@@ -53,6 +53,7 @@ RUN apt-get -y install \
     netcat-traditional \
     patchutils \
     perlmagick \
+    tzdata \
     vim-common
 
 # Ubuntu 24 doesn't ship new enough versions of a few modules or doesn't ship them at all, so get them from CPAN

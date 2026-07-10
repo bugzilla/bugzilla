@@ -198,7 +198,16 @@ sub build_thread_marker {
 
     my $sitespec = '@' . Bugzilla->params->{'urlbase'};
     $sitespec =~ s/:\/\//\./;    # Make the protocol look like part of the domain
-    $sitespec =~ s/\/.*$//;      # Strip path component — / is illegal after @ in Message-ID
+    $sitespec =~ s/\/$//;        # Drop the lone trailing slash every urlbase has
+
+    # Multiple Bugzillas can be hosted in different subdirectories on the same
+    # domain, so relocate any path component in front of the domain (like the
+    # port below) rather than discarding it — '/' is illegal in a domain.
+    if ($sitespec =~ s/^(\@[^\/]+)\/(.+)$/$1/) {
+        (my $path = $2) =~ s/\//-/g;    # sanitize any remaining internal slashes
+        $sitespec = "-$path$sitespec";
+    }
+
     if ($sitespec =~ s/^([^:\/]+):(\d+)/$1/) {    # Remove port number, to relocate
         $sitespec = "-$2$sitespec";               # Put the port number back in, before the '@'
     }
@@ -227,7 +236,16 @@ sub build_message_id {
 
     my $sitespec = '@' . Bugzilla->params->{'urlbase'};
     $sitespec =~ s/:\/\//\./;    # Make the protocol look like part of the domain
-    $sitespec =~ s/\/.*$//;      # Strip path component — / is illegal after @ in Message-ID
+    $sitespec =~ s/\/$//;        # Drop the lone trailing slash every urlbase has
+
+    # Multiple Bugzillas can be hosted in different subdirectories on the same
+    # domain, so relocate any path component in front of the domain (like the
+    # port below) rather than discarding it — '/' is illegal in a domain.
+    if ($sitespec =~ s/^(\@[^\/]+)\/(.+)$/$1/) {
+        (my $path = $2) =~ s/\//-/g;    # sanitize any remaining internal slashes
+        $sitespec = "-$path$sitespec";
+    }
+
     if ($sitespec =~ s/^([^:\/]+):(\d+)/$1/) {    # Remove port number, to relocate
         $sitespec = "-$2$sitespec";               # Put the port number back in, before the '@'
     }

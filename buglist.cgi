@@ -471,23 +471,6 @@ my $format = $template->get_format(
   scalar $params->param('ctype')
 );
 
-# Use server push to display a "Please wait..." message for the user while
-# executing their query if their browser supports it and they are viewing
-# the bug list as HTML and they have not disabled it by adding &serverpush=0
-# to the URL.
-#
-# Server push is compatible with Gecko-based browsers and Opera, but not with
-# MSIE, Lynx or Safari (bug 441496).
-
-my $serverpush
-  = $format->{'extension'} eq "html"
-  && exists $ENV{'HTTP_USER_AGENT'}
-  && $ENV{'HTTP_USER_AGENT'} =~ /(Mozilla.[3-9]|Opera)/
-  && $ENV{'HTTP_USER_AGENT'} !~ /compatible/i
-  && $ENV{'HTTP_USER_AGENT'} !~ /(?:WebKit|Trident|KHTML)/
-  && !defined($cgi->param('serverpush')) || $cgi->param('serverpush');
-
-
 # Generate a reasonable filename for the user agent to suggest to the user
 # when the user saves the bug list.  Uses the name of the remembered query
 # if available.  We have to do this now, even though we return HTTP headers
@@ -717,27 +700,6 @@ $params->delete('limit') if $vars->{'default_limited'};
 ################################################################################
 # Query Execution
 ################################################################################
-
-# Time to use server push to display an interim message to the user until
-# the query completes and we can display the bug list.
-if ($serverpush) {
-  print $cgi->multipart_init();
-  print $cgi->multipart_start(-type => 'text/html');
-
-  # Generate and return the UI (HTML page) from the appropriate template.
-  $template->process("list/server-push.html.tmpl", $vars)
-    || ThrowTemplateError($template->error());
-
-  # Under mod_perl, flush stdout so that the page actually shows up.
-  if ($ENV{MOD_PERL}) {
-    require Apache2::RequestUtil;
-    Apache2::RequestUtil->request->rflush();
-  }
-
-  # Don't do multipart_end() until we're ready to display the replacement
-  # page, otherwise any errors that happen before then (like SQL errors)
-  # will result in a blank page being shown to the user instead of the error.
-}
 
 # Connect to the shadow database if this installation is using one to improve
 # query performance.
@@ -1156,5 +1118,3 @@ $template->process($format->{'template'}, $vars)
 ################################################################################
 # Script Conclusion
 ################################################################################
-
-print $cgi->multipart_final() if $serverpush;

@@ -24,7 +24,7 @@ sub should_handle {
   #   https://bugs.launchpad.net/ubuntu/+bug/1234
   #   https://launchpad.net/bugs/1234
   # All variations end with either "/bugs/1234" or "/+bug/1234"
-  return ($uri->authority =~ /launchpad\.net$/ and $uri->path =~ m|bugs?/\d+$|)
+  return ($uri->authority =~ /launchpad\.net$/ and $uri->path =~ m|bugs?/\d+$|a)
     ? 1
     : 0;
 }
@@ -36,7 +36,7 @@ sub _check_value {
 
   # This is the shortest standard URL form for Launchpad bugs,
   # and so we reduce all URLs to this.
-  $uri->path =~ m|bugs?/(\d+)$|;
+  $uri->path =~ m|bugs?/(\d+)$|a;
   $uri = new URI("https://launchpad.net/bugs/$1");
 
   return $uri;

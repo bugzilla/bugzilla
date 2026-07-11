@@ -81,7 +81,7 @@ sub parse_mail {
     {mail => $input_email, fields => \%fields});
 
   my $summary = $input_email->header('Subject');
-  if ($summary =~ /\[\S+ (\d+)\](.*)/i) {
+  if ($summary =~ /\[\S+ (?a:(\d+))\](.*)/i) {
     $fields{'bug_id'} = $1;
     $summary = trim($2);
   }

@@ -23,7 +23,7 @@ sub should_handle {
   # JIRA URLs have only one basic form (but the jira is optional):
   #   https://issues.apache.org/jira/browse/KEY-1234
   #   http://issues.example.com/browse/KEY-1234
-  return ($uri->path =~ m|/browse/[A-Z][A-Z]+-\d+$|) ? 1 : 0;
+  return ($uri->path =~ m|/browse/[A-Z][A-Z]+-\d+$|a) ? 1 : 0;
 }
 
 sub _check_value {

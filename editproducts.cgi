@@ -350,7 +350,7 @@ if ($action eq 'updategroupcontrols') {
   my @now_na        = ();
   my @now_mandatory = ();
   foreach my $f ($cgi->param()) {
-    if ($f =~ /^membercontrol_(\d+)$/) {
+    if ($f =~ /^membercontrol_(\d+)$/a) {
       my $id = $1;
       if ($cgi->param($f) == CONTROLMAPNA) {
         push @now_na, $id;

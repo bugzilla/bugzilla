@@ -186,7 +186,7 @@ sub rename_field_value {
     $query =~ s/\b$field=\Q$old\E\b/$field=$new/gi;
 
     # Fix boolean charts.
-    while ($query =~ /\bfield(\d+-\d+-\d+)=\Q$field\E\b/gi) {
+    while ($query =~ /\bfield(?a:(\d+-\d+-\d+))=\Q$field\E\b/gi) {
       my $chart_id = $1;
 
       # Note that this won't handle lists or substrings inside of

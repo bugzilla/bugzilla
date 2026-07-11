@@ -60,7 +60,7 @@ sub get_notifications {
 
   # On which branch is the current installation running?
   my @current_version
-    = (BUGZILLA_VERSION =~ m/^(\d+)\.(\d+)(?:(rc|\.)(\d+))?\+?$/);
+    = (BUGZILLA_VERSION =~ m/^(\d+)\.(\d+)(?:(rc|\.)(\d+))?\+?$/a);
 
   my @release;
   if (Bugzilla->params->{'upgrade_notification'} eq 'development_snapshot') {
@@ -144,7 +144,7 @@ sub get_notifications {
   # Only notify the administrator if the latest version available
   # is newer than the current one.
   my @new_version
-    = ($release[0]->{'latest_ver'} =~ m/^(\d+)\.(\d+)(?:(rc|\.)(\d+))?\+?$/);
+    = ($release[0]->{'latest_ver'} =~ m/^(\d+)\.(\d+)(?:(rc|\.)(\d+))?\+?$/a);
 
   # We convert release candidates 'rc' to integers (rc ? 0 : 1) in order
   # to compare versions easily.

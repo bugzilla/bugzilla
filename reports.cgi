@@ -171,7 +171,7 @@ sub generate_chart {
 
     my @line = split /\|/;
     my $date = $line[0];
-    my ($yy, $mm, $dd) = $date =~ /^\d{2}(\d{2})(\d{2})(\d{2})$/;
+    my ($yy, $mm, $dd) = $date =~ /^\d{2}(\d{2})(\d{2})(\d{2})$/a;
     push @{$data{DATE}}, "$mm/$dd/$yy";
 
     for my $i (1 .. $#fields) {

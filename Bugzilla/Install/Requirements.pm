@@ -118,8 +118,8 @@ sub REQUIRED_MODULES {
 
     {package => 'Moo', module => 'Moo', version => '2.003004',},
 
-    # versions prior to 3.008 are broken, see https://bugzilla.mozilla.org/show_bug.cgi?id=1560873
-    {package => 'Template-Toolkit', module => 'Template', version => '3.008'},
+    # versions prior to 3.009 are broken, see https://bugzilla.mozilla.org/show_bug.cgi?id=1639128
+    {package => 'Template-Toolkit', module => 'Template', version => '3.009'},
 
     # versions prior to 2.600 pulled Email::Address, we now use Email::Address::XS
     {package => 'Email-Sender', module => 'Email::Sender', version => '2.600',},

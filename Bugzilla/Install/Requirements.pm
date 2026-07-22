@@ -127,7 +127,7 @@ sub REQUIRED_MODULES {
         package => 'Template-Toolkit',
         module  => 'Template',
         version => '2.24',
-        blacklist => ['^2.2[89]$', '^3.00[0-8]$']
+        blocklist => ['^2.2[89]$', '^3.00[0-8]$']
     },
     # 1.300011 has a debug mode for SMTP and automatically pass -i to sendmail.
     {

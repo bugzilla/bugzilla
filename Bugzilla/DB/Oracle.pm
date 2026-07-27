@@ -114,7 +114,7 @@ sub sql_group_concat {
     my ($self, $text, $separator) = @_;
     $separator = $self->quote(', ') if !defined $separator;
     my ($distinct, $rest) = $text =~/^(\s*DISTINCT\s|)(.+)$/i;
-    return "group_concat($distinct T_CLOB_DELIM(NVL($rest, ' '), $separator))";
+    return "group_concat($distinct T_CLOB_DELIM(NVL(TO_CHAR($rest), ' '), $separator))";
 }
 
 sub sql_regexp {

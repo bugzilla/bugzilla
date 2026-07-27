@@ -53,13 +53,15 @@ if ($action eq 'queue') {
 else {
     my $flagtypes = get_flag_types();
     my @types = ('all', @$flagtypes);
+    my $products = $user->get_selectable_products;
 
     my $vars = {};
     $vars->{'types'} = \@types;
     $vars->{'requests'} = {};
+    $vars->{'products'} = $products;
 
     my %components;
-    foreach my $prod (@{$user->get_selectable_products}) {
+    foreach my $prod (@$products) {
         foreach my $comp (@{$prod->components}) {
             $components{$comp->name} = 1;
         }

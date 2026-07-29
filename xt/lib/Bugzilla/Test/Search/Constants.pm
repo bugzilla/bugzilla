@@ -1244,6 +1244,16 @@ use constant CUSTOM_SEARCH_TESTS => (
     ]
   },
 
+  {
+    name       => 'flagtypes.name = <1> AND flagtypes.name = <1>',
+    contains   => [1],
+    top_params => {j_top => 'AND_G'},
+    params     => [
+      {f => 'flagtypes.name', o => 'equals', v => '<1>'},
+      {f => 'flagtypes.name', o => 'equals', v => '<1>'},
+    ]
+  },
+
 );
 
 1;

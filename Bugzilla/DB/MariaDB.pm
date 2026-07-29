@@ -786,7 +786,6 @@ sub bz_setup_database {
           push(@binary_sql, "MODIFY COLUMN $name $binary");
           push(@utf8_sql,   "MODIFY COLUMN $name $utf8");
         }
-      }
       }    # foreach column
 
       if (@binary_sql) {

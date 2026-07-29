@@ -728,8 +728,17 @@ sub bz_setup_database {
     print "\n", install_string('mysql_utf8_conversion');
 
     if (!Bugzilla->installation_answers->{NO_PAUSE}) {
+      my $allow_unsafe_utf8_conversion
+        = Bugzilla->installation_answers->{ALLOW_UNSAFE_UTF8_CONVERSION};
       if (Bugzilla->installation_mode == INSTALLATION_MODE_NON_INTERACTIVE) {
-        die install_string('continue_without_answers'), "\n";
+        if ($allow_unsafe_utf8_conversion) {
+          print "\n"
+            . install_string('continuing_with_unsafe_utf8_conversion')
+            . "\n";
+        }
+        else {
+          die install_string('continue_without_answers'), "\n";
+        }
       }
       else {
         print "\n         " . install_string('enter_or_ctrl_c');

@@ -43,8 +43,30 @@ s/%%BZ_DB_NAME%%/'$BZ_DB_NAME'/;
 s/%%BZ_DB_USER%%/'$BZ_DB_USER'/;
 s/%%BZ_DB_PASS%%/'${BZ_DB_PASS//@/\\@//$/\\$}'/;
 s@%%BZ_URLBASE%%@'${BZ_URLBASE//@/\\@}'@;
+s/%%BZ_ALLOW_UNSAFE_UTF8_CONVERSION%%/${BZ_ALLOW_UNSAFE_UTF8_CONVERSION:-0}/;
 " /root/docker/checksetup_answers.txt
-perl checksetup.pl /root/docker/checksetup_answers.txt
+
+CHECKSETUP_LOG=$(mktemp)
+perl checksetup.pl /root/docker/checksetup_answers.txt 2>&1 | tee "$CHECKSETUP_LOG"
+CHECKSETUP_EXIT=${PIPESTATUS[0]}
+
+if [ $CHECKSETUP_EXIT -ne 0 ]; then
+  if grep -q "Re-run checksetup.pl in interactive mode" "$CHECKSETUP_LOG"; then
+    cat - <<EOF
+
+checksetup.pl stopped because a potentially destructive conversion requires
+explicit approval in non-interactive mode.
+
+To proceed with the UTF-8 conversion in Docker, re-run with:
+  BZ_ALLOW_UNSAFE_UTF8_CONVERSION=1 docker compose up
+
+Only use this if you understand the warning and have a database backup.
+EOF
+  fi
+  exit $CHECKSETUP_EXIT
+fi
+
+rm -f "$CHECKSETUP_LOG"
 echo "Checksetup completed."
 
 LOGIN_USER="Admin user: $BZ_ADMIN_EMAIL"

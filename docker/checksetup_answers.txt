@@ -37,3 +37,4 @@ $answer{'db_mysql_ssl_ca_file'}     = '';
 $answer{'db_mysql_ssl_ca_path'}     = '';
 $answer{'db_mysql_ssl_client_cert'} = '';
 $answer{'db_mysql_ssl_client_key'}  = '';
+$answer{'ALLOW_UNSAFE_UTF8_CONVERSION'} = %%BZ_ALLOW_UNSAFE_UTF8_CONVERSION%%;

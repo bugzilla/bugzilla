@@ -2919,7 +2919,7 @@ sub _flagtypes_nonchanged {
     # don't call build_subselect as this must run as a true sub-select
     $args->{term} = "EXISTS (
         SELECT 1
-          FROM $bugs_table bugs_$chart_id
+          FROM bugs bugs_$chart_id
           LEFT JOIN attachments AS attachments_$chart_id
                     ON bugs_$chart_id.bug_id = attachments_$chart_id.bug_id
           LEFT JOIN flags AS flags_$chart_id

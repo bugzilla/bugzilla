@@ -12,7 +12,7 @@ use strict;
 use warnings;
 
 use Bugzilla::Constants;
-use Bugzilla::Token qw(issue_session_token);
+use Bugzilla::Token qw(issue_hash_token);
 
 use DateTime;
 
@@ -64,7 +64,7 @@ sub get_banner {
     show_thanks    => $show_thanks,
     visibility     => $visibility,
     settings_link  => 'editparams.cgi?section=donation#donation_banner_visibility_desc',
-    token          => issue_session_token('edit_user_prefs'),
+    token          => issue_hash_token(['donation_banner']),
   };
 
   if ($visibility eq 'admins_only') {

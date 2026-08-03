@@ -24,6 +24,8 @@ use Bugzilla::User::APIKey;
 use Bugzilla::User::Setting qw(clear_settings_cache);
 use Bugzilla::Token;
 
+use DateTime;
+
 # Donation banner settings are managed from the dedicated "Donate" tab (and the
 # home page banner), not the generic Settings tab. Two of them hold internal
 # state (last shown version, reminder date) with no legal_values, so they would
@@ -166,6 +168,10 @@ sub DoDonate {
   my $user = Bugzilla->user;
 
   $vars->{'settings'} = $user->settings;
+
+  # Default the reminder date picker to today rather than the stored epoch
+  # sentinel, since a reminder is always meant to be a future date.
+  $vars->{'today'} = DateTime->now(time_zone => Bugzilla->local_timezone)->ymd;
 }
 
 sub SaveDonate {

@@ -8,8 +8,14 @@
 
 [% settings = user.settings %]
 [% pref = settings.donate_banner_pref.value %]
-[% next_date = (pref == 'specific_date' && !settings.donate_banner_reminder_date.is_default)
-    ? settings.donate_banner_reminder_date.value : '' %]
+[% next_date = settings.donate_banner_reminder_date.is_default
+    ? '' : settings.donate_banner_reminder_date.value %]
+[%# The setting defaults to the epoch as a "show immediately" sentinel; show
+  # today in the picker instead, since reminders are always future dates.
+  #%]
+[% IF !next_date || next_date == '1970-01-01' %]
+  [% next_date = today %]
+[% END %]
 
 <p>
   Bugzilla is developed and maintained by volunteers.
@@ -38,7 +44,7 @@
       </select>
     </td>
   </tr>
-  <tr>
+  <tr id="donate_date_row"[% ' style="display: none"' UNLESS pref == 'specific_date' %]>
     <td class="right"><label for="donate_banner_reminder_date">Next reminder date</label></td>
     <td>
       <input type="date" id="donate_banner_reminder_date"
@@ -50,3 +56,15 @@
     </td>
   </tr>
 </table>
+
+<script type="text/javascript">
+  (function() {
+    var pref = document.getElementById('donate_banner_pref');
+    var row  = document.getElementById('donate_date_row');
+    function toggle() {
+      row.style.display = (pref.value === 'specific_date') ? '' : 'none';
+    }
+    pref.addEventListener('change', toggle);
+    toggle();
+  })();
+</script>

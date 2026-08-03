@@ -817,6 +817,8 @@ tr.shared_search {
     width: 110px;
     height: 110px;
     flex: 0 0 auto;
+    object-fit: contain;
+    object-position: center;
     border: 1px dashed #4b7d61;
     border-radius: 10px;
     background: #f6fbf8;

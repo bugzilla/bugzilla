@@ -18,7 +18,7 @@
 %]
 
 [% IF donation %]
-  <div id="new_release" class="donation_banner">
+  <div class="home_banner donation_banner">
     <div class="donation_banner_layout">
       <img
         src="images/donation-mascot-placeholder.svg"
@@ -58,8 +58,10 @@
       </div>
     </div>
   </div>
-[% ELSIF release %]
-  <div id="new_release">
+[% END %]
+
+[% IF release %]
+  <div id="new_release" class="home_banner">
     [% IF release.data %]
       [% IF release.eos_date %]
         <p>[% terms.Bugzilla %] [%+ release.branch_version FILTER html %] will

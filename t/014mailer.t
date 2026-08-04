@@ -9,7 +9,7 @@
 #Bugzilla Test 14#
 ####Mailer.pm#####
 
-use 5.14.0;
+use 5.10.1;
 use strict;
 use warnings;
 

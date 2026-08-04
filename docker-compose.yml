@@ -30,6 +30,7 @@ services:
       - BZ_DB_USER=bugs
       - BZ_DB_NAME=bugs
       - BZ_DB_PASS=bugzilla
+      - BZ_ALLOW_UNSAFE_UTF8_CONVERSION=${BZ_ALLOW_UNSAFE_UTF8_CONVERSION:-0}
       - MARIADB_ROOT_HOST=%
       - MARIADB_ROOT_PASSWORD=bugzilla
 

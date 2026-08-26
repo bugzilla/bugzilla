@@ -6,7 +6,7 @@
 # This Source Code Form is "Incompatible With Secondary Licenses", as
 # defined by the Mozilla Public License, v. 2.0.
 
-use 5.10.1;
+use 5.14.0;
 use strict;
 use warnings;
 
@@ -708,16 +708,16 @@ sub userDataToVars {
   $vars->{'groups'}    = $user->bless_groups();
 
   $vars->{'permissions'} = $dbh->selectall_hashref(
-    qq{SELECT id,
+    'SELECT id,
                   COUNT(directmember.group_id) AS directmember,
                   COUNT(regexpmember.group_id) AS regexpmember,
-                  (CASE WHEN (groups.id IN ($grouplist)
+                  (CASE WHEN (groups.id IN (' . $grouplist . ')
                               AND COUNT(directmember.group_id) = 0
                               AND COUNT(regexpmember.group_id) = 0
                              ) THEN 1 ELSE 0 END) 
                       AS derivedmember,
                   COUNT(directbless.group_id) AS directbless
-           FROM groups
+           FROM ' . $dbh->quote_identifier('groups') . '
            LEFT JOIN user_group_map AS directmember
                   ON directmember.group_id = id
                  AND directmember.user_id = ?
@@ -733,7 +733,7 @@ sub userDataToVars {
                  AND directbless.user_id = ?
                  AND directbless.isbless = 1
                  AND directbless.grant_type = ?
-          } . $dbh->sql_group_by('id'),
+          ' . $dbh->sql_group_by('id'),
     'id', undef,
     (
       $otheruserid, GRANT_DIRECT, $otheruserid, GRANT_REGEXP,
@@ -742,12 +742,14 @@ sub userDataToVars {
   );
 
   # Find indirect bless permission.
-  $query = qq{SELECT groups.id
-                FROM groups, group_group_map AS ggm
+  $query = 'SELECT groups.id
+                FROM '
+    . $dbh->quote_identifier('groups')
+    . ', group_group_map AS ggm
                 WHERE groups.id = ggm.grantor_id
-                  AND ggm.member_id IN ($grouplist)
+                  AND ggm.member_id IN (' . $grouplist . ')
                   AND ggm.grant_type = ?
-               } . $dbh->sql_group_by('id');
+               ' . $dbh->sql_group_by('id');
   foreach (@{$dbh->selectall_arrayref($query, undef, (GROUP_BLESS))}) {
 
     # Merge indirect bless permissions into permission variable.

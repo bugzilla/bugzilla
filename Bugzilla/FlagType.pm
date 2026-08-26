@@ -7,7 +7,7 @@
 
 package Bugzilla::FlagType;
 
-use 5.10.1;
+use 5.14.0;
 use strict;
 use warnings;
 
@@ -40,7 +40,7 @@ use Bugzilla::Error;
 use Bugzilla::Util;
 use Bugzilla::Group;
 
-use Email::Address;
+use Email::Address::XS;
 use List::MoreUtils qw(uniq);
 
 use base qw(Bugzilla::Object);
@@ -306,12 +306,12 @@ sub _check_cc_list {
     || ThrowUserError('flag_type_cc_list_invalid', {cc_list => $cc_list});
 
   my @addresses = split(/[,\s]+/, $cc_list);
-  my $addr_spec = $Email::Address::addr_spec;
 
   # We do not call check_email_syntax() because these addresses do not
   # require to match 'emailregexp' and do not depend on 'emailsuffix'.
   foreach my $address (@addresses) {
-    ($address !~ /\P{ASCII}/ && $address =~ /^$addr_spec$/)
+    my $email = Email::Address::XS->parse_bare_address($address); 
+    ($address !~ /\P{ASCII}/ && $email->is_valid)
       || ThrowUserError('illegal_email_address', {addr => $address, default => 1});
   }
   return $cc_list;

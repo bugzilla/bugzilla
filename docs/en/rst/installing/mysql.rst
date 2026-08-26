@@ -3,7 +3,7 @@
 MySQL
 #####
 
-You need MySQL version 5.0.15 or higher.
+The minimum required version is MySQL 5.6.12.
 
 It's possible to test which version of MySQL you have installed with:
 
@@ -15,12 +15,14 @@ Installing
 Windows
 -------
 
-Download the MySQL 32-bit or 64-bit MSI installer from the
-`MySQL website <http://www.mysql.com/downloads/mysql/>`_ (~28 MB).
+Download the MySQL Installer for Windows from the
+[MySQL website](https://dev.mysql.com/downloads/windows/installer/) 
+(sizes vary based on the installer version).
 
-MySQL has a standard Windows installer. It's ok to select a Typical MySQL
-install (the default). The rest of this documentation assumes assume you
-have installed MySQL into :file:`C:\\mysql`. Adjust paths appropriately if not.
+MySQL provides a standard Windows installer. It is recommended to select the 
+default installation options unless you have specific requirements. This 
+documentation assumes that you have installed MySQL in `C:\mysql`. Adjust paths 
+appropriately if your installation directory differs.
 
 Linux/Mac OS X
 --------------
@@ -34,6 +36,17 @@ and follow its advice.
 
 If you did install MySQL manually rather than from a package, make sure the
 server is started when the machine boots.
+
+Create the Database
+===================
+
+You need to create a database for Bugzilla to use. Run the :file:`mysql`
+command-line client and enter:
+
+::
+    CREATE DATABASE IF NOT EXISTS bugs CHARACTER SET = 'utf8';
+
+The above command makes sure a database like that doesn't exist already.
 
 .. _mysql-add-user:
 
@@ -69,7 +82,7 @@ configuration file, which is:
 * Red Hat/Fedora: :file:`/etc/my.cnf`
 * Debian/Ubuntu: :file:`/etc/mysql/my.cnf`
 * Windows: :file:`C:\\mysql\\bin\\my.ini`
-* Mac OS X: :file:`/etc/my/cnf`
+* Mac OS X: :file:`/etc/my.cnf`
 
 .. _mysql-max-allowed-packet:
 
@@ -130,6 +143,7 @@ command-line client and enter the following, replacing ``$bugs_db``
 with your Bugzilla database name (which is ``bugs`` by default):
 
 .. code-block:: sql
+   :force:
 
     USE $bugs_db;
     

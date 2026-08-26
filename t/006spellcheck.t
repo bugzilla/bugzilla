@@ -10,11 +10,11 @@
 #Bugzilla Test 6#
 ####Spelling#####
 
-use 5.10.1;
+use 5.14.0;
 use strict;
 use warnings;
 
-use lib 't';
+use lib qw(. lib t);
 use Support::Files;
 
 # -1 because 006spellcheck.t must not be checked.

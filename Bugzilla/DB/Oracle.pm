@@ -21,7 +21,7 @@ For interface details see L<Bugzilla::DB> and L<DBI>.
 
 package Bugzilla::DB::Oracle;
 
-use 5.10.1;
+use 5.14.0;
 use Moo;
 
 extends qw(Bugzilla::DB);
@@ -117,7 +117,7 @@ sub sql_group_concat {
   my ($self, $text, $separator) = @_;
   $separator = $self->quote(', ') if !defined $separator;
   my ($distinct, $rest) = $text =~ /^(\s*DISTINCT\s|)(.+)$/i;
-  return "group_concat($distinct T_CLOB_DELIM(NVL($rest, ' '), $separator))";
+  return "group_concat($distinct T_CLOB_DELIM(NVL(TO_CHAR($rest), ' '), $separator))";
 }
 
 sub sql_regexp {
@@ -319,7 +319,7 @@ sub adjust_statement {
 
   # Oracle doesn't have LIMIT, so if we find the LIMIT comment, wrap the
   # query with "SELECT * FROM (...) WHERE rownum < $limit"
-  my ($limit, $offset) = ($part =~ m{/\* LIMIT (\d*) (\d*) \*/}o);
+  my ($limit, $offset) = ($part =~ m{/\* LIMIT (\d*) (\d*) \*/}ao);
 
   push @result, $part;
   while (@parts) {
@@ -349,7 +349,7 @@ sub adjust_statement {
     $nonstring =~ s/\bAS\b//ig;
 
     # Look for a LIMIT clause
-    ($limit) = ($nonstring =~ m(/\* LIMIT (\d*) \*/)o);
+    ($limit) = ($nonstring =~ m(/\* LIMIT (\d*) \*/)ao);
 
     if (!length($string)) {
       push @result, EMPTY_STRING;
@@ -744,7 +744,7 @@ sub _get_create_trigger_ddl {
 
 package Bugzilla::DB::Oracle::st;
 
-use 5.10.1;
+use 5.14.0;
 use strict;
 use warnings;
 

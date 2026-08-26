@@ -7,7 +7,7 @@
 
 package Bugzilla::DB::Sqlite;
 
-use 5.10.1;
+use 5.14.0;
 use Moo;
 
 extends qw(Bugzilla::DB);
@@ -343,5 +343,9 @@ For interface details see L<Bugzilla::DB> and L<DBI>.
 =item sql_istring
 
 =item bz_setup_database
+
+=item BUILDARGS
+
+=item on_dbi_connected
 
 =back

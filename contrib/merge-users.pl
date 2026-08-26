@@ -6,7 +6,7 @@
 # This Source Code Form is "Incompatible With Secondary Licenses", as
 # defined by the Mozilla Public License, v. 2.0.
 
-use 5.10.1;
+use 5.14.0;
 use strict;
 use warnings;
 
@@ -52,7 +52,7 @@ pod2usage(0) if $help;
 # Make sure accounts were specified on the command line and exist.
 my $old = $ARGV[0] || die "You must specify an old user account.\n";
 my $old_id;
-if ($old =~ /^id:(\d+)$/) {
+if ($old =~ /^id:(\d+)$/a) {
 
   # As the old user account may be a deleted one, we don't
   # check whether this user ID is valid or not.
@@ -75,7 +75,7 @@ else {
 
 my $new = $ARGV[1] || die "You must specify a new user account.\n";
 my $new_id;
-if ($new =~ /^id:(\d+)$/) {
+if ($new =~ /^id:(\d+)$/a) {
   $new_id = $1;
 
   # Make sure this user ID exists.

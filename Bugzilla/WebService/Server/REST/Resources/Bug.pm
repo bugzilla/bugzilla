@@ -7,7 +7,7 @@
 
 package Bugzilla::WebService::Server::REST::Resources::Bug;
 
-use 5.10.1;
+use 5.14.0;
 use strict;
 use warnings;
 
@@ -134,7 +134,7 @@ sub _rest_resources {
         params => sub {
           my $value = $_[0];
           my $param = 'names';
-          $param = 'ids' if $value =~ /^\d+$/;
+          $param = 'ids' if $value =~ /^\d+$/a;
           return {$param => [$_[0]]};
         }
       }

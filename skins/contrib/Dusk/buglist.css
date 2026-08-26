@@ -9,3 +9,7 @@
 tr.bz_bugitem:hover {
     background-color: #ccccff;
 }
+
+.bz_sort_order_secondary {
+  color: #555;
+}

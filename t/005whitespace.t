@@ -9,11 +9,11 @@
 #Bugzilla Test 5#
 #####no_tabs#####
 
-use 5.10.1;
+use 5.14.0;
 use strict;
 use warnings;
 
-use lib 't';
+use lib qw(. lib t);
 
 use Support::Files;
 use Support::Templates;

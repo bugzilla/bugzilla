@@ -7,7 +7,7 @@
 
 package Bugzilla::Extension::MoreBugUrl::RT;
 
-use 5.10.1;
+use 5.14.0;
 use strict;
 use warnings;
 
@@ -23,7 +23,7 @@ sub should_handle {
   # RT URLs can look like various things:
   #   http://example.com/rt/Ticket/Display.html?id=1234
   #   https://example.com/Public/Bug/Display.html?id=1234
-  return ($uri->path =~ m|/Display\.html$| and $uri->query_param('id') =~ /^\d+$/)
+  return ($uri->path =~ m|/Display\.html$| and $uri->query_param('id') =~ /^\d+$/a)
     ? 1
     : 0;
 }

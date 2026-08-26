@@ -7,7 +7,7 @@
 
 package Bugzilla::Error;
 
-use 5.10.1;
+use 5.14.0;
 use strict;
 use warnings;
 
@@ -103,7 +103,6 @@ sub _throw_error {
     my $cgi = Bugzilla->cgi;
     $cgi->close_standby_message('text/html', 'inline', 'error', 'html');
     print $message;
-    print $cgi->multipart_final() if $cgi->{_multipart_in_progress};
   }
   elsif (Bugzilla->error_mode == ERROR_MODE_TEST) {
     die Dumper($vars);

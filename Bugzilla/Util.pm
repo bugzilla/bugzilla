@@ -7,7 +7,7 @@
 
 package Bugzilla::Util;
 
-use 5.10.1;
+use 5.14.0;
 use strict;
 use warnings;
 
@@ -33,7 +33,7 @@ use Bugzilla::Error;
 use Date::Parse;
 use Date::Format;
 use Digest;
-use Email::Address;
+use Email::Address::XS;
 use List::Util qw(first);
 use Scalar::Util qw(tainted blessed);
 use Text::Wrap;
@@ -223,13 +223,19 @@ sub html_light_quote {
 sub email_filter {
   my ($toencode) = @_;
   if (!Bugzilla->user->id) {
-    my @emails = Email::Address->parse($toencode);
-    if (scalar @emails) {
-      my @hosts    = map { quotemeta($_->host) } @emails;
-      my $hosts_re = join('|', @hosts);
-      $toencode =~ s/\@(?:$hosts_re)//g;
-      return $toencode;
+    my $email_re = qr/([a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,})/;
+    my @hosts;
+    while ($toencode =~ /$email_re/g) {
+      my @emails = Email::Address::XS->parse($1);
+      if (scalar @emails) {
+        my @these_hosts = map { quotemeta($_->host) } @emails;
+        push @hosts, @these_hosts;
+      }
     }
+    my $hosts_re = join('|', @hosts);
+
+    $toencode =~ s/\@(?:$hosts_re)//g;
+    return $toencode;
   }
   return $toencode;
 }
@@ -355,11 +361,11 @@ sub is_ipv4 {
   my $ip = shift;
   return unless defined $ip;
 
-  my @octets = $ip =~ /^(\d{1,3})\.(\d{1,3})\.(\d{1,3})\.(\d{1,3})$/;
+  my @octets = $ip =~ /^(\d{1,3})\.(\d{1,3})\.(\d{1,3})\.(\d{1,3})$/a;
   return unless scalar(@octets) == 4;
 
   foreach my $octet (@octets) {
-    return unless ($octet >= 0 && $octet <= 255 && $octet !~ /^0\d{1,2}$/);
+    return unless ($octet >= 0 && $octet <= 255 && $octet !~ /^0\d{1,2}$/a);
   }
 
   # The IP address is valid and can now be detainted.
@@ -584,7 +590,7 @@ sub format_time {
   # If $format is not set, try to guess the correct date format.
   if (!$format) {
     if (!ref $date
-      && $date =~ /^(\d{4})[-\.](\d{2})[-\.](\d{2}) (\d{2}):(\d{2})(:(\d{2}))?$/)
+      && $date =~ /^(\d{4})[-\.](\d{2})[-\.](\d{2}) (\d{2}):(\d{2})(:(\d{2}))?$/a)
     {
       my $sec = $7;
       if (defined $sec) {
@@ -614,7 +620,7 @@ sub datetime_from {
   my @time;
 
   # Most dates will be in this format, avoid strptime's generic parser
-  if ($date =~ /^(\d{4})[\.-](\d{2})[\.-](\d{2})(?: (\d{2}):(\d{2}):(\d{2}))?$/) {
+  if ($date =~ /^(\d{4})[\.-](\d{2})[\.-](\d{2})(?: (\d{2}):(\d{2}):(\d{2}))?$/a) {
     @time = ($6, $5, $4, $3, $2 - 1, $1 - 1900, undef);
   }
   else {
@@ -740,17 +746,15 @@ sub validate_email_syntax {
   my $match  = Bugzilla->params->{'emailregexp'};
   my $email  = $addr . Bugzilla->params->{'emailsuffix'};
 
-  # This regexp follows RFC 2822 section 3.4.1.
-  my $addr_spec = $Email::Address::addr_spec;
-
   # RFC 2822 section 2.1 specifies that email addresses must
   # be made of US-ASCII characters only.
   # Email::Address::addr_spec doesn't enforce this.
   # We set the max length to 127 to ensure addresses aren't truncated when
   # inserted into the tokens.eventdata field.
+  my $address = Email::Address::XS->parse_bare_address($email);
   if ( $addr =~ /$match/
+    && $address->is_valid
     && $email !~ /\P{ASCII}/
-    && $email =~ /^$addr_spec$/
     && length($email) <= 127)
   {
     # We assume these checks to suffice to consider the address untainted.
@@ -778,8 +782,8 @@ sub validate_date {
   if ($ts) {
     $date2 = time2str("%Y-%m-%d", $ts);
 
-    $date  =~ s/(\d+)-0*(\d+?)-0*(\d+?)/$1-$2-$3/;
-    $date2 =~ s/(\d+)-0*(\d+?)-0*(\d+?)/$1-$2-$3/;
+    $date  =~ s/(\d+)-0*(\d+?)-0*(\d+?)/$1-$2-$3/a;
+    $date2 =~ s/(\d+)-0*(\d+?)-0*(\d+?)/$1-$2-$3/a;
   }
   my $ret = ($ts && $date eq $date2);
   return $ret ? 1 : 0;
@@ -793,7 +797,7 @@ sub validate_time {
   my $ts = str2time($time);
   if ($ts) {
     $time2 = time2str("%H:%M:%S", $ts);
-    if ($time =~ /^(\d{1,2}):(\d\d)(?::(\d\d))?$/) {
+    if ($time =~ /^(\d{1,2}):(\d\d)(?::(\d\d))?$/a) {
       $time = sprintf("%02d:%02d:%02d", $1, $2, $3 || 0);
     }
   }
@@ -1313,18 +1317,44 @@ if Bugzilla is currently using the shadowdb or not. Used like:
 
 =back
 
-=head1 B<Methods in need of POD>
-
 =over
 
-=item do_ssl_redirect_if_required
+=item C<write_text($filename, $content)>
 
-=item validate_time
+Writes $content to $filename. The content will be encoded as UTF-8. Returns 1 if
+the atomic write was successful, 0 otherwise. C<$!> will be set to the error
+from C<rename()>.
 
-=item is_ipv4
+=item C<read_text($filename)>
 
-=item is_ipv6
+Reads the contents of $filename and returns it as a string. The string will be
+decoded as UTF-8.
 
-=item display_value
+=item C<is_ipv4>
+
+Returns true if the given IP address is an IPv4 address.
+
+=item C<is_ipv6>
+
+Returns true if the given IP address is an IPv6 address.
+
+=item C<do_ssl_redirect_if_required>
+
+If Bugzilla is configured to redirect all HTTP requests to HTTPS, this function
+will redirect the user to the HTTPS version of the current page. It will not do
+anything if the user is already on HTTPS, or if there is no C<sslbase> parameter
+set.
+
+=item C<validate_time>
+
+Validates a time string. Returns true or false depending on whether the time
+string is valid.
+
+=item C<display_value>
+
+Returns the display value for a given field and value. This value comes from the
+value_descs template variable. The value_descs variable is set in the template
+file C<global/value-descs.none.tmpl>. This is used for localizing Bugzilla to
+other languages.
 
 =back

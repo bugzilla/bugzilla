@@ -21,8 +21,8 @@ body {
 }
 
 #header .links, #footer {
-    background-color: #929bb1;
-    color: #ddd;
+    background-color: #667089;
+    color: #fff;
 }
 
 #header {
@@ -51,7 +51,7 @@ body {
 }
 
 a {
-    color: #6070cf;
+    color: #4659c7;
 }
 a:hover {
     color: #8090ef;
@@ -190,7 +190,7 @@ hr {
 }
 
 .tabs td {
-    background: #c8c8c8;
+    background: #e2e2e2;
     border-width: 1px;
 }
 
@@ -234,4 +234,12 @@ hr {
         margin: 0;
         padding: 0;
     }
+}
+
+/**************/
+/* Bug Fields */
+/**************/
+
+th.required:before, span.required_star {
+    color: #cc3333;
 }

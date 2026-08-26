@@ -21,7 +21,7 @@ For interface details see L<Bugzilla::DB> and L<DBI>.
 
 package Bugzilla::DB::Pg;
 
-use 5.10.1;
+use 5.14.0;
 use Moo;
 
 use Bugzilla::Error;
@@ -250,7 +250,7 @@ sub bz_check_server_version {
   my $self           = shift;
   my ($db)           = @_;
   my $server_version = $self->SUPER::bz_check_server_version(@_);
-  my ($major_version, $minor_version) = $server_version =~ /^0*(\d+)\.0*(\d+)/;
+  my ($major_version, $minor_version) = $server_version =~ /^0*(\d+)\.0*(\d+)/a;
 
   # Pg 9.0 requires DBD::Pg 2.17.2 in order to properly read bytea values.
   # Pg 9.2 requires DBD::Pg 2.19.3 as spclocation no longer exists.

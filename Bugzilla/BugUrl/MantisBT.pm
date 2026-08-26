@@ -7,7 +7,7 @@
 
 package Bugzilla::BugUrl::MantisBT;
 
-use 5.10.1;
+use 5.14.0;
 use strict;
 use warnings;
 
@@ -22,7 +22,7 @@ sub should_handle {
 
   # MantisBT URLs look like the following ('bugs' directory is optional):
   #   http://www.mantisbt.org/bugs/view.php?id=1234
-  return ($uri->path_query =~ m|view\.php\?id=\d+$|) ? 1 : 0;
+  return ($uri->path_query =~ m|view\.php\?id=\d+$|a) ? 1 : 0;
 }
 
 sub _check_value {

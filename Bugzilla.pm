@@ -7,7 +7,7 @@
 
 package Bugzilla;
 
-use 5.10.1;
+use 5.14.0;
 use strict;
 use warnings;
 
@@ -84,7 +84,10 @@ sub init_page {
   }
 
   if (${^TAINT}) {
-    my $path = '';
+    # PATH *MUST* contain SOMETHING or newer Perls will throw an error. Keep this
+    # minimal and platform-specific so command lookups still work when needed.
+    # see https://bugzilla.mozilla.org/show_bug.cgi?id=1923778
+    my $path = '/bin:/usr/bin';
     if (ON_WINDOWS) {
 
       # On Windows, these paths are tainted, preventing
@@ -94,12 +97,18 @@ sub init_page {
         trick_taint($ENV{$temp}) if $ENV{$temp};
       }
 
+      # Native Windows command lookup should include System32.
+      my $system_root = $ENV{SYSTEMROOT} || $ENV{WINDIR} || 'C:\\Windows';
+      trick_taint($system_root);
+      $path = "$system_root\\System32";
+
       # Some DLLs used by Strawberry Perl are also in c\bin,
       # see https://rt.cpan.org/Public/Bug/Display.html?id=99104
       if (!ON_ACTIVESTATE) {
-        my $c_path = $path = dirname($^X);
+        my $perl_path = dirname($^X);
+        my $c_path    = $perl_path;
         $c_path =~ s/\bperl\b(?=\\bin)/c/;
-        $path .= ";$c_path";
+        $path .= ";$perl_path;$c_path";
         trick_taint($path);
       }
     }
@@ -461,7 +470,6 @@ sub error_mode {
     $class->request_cache->{error_mode} = $newval;
   }
 
-  # XXX - Once we require Perl 5.10.1, this test can be replaced by //.
   if (exists $class->request_cache->{error_mode}) {
     return $class->request_cache->{error_mode};
   }
@@ -509,7 +517,6 @@ sub usage_mode {
     $class->request_cache->{usage_mode} = $newval;
   }
 
-  # XXX - Once we require Perl 5.10.1, this test can be replaced by //.
   if (exists $class->request_cache->{usage_mode}) {
     return $class->request_cache->{usage_mode};
   }

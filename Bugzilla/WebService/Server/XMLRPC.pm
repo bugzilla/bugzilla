@@ -7,7 +7,7 @@
 
 package Bugzilla::WebService::Server::XMLRPC;
 
-use 5.10.1;
+use 5.14.0;
 use strict;
 use warnings;
 
@@ -128,7 +128,7 @@ sub handle_login {
 # and also, in some cases, to more-usefully decode them.
 package Bugzilla::XMLRPC::Deserializer;
 
-use 5.10.1;
+use 5.14.0;
 use strict;
 use warnings;
 
@@ -254,7 +254,7 @@ sub _validation_subs {
 
 package Bugzilla::XMLRPC::SOM;
 
-use 5.10.1;
+use 5.14.0;
 use strict;
 use warnings;
 
@@ -281,7 +281,7 @@ sub paramsin {
 # See http://rt.cpan.org/Public/Bug/Display.html?id=32952.
 package Bugzilla::XMLRPC::Serializer;
 
-use 5.10.1;
+use 5.14.0;
 use strict;
 use warnings;
 

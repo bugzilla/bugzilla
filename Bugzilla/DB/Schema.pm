@@ -15,7 +15,7 @@ package Bugzilla::DB::Schema;
 #
 ###########################################################################
 
-use 5.10.1;
+use 5.14.0;
 use Moo;
 
 use Bugzilla::Error;
@@ -1747,10 +1747,21 @@ DB-specific code in a subclass. Methods which are prefixed with C<_>
 are considered protected. Subclasses may override these methods, but
 other modules should not invoke these methods directly.
 
+=over 4
+
 =cut
 
 #--------------------------------------------------------------------------
 sub BUILD {
+
+=item C<BUILD>
+
+This method exists to bridge between the old way of doing things (calling C<_initialize>)
+and the Moo way of doing things. Moo will call this method when you call C<new> on a class,
+and it will throw an error if called on the base class. This is because the base class is abstract.
+
+=cut
+
   my $self   = shift;
   my $class  = ref($self) || $self;
 
@@ -1768,13 +1779,40 @@ sub BUILD {
 # instead setting it in _initialize() if it isn't already passed in.
 has 'abstract_schema' => ( init_arg => '_abstract_schema', is => 'rw' );
 
+=item C<abstract_schema>
+
+Returns the abstract schema for this database. It is initialized in C<_initialize>.
+
+=cut
+
 # this could also be lazy, but it is also set in _initialize()
 has 'schema' => (init_arg =>undef, is => 'rw');
 
+=item C<schema>
+
+Returns the schema for this database. It is initialized in C<_initialize>
+and cannot be passed in to C<new>.
+
+=cut
+
 has 'db_specific' => (init_arg => undef, is => 'rw');
+
+=item C<db_specific>
+
+Returns the DB-specific schema for this database. It is initialized in C<_initialize>
+and cannot be passed in to C<new>.
+
+=cut
 
 has 'db' => (is => 'ro', weak_ref => 1, required => 1);
 
+=item C<db>
+
+Returns the L<Bugzilla::DB> object that this schema is associated with.
+This is a weak reference, so it will be C<undef> if the L<Bugzilla::DB>
+object has been destroyed.
+
+=cut
 
 #--------------------------------------------------------------------------
 sub _initialize {
@@ -1976,7 +2014,9 @@ is undefined.
 
   return
       "\n     CONSTRAINT $fk_name FOREIGN KEY ($column)\n"
-    . "     REFERENCES $to_table($to_column)\n"
+    . "     REFERENCES "
+    . Bugzilla->dbh->quote_identifier($to_table)
+    . "($to_column)\n"
     . "      ON UPDATE $update ON DELETE $delete";
 }
 
@@ -2011,13 +2051,18 @@ sub get_add_fks_sql {
   my @add = $self->_column_fks_to_ddl($table, $column_fks);
 
   my @sql;
+  my $dbh = Bugzilla->dbh;
   if ($self->MULTIPLE_FKS_IN_ALTER) {
-    my $alter = "ALTER TABLE $table ADD " . join(', ADD ', @add);
+    my $alter
+      = "ALTER TABLE "
+      . $dbh->quote_identifier($table) . " ADD "
+      . join(', ADD ', @add);
     push(@sql, $alter);
   }
   else {
     foreach my $fk_string (@add) {
-      push(@sql, "ALTER TABLE $table ADD $fk_string");
+      push(@sql,
+        "ALTER TABLE " . $dbh->quote_identifier($table) . " ADD $fk_string");
     }
   }
   return @sql;
@@ -2038,7 +2083,8 @@ sub get_drop_fk_sql {
   my ($self, $table, $column, $references) = @_;
   my $fk_name = $self->_get_fk_name($table, $column, $references);
 
-  return ("ALTER TABLE $table DROP CONSTRAINT $fk_name");
+  return (
+    "ALTER TABLE " . Bugzilla->dbh->quote_identifier($table) . " DROP CONSTRAINT $fk_name");
 }
 
 sub convert_type {
@@ -2203,7 +2249,9 @@ sub _get_create_table_ddl {
   }
 
   my $sql
-    = "CREATE TABLE $table (\n" . join(",\n", @col_lines, @fk_lines) . "\n)";
+    = "CREATE TABLE "
+    . Bugzilla->dbh->quote_identifier($table) . " (\n"
+    . join(",\n", @col_lines, @fk_lines) . "\n)";
   return $sql;
 
 }
@@ -2227,7 +2275,9 @@ sub _get_create_index_ddl {
   my $sql = "CREATE ";
   $sql .= "$index_type " if ($index_type && $index_type eq 'UNIQUE');
   $sql
-    .= "INDEX $index_name ON $table_name \(" . join(", ", @$index_fields) . "\)";
+    .= "INDEX $index_name ON "
+    . Bugzilla->dbh->quote_identifier($table_name) . ' ('
+    . join(', ', @$index_fields) . ')';
 
   return ($sql);
 
@@ -2253,16 +2303,20 @@ sub get_add_column_ddl {
 
   my ($self, $table, $column, $definition, $init_value) = @_;
   my @statements;
+  my $dbh = Bugzilla->dbh;
   push(@statements,
-        "ALTER TABLE $table "
+        'ALTER TABLE '
+      . $dbh->quote_identifier($table) . ' '
       . $self->ADD_COLUMN
       . " $column "
       . $self->get_type_ddl($definition));
 
   # XXX - Note that although this works for MySQL, most databases will fail
   # before this point, if we haven't set a default.
-  (push(@statements, "UPDATE $table SET $column = $init_value"))
-    if defined $init_value;
+  (
+    push(@statements,
+      'UPDATE ' . $dbh->quote_identifier($table) . " SET $column = $init_value")
+  ) if defined $init_value;
 
   if (defined $definition->{REFERENCES}) {
     push(@statements,
@@ -2329,6 +2383,7 @@ sub get_alter_column_ddl {
 
   my $self = shift;
   my ($table, $column, $new_def, $set_nulls_to) = @_;
+  my $dbh = Bugzilla->dbh;
 
   my @statements;
   my $old_def  = $self->get_column_abstract($table, $column);
@@ -2355,7 +2410,10 @@ sub get_alter_column_ddl {
 
   # If we went from having a default to not having one
   elsif (!defined $default && defined $default_old) {
-    push(@statements, "ALTER TABLE $table ALTER COLUMN $column" . " DROP DEFAULT");
+    push(@statements,
+          "ALTER TABLE "
+        . $dbh->quote_identifier($table)
+        . " ALTER COLUMN $column DROP DEFAULT");
   }
 
   # If we went from no default to a default, or we changed the default.
@@ -2363,28 +2421,40 @@ sub get_alter_column_ddl {
     || ($default ne $default_old))
   {
     push(@statements,
-      "ALTER TABLE $table ALTER COLUMN $column " . " SET DEFAULT $default");
+          "ALTER TABLE "
+        . $dbh->quote_identifier($table)
+        . " ALTER COLUMN $column SET DEFAULT $default");
   }
 
   # If we went from NULL to NOT NULL.
   if (!$old_def->{NOTNULL} && $new_def->{NOTNULL}) {
     push(@statements, $self->_set_nulls_sql(@_));
-    push(@statements, "ALTER TABLE $table ALTER COLUMN $column" . " SET NOT NULL");
+    push(@statements,
+          "ALTER TABLE "
+        . $dbh->quote_identifier($table)
+        . " ALTER COLUMN $column SET NOT NULL");
   }
 
   # If we went from NOT NULL to NULL
   elsif ($old_def->{NOTNULL} && !$new_def->{NOTNULL}) {
-    push(@statements, "ALTER TABLE $table ALTER COLUMN $column" . " DROP NOT NULL");
+    push(@statements,
+          "ALTER TABLE "
+        . $dbh->quote_identifier($table)
+        . " ALTER COLUMN $column DROP NOT NULL");
   }
 
   # If we went from not being a PRIMARY KEY to being a PRIMARY KEY.
   if (!$old_def->{PRIMARYKEY} && $new_def->{PRIMARYKEY}) {
-    push(@statements, "ALTER TABLE $table ADD PRIMARY KEY ($column)");
+    push(@statements,
+          "ALTER TABLE "
+        . $dbh->quote_identifier($table)
+        . " ADD PRIMARY KEY ($column)");
   }
 
   # If we went from being a PK to not being a PK
   elsif ($old_def->{PRIMARYKEY} && !$new_def->{PRIMARYKEY}) {
-    push(@statements, "ALTER TABLE $table DROP PRIMARY KEY");
+    push(@statements,
+      "ALTER TABLE " . $dbh->quote_identifier($table) . " DROP PRIMARY KEY");
   }
 
   return @statements;
@@ -2406,7 +2476,10 @@ sub _set_nulls_sql {
   }
   my @sql;
   if (defined $default) {
-    push(@sql, "UPDATE $table SET $column = $default" . "  WHERE $column IS NULL");
+    push(@sql,
+          "UPDATE "
+        . Bugzilla->dbh->quote_identifier($table)
+        . " SET $column = $default WHERE $column IS NULL");
   }
   return @sql;
 }
@@ -2441,7 +2514,9 @@ sub get_drop_column_ddl {
 =cut
 
   my ($self, $table, $column) = @_;
-  return ("ALTER TABLE $table DROP COLUMN $column");
+  return ("ALTER TABLE "
+      . Bugzilla->dbh->quote_identifier($table)
+      . " DROP COLUMN $column");
 }
 
 =item C<get_drop_table_ddl($table)>
@@ -2454,7 +2529,7 @@ sub get_drop_column_ddl {
 
 sub get_drop_table_ddl {
   my ($self, $table) = @_;
-  return ("DROP TABLE $table");
+  return ('DROP TABLE ' . Bugzilla->dbh->quote_identifier($table));
 }
 
 sub get_rename_column_ddl {
@@ -2504,7 +2579,11 @@ Gets SQL to rename a table in the database.
 =cut
 
   my ($self, $old_name, $new_name) = @_;
-  return ("ALTER TABLE $old_name RENAME TO $new_name");
+  my $dbh = Bugzilla->dbh;
+  return ('ALTER TABLE '
+      . $dbh->quote_identifier($old_name)
+      . ' RENAME TO '
+      . $dbh->quote_identifier($new_name));
 }
 
 =item C<delete_table($name)>

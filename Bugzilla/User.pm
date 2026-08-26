@@ -7,7 +7,7 @@
 
 package Bugzilla::User;
 
-use 5.10.1;
+use 5.14.0;
 use strict;
 use warnings;
 
@@ -131,7 +131,19 @@ sub new {
       $_[0] = $param;
     }
   }
-  return $class->SUPER::new(@_);
+
+  $user = $class->SUPER::new(@_);
+
+  # MySQL considers some non-ascii characters such as umlauts to equal
+  # ascii characters returning a user when it should not.
+  if ($user && ref $param eq 'HASH' && exists $param->{name}) {
+    my $login = $param->{name};
+    if (lc $login ne lc $user->login) {
+      $user = undef;
+    }
+  }
+
+  return $user;
 }
 
 sub super_user {
@@ -425,7 +437,7 @@ sub _set_groups_to_object {
     # Go through the array, and turn items into group objects
     my @groups = ();
     foreach my $value (@{$changes->{$key}}) {
-      my $type  = $value =~ /^\d+$/ ? 'id' : 'name';
+      my $type  = $value =~ /^\d+$/a ? 'id' : 'name';
       my $group = Bugzilla::Group->new({$type => $value});
 
       if (!$group || !$user->can_bless($group->id)) {
@@ -1630,7 +1642,7 @@ sub visible_groups_direct {
   }
   else {
     # All groups are visible if usevisibilitygroups is off.
-    $sth = $dbh->prepare('SELECT id FROM groups');
+    $sth = $dbh->prepare('SELECT id FROM ' . $dbh->quote_identifier('groups'));
   }
   $sth->execute();
 
@@ -1694,7 +1706,7 @@ sub derive_regexp_groups {
 
   $sth = $dbh->prepare(
     "SELECT id, userregexp, user_group_map.group_id
-                            FROM groups
+                            FROM " . $dbh->quote_identifier('groups') . "
                        LEFT JOIN user_group_map
                               ON groups.id = user_group_map.group_id
                              AND user_group_map.user_id = ?
@@ -1918,7 +1930,7 @@ sub match_field {
         # The field is a requestee field; in order for its name
         # to show up correctly on the confirmation page, we need
         # to find out the name of its flag type.
-        if ($field_name =~ /^requestee(_type)?-(\d+)$/) {
+        if ($field_name =~ /^requestee(_type)?-(\d+)$/a) {
           my $flag_type;
           if ($1) {
             require Bugzilla::FlagType;
@@ -2585,14 +2597,14 @@ sub validate_password_check {
   if ($complexity_level eq 'letters_numbers_specialchars') {
     return 'password_not_complex'
       if ($password !~ /[[:alpha:]]/
-      || $password !~ /\d/
+      || $password !~ /\d/a
       || $password !~ /[[:punct:]]/);
   }
   elsif ($complexity_level eq 'letters_numbers') {
     return 'password_not_complex'
       if ($password !~ /[[:lower:]]/
       || $password !~ /[[:upper:]]/
-      || $password !~ /\d/);
+      || $password !~ /\d/a);
   }
   elsif ($complexity_level eq 'mixed_letters') {
     return 'password_not_complex'

@@ -27,7 +27,7 @@
 # Bonus:
 # Offer subscription when you get a "series already exists" error?
 
-use 5.10.1;
+use 5.14.0;
 use strict;
 use warnings;
 
@@ -75,7 +75,7 @@ $vars->{'doc_section'} = 'using/reports-and-charts.html#charts';
 # encode it in the name, as "action-<action>". Some params even contain the
 # series_id they apply to (e.g. subscribe, unsubscribe).
 my @actions = grep(/^action-/, $cgi->param());
-if ($actions[0] && $actions[0] =~ /^action-([^\d]+)(\d*)$/) {
+if ($actions[0] && $actions[0] =~ /^action-(?a:([^\d]+)(\d*))$/) {
   $action    = $1;
   $series_id = $2 if $2;
 }
@@ -236,14 +236,14 @@ exit;
 
 # Find any selected series and return either the first or all of them.
 sub getAndValidateSeriesIDs {
-  my @series_ids = grep(/^\d+$/, $cgi->param("name"));
+  my @series_ids = grep(/^\d+$/a, $cgi->param("name"));
 
   return wantarray ? @series_ids : $series_ids[0];
 }
 
 # Return a list of IDs of all the lines selected in the UI.
 sub getSelectedLines {
-  my @ids = map { /^select(\d+)$/ ? $1 : () } $cgi->param();
+  my @ids = map { /^select(\d+)$/a ? $1 : () } $cgi->param();
 
   return @ids;
 }
@@ -318,14 +318,10 @@ sub plot {
 
   my $format
     = $template->get_format("reports/chart", "", scalar($cgi->param('ctype')));
-  $format->{'ctype'} = 'text/html' if $cgi->param('debug');
 
   $cgi->set_dated_content_disp('inline', 'chart', $format->{extension});
   print $cgi->header($format->{'ctype'});
   disable_utf8() if ($format->{'ctype'} =~ /^image\//);
-
-  # Debugging PNGs is a pain; we need to be able to see the error messages
-  $vars->{'chart'}->dump() if $cgi->param('debug');
 
   $template->process($format->{'template'}, $vars)
     || ThrowTemplateError($template->error());
@@ -361,10 +357,6 @@ sub view {
   $vars->{'category'} = Bugzilla::Chart::getVisibleSeries();
 
   print $cgi->header();
-
-  # If we have having problems with bad data, we can set debug=1 to dump
-  # the data structure.
-  $chart->dump() if $cgi->param('debug');
 
   $template->process("reports/create-chart.html.tmpl", $vars)
     || ThrowTemplateError($template->error());

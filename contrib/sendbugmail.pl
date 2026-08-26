@@ -6,7 +6,7 @@
 # This Source Code Form is "Incompatible With Secondary Licenses", as
 # defined by the Mozilla Public License, v. 2.0.
 
-use 5.10.1;
+use 5.14.0;
 use strict;
 use warnings;
 
@@ -33,7 +33,7 @@ my $bugnum  = $ARGV[0];
 my $changer = $ARGV[1];
 
 # Validate the bug number.
-if (!($bugnum =~ /^(\d+)$/)) {
+if (!($bugnum =~ /^(\d+)$/a)) {
   say STDERR "Bug number \"$bugnum\" not numeric.";
   usage();
 }

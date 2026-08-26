@@ -10,7 +10,7 @@
 #Bugzilla Test 10#
 ## dependencies ##
 
-use 5.10.1;
+use 5.14.0;
 use strict;
 use warnings;
 
@@ -71,7 +71,7 @@ foreach my $module (keys %mods) {
         $used =~ s#/#::#g;
         $used =~ s#\.pm$##;
         $used =~ s#\$module#[^:]+#;
-        $used =~ s#\${[^}]+}#[^:]+#;
+        $used =~ s#\$\{[^}]+\}#[^:]+#;
         $used =~ s#[" ]##g;
         push(@use, grep(/^\Q$used\E$/, keys %mods));
       }

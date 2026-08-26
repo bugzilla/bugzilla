@@ -7,7 +7,7 @@
 
 package Bugzilla::Template::Plugin::Hook;
 
-use 5.10.1;
+use 5.14.0;
 use strict;
 use warnings;
 
@@ -33,7 +33,7 @@ sub process {
   $template ||= $context->stash->{component}->{name};
 
   # sanity check:
-  if (!$template =~ /[\w\.\/\-_\\]+/) {
+  if ($template !~ /[\w\.\/\-_\\]+/) {
     ThrowCodeError('template_invalid', {name => $template});
   }
 

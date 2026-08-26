@@ -7,7 +7,7 @@
 
 package Bugzilla::CGI;
 
-use 5.10.1;
+use 5.14.0;
 use strict;
 use warnings;
 
@@ -124,7 +124,7 @@ sub canonicalise_query {
 
     # Remove the Boolean Charts for standard query.cgi fields
     # They are listed in the query URL already
-    next if $key =~ /^(field|type|value)(-\d+){3}$/;
+    next if $key =~ /^(field|type|value)(-\d+){3}$/a;
 
     my $esc_key = url_quote($key);
 
@@ -156,7 +156,7 @@ sub clean_search_url {
 
     # Custom Search stuff is empty if it's "noop". We also keep around
     # the old Boolean Chart syntax for backwards-compatibility.
-    if ( ($param =~ /\d-\d-\d/ || $param =~ /^[[:alpha:]]\d+$/)
+    if ( ($param =~ /\d-\d-\d/a || $param =~ /^[[:alpha:]]\d+$/a)
       && defined $self->param($param)
       && $self->param($param) eq 'noop')
     {
@@ -165,7 +165,7 @@ sub clean_search_url {
 
     # Any "join" for custom search that's an AND can be removed, because
     # that's the default.
-    if (($param =~ /^j\d+$/ || $param eq 'j_top') && $self->param($param) eq 'AND')
+    if (($param =~ /^j\d+$/a || $param eq 'j_top') && $self->param($param) eq 'AND')
     {
       $self->delete($param);
     }
@@ -260,50 +260,10 @@ sub check_etag {
   return 0;
 }
 
-# Have to add the cookies in.
-sub multipart_start {
-  my $self = shift;
-
-  my %args = @_;
-
-  # CGI.pm::multipart_start doesn't honour its own charset information, so
-  # we do it ourselves here
-  if (defined $self->charset() && defined $args{-type}) {
-
-    # Remove any existing charset specifier
-    $args{-type} =~ s/;.*$//;
-
-    # and add the specified one
-    $args{-type} .= '; charset=' . $self->charset();
-  }
-
-  my $headers = $self->SUPER::multipart_start(%args);
-
-  # Eliminate the one extra CRLF at the end.
-  $headers =~ s/$CGI::CRLF$//;
-
-  # Add the cookies. We have to do it this way instead of
-  # passing them to multpart_start, because CGI.pm's multipart_start
-  # doesn't understand a '-cookie' argument pointing to an arrayref.
-  foreach my $cookie (@{$self->{Bugzilla_cookie_list}}) {
-    $headers .= "Set-Cookie: ${cookie}${CGI::CRLF}";
-  }
-  $headers .= $CGI::CRLF;
-  $self->{_multipart_in_progress} = 1;
-  return $headers;
-}
-
 sub close_standby_message {
   my ($self, $contenttype, $disp, $disp_prefix, $extension) = @_;
   $self->set_dated_content_disp($disp, $disp_prefix, $extension);
-
-  if ($self->{_multipart_in_progress}) {
-    print $self->multipart_end();
-    print $self->multipart_start(-type => $contenttype);
-  }
-  elsif (!$self->{_header_done}) {
-    print $self->header($contenttype);
-  }
+  print $self->header($contenttype) if !$self->{_header_done};
 }
 
 our $ALLOW_UNSAFE_RESPONSE = 0;
@@ -669,7 +629,7 @@ sub url_is_attachment_base {
     # In this circumstance we run quotemeta first because we need to
     # insert an active regex meta-character afterward.
     $regex = quotemeta($attach_base);
-    $regex =~ s/\\\%bugid\\\%/\\d+/;
+    $regex =~ s/\\\%bugid\\\%/(?a:\\d+)/;
   }
   $regex = "^$regex";
   return ($self->url =~ $regex) ? 1 : 0;
@@ -800,14 +760,10 @@ instead of calling this directly.
 
 Redirects from the current URL to one prefixed by the urlbase parameter.
 
-=item C<multipart_start>
-
-Starts a new part of the multipart document using the specified MIME type.
-If not specified, text/html is assumed.
-
 =item C<close_standby_message>
 
-Ends a part of the multipart document, and starts another part.
+Sets the content disposition header and sends the response header if it has
+not already been sent.
 
 =item C<set_dated_content_disp>
 

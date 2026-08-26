@@ -13,7 +13,7 @@
 # the same points.
 package Bugzilla::Chart;
 
-use 5.10.1;
+use 5.14.0;
 use strict;
 use warnings;
 
@@ -61,7 +61,7 @@ sub init {
   foreach my $param ($cgi->param()) {
 
     # Store all the lines
-    if ($param =~ /^line(\d+)$/) {
+    if ($param =~ /^line(\d+)$/a) {
       foreach my $series_id ($cgi->param($param)) {
         detaint_natural($series_id) || ThrowCodeError("invalid_series_id");
         my $series = new Bugzilla::Series($series_id);
@@ -70,7 +70,7 @@ sub init {
     }
 
     # Store all the labels
-    if ($param =~ /^label(\d+)$/) {
+    if ($param =~ /^label(\d+)$/a) {
       $self->{'labels'}[$1] = $cgi->param($param);
     }
   }

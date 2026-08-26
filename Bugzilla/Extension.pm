@@ -7,7 +7,7 @@
 
 package Bugzilla::Extension;
 
-use 5.10.1;
+use 5.14.0;
 use strict;
 use warnings;
 
@@ -52,7 +52,7 @@ sub load {
     }
     else {
       my $name = require $config_file;
-      if ($name =~ /^\d+$/) {
+      if ($name =~ /^\d+$/a) {
         ThrowCodeError('extension_must_return_name',
           {extension => $config_file, returned => $name});
       }
@@ -68,7 +68,7 @@ sub load {
   }
   else {
     my $name = require $extension_file;
-    if ($name =~ /^\d+$/) {
+    if ($name =~ /^\d+$/a) {
       ThrowCodeError('extension_must_return_name',
         {extension => $extension_file, returned => $name});
     }

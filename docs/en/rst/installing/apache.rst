@@ -10,23 +10,40 @@ default) and mod_perl. mod_perl is faster but takes more resources. You
 should probably only consider mod_perl if your Bugzilla is going to be heavily
 used.
 
-These instructions require editing the Apache configuration file, which is:
+These instructions require editing the Apache server configuration. The directory
+location depends on your operation system.
 
-* Fedora/Red Hat: :file:`/etc/httpd/conf/httpd.conf`
-* Debian/Ubuntu: :file:`/etc/apache2/apache2.conf`
-* Mac OS X: :file:`/etc/apache2/httpd.conf`
+In these instructions, when asked to restart Apache, the command is: ::
 
-Alternatively, on Debian or Ubuntu, you can instead put the below code into a
-separate file in the directory :file:`/etc/apache2/sites-enabled/`.
-
-In these instructions, when asked to restart Apache, the command is:
-
-:command:`sudo apachectl start`
+  sudo apachectl restart
 
 (or run it as root if your OS installation does not use sudo).
 
-Securing Apache
+Fedora / RHEL
+================
+
+Create a new file in :file:`/etc/httpd/conf.d/`.
+
+Debian / Ubuntu
 ===============
+
+Create a new file in :file:`/etc/apache2/conf-available/`. To enable your custom
+configuration, create a symbolic link: ::
+
+  ln -s /etc/apache2/conf-available/<filename>.conf \
+        /etc/apache2/conf-enabled/<filename>.conf
+
+Alternatively, on Debian or Ubuntu, you can instead put the below code into a
+separate file in the directory :file:`/etc/apache2/sites-available/` and symlink
+it to :file:`/etc/apache2/sites-enabled/`.
+
+Mac OS X
+========
+
+Modify the Apache configuration file :file:`/etc/apache2/httpd.conf`
+
+Securing Apache
+###############
 
 When external systems interact with Bugzilla via webservices
 (REST/XMLRPC/JSONRPC) they include the user's credentials as part of the URL
@@ -125,7 +142,7 @@ under mod_perl:
   30MB per httpd child. The more RAM you can get, the better. mod_perl is
   basically trading RAM for speed. At least 2GB total system RAM is
   recommended for running Bugzilla under mod_perl.
-  
+
 * Under mod_perl, you have to restart Apache if you make any manual change to
   any Bugzilla file. You can't just reload--you have to actually
   *restart* the server (as in make sure it stops and starts

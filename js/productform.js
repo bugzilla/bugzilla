@@ -248,53 +248,24 @@ function fake_diff_array(a, b) {
  * @return             Merged and sorted array.
  */
 function merge_arrays(a, b, b_is_select) {
-    var pos_a = 0;
-    var pos_b = 0;
+    var items = a.slice();
     var ret = new Array();
-    var bitem, aitem;
+    var i;
 
-    // Iterate through both arrays and add the larger item to the return
-    // list. Remove dupes, too. Use toLowerCase to provide
-    // case-insensitivity.
-    while ((pos_a < a.length) && (pos_b < b.length)) {
-        aitem = a[pos_a];
-        if (b_is_select)
-            bitem = b[pos_b].value;
-        else
-            bitem = b[pos_b];
+    for (i = 0; i < b.length; i++)
+        items[items.length] = b_is_select ? b[i].value : b[i];
 
-        // Smaller item in list a.
-        if (aitem.toLowerCase() < bitem.toLowerCase()) {
-            ret[ret.length] = aitem;
-            pos_a++;
-        }
-        else {
-            // Smaller item in list b.
-            if (aitem.toLowerCase() > bitem.toLowerCase()) {
-                ret[ret.length] = bitem;
-                pos_b++;
-            }
-            else {
-                // List contents are equal, include both counters.
-                ret[ret.length] = aitem;
-                pos_a++;
-                pos_b++;
-            }
-        }
-    }
+    items.sort(function(left, right) {
+        left = left.toLowerCase();
+        right = right.toLowerCase();
+        return left < right ? -1 : left > right ? 1 : 0;
+    });
 
-    // Catch leftovers here. These sections are ugly code-copying.
-    if (pos_a < a.length)
-        for (; pos_a < a.length ; pos_a++)
-            ret[ret.length] = a[pos_a];
-
-    if (pos_b < b.length) {
-        for (; pos_b < b.length; pos_b++) {
-            if (b_is_select)
-                bitem = b[pos_b].value;
-            else
-                bitem = b[pos_b];
-            ret[ret.length] = bitem;
+    for (i = 0; i < items.length; i++) {
+        if (!ret.length
+            || items[i].toLowerCase() != ret[ret.length - 1].toLowerCase())
+        {
+            ret[ret.length] = items[i];
         }
     }
 

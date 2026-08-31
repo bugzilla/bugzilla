@@ -24,6 +24,16 @@ use Bugzilla::User::APIKey;
 use Bugzilla::User::Setting qw(clear_settings_cache);
 use Bugzilla::Token;
 
+use DateTime;
+
+# Donation banner settings are managed from the dedicated "Donate" tab (and the
+# home page banner), not the generic Settings tab. Two of them hold internal
+# state (last shown version, reminder date) with no legal_values, so they would
+# otherwise render as empty dropdowns and be reset to their defaults whenever the
+# Settings tab is saved.
+use constant DONATION_SETTINGS =>
+  qw(donate_banner_pref donate_banner_last_version donate_banner_reminder_date);
+
 my $template = Bugzilla->template;
 local our $vars = {};
 
@@ -135,21 +145,62 @@ sub DoSettings {
   my $user = Bugzilla->user;
 
   my $settings = $user->settings;
-  $vars->{'settings'} = $settings;
+  my %visible_settings = map { $_ => $settings->{$_} }
+    grep { $_ !~ /^donate_banner_/ } keys %$settings;
+  $vars->{'settings'} = \%visible_settings;
 
-  my @setting_list = sort keys %$settings;
+  my @setting_list = sort keys %visible_settings;
   $vars->{'setting_names'} = \@setting_list;
 
   $vars->{'has_settings_enabled'} = 0;
 
   # Is there at least one user setting enabled?
   foreach my $setting_name (@setting_list) {
-    if ($settings->{"$setting_name"}->{'is_enabled'}) {
+    if ($visible_settings{$setting_name}->{'is_enabled'}) {
       $vars->{'has_settings_enabled'} = 1;
       last;
     }
   }
   $vars->{'dont_show_button'} = !$vars->{'has_settings_enabled'};
+}
+
+sub DoDonate {
+  my $user = Bugzilla->user;
+
+  $vars->{'settings'} = $user->settings;
+
+  # Default the reminder date picker to today rather than the stored epoch
+  # sentinel, since a reminder is always meant to be a future date.
+  $vars->{'today'} = DateTime->now(time_zone => Bugzilla->local_timezone)->ymd;
+}
+
+sub SaveDonate {
+  my $cgi  = Bugzilla->cgi;
+  my $user = Bugzilla->user;
+  my $settings = $user->settings;
+
+  my $pref = $cgi->param('donate_banner_pref') || 'next_upgrade';
+  my $date = $cgi->param('donate_banner_reminder_date') || '';
+
+  if ($pref eq 'specific_date') {
+    validate_date($date)
+      || ThrowUserError('illegal_date', {date => $date, format => 'YYYY-MM-DD'});
+    $settings->{'donate_banner_reminder_date'}->set($date);
+  }
+  elsif ($pref ne 'next_upgrade' && $pref ne 'never') {
+    ThrowCodeError('setting_value_invalid',
+      {name => 'donate_banner_pref', value => $pref});
+  }
+
+  $settings->{'donate_banner_pref'}->set($pref);
+
+  # Stamp the current version so that the "next upgrade" reminder is dismissed
+  # until Bugzilla is actually upgraded, matching the home page banner. Without
+  # this, get_banner() still sees last_version != current and keeps showing.
+  $settings->{'donate_banner_last_version'}->set(BUGZILLA_VERSION);
+
+  clear_settings_cache($user->id);
+  $vars->{'settings'} = $user->settings(1);
 }
 
 sub SaveSettings {
@@ -159,8 +210,11 @@ sub SaveSettings {
   my $settings     = $user->settings;
   my @setting_list = keys %$settings;
 
+  my %is_donation_setting = map { $_ => 1 } DONATION_SETTINGS;
+
   foreach my $name (@setting_list) {
     next if !($settings->{$name}->{'is_enabled'});
+    next if $is_donation_setting{$name};
     my $value = $cgi->param($name);
     next unless defined $value;
     my $setting = new Bugzilla::User::Setting($name);
@@ -644,6 +698,14 @@ SWITCH: for ($current_tab_name) {
   /^settings$/ && do {
     SaveSettings() if $save_changes;
     DoSettings();
+    last SWITCH;
+  };
+  /^donate$/ && do {
+    if (Bugzilla->params->{'donation_banner_visibility'} eq 'disabled') {
+      last SWITCH;
+    }
+    SaveDonate() if $save_changes;
+    DoDonate();
     last SWITCH;
   };
   /^email$/ && do {

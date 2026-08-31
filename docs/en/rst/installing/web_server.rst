@@ -10,4 +10,5 @@ Bugzilla requires a web server to run CGI scripts. It supports the following:
 
    apache
    apache-windows
+   nginx
    iis

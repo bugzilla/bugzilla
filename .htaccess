@@ -37,6 +37,7 @@ Options -Indexes
 </IfModule>
 </IfModule>
 
+
 <IfModule mod_rewrite.c>
   RewriteEngine On
   RewriteOptions inherit

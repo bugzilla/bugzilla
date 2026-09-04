@@ -64,12 +64,13 @@ sub _record_mail_warning {
 
 sub generate_email {
   my ($vars, $templates) = @_;
+  my $user = $vars->{to_user};
   my ($lang, $email_format, $msg_text, $msg_html, $msg_header);
   state $use_utf8 = Bugzilla->params->{'utf8'};
 
-  if ($vars->{to_user}) {
-    $lang         = $vars->{to_user}->setting('lang');
-    $email_format = $vars->{to_user}->setting('email_format');
+  if ($user) {
+    $lang         = $user->setting('lang');
+    $email_format = $user->setting('email_format');
   }
   else {
     # If there are users in the CC list who don't have an account,
@@ -115,10 +116,10 @@ sub generate_email {
   }
 
   my $email = Bugzilla::MIME->new($msg_header);
-  if (scalar(@parts) == 1) {
-    $email->content_type_set($parts[0]->content_type);
-  }
-  else {
+
+  # If there's only one part, we don't need to set the overall content type
+  # because Email::MIME will automatically take it from that part (bug 1657496)
+  if (scalar(@parts) > 1) {
     $email->content_type_set('multipart/alternative');
 
     # Some mail clients need same encoding for each part, even empty ones.

@@ -379,7 +379,14 @@ sub sendMail {
     if (Bugzilla->params->{'use_mailer_queue'}) {
         enqueue($vars);
     } else {
-        MessageToMTA(_generate_bugmail($vars));
+        MessageToMTA(generate_email(
+            $vars,
+            {
+                header => 'email/bugmail-header.txt.tmpl',
+                text   => 'email/bugmail.txt.tmpl',
+                html   => 'email/bugmail.html.tmpl'
+            }
+        ));
     }
 
     return 1;
@@ -419,7 +426,14 @@ sub dequeue {
         }
     }
     # generate bugmail and send
-    MessageToMTA(_generate_bugmail($vars), 1);
+    MessageToMTA(generate_email(
+        $vars,
+        {
+            header => 'email/bugmail-header.txt.tmpl',
+            text   => 'email/bugmail.txt.tmpl',
+            html   => 'email/bugmail.html.tmpl'
+        }
+    ), 1);
 }
 
 sub _flatten_object {
@@ -430,56 +444,6 @@ sub _flatten_object {
     my $cache = Bugzilla->request_cache->{bugmail_flat_objects} ||= {};
     my $key = blessed($object) . '-' . $object->id;
     return $cache->{$key} ||= $object->flatten_to_hash;
-}
-
-sub _generate_bugmail {
-    my ($vars) = @_;
-    my $user = $vars->{to_user};
-    my $template = Bugzilla->template_inner($user->setting('lang'));
-    my ($msg_text, $msg_html, $msg_header);
-    state $use_utf8 = Bugzilla->params->{'utf8'};
-
-    $template->process("email/bugmail-header.txt.tmpl", $vars, \$msg_header)
-        || ThrowTemplateError($template->error());
-    $template->process("email/bugmail.txt.tmpl", $vars, \$msg_text)
-        || ThrowTemplateError($template->error());
-
-    my @parts = (
-        Bugzilla::MIME->create(
-            attributes => {
-                content_type => 'text/plain',
-                charset      => $use_utf8 ? 'UTF-8' : 'iso-8859-1',
-                encoding     => 'quoted-printable',
-            },
-            body_str => $msg_text,
-            encode_check => Encode::FB_DEFAULT
-        )
-    );
-    if ($user->setting('email_format') eq 'html') {
-        $template->process("email/bugmail.html.tmpl", $vars, \$msg_html)
-            || ThrowTemplateError($template->error());
-        push @parts, Bugzilla::MIME->create(
-            attributes => {
-                content_type => 'text/html',
-                charset      => $use_utf8 ? 'UTF-8' : 'iso-8859-1',
-                encoding     => 'quoted-printable',
-            },
-            body_str => $msg_html,
-            encode_check => Encode::FB_DEFAULT
-        );
-    }
-
-    my $email = Bugzilla::MIME->new($msg_header);
-
-    # If there's only one part, we don't need to set the overall content type
-    # because Email::MIME will automatically take it from that part (bug 1657496)
-    if (scalar(@parts) > 1) {
-        $email->content_type_set('multipart/alternative');
-        # Some mail clients need same encoding for each part, even empty ones.
-        $email->charset_set('UTF-8') if $use_utf8;
-    }
-    $email->parts_set(\@parts);
-    return $email;
 }
 
 sub _get_diffs {

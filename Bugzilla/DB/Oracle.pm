@@ -748,7 +748,7 @@ use 5.14.0;
 use strict;
 use warnings;
 
-use base -norequire, qw(DBI::st);
+use parent -norequire, qw(DBI::st);
 
 sub fetchrow_arrayref {
   my $self = shift;

@@ -1,5 +1,24 @@
 #!/bin/bash
 
+SCRIPTS_DIR="/custom-scripts"
+
+# Execute any custom scripts prior to starting services
+if [[ -e "${SCRIPTS_DIR}" ]] && [[ -n "$(/bin/ls -A ${SCRIPTS_DIR} 2>/dev/null)" ]]; then
+    echo "[custom-scripts] Files found, executing"
+    for SCRIPT in "${SCRIPTS_DIR}"/*; do
+        NAME="$(basename "${SCRIPT}")"
+        if [[ -f "${SCRIPT}" ]]; then
+            echo "[custom-scripts] ${NAME}: executing..."
+            /bin/bash "${SCRIPT}"
+            echo "[custom-scripts] ${NAME}: exited $?"
+        elif [[ ! -f "${SCRIPT}" ]]; then
+            echo "[custom-scripts] ${NAME}: is not a file"
+        fi
+    done
+else
+    echo "[custom-scripts] No custom scripts found, continuing with startup..."
+fi
+
 [ -z "$BZ_DB_HOST" ] && echo "Missing Docker Environment, check docker-compose.yml" && exit -1
 cd /var/www/html
 apachectl start

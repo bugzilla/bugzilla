@@ -256,6 +256,16 @@ sub sql_group_by {
   return "GROUP BY $needed_columns";
 }
 
+sub sql_upsert {
+  my ($self, $table, $hash) = @_;
+  my @keys         = keys %$hash;
+  my @values       = @$hash{@keys};
+  my $columns      = join(', ', map {"`$_`"} @keys);
+  my $placeholders = join(', ', map {"?"} 1 .. @keys);
+
+  return ("REPLACE INTO `$table` ($columns) VALUES ($placeholders)", \@values);
+}
+
 sub bz_explain {
   my ($self, $sql) = @_;
   my $sth = $self->prepare("EXPLAIN $sql");

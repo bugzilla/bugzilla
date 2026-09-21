@@ -1,6 +1,0 @@
-coldmood.tan@feisu.com
-jovanny.wu@feisu.com
-nan.su@feisu.com
-george.yang@feisu.com
-# for i in $(\grep -v ^# users); do ./createaccount.cgi --login=${i%%@*} --password=$i --email=$i; done
-# ./checksetup.pl --adduser=username1,password1,email1

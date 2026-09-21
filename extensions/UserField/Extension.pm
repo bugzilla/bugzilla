@@ -78,7 +78,8 @@ our $VERSION = '1.0';
 # field (Administration -> Custom Fields) before you add it here.
 # ---------------------------------------------------------------------
 use constant USER_FIELDS => qw(
-  cf_owner
+  cf_dev_responsible
+  cf_qa_responsible
 );
 
 # --- Validation -------------------------------------------------------

@@ -1,0 +1,36 @@
+[%# This Source Code Form is subject to the terms of the Mozilla Public
+  # License, v. 2.0. If a copy of the MPL was not distributed with this
+  # file, You can obtain one at http://mozilla.org/MPL/2.0/.
+  #%]
+
+[% PROCESS "donation/banner.html.tmpl" show_dismissal=0 %]
+
+<p>Choose when you want to be reminded about supporting Bugzilla on the home page:</p>
+
+<table>
+  <tr>
+    <td><label for="donate_banner_pref">Reminder:</label></td>
+    <td>
+      <select id="donate_banner_pref" name="donate_banner_pref">
+        <option value="next_upgrade" [% ' selected="selected"' IF donate_pref == 'next_upgrade' %]>
+          Remind me after the next Bugzilla upgrade
+        </option>
+        <option value="specific_date" [% ' selected="selected"' IF donate_pref == 'specific_date' %]>
+          Remind me on a specific date
+        </option>
+        <option value="never" [% ' selected="selected"' IF donate_pref == 'never' %]>
+          Never show this again
+        </option>
+      </select>
+    </td>
+  </tr>
+  <tr id="donate_date_row"[% ' style="display: none"' UNLESS donate_pref == 'specific_date' %]>
+    <td><label for="donate_banner_reminder_date">Date:</label></td>
+    <td>
+      <input type="date" id="donate_banner_reminder_date"
+             name="donate_banner_reminder_date"
+             value="[% reminder_date FILTER html %]">
+      <div class="hint">Used only when a specific date is selected.</div>
+    </td>
+  </tr>
+</table>

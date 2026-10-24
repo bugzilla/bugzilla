@@ -1559,6 +1559,24 @@ C<emailsuffix> parameter is not empty.
 
 =back
 
+=head2 user_preferences_settings
+
+This hook allows extensions to exclude settings from the General Settings tab
+in User Preferences, for example if the extension is managing them using
+custom UI. It is called while displaying the settings and while saving them,
+so excluded settings are neither displayed nor updated by that tab.
+
+Params:
+
+=over
+
+=item C<skip_settings>
+
+A hashref whose keys are setting names. Set the value for a setting name to a
+true value to exclude that setting from the General Settings tab.
+
+=back
+
 =head2 user_preferences
 
 This hook allows you to add additional panels to the User Preferences page,

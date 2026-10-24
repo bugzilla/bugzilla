@@ -982,6 +982,14 @@ sub template_before_process {
   }
 }
 
+sub user_preferences_settings {
+  my ($self, $args) = @_;
+
+  # Exclude this setting from the General Settings tab when the extension
+  # provides its own UI for managing it.
+  $args->{skip_settings}->{example_pref} = 1;
+}
+
 sub user_check_account_creation {
   my ($self, $args) = @_;
 

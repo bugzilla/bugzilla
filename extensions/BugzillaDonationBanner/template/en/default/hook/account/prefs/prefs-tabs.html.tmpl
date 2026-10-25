@@ -4,7 +4,7 @@
   #%]
 
 [% UNLESS Param('donation_banner_visibility') == 'disabled' %]
-  [% CALL tabs.import([{
+  [% tabs = tabs.import([{
       name => 'donate',
       label => 'Donate to Bugzilla',
       link => 'userprefs.cgi?tab=donate',

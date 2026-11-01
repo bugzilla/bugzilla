@@ -17,7 +17,7 @@ use Bugzilla::Constants;
 use Bugzilla::Error;
 use Bugzilla::Group;
 use Bugzilla::User;
-use Bugzilla::User::Setting;
+use Bugzilla::User::Setting qw(add_setting clear_settings_cache);
 use Bugzilla::Util qw(diff_arrays html_quote remote_ip);
 use Bugzilla::Status qw(is_open_state);
 use Bugzilla::Install::Filesystem;
@@ -576,15 +576,15 @@ sub install_before_final_checks {
   my ($self, $args) = @_;
   print "Install-before_final_checks hook\n" unless $args->{silent};
 
-  # Add a new user setting like this:
-  #
-  # add_setting('product_chooser',           # setting name
-  #             ['pretty', 'full', 'small'], # options
-  #             'pretty');                   # default
-  #
-  # To add descriptions for the setting and choices, add extra values to
-  # the hash defined in global/setting-descs.none.tmpl. Do this in a hook:
-  # hook/global/setting-descs-settings.none.tmpl .
+  # A regular setting is displayed and saved by General Settings automatically:
+  # add_setting('example_regular_setting', ['first', 'second'], 'first');
+  # Add descriptions for the setting and its values in
+  # hook/global/setting-descs-settings.none.tmpl.
+
+  # This setting is managed by a custom preferences tab.
+  # See template/en/default/account/prefs/my_tab.html.tmpl.
+  add_setting('product_chooser', ['pretty', 'full', 'small'], 'pretty',
+    undef, undef, $args->{silent});
 }
 
 sub install_filesystem {
@@ -982,6 +982,13 @@ sub template_before_process {
   }
 }
 
+sub user_preferences_settings {
+  my ($self, $args) = @_;
+
+  # The Example extension manages this setting in its custom preferences tab.
+  $args->{skip_settings}->{product_chooser} = 1;
+}
+
 sub user_check_account_creation {
   my ($self, $args) = @_;
 
@@ -1010,13 +1017,17 @@ sub user_preferences {
 
   return unless $tab eq 'my_tab';
 
-  my $value = Bugzilla->input_params->{'example_pref'};
+  my $user = Bugzilla->user;
+  my $setting = $user->settings->{product_chooser};
   if ($save) {
-
-    # Validate your data and update the DB accordingly.
-    $value =~ s/\s+/:/g;
+    my $value = Bugzilla->input_params->{'product_chooser'};
+    if (defined $value) {
+      $setting->validate_value($value);
+      $setting->set($value);
+      clear_settings_cache($user->id);
+    }
   }
-  $args->{'vars'}->{example_pref} = $value;
+  $args->{'vars'}->{product_chooser} = $setting->{value};
 
   # Set the 'handled' scalar reference to true so that the caller
   # knows the panel name is valid and that an extension took care of it.

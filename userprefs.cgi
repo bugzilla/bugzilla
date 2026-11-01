@@ -134,7 +134,13 @@ sub SaveAccount {
 sub DoSettings {
   my $user = Bugzilla->user;
 
-  my $settings = $user->settings;
+  my %skip_settings;
+  Bugzilla::Hook::process('user_preferences_settings',
+    {skip_settings => \%skip_settings});
+
+  my $all_settings = $user->settings;
+  my $settings = {map { $_ => $all_settings->{$_} }
+      grep { !$skip_settings{$_} } keys %$all_settings};
   $vars->{'settings'} = $settings;
 
   my @setting_list = sort keys %$settings;
@@ -159,8 +165,13 @@ sub SaveSettings {
   my $settings     = $user->settings;
   my @setting_list = keys %$settings;
 
+  my %skip_settings;
+  Bugzilla::Hook::process('user_preferences_settings',
+    {skip_settings => \%skip_settings});
+
   foreach my $name (@setting_list) {
     next if !($settings->{$name}->{'is_enabled'});
+    next if $skip_settings{$name};
     my $value = $cgi->param($name);
     next unless defined $value;
     my $setting = new Bugzilla::User::Setting($name);

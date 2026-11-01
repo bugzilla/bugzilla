@@ -1,0 +1,64 @@
+.home_banner {
+  box-sizing: border-box;
+  max-width: 640px;
+  margin: 1em auto;
+  padding: 0.5em 1em;
+  border-width: 2px;
+  border-style: solid;
+  border-radius: 8px;
+  text-align: left;
+}
+
+.home_banner .notice {
+  font-size: 80%;
+  font-weight: normal;
+}
+
+.donation_banner_preferences {
+  margin-left: 0;
+  margin-right: 0;
+}
+
+.donation_banner {
+  border-color: #4a9a4a;
+  color: #000;
+  background: #f4faf4;
+  font-weight: normal;
+}
+
+.donation_banner_layout { display: flex; align-items: center; gap: 1rem; }
+.donation_banner_image {
+  width: 110px; height: 110px; flex: 0 0 auto; object-fit: contain;
+  border: 1px dashed #4a9a4a;
+  border-radius: 10px; background: #e3f2e3;
+}
+.donation_banner_content { flex: 1 1 auto; padding-top: 0.35rem; }
+.donation_banner_thanks { margin: 0 0 0.5rem; font-weight: bold; }
+.donation_banner_message { margin: 0 0 0.6rem; font-size: 1.08rem; line-height: 1.45; }
+.donation_banner_cta_row { margin: 0 0 0.75rem; }
+.donation_banner_cta {
+  display: inline-block; padding: 0.55rem 1rem; border: 1px solid #3a7d3a;
+  border-radius: 5px; background: #3a7d3a; color: #fff !important;
+  text-decoration: none; font-weight: bold; font-size: 1rem;
+}
+.donation_banner_cta:hover { background: #2f6a2f; text-decoration: none; }
+.donation_banner_dismissal { margin-top: 0.75rem; }
+.donation_banner_dismissal summary { cursor: pointer; color: #555; }
+.donation_banner_dismissal[open] summary { margin-bottom: 0.5rem; }
+.donation_banner_form { display: flex; align-items: center; flex-wrap: wrap; gap: 0.5rem; }
+.donation_banner_label { font-weight: bold; }
+.donation_banner_select { min-width: 240px; }
+.donation_banner_date_field { display: inline-flex; align-items: center; gap: 0.35rem; }
+.donation_banner_date_field[hidden] { display: none; }
+.donation_banner_submit { padding: 0.35rem 0.8rem; }
+.donation_banner_form_subtle { font-size: 0.9rem; opacity: 0.9; }
+.donation_banner_form_subtle .donation_banner_label { font-weight: normal; color: #555; }
+.donation_banner_form_subtle .donation_banner_select { min-width: 230px; padding: 0.25rem 0.4rem; font-size: 0.9rem; }
+.donation_banner_form_subtle .donation_banner_submit { padding: 0.25rem 0.65rem; font-size: 0.88rem; }
+.donation_banner_preferences_note { margin: 0.5rem 0 0; font-size: 0.7rem; color: #555; }
+
+@media (max-width: 720px) {
+  .donation_banner_layout { align-items: flex-start; }
+  .donation_banner_image { width: 84px; height: 84px; }
+  .donation_banner_select { min-width: 100%; }
+}

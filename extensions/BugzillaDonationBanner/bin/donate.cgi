@@ -14,6 +14,12 @@ use Bugzilla::Util qw(correct_urlbase);
 use Bugzilla::Extension::BugzillaDonationBanner::Donation;
 
 my $cgi = Bugzilla->cgi;
+
+if ($cgi->request_method ne 'POST') {
+  print $cgi->header(-status => '405 Method Not Allowed', -allow => 'POST');
+  exit;
+}
+
 Bugzilla->login(LOGIN_REQUIRED);
 check_hash_token($cgi->param('token'), ['donation_banner']);
 

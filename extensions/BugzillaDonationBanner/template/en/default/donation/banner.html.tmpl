@@ -1,4 +1,5 @@
 [% IF donation %]
+  <link rel="stylesheet" type="text/css" href="extensions/BugzillaDonationBanner/web/donation-banner.css">
   <div class="donation_banner home_banner[% ' donation_banner_preferences' UNLESS show_dismissal %]">
     <div class="donation_banner_layout">
       <img src="extensions/BugzillaDonationBanner/web/buggie_watering.svg"
@@ -9,9 +10,10 @@
         [% END %]
         <p class="donation_banner_message">[% donation.message FILTER html %]</p>
         <p class="donation_banner_cta_row">
-          <a href="[% donation.url FILTER html %]" class="donation_banner_cta">Donate to Bugzilla</a>
+          <a href="[% donation.url FILTER html %]" class="donation_banner_cta" rel="noreferrer">Donate to Bugzilla</a>
         </p>
         [% IF show_dismissal %]
+          <script type="text/javascript" src="extensions/BugzillaDonationBanner/web/donation-banner.js" defer></script>
           <details class="donation_banner_dismissal">
             <summary>Remind me later or dismiss this message</summary>
             <form method="post"

@@ -60,12 +60,18 @@ sub BUILDARGS {
     qw(db_mysql_ssl_ca_file db_mysql_ssl_ca_path
       db_mysql_ssl_client_cert db_mysql_ssl_client_key)
   };
-  if ($ssl_ca_file || $ssl_ca_path || $ssl_cert || $ssl_key) {
+  my $ssl_enabled = $params->{db_mariadb_ssl};
+  my $ssl_verify = $params->{db_mariadb_ssl_verify};
+  if ((defined $ssl_enabled && $ssl_enabled eq '1')
+    || ((!defined $ssl_enabled || $ssl_enabled eq '')
+      && ($ssl_ca_file || $ssl_ca_path || $ssl_cert || $ssl_key)))
+  {
     $attrs{'mariadb_ssl'}             = 1;
     $attrs{'mariadb_ssl_ca_file'}     = $ssl_ca_file if $ssl_ca_file;
     $attrs{'mariadb_ssl_ca_path'}     = $ssl_ca_path if $ssl_ca_path;
     $attrs{'mariadb_ssl_client_cert'} = $ssl_cert if $ssl_cert;
     $attrs{'mariadb_ssl_client_key'}  = $ssl_key if $ssl_key;
+    $attrs{'mariadb_ssl_verify_server_cert'} = 1 if $ssl_verify;
   }
 
   return {dsn => $dsn, user => $user, pass => $pass, attrs => \%attrs};

@@ -13,6 +13,8 @@ services:
     volumes:
       - bugzilla5-data-dir:/var/www/html/data
       - .:/mnt/sync
+      # Optional private CA for strict database TLS verification.
+      # - ./certs/database-ca.pem:/certs/database-ca.pem:ro
     tmpfs:
       - /tmp
       - /run/lock
@@ -30,6 +32,9 @@ services:
       - BZ_DB_USER=bugs
       - BZ_DB_NAME=bugs
       - BZ_DB_PASS=bugzilla
+      - BZ_DB_SSL=${BZ_DB_SSL:-1}
+      - BZ_DB_SSL_VERIFY=${BZ_DB_SSL_VERIFY:-0}
+      - BZ_DB_SSL_CA_FILE=${BZ_DB_SSL_CA_FILE:-/etc/ssl/certs/ca-certificates.crt}
       - BZ_ALLOW_UNSAFE_UTF8_CONVERSION=${BZ_ALLOW_UNSAFE_UTF8_CONVERSION:-0}
       - MARIADB_ROOT_HOST=%
       - MARIADB_ROOT_PASSWORD=bugzilla

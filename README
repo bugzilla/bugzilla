@@ -32,13 +32,16 @@ Only do this if you understand the warning and have a backup of your data.
 Upgrading the Docker database
 -----------------------------
 
-The example database image uses MariaDB 12.3. If an existing Docker installation
-has a database volume from an older MariaDB release, back up the database and
-check the MariaDB upgrade instructions before changing the image. The example
-Compose file does not enable automatic database upgrades. If using the official
-MariaDB image's automatic upgrade feature, configure MARIADB_AUTO_UPGRADE=1 on
-the database service for the upgrade and verify the result before relying on
-the upgraded data.
+The example Compose file uses MariaDB 12.3 and enables MARIADB_AUTO_UPGRADE on
+the database service by default. On startup with an older database volume,
+the MariaDB image runs mariadb-upgrade when needed. Before changing the image,
+back up the entire database and review
+the MariaDB upgrade instructions; automatic upgrade can change system tables
+and affect downgrade options. The image's system-table backup is not a complete
+backup of your Bugzilla database. Verify the result after upgrading.
+
+To disable automatic upgrades, set MARIADB_AUTO_UPGRADE to an empty value in
+the Compose environment (for example, in a .env file).
 
 See https://mariadb.com/docs/server/server-management/install-and-upgrade-mariadb/upgrading/
 

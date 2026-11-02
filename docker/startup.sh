@@ -3,19 +3,21 @@
 SCRIPTS_DIR="/custom-scripts"
 
 # Execute any custom scripts prior to starting services
-if [[ -e "${SCRIPTS_DIR}" ]] && [[ -n "$(/bin/ls -A ${SCRIPTS_DIR} 2>/dev/null)" ]]; then
-    echo "[custom-scripts] Files found, executing"
-    for SCRIPT in "${SCRIPTS_DIR}"/*; do
-        NAME="$(basename "${SCRIPT}")"
-        if [[ -f "${SCRIPT}" ]]; then
-            echo "[custom-scripts] ${NAME}: executing..."
-            /bin/bash "${SCRIPT}"
-            echo "[custom-scripts] ${NAME}: exited $?"
-        elif [[ ! -f "${SCRIPT}" ]]; then
-            echo "[custom-scripts] ${NAME}: is not a file"
-        fi
-    done
-else
+SCRIPTS_FOUND=0
+for SCRIPT in "${SCRIPTS_DIR}"/*; do
+    [[ -f "${SCRIPT}" ]] || continue
+    SCRIPTS_FOUND=1
+    NAME="$(basename "${SCRIPT}")"
+    echo "[custom-scripts] ${NAME}: executing..."
+    /bin/bash "${SCRIPT}"
+    STATUS=$?
+    echo "[custom-scripts] ${NAME}: exited ${STATUS}"
+    if [[ ${STATUS} -ne 0 ]]; then
+        echo "[custom-scripts] Startup stopped because ${NAME} failed." >&2
+        exit "${STATUS}"
+    fi
+done
+if [[ ${SCRIPTS_FOUND} -eq 0 ]]; then
     echo "[custom-scripts] No custom scripts found, continuing with startup..."
 fi
 
@@ -112,3 +114,4 @@ cat - <<EOF
 EOF
 # don't exit docker
 while [ 1 ]; do sleep 1000; done
+

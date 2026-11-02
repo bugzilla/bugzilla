@@ -22,7 +22,7 @@ services:
       - 8080:80
     depends_on:
       - bugzilla5.db
-    environment: &bugzilla_env
+    environment:
       - BZ_ADMIN_EMAIL=admin@bugzilla.test
       - BZ_ADMIN_PASSWORD=password01!
       - BZ_ADMIN_REALNAME=Test Admin
@@ -48,7 +48,10 @@ services:
     tmpfs:
       - /tmp
       - /var/lock
-    environment: *bugzilla_env
+    environment:
+      - MARIADB_ROOT_HOST=%
+      - MARIADB_ROOT_PASSWORD=bugzilla
+      - MARIADB_AUTO_UPGRADE=${MARIADB_AUTO_UPGRADE-1}
 
 volumes:
   bugzilla5-mysql-db:

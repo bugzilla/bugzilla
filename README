@@ -29,6 +29,19 @@ interactive confirmation, you can explicitly allow that conversion with:
 
 Only do this if you understand the warning and have a backup of your data.
 
+Upgrading the Docker database
+-----------------------------
+
+The example database image uses MariaDB 12.3. If an existing Docker installation
+has a database volume from an older MariaDB release, back up the database and
+check the MariaDB upgrade instructions before changing the image. The example
+Compose file does not enable automatic database upgrades. If using the official
+MariaDB image's automatic upgrade feature, configure MARIADB_AUTO_UPGRADE=1 on
+the database service for the upgrade and verify the result before relying on
+the upgraded data.
+
+See https://mariadb.com/docs/server/server-management/install-and-upgrade-mariadb/upgrading/
+
 Reporting Bugs
 ==============
 

@@ -1,0 +1,5 @@
+.git
+.env
+/data
+/localconfig
+/custom-scripts

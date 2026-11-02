@@ -1,5 +1,26 @@
 #!/bin/bash
 
+SCRIPTS_DIR="/custom-scripts"
+
+# Execute any custom scripts prior to starting services
+SCRIPTS_FOUND=0
+for SCRIPT in "${SCRIPTS_DIR}"/*; do
+    [[ -f "${SCRIPT}" ]] || continue
+    SCRIPTS_FOUND=1
+    NAME="$(basename "${SCRIPT}")"
+    echo "[custom-scripts] ${NAME}: executing..."
+    /bin/bash "${SCRIPT}"
+    STATUS=$?
+    echo "[custom-scripts] ${NAME}: exited ${STATUS}"
+    if [[ ${STATUS} -ne 0 ]]; then
+        echo "[custom-scripts] Startup stopped because ${NAME} failed." >&2
+        exit "${STATUS}"
+    fi
+done
+if [[ ${SCRIPTS_FOUND} -eq 0 ]]; then
+    echo "[custom-scripts] No custom scripts found, continuing with startup..."
+fi
+
 [ -z "$BZ_DB_HOST" ] && echo "Missing Docker Environment, check docker-compose.yml" && exit -1
 cd /var/www/html
 apachectl start
@@ -93,3 +114,4 @@ cat - <<EOF
 EOF
 # don't exit docker
 while [ 1 ]; do sleep 1000; done
+

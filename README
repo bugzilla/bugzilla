@@ -29,6 +29,45 @@ interactive confirmation, you can explicitly allow that conversion with:
 
 Only do this if you understand the warning and have a backup of your data.
 
+Upgrading the Docker database
+-----------------------------
+
+The example Compose file uses MariaDB 12.3 and enables MARIADB_AUTO_UPGRADE on
+the database service by default. On startup with an older database volume,
+the MariaDB image runs mariadb-upgrade when needed. Before changing the image,
+back up the entire database and review
+the MariaDB upgrade instructions; automatic upgrade can change system tables
+and affect downgrade options. The image's system-table backup is not a complete
+backup of your Bugzilla database. Verify the result after upgrading.
+
+To disable automatic upgrades, set MARIADB_AUTO_UPGRADE to an empty value in
+the Compose environment (for example, in a .env file).
+
+See https://mariadb.com/docs/server/server-management/install-and-upgrade-mariadb/upgrading/
+
+Docker database TLS
+-------------------
+
+The Docker configuration requires TLS to the MariaDB server by default.
+`BZ_DB_SSL=0` disables TLS for both Bugzilla and the database setup connection.
+The default `BZ_DB_SSL_VERIFY=0` enables TLS without strict certificate and
+hostname verification. This encrypts traffic but does not establish the
+server's identity.
+
+Set `BZ_DB_SSL_VERIFY=1` to verify the certificate and database hostname.
+Strict mode uses the operating system CA bundle at
+/etc/ssl/certs/ca-certificates.crt unless `BZ_DB_SSL_CA_FILE` specifies another
+PEM file inside the web container. Mount a private CA (or a trusted self-signed
+server certificate) read-only and set this path when needed. The server
+certificate must match BZ_DB_HOST. Automatically generated MariaDB server
+certificates are not trusted by the system CA bundle.
+
+The settings must be 0 or 1, and verification requires TLS to be enabled.
+Container configuration is applied when localconfig is created; recreate the
+web container after changing these settings. An existing localconfig retains
+its values and must be updated separately. A server that does not support TLS
+requires upgrading or configuring the server, or explicitly disabling TLS.
+
 Reporting Bugs
 ==============
 

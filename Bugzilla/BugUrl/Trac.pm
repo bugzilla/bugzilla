@@ -23,7 +23,7 @@ sub should_handle {
   # Trac URLs can look like various things:
   #   http://dev.mutt.org/trac/ticket/1234
   #   http://trac.roundcube.net/ticket/1484130
-  return ($uri->path =~ m|/ticket/\d+$|) ? 1 : 0;
+  return ($uri->path =~ m|/ticket/\d+$|a) ? 1 : 0;
 }
 
 sub _check_value {

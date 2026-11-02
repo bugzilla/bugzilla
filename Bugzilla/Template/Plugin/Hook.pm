@@ -33,7 +33,7 @@ sub process {
   $template ||= $context->stash->{component}->{name};
 
   # sanity check:
-  if (!$template =~ /[\w\.\/\-_\\]+/) {
+  if ($template !~ /[\w\.\/\-_\\]+/) {
     ThrowCodeError('template_invalid', {name => $template});
   }
 

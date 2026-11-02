@@ -23,7 +23,7 @@ sub should_handle {
   # BitBucket issues have the form of
   # bitbucket.org/user/project/issue/1234
   return (lc($uri->authority) eq "bitbucket.org"
-      && $uri->path =~ m|[^/]+/[^/]+/issue/\d+|i) ? 1 : 0;
+      && $uri->path =~ m|[^/]+/[^/]+/issue/\d+|ai) ? 1 : 0;
 }
 
 sub _check_value {
@@ -31,7 +31,7 @@ sub _check_value {
 
   my $uri = $class->SUPER::_check_value(@_);
 
-  my ($path) = $uri->path =~ m|([^/]+/[^/]+/issue/\d+)|i;
+  my ($path) = $uri->path =~ m|([^/]+/[^/]+/issue/\d+)|ai;
   $uri = new URI("https://bitbucket.org/$path");
 
   return $uri;

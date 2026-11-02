@@ -458,7 +458,7 @@ sub _check_tag {
     and ThrowUserError('comment_tag_too_short', {tag => $tag});
   length($tag) > MAX_COMMENT_TAG_LENGTH
     and ThrowUserError('comment_tag_too_long', {tag => $tag});
-  $tag =~ /^[\w\d\._-]+$/ or ThrowUserError('comment_tag_invalid', {tag => $tag});
+  $tag =~ /^[\w\._-]+$/ or ThrowUserError('comment_tag_invalid', {tag => $tag});
   return $tag;
 }
 

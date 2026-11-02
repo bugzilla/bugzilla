@@ -24,7 +24,7 @@ sub should_handle {
   #   http(s)://code.google.com/p/PROJECT_NAME/issues/detail?id=1234
   return (lc($uri->authority) eq 'code.google.com'
       and $uri->path =~ m|^/p/[^/]+/issues/detail$|
-      and $uri->query_param('id') =~ /^\d+$/) ? 1 : 0;
+      and $uri->query_param('id') =~ /^\d+$/a) ? 1 : 0;
 }
 
 sub _check_value {

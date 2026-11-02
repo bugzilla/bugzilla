@@ -75,7 +75,7 @@ $vars->{'doc_section'} = 'using/reports-and-charts.html#charts';
 # encode it in the name, as "action-<action>". Some params even contain the
 # series_id they apply to (e.g. subscribe, unsubscribe).
 my @actions = grep(/^action-/, $cgi->param());
-if ($actions[0] && $actions[0] =~ /^action-([^\d]+)(\d*)$/) {
+if ($actions[0] && $actions[0] =~ /^action-(?a:([^\d]+)(\d*))$/) {
   $action    = $1;
   $series_id = $2 if $2;
 }
@@ -236,14 +236,14 @@ exit;
 
 # Find any selected series and return either the first or all of them.
 sub getAndValidateSeriesIDs {
-  my @series_ids = grep(/^\d+$/, $cgi->param("name"));
+  my @series_ids = grep(/^\d+$/a, $cgi->param("name"));
 
   return wantarray ? @series_ids : $series_ids[0];
 }
 
 # Return a list of IDs of all the lines selected in the UI.
 sub getSelectedLines {
-  my @ids = map { /^select(\d+)$/ ? $1 : () } $cgi->param();
+  my @ids = map { /^select(\d+)$/a ? $1 : () } $cgi->param();
 
   return @ids;
 }

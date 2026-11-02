@@ -183,7 +183,7 @@ sub extension_requirement_packages {
   foreach my $file_set (@$file_sets) {
     my $file = shift @$file_set;
     my $name = require $file;
-    if ($name =~ /^\d+$/) {
+    if ($name =~ /^\d+$/a) {
       die install_string('extension_must_return_name',
         {file => $file, returned => $name});
     }
@@ -538,7 +538,7 @@ sub _sort_accept_language {
   my @qlanguages;
   my @languages;
   foreach (split /,/, $accept_language) {
-    if (m/([A-Za-z\-]+)(?:;q=(\d(?:\.\d+)))?/) {
+    if (m/([A-Za-z\-]+)(?:;q=(\d(?:\.\d+)))?/a) {
       my $lang   = $1;
       my $qvalue = $2;
       $qvalue = 1 if not defined $qvalue;

@@ -18,11 +18,10 @@ from 5.0.4).
 | Version             | Supported          | End of Support             |
 | ------------------- | ------------------ | -------------------------- |
 | 5.9.x (harmony/6.0) | :ballot_box_with_check: | 4 months after 6.4 release |
-| 5.1.x               | :ballot_box_with_check: | When 5.9.1 is released     |
-| 5.0.6 (5.2.x)       | :white_check_mark: | 4 months after 6.2 release |
+| 5.3.x (5.1.x)       | :ballot_box_with_check: | When 5.9.3 is released     |
+| 5.2.x (5.0.5+)      | :white_check_mark: | 4 months after 6.2 release |
 | 5.0.4.x             | :white_check_mark: | 4 months after 6.0 release |
-| 4.4.x               | :white_check_mark: | 4 months after 5.2 release |
-| < 4.4               | :x:                |                            |
+| < 5.0               | :x: | 4 months after 5.2 release |
 
 :ballot_box_with_check: = Development Branch
 

@@ -3,3 +3,14 @@
   min-width: 150px;
   width: 350px;
 }
+
+.wy-table-responsive table td,
+.wy-table-responsive table th {
+  white-space: wrap;
+}
+
+.rst-content table.docutils td,
+.rst-content table.field-list td,
+.wy-table td {
+	vertical-align: top;
+}

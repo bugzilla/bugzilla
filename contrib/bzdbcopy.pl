@@ -154,7 +154,7 @@ foreach my $table (@table_list) {
 
         # In MySQL, decimal cols can be too long.
         my $col_type = $col_info->{TYPE};
-        $col_type =~ /decimal\((\d+),(\d+)\)/;
+        $col_type =~ /decimal\((\d+),(\d+)\)/a;
         my ($precision, $decimals) = ($1, $2);
 
         # If it's longer than precision + decimal point

@@ -134,6 +134,16 @@ sub update_params {
 
   # --- UPDATE OLD PARAMS ---
 
+  # Normalize legacy utf8 values to explicit charset names.
+  if (exists $param->{'utf8'}) {
+    if ($param->{'utf8'} eq '1') {
+      $param->{'utf8'} = 'utf8mb4';
+    }
+    elsif ($param->{'utf8'} eq 'utf8') {
+      $param->{'utf8'} = 'utf8mb3';
+    }
+  }
+
   # Change from usebrowserinfo to defaultplatform/defaultopsys combo
   if (exists $param->{'usebrowserinfo'}) {
     if (!$param->{'usebrowserinfo'}) {
@@ -231,7 +241,7 @@ sub update_params {
     }
   }
 
-  $param->{'utf8'} = 1 if $new_install;
+  $param->{'utf8'} = 'utf8mb4' if $new_install;
 
   # Bug 452525: OR based groups are on by default for new installations
   $param->{'or_groups'} = 1 if $new_install;

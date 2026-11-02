@@ -134,7 +134,7 @@ sub _rest_resources {
         params => sub {
           my $value = $_[0];
           my $param = 'names';
-          $param = 'ids' if $value =~ /^\d+$/;
+          $param = 'ids' if $value =~ /^\d+$/a;
           return {$param => [$_[0]]};
         }
       }

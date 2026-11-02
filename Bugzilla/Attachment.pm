@@ -385,7 +385,7 @@ sub datasize {
 sub _get_local_filename {
   my $self = shift;
   my $hash = ($self->id % 100) + 100;
-  $hash =~ s/.*(\d\d)$/group.$1/;
+  $hash =~ s/.*(\d\d)$/group.$1/a;
   return bz_locations()->{'attachdir'} . "/$hash/attachment." . $self->id;
 }
 
@@ -844,7 +844,7 @@ sub create {
   if ($size > Bugzilla->params->{'maxattachmentsize'} * 1024) {
     my $attachdir = bz_locations()->{'attachdir'};
     my $hash      = ($attachid % 100) + 100;
-    $hash =~ s/.*(\d\d)$/group.$1/;
+    $hash =~ s/.*(\d\d)$/group.$1/a;
     mkdir "$attachdir/$hash", 0770;
     chmod 0770, "$attachdir/$hash";
     if (ref $data) {

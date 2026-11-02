@@ -24,7 +24,7 @@ sub should_handle {
   #   https://bugs.php.net/bug.php?id=1234
   return (lc($uri->authority) eq 'bugs.php.net'
       and $uri->path =~ m|/bug\.php$|
-      and $uri->query_param('id') =~ /^\d+$/) ? 1 : 0;
+      and $uri->query_param('id') =~ /^\d+$/a) ? 1 : 0;
 }
 
 sub _check_value {

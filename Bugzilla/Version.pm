@@ -211,11 +211,11 @@ sub vers_cmp {
   my ($a, $b) = @_;
 
   # Remove leading zeroes - Bug 344661
-  $a =~ s/^0*(\d.+)/$1/;
-  $b =~ s/^0*(\d.+)/$1/;
+  $a =~ s/^0*(\d.+)/$1/a;
+  $b =~ s/^0*(\d.+)/$1/a;
 
-  my @A = ($a =~ /([-.]|\d+|[^-.\d]+)/g);
-  my @B = ($b =~ /([-.]|\d+|[^-.\d]+)/g);
+  my @A = ($a =~ /([-.]|\d+|[^-.\d]+)/ag);
+  my @B = ($b =~ /([-.]|\d+|[^-.\d]+)/ag);
 
   my ($A, $B);
   while (@A and @B) {
@@ -239,7 +239,7 @@ sub vers_cmp {
     elsif ($B eq '.') {
       return 1;
     }
-    elsif ($A =~ /^\d+$/ and $B =~ /^\d+$/) {
+    elsif ($A =~ /^\d+$/a and $B =~ /^\d+$/a) {
       if ($A =~ /^0/ || $B =~ /^0/) {
         return $A cmp $B if $A cmp $B;
       }

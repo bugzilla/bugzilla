@@ -516,12 +516,12 @@ sub process_bug {
     # to the wrong attachment. Since the new attachment ID is unknown yet
     # let's strip it out for now. We will make a comment with the right ID
     # later
-    $data =~ s/Created an attachment \(id=\d+\)/Created an attachment/g;
+    $data =~ s/Created an attachment \(id=\d+\)/Created an attachment/ag;
 
     # Same goes for bug #'s Since we don't know if the referenced bug
     # is also being moved, lets make sure they know it means a different
     # bugzilla.
-    $data =~ s/([Bb]ugs?\s*\#?\s*(\d+))/$url$2/g;
+    $data =~ s/([Bb]ugs?\s*\#?\s*(\d+))/$url$2/ag;
 
     # Keep the original commenter if possible, else we will fall back
     # to the exporter account.

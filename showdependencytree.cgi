@@ -39,7 +39,7 @@ my $id  = $bug->id;
 
 local our $hide_resolved = $cgi->param('hide_resolved') ? 1 : 0;
 local our $maxdepth = $cgi->param('maxdepth') || 0;
-if ($maxdepth !~ /^\d+$/) {
+if ($maxdepth !~ /^\d+$/a) {
   $maxdepth = 0;
 }
 

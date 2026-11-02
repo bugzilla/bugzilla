@@ -26,8 +26,8 @@ sub should_handle {
   return (
     lc($uri->authority) eq 'bugs.debian.org'
       and
-      (($uri->path =~ /bugreport\.cgi$/ and $uri->query_param('bug') =~ m|^\d+$|)
-      or $uri->path =~ m|^/\d+$|)
+      (($uri->path =~ /bugreport\.cgi$/ and $uri->query_param('bug') =~ m|^\d+$|a)
+      or $uri->path =~ m|^/\d+$|a)
   ) ? 1 : 0;
 }
 
@@ -38,7 +38,7 @@ sub _check_value {
 
   # This is the shortest standard URL form for Debian BTS URLs,
   # and so we reduce all URLs to this.
-  $uri->path =~ m|^/(\d+)$| || $uri->query_param('bug') =~ m|^(\d+)$|;
+  $uri->path =~ m|^/(\d+)$|a || $uri->query_param('bug') =~ m|^(\d+)$|a;
   $uri = new URI("http://bugs.debian.org/$1");
 
   return $uri;

@@ -349,7 +349,7 @@ sub SaveEmail {
 
   # Remove any bug ids the user no longer wants to ignore
   foreach my $key (grep(/^remove_ignored_bug_/, $cgi->param)) {
-    my ($bug_id) = $key =~ /(\d+)$/;
+    my ($bug_id) = $key =~ /(\d+)$/a;
     delete $ignored_bugs{$bug_id};
   }
 

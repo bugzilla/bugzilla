@@ -466,7 +466,7 @@ sub _translate_value {
   }
 
   # Sanity check to make sure that none of the <> stuff was left in.
-  if ($value =~ /<\d/) {
+  if ($value =~ /<\d/a) {
     die $self->name . ": value untranslated: $value\n";
   }
   return $value;
@@ -485,7 +485,7 @@ sub _translate_value_for_bug {
   $value =~ s/<$number-reporter>/$reporter/g;
   if ($value =~ /<$number-bug_group>/) {
     my @bug_groups = map { $_->name } @{$bug->groups_in};
-    @bug_groups = grep { $_ =~ /^\d+-group-/ } @bug_groups;
+    @bug_groups = grep { $_ =~ /^\d+-group-/a } @bug_groups;
     my $group = $bug_groups[0];
     $value =~ s/<$number-bug_group>/$group/g;
   }

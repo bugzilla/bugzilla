@@ -82,7 +82,7 @@ sub get_object {
   if (ref $_ eq 'HASH' && keys %$_) {
     @results = @{$class->match($_)};
   }
-  elsif (m/^\d+$/) {
+  elsif (m/^\d+$/a) {
     @results = ($class->new($_));
   }
   elsif (m/\w/i && grep { $_ eq 'name' } ($class->_get_db_columns)) {

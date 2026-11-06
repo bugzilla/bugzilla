@@ -7,7 +7,7 @@
 
 package Bugzilla::WebService::Server::REST;
 
-use 5.10.1;
+use 5.14.0;
 use strict;
 use warnings;
 
@@ -512,7 +512,7 @@ sub _get_content_prefs {
   my @accept_types = split /,/, $self->cgi->http('accept') || '';
   my $order        = 0;
   for my $accept_type (@accept_types) {
-    my ($weight) = ($accept_type =~ /q=(\d\.\d+|\d+)/);
+    my ($weight) = ($accept_type =~ /q=(\d\.\d+|\d+)/a);
     my ($name)   = ($accept_type =~ m#(\S+/[^;]+)#);
     next unless $name;
     push @prefs, {name => $name, order => $order++};

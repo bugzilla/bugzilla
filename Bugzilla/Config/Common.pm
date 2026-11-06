@@ -7,11 +7,11 @@
 
 package Bugzilla::Config::Common;
 
-use 5.10.1;
+use 5.14.0;
 use strict;
 use warnings;
 
-use Email::Address;
+use Email::Address::XS;
 use Socket;
 
 use Bugzilla::Util;
@@ -80,7 +80,8 @@ sub check_regexp {
 
 sub check_email {
   my ($value) = @_;
-  if ($value !~ $Email::Address::mailbox) {
+  my ($mbox) = Email::Address::XS->parse($value);
+  if (!$mbox->is_valid) {
     return "must be a valid email address.";
   }
   return "";
@@ -96,7 +97,7 @@ sub check_sslbase {
 
     # Fall back to port 443 if for some reason getservbyname() fails.
     my $port = getservbyname('https', 'tcp') || 443;
-    if ($host =~ /^(.+):(\d+)$/) {
+    if ($host =~ /^(.+):(\d+)$/a) {
       $host = $1;
       $port = $2;
     }
@@ -124,12 +125,22 @@ sub check_ip {
 
 sub check_utf8 {
   my ($utf8, $entry) = @_;
-
   # You cannot turn off the UTF-8 parameter.
   if (!$utf8) {
     return "You cannot disable UTF-8 support.";
   }
-  elsif ($entry eq 'utf8mb4' && $utf8 ne 'utf8mb4') {
+
+  my $current_utf8 = Bugzilla->params->{'utf8'};
+  $current_utf8 = 'utf8mb4' if !defined $current_utf8 || $current_utf8 eq '1';
+  $current_utf8 = 'utf8mb3' if $current_utf8 eq 'utf8';
+
+  $utf8 = 'utf8mb4' if $utf8 eq '1';
+  $utf8 = 'utf8mb3' if $utf8 eq 'utf8';
+
+  if ($current_utf8 eq 'utf8mb3' && $utf8 ne 'utf8mb3' && $utf8 ne 'utf8mb4') {
+    return "You cannot downgrade from utf8mb3 support, only keep it or change to utf8mb4.";
+  }
+  elsif ($current_utf8 eq 'utf8mb4' && $utf8 ne 'utf8mb4') {
     return "You cannot disable UTF8-MB4 support.";
   }
 
@@ -342,7 +353,7 @@ sub check_maxattachmentsize {
 sub check_notification {
   my $option = shift;
   my @current_version
-    = (BUGZILLA_VERSION =~ m/^(\d+)\.(\d+)(?:(rc|\.)(\d+))?\+?$/);
+    = (BUGZILLA_VERSION =~ m/^(\d+)\.(\d+)(?:(rc|\.)(\d+))?\+?$/a);
   if ($current_version[1] % 2 && $option eq 'stable_branch_release') {
     return
         "You are currently running a development snapshot, and so your "

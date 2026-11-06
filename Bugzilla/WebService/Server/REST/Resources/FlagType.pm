@@ -7,7 +7,7 @@
 
 package Bugzilla::WebService::Server::REST::Resources::FlagType;
 
-use 5.10.1;
+use 5.14.0;
 use strict;
 use warnings;
 
@@ -44,7 +44,7 @@ sub _rest_resources {
       PUT => {
         method => 'update',
         params => sub {
-          my $param = $_[0] =~ /^\d+$/ ? 'ids' : 'names';
+          my $param = $_[0] =~ /^\d+$/a ? 'ids' : 'names';
           return {$param => [$_[0]]};
         }
       }

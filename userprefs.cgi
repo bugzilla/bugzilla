@@ -6,7 +6,7 @@
 # This Source Code Form is "Incompatible With Secondary Licenses", as
 # defined by the Mozilla Public License, v. 2.0.
 
-use 5.10.1;
+use 5.14.0;
 use strict;
 use warnings;
 
@@ -349,7 +349,7 @@ sub SaveEmail {
 
   # Remove any bug ids the user no longer wants to ignore
   foreach my $key (grep(/^remove_ignored_bug_/, $cgi->param)) {
-    my ($bug_id) = $key =~ /(\d+)$/;
+    my ($bug_id) = $key =~ /(\d+)$/a;
     delete $ignored_bugs{$bug_id};
   }
 
@@ -390,18 +390,19 @@ sub DoPermissions {
   my (@has_bits, @set_bits);
 
   my $groups
-    = $dbh->selectall_arrayref(
-        "SELECT DISTINCT name, description FROM groups WHERE id IN ("
+    = $dbh->selectall_arrayref('SELECT DISTINCT name, description FROM '
+      . $dbh->quote_identifier('groups')
+      . ' WHERE id IN ('
       . $user->groups_as_string
-      . ") ORDER BY name");
+      . ') ORDER BY name');
   foreach my $group (@$groups) {
     my ($nam, $desc) = @$group;
     push(@has_bits, {"desc" => $desc, "name" => $nam});
   }
   $groups = $dbh->selectall_arrayref(
     'SELECT DISTINCT id, name, description
-                                          FROM groups
-                                         ORDER BY name'
+       FROM ' . $dbh->quote_identifier('groups') . '
+      ORDER BY name'
   );
   foreach my $group (@$groups) {
     my ($group_id, $nam, $desc) = @$group;

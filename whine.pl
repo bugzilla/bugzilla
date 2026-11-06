@@ -10,7 +10,7 @@
 # Script Initialization
 ################################################################################
 
-use 5.10.1;
+use 5.14.0;
 use strict;
 use warnings;
 
@@ -133,7 +133,7 @@ while (my ($schedule_id, $day, $time) = $sched_h->fetchrow_array) {
   if (&check_today($day)) {
 
     # Values that are not entirely numeric are intervals, like "30min"
-    if ($time !~ /^\d+$/) {
+    if ($time !~ /^\d+$/a) {
 
       # set it to now
       $sth = $dbh->prepare(
@@ -176,7 +176,7 @@ while (my ($schedule_id, $day, $time) = $sched_h->fetchrow_array) {
 
     # If configured for a particular time, set it to that, otherwise
     # midnight
-    my $target_time = ($time =~ /^\d+$/) ? $time : 0;
+    my $target_time = ($time =~ /^\d+$/a) ? $time : 0;
 
     my $run_next
       = $dbh->sql_date_math(
@@ -250,7 +250,8 @@ sub get_next_event {
           }
         }
         elsif ($mailto_type == MAILTO_GROUP) {
-          my $sth = $dbh->prepare("SELECT name FROM groups " . "WHERE id=?");
+          my $sth = $dbh->prepare(
+            'SELECT name FROM ' . $dbh->quote_identifier('groups') . ' WHERE id = ?');
           $sth->execute($mailto);
           my $groupname = $sth->fetch->[0];
           my $group_id  = Bugzilla::Group::ValidateGroupName($groupname, $owner);
@@ -539,11 +540,11 @@ sub reset_timer {
   # If the schedule is to run today, and it runs many times per day,
   # it shall be set to run immediately.
   $run_today = &check_today($run_day);
-  if (($run_today) && ($run_time !~ /^\d+$/)) {
+  if (($run_today) && ($run_time !~ /^\d+$/a)) {
 
     # The default of 60 catches any bad value
     my $minute_interval = 60;
-    if ($run_time =~ /^(\d+)min$/i) {
+    if ($run_time =~ /^(\d+)min$/ai) {
       $minute_interval = $1;
     }
 
@@ -562,7 +563,7 @@ sub reset_timer {
     $minute_offset = 0;
 
     # Set the target time if it's a specific hour
-    my $target_time = ($run_time =~ /^\d+$/) ? $run_time : 0;
+    my $target_time = ($run_time =~ /^\d+$/a) ? $run_time : 0;
 
     my $nextdate = &get_next_date($run_day);
     my $run_next
@@ -646,7 +647,7 @@ sub get_next_date {
       $add_days = 2;
     }
   }
-  elsif ($day !~ /^\d+$/) {        # A specific day of the week
+  elsif ($day !~ /^\d+$/a) {        # A specific day of the week
         # The default is used if there is a bad value in the database, in
         # which case we mark it to a less-popular day (Sunday)
     my $day_num = 0;

@@ -13,7 +13,7 @@ package Bugzilla::Install::Requirements;
 # Subroutines may "require" and "import" from modules, but they
 # MUST NOT "use."
 
-use 5.10.1;
+use 5.14.0;
 use strict;
 use warnings;
 
@@ -78,8 +78,8 @@ use constant APACHE_PATH => [qw(
 # installed or not. "version" is the version we need, or 0 if we'll accept
 # any version.
 #
-# "blacklist" is an arrayref of regular expressions that describe versions that
-# are 'blacklisted'--that is, even if the version is high enough, Bugzilla
+# "blocklist" is an arrayref of regular expressions that describe versions that
+# are 'blocklisted'--that is, even if the version is high enough, Bugzilla
 # will refuse to say that it's OK to run with that version.
 sub REQUIRED_MODULES {
   my @modules = (
@@ -118,11 +118,19 @@ sub REQUIRED_MODULES {
 
     {package => 'Moo', module => 'Moo', version => '2.003004',},
 
-    # 2.24 contains several useful text virtual methods.
-    {package => 'Template-Toolkit', module => 'Template', version => '2.24'},
+    # versions prior to 3.009 are broken, see https://bugzilla.mozilla.org/show_bug.cgi?id=1639128
+    {package => 'Template-Toolkit', module => 'Template', version => '3.009'},
 
-    # 1.300011 has a debug mode for SMTP and automatically pass -i to sendmail.
-    {package => 'Email-Sender', module => 'Email::Sender', version => '1.300011',},
+    # versions prior to 2.600 pulled Email::Address, we now use Email::Address::XS
+    {package => 'Email-Sender', module => 'Email::Sender', version => '2.600',},
+
+    # versions prior to 1.05 contain a security risk
+    {
+      package => 'Email-Address-XS',
+      module  => 'Email::Address::XS',
+      version => '1.05',
+    },
+
     {
       package => 'Email-MIME',
       module  => 'Email::MIME',
@@ -288,7 +296,7 @@ sub OPTIONAL_MODULES {
       version => '0.712',
 
       # SOAP::Transport::HTTP 1.12 is bogus.
-      blacklist => ['^1\.12$'],
+      blocklist => ['^1\.12$'],
       feature   => ['xmlrpc'],
     },
 
@@ -739,19 +747,18 @@ sub have_vers {
 
     # If we come here, then the version is not a valid one.
     # We try to sanitize it.
-    if ($vnum =~ /^((\d+)(\.\d+)*)/) {
+    if ($vnum =~ /^((\d+)(\.\d+)*)/a) {
       $vnum = $1;
     }
   }
   $vnum ||= -1;
 
-  # Must do a string comparison as $vnum may be of the form 5.10.1.
   my $vok
     = ($vnum ne '-1' && version->new($vnum) >= version->new($wanted)) ? 1 : 0;
-  my $blacklisted;
-  if ($vok && $params->{blacklist}) {
-    $blacklisted = grep($vnum =~ /$_/, @{$params->{blacklist}});
-    $vok         = 0 if $blacklisted;
+  my $blocklisted;
+  if ($vok && $params->{blocklist}) {
+    $blocklisted = grep($vnum =~ /$_/, @{$params->{blocklist}});
+    $vok         = 0 if $blocklisted;
   }
 
   if ($output) {
@@ -760,7 +767,7 @@ sub have_vers {
       ok          => $vok,
       wanted      => $wanted,
       found       => $vnum,
-      blacklisted => $blacklisted
+      blocklisted => $blocklisted
     });
   }
 
@@ -769,8 +776,8 @@ sub have_vers {
 
 sub _checking_for {
   my ($params) = @_;
-  my ($package, $ok, $wanted, $blacklisted, $found)
-    = @$params{qw(package ok wanted blacklisted found)};
+  my ($package, $ok, $wanted, $blocklisted, $found)
+    = @$params{qw(package ok wanted blocklisted found)};
 
   my $ok_string = $ok ? install_string('module_ok') : '';
 
@@ -798,10 +805,10 @@ sub _checking_for {
     $ok_string = install_string('module_not_found');
   }
 
-  my $black_string = $blacklisted ? install_string('blacklisted') : '';
+  my $block_string = $blocklisted ? install_string('blocklisted') : '';
   my $want_string = $wanted ? "v$wanted" : install_string('any');
 
-  my $str = sprintf "%s %20s %-11s $ok_string $black_string\n",
+  my $str = sprintf "%s %20s %-11s $ok_string $block_string\n",
     install_string('checking_for'), $package, "($want_string)";
   print $ok ? $str : colored($str, COLOR_ERROR);
 }

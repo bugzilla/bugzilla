@@ -6,7 +6,7 @@
 # This Source Code Form is "Incompatible With Secondary Licenses", as
 # defined by the Mozilla Public License, v. 2.0.
 
-use 5.10.1;
+use 5.14.0;
 use strict;
 use warnings;
 
@@ -24,7 +24,7 @@ BEGIN {
 use lib qw(. lib);
 
 use Data::Dumper;
-use Email::Address;
+use Email::Address::XS;
 use Email::Reply qw(reply);
 use Email::MIME;
 use Getopt::Long qw(:config bundling);
@@ -81,7 +81,7 @@ sub parse_mail {
     {mail => $input_email, fields => \%fields});
 
   my $summary = $input_email->header('Subject');
-  if ($summary =~ /\[\S+ (\d+)\](.*)/i) {
+  if ($summary =~ /\[\S+ (?a:(\d+))\](.*)/i) {
     $fields{'bug_id'} = $1;
     $summary = trim($2);
   }
@@ -129,7 +129,7 @@ sub parse_mail {
 
   %fields = %{Bugzilla::Bug::map_fields(\%fields)};
 
-  my ($reporter) = Email::Address->parse($input_email->header('From'));
+  my ($reporter) = Email::Address::XS->parse($input_email->header('From'));
   $fields{'reporter'} = $reporter->address;
 
   # The summary line only affects us if we're doing a post_bug.

@@ -7,7 +7,7 @@
 
 package Bugzilla::Extension::MoreBugUrl::Savane;
 
-use 5.10.1;
+use 5.14.0;
 use strict;
 use warnings;
 
@@ -19,7 +19,7 @@ use base qw(Bugzilla::BugUrl);
 
 sub should_handle {
   my ($class, $uri) = @_;
-  return ($uri->as_string =~ m|/bugs/(index\.php)?\?\d+$|) ? 1 : 0;
+  return ($uri->as_string =~ m|/bugs/(index\.php)?\?\d+$|a) ? 1 : 0;
 }
 
 sub _check_value {

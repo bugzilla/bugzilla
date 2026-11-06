@@ -7,7 +7,7 @@
 
 package Bugzilla::Extension::MoreBugUrl::Redmine;
 
-use 5.10.1;
+use 5.14.0;
 use strict;
 use warnings;
 
@@ -19,7 +19,7 @@ use base qw(Bugzilla::BugUrl);
 
 sub should_handle {
   my ($class, $uri) = @_;
-  return ($uri->path =~ m|/issues/\d+$|) ? 1 : 0;
+  return ($uri->path =~ m|/issues/\d+$|a) ? 1 : 0;
 }
 
 sub _check_value {

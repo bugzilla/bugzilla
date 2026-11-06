@@ -7,7 +7,7 @@
 
 package Bugzilla::Group;
 
-use 5.10.1;
+use 5.14.0;
 use strict;
 use warnings;
 
@@ -440,7 +440,8 @@ sub create {
 sub ValidateGroupName {
   my ($name, @users) = (@_);
   my $dbh   = Bugzilla->dbh;
-  my $query = "SELECT id FROM groups " . "WHERE name = ?";
+  my $query
+    = 'SELECT id FROM ' . $dbh->quote_identifier('groups') . ' WHERE name = ?';
   if (Bugzilla->params->{'usevisibilitygroups'}) {
     my @visible = (-1);
     foreach my $user (@users) {

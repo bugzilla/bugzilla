@@ -23,6 +23,10 @@
   # generate_api_token: generate a token which can be used to make authenticated webservice calls
   #%]
 
+[% mail_warnings = mail_warnings() %]
+[% IF !message && mail_warnings.size && user.in_group('admin') %]
+  [% message = 'mail_delivery_warnings' %]
+[% END %]
 [% IF message %]
   [% PROCESS global/messages.html.tmpl %]
 [% END %]

@@ -7,7 +7,7 @@
 
 package Bugzilla::WebService::Server::REST::Resources::BugUserLastVisit;
 
-use 5.10.1;
+use 5.14.0;
 use strict;
 use warnings;
 
@@ -18,7 +18,7 @@ BEGIN {
 sub _rest_resources {
   return [
     # bug-id
-    qr{^/bug_user_last_visit/(\d+)$},
+    qr{^/bug_user_last_visit/(\d+)$}a,
     {
       GET => {
         method => 'get',

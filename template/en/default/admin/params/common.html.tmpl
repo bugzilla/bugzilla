@@ -16,6 +16,11 @@
       [% IF param.type == "t" %]
         <input type="text" size="80" name="[% param.name FILTER html %]"
                id="[% param.name FILTER html %]" value="[% Param(param.name) FILTER html %]">
+      [% ELSIF param.type == "r" %]
+        <input type="text" size="80" name="[% param.name FILTER html %]_readonly"
+               id="[% param.name FILTER html %]_readonly" value="[% Param(param.name) FILTER html %]" disabled>
+        <input type="hidden" name="[% param.name FILTER html %]" value="[% Param(param.name) FILTER html %]"><br>
+        This value is read-only and you can't change it.
       [% ELSIF param.type == "p" %]
         <input type="password" size="80" name="[% param.name FILTER html %]"
                id="[% param.name FILTER html %]" value="[% Param(param.name) FILTER html %]"

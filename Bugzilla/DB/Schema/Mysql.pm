@@ -13,7 +13,7 @@ package Bugzilla::DB::Schema::Mysql;
 #
 ###############################################################################
 
-use 5.10.1;
+use 5.14.0;
 use Moo;
 
 use Bugzilla::Error;
@@ -144,11 +144,15 @@ sub _get_create_index_ddl {
   # Returns a "create index" SQL statement.
 
   my ($self, $table_name, $index_name, $index_fields, $index_type) = @_;
+  my $dbh = Bugzilla->dbh;
 
   my $sql = "CREATE ";
   $sql .= "$index_type "
     if ($index_type eq 'UNIQUE' || $index_type eq 'FULLTEXT');
-  $sql .= "INDEX \`$index_name\` ON $table_name \("
+  $sql
+    .= "INDEX "
+    . $dbh->quote_identifier($index_name) . " ON "
+    . $dbh->quote_identifier($table_name) . " \("
     . join(", ", @$index_fields) . "\)";
 
   return ($sql);
@@ -182,10 +186,12 @@ sub get_alter_column_ddl {
 
   my @statements;
 
-  push(
-    @statements, "UPDATE $table SET $column = $set_nulls_to
-                        WHERE $column IS NULL"
-  ) if defined $set_nulls_to;
+  my $dbh = Bugzilla->dbh;
+  push(@statements,
+        "UPDATE "
+      . $dbh->quote_identifier($table)
+      . " SET $column = $set_nulls_to WHERE $column IS NULL")
+    if defined $set_nulls_to;
 
   # Calling SET DEFAULT or DROP DEFAULT is *way* faster than calling
   # CHANGE COLUMN, so just do that if we're just changing the default.
@@ -197,27 +203,32 @@ sub get_alter_column_ddl {
     && $self->columns_equal(\%new_defaultless, \%old_defaultless))
   {
     if (!defined $new_def->{DEFAULT}) {
-      push(@statements, "ALTER TABLE $table ALTER COLUMN $column DROP DEFAULT");
+      push(@statements,
+           "ALTER TABLE "
+           . $dbh->quote_identifier($table)
+           . " ALTER COLUMN $column DROP DEFAULT");
     }
     else {
-      push(
-        @statements, "ALTER TABLE $table ALTER COLUMN $column
-                               SET DEFAULT " . $new_def->{DEFAULT}
-      );
+      push(@statements,
+           "ALTER TABLE "
+           . $dbh->quote_identifier($table)
+           . " ALTER COLUMN $column SET DEFAULT "
+           . $new_def->{DEFAULT});
     }
   }
   else {
     my $new_ddl = $self->get_type_ddl(\%new_def_copy);
-    push(
-      @statements, "ALTER TABLE $table CHANGE COLUMN 
-                       $column $column $new_ddl"
-    );
+    push(@statements,
+         "ALTER TABLE "
+         . $dbh->quote_identifier($table)
+         . " CHANGE COLUMN $column $column $new_ddl");
   }
 
   if ($old_def->{PRIMARYKEY} && !$new_def->{PRIMARYKEY}) {
 
     # Dropping a PRIMARY KEY needs an explicit DROP PRIMARY KEY
-    push(@statements, "ALTER TABLE $table DROP PRIMARY KEY");
+    push(@statements,
+         'ALTER TABLE ' . $dbh->quote_identifier($table) . ' DROP PRIMARY KEY');
   }
 
   return @statements;
@@ -226,8 +237,9 @@ sub get_alter_column_ddl {
 sub get_drop_fk_sql {
   my ($self, $table, $column, $references) = @_;
   my $fk_name = $self->_get_fk_name($table, $column, $references);
-  my @sql     = ("ALTER TABLE $table DROP FOREIGN KEY $fk_name");
   my $dbh     = Bugzilla->dbh;
+  my @sql     = (
+    "ALTER TABLE " . $dbh->quote_identifier($table) . " DROP FOREIGN KEY $fk_name");
 
   # MySQL requires, and will create, an index on any column with
   # an FK. It will name it after the fk, which we never do.
@@ -254,7 +266,7 @@ sub get_rename_indexes_ddl {
   my ($self, $table, %indexes) = @_;
   my @keys = keys %indexes or return ();
 
-  my $sql = "ALTER TABLE $table ";
+  my $sql = 'ALTER TABLE' . Bugzilla->dbh->quote_identifier($table) . ' ';
 
   foreach my $old_name (@keys) {
     my $name = $indexes{$old_name}->{NAME};
@@ -275,7 +287,9 @@ sub get_rename_indexes_ddl {
 
 sub get_set_serial_sql {
   my ($self, $table, $column, $value) = @_;
-  return ("ALTER TABLE $table AUTO_INCREMENT = $value");
+  return ("ALTER TABLE "
+      . Bugzilla->dbh->quote_identifier($table)
+      . " AUTO_INCREMENT = $value");
 }
 
 # Converts a DBI column_info output to an abstract column definition.
@@ -413,7 +427,9 @@ sub get_rename_column_ddl {
 
   # MySQL doesn't like having the PRIMARY KEY statement in a rename.
   $def =~ s/PRIMARY KEY//i;
-  return ("ALTER TABLE $table CHANGE COLUMN $old_name $new_name $def");
+  return ("ALTER TABLE "
+      . Bugzilla->dbh->quote_identifier($table)
+      . " CHANGE COLUMN $old_name $new_name $def");
 }
 
 1;

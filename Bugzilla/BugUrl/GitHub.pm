@@ -7,7 +7,7 @@
 
 package Bugzilla::BugUrl::GitHub;
 
-use 5.10.1;
+use 5.14.0;
 use strict;
 use warnings;
 
@@ -25,7 +25,7 @@ sub should_handle {
 # GitHub pull request URLs have only one form:
 #  https://github.com/USER_OR_TEAM_OR_ORGANIZATION_NAME/REPOSITORY_NAME/pull/111
   return (lc($uri->authority) eq 'github.com'
-      and $uri->path =~ m!^/[^/]+/[^/]+/(?:issues|pull)/\d+$!) ? 1 : 0;
+      and $uri->path =~ m!^/[^/]+/[^/]+/(?:issues|pull)/\d+$!a) ? 1 : 0;
 }
 
 sub _check_value {

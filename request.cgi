@@ -6,7 +6,7 @@
 # This Source Code Form is "Incompatible With Secondary Licenses", as
 # defined by the Mozilla Public License, v. 2.0.
 
-use 5.10.1;
+use 5.14.0;
 use strict;
 use warnings;
 
@@ -55,13 +55,15 @@ if ($action eq 'queue') {
 else {
   my $flagtypes = get_flag_types();
   my @types     = ('all', @$flagtypes);
+  my $products = $user->get_selectable_products;
 
   my $vars = {};
   $vars->{'types'}    = \@types;
   $vars->{'requests'} = {};
+  $vars->{'products'} = $products;
 
   my %components;
-  foreach my $prod (@{$user->get_selectable_products}) {
+  foreach my $prod (@$products) {
     foreach my $comp (@{$prod->components}) {
       $components{$comp->name} = 1;
     }

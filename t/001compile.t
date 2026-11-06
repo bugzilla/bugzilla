@@ -10,7 +10,7 @@
 #Bugzilla Test 1#
 ###Compilation###
 
-use 5.10.1;
+use 5.14.0;
 use strict;
 use warnings;
 
@@ -84,7 +84,9 @@ SKIP: {
 
     # Check that we have a DBI module to support the DB, if this
     # is a database module (but not Schema)
-    if ($file =~ m{Bugzilla/DB/([^/]+)\.pm$} and $file ne "Bugzilla/DB/Schema.pm") {
+    if ($file =~ m{Bugzilla/DB/([^/]+)\.pm$}
+      and $file ne "Bugzilla/DB/Schema.pm"
+      and $file ne "Bugzilla/DB/QuoteIdentifier.pm") {
       my $module = lc($1);
       my $dbd    = DB_MODULE->{$module}->{dbd}->{module};
       eval("use $dbd; 1") or skip "$file: $dbd not installed", 1;

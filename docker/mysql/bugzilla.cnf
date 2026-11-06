@@ -1,0 +1,9 @@
+[mysqld]
+max_allowed_packet = 1G
+innodb_file_per_table = ON
+innodb_large_prefix   = ON
+innodb_file_format = Barracuda
+ft_min_word_len = 2
+
+[mysql]
+max_allowed_packet = 1G

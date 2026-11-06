@@ -113,7 +113,7 @@ rst_prolog = """
 .. role:: field
     :class: field
 
-.. |min-perl-ver| replace:: 5.10.1
+.. |min-perl-ver| replace:: 5.14.0
 """
 
 rst_epilog = """
@@ -128,12 +128,31 @@ them `here <https://bugzilla.mozilla.org/enter_bug.cgi?product=Bugzilla&componen
 
 # The theme to use for HTML and HTML Help pages.  See the documentation for
 # a list of builtin themes.
-html_theme = 'default'
+html_theme = "sphinx_rtd_theme"
 
 # Theme options are theme-specific and customize the look and feel of a theme
 # further.  For a list of options available for each theme, see the
 # documentation.
-#html_theme_options = {}
+html_theme_options = {
+    #'analytics_id': 'G-XXXXXXXXXX',  #  Provided by Google in your dashboard
+    #'analytics_anonymize_ip': False,
+    'logo_only': True,
+    'display_version': True,
+    'prev_next_buttons_location': 'bottom',
+    'style_external_links': False,
+    'vcs_pageview_mode': '',
+    #'style_nav_header_background': 'white',
+    # Toc options
+    'collapse_navigation': True,
+    'sticky_navigation': True,
+    'navigation_depth': 4,
+    'includehidden': True,
+    'titles_only': False
+}
+
+html_css_files = [
+    "bugzilla.css"
+]
 
 # Add any paths that contain custom themes here, relative to this directory.
 #html_theme_path = []
@@ -145,11 +164,11 @@ html_theme = 'default'
 # A shorter title for the navigation bar.  Default is the same as html_title.
 #html_short_title = None
 
-html_style = "bugzilla.css"
+#html_style = "bugzilla.css"
 
 # The name of an image file (relative to this directory) to place at the top
 # of the sidebar.
-html_logo = "../images/bugzilla.png"
+html_logo = "../images/bugzilla-logo-white.svg"
 
 # The name of an image file (within the static path) to use as favicon of the
 # docs.  This file should be a Windows icon file (.ico) being 16x16 or 32x32
@@ -383,13 +402,10 @@ pdf_fit_background_mode = 'scale'
 # Temporary highlighting of TODO items
 todo_include_todos = False
 
-# The readthedocs.org website cannot access POD.
-on_rtd = os.environ.get('READTHEDOCS', None) == 'True'
+# Originally, the readthedocs.org website could not access POD,
+# so we would conditionally override that here if we were building
+# on RTD, but that's no longer the case.
+base_api_url = '../integrating/api/'
 
-if on_rtd:
-    base_api_url = 'https://www.bugzilla.org/docs/5.0/en/html/integrating/api/'
-else:
-    base_api_url = '../integrating/api/'
-
-extlinks = {'bug': ('https://bugzilla.mozilla.org/show_bug.cgi?id=%s', 'bug  '),
-            'api': (base_api_url + '%s', '')}
+extlinks = {'bug': ('https://bugzilla.mozilla.org/show_bug.cgi?id=%s', 'bug  %s'),
+            'api': (base_api_url + '%s', "%s")}

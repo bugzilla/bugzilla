@@ -23,7 +23,7 @@
 # All these TeX packages together are close to a gig :-| But after you've
 # installed them, you can remove texlive-latex-extra-doc to save 400MB.
 
-use 5.10.1;
+use 5.14.0;
 use strict;
 use warnings;
 
@@ -33,6 +33,7 @@ BEGIN { chdir dirname($0); }
 use lib qw(.. ../lib lib);
 
 use Cwd;
+use File::Copy qw(copy);
 use File::Copy::Recursive qw(rcopy);
 use File::Find;
 use File::Path qw(rmtree make_path);
@@ -83,12 +84,19 @@ END_HTML
 
   $converter->contents_page_start($contents_start);
   $converter->contents_page_end("</body></html>");
-  $converter->add_css('./../../../../style.css');
+  if (exists($::ENV{'READTHEDOCS'})) {
+    $converter->add_css('./../../style.css');
+  } else {
+    $converter->add_css('./../../../../style.css');
+  }
   $converter->javascript_flurry(0);
   $converter->css_flurry(0);
   make_path('html/integrating/api');
   $converter->batch_convert(['../../'], 'html/integrating/api');
 
+  if (exists($::ENV{'READTHEDOCS'})) {
+    copy('../style.css', 'html/style.css') or die "Copy failed: $!";
+  }
   print "\n";
 }
 

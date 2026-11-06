@@ -6,7 +6,7 @@
 # This Source Code Form is "Incompatible With Secondary Licenses", as
 # defined by the Mozilla Public License, v. 2.0.
 
-use 5.10.1;
+use 5.14.0;
 use strict;
 use warnings;
 
@@ -33,10 +33,10 @@ sub build_requires {
 
 sub recommends {
     my $recommends = OPTIONAL_MODULES();
-    my @blacklist = ('Apache-SizeLimit', 'mod_perl'); # Does not compile properly on Travis
+    my @blocklist = ('Apache-SizeLimit', 'mod_perl'); # Does not compile properly on Travis
     my $hrecommends = {};
     foreach my $module (@$recommends) {
-        next if grep($_ eq $module->{package}, @blacklist);
+        next if grep($_ eq $module->{package}, @blocklist);
         $hrecommends->{$module->{module}} = $module->{version};
     }
     return $hrecommends;

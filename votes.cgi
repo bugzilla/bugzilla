@@ -9,7 +9,7 @@
 # This script remains as a backwards-compatibility URL for before
 # the time that Voting was an extension.
 
-use 5.10.1;
+use 5.14.0;
 use strict;
 use warnings;
 

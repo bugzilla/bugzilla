@@ -19,6 +19,12 @@
 [% IF release %]
   <div id="new_release">
     [% IF release.data %]
+      [% IF release.eos_date %]
+        <p>[% terms.Bugzilla %] [%+ release.branch_version FILTER html %] will
+        no longer receive security updates after [% release.eos_date FILTER html %].
+        You are highly encouraged to upgrade in order to keep your
+        system secure.</p>
+      [% END %]
       [% IF release.deprecated %]
         <p>Bugzilla [%+ release.deprecated FILTER html %] is no longer
         supported. You are highly encouraged to upgrade in order to keep your
@@ -93,6 +99,7 @@
     <form id="quicksearchForm" name="quicksearchForm" action="buglist.cgi">
       <input id="quicksearch_main" name="quicksearch" title="Quick Search"
              placeholder="Enter [% terms.abug %] # or some search terms"
+             aria-labelledby="find"
              autofocus required>
       <input id="find" type="submit" value="Quick Search">
       <a href="page.cgi?id=quicksearch.html" title="Quick Search help">[?]</a>
@@ -137,10 +144,12 @@
         <a href="buglist.cgi?chfield=%5BBug%20creation%5D&amp;chfieldfrom=24h">last 24 hours</a>
         [% title = BLOCK %][% terms.Bugs %] reported in the last 24 hours[% END %]
         <a href="buglist.cgi?chfield=%5BBug%20creation%5D&amp;chfieldfrom=24h&amp;ctype=atom&amp;title=[% title FILTER uri %]"
+           aria-label="Bugs reported in the last 24 hours - RSS feed"
            class="rss">&nbsp;</a>
         | <a href="buglist.cgi?chfield=%5BBug%20creation%5D&amp;chfieldfrom=7d">last 7 days</a>
         [% title = BLOCK %][% terms.Bugs %] reported in the last 7 days[% END %]
         <a href="buglist.cgi?chfield=%5BBug%20creation%5D&amp;chfieldfrom=7d&amp;ctype=atom&amp;title=[% title FILTER uri %]"
+           aria-label="Bugs reported in the last 7 days - RSS feed"
            class="rss">&nbsp;</a>
       </li>
       <li>
@@ -148,10 +157,12 @@
         <a href="buglist.cgi?chfieldfrom=24h">last 24 hours</a>
         [% title = BLOCK %][% terms.Bugs %] changed in the last 24 hours[% END %]
         <a href="buglist.cgi?chfieldfrom=24h&amp;ctype=atom&amp;title=[% title FILTER uri %]"
+           aria-label="Bugs changed in the last 24 hours - RSS feed"
            class="rss">&nbsp;</a>
         | <a href="buglist.cgi?chfieldfrom=7d">last 7 days</a>
         [% title = BLOCK %][% terms.Bugs %] changed in the last 7 days[% END %]
         <a href="buglist.cgi?chfieldfrom=7d&amp;ctype=atom&amp;title=[% title FILTER uri %]"
+           aria-label="Bugs changed in the last 7 days - RSS feed"
            class="rss">&nbsp;</a>
       </li>
     </ul>

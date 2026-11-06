@@ -8,7 +8,7 @@
 # This exists to implement the template-before_process hook.
 package Bugzilla::Template::Context;
 
-use 5.10.1;
+use 5.14.0;
 use strict;
 use warnings;
 

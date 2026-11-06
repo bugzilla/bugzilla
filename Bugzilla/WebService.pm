@@ -9,7 +9,7 @@
 # actual RPC server, see Bugzilla::WebService::Server and its subclasses.
 package Bugzilla::WebService;
 
-use 5.10.1;
+use 5.14.0;
 use strict;
 use warnings;
 

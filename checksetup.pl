@@ -12,7 +12,7 @@
 # Initialization
 ######################################################################
 
-use 5.10.1;
+use 5.14.0;
 use strict;
 use warnings;
 
@@ -118,6 +118,16 @@ Bugzilla::DB::bz_create_database() if $lc_hash->{'db_check'};
 
 # now get a handle to the database:
 my $dbh = Bugzilla->dbh;
+
+# We want to catch if the user is trying to "upgrade" from 5.1 because
+# that's actually a downgrade and you can't do that.
+my $bz51install;
+eval { $bz51install = $dbh->bz_index_info('bz_schema', 'bz_schema_version_idx'); };
+if ($bz51install) {
+  require Bugzilla::Error;
+  import Bugzilla::Error;
+  ThrowCodeError("bz51_attempted_upgrade");
+}
 
 # Create the tables, and do any database-specific schema changes.
 $dbh->bz_setup_database();

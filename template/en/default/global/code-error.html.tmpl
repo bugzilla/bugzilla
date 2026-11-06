@@ -397,6 +397,13 @@
     Bugzilla does not support the search type
     "[% operator.truncate(30, "...") FILTER html %]".
 
+  [% ELSIF error == "bz51_attempted_upgrade" %]
+    [% title = "Invalid Upgrade Path" %]
+    It looks like you are attempting to "upgrade" from
+    Bugzilla 5.1. This is not supported because 5.2 is
+    based on Bugzilla 5.0.6 and not 5.1, so this is
+    actually a downgrade.
+
   [% ELSE %]
     [%# Try to find hooked error messages %]
     [% error_message = Hook.process("errors") %]

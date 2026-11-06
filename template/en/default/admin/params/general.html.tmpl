@@ -23,9 +23,12 @@
     _ " only after the data has been converted from existing legacy"
     _ " character encodings to UTF-8, using the <kbd>contrib/recode.pl</kbd>"
     _ " script</strong>."
-    _ " <p>Note that if you turn this parameter from &quot;off&quot; to"
-    _ " &quot;on&quot;, you must re-run <kbd>checksetup.pl</kbd> immediately"
-    _ " afterward.</p>",
+    _ " <p>Note that if you change this parameter you must re-run"
+    _ " <kbd>checksetup.pl</kbd> immediately afterward.</p>",
+
+  utf8_collate =>
+    "The collation to use in database tables. This parameter is"
+    _ " automatically set by checksetup.pl.",
 
   shutdownhtml => 
     "If this field is non-empty, then Bugzilla will be completely"

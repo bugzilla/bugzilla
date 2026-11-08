@@ -51,7 +51,7 @@ services:
     environment:
       - MARIADB_ROOT_HOST=%
       - MARIADB_ROOT_PASSWORD=bugzilla
-      - MARIADB_AUTO_UPGRADE=${MARIADB_AUTO_UPGRADE-1}
+      - MARIADB_AUTO_UPGRADE=${MARIADB_AUTO_UPGRADE-0}
 
 volumes:
   bugzilla5-mysql-db:

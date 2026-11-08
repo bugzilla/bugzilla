@@ -32,18 +32,62 @@ Only do this if you understand the warning and have a backup of your data.
 Upgrading the Docker database
 -----------------------------
 
-The example Compose file uses MariaDB 12.3 and enables MARIADB_AUTO_UPGRADE on
-the database service by default. On startup with an older database volume,
-the MariaDB image runs mariadb-upgrade when needed. Before changing the image,
-back up the entire database and review
-the MariaDB upgrade instructions; automatic upgrade can change system tables
-and affect downgrade options. The image's system-table backup is not a complete
-backup of your Bugzilla database. Verify the result after upgrading.
+WARNING: An existing database must be upgraded when moving to the MariaDB 12.3
+image. Automatic upgrade is disabled by default. Starting the server without
+completing the upgrade can leave system tables or application tables
+incompatible and cause errors or unexpected behavior.
 
-To disable automatic upgrades, set MARIADB_AUTO_UPGRADE to an empty value in
-the Compose environment (for example, in a .env file).
+Before starting MariaDB 12.3 against an existing volume:
 
-See https://mariadb.com/docs/server/server-management/install-and-upgrade-mariadb/upgrading/
+1. Back up the entire database and verify that the backup can be restored.
+2. Stop Bugzilla and shut down the existing MariaDB server cleanly. MariaDB
+   12.3 cannot upgrade a 10.6 data directory that was not shut down cleanly.
+3. Review the MariaDB upgrade instructions, including incompatible changes
+   between your current and target versions:
+   https://mariadb.com/docs/server/server-management/install-and-upgrade-mariadb/upgrading/
+
+Starting the new server can change data files, and upgrading can change system
+tables and affect downgrade options. The image's automatic system-table backup
+is not a complete backup of the Bugzilla database.
+
+Start only the database service and choose one of these upgrade methods before
+starting Bugzilla:
+
+Automatic system-table upgrade:
+
+    MARIADB_AUTO_UPGRADE=1 docker compose up -d --build bugzilla5.db
+    docker compose logs bugzilla5.db
+
+Wait until the logs show that mariadb-upgrade finished successfully and the
+server is ready for connections. The image's automatic upgrade updates system
+tables but does not check application tables. Run the following command to
+check and upgrade all tables:
+
+    docker compose exec --user mysql bugzilla5.db mariadb-upgrade --force -u root -p
+
+Enter the database root password when prompted.
+
+Manual upgrade:
+
+With automatic upgrade disabled, start the database service:
+
+    docker compose up -d --build bugzilla5.db
+
+Once the database is ready, run:
+
+    docker compose exec --user mysql bugzilla5.db mariadb-upgrade -u root -p
+
+Enter the database root password when prompted. Check the command output for
+errors. If the server cannot start or the upgrade fails, consult the MariaDB
+upgrade documentation before proceeding.
+
+After the upgrade completes, verify the database and start Bugzilla:
+
+    docker compose up -d --build
+
+The MariaDB 12.3 database container provides the mariadb client rather than
+mysql. For example, use docker compose exec bugzilla5.db mariadb for
+interactive database access.
 
 Reporting Bugs
 ==============

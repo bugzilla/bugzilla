@@ -226,6 +226,13 @@ blank, then MySQL's compiled-in default will be used. You probably
 want that.
 END
   localconfig_db_user              => "Who we connect to the database as.",
+  localconfig_db_mariadb_ssl => <<'END',
+Require TLS for MariaDB connections. Leave empty to retain the legacy
+behavior, which enables TLS when certificate settings are supplied.
+END
+  localconfig_db_mariadb_ssl_verify => <<'END',
+Verify the MariaDB server certificate and hostname using the configured CA.
+END
   localconfig_db_mysql_ssl_ca_file => <<'END',
 Path to a PEM file with a list of trusted SSL CA certificates.
 The file must be readable by web server user.

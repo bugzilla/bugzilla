@@ -1,6 +1,21 @@
 #!/bin/bash
 
 [ -z "$BZ_DB_HOST" ] && echo "Missing Docker Environment, check docker-compose.yml" && exit -1
+export BZ_DB_SSL="${BZ_DB_SSL:-1}"
+export BZ_DB_SSL_VERIFY="${BZ_DB_SSL_VERIFY:-0}"
+export BZ_DB_SSL_CA_FILE="${BZ_DB_SSL_CA_FILE:-/etc/ssl/certs/ca-certificates.crt}"
+if [[ ! "$BZ_DB_SSL" =~ ^[01]$ || ! "$BZ_DB_SSL_VERIFY" =~ ^[01]$ ]]; then
+  echo "BZ_DB_SSL and BZ_DB_SSL_VERIFY must be 0 or 1" >&2
+  exit 1
+fi
+if [[ "$BZ_DB_SSL" == 0 && "$BZ_DB_SSL_VERIFY" == 1 ]]; then
+  echo "BZ_DB_SSL_VERIFY requires BZ_DB_SSL=1" >&2
+  exit 1
+fi
+if [[ "$BZ_DB_SSL_VERIFY" == 1 && ! -r "$BZ_DB_SSL_CA_FILE" ]]; then
+  echo "Database TLS CA file is not readable: $BZ_DB_SSL_CA_FILE" >&2
+  exit 1
+fi
 cd /var/www/html
 apachectl start
 while :
@@ -11,27 +26,7 @@ do
   sleep 2
 done
 echo "Checking database..."
-cat - >/root/docker/myclient-root.cnf <<EOF
-[client]
-host='$BZ_DB_HOST'
-port=$BZ_DB_PORT
-user='root'
-password='$MARIADB_ROOT_PASSWORD'
-EOF
-TESTSQL="show databases like '$BZ_DB_NAME'"
-DBEXISTS=`echo "$TESTSQL" | mysql --defaults-file=/root/docker/myclient-root.cnf -BN`
-[ -z "$DBEXISTS" ] && (
-  echo "Database not found, creating..."
-  CREATESQL="
-CREATE DATABASE \`$BZ_DB_NAME\`;
-GRANT SELECT, INSERT,
-UPDATE, DELETE, INDEX, ALTER, CREATE, LOCK TABLES,
-CREATE TEMPORARY TABLES, DROP, REFERENCES ON \`$BZ_DB_NAME\`.*
-TO '$BZ_DB_USER'@'%' IDENTIFIED BY '$BZ_DB_PASS';
-FLUSH PRIVILEGES;
-"
-  echo "$CREATESQL" | mysql --defaults-file=/root/docker/myclient-root.cnf -BN
-)
+perl /root/docker/setup_database.pl || exit $?
 echo "Beginning checksetup..."
 perl -pi -e "
 s/%%BZ_ADMIN_EMAIL%%/'${BZ_ADMIN_EMAIL//@/\\@}'/;
@@ -45,6 +40,21 @@ s/%%BZ_DB_PASS%%/'${BZ_DB_PASS//@/\\@//$/\\$}'/;
 s@%%BZ_URLBASE%%@'${BZ_URLBASE//@/\\@}'@;
 s/%%BZ_ALLOW_UNSAFE_UTF8_CONVERSION%%/${BZ_ALLOW_UNSAFE_UTF8_CONVERSION:-0}/;
 " /root/docker/checksetup_answers.txt
+
+# Answers are evaluated in a restricted Perl compartment, so serialize the
+# values here instead of trying to read the environment from the answers file.
+perl -MData::Dumper -pi -e '
+  my %values = (
+    BZ_DB_SSL => $ENV{BZ_DB_SSL},
+    BZ_DB_SSL_VERIFY => $ENV{BZ_DB_SSL_VERIFY},
+    BZ_DB_SSL_CA_FILE => ($ENV{BZ_DB_SSL} && $ENV{BZ_DB_SSL_VERIFY})
+      ? $ENV{BZ_DB_SSL_CA_FILE} : "",
+  );
+  for my $key (keys %values) {
+    my $value = Data::Dumper->new([$values{$key}])->Terse(1)->Indent(0)->Dump;
+    s/%%\Q$key\E%%/$value/g;
+  }
+' /root/docker/checksetup_answers.txt
 
 CHECKSETUP_LOG=$(mktemp)
 perl checksetup.pl /root/docker/checksetup_answers.txt 2>&1 | tee "$CHECKSETUP_LOG"

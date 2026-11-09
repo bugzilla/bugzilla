@@ -7,12 +7,23 @@
   #%]
 
 <p>
-  Type some short text in the field below. Whitespaces will be replaced
-  by colons.
+  Choose the product chooser to use when entering bugs.
 </p>
 
 <p>
-  <label for="example_pref">Short text:</label>
-  <input type="text" id="example_pref" name="example_pref" size="30"
-         maxlength="50" value="[% example_pref FILTER html %]">
+  <label for="product_chooser">Product chooser:</label>
+  <select id="product_chooser" name="product_chooser">
+    <option value="pretty"[% ' selected="selected"' IF product_chooser == 'pretty' %]>
+      Pretty chooser
+    </option>
+    <option value="full"[% ' selected="selected"' IF product_chooser == 'full' %]>
+      Full chooser
+    </option>
+    <option value="small"[% ' selected="selected"' IF product_chooser == 'small' %]>
+      Small chooser
+    </option>
+  </select>
 </p>
+
+[%# You could put an example screenshot of each chooser type here for
+    the user to see what their choice does, for example. %]

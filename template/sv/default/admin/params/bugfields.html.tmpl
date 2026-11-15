@@ -1,0 +1,47 @@
+[%# This Source Code Form is subject to the terms of the Mozilla Public
+  # License, v. 2.0. If a copy of the MPL was not distributed with this
+  # file, You can obtain one at http://mozilla.org/MPL/2.0/.
+  #
+  # This Source Code Form is "Incompatible With Secondary Licenses", as
+  # defined by the Mozilla Public License, v. 2.0.
+  #%]
+[%
+   title = "Fält för $terms.bugs"
+   desc = "Välj de fält som ska visas"
+%]
+
+[% param_descs = {
+  useclassification => "Om detta är aktiverat kopplar Bugzilla varje produkt till en " _
+                       "viss klassificering. Du måste dock ha behörigheten " _
+                       "'editclassification' för att kunna redigera klassificeringar.",
+
+  usetargetmilestone => "Vill du använda fältet för målmilstolpe?",
+
+  useqacontact => "Vill du använda fältet för QA-kontakt?",
+
+  usestatuswhiteboard => "Vill du använda fältet för statusanslagstavla?",
+
+  use_see_also => 
+    "Vill du använda fältet Se även? Det låter dig hänvisa till"
+    _ " $terms.bugs i andra installationer. Även om du inaktiverar fältet"
+    _ " visas redan angivna relationer för $terms.bugs (URL:er) fortfarande"
+    _ " och kan tas bort.",
+
+  defaultpriority => "Detta är den prioritet som nya $terms.bugs får.",
+
+  defaultseverity => "Detta är den allvarlighetsgrad som nya $terms.bugs får.",
+
+  defaultplatform => "Detta är den plattform som är förvald i formuläret för att skapa ${terms.bug}.<br> " _
+                     "Du kan lämna fältet tomt: " _
+                     "då använder Bugzilla den plattform som webbläsaren " _
+                     "rapporterar att den körs på som standard.",
+
+  defaultopsys => "Detta är det operativsystem som är förvalt i formuläret för att skapa ${terms.bug}.<br> " _
+                  "Du kan lämna fältet tomt: " _
+                  "då använder Bugzilla det operativsystem som webbläsaren " _
+                  "rapporterar att den körs på som standard.",
+
+  collapsed_comment_tags => "En kommaseparerad lista med taggar som, när de används " _
+                            "på kommentarer, gör att de visas hopfällda som standard",
+  }
+%]

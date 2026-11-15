@@ -1,0 +1,28 @@
+[%# This Source Code Form is subject to the terms of the Mozilla Public
+  # License, v. 2.0. If a copy of the MPL was not distributed with this
+  # file, You can obtain one at http://mozilla.org/MPL/2.0/.
+  #
+  # This Source Code Form is "Incompatible With Secondary Licenses", as
+  # defined by the Mozilla Public License, v. 2.0.
+  #%]
+
+[% USE Bugzilla %]
+
+[% PROCESS "bug/show-header.html.tmpl" %]
+
+[% IF    title_tag == "bug_processed" %]
+  [% title = BLOCK %]
+    [% IF Bugzilla.cgi.param('id') %]
+      [%+ id FILTER html %]
+    [% ELSE %]
+      [% terms.Bugs %]
+    [% END %]
+    har behandlats
+  [% END %]
+[% ELSIF title_tag == "mid_air" %]
+  [% title = "Samtidig ändring!" %]
+[% END %]
+
+[% Hook.process('title') %]
+
+[% PROCESS global/header.html.tmpl %]

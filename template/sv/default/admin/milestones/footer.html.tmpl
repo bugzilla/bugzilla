@@ -1,0 +1,40 @@
+[%# This Source Code Form is subject to the terms of the Mozilla Public
+  # License, v. 2.0. If a copy of the MPL was not distributed with this
+  # file, You can obtain one at http://mozilla.org/MPL/2.0/.
+  #
+  # This Source Code Form is "Incompatible With Secondary Licenses", as
+  # defined by the Mozilla Public License, v. 2.0.
+  #%]
+
+<hr>
+
+<p>
+
+[% UNLESS no_add_milestone_link %]
+  <a title="Lägg till en milstolpe i produkten '[% product.name FILTER html %]'"
+     href="editmilestones.cgi?action=add&amp;product=
+          [%- product.name FILTER uri %]">Lägg till</a> en milstolpe.
+[% END %]
+
+[% IF milestone.name && !no_edit_milestone_link %]
+  Redigera milstolpen <a
+  title="Redigera milstolpen '[% milestone.name FILTER html %]' för produkten '
+         [%- product.name FILTER html %]'"
+  href="editmilestones.cgi?action=edit&amp;product=
+        [%- product.name FILTER uri %]&amp;milestone=
+        [%- milestone.name FILTER uri %]">
+        '[% milestone.name FILTER html %]'</a>.
+[% END %]
+
+[% UNLESS no_edit_other_milestones_link %]
+  Redigera andra milstolpar för produkten <a
+  href="editmilestones.cgi?product=
+        [%- product.name FILTER uri %]">'[% product.name FILTER html %]'</a>.
+
+[% END %]
+
+  Redigera produkten <a
+  href="editproducts.cgi?action=edit&amp;product=
+        [%- product.name FILTER uri %]">'[% product.name FILTER html %]'</a>.
+
+</p>

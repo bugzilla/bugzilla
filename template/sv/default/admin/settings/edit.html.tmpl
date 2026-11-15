@@ -1,0 +1,49 @@
+[%# This Source Code Form is subject to the terms of the Mozilla Public
+  # License, v. 2.0. If a copy of the MPL was not distributed with this
+  # file, You can obtain one at http://mozilla.org/MPL/2.0/.
+  #
+  # This Source Code Form is "Incompatible With Secondary Licenses", as
+  # defined by the Mozilla Public License, v. 2.0.
+  #%]
+
+[% PROCESS global/header.html.tmpl title = "Standardinställningar" style_urls = ['skins/standard/admin.css'] %]
+[% PROCESS "global/setting-descs.none.tmpl" %]
+
+<p>
+  Här kan du redigera värdena för standardinställningarna. Standardvärdet för
+  varje inställning gäller användare som inte har valt ett eget värde och
+  personer som inte är inloggade.
+</p>
+
+<div>
+  Kryssrutan ”Aktiverad” styr om användare kan välja den här inställningen:
+  <ul>
+    <li>När rutan är markerad kan användarna välja ett eget värde.</li>
+    <li>När rutan inte är markerad används standardvärdet för alla.</li>
+  </ul>
+</div>
+
+<form id="settings" method="post" action="editsettings.cgi">
+  <table id="admin_table">
+    <tr class="column_header"><th>Inställning</th><th>Standardvärde</th><th>Aktiverad</th></tr>
+    [% FOREACH name = settings.keys.sort %]
+      [% checkbox_name = name _ '-enabled' %]
+      <tr>
+        <td>[% setting_descs.$name OR name FILTER html %]</td>
+        <td><select name="[% name FILTER html %]" id="[% name FILTER html %]">
+          [% FOREACH x = settings.${name}.legal_values %]
+            <option value="[% x FILTER html %]"[% " selected=\"selected\"" IF x == settings.${name}.default_value %]>
+              [% setting_descs.${x} OR x FILTER html %]</option>
+          [% END %]
+        </select></td>
+        <td class="center"><input type="checkbox" name="[% checkbox_name FILTER html %]"
+          id="[% checkbox_name FILTER html %]"[% " checked=\"checked\"" IF settings.${name}.is_enabled %]></td>
+      </tr>
+    [% END %]
+  </table>
+  <input type="hidden" name="action" value="update">
+  <input type="hidden" name="token" value="[% token FILTER html %]">
+  <input type="submit" id="update" value="Skicka ändringar">
+</form>
+
+[% PROCESS global/footer.html.tmpl %]

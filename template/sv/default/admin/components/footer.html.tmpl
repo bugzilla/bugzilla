@@ -1,0 +1,36 @@
+[%# This Source Code Form is subject to the terms of the Mozilla Public
+  # License, v. 2.0. If a copy of the MPL was not distributed with this
+  # file, You can obtain one at http://mozilla.org/MPL/2.0/.
+  #
+  # This Source Code Form is "Incompatible With Secondary Licenses", as
+  # defined by the Mozilla Public License, v. 2.0.
+  #%]
+
+<hr>
+
+<p>
+Redigera
+
+[% IF comp && !no_edit_component_link %]
+  komponenten <a 
+  title="Redigera komponenten '[% comp.name FILTER html %]'"
+  href="editcomponents.cgi?action=edit&amp;product=
+  [%- product.name FILTER uri %]&amp;component=[% comp.name FILTER uri %]">
+   '[% comp.name FILTER html %]'</a>
+  eller redigera
+[% END %]
+
+[% IF !no_edit_other_components_link %]
+andra komponenter i produkten <a 
+  title="Välj en komponent i produkten '[% product.name FILTER html %]' att redigera"
+  href="editcomponents.cgi?product=
+  [%- product.name FILTER uri %]">'[% product.name FILTER html %]'</a>,
+  eller redigera
+[% END %]
+
+produkten <a 
+  title="Redigera produkten '[% product.name FILTER html %]'"
+  href="editproducts.cgi?action=edit&amp;product=
+  [%- product.name FILTER uri %]">'[% product.name FILTER html %]'</a>.
+
+</p>

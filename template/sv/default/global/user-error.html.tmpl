@@ -1583,88 +1583,86 @@
     [% title = "Felaktigt formaterad sökning" %]
     [% terms.Bugzilla %] kan inte tolka sökningen korrekt:
     <em>[% string FILTER html %]</em>.<br>
-    If you use quotes to enclose strings, make sure both quotes are present.
-    If you really want to look for a quote in a string, type \" instead of ".
-    For instance, <em>"I'm so \"special\", really"</em> (with quotes) will be
-    interpreted as <em>I'm so "special", really</em>.
+    Om du använder citattecken för att avgränsa strängar måste båda finnas med.
+    Om du vill söka efter ett citattecken i en sträng skriver du \" i stället för ".
+    Exempelvis tolkas <em>"I'm so \"special\", really"</em> (med citattecken) som
+    <em>I'm so "special", really</em>.
 
   [% ELSIF error == "quicksearch_unknown_field" %]
-    [% title = "QuickSearch Error" %]
-    There is a problem with your search:
+    [% title = "QuickSearch-fel" %]
+    Det finns ett problem med sökningen:
     [% FOREACH field = unknown %]
-      <p><code>[% field FILTER html %]</code> is not a valid field name.</p>
+      <p><code>[% field FILTER html %]</code> är inte ett giltigt fältnamn.</p>
     [% END %]
     [% FOREACH field = ambiguous.keys %]
-      <p><code>[% field FILTER html %]</code> matches more than one field:
+      <p><code>[% field FILTER html %]</code> matchar fler än ett fält:
         [%+ ambiguous.${field}.join(', ') FILTER html %]</p>
     [% END %]
 
     [% IF unknown.size %]
-      <p>The legal field names are 
-        <a href="page.cgi?id=quicksearch.html#fields">listed here</a>.</p>
+      <p>De giltiga fältnamnen
+        <a href="page.cgi?id=quicksearch.html#fields">finns här</a>.</p>
     [% END %]
 
   [% ELSIF error == "quip_too_long" %]
-    [% title = "Quip Too Long" %]
-    You entered a quip with a length of [% length FILTER none %] characters, 
-    but the maximum allowed length is [% constants.MAX_QUIP_LENGTH FILTER none %] 
-    characters.
+    [% title = "Citatet är för långt" %]
+    Du angav ett citat med [% length FILTER none %] tecken, men högsta tillåtna
+    längd är [% constants.MAX_QUIP_LENGTH FILTER none %] tecken.
 
   [% ELSIF error == "reassign_to_empty" %]
-    [% title = "Illegal Reassignment" %]
-    To reassign [% terms.abug %], you must provide an address for
-    the new assignee.
+    [% title = "Ogiltig omtilldelning" %]
+    För att tilldela om [% terms.abug %] måste du ange en adress till
+    den nya ansvariga personen.
 
   [% ELSIF error == "report_axis_invalid" %]
-    [% title = "Invalid Axis" %]
-    <em>[% val FILTER html %]</em> is not a valid value for
-    [%+ IF    fld == "x" %]the horizontal axis
-    [%+ ELSIF fld == "y" %]the vertical axis
-    [%+ ELSIF fld == "z" %]the multiple tables/images
-    [%+ ELSE %]a report axis[% END %] field.
+    [% title = "Ogiltig axel" %]
+    <em>[% val FILTER html %]</em> är inte ett giltigt värde för fältet
+    [%+ IF    fld == "x" %]horisontell axel
+    [%+ ELSIF fld == "y" %]vertikal axel
+    [%+ ELSIF fld == "z" %]flera tabeller/bilder
+    [%+ ELSE %]rapportaxel[% END %].
 
   [% ELSIF error == "report_name_missing" %]
-    [% title = "No Report Name Specified" %]
-    You must enter a name for your report.
+    [% title = "Inget rapportnamn har angetts" %]
+    Du måste ange ett namn för rapporten.
 
   [% ELSIF error == "report_access_denied" %]
-    [% title = "Report Access Denied" %]
-    You cannot access this report.
+    [% title = "Åtkomst till rapport nekad" %]
+    Du kan inte komma åt rapporten.
 
   [% ELSIF error == "require_component" %]
-    [% title = "Component Needed" %]
-    To file this [% terms.bug %], you must first choose a component.
-    If necessary, just guess.
+    [% title = "Komponent krävs" %]
+    För att rapportera [% terms.bug %] måste du först välja en komponent.
+    Gissa om det behövs.
 
   [% ELSIF error == "relationship_loop_single" %]
     [% title = "Relationship Loop Detected" %]
     [% field_descs.$field_name FILTER html %]
     for [% terms.bug %] [%+ bug_id FILTER html %]
-    has a circular dependency on [% terms.bug %] [%+ dep_id FILTER html %].
+    har ett cirkulärt beroende av [% terms.bug %] [%+ dep_id FILTER html %].
 
   [% ELSIF error == "request_queue_group_invalid" %]
-    The group field <em>[% group FILTER html %]</em> is invalid.
+    Gruppfältet <em>[% group FILTER html %]</em> är ogiltigt.
 
   [% ELSIF error == "require_new_password" %]
-    [% title = "New Password Needed" %]
-    You cannot change your password without choosing a new one.
+    [% title = "Nytt lösenord krävs" %]
+    Du kan inte ändra lösenordet utan att välja ett nytt.
 
   [% ELSIF error == "required_field" %]
-    [% title = "Field Must Be Set" %]
-    A value must be set for the '[% field_descs.${field.name} FILTER html %]'
-    field.
+    [% title = "Fältet måste anges" %]
+    Ett värde måste anges för fältet ”[% field_descs.${field.name} FILTER html %]”.
 
   [% ELSIF error == "require_summary" %]
-    [% title = "Summary Needed" %]
-    You must enter a summary for this [% terms.bug %].
+    [% title = "Sammanfattning krävs" %]
+    Du måste ange en sammanfattning för [% terms.bug %].
 
   [% ELSIF error == "resolution_cant_clear" %]
     [% terms.Bug %] [%+ bug_id FILTER bug_link(bug_id) FILTER none %] is 
-    closed, so you cannot clear its resolution.
+    är stängd och därför kan du inte rensa dess lösning.
 
   [% ELSIF error == "resolution_not_allowed" %]
-    [% title = "Resolution Not Allowed" %]
-    You cannot set a resolution for open [% terms.bugs %].
+    [% title = "Lösning är inte tillåten" %]
+    Du kan inte ange en lösning för öppna [% terms.bugs %].
 
   [% ELSIF error == "saved_search_used_by_whines" %]
     [% title = "Saved Search In Use" %]

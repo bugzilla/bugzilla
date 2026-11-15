@@ -1,0 +1,140 @@
+[%# This Source Code Form is subject to the terms of the Mozilla Public
+  # License, v. 2.0. If a copy of the MPL was not distributed with this
+  # file, You can obtain one at http://mozilla.org/MPL/2.0/.
+  #
+  # This Source Code Form is "Incompatible With Secondary Licenses", as
+  # defined by the Mozilla Public License, v. 2.0.
+  #%]
+[%
+   title = "Användarautentisering"
+   desc = "Ställ in autentiseringsprinciper"
+%]
+
+[% param_descs = {
+  auth_env_id => "Miljövariabel som används av ett externt autentiseringssystem " _
+                 "för att lagra en unik identifierare för varje användare. Lämna den tom " _
+                 "om någon sådan saknas eller om denna autentiseringsmetod " _
+                 "inte används.",
+
+  auth_env_email => "Miljövariabel som används av ett externt autentiseringssystem " _
+                    "för att lagra varje användares e-postadress. Detta är ett obligatoriskt " _
+                    "fält för miljöbaserad autentisering. Lämna fältet tomt " _
+                    "om du inte ska använda funktionen.",
+
+  auth_env_realname => "Miljövariabel som används av ett externt autentiseringssystem " _
+                       "för att lagra användarens riktiga namn. Lämna fältet tomt om " _
+                       "någon sådan saknas eller om denna autentiseringsmetod inte " _
+                       "används.",
+
+  user_info_class => "Mekanism(er) som ska användas för att hämta användarens inloggningsuppgifter.
+                      Fler än en kan väljas. Om den första inte returnerar något
+                      provas den andra och så vidare.<br>
+                      Typerna är:
+                      <dl>
+                        <dt>CGI</dt>
+                        <dd>
+                          Begär användarnamn och lösenord via ett CGI-formulär.
+                        </dd>
+                        <dt>Env</dt>
+                        <dd>
+                          Information om en redan autentiserad användare skickas i systemets
+                          miljövariabler.
+                        </dd>
+                      </dl>",
+
+  user_verify_class => "Mekanism(er) som ska användas för att verifiera, alltså autentisera, information
+                        som hämtats av user_info_class.
+                        Fler än en kan väljas. Om den första inte hittar användaren
+                        provas den andra och så vidare.<br>
+                        Typerna är:
+                        <dl>
+                          <dt>DB</dt>
+                          <dd>
+                            Bugzillas inbyggda autentisering. Detta är det vanligaste
+                            valet.
+                          </dd>
+                          <dt>RADIUS</dt>
+                          <dd>
+                            RADIUS-autentisering via en RADIUS-server.
+                            Mer information finns i Bugzillas dokumentation.
+                            Metoden kräver att
+                            <a href=\"?section=radius\">ytterligare
+                            parametrar</a> anges.
+                          </dd>
+                          <dt>LDAP</dt>
+                          <dd>
+                            LDAP-autentisering via en LDAP-server.
+                            Mer information finns i Bugzillas dokumentation.
+                            Metoden kräver att
+                            <a href=\"?section=ldap\">ytterligare
+                            parametrar</a> anges.
+                          </dd>
+                        </dl>",
+
+  rememberlogin => "Styr hanteringen av sessionskakor
+                    <ul>
+                      <li>
+                        on - sessionskakor upphör aldrig att gälla. Användaren behöver bara logga in
+                        en gång per webbläsare.
+                      </li>
+                      <li>
+                        off - sessionskakor gäller tills användarens session avslutas. Användaren
+                        måste logga in i varje ny webbläsarsession.
+                      </li>
+                      <li>
+                        defaulton/defaultoff - standardbeteende enligt beskrivningen
+                        ovan, men användaren kan välja om Bugzilla ska
+                        komma ihåg inloggningen eller inte.
+                      </li>
+                    </ul>",
+
+  requirelogin => "Om alternativet är aktiverat kräver all åtkomst till systemet utöver " _
+                  "startsidan inloggning. Anonyma användare tillåts inte.",
+
+  webservice_email_filter =>
+    "Filtrera e-postadresser som returneras av WebService API beroende på " _
+    "om användaren är inloggad eller inte. Det fungerar på samma sätt som " _
+    "webbgränssnittet för närvarande filtrerar e-postadresser. Om <var>requirelogin</var> " _
+    "är aktiverat har parametern ingen effekt eftersom användare måste vara inloggade " _
+    "för att kunna använda Bugzilla.",
+
+  emailregexp =>
+    "Anger det reguljära uttryck som ska användas för giltiga e-postadresser. " _
+    "Standardvärdet försöker matcha fullständiga e-postadresser. " _
+    "Använd <kbd>.*</kbd> för att godta alla e-postadresser som följer " _
+    "specifikationen <a href=\"http://tools.ietf.org/html/rfc2822#section-3.4.1\">RFC 2822</a>. " _
+    "Ett annat vanligt värde är <kbd>^[^@]+$</kbd>, " _
+    "vilket innebär 'lokala användarnamn, @ är inte tillåtet'.",
+
+  emailregexpdesc => "Beskrivningen förklarar vilka giltiga adresser som " _
+                     "tillåts av parametern <var>emailregexp</var>.",
+
+  emailsuffix => "En sträng som läggs till varje e-postadress när e-post faktiskt " _
+                 "skickas till den adressen. Detta är användbart om du har ändrat " _
+                 "parametern <var>emailregexp</var> så att bara lokala användarnamn tillåts, " _
+                 "men vill att e-post ska levereras till username@my.local.hostname.",
+
+  createemailregexp => "Anger det skiftlägesokänsliga reguljära uttryck som används för e-postadresser som " _
+                       "får registrera sig själva med funktionen 'Nytt konto'. Standardvärdet " _
+                       "(.*) tillåter att vilket konto som helst som matchar emailregexp " _
+                       "skapas. Om parametern lämnas tom får inga användare skapa egna konton " _
+                       "och alla konton måste skapas av en administratör.",
+
+  password_complexity =>
+    "Ange lösenordens komplexitetskrav. I alla fall måste lösenorden " _
+    "bestå av minst ${constants.USER_PASSWORD_MIN_LENGTH} tecken." _
+    "<ul><li>no_constraints - inga komplexitetskrav.</li>" _
+    "<li>mixed_letters - lösenorden måste innehålla minst en VERSAL och en gemen " _
+    "bokstav.</li>" _
+    "<li>letters_numbers - lösenorden måste innehålla minst en VERSAL, en " _
+    "gemen bokstav och en siffra.</li>" _
+    "<li>letters_numbers_specialchars - lösenorden måste innehålla minst en " _
+    "bokstav, en siffra och ett specialtecken.</li></ul>"
+
+  password_check_on_login =>
+    "Om parametern är aktiverad kontrollerar $terms.Bugzilla att lösenordet uppfyller de aktuella " _
+    "reglerna för komplexitet och minsta längd när användaren loggar in " _
+    "i webbgränssnittet för ${terms.Bugzilla}. Om det inte gör det kan användaren " _
+    "inte logga in och får ett meddelande om att återställa lösenordet."
+  }
+%]

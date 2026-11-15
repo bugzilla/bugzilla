@@ -1,0 +1,37 @@
+[%# This Source Code Form is subject to the terms of the Mozilla Public
+  # License, v. 2.0. If a copy of the MPL was not distributed with this
+  # file, You can obtain one at http://mozilla.org/MPL/2.0/.
+  #
+  # This Source Code Form is "Incompatible With Secondary Licenses", as
+  # defined by the Mozilla Public License, v. 2.0.
+  #%]
+
+[% PROCESS "bug/show-header.html.tmpl" %]
+[% PROCESS global/header.html.tmpl
+  title = "$terms.Bug $id har skickats &ndash; $filtered_desc"
+  header = "$terms.Bug&nbsp;$id har skickats"
+%]
+
+[% header_done = 1 %]
+
+[% FOREACH item = sentmail %]
+  [% PROCESS bug/process/results.html.tmpl
+     type = item.type
+     id = item.id
+     sent_bugmail = item
+   %]
+[% END %]
+
+<br>
+
+<hr>
+
+[% PROCESS bug/edit.html.tmpl %]
+
+<hr>
+
+[% PROCESS bug/navigate.html.tmpl bottom_navigator => 1 %]
+
+<br>
+
+[% PROCESS global/footer.html.tmpl %]

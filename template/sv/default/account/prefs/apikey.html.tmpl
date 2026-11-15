@@ -1,0 +1,80 @@
+[%# This Source Code Form is subject to the terms of the Mozilla Public
+  # License, v. 2.0. If a copy of the MPL was not distributed with this
+  # file, You can obtain one at http://mozilla.org/MPL/2.0/.
+  #
+  # This Source Code Form is "Incompatible With Secondary Licenses", as
+  # defined by the Mozilla Public License, v. 2.0.
+  #%]
+
+[%# INTERFACE:
+  # api_keys: array. Array of api keys this user has.
+  # any_revoked: boolean. True is any keys have been revoked.
+  #%]
+
+<p>
+  API-nycklar används för att autentisera anrop till WebService-API:t. Du kan
+  skapa fler än en API-nyckel vid behov. Varje API-nyckel kan ha en valfri
+  beskrivning som hjälper dig att hålla reda på vad nyckeln används till.
+  Dokumentation om inloggning finns
+  <a href="[% docs_urlbase FILTER html %]api/core/v1/general.html#authentication">här</a>.
+</p>
+
+<h3>Befintliga API-nycklar</h3>
+
+<p>Här kan du ändra beskrivningen samt återkalla eller återaktivera befintliga API-nycklar.</p>
+
+<table id="email_prefs">
+  <tr class="column_header">
+    <th>API-nyckel</th>
+    <th>Beskrivning (valfritt)</th>
+    <th>Senast använd</th>
+    <th>Återkallad</th>
+  </tr>
+
+  [% FOREACH api_key IN api_keys %]
+    <tr[% IF api_key.revoked %] class="apikey_revoked"[% END %]>
+      <td>[% api_key.api_key FILTER html %]</td>
+      <td>
+        <input name="description_[% api_key.id FILTER html %]"
+          id="description_[% api_key.id FILTER html %]"
+          value="[% api_key.description FILTER html %]">
+      </td>
+      [% IF api_key.last_used %]
+        <td>[% api_key.last_used FILTER time %]</td>
+      [% ELSE %]
+        <td class="center"><i>aldrig använd</i></td>
+      [% END %]
+      <td class="center">
+        <input type="checkbox" value="1"
+          name="revoked_[% api_key.id FILTER html %]"
+          id="revoked_[% api_key.id FILTER html %]"
+          [% IF api_key.revoked %] checked="checked" [% END %]>
+      </td>
+    </tr>
+  [% END %]
+  [% UNLESS api_keys.size %]
+    <tr><td colspan="4">Du har inga API-nycklar.</td></tr>
+  [% END %]
+</table>
+
+[% IF any_revoked %]
+  <a id="apikey_revoked_controller" class="bz_default_hidden"
+     href="javascript:TUI_toggle_class('apikey_revoked')">Dölj återkallade nycklar</a>
+  <script type="text/javascript">
+    TUI_hide_default('apikey_revoked');
+    TUI_alternates['apikey_revoked'] = 'Visa återkallade nycklar';
+    YAHOO.util.Dom.removeClass('apikey_revoked_controller',
+                               'bz_default_hidden');
+  </script>
+[% END %]
+
+<h3>Ny API-nyckel</h3>
+
+<p>Du kan skapa en ny API-nyckel genom att markera kryssrutan nedan och
+valfritt ange en beskrivning. API-nyckeln genereras slumpmässigt åt dig.</p>
+
+<p>
+  <input type="checkbox" name="new_key" id="new_key">
+  Skapa en ny API-nyckel med valfri beskrivning
+  <input name="new_description" id="new_description">
+</p>

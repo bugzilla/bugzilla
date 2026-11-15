@@ -1,0 +1,63 @@
+[%# This Source Code Form is subject to the terms of the Mozilla Public
+  # License, v. 2.0. If a copy of the MPL was not distributed with this
+  # file, You can obtain one at http://mozilla.org/MPL/2.0/.
+  #
+  # This Source Code Form is "Incompatible With Secondary Licenses", as
+  # defined by the Mozilla Public License, v. 2.0.
+  #%]
+
+[% 
+   title = "Allmänt"
+   desc = "Övriga allmänna inställningar som inte är nödvändiga." 
+%]
+
+[% param_descs = {
+  maintainer => 
+    "E-postadressen till personen som underhåller denna installation "
+    _ "av Bugzilla.",
+
+  utf8 => 
+    "Använd UTF-8-kodning (Unicode) för all text i ${terms.Bugzilla}. Nya"
+    _ " installationer bör aktivera detta för att undvika problem med teckenkodning."
+    _ " <strong>Befintliga databaser bör aktivera detta först efter att data har"
+    _ " konverterats från äldre teckenkodningar till UTF-8 med skriptet"
+    _ " <kbd>contrib/recode.pl</kbd></strong>."
+    _ " <p>Observera att om du ändrar denna parameter måste du köra"
+    _ " <kbd>checksetup.pl</kbd> igen omedelbart efteråt.</p>",
+
+  utf8_collate =>
+    "Sorteringsordningen som ska användas i databastabeller. Parametern"
+    _ " anges automatiskt av checksetup.pl.",
+
+  shutdownhtml => 
+    "Om detta fält inte är tomt stängs Bugzilla av helt och den här texten"
+    _ " visas i stället för alla sidor i ${terms.Bugzilla}.",
+
+  announcehtml => 
+    "Om detta fält inte är tomt visar Bugzilla innehållet i fältet högst upp"
+    _ " på varje HTML-sida. HTML-koden du anger i fältet omsluts inte av något."
+    _ " Du kan vilja omsluta den med en <code>&lt;div&gt;</code>. Ge div-elementet"
+    _ " <em>id=\"message\"</em> för grön text i en röd ruta eller <em>class=\"bz_private\"</em>"
+    _ " för mörkröd text på röd bakgrund. Allt som definieras i "
+    _ " <code>skins/standard/global.css</code> eller <code>skins/custom/global.css</code>"
+    _ " fungerar. Använd <em>class=\"center\"</em> för centrerad text.",
+
+  upgrade_notification => 
+    "Bugzilla kan informera dig när en ny utgåva finns tillgänglig."
+    _ " Meddelandet visas på startsidan för $terms.Bugzilla,"
+    _ " men bara för administratörer."
+    _ " <ul><li>'development_snapshot' meddelar dig om den senaste släppta "
+    _ "utvecklingsversionen.</li>"
+    _ " <li>'latest_stable_release' meddelar dig om den senaste tillgängliga"
+    _ " utgåvan på den senaste stabila grenen. Den grenen kan skilja sig från"
+    _ " den gren som installationen bygger på.</li>"
+    _ " <li>'stable_branch_release' meddelar dig bara om nya utgåvor"
+    _ " som motsvarar den gren som installationen bygger på."
+    _ " Om du kör en utgåvekandidat får du också meddelanden om nyare"
+    _ " utgåvekandidater.</li>"
+    _ " <li>'disabled' meddelar dig aldrig om nya utgåvor och ingen"
+    _ " anslutning upprättas till en fjärrserver.</li></ul>"
+    _ " <p>Observera att om Bugzilla-servern kräver en proxy för att"
+    _ " få åtkomst till internet kan du även behöva ange parametern <var>proxy_url</var>"
+    _ " i avsnittet Avancerat.</p>",
+} %]

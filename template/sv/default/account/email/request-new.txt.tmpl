@@ -1,0 +1,26 @@
+From: [% Param('mailfrom') %]
+To: [% email %]
+Subject: [% terms.Bugzilla %]: bekräfta att du vill skapa ett konto
+X-Bugzilla-Type: admin
+
+[%+ terms.Bugzilla %] har tagit emot en begäran om att skapa ett användarkonto
+med din e-postadress ([% email %]).
+
+Fortsätt skapa kontot med den här e-postadressen genom att öppna följande länk
+före [% expiration_ts FILTER time("%e %B %Y kl. %H:%M %Z") %]:
+
+[%+ urlbase %]token.cgi?t=[% token FILTER uri %]&a=request_new_account
+
+Om du inte öppnar länken före [% expiration_ts FILTER time("%e %B %Y kl. %H:%M %Z") %], eller vill använda en annan e-postadress, kan du börja om här:
+
+[%+ urlbase %]createaccount.cgi
+
+[% IF Param('createemailregexp') == '.*' && Param('emailsuffix') == '' %]
+INTEGRITETSINFORMATION: [% terms.Bugzilla %] är ett öppet system för felhantering. Aktivitet i de flesta [%+ terms.bugs %], inklusive e-postadresser, är synlig för allmänheten. Vi rekommenderar att du använder ett sekundärt konto eller en kostnadsfri e-posttjänst för att undvika skräppost i din primära inkorg.
+[% END %]
+
+Om du inte vill skapa ett konto, eller om begäran gjordes av misstag, kan du inte göra något eller öppna följande länk:
+
+[%+ urlbase %]token.cgi?t=[% token FILTER uri %]&a=cancel_new_account
+
+Om länkarna inte fungerar, eller om du har andra frågor om ditt konto, kontaktar du administratören på [% Param('maintainer') %].

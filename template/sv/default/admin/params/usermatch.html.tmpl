@@ -1,0 +1,28 @@
+[%# This Source Code Form is subject to the terms of the Mozilla Public
+  # License, v. 2.0. If a copy of the MPL was not distributed with this
+  # file, You can obtain one at http://mozilla.org/MPL/2.0/.
+  #
+  # This Source Code Form is "Incompatible With Secondary Licenses", as
+  # defined by the Mozilla Public License, v. 2.0.
+  #%]
+[%
+   title = "Användarmatchning"
+   desc = "Ställ in principer för användarmatchning"
+%]
+
+[% param_descs = {
+  usemenuforusers => "Om alternativet är aktiverat erbjuder $terms.Bugzilla en lista " _
+                     "att välja ur, i stället för ett textfält, när en användare ska " _
+                     "väljas. Alternativet bör inte aktiveras på webbplatser med många användare.",
+
+  ajax_user_autocompletion => "Om alternativet är aktiverat visas en lista med matchningar som " _
+                              "kan väljas när du skriver i vissa användarfält.",
+
+  maxusermatches => "Sök inte efter fler matchningar än detta antal.<br> " _
+                    "Om värdet är ”1” visas inga användare när flera matchar. " _
+                    "Detta är användbart av integritetsskäl.<br> " _
+                    "Värdet noll innebär ingen gräns.",
+
+  confirmuniqueusermatch => "Om en bekräftelsesida ska visas när endast en användare " _
+                            "matchar en sökning." }
+%]

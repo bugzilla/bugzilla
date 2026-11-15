@@ -1,0 +1,99 @@
+[%# This Source Code Form is subject to the terms of the Mozilla Public
+  # License, v. 2.0. If a copy of the MPL was not distributed with this
+  # file, You can obtain one at http://mozilla.org/MPL/2.0/.
+  #
+  # This Source Code Form is "Incompatible With Secondary Licenses", as
+  # defined by the Mozilla Public License, v. 2.0.
+  #%]
+
+[% INCLUDE global/header.html.tmpl
+   title = "Redigera arbetsflöde"
+   style_urls = ['skins/standard/admin.css']
+%]
+
+<script type="text/javascript">
+<!--
+  function toggle_cell(cell) {
+    if (cell.checked)
+      cell.parentNode.className = "checked";
+    else
+      cell.parentNode.className = "";
+  }
+//-->
+</script>
+
+<p>
+  På den här sidan anger du vilka statusövergångar som är giltiga i arbetsflödet.
+  För kompatibilitet med äldre versioner av Bugzilla visas vid återöppning av
+  [% terms.abug %] bara [% display_value("bug_status", "UNCONFIRMED") FILTER html %] eller
+  [%+ display_value("bug_status", "REOPENED") FILTER html %], om arbetsflödet tillåter det,
+  men inte båda. Valet beror på om [% terms.bug %] någon gång har bekräftats.
+  Därför är det lämpligt att tillåta båda övergångarna och låta Bugzilla välja
+  rätt övergång.
+</p>
+
+<form id="workflow_form" method="POST" action="editworkflow.cgi">
+<table id="workflow">
+  <tr>
+    <th colspan="2">&nbsp;</th>
+    <th colspan="[% statuses.size FILTER html %]" class="title">Till</th>
+  </tr>
+
+  <tr>
+    <th rowspan="[% statuses.size + 2 FILTER html %]" class="title">Från</th>
+    <th>&nbsp;</th>
+    [% FOREACH status = statuses %]
+      <th class="[% status.is_open ? "open-status" : "closed-status" %] center">
+        [% display_value("bug_status", status.name) FILTER html %]
+      </th>
+    [% END %]
+  </tr>
+
+  [% p = [{id => 0, name => "{Start}", is_open => 1}] %]
+  [% FOREACH status = p.merge(statuses) %]
+    <tr class="highlight">
+      <th class="[% status.is_open ? "open-status" : "closed-status" %]">
+        [% display_value("bug_status", status.name) FILTER html %]
+      </th>
+
+      [% FOREACH new_status = statuses %]
+        [% IF status.id != new_status.id %]
+          [% checked = workflow.${status.id}.${new_status.id}.defined ? 1 : 0 %]
+          [% mandatory = (status.id && new_status.name == Param("duplicate_or_move_bug_status")) ? 1 : 0 %]
+          <td class="[% "checked" IF checked || mandatory %]"
+              title="Från [% status.name FILTER html %] till [% new_status.name FILTER html %]">
+            <input type="checkbox" name="w_[% status.id %]_[% new_status.id %]"
+                   id="w_[% status.id %]_[% new_status.id %]" onclick="toggle_cell(this)"
+                   [%+ "checked='checked'" IF checked || mandatory %]
+                   [%+ "disabled='disabled'" IF mandatory %]>
+          </td>
+        [% ELSE %]
+          <td class="forbidden">&nbsp;</td>
+        [% END %]
+      [% END %]
+    </tr>
+  [% END %]
+</table>
+
+<p>
+  När [% terms.abug %] markeras som en dubblett av en annan eller flyttas till
+  en annan installation sätts statusen automatiskt till
+  <b>[% display_value("bug_status", Param("duplicate_or_move_bug_status")) FILTER html %]</b>.
+  Alla övergångar till den här statusen måste därför vara giltiga, vilket är
+  anledningen till att de inte kan redigeras ovan.<br>
+  Obs! Du kan ändra inställningen på sidan
+  <a href="editparams.cgi?section=bugchange#duplicate_or_move_bug_status">Inställningar</a>
+  genom att redigera parametern <i>duplicate_or_move_bug_status</i>.
+</p>
+
+<p class="center">
+  <input type="hidden" name="action" value="update">
+  <input type="hidden" name="token" value="[% token FILTER html %]">
+  <input type="submit" id="update_workflow" value="Spara ändringar"> -
+  <a href="editworkflow.cgi">Avbryt ändringar</a> -
+  <a href="editworkflow.cgi?action=edit_comment">Visa kommentarer som krävs vid statusövergångar</a>
+</p>
+
+</form>
+
+[% INCLUDE global/footer.html.tmpl %]

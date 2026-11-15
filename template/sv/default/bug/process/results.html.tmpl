@@ -1,0 +1,35 @@
+[%# This Source Code Form is subject to the terms of the Mozilla Public
+  # License, v. 2.0. If a copy of the MPL was not distributed with this
+  # file, You can obtain one at http://mozilla.org/MPL/2.0/.
+  #
+  # This Source Code Form is "Incompatible With Secondary Licenses", as
+  # defined by the Mozilla Public License, v. 2.0.
+  #%]
+
+[% UNLESS header_done %]
+  [% PROCESS bug/process/header.html.tmpl %]
+[% END %]
+
+[% DEFAULT type="bug" %]
+
+[% link = BLOCK %][% terms.bug %] [%+ id FILTER bug_link(id) FILTER none %][% END %]
+
+[%
+  title = {
+    'bug' => "Ändringar har skickats för $link" ,
+    'dupe' => "Dubblettmarkering har lagts till för $link" ,
+    'dep' => "Kontrollerar beroendeändringar för $link" ,
+    'created' => "$link har skapats" ,
+    'move' => "$link har flyttats till en annan databas" ,
+  }
+%]
+
+[% Hook.process('title') %]
+
+<dl>
+  <dt>[% title.$type.ucfirst %]</dt>
+  <dd>
+    [% PROCESS "bug/process/bugmail.html.tmpl" mailing_bugid = id %]
+    [% Hook.process("links") %]
+  </dd>
+</dl>

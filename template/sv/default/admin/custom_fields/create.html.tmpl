@@ -1,0 +1,50 @@
+[%# This Source Code Form is subject to the terms of the Mozilla Public
+  # License, v. 2.0. If a copy of the MPL was not distributed with this
+  # file, You can obtain one at http://mozilla.org/MPL/2.0/.
+  #
+  # This Source Code Form is "Incompatible With Secondary Licenses", as
+  # defined by the Mozilla Public License, v. 2.0.
+  #%]
+
+[% javascript = BLOCK %]
+  [% INCLUDE "admin/custom_fields/cf-js.js.tmpl" %]
+[% END %]
+
+[% PROCESS global/header.html.tmpl
+           title = "Lägg till ett anpassat fält"
+           onload = "document.getElementById('new_bugmail').disabled = true;"
+           javascript_urls = [ 'js/util.js' ]
+           doc_section = "administering/custom-fields.html#adding-custom-fields"
+           style_urls = ['skins/standard/admin.css']
+%]
+
+<script type="text/javascript">
+  YAHOO.util.Event.onDOMReady(function() {onChangeType(document.getElementById('type'))});
+</script>
+
+<p>
+  Anpassade fält kan göra Bugzillas gränssnitt svårt att använda. Många
+  administratörer lägger till många egna fält och får sedan höra att gränssnittet
+  är för komplicerat. Fundera därför noga innan du lägger till ett anpassat fält.
+  Bugzilla kanske redan har funktionen du behöver, men den kan behöva aktiveras.
+</p>
+
+<ul>
+  <li>Namn på anpassade fält måste börja med ”cf_” för att skiljas från
+      standardfält. Om du utelämnar ”cf_” läggs det till automatiskt.</li>
+  <li>Beskrivningar är korta texter som beskriver fältet och används som etikett
+      för fältet i användargränssnittet.</li>
+</ul>
+
+<form id="add_field" action="editfields.cgi" method="GET">
+  [% PROCESS "admin/custom_fields/edit-common.html.tmpl" %]
+  <input type="hidden" name="action" value="new">
+  <input type="hidden" name="token" value="[% token FILTER html %]">
+  <input type="submit" id="create" value="Skapa">
+</form>
+
+<p>
+  <a href="editfields.cgi">Tillbaka till listan över befintliga anpassade fält</a>
+</p>
+
+[% PROCESS global/footer.html.tmpl %]

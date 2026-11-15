@@ -1,0 +1,45 @@
+[%# This Source Code Form is subject to the terms of the Mozilla Public
+  # License, v. 2.0. If a copy of the MPL was not distributed with this
+  # file, You can obtain one at http://mozilla.org/MPL/2.0/.
+  #
+  # This Source Code Form is "Incompatible With Secondary Licenses", as
+  # defined by the Mozilla Public License, v. 2.0.
+  #%]
+[%
+   title = "Diagram"
+   desc = "Valfria inställningar för att skapa diagram"
+%]
+
+[% param_descs = {
+  webdotbase => "Det går att visa diagram över beroenden mellan ${terms.bugs}. Du kan ange " _
+                 "något av följande för parametern:
+                 <ul>
+                   <li>
+                     En fullständig sökväg till 'dot' (en del av
+                     <a href=\"http://www.graphviz.org\">GraphViz</a>) skapar
+                     diagrammen lokalt.
+                   </li>
+                   <li>
+                     Ett URL-prefix som pekar på en installation av paketet
+                     <a href=\"http://www.research.att.com/~north/cgi-bin/webdot.cgi\">webdot</a>
+                     skapar diagrammen på annan dator.
+                   </li>
+                   <li>
+                     Ett tomt värde stänger av beroendediagram.
+                   </li>
+                 </ul>
+                 Standardvärdet är en publikt tillgänglig webdot-server. Om du ändrar
+                 värdet måste du säkerställa att webdot-servern kan läsa filer från din
+                 webdot-katalog. I Apache görs detta genom att redigera filen .htaccess;
+                 i andra system kan andra åtgärder krävas. Du kan köra <kbd>checksetup.pl</kbd>
+                 för att återskapa .htaccess-filen om den har gått förlorad.",
+
+  font_file => "Du kan ange den fullständiga sökvägen till en TrueType- eller OpenType-typsnittsfil " _
+               "som ska användas för att visa text (etiketter, förklaringar osv.) i diagram och " _
+               "grafiska rapporter. För att stödja så många språk som möjligt rekommenderar vi ett " _
+               "typsnitt som <a href=\"http://unifoundry.com/unifont.html\">Unifont</a>, som har stöd " _
+               "för alla utskrivbara tecken i Basic Multilingual Plane. Om parametern lämnas tom används " _
+               "ett standardtypsnitt, men det har endast stöd för engelska tecken och andra tecken visas " _
+               "därför felaktigt.",
+  }
+%]

@@ -1,0 +1,38 @@
+[%# This Source Code Form is subject to the terms of the Mozilla Public
+  # License, v. 2.0. If a copy of the MPL was not distributed with this
+  # file, You can obtain one at http://mozilla.org/MPL/2.0/.
+  #
+  # This Source Code Form is "Incompatible With Secondary Licenses", as
+  # defined by the Mozilla Public License, v. 2.0.
+  #%]
+
+[% IF Param('useclassification') && classification %]
+  [% classification_url_part = BLOCK %]&amp;classification=[%- classification.name FILTER uri %][% END %]
+  [% classification_url_part_start = BLOCK %]classification=[%- classification.name FILTER uri %][% END %]
+  [% classification_text = BLOCK %]i klassificeringen ”[% classification.name FILTER html %]”[% END %]
+[% END %]
+
+<hr>
+
+<p>
+[% UNLESS no_add_product_link || !user.in_group("editcomponents") %]
+  <a title="Lägg till en produkt" href="editproducts.cgi?action=add">Lägg till</a> en produkt
+  [% IF Param('useclassification') && classification %]
+    (<a title="Lägg till en produkt i klassificeringen ”[% classification.name FILTER html %]”"
+         href="editproducts.cgi?action=add[%- classification_url_part %]">i klassificeringen ”[% classification.name FILTER html %]”</a>)
+  [% END %].
+[% END %]
+
+[% IF product && !no_edit_product_link %]
+  Redigera produkten <a title="Redigera produkten ”[% product.name FILTER html %]” [% classification_text FILTER none %]"
+  href="editproducts.cgi?action=edit&amp;product=[% product.name FILTER uri %]">”[% product.name FILTER html %]”</a>.
+[% END %]
+
+[% UNLESS no_edit_other_products_link %]
+  Redigera <a href="editproducts.cgi?[%- classification_url_part_start FILTER none %]">andra produkter [% classification_text %]</a>.
+[% END %]
+
+[% IF Param('useclassification') && classification && user.in_group('editclassifications') %]
+  Redigera klassificeringen <a href="editclassifications.cgi?action=edit[%- classification_url_part %]">”[%- classification.name FILTER html %]”</a>.
+[% END %]
+</p>

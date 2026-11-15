@@ -1,0 +1,56 @@
+[%# This Source Code Form is subject to the terms of the Mozilla Public
+  # License, v. 2.0. If a copy of the MPL was not distributed with this
+  # file, You can obtain one at http://mozilla.org/MPL/2.0/.
+  #
+  # This Source Code Form is "Incompatible With Secondary Licenses", as
+  # defined by the Mozilla Public License, v. 2.0.
+  #%]
+
+[% IF classification %]
+  [% classification_text = BLOCK %]i klassificeringen ”[% classification.name FILTER html %]”[% END %]
+[% END %]
+
+[% title = BLOCK %]Uppdaterar produkten ”[% product.name FILTER html %]” [% classification_text FILTER none %][% END %]
+[% PROCESS global/header.html.tmpl title = title style_urls = ['skins/standard/admin.css'] %]
+
+[% IF changes.name.defined %]
+  <p>Produktnamnet har ändrats från ”[% changes.name.0 FILTER html %]” till
+  ”<a href="editproducts.cgi?action=edit&amp;product=[%- product.name FILTER uri %]">[% product.name FILTER html %]</a>”.</p>
+[% END %]
+
+[% IF changes.description.defined %]
+  <p>Beskrivningen har ändrats till:</p>
+  <p class="indented">[% product.description FILTER html_light %]</p>
+[% END %]
+
+[% IF changes.isactive.defined %]
+  <p>Produkten är nu
+  [% IF product.is_active %]öppen för[% ELSE %]stängd för[% END %]
+  nya [% terms.bugs %].</p>
+[% END %]
+
+[% IF changes.defaultmilestone.defined %]
+  <p>Standardmilstolpen har ändrats från ”[% changes.defaultmilestone.0 FILTER html %]” till
+  ”[% product.default_milestone FILTER html %]”.</p>
+[% END %]
+
+[% IF changes.allows_unconfirmed.defined %]
+  <p>
+  [% IF product.allows_unconfirmed %]
+    Produkten tillåter nu statusen [%+ display_value('bug_status', 'UNCONFIRMED') FILTER html %].
+  [% ELSE %]
+    Produkten tillåter inte längre statusen [%+ display_value('bug_status', 'UNCONFIRMED') FILTER html %].
+    Observera att <a href="buglist.cgi?product=[%- product.name FILTER uri %]&amp;bug_status=UNCONFIRMED">[%- terms.bugs %] som för närvarande har statusen [%+ display_value('bug_status', 'UNCONFIRMED') FILTER html %]</a>
+    behåller statusen tills de redigeras.
+  [% END %]
+  </p>
+[% END %]
+
+[% Hook.process('changes') %]
+
+[% IF !changes.keys.size %]
+  <p>Inget har ändrats för produkten ”[% product.name FILTER html %]”.</p>
+[% END %]
+
+[% PROCESS admin/products/footer.html.tmpl %]
+[% PROCESS global/footer.html.tmpl %]

@@ -1,0 +1,127 @@
+[%# This Source Code Form is subject to the terms of the Mozilla Public
+  # License, v. 2.0. If a copy of the MPL was not distributed with this
+  # file, You can obtain one at http://mozilla.org/MPL/2.0/.
+  #
+  # This Source Code Form is "Incompatible With Secondary Licenses", as
+  # defined by the Mozilla Public License, v. 2.0.
+  #%]
+
+[% types = [
+  "noop", "equals", "notequals", "anyexact", "substring", "casesubstring",
+  "notsubstring", "anywordssubstr", "allwordssubstr", "nowordssubstr",
+  "regexp", "notregexp", "lessthan", "lessthaneq", "greaterthan",
+  "greaterthaneq", "anywords", "allwords", "nowords", "changedbefore",
+  "changedafter", "changedfrom", "changedto", "changedby", "matches",
+  "notmatches", "isempty", "isnotempty",
+] %]
+
+<div class="bz_section_title" id="custom_search_filter">
+  <div id="custom_search_query_controller" class="arrow">&#9660;</div>
+  <a id="chart" href="javascript:TUI_toggle_class('custom_search_query')" >
+    Anpassad sökning</a> <span class="section_help">Hittade du inte det du
+      söker ovan? Här kan du använda OCH, ELLER och andra mer komplexa sökningar.</span>
+</div>
+<div id="custom_search_filter_section"
+     class="bz_search_section custom_search_query">
+  [% SET indent_level = 0 %]
+  [% SET cond_num = 0 %]
+  [% FOREACH condition = default.custom_search %]
+    [% SET cond_num = loop.count - 1 %]
+    [% PROCESS one_condition with_buttons = 0 %]
+  [% END %]
+  [% PROCESS one_condition
+    with_buttons = 1
+    condition = { f => 'noop' }
+    cond_num = cond_num + 1 %]
+  <script type="text/javascript">
+    TUI_alternates['custom_search_query'] = '&#9658;';
+    TUI_hide_default('custom_search_query');
+    TUI_alternates['custom_search_advanced'] = "Visa avancerade funktioner";
+    TUI_hide_default('custom_search_advanced');
+  </script>
+  <script type="text/javascript" src="[% 'js/custom-search.js' FILTER mtime %]"></script>
+  <script type="text/javascript">
+    redirect_html4_browsers();
+    var cs_and_label = 'Matcha ALLA följande:';
+    var cs_or_label  = 'Matcha NÅGOT av följande:';
+    cs_reconfigure('custom_search_last_row');
+  </script>
+  <script type="text/javascript" src="[% 'js/history.js/native.history.js' FILTER mtime %]"></script>
+</div>
+
+[% BLOCK one_condition %]
+  [% RETURN IF !condition.f %]
+  [% IF !top_level_any_shown %]
+    [% INCLUDE any_all_select name = "j_top" selected = default.j_top.0 with_advanced_link = 1 %]
+    [% top_level_any_shown = 1 %]
+  [% END %]
+  [% IF condition.f == "CP" %][% indent_level = indent_level - 1 %][% END %]
+  <div class="custom_search_condition"
+       [% ' style="margin-left: ' _ (indent_level * 2) _ 'em"' IF indent_level %]
+       [% ' id="custom_search_last_row"' IF with_buttons %]>
+    [% IF previous_condition.f == "OP" %]
+      [% INCLUDE any_all_select name = "j" _ (cond_num - 1) selected = previous_condition.j %]
+    [% END %]
+    [% IF with_buttons %]
+      <button id="op_button" type="button" class="custom_search_advanced"
+              title="Starta en ny grupp med villkor, inklusive denna rad"
+              onclick="custom_search_open_paren()">(</button>
+    [% END %]
+    [% UNLESS condition.f == "CP" %]
+      <span id="custom_search_not_container_[% cond_num FILTER html %]"
+            class="custom_search_not_container[%- ' custom_search_advanced' UNLESS condition.n %]"
+            title="Sök efter motsatsen till villkoren här">
+        <input type="checkbox" id="n[% cond_num FILTER html %]"
+               class="custom_search_form_field" name="n[% cond_num FILTER html %]" value="1"
+               onclick="custom_search_not_changed([% cond_num FILTER js %])"
+               [% ' checked="checked"' IF condition.n %]>
+        <label for="n[% cond_num FILTER html %]">Inte</label>
+      </span>
+    [% END %]
+    [% IF condition.f == "OP" %]
+      <input type="hidden" name="f[% cond_num FILTER html %]" id="f[% cond_num FILTER html %]" value="OP">
+      ([% indent_level = indent_level + 1 %]
+    [% ELSIF condition.f == "CP" %]
+      <input type="hidden" name="f[% cond_num FILTER html %]" id="f[% cond_num FILTER html %]" value="CP">)
+    [% ELSE %]
+      <select name="f[% cond_num FILTER html %]" title="Fält" id="f[% cond_num FILTER html %]"
+              onchange="fix_query_string(this)" class="custom_search_form_field">
+        [% field_hash = {}; FOREACH field IN fields; field_hash.${field.name} = field; END; %]
+        [% FOREACH field_name = field_hash.keys.sort_by_field_name(field_descs) %]
+          [% field = field_hash.$field_name %]
+          <option value="[% field.name FILTER html %]"[%~ ' selected="selected"' IF field.name == condition.f %]>
+            [% field_descs.${field.name} || field.description FILTER html %]</option>
+        [% END %]
+      </select>
+      [% INCLUDE "search/type-select.html.tmpl" name = "o${cond_num}", class = "custom_search_form_field" types = types, selected = condition.o %]
+      <input name="v[% cond_num FILTER html %]" title="Värde" class="custom_search_form_field"
+             onchange="fix_query_string(this)" value="[% condition.v FILTER html %]">
+    [% END %]
+    [% IF with_buttons %]
+      <button class="custom_search_add_button" type="button" id="add_button" title="Lägg till en ny rad"
+              onclick="custom_search_new_row()">+</button>
+      <span id="cp_container" [% ' class="bz_default_hidden"' IF !indent_level %]>
+        <button id="cp_button" type="button" title="Avsluta denna villkorsgrupp"
+                onclick="custom_search_close_paren()">)</button>
+      </span>
+    [% END %]
+  </div>
+  [% previous_condition = condition %]
+[% END %]
+
+[% BLOCK any_all_select %]
+  <div class="any_all_select">
+    <select name="[% name FILTER html %]" id="[% name FILTER html %]" onchange="fix_query_string(this)">
+      <option value="AND">Matcha ALLA följande var för sig:</option>
+      <option value="OR" [% ' selected="selected"' IF selected == "OR" %]>
+        Matcha NÅGOT av följande var för sig:</option>
+      <option value="AND_G" [% ' selected' IF selected == "AND_G" %]>
+        Matcha ALLA följande mot samma fält:</option>
+    </select>
+    [% IF with_advanced_link %]
+      <a id="custom_search_advanced_controller" href="javascript:TUI_toggle_class('custom_search_advanced')">
+        Dölj avancerade funktioner
+      </a>
+    [% END %]
+  </div>
+[% END %]

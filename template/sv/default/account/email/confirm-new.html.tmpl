@@ -1,0 +1,23 @@
+[%# This Source Code Form is subject to the terms of the Mozilla Public
+  # License, v. 2.0. If a copy of the MPL was not distributed with this
+  # file, You can obtain one at http://mozilla.org/MPL/2.0/.
+  #%]
+
+[% title = BLOCK %]Skapa ett nytt användarkonto för '[% email FILTER html %]'[% END %]
+[% PROCESS "global/header.html.tmpl" title = title %]
+[% password_complexity = Param('password_complexity') %]
+<p>För att skapa kontot anger du ett lösenord i formuläret nedan. Din e-postadress och ditt riktiga namn, om du anger det, visas tillsammans med ändringar du gör.</p>
+<form id="confirm_account_form" method="post" action="token.cgi">
+  <input type="hidden" name="t" value="[% token FILTER html %]"><input type="hidden" name="a" value="confirm_new_account">
+  <table>
+    <tr><th>E-postadress:</th><td>[% email FILTER html %]</td></tr>
+    <tr><th><small><i>(VALFRITT)</i></small> <label for="realname">Riktigt namn</label>:</th><td><input id="realname" name="realname" autofocus></td></tr>
+    <tr><th><label for="passwd1">Ange lösenord</label>:</th><td><input type="password" id="passwd1" name="passwd1" value="" required> (Lösenordet ska vara minst [% constants.USER_PASSWORD_MIN_LENGTH FILTER none %] tecken långt [% IF password_complexity == "mixed_letters" %]och innehålla minst en versal och en gemen bokstav[% ELSIF password_complexity == "letters_numbers" %]och innehålla minst en versal, en gemen bokstav och en siffra[% ELSIF password_complexity == "letters_numbers_specialchars" %]och innehålla minst en bokstav, en siffra och ett specialtecken[% END ~%].)</td></tr>
+    <tr><th><label for="passwd2">Bekräfta lösenordet</label>:</th><td><input type="password" id="passwd2" name="passwd2" value="" required></td></tr>
+    <tr><th>&nbsp;</th><td><input type="submit" id="confirm" value="Skapa"></td></tr>
+  </table>
+</form>
+<p>Kontot skapas inte om formuläret inte fylls i före <b>[% expiration_ts FILTER time("%e %B %Y kl. %H:%M %Z") %]</b>.</p>
+<p>Om du inte vill skapa ett konto med den här e-postadressen klickar du på knappen nedan. Då glöms dina uppgifter bort.</p>
+<form id="cancel_account_form" method="post" action="token.cgi"><input type="hidden" name="t" value="[% token FILTER html %]"><input type="hidden" name="a" value="cancel_new_account"><input type="submit" id="confirm" value="Avbryt kontoskapandet"></form>
+[% PROCESS global/footer.html.tmpl %]

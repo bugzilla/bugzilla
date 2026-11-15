@@ -1,0 +1,63 @@
+[%# This Source Code Form is subject to the terms of the Mozilla Public
+  # License, v. 2.0. If a copy of the MPL was not distributed with this
+  # file, You can obtain one at http://mozilla.org/MPL/2.0/.
+  #
+  # This Source Code Form is "Incompatible With Secondary Licenses", as
+  # defined by the Mozilla Public License, v. 2.0.
+  #%]
+
+[% PROCESS global/header.html.tmpl
+  title = "Välj klassificering"
+  style_urls = ['skins/standard/admin.css']
+%]
+
+<table id="admin_table">
+  <tr class="column_header">
+    <th>Redigera klassificering ...</th>
+    <th>Beskrivning</th>
+    <th>Sorteringsnyckel</th>
+    <th>Produkter</th>
+    <th>Åtgärd</th>
+  </tr>
+
+  [% FOREACH cl = classifications %]
+    <tr>
+      <td>
+        <a href="editclassifications.cgi?action=edit&amp;classification=[% cl.name FILTER uri %]">
+          <b>[% cl.name FILTER html %]</b>
+        </a>
+      </td>
+      <td>
+      [% IF cl.description %]
+        [% cl.description FILTER html_light %]
+      [% ELSE %]
+        <span class="warning">saknas</span>
+      [% END %]
+      </td>
+      <td>[% cl.sortkey FILTER html %]</td>
+      [% IF (cl.id == 1) %]
+        <td>[% cl.product_count FILTER html %]</td>
+      [% ELSE %]
+        <td>
+          <a href="editclassifications.cgi?action=reclassify&amp;classification=[% cl.name FILTER uri %]">
+            omklassificera&nbsp;([% cl.product_count FILTER html %])</a>
+        </td>
+      [% END %]
+
+      [% IF (cl.id == 1) %]
+        <td></td>
+      [% ELSE %]
+        <td>
+          <a href="editclassifications.cgi?action=del&amp;classification=[% cl.name FILTER uri %]">radera</a>
+        </td>
+      [% END %]
+    </tr>
+  [% END %]
+
+</table>
+
+<p>
+  <a href="editclassifications.cgi?action=add">Lägg till en ny klassificering</a>.
+</p>
+
+[% PROCESS global/footer.html.tmpl %]

@@ -1,0 +1,38 @@
+[%# This Source Code Form is subject to the terms of the Mozilla Public
+  # License, v. 2.0. If a copy of the MPL was not distributed with this
+  # file, You can obtain one at http://mozilla.org/MPL/2.0/.
+  #
+  # This Source Code Form is "Incompatible With Secondary Licenses", as
+  # defined by the Mozilla Public License, v. 2.0.
+  #%]
+
+[% PROCESS global/header.html.tmpl
+  title = "Radera nyckelord"
+  style_urls = ['skins/standard/admin.css']
+%]
+
+<h2>Bekräftelse</h2>
+
+<p class="confirmation">
+  [% IF keyword.bug_count == 1 %]
+    Ett [% terms.bug %]
+  [% ELSIF keyword.bug_count > 1 %]
+    [% keyword.bug_count FILTER html %] [%+ terms.bugs %]
+  [% END %]
+   har nyckelordet <em>[% keyword.name FILTER html %]</em> angivet.
+</p>
+
+<p>
+  Vill du verkligen radera detta nyckelord?
+</p>
+
+<form method="post" action="editkeywords.cgi">
+  <input type="hidden" name="id" value="[% keyword.id FILTER html %]">
+  <input type="hidden" name="action" value="delete">
+  <input type="hidden" name="token" value="[% token FILTER html %]">
+  <input type="submit" id="delete" value="Ja, radera">
+</form>
+
+<p><a href="editkeywords.cgi">Redigera andra nyckelord</a>.</p>
+
+[% PROCESS global/footer.html.tmpl %]

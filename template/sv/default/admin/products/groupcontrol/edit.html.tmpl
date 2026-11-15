@@ -1,0 +1,306 @@
+[%# This Source Code Form is subject to the terms of the Mozilla Public
+  # License, v. 2.0. If a copy of the MPL was not distributed with this
+  # file, You can obtain one at http://mozilla.org/MPL/2.0/.
+  #
+  # This Source Code Form is "Incompatible With Secondary Licenses", as
+  # defined by the Mozilla Public License, v. 2.0.
+  #%]
+
+[% title = BLOCK %]
+    Redigera gruppinställningar för [% product.name FILTER html %]
+[% END %]
+[% PROCESS global/header.html.tmpl 
+  title = title
+  style_urls = ['skins/standard/admin.css']
+%]
+
+[% display_headers = 1 %]
+[% FOREACH group = product.group_controls(1).values.sort("name") %]
+  [% NEXT UNLESS group.group.isactive OR group.bug_count %]
+  [% IF display_headers %]
+    [% display_headers = 0 %]
+    <form method="post" action="editproducts.cgi">
+      <input type="hidden" name="action" value="updategroupcontrols">
+      <input type="hidden" name="product" value="[% product.name FILTER html %]">
+      <input type="hidden" name="token" value="[% token FILTER html %]">
+
+      <table id="admin_table">
+        <tr class="column_header">
+          <th>Grupp</th>
+          <th>Inmatning</th>
+          <th>Medlemsstyrning</th>
+          <th>Övrig styrning</th>
+          <th>Kan redigera</th>
+          <th>editcomponents</th>
+          <th>canconfirm</th>
+          <th>editbugs</th>
+          <th>[% terms.Bugs %]</th>
+        </tr>
+  [% END %]
+  [% IF !group.group.isactive %]
+    <tr class="disabled">
+      <td>[% group.group.name FILTER html %]</td>
+      <td class="center" colspan="7">Inaktiverad</td>
+      <td>[% group.bug_count FILTER html %]</td>
+    </tr>
+  [% ELSE %]
+    <tr>
+      <td>[% group.group.name FILTER html %]</td>
+      <td>
+        <input type=checkbox value=1 name=entry_[% group.id %]
+          [% " checked='checked'" IF group.entry %]>
+      </td>
+      <td>
+        <select name="membercontrol_[% group.id %]">
+          <option value=[% constants.CONTROLMAPNA %]
+            [% " selected='selected'" IF group.membercontrol == constants.CONTROLMAPNA %]
+            >NA
+          </option>
+          <option value=[% constants.CONTROLMAPSHOWN %]
+            [% " selected='selected'" IF group.membercontrol == constants.CONTROLMAPSHOWN %]
+            >Visas
+          </option>
+          <option value=[% constants.CONTROLMAPDEFAULT %]
+            [% " selected='selected'" IF group.membercontrol == constants.CONTROLMAPDEFAULT %]
+            >Standard
+          </option>
+          <option value=[% constants.CONTROLMAPMANDATORY %]
+            [% " selected='selected'" IF group.membercontrol == constants.CONTROLMAPMANDATORY %]
+            >Obligatorisk
+          </option>
+        </select>
+      </td>
+      <td>
+        <select name="othercontrol_[% group.id %]">
+          <option value=[% constants.CONTROLMAPNA %]
+            [% " selected='selected'" IF group.othercontrol == constants.CONTROLMAPNA %]
+            >NA
+          </option>
+          <option value=[% constants.CONTROLMAPSHOWN %]
+            [% " selected='selected'" IF group.othercontrol == constants.CONTROLMAPSHOWN %]
+            >Visas
+          </option>
+          <option value=[% constants.CONTROLMAPDEFAULT %]
+            [% " selected='selected'" IF group.othercontrol == constants.CONTROLMAPDEFAULT %]
+            >Standard
+          </option>
+          <option value=[% constants.CONTROLMAPMANDATORY %]
+            [% " selected='selected'" IF group.othercontrol == constants.CONTROLMAPMANDATORY %]
+            >Obligatorisk
+          </option>
+        </select>
+      </td>
+      <td>
+        <input type=checkbox value=1 name=canedit_[% group.id %]
+        [% " checked='checked'" IF group.canedit %]>
+      </td>
+      <td>
+        <input type=checkbox value=1 name=editcomponents_[% group.id %]
+        [% " checked='checked'" IF group.editcomponents %]>
+      </td>
+      <td>
+        <input type=checkbox value=1 name=canconfirm_[% group.id %]
+        [% " checked='checked'" IF group.canconfirm %]>
+      </td>
+      <td>
+        <input type=checkbox value=1 name=editbugs_[% group.id %]
+        [% " checked='checked'" IF group.editbugs %]>
+      </td>
+      <td>[% group.bug_count || 0 FILTER html %]</td>
+    </tr>
+  [% END %]
+[% END %]
+
+[% IF display_headers %]
+  <p>Inga grupper är tillgängliga för produkter.
+  [% IF user.in_group('creategroups') %]
+    <a href="editgroups.cgi?action=add">Skapa en ny grupp</a>
+  [% END %]
+  </p>
+[% ELSE %]
+    </table>
+    <br>
+    <input type=submit name="submit" value="Spara">
+  </form>
+[% END %]
+
+<p>
+De här inställningarna styr gruppernas relation till
+produkten.
+</p>
+<p>
+Om någon grupp har <b>Inmatning</b> markerad begränsar produkten
+registrering av [% terms.bugs %] till användare som är medlemmar i
+[%+ IF Param('or_groups') %]minst en av[% ELSE %]alla[% END %] grupper
+med inmatning markerad.
+</p>
+<p>
+Om någon grupp har <b>Kan redigera</b> markerad blir produkten
+skrivskyddad för användare som inte är medlemmar i
+[%+ IF Param('or_groups') %]en av[% ELSE %]alla[% END %] grupper
+med Kan redigera markerad. Endast användare som är medlemmar i
+[%+ IF Param('or_groups') %]minst en av[% ELSE %]alla[% END %] grupperna med redigeringsbehörighet
+kan redigera. Det är en ytterligare begränsning av vad en användare kan redigera.
+</p>
+<p>
+Med följande inställningar kan du välja behörigheter <b>per produkt</b>.
+Det är ett praktiskt sätt att ge vissa användare behörigheter för enbart vissa
+produkter utan att ge dem globala behörigheter som skulle påverka alla
+produkter:
+</p>
+<p>
+En grupp med <b>editcomponents</b> markerad låter användare i gruppen
+redigera alla delar av produkten, inklusive komponenter,
+milstolpar och versioner.
+</p>
+<p>
+En grupp med <b>canconfirm</b> markerad låter användare i gruppen
+bekräfta [% terms.bugs %] i produkten.
+</p>
+<p>
+En grupp med <b>editbugs</b> markerad låter användare i gruppen
+redigera alla fält för [% terms.bugs %] i produkten.
+</p>
+<p>
+Fälten <b>Medlemsstyrning</b> och <b>Övrig styrning</b>
+anger vilka [% terms.bugs %] som placeras i
+gruppen enligt följande definitioner.
+</p>
+
+<table id="group_settings_desc">
+  <tr>
+    <th>
+      Medlemsstyrning
+    </th>
+    <th>
+      Övrig styrning
+    </th>
+    <th>
+      Tolkning
+    </th>
+  </tr>
+  <tr>
+    <td>
+      NA
+    </td>
+    <td>
+      NA
+    </td>
+    <td>
+      [% terms.Bugs %] i produkten kopplas aldrig till den här gruppen.
+    </td>
+  </tr>
+  <tr>
+    <td>
+      Visas
+    </td>
+    <td>
+      NA
+    </td>
+    <td>
+      [% terms.Bugs %] i produkten får begränsas till den här
+      gruppen. Användare som är medlemmar i gruppen kan placera [% terms.bugs %] i
+      gruppen.
+    </td>
+  </tr>
+  <tr>
+    <td>
+      Visas
+    </td>
+    <td>
+      Visas
+    </td>
+    <td>
+      [% terms.Bugs %] i produkten kan placeras i gruppen av alla som
+      har behörighet att redigera [% terms.bug %], även om de inte är medlemmar
+      i gruppen.
+    </td>
+  </tr>
+  <tr>
+    <td>
+      Visas
+    </td>
+    <td>
+      Standard
+    </td>
+    <td>
+      [% terms.Bugs %] i produkten kan placeras i gruppen av alla som
+      har behörighet att redigera [% terms.bug %], även om de inte är medlemmar
+      i gruppen. Icke-medlemmar placerar [% terms.bugs %] i gruppen som standard.
+    </td>
+  </tr>
+  <tr>
+    <td>
+      Visas
+    </td>
+    <td>
+      Obligatorisk
+    </td>
+    <td>
+      [% terms.Bugs %] i produkten får begränsas till den här
+      gruppen. Användare som är medlemmar i gruppen kan placera [% terms.bugs %]
+      i gruppen. Icke-medlemmar måste begränsa [% terms.bugs %] till
+      gruppen när de först registrerar [% terms.abug %] för produkten.
+    </td>
+  </tr>
+  <tr>
+    <td>
+      Standard
+    </td>
+    <td>
+      NA
+    </td>
+    <td>
+      [% terms.Bugs %] i produkten får begränsas till den här
+      gruppen och placeras där som standard. Användare som är medlemmar i
+      gruppen kan placera [% terms.bugs %] i den.
+    </td>
+  </tr>
+  <tr>
+    <td>
+      Standard
+    </td>
+    <td>
+      Standard
+    </td>
+    <td>
+      [% terms.Bugs %] i produkten får begränsas till den här
+      gruppen och placeras där som standard. Användare som är medlemmar i gruppen
+      kan placera [% terms.bugs %] i den. Icke-medlemmar kan
+      begränsa [% terms.bugs %] till gruppen när de registreras och gör det som standard.
+    </td>
+  </tr>
+  <tr>
+    <td>
+      Standard
+    </td>
+    <td>
+      Obligatorisk
+    </td>
+    <td>
+      [% terms.Bugs %] i produkten får begränsas till den här
+      gruppen och placeras där som standard. Användare som är medlemmar i gruppen
+      kan placera [% terms.bugs %] i den. Icke-medlemmar måste
+      placera [% terms.bugs %] i gruppen när de registreras.
+    </td>
+  </tr>
+  <tr>
+    <td>
+      Obligatorisk
+    </td>
+    <td>
+      Obligatorisk
+    </td>
+    <td>
+      [% terms.Bugs %] i produkten måste begränsas till den här
+      gruppen. Användaren får inget val.
+    </td>
+  </tr>
+</table>
+<p>
+Observera att tabellen ovan visar de enda tillåtna kombinationerna
+för fältinställningarna <b>Medlemsstyrning</b> och <b>Övrig styrning</b>.
+Ett försök att spara en kombination som inte finns med där, till exempel
+Obligatorisk/NA eller Standard/Visas, ger ett felmeddelande.
+</p>
+[% PROCESS global/footer.html.tmpl %]

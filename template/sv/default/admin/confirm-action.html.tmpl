@@ -1,0 +1,46 @@
+[%# This Source Code Form is subject to the terms of the Mozilla Public
+  # License, v. 2.0. If a copy of the MPL was not distributed with this
+  # file, You can obtain one at http://mozilla.org/MPL/2.0/.
+  #
+  # This Source Code Form is "Incompatible With Secondary Licenses", as
+  # defined by the Mozilla Public License, v. 2.0.
+  #%]
+
+[% PROCESS global/header.html.tmpl title = "Misstänkt åtgärd" %]
+
+[% IF abuser %]
+  <div class="throw_error">
+    <p>När du visar ett administrationsformulär i Bugzilla skapas en slumpmässig token
+    som sparas både i databasen och i formuläret. Den säkerställer att begärda ändringar
+    kommer från ett formulär som Bugzilla har skapat. Token som används just nu är tyvärr
+    felaktig, vilket tyder på att du inte kom från rätt sida. Följande token har använts:</p>
+    [% IF token_action != expected_action %]
+      <p><span class="label">Sparad åtgärd:&nbsp;</span>[%+ token_action FILTER html %]<br>
+      Åtgärden stämmer inte överens med den förväntade ([% expected_action FILTER html %]).</p>
+    [% END %]
+    [% IF abuser != user.identity %]
+      <p><span class="label">Skapad av:&nbsp;</span>[%+ abuser FILTER html %]<br>
+      Den här token har inte skapats av dig. Någon kan ha försökt lura dig.</p>
+    [% END %]
+  </div>
+  <p>Rapportera problemet till [% Param("maintainer") FILTER html %].</p>
+[% ELSE %]
+  <div class="throw_error">
+    Du verkar inte ha kommit från rätt sida. Du har ingen giltig token för åtgärden
+    <em>[% expected_action FILTER html %]</em> när skriptet ”[% script_name FILTER html%]” körs.
+    Det kan bero på något av följande:<br>
+    <ul>
+      <li>Du klickade på knappen ”Bakåt” i webbläsaren efter att ha skickat ändringar.</li>
+      <li>Du angav webbadressen direkt i webbläsarens adressfält.</li>
+      <li>Du följde en webbadress som omdirigerade dig hit <b>utan ditt medgivande</b>.</li>
+    </ul>
+    Vill du ändå verkställa ändringarna? Resultatet kan bli oväntat och oönskat.
+  </div>
+  <form name="check" id="check" method="post" action="[% script_name FILTER html %]">
+    [% PROCESS "global/hidden-fields.html.tmpl" exclude="^(Bugzilla_login|Bugzilla_password)$" %]
+    <input type="submit" id="confirm" value="Bekräfta ändringar">
+  </form>
+  <p>Du kan också kasta bort ändringarna och gå tillbaka till <a href="[% alternate_script FILTER html %]">[%- alternate_script FILTER html %]</a>.</p>
+[% END %]
+
+[% PROCESS global/footer.html.tmpl %]

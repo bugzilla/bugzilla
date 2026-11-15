@@ -1,0 +1,2026 @@
+[%# This Source Code Form is subject to the terms of the Mozilla Public
+  # License, v. 2.0. If a copy of the MPL was not distributed with this
+  # file, You can obtain one at http://mozilla.org/MPL/2.0/.
+  #
+  # This Source Code Form is "Incompatible With Secondary Licenses", as
+  # defined by the Mozilla Public License, v. 2.0.
+  #%]
+
+[%# INTERFACE:
+  # header_done: boolean. True if the Bugzilla header has already been printed.
+  # error: string. The tag of the error, or the error message to be displayed
+  # (deprecated). May contain HTML if it's an error message.
+  #%]
+
+[%# This is a list of all the possible user errors. Please keep them in
+  # alphabetical order by error tag, and leave a blank line between errors.
+  #
+  # Note that you must explicitly filter every single template variable
+  # in this file; if you do not wish to change it, use the "none" filter.
+  #
+  # Extension- or custom-specific error handling  can be easily added 
+  # via hooks: just place additional code into
+  # template/en/hook/global/user-error-errors.html.tmpl
+  # Note: be aware of uniqueness of error string parameter value, since
+  # nobody can guarantee the hook files processing order in the future.
+  #%]
+
+[% PROCESS "global/field-descs.none.tmpl" %]
+
+[% DEFAULT title = "Fel" %]
+
+[% error_message = BLOCK %]
+  [% IF    error == "account_creation_disabled" %]
+    [% title = "Det går inte att skapa konton" %]
+    Det går inte att skapa användarkonton.
+    <hr>
+    Nya konton måste skapas av en administratör. Ansvarig är
+    [% Param("maintainer") %].
+
+  [% ELSIF error == "account_creation_restricted" %]
+    [% title = "Begränsat skapande av konton" %]
+    Skapandet av användarkonton är begränsat.
+    <hr>
+    Kontakta administratören eller den ansvariga
+    ([% Param("maintainer") %]) för information om hur
+    du skapar ett konto.
+
+  [% ELSIF error == "account_disabled" %]
+    [% title = "Kontot är inaktiverat" %]
+    [% disabled_reason FILTER none %]
+    <hr>
+    Om du anser att ditt konto bör återställas, skicka e-post till
+    [% Param("maintainer") %] och förklara varför.
+
+  [% ELSIF error == "account_exists" %]
+    [% title = "Kontot finns redan" %]
+    Det finns redan ett konto med
+    [% IF email %]
+      inloggningsnamnet [% email FILTER html %].
+    [% ELSE %]
+      det inloggningsnamnet.
+    [% END %]
+
+  [% ELSIF error == "account_locked" %]
+    [% title = "Kontot är låst" %]
+    Din IP-adress ([% ip_addr FILTER html %]) har låsts ute från
+    kontot till [% unlock_at FILTER time %], eftersom du har
+    överskridit det högsta antalet inloggningsförsök.
+
+  [% ELSIF error == "alias_has_comma_or_space" %]
+    [% title = "Ogiltiga tecken i alias" %]
+    Aliaset <em>[% alias FILTER html %]</em> innehåller ett eller flera
+    kommatecken eller blanksteg. Alias får inte innehålla kommatecken eller
+    blanksteg eftersom dessa tecken används för att skilja alias åt i listor.
+    Välj ett alias utan kommatecken och blanksteg.
+
+  [% ELSIF error == "alias_in_use" %]
+    [% title = "Aliaset används redan" %]
+    [% IF user.can_see_bug(bug_id) %]
+      [% terms.Bug %] [%+ bug_id FILTER bug_link(bug_id) FILTER none %]
+    [% ELSE %]
+      En annan [% terms.bug %]
+    [% END %]
+    använder redan aliaset <em>[% alias FILTER html %]</em>.
+    Välj ett annat alias.
+
+  [% ELSIF error == "alias_is_numeric" %]
+    [% title = "Aliaset är numeriskt" %]
+    Du försökte ge [% terms.bug %] aliaset <em>[% alias FILTER html %]</em>,
+    men alias kan inte enbart bestå av siffror eftersom de då
+    kan förväxlas med [% terms.bug %]-ID:n. Välj ett alias
+    som innehåller minst en bokstav.
+
+  [% ELSIF error == "alias_too_long" %]
+    [% title = "Aliaset är för långt" %]
+    Alias för [% terms.Bug %] får inte vara längre än 40 tecken.
+    Välj ett kortare alias.
+
+  [% ELSIF error == "api_key_not_valid" %]
+    [% title = "Ogiltig API-nyckel" %]
+    API-nyckeln du angav är ogiltig. Kontrollera att du skrev in den
+    rätt.
+
+  [% ELSIF error == "api_key_revoked" %]
+    [% title = "Ogiltig API-nyckel" %]
+    API-nyckeln du angav har återkallats av användaren som skapade den.
+
+  [% ELSIF error == "attachment_bug_id_mismatch" %]
+    [% title = "Ogiltiga bilagor" %]
+    Du försökte utföra en åtgärd på bilagor från olika [% terms.bugs %].
+    Åtgärden kräver att alla bilagor hör till samma [% terms.bug %].
+
+  [% ELSIF error == "auth_cant_create_account" %]
+    [% title = "Det går inte att skapa konton" %]
+    Den här webbplatsen använder en autentiseringsmetod som inte tillåter
+    att konton skapas. Kontakta en administratör för att få ett nytt konto.
+
+  [% ELSIF error == "auth_failure" %]
+    [% title = "Behörighet krävs" %]
+    [% admindocslinks = {'groups.html#groups' => 'Gruppsäkerhet'} %]
+    Tyvärr
+    [% IF group %]
+      är du inte medlem i gruppen ”[% group FILTER html %]”,
+    [% END %]
+
+    [% IF reason %]
+      [% IF group %] och [% END %]
+      [% IF reason == "cant_bless" %]
+        saknar du behörighet att lägga till eller ta bort personer från en grupp,
+      [% ELSIF reason == "not_visible" %]
+        finns det synlighetsbegränsningar för vissa användargrupper,
+      [% END %]
+    [% END %]
+
+    [% IF group || reason %] och därför [% END %] har du inte behörighet att
+    [% IF action == "access" %]
+      komma åt
+    [% ELSIF action == "add" %]
+      lägga till nya
+    [% ELSIF action == "begin" %]
+      påbörja
+    [% ELSIF action == "modify" %]
+      ändra
+    [% ELSIF action == "delete" %]
+      ta bort
+    [% ELSIF action == "edit" %]
+      lägga till, ändra eller ta bort
+    [% ELSIF action == "run" %]
+      köra
+    [% ELSIF action == "schedule" %]
+      schemalägga
+    [% ELSIF action == "search" %]
+      söka i
+    [% ELSIF action == "use" %]
+      använda
+    [% ELSIF action == "approve" %]
+      godkänna
+    [% ELSE %]
+      [%+ Hook.process('auth_failure_action') %]
+    [% END %]
+
+    [% IF object == "administrative_pages" %]
+      administrativa sidor
+    [% ELSIF object == "attachment" %]
+      [% IF attach_id %]
+        bilaga #[% attach_id FILTER html %]
+      [% ELSE %]
+        den här bilagan
+      [% END %]
+    [% ELSIF object == "bugs" %]
+      [%+ terms.bugs %]
+    [% ELSIF object == "bug_fields" %]
+      fältet [% field_descs.$field FILTER html %]
+    [% ELSIF object == "charts" %]
+      funktionen ”Nya diagram”
+    [% ELSIF object == "classifications" %]
+      klassificeringar
+    [% ELSIF object == "components" %]
+      komponenter
+    [% ELSIF object == "comment_tags" %]
+      kommentaretiketter
+    [% ELSIF object == "custom_fields" %]
+      anpassade fält
+    [% ELSIF object == "field_values" %]
+      fältvärden
+    [% ELSIF object == "flagtypes" %]
+      flaggtyper
+    [% ELSIF object == "group_access" %]
+      gruppåtkomst
+    [% ELSIF object == "groups" %]
+      grupper
+    [% ELSIF object == "keywords" %]
+      nyckelord
+    [% ELSIF object == "milestones" %]
+      milstolpar
+    [% ELSIF object == "multiple_bugs" %]
+      flera [% terms.bugs %] samtidigt
+    [% ELSIF object == "parameters" %]
+      parametrar
+    [% ELSIF object == "products" %]
+      produkter
+    [% ELSIF object == "quips" %]
+      citat
+    [% ELSIF object == "reports" %]
+      bevakningsrapporter
+    [% ELSIF object == "sanity_check" %]
+      en rimlighetskontroll
+    [% ELSIF object == "settings" %]
+      inställningar
+    [% ELSIF object == "sudo_session" %]
+      en sudo-session
+    [% ELSIF object == "timetracking_summaries" %]
+      sammanfattningsrapporter för tidsspårning
+    [% ELSIF object == "user" %]  
+      användaren [% IF userid %] med ID ”[% userid FILTER html %]”
+      [% ELSE %]du angav [% END %]
+    [% ELSIF object == "users" %]
+      användare
+    [% ELSIF object == "versions" %]
+      versioner
+    [% ELSIF object == "workflow" %]
+      arbetsflödet
+    [% ELSE %]
+      [%+ Hook.process('auth_failure_object') %]
+    [% END %].
+
+    [% Hook.process("auth_failure") %]
+
+  [% ELSIF error == "auth_invalid_token" %]
+    [% title = "Ett tokenfel inträffade" %]
+    Tokenet ”[% token FILTER html %]” är inte giltigt. Det kan bero på att
+    du läste in sidan för mer än tre dagar sedan.
+
+  [% ELSIF error == "auth_untrusted_request" %]
+    [% title = "Otillförlitlig autentiseringsbegäran" %]
+    Du försökte logga in med kontot <em>[% login FILTER html %]</em>, men
+    [% terms.Bugzilla %] kan inte lita på din begäran. Kontrollera att
+    webbläsaren accepterar kakor och att du inte har omdirigerats hit från en
+    extern webbplats. <a href="index.cgi?GoAheadAndLogIn=1">Klicka här</a> om
+    du ändå vill logga in.
+
+  [% ELSIF error == "attachment_deletion_disabled" %]
+    [% title = "Borttagning av bilagor är avstängd" %]
+    Det går inte att ta bort bilagor i den här installationen.
+
+  [% ELSIF error == "attachment_removed" %]
+    [% title = "Bilagan har tagits bort" %]
+    Bilagan du försöker komma åt har tagits bort.
+
+  [% ELSIF error == "bad_page_cgi_id" %]
+    [% title = "Ogiltigt sid-ID" %]
+    ID:t <code>[% page_id FILTER html %]</code> är inte en
+    giltig sididentifierare.
+
+  [% ELSIF error == "bug_access_denied" %]
+    [% title = "$terms.Bug: åtkomst nekad" %]
+    [% admindocslinks = {'groups.html#groups' => 'Gruppsäkerhet'} %]
+    Du har inte behörighet att komma åt [% terms.bug %] #[% bug_id FILTER html %].
+
+  [% ELSIF error == "bug_access_query" %]
+    [% title = "$terms.Bug: åtkomst nekad" %]
+    [% docslinks = {'administering/users.html#creating-new-users' => 'Skapa ett konto'} %]
+    Du har inte behörighet att komma åt [% terms.bug %] #[% bug_id FILTER html %].
+    För att se [% terms.bug %] måste du först
+    first <a href="show_bug.cgi?id=
+                   [% bug_id FILTER uri %]&amp;GoAheadAndLogIn=1">logga
+    in på ett konto</a> med rätt behörighet.
+
+  [% ELSIF error == "bug_url_invalid" %]
+    [% title = "Ogiltig URL till $terms.bug" %]
+    <code>[% url FILTER html %]</code> är inte en giltig URL till [% terms.abug %].
+    [% IF reason == 'http' %]
+      URL:er måste börja med ”http” eller ”https”.
+    [% ELSIF reason == 'path_only' %]
+      Du måste ange en fullständig URL.
+    [% ELSIF reason == 'id' %]
+      Det finns inget giltigt ID för [% terms.bug %] i URL:en.
+    [% ELSE %]
+      URL:er i [%+ field_descs.see_also FILTER html %] ska peka på något av följande:
+      <ul>
+        <li><code>show_bug.cgi</code> i en Bugzilla-installation.</li>
+        <li>En b[% %]ug på launchpad.net.</li>
+        <li>Ett ärende på code.google.com.</li>
+        <li>En b[% %]ug på b[% %]ugs.debian.org.</li>
+        <li>Ett ärende i en JIRA-installation.</li>
+        <li>En biljett i en Trac-installation.</li>
+        <li>En b[% %]ug i en MantisBT-installation.</li>
+        <li>En b[% %]ug på sourceforge.net.</li>
+        <li>Ett ärende eller en pull-begäran på github.com.</li>
+        [% Hook.process('bug_url_invalid_tracker') %]
+      </ul>
+    [% END %]
+
+  [% ELSIF error == "bug_url_too_long" %]
+    [% title = "Ogiltig URL till $terms.bug" %]
+    URL:er till [% terms.Bug %] får inte vara längre än
+    [%+ constants.MAX_BUG_URL_LENGTH FILTER none %] tecken.
+    <code>[% url FILTER html %]</code> är för lång.
+
+  [% ELSIF error == "buglist_parameters_required" %]
+    [% title = "Parametrar krävs" %]
+    [% docslinks = {'using/finding.html' => "Söka efter $terms.bugs",
+                    'using/finding.html#bug-lists' => "Listor med $terms.bugs"} %]
+    Du kan inte söka eller skapa sparade sökningar utan några sökvillkor.
+
+  [% ELSIF error == "cc_remove_denied" %]
+    [% title = "Ändring nekad" %]
+    Du har inte behörighet att ta bort andra personer från CC-listan.
+
+  [% ELSIF error == "chart_too_large" %]
+    [% title = "Diagrammet är för stort" %]
+    Ett diagram får högst vara 2 000 × 2 000.
+
+  [% ELSIF error == "comment_id_invalid" %]
+    [% id FILTER html %] är inte ett giltigt kommentar-ID.
+
+  [% ELSIF error == "comment_invalid_isprivate" %]
+    Du försökte ändra sekretessen för kommentaren med ID [% id FILTER html %],
+    men den kommentaren är inte giltig för [% terms.bug %].
+
+  [% ELSIF error == "comment_is_private" %]
+    Kommentaren med ID [% id FILTER html %] är privat.
+
+  [% ELSIF error == "comment_required" %]
+    [% title = "Kommentar krävs" %]
+    Du måste ange en
+    [% IF old.defined && new.defined %]
+      <b>kommentar</b> när du ändrar [% field_descs.$field FILTER html %]
+      för [% terms.abug %] från [% (old || "(tomt)") FILTER html %]
+      till [% (new || "(tomt)") FILTER html %].
+    [% ELSIF new %]
+      beskrivning för [% terms.bug %].
+    [% ELSE %]
+      <b>kommentar</b> till ändringen.
+    [% END %]
+
+  [% ELSIF error == "comment_too_long" %]
+    [% title = "Kommentaren är för lång" %]
+    Kommentarer får inte vara längre än
+    [%+ constants.MAX_COMMENT_LENGTH FILTER html %] tecken.
+
+  [% ELSIF error == "comment_tag_disabled" %]
+    [% title = "Kommentaretiketter är avstängda" %]
+    Kommentaretiketter är inte aktiverade.
+
+  [% ELSIF error == "comment_tag_invalid" %]
+    [% title = "Ogiltig kommentaretikett" %]
+    Kommentaretiketten ”[% tag FILTER html %]” innehåller ogiltiga tecken eller
+    ord.
+
+  [% ELSIF error == "comment_tag_too_long" %]
+    [% title = "Kommentaretiketten är för lång" %]
+    Kommentaretiketter får inte vara längre än
+    [%+ constants.MAX_COMMENT_TAG_LENGTH FILTER html %] tecken.
+
+  [% ELSIF error == "comment_tag_too_short" %]
+    [% title = "Kommentaretiketten är för kort" %]
+    Kommentaretiketter måste innehålla minst
+    [%+ constants.MIN_COMMENT_TAG_LENGTH FILTER html %] tecken.
+
+  [% ELSIF error == "auth_classification_not_enabled" %]
+    [% title = "Klassificering är inte aktiverad" %]
+    Klassificering är inte aktiverad.
+
+  [% ELSIF error == "classification_name_too_long" %]
+    [% title = "Klassificeringsnamnet är för långt" %]
+    Namnet på en klassificering är begränsat till [% constants.MAX_CLASSIFICATION_SIZE FILTER html %]
+    tecken. ”[% name FILTER html %]” är för långt ([% name.length %] tecken).
+
+[% ELSIF error == "classification_not_specified" %]
+    [% title = "Du måste ange ett klassificeringsnamn" %]
+    Du måste ange ett klassificeringsnamn.
+
+  [% ELSIF error == "classification_already_exists" %]
+    [% title = "Klassificeringen finns redan" %]
+    En klassificering med namnet ”[% name FILTER html %]” finns redan.
+
+  [% ELSIF error == "classification_invalid_sortkey" %]
+    [% title = "Ogiltig sorteringsnyckel för klassificering" %]
+    Sorteringsnyckeln ”[% sortkey FILTER html %]” är ogiltig. Den måste vara ett
+    heltal mellan 0 och [% constants.MAX_SMALLINT FILTER html %].
+
+  [% ELSIF error == "classification_not_deletable" %]
+    [% title = "Standardklassificeringen kan inte tas bort" %]
+    Du kan inte ta bort standardklassificeringen.
+
+  [% ELSIF error == "classification_has_products" %]
+     Det finns produkter för denna klassificering. Du
+     måste tilldela produkterna till en annan klassificering innan du
+     kan ta bort den här.
+
+  [% ELSIF error == "component_already_exists" %]
+    [% title = "Komponenten finns redan" %]
+    Produkten <em>[% product.name FILTER html %]</em> har redan
+    en komponent med namnet <em>[% name FILTER html %]</em>.
+
+  [% ELSIF error == "component_blank_description" %]
+    [% title = "Komponentbeskrivningen får inte vara tom" %]
+    Du måste ange en beskrivning för komponenten.
+
+  [% ELSIF error == "component_blank_name" %]
+    [% title = "Komponentnamnet får inte vara tomt" %]
+    Du måste ange ett namn för den nya komponenten.
+
+  [% ELSIF error == "component_has_bugs" %]
+    [% title = BLOCK %]Komponenten har [% terms.Bugs %][% END %]
+    Det finns [% nb FILTER html %] [%+ terms.bugs %] för denna komponent.
+    Du måste tilldela [% terms.bugs %] till en annan komponent innan du
+    kan ta bort den här.
+
+  [% ELSIF error == "component_is_last" %]
+    [% title = BLOCK %]Sista komponenten i produkten[% END %]
+    ”[% comp.name FILTER html %]” är den sista komponenten i
+    produkten ”[% comp.product.name FILTER html %]”. Du kan inte ta bort den.
+
+  [% ELSIF error == "component_name_too_long" %]
+    [% title = "Komponentnamnet är för långt" %]
+    Namnet på en komponent är begränsat till [% constants.MAX_COMPONENT_SIZE FILTER html %]
+    tecken. ”[% name FILTER html %]” är för långt ([% name.length %] tecken).
+
+  [% ELSIF error == "component_need_initialowner" %]
+    [% title = "Komponenten kräver en standardtilldelad" %]
+    Komponenten kräver en standardtilldelad.
+
+  [% ELSIF error == "customfield_nonexistent" %]
+    [% title = "Okänt anpassat fält" %]
+    Det finns inget anpassat fält med namnet ”[% name FILTER html %]”.
+
+  [% ELSIF error == "customfield_not_obsolete" %]
+    [% title = "Det anpassade fältet är inte föråldrat" %]
+    Det anpassade fältet ”[% name FILTER html %]” är inte föråldrat.
+    Markera ett anpassat fält som föråldrat innan du försöker ta bort det.
+
+  [% ELSIF error == "customfield_has_activity" %]
+    [% title = "Det anpassade fältet har aktivitet" %]
+    Det anpassade fältet ”[% name FILTER html %]” kan inte tas bort eftersom
+    det har registrerad aktivitet.
+
+  [% ELSIF error == "customfield_has_contents" %]
+    [% title = "Det anpassade fältet har innehåll" %]
+    Det anpassade fältet ”[% name FILTER html %]” kan inte tas bort eftersom
+    minst en [% terms.bug %] har ett värde i fältet.
+
+  [% ELSIF error == "dependency_loop_multi" %]
+    [% title = "Beroendeslinga upptäckt" %]
+    Följande [% terms.bug %] skulle visas i både delarna ”beror på”
+    och ”blockerar” av beroendeträdet om dessa ändringar
+    sparas:
+    [% FOREACH dep = deps %]
+      [%+ dep FILTER bug_link(dep) FILTER none %]
+    [% END %].
+    Det skulle skapa ett cirkulärt beroende, vilket inte är tillåtet.
+
+  [% ELSIF error == "dependency_loop_single" %]
+    [% title = "Beroendeslinga upptäckt" %]
+    Du kan inte låta [% terms.abug %] blockera sig själv eller bero på sig själv.
+
+  [% ELSIF error == "dupe_id_required" %]
+    [% title = "ID för dubblett-" _ terms.Bug _ " krävs" %]
+    Du måste ange ID:t för [% terms.abug %] för att markera denna [% terms.bug %]
+    som en dubblett.
+
+  [% ELSIF error == "dupe_not_allowed" %]
+    [% title = "Det går inte att markera " _ terms.bugs _ " som dubbletter" %]
+    Du kan inte markera [% terms.bugs %] som dubbletter när
+    du ändrar flera [% terms.bugs %] samtidigt.
+
+  [% ELSIF error == "dupe_loop_detected" %]
+    [% title = "Slinga upptäckt bland dubbletter" %]
+    Du kan inte markera [% terms.bug %] [%+ bug_id FILTER html %] som
+    en dubblett av
+    [% IF dupe_of == bug_id %]
+      sig själv
+    [% ELSE %]
+      [%+ terms.bug %] [%+ dupe_of FILTER html %], eftersom det
+      skulle skapa en dubblettslinga
+    [% END %].
+
+  [% ELSIF error == "email_change_in_progress" %]
+    [% title = "Byte av e-postadress pågår redan" %]
+    Byte av e-postadress pågår redan. Kontrollera din e-post.
+
+  [% ELSIF error == "email_no_body" %]
+    Ditt meddelande innehöll ingen text, så långt vi kunde avgöra.
+
+  [% ELSIF error == "empty_group_description" %]
+    [% title = "Gruppbeskrivningen får inte vara tom" %]
+    Du måste ange en beskrivning för gruppen.
+
+  [% ELSIF error == "empty_group_name" %]
+    [% title = "Gruppnamnet får inte vara tomt" %]
+    Du måste ange ett namn för gruppen.
+  
+  [% ELSIF error == "entry_access_denied" %]
+    [% title = "Åtkomst nekad" %]
+    [% admindocslinks = {'categorization.html#product-group-controls' => 'Gruppsäkerhet'} %]
+    Produkten <em>[% product FILTER html %]</em> finns antingen inte
+    eller så har du inte behörighet att
+    rapportera [% terms.abug %] i den.
+
+  [% ELSIF error == "extension_create_no_name" %]
+    Du måste ange ett namn på tillägget som argument till skriptet.
+
+  [% ELSIF error == "extension_disabled" %]
+    [% title = "Tillägget är inaktiverat" %]
+    Du kan inte öppna sidan eftersom tillägget ”[% name FILTER html %]”
+    är inaktiverat.
+
+  [% ELSIF error == "extension_first_letter_caps" %]
+    Den första bokstaven i tilläggets namn måste vara en versal.
+    (Du angav ”[% name FILTER html %]”.)
+
+  [% ELSIF error == "feature_disabled" %]
+    Funktionen [% install_string("feature_$feature") FILTER html %] är inte
+    tillgänglig i denna Bugzilla.
+    [% IF user.in_group('admin') %]
+      Kör <kbd>checksetup.pl</kbd> om du vill aktivera funktionen för att se
+      hur de nödvändiga kraven installeras.
+    [% END %]
+
+  [% ELSIF error == "field_already_exists" %]
+    [% title = "Fältet finns redan" %]
+    Fältet ”[% field.name FILTER html %]”
+    ([% field.description FILTER html %]) finns redan. Välj
+    ett annat namn.
+
+  [% ELSIF error == "field_cant_control_self" %]
+    [% title = "Fältet kan inte styra sig självt" %]
+    Fältet [% field.description FILTER html %] kan inte ställas in för att styra
+    sig självt.
+
+  [% ELSIF error == "field_control_must_be_select" %]
+    [% title = "Ogiltig fälttyp har valts" %]
+    Endast rullgardins- och flervalsfält kan användas för att styra
+    synligheten/värdena för andra fält. [% field.description FILTER html %]
+    har fel fälttyp.
+
+  [% ELSIF error == "field_invalid_name" %]
+    [% title = "Ogiltigt fältnamn" %]
+    ”[% name FILTER html %]” är inte ett giltigt namn för ett fält.
+    Ett namn får bara innehålla bokstäver, siffror och understreck.
+
+  [% ELSIF error == "field_invalid_sortkey" %]
+    [% title = "Ogiltig sorteringsnyckel för fält" %]
+    Sorteringsnyckeln [% sortkey FILTER html %] som du angav för
+    fältet är inte ett giltigt positivt heltal.
+
+  [% ELSIF error == "field_missing_description" %]
+    [% title = "Beskrivning saknas för fältet" %]
+    Du måste ange en beskrivning för fältet.
+
+  [% ELSIF error == "field_long_desc_too_long" %]
+    [% title = "Lång beskrivning för fältet är för lång" %]
+    Den långa beskrivning du angav för fältet är längre än
+    [% constants.MAX_FIELD_LONG_DESC_LENGTH FILTER html %] tecken.
+
+  [% ELSIF error == "field_missing_name" %]
+    [% title = "Namn saknas för fältet" %]
+    Du måste ange ett namn för fältet.
+
+  [% ELSIF error == "field_value_control_select_only" %]
+    [% title = "Ogiltigt värdestyrande fält" %]
+    Endast rullgardins- eller flervalsfält kan ha ett fält som
+    styr deras värden.
+
+  [% ELSIF error == "field_visibility_values_must_be_selected" %]
+    [% title = "Värden saknas för synlighetsfältet" %]
+    Minst ett värde måste väljas för synlighetsfältet
+    ”[% field.name FILTER html %]”.
+
+  [% ELSIF error == "fieldname_invalid" %]
+    [% title = "Det angivna fältet finns inte" %]
+    Fältet ”[% field.name FILTER html %]” finns inte eller
+    kan inte redigeras med detta gränssnitt.
+
+  [% ELSIF error == "fieldvalue_already_exists" %]
+    [% title = "Fältvärdet finns redan" %]
+    Värdet ”[% value.name FILTER html %]” finns redan för
+    fältet [%+ field.description FILTER html %].
+
+  [% ELSIF error == "fieldvalue_is_controller" %]
+    [% title = "Värdet styr andra fält" %]
+    Du kan inte ta bort [% value.field.description FILTER html %]
+    ”[% value.name FILTER html %]” eftersom det
+    [% IF fields.size %]
+      styr synligheten för följande fält:
+      [%+ fields.join(', ') FILTER html %].
+    [% END %]
+    [% ' Dessutom ' IF fields.size AND vals.size %]
+    [% IF vals.size %]
+      styr det synligheten för följande fältvärden:
+      <ul>
+        [% FOREACH field_name = vals.keys %]
+          [% FOREACH val = vals.${field_name} %]
+            <li>[% val.field.name FILTER html %]:
+              ”[% val.name FILTER html %]”</li>
+          [% END %]
+        [% END %]
+      </ul>
+    [% END %]
+
+  [% ELSIF error == "fieldvalue_is_default" %]
+    [% title = "Angivet fältvärde är standardvärde" %]
+    ”[% value.name FILTER html %]” är standardvärdet för
+    fältet ”[% field.description FILTER html %]” och kan inte tas bort
+    eller inaktiveras.
+    [% IF user.in_group('tweakparams') %]
+      Du måste först <a href="editparams.cgi?section=bugfields#
+      [%- param_name FILTER uri %]">ändra</a> standardvärdet.
+    [% END %]
+
+  [% ELSIF error == "fieldvalue_name_too_long" %]
+    [% title = "Fältvärdet är för långt" %]
+    Värdet för ett fält är begränsat till
+    [%+ constants.FIELD_VALUE_MAX_SIZE FILTER none %] tecken.
+    ”[% value FILTER html %]” är för långt ([% value.length %] tecken).
+
+  [% ELSIF error == "fieldvalue_not_editable" %]
+    [% title = "Fältvärdet kan inte redigeras" %]
+    Värdet ”[% old_value.name FILTER html %]” kan inte byta namn eftersom
+    det har en särskild funktion för fältet ”[% field.description FILTER html %]”.
+
+  [% ELSIF error == "fieldvalue_not_deletable" %]
+    [% title = "Fältvärdet kan inte tas bort" %]
+    Värdet ”[% value.name FILTER html %]” kan inte tas bort eller
+    inaktiveras eftersom det har en särskild funktion för
+    fältet ”[% field.description FILTER html %]”.
+
+  [% ELSIF error == "fieldvalue_reserved_word" %]
+    [% title = "Reserverat ord är inte tillåtet" %]
+    Du kan inte använda värdet ”[% value FILTER html %]” för
+    fältet ”[% field.description FILTER html %]”. Värdet används internt.
+    Välj ett annat.
+
+  [% ELSIF error == "fieldvalue_sortkey_invalid" %]
+    [% title = "Ogiltig sorteringsnyckel för fältvärde" %]
+    Sorteringsnyckeln ”[% sortkey FILTER html %]” för
+    fältet [%+ field.description FILTER html %] måste vara ett heltal
+    mellan 0 och [% constants.MAX_SMALLINT FILTER none %].
+
+  [% ELSIF error == "fieldvalue_still_has_bugs" %]
+    [% title = "Du kan inte ta bort detta fältvärde" %]
+    Du kan inte ta bort värdet ”[% value.name FILTER html %]” från
+    fältet [%+ field.description FILTER html %], eftersom det fortfarande används av
+    [%+ value.bug_count FILTER html %] [%+ terms.bugs %].
+
+  [% ELSIF error == "fieldvalue_undefined" %]
+    [% title = "Odefinierat värde är inte tillåtet" %]
+    Du måste ange ett värde.
+
+  [% ELSIF error == "file_not_specified" %]
+    [% title = "Ingen fil har angetts" %]
+    Du angav ingen fil att bifoga.
+
+  [% ELSIF error == "filename_not_specified" %]
+    [% title = "Inget filnamn har angetts" %]
+    Du måste ange ett filnamn för bilagan.
+
+  [% ELSIF error == "file_too_large" %]
+    [% title = "Filen är för stor" %]
+    [%# Convert maxlocalattachment from Mb to Kb %]
+    [% max_local = Param('maxlocalattachment') * 1024 %]
+    [% max_limit = [Param('maxattachmentsize'), max_local] %]
+    Filen du försöker bifoga är [% filesize FILTER html %]
+    kilobyte (KB) stor. Bilagor får inte vara större än
+    [%# Hack to get the max value between both limits %]
+    [%+ max_limit.nsort.last FILTER html %] KB. <br>
+    Vi rekommenderar att du lagrar bilagan någon annanstans
+    och sedan klistrar in URL:en till filen i lämpligt textfält på
+    sidan för att skapa bilagor. Fältet öppnas genom att klicka på
+    länken ”klistra in text som bilaga”.
+    <br>Om bilagan är en bild kan du också konvertera den till ett
+    komprimerbart format som JPG eller PNG och försöka igen.
+
+  [% ELSIF error == "flag_type_requestee_disabled" %]
+    [% title = "Flaggan kan inte begäras från en viss person" %]
+    Du kan inte begära <em>[% type.name FILTER html %]</em> från en viss person.
+
+  [% ELSIF error == "flag_requestee_disabled" %]
+    [% title = "Den begärda flaggmottagaren är inaktiverad" %]
+    Du kan inte fråga <em>[% requestee.identity FILTER html %]</em> eftersom
+    kontot är inaktiverat.
+
+  [% ELSIF error == "flag_requestee_needs_privs" %]
+    [% title = "Flaggmottagaren behöver behörighet" %]
+    [% requestee.identity FILTER html %] har inte behörighet att ange
+    flaggan <em>[% flagtype.name FILTER html %]</em>. Välj en användare som är
+    medlem i gruppen <em>[% flagtype.grant_group.name FILTER html %]</em>.
+
+  [% ELSIF error == "flag_requestee_unauthorized" %]
+    [% title = "Flaggmottagaren saknar behörighet" %]
+    [% admindocslinks = {'flags.html' => 'Administrera flaggor',
+                         'categorization.html#assigning-group-controls-to-products' => 'Gruppsäkerhet'} %]
+    [% docslinks = {'using/understanding.html#flags' => 'Använda flaggor'} %]
+
+    Du bad [% requestee.identity FILTER html %]
+    om <code>[% flag_type.name FILTER html %]</code> för [% terms.bug %]
+    [%+ bug_id FILTER html -%]
+    [% IF attach_id && attach_id > 0 %], bilaga [% attach_id FILTER html %][% END %],
+    men [% terms.bug %] har begränsats till användare i vissa grupper,
+    och användaren du frågade finns inte i alla grupper som
+    [% terms.bug %] har begränsats till.
+    Välj någon annan att fråga, eller ge användare på [% terms.bug %]s CC-lista
+    åtkomst och lägg till användaren i listan.
+
+  [% ELSIF error == "flag_requestee_unauthorized_attachment" %]
+    [% title = "Flaggmottagaren saknar behörighet" %]
+    [% admindocslinks = {'flags.html' => 'Administrera flaggor',
+                         'categorization.html#assigning-group-controls-to-products' => 'Gruppsäkerhet'} %]
+    [% docslinks = {'using/understanding.html#flags' => 'Använda flaggor'} %]
+
+    Du bad [% requestee.identity FILTER html %]
+    om <code>[% flag_type.name FILTER html %]</code> för
+    [%+ terms.bug %] [%+ bug_id FILTER html %],
+    bilaga [% attach_id FILTER html %], men bilagan
+    är begränsad till användare i gruppen [% Param("insidergroup") FILTER html %],
+    och användaren du frågade är inte med i gruppen. Välj någon annan
+    att fråga eller be en administratör att lägga till användaren i gruppen.
+
+  [% ELSIF error == "flag_status_invalid" %]
+    [% title = "Ogiltig flaggstatus" %]
+    Flaggstatusen <em>[% status FILTER html %]</em>
+    [% IF id %]
+      för flagg-ID #[% id FILTER html %]
+    [% END %]
+    är ogiltig.
+
+  [% ELSIF error == "flag_type_cannot_deactivate" %]
+    [% title = "Flaggtypen kan inte inaktiveras" %]
+    Flaggtypen ”[% flagtype.name FILTER html %]” gäller även vissa
+    produkter som du inte kan se och därför får du inte inaktivera den.
+
+  [% ELSIF error == "flag_type_cannot_delete" %]
+    [% title = "Flaggtypen får inte tas bort" %]
+    Flaggtypen ”[% flagtype.name FILTER html %]” gäller även vissa
+    produkter som du inte kan se och därför får du inte ta bort den.
+
+  [% ELSIF error == "flag_type_cc_list_invalid" %]
+    [% title = "Ogiltig CC-lista för flaggtyp" %]
+    [% admindocslinks = {'flags.html' => 'Administrera flaggor'} %]
+    CC-listan [% cc_list FILTER html %] måste vara kortare än 200 tecken.
+
+  [% ELSIF error == "flag_type_component_without_product" %]
+    [% title = "Produkt saknas" %]
+    En komponent valdes utan att någon produkt valdes.
+
+  [% ELSIF error == "flag_type_description_invalid" %]
+    [% title = "Ogiltig beskrivning av flaggtyp" %]
+    [% admindocslinks = {'flags.html' => 'Administrera flaggor'} %]
+    Du måste ange en beskrivning för flaggtypen.
+
+  [% ELSIF error == "flag_type_name_invalid" %]
+    [% title = "Ogiltigt namn på flaggtyp" %]
+    [% admindocslinks = {'flags.html' => 'Administrera flaggor'} %]
+    Namnet <em>[% name FILTER html %]</em> måste innehålla 1–50 tecken
+    och får inte innehålla mellanslag eller kommatecken.
+
+  [% ELSIF error == "flag_type_not_editable" %]
+    [% title = "Flaggtypen kan inte ändras" %]
+    Du får inte ändra egenskaper för flaggtypen ”[% flagtype.name FILTER html %]”,
+    eftersom flaggtypen inte är tillgänglig för de produkter du kan administrera.
+
+  [% ELSIF error == "flag_not_unique" %]
+    [% title = "Flaggan är inte unik" %]
+    Flaggan ”[% value FILTER html %]” har angetts flera gånger.
+    Du måste ange ID-värdet för att uppdatera flaggan.
+
+  [% ELSIF error == "flag_type_not_unique" %]
+    [% title = "Flaggtypen är inte unik" %]
+    Flaggtypen ”[% value FILTER html %]” matchar flera flaggtyper.
+    Du måste ange typ-ID:t för att uppdatera eller lägga till en flagga.
+
+  [% ELSIF error == "flag_type_not_multiplicable" %]
+    [% docslinks = {'using/understanding.html#flags' => 'Använda flaggor'} %]
+    Du kan inte ha flera flaggor av typen <em>[% type.name FILTER html %]</em>
+    för [% IF attachment %] den här bilagan [% ELSE %] [%+ terms.bug %] [% END %].
+
+  [% ELSIF error == "flag_update_denied" %]
+    [% title = "Ändring av flagga nekad" %]
+    [% admindocslinks = {'flags.html' => 'Administrera flaggor',
+                         'categorization.html#assigning-group-controls-to-products' => 'Gruppsäkerhet'} %]
+    [% docslinks = {'using/understanding.html#flags' => 'Använda flaggor'} %]
+    Du försökte [% IF status == "+" %] bevilja [% ELSIF status == "-" %] neka
+    [% ELSIF status == "X" %] rensa [% ELSE %] begära [% END %]
+    <code>[% name FILTER html %]
+          [% IF status == "X" %][% old_status FILTER html %][% END %]</code>.
+
+    Endast en användare med nödvändig behörighet kan göra ändringen.
+
+  [% ELSIF error == "format_not_found" %]
+    [% title = "Formatet hittades inte" %]
+    Det begärda formatet <em>[% format FILTER html %]</em> finns inte med
+    innehållstypen <em>[% ctype FILTER html %]</em>.
+    [% IF invalid %]
+      Båda parametrarna får endast innehålla bokstäver och bindestreck.
+    [% END %]
+
+  [% ELSIF error == "flag_type_sortkey_invalid" %]
+    [% title = "Ogiltig sorteringsnyckel för flaggtyp" %]
+    Sorteringsnyckeln <em>[% sortkey FILTER html %]</em> måste vara ett heltal
+    mellan 0 och [% constants.MAX_SMALLINT FILTER none %].
+
+  [% ELSIF error == "freetext_too_long" %]
+    [% title = "Texten är för lång" %]
+    Texten du angav i fältet [% field_descs.$field FILTER html %]
+    är för lång ([% text.length FILTER html %] tecken,
+    över den högsta tillåtna längden på
+    [%+ constants.MAX_FREETEXT_LENGTH FILTER none %] tecken).
+
+  [% ELSIF error == "group_cannot_delete" %]
+    [% title = "Gruppen kan inte tas bort" %]
+    Gruppen <em>[% group.name FILTER html %]</em> kan inte tas bort eftersom det finns
+    <a href="editgroups.cgi?action=del&amp;group=
+             [%- group.id FILTER uri %]">poster</a>
+    i databasen som hänvisar till den. Alla hänvisningar till gruppen måste
+    tas bort innan du kan ta bort den.
+
+  [% ELSIF error == "group_cannot_view" %]
+    [% title = "Det går inte att visa grupper" %]
+    För att visa grupper måste du vara medlem i gruppen ”editusers” eller
+    ”creategroups” eller ha behörighet att lägga till användare i minst en grupp.
+
+  [% ELSIF error == "group_exists" %]
+    [% title = "Gruppen finns redan" %]
+    Gruppen [% name FILTER html %] finns redan.
+
+  [% ELSIF error == "group_has_special_role" %]
+    [% title = "Gruppen kan inte tas bort" %]
+    [% IF groups.size == 1 %]
+      [% attr = "den" %]
+      [% param = "parametern" %]
+    [% ELSE %]
+      [% attr = "dem" %]
+      [% param = "parametrarna" %]
+    [% END %]
+    Gruppen ”[% name FILTER html %]” används av
+    [% param FILTER html %] ”[% groups.join("” och ”") FILTER html %]”.
+    För att ta bort gruppen måste du först ändra
+    [%+ param FILTER html %] så att [% attr FILTER html %] pekar på en annan grupp.
+
+
+  [% ELSIF error == "group_invalid_removal" %]
+    Du försökte ta bort [% terms.bug %] [%+ bug_id FILTER html %]
+    från gruppen ”[% name FILTER html %]”, men antingen finns gruppen inte
+    eller så får du inte ta bort [% terms.bugs %] från gruppen i
+    produkten ”[% product FILTER html %]”.
+
+  [% ELSIF error == "group_restriction_not_allowed" %]
+    [% title = "Gruppbegränsning är inte tillåten" %]
+    Du försökte begränsa [% bug_id ? "$terms.bug $bug_id" : terms.abug FILTER html %]
+    till gruppen ”[% name FILTER html %]”, men antingen finns gruppen inte
+    eller så får du inte begränsa [% terms.bugs %] till gruppen i
+    produkten ”[% product FILTER html %]”.
+
+  [% ELSIF error == "group_not_specified" %]
+    [% title = "Ingen grupp har angetts" %]
+    Ingen grupp har angetts.
+
+  [% ELSIF error == "group_not_visible" %]
+    [% title = "Gruppen är inte tillåten" %]
+    Du får inte se medlemmar i gruppen [% group.name FILTER html %].
+
+  [% ELSIF error == "system_group_not_deletable" %]
+    [% title = "Systemgrupper kan inte tas bort" %]
+    <em>[% name FILTER html %]</em> är en systemgrupp.
+    Gruppen kan inte tas bort.
+
+  [% ELSIF error == "illegal_attachment_edit" %]
+    [% title = "Obehörig åtgärd" %]
+    Du har inte behörighet att redigera bilaga [% attach_id FILTER html %].
+
+  [% ELSIF error == "illegal_attachment_edit_bug" %]
+    [% title = "Obehörig åtgärd" %]
+    Du har inte behörighet att redigera bilagor i [% terms.bug %]
+    [%+ bug_id FILTER html %].
+         
+  [% ELSIF error == "illegal_bug_status_transition" %]
+    [% title = "Otillåten ändring av $terms.Bug-status" %]
+    [% IF old.defined %]
+      Du får inte ändra statusen för [% terms.bug %] från
+      [%+ old.name FILTER html %] till [% new.name FILTER html %].
+    [% ELSE %]
+      Du får inte rapportera nya [% terms.bugs %] med
+      statusen [%+ new.name FILTER html %].
+    [% END %]
+
+  [% ELSIF error == "illegal_change" %]
+    [% title = "Inte tillåtet" %]
+    Du försökte ändra fältet
+    <strong>[% field_descs.$field FILTER html %]</strong>
+    [% IF oldvalue.defined AND oldvalue != "" %]
+      från <em>[% oldvalue.join(', ') FILTER html %]</em>
+    [% END %]
+    [% IF newvalue.defined AND newvalue != "" %]
+      till <em>[% newvalue.join(', ') FILTER html %]</em>
+    [% END %],
+    men endast
+    [% IF privs < constants.PRIVILEGES_REQUIRED_EMPOWERED %]
+      den tilldelade
+      [% IF privs < constants.PRIVILEGES_REQUIRED_ASSIGNEE %] eller rapportören [% END %]
+      för [% terms.bug %], eller
+    [% END %]
+    en användare med nödvändig behörighet får ändra fältet.
+
+  [% ELSIF error == "illegal_change_deps" %]
+    [% title = "Inte tillåtet" %]
+    Du försökte ändra fältet
+    <strong>[% field_descs.$field FILTER html %],</strong>
+    men endast en användare som får redigera
+    båda berörda [% terms.bugs %] får ändra fältet.
+
+  [% ELSIF error == "illegal_date" %]
+    [% title = "Ogiltigt datum" %]
+    ”<kbd>[% date FILTER html %]</kbd>” är inte ett giltigt datum.
+    [% IF format %]
+      Använd formatet ”<code>[% format FILTER html %]</code>”.
+    [% END %]
+    
+  [% ELSIF error == "illegal_email_address" %]
+    [% title = "Ogiltig e-postadress" %]
+    E-postadressen du angav (<b>[% addr FILTER html %]</b>)
+    godkändes inte av vår syntaxkontroll för giltiga e-postadresser.
+    [% IF default %]
+      En giltig adress måste innehålla exakt ett ”@”
+      och minst en punkt efter @-tecknet.
+    [% ELSE %]
+      [%+ Param('emailregexpdesc') FILTER html_light %]
+    [% END %]
+    Den får inte heller innehålla otillåtna tecken.
+
+  [% ELSIF error == "illegal_frequency" %]
+    [% title = "För ofta" %]
+    Om du inte är administratör får du inte skapa serier som
+    körs oftare än en gång var [% minimum FILTER html %]:e dag.
+    
+  [% ELSIF error == "illegal_group_control_combination" %]
+    [% title = "Din kombination av gruppstyrningar är otillåten" %]
+    [% admindocslinks = {'categorization.html#assigning-group-controls-to-products' => 'Tilldela gruppstyrningar till produkter'} %]
+    Din kombination av gruppstyrningar för gruppen ”[% groupname FILTER html %]”
+    är otillåten.
+
+  [% ELSIF error == "illegal_pronoun" %]
+    [% title = "Otillåtet pronomen" %]
+    Pronomenet du använde ([% pronoun FILTER html %]) är otillåtet. Du måste använda
+    ett av de godkända pronomenen. Se
+    <a href="[% docs_urlbase FILTER html %]query.html#pronouns">pronomenersättning</a>
+    för en fullständig lista.
+
+  [% ELSIF error == "illegal_query_name" %]
+    [% title = "Otillåtet söknamn" %]
+    Namnet på sökningen får inte innehålla följande tecken:
+    &lt;, &gt;, &amp;.
+
+  [% ELSIF error == "illegal_series_creation" %]
+    [% admindocslinks = {'categorization.html#assigning-group-controls-to-products' => 'Gruppsäkerhet'} %]
+    [% docslinks = {'using/reports-and-charts.html' => 'Rapportering'} %]
+    Du har inte behörighet att skapa serier.
+        
+  [% ELSIF error == "illegal_series_edit" %]
+    [% admindocslinks = {'categorization.html#assigning-group-controls-to-products' => 'Gruppsäkerhet'} %]
+    [% docslinks = {'using/reports-and-charts.html' => 'Rapportering'} %]
+    Du har inte behörighet att redigera serien. För att göra det måste du vara
+    dess skapare eller administratör.
+
+  [% ELSIF error == "illegal_time" %]
+    [% title = "Ogiltig tid" %]
+    ”<kbd>[% time FILTER html %]</kbd>” är inte en giltig tid.
+    [% IF format %]
+      Använd formatet ”<code>[% format FILTER html %]</code>”.
+    [% END %]
+
+  [% ELSIF error == "illegal_regexp" %]
+    [% title = "Illegal Regular Expression" %]
+    Det reguljära uttryck du angav, [% value FILTER html %], är inte giltigt.
+    Felet var: [% dberror FILTER html %].
+        
+  [% ELSIF error == "insufficient_data_points" %]
+    [% docslinks = {'using/reports-and-charts.html' => 'Rapportering'} %]
+    Det finns inte tillräckligt med datapunkter för att skapa ett diagram ännu.
+        
+  [% ELSIF error == "invalid_attach_id" %]
+    [% title = "Ogiltigt bilage-ID" %]
+    Bilage-ID:t [% attach_id FILTER html %] är ogiltigt.
+
+  [% ELSIF error == "bug_id_does_not_exist" %]
+    [% title = BLOCK %]Ogiltigt [% terms.Bug %]-ID[% END %]
+    [% terms.Bug %] #[% bug_id FILTER html %] finns inte.
+    
+  [% ELSIF error == "improper_bug_id_field_value" %]
+    [% title = BLOCK %]
+      [% IF bug_id %]Ogiltigt [% ELSE %]Saknat [% END %] [% terms.Bug %]-ID
+    [% END %]
+    [% IF bug_id %]
+      ”[% bug_id FILTER html %]” är inte ett giltigt nummer för [% terms.bug %]
+      eller ett alias till [% terms.abug %].
+    [% ELSE %]
+      [% IF field %]
+        Fältet ”[% field_descs.$field FILTER html %]”
+        får inte vara tomt.
+      [% END %]
+      Du måste ange ett giltigt nummer för [% terms.bug %].
+    [% END %]
+
+  [% ELSIF error == "invalid_changedsince" %]
+    [% title = "Ogiltigt ”Ändrad sedan”" %]
+    Värdet för ”ändrad sedan”, ”[% changedsince FILTER html %]”, måste vara ett
+    heltal >= 0.
+
+  [% ELSIF error == "invalid_content_type" %]
+    [% title = "Ogiltig innehållstyp" %]
+    Innehållstypen <em>[% contenttype FILTER html %]</em> är ogiltig.
+    Giltiga typer måste ha formen <em>foo/bar</em>, där <em>foo</em>
+    är en av <em>[% constants.LEGAL_CONTENT_TYPES.join(', ') FILTER html %]</em>
+    och <em>bar</em> inte får innehålla specialtecken (som ”=”, ”?”, …).
+
+  [% ELSIF error == "invalid_datasets" %]
+    [% title = "Ogiltiga datauppsättningar" %]
+    Ogiltiga datauppsättningar <em>[% datasets.join(":") FILTER html %]</em>. Endast siffror,
+    bokstäver och kolon är tillåtna.
+
+  [% ELSIF error == "invalid_dimensions" %]
+    [% title = "Ogiltiga dimensioner" %]
+    Angiven bredd eller höjd är inte ett positivt heltal.
+
+  [% ELSIF error == "invalid_format" %]
+    [% title = "Ogiltigt format" %]
+    Formatet ”[% format FILTER html %]” är ogiltigt (måste vara ett av
+    [% FOREACH my_format = formats %]
+      "[% my_format FILTER html %]"
+    [% END %]
+    ).
+
+  [% ELSIF error == "invalid_group_ID" %]
+    [% title = "Ogiltigt grupp-ID" %]
+    Gruppen du angav finns inte.
+
+  [% ELSIF error == "invalid_group_name" %]
+    [% title = "Ogiltigt gruppnamn" %]
+    Gruppen du angav, [% name FILTER html %], är inte giltig här.
+
+  [% ELSIF error == "invalid_keyword_id" %]
+    Nyckelords-ID:t <em>[% id FILTER html %]</em> kunde inte hittas.
+
+  [% ELSIF error == "invalid_maxrows" %]
+    [% title = "Ogiltigt högsta antal rader" %]
+    Det högsta antalet rader, ”[% maxrows FILTER html %]”, måste vara
+    ett positivt heltal.
+
+  [% ELSIF error == "invalid_parameter" %]
+    [% title = "Ogiltig parameter" %]
+    Det nya värdet för [% name FILTER html %] är ogiltigt: [% err FILTER html %].
+
+  [% ELSIF error == "invalid_regexp" %]
+    [% title = "Ogiltigt reguljärt uttryck" %]
+    Det reguljära uttryck du angav är ogiltigt.
+
+  [% ELSIF error == "invalid_user" %]
+    [% title = "Ogiltig användare" %]
+    Det finns inget användarkonto
+    [% IF user_id %]
+      med ID <em>[% user_id FILTER html %]</em>.
+    [% ELSIF user_login %]
+      med inloggningsnamnet <em>[% user_login FILTER html %]</em>.
+    [% ELSE %]
+      angivet.
+    [% END %]
+
+  [% ELSIF error == "invalid_user_group" %]
+    [% title = "Invalid User Group" %]
+    [% IF users.size > 1 %] Users [% ELSE %] User [% END %]
+    '[% users.join(', ') FILTER html %]'
+    [% IF users.size > 1 %] are [% ELSE %] is [% END %]
+    not able to edit the
+    [% IF product %]
+      '[% product FILTER html %]'
+    [% END %]
+    [%+ field_descs.product FILTER html %]
+    [% IF bug_id %]
+      for [% terms.bug %] '[% bug_id FILTER html %]'.
+    [% ELSIF new %]
+      and may not be included on a new [% terms.bug %].
+    [% ELSE %]
+      for at least one [% terms.bug %] being changed.
+    [% END %]
+
+  [% ELSIF error == "invalid_username" %]
+    [% title = "Ogiltigt användarnamn" %]
+    Namnet <kbd>[% name FILTER html %]</kbd> är inte ett giltigt användarnamn.
+    Antingen stavade du det fel eller så har personen inte
+    registrerat ett konto hos [% terms.Bugzilla %].
+
+  [% ELSIF error == "invalid_login_or_password" %]
+    [% title = "Ogiltigt inloggningsnamn eller lösenord" %]
+    Inloggningsnamnet eller lösenordet du angav är inte giltigt.
+    [%# People get two login attempts before being warned about
+      # being locked out.
+      #%]
+    [% IF remaining <=  2 %]
+      Om du inte anger rätt lösenord inom
+      [%+ remaining FILTER html %] ytterligare försök låses du ute från
+      kontot i [%+ constants.LOGIN_LOCKOUT_INTERVAL FILTER html %] minuter.
+      Du kan återställa lösenordet med länken ”Glömt lösenordet”
+      för att undvika att låsas ute.
+    [% END %]
+
+  [% ELSIF error == "invalid_cookies_or_token" %]
+    [% title = "Ogiltiga eller utgångna kakor eller token" %]
+    Kakorna eller tokenet som angavs var inte giltiga eller har gått ut.
+    Du kan logga in igen för att få nya kakor eller ett nytt token.
+
+  [% ELSIF error == "json_rpc_get_method_required" %]
+    När JSON-RPC används över GET måste du ange parametern ”method”.
+    Se dokumentationen på
+    [%+ docs_urlbase FILTER html %]api/Bugzilla/WebService/Server/JSONRPC.html
+
+  [% ELSIF error == "json_rpc_illegal_content_type" %]
+    När JSON-RPC används över POST kan du inte skicka data som
+    [%+ content_type FILTER html %]. Endast application/json och
+    application/json-rpc tillåts.
+
+  [% ELSIF error == "json_rpc_invalid_params" %]
+    Argumentet ”params” kunde inte tolkas som giltig JSON.
+    Fel: [% err_msg FILTER html %]
+    Värde: [% params FILTER html %]
+
+  [% ELSIF error == "json_rpc_invalid_callback" %]
+    Du kan inte använda ”[% callback FILTER html %]” som parametern ”callback”.
+    Av säkerhetsskäl är endast bokstäver, siffror och följande tecken
+    tillåtna i parametern ”callback”: <code>[]._</code>
+
+  [% ELSIF error == "json_rpc_post_only" %]
+    Av säkerhetsskäl måste du använda HTTP POST för att anropa
+    metoden ”[% method FILTER html %]”.
+
+  [% ELSIF error == "rest_invalid_resource" %]
+    Ingen REST API-resurs hittades för ”[% method FILTER html +%] [%+ path FILTER html %]”.
+
+  [% ELSIF error == "get_products_invalid_type" %]
+    Produkttypen ”[% type FILTER html %]” är ogiltig. Giltiga val är
+    ”accessible”, ”selectable” och ”enterable”.
+
+  [% ELSIF error == "keyword_already_exists" %]
+    [% title = "Nyckelordet finns redan" %]
+    Ett nyckelord med namnet [% name FILTER html %] finns redan.
+
+  [% ELSIF error == "keyword_blank_description" %]
+    [% title = "Tom nyckelordsbeskrivning är inte tillåten" %]
+    Du måste ange en beskrivning för nyckelordet.
+     
+  [% ELSIF error == "keyword_blank_name" %]
+    [% title = "Tomt nyckelordsnamn är inte tillåtet" %]
+    Du måste ange ett namn för nyckelordet.
+     
+  [% ELSIF error == "keyword_invalid_name" %]
+    [% title = "Ogiltigt nyckelordsnamn" %]
+    Du får inte använda kommatecken eller mellanslag i ett nyckelordsnamn.
+     
+  [% ELSIF error == "login_needed_for_password_change" %]
+    [% title = "Inloggningsnamn krävs" %]
+    Du måste ange ett inloggningsnamn när du begär att få ändra lösenordet.
+
+  [% ELSIF error == "login_required_for_pronoun" %]
+    [% title = "Inloggningsnamn krävs" %]
+    Du kan inte använda %user% utan att vara inloggad, eftersom %user% syftar
+    på ditt inloggningsnamn, som vi inte känner till.
+
+  [% ELSIF error == "login_required" %]
+    [%# Used for non-web-based LOGIN_REQUIRED situations. %]
+    Du måste logga in innan du kan använda den här delen av [% terms.Bugzilla %].
+
+  [% ELSIF error == "migrate_config_created" %]
+    Filen <kbd>[% file FILTER html %]</kbd> innehåller konfigurationsvariabler
+    som måste anges innan migreringen kan fortsätta.
+
+  [% ELSIF error == "migrate_from_invalid" %]
+    ”[% from FILTER html %]” är inte en giltig typ av [% terms.bug %]-spårare
+    att migrera från. I katalogen <kbd>Bugzilla/Migrate/</kbd> finns en lista
+    över giltiga [% terms.bug %]-spårare.
+
+  [% ELSIF error == "milestone_already_exists" %]
+    [% title = "Milstolpen finns redan" %]
+    [% admindocslinks = {'categorization.html#products'   => 'Administrera produkter',
+                         'categorization.html#milestones' => 'Om milstolpar'} %]
+    Milstolpen ”[% name FILTER html %]” finns redan för produkten ”
+    [%- product FILTER html %]”.
+
+  [% ELSIF error == "milestone_blank_name" %]
+    [% title = "Tomt milstolpsnamn är inte tillåtet" %]
+    Du måste ange ett namn för milstolpen.
+
+  [% ELSIF error == "milestone_is_default" %]
+    [% title = "Standardmilstolpen kan inte tas bort" %]
+    [% admindocslinks = {'categorization.html#products'   => 'Administrera produkter',
+                         'categorization.html#milestones' => 'Om milstolpar'} %]
+    [% milestone.name FILTER html %] är standardmilstolpe för produkten
+    ”[% milestone.product.name FILTER html %]” och kan därför inte tas bort.
+
+  [% ELSIF error == "milestone_name_too_long" %]
+    [% title = "Milstolpsnamnet är för långt" %]
+    Namnet på en milstolpe får vara högst [% constants.MAX_MILESTONE_SIZE FILTER html %]
+    tecken. ”[% name FILTER html %]” är för långt ([% name.length %] tecken).
+
+  [% ELSIF error == "milestone_required" %]
+    [% title = "Milstolpe krävs" %]
+    Du måste välja en målmilstolpe för [% terms.bug %]
+    [%+ bug.id FILTER html %]
+    om du ska acceptera den. En del av att acceptera
+    [%+ terms.abug %] är att uppskatta när den ska åtgärdas.
+
+  [% ELSIF error == "milestone_sortkey_invalid" %]
+    [% title = "Ogiltig sorteringsnyckel för milstolpe" %]
+    Sorteringsnyckeln ”[% sortkey FILTER html %]” ligger inte inom intervallet
+    [%+ constants.MIN_SMALLINT FILTER html %] &le; sortkey &le;
+    [%+ constants.MAX_SMALLINT FILTER html %].
+
+  [% ELSIF error == "misarranged_dates" %]
+    [% title = "Datumen är i fel ordning" %]
+    Startdatumet ([% datefrom FILTER html %]) ligger efter
+    slutdatumet ([% dateto FILTER html %]).
+
+  [% ELSIF error == "mismatched_bug_ids_on_obsolete" %]
+    Bilagan [% attach_id FILTER html %] hör till en annan [% terms.bug %],
+    men du försökte markera den som föråldrad samtidigt som du skapade en ny bilaga för
+    [%+ terms.bug %] [%+ my_bug_id FILTER html %].
+
+  [% ELSIF error == "missing_attachment_description" %]
+    [% title = "Bilagebeskrivning saknas" %]
+    Du måste ange en beskrivning för bilagan.
+
+  [% ELSIF error == "missing_bug_id" %]
+    [% title = "$terms.Bug-ID saknas" %]
+    Inget ID för [% terms.bug %] angavs.
+
+  [% ELSIF error == "missing_category" %]
+    [% title = "Kategori saknas" %]
+    Du angav ingen kategori för serien.
+
+  [% ELSIF error == "missing_component" %]
+    [% title = "Komponent saknas" %]
+    [% admindocslinks = {'categorization.html#products'   => 'Administrera produkter',
+                         'categorization.html#milestones' => 'Skapa en komponent'} %]
+    Produkten <em>[% product.name FILTER html %]</em> måste ha minst en aktiv
+    komponent för att du ska kunna registrera [% terms.abug %] i den.<br>
+    [% IF user.in_group("editcomponents", product.id) %]
+      <a href="editcomponents.cgi?action=add&amp;product=[% product.name FILTER uri %]">Skapa
+      en ny komponent</a>.
+    [% ELSE %]
+      Kontakta [% Param("maintainer") %] och be dem
+      lägga till en komponent i produkten.
+    [% END %]
+
+  [% ELSIF error == "missing_content_type" %]
+    [% title = "Innehållstyp saknas" %]
+     Du bad [% terms.Bugzilla %] att fastställa innehållstypen automatiskt, men
+     webbläsaren angav ingen innehållstyp när filen skickades upp.
+     Du måste därför ange en innehållstyp manuellt.
+
+  [% ELSIF error == "missing_cookie" %]
+    [% title = "Kaka saknas" %]
+    Kakan som lagrade resultatet av din senaste sökning verkar ha försvunnit.
+    Du behöver börja om från <a href="query.cgi">söksidan</a>.
+
+  [% ELSIF error == "missing_datasets" %]
+    [% title = "Inga datauppsättningar har valts" %]
+    [% docslinks = {'using/reports-and-charts.html' => 'Rapportering'} %]
+    Du måste ange en eller flera datauppsättningar att rita.
+
+  [% ELSIF error == "missing_frequency" %]
+    [% title = "Frekvens saknas" %]
+    [% docslinks = {'using/reports-and-charts.html' => 'Rapportering'} %]
+    Du angav ingen giltig frekvens för serien.
+
+  [% ELSIF error == "missing_name" %]
+    [% title = "Namn saknas" %]
+    [% docslinks = {'using/reports-and-charts.html' => 'Rapportering'} %]
+    Du angav inget namn för serien.
+
+  [% ELSIF error == "missing_query" %]
+    [% title = "Sökning saknas" %]
+    [% docslinks = {'using/finding.html' => "Söka efter $terms.bugs",
+                    'using/finding.html#bug-lists' => "Listor med $terms.bugs"} %]
+    Sökningen med namnet <em>[% name FILTER html %]</em>
+    [% IF sharer_id && sharer_id != user.id %]
+      har inte gjorts synlig för dig.
+    [% ELSE %]
+      finns inte.
+    [% END %]
+
+  [% ELSIF error == "need_quipid" %]
+    [% title = "Citat-ID saknas" %]
+    Ett giltigt citat-ID krävs.
+
+  [% ELSIF error == "missing_resolution" %]
+    [% title = "Lösning krävs" %]
+    En giltig lösning krävs för att markera [% terms.bugs %] som
+    [%+ status FILTER upper FILTER html %].
+
+  [% ELSIF error == "missing_subcategory" %]
+    [% title = "Underkategori saknas" %]
+    Du angav ingen underkategori för serien.
+                
+  [% ELSIF error == "missing_version" %]
+    [% title = "Version saknas" %]
+    [% admindocslinks = {'categorization.html#versions' => 'Definiera versioner'} %]
+    Produkten <em>[% product.name FILTER html %]</em> måste ha minst en aktiv
+    version för att du ska kunna registrera [% terms.abug %] i den.<br>
+    [% IF user.in_group("editcomponents", product.id) %]
+      <a href="editversions.cgi?action=add&amp;product=[% product.name FILTER uri %]">Skapa
+      en ny version</a>.
+    [% ELSE %]
+      Kontakta [% Param("maintainer") %] och be dem
+      lägga till en version i produkten.
+    [% END %]
+
+  [% ELSIF error == "multiple_alias_not_allowed" %]
+    Du kan inte ange alias när du ändrar flera [% terms.bugs %]
+    samtidigt.
+
+  [% ELSIF error == "need_quip" %]
+    [% title = "Citat krävs" %]
+    [% docslinks = {'administering/quips.html' => 'Om citat'} %]
+    Ange ett citat i textfältet.
+
+  [% ELSIF error == "new_password_missing" %]
+    [% title = "Nytt lösenord saknas" %]
+    Du måste ange ett nytt lösenord.
+
+  [% ELSIF error == "no_axes_defined" %]
+    [% title = "Inga axlar har angetts" %]
+    [% docslinks = {'using/reports-and-charts.html' => 'Rapportering'} %]
+    Du angav inga axlar att rita.
+
+  [% ELSIF error == "no_bugs_chosen" %]
+    [% title = BLOCK %]Inga [% terms.Bugs %] har valts[% END %]
+    Du har inte valt några [% terms.bugs %]
+    [% IF action == "modify" %]
+      att ändra.
+    [% ELSIF action == "view" %]
+      att visa.
+    [% ELSIF action == 'summarize' %]
+      för att visa tidssammanfattningar.
+    [% END %]
+
+  [% ELSIF error == "no_tag_to_edit" %]
+    [% title = "Ingen etikett har valts" %]
+    Du försökte skapa eller ta bort en etikett utan namn.
+
+  [% ELSIF error == "no_initial_bug_status" %]
+    [% title = "Ingen ursprunglig status för $terms.bug" %]
+    Ingen status för [% terms.bug %] är tillgänglig när [% terms.bug %] skapas.
+    Rapportera problemet till [% Param("maintainer") %].
+    
+  [% ELSIF error == "no_keywords" %]
+    [% title = "Inga nyckelord" %]
+    [% admindocslinks = {'keywords.html' => 'Ställa in ett nyckelord'} %]
+    Inga nyckelord har definierats för installationen.
+
+  [% ELSIF error == "no_new_quips" %]
+    [% title = "Inga nya kommentarer" %]
+    [% admindocslinks = {'quips.html' => 'Styra användningen av citat'} %]
+    Denna webbplats tillåter inte att nya kommentarer läggs till.
+
+  [% ELSIF error == "no_page_specified" %]
+    [% title = "Ingen sida har angetts" %]
+    Du angav inte ID:t för en sida som ska visas.
+
+  [% ELSIF error == "no_products" %]
+    [% title = "Inga produkter" %]
+    [% admindocslinks = {
+      'categorization.html#creating-new-products'  => 'Ställa in en produkt',
+      'categorization.html#components'             => 'Lägga till komponenter i produkter',
+      'categorization.html#product-group-controls' => 'Gruppsäkerhet'
+    } %]
+    Antingen har inga produkter definierats för att rapportera [% terms.bugs %] i eller så
+    har du inte åtkomst till någon.
+
+  [% ELSIF error == "number_not_integer" %]
+    [% title = "Heltalsvärde krävs" %]
+    Värdet ”[% num FILTER html %]” i fältet
+    <em>[% field_descs.$field FILTER html %]</em>
+    är inte ett heltalsvärde.
+
+  [% ELSIF error == "number_not_numeric" %]
+    [% title = "Numeriskt värde krävs" %]
+    Värdet ”[% num FILTER html %]” i fältet
+    <em>[% field_descs.$field FILTER html %]</em>
+    är inte ett numeriskt värde.
+
+  [% ELSIF error == "number_too_large" %]
+    [% title = "Talet är för stort" %]
+    Värdet ”[% num FILTER html %]” i fältet
+    <em>[% field_descs.$field FILTER html %]</em>
+    är större än det högsta tillåtna värdet ”[% max_num FILTER html %]”.
+
+  [% ELSIF error == "number_too_small" %]
+    [% title = "Talet är för litet" %]
+    Värdet ”[% num FILTER html %]” i fältet
+    <em>[% field_descs.$field FILTER html %]</em>
+    är mindre än det lägsta tillåtna värdet ”[% min_num FILTER html %]”.
+
+  [% ELSIF error == "object_not_specified" %]
+    [% type = BLOCK %][% INCLUDE object_name class = class %][% END %]
+    [% title = BLOCK %][% type FILTER ucfirst FILTER html %] har inte
+    angetts[% END %]
+    Du måste välja/ange en [% type FILTER html %].
+
+  [% ELSIF error == "object_does_not_exist" %]
+    [% type = BLOCK %][% INCLUDE object_name class = class %][% END %]
+    [% title = BLOCK %]Ogiltig [% type FILTER ucfirst FILTER html %][% END %]
+    Det finns ingen [% type FILTER html %]
+    [% IF id.defined %]
+      med ID:t ”[% id FILTER html %]”
+    [% ELSE %]
+      med namnet ”[% name FILTER html %]”
+    [% END %]
+    [% IF product.defined %]
+      i produkten ”[% product.name FILTER html %]”
+    [% END %].
+    [% IF class == "Bugzilla::User" %]
+      Antingen skrev du namnet fel eller så har användaren ännu inte registrerat
+      ett konto hos [% terms.Bugzilla %].
+    [% ELSIF class == "Bugzilla::Keyword" %]
+      Se listan över tillgängliga <a href="describekeywords.cgi">nyckelord</a>.
+    [% END %]
+
+  [% ELSIF error == "old_password_incorrect" %]
+    [% title = "Fel lösenord" %]
+    Du angav inte ditt nuvarande lösenord korrekt.
+
+  [% ELSIF error == "old_password_required" %]
+    [% title = "Tidigare lösenord krävs" %]
+    Du måste ange ditt tidigare lösenord för att ändra e-postadressen.
+
+  [% ELSIF error == "password_change_requests_not_allowed" %]
+    [% title = "Begäran om lösenordsbyte är inte tillåten" %]
+    Systemet är inte konfigurerat för att tillåta begäran om lösenordsbyte.
+
+  [% ELSIF error == "passwords_dont_match" %]
+    [% title = "Lösenorden stämmer inte överens" %]
+    De två lösenorden du angav stämmer inte överens.
+
+  [% ELSIF error == "password_too_short" %]
+    [% title = "Lösenordet är för kort" %]
+    Lösenordet måste vara minst
+    [%+ constants.USER_PASSWORD_MIN_LENGTH FILTER html %] tecken långt.
+    [% IF locked_user %]
+      Du måste <a href="token.cgi?a=reqpw&amp;loginname=[% locked_user.email FILTER uri %]&amp;token=[% issue_hash_token(['reqpw']) FILTER uri %]">
+      begära ett nytt lösenord</a> för att kunna logga in igen.
+    [% END %]
+
+  [% ELSIF error == "password_not_complex" %]
+    [% title = "Lösenordet uppfyller inte kraven" %]
+    [% passregex = Param('password_complexity') %]
+    Lösenordet måste innehålla minst en:
+    <ul>
+      [% IF passregex == 'letters_numbers_specialchars' %]
+        <li>bokstav</li>
+        <li>specialtecken</li>
+      [% ELSIF passregex.search('letters') %]
+        <li>VERSAL</li>
+        <li>gemen</li>
+      [% END %]
+      [% IF passregex.search('numbers') %]
+        <li>siffra</li>
+      [% END %]
+    </ul>
+    [% IF locked_user %]
+      Du måste <a href="token.cgi?a=reqpw&amp;loginname=[% locked_user.email FILTER uri %]&amp;token=[% issue_hash_token(['reqpw']) FILTER uri %]">
+      begära ett nytt lösenord</a> för att kunna logga in igen.
+    [% END %]
+
+  [% ELSIF error == "product_access_denied" %]
+    [% title = "Åtkomst till produkten nekad" %]
+    Antingen finns produkten
+    [%+ IF id.defined %]
+      med ID:t [% id FILTER html %]
+    [% ELSE %]
+      ”[% name FILTER html %]”
+    [% END %]
+    inte eller så har du inte åtkomst till den.
+
+  [% ELSIF error == "product_illegal_group" %]
+    [% title = "Ogiltig grupp" %]
+    [% group.name FILTER html %] är inte en aktiv [% terms.bug %]-grupp
+    och därför kan du inte redigera dess gruppstyrningar.
+
+  [% ELSIF error == "product_name_already_in_use" %]
+    [% title = "Produktnamnet finns redan" %]
+    [% admindocslinks = {'categorization.html#products' => 'Administrera produkter'} %]
+    Produktnamnet ”[% product FILTER html %]” finns redan.
+  
+  [% ELSIF error == "product_name_diff_in_case" %]
+    [% title = "Produktnamnet skiljer endast i skiftläge" %]
+    [% admindocslinks = {'categorization.html#products' => 'Administrera produkter'} %]
+    Produktnamnet ”[% product FILTER html %]” skiljer sig från den befintliga
+    produkten ”[% existing_product FILTER html %]” endast i skiftläge.
+
+  [% ELSIF error == "product_name_too_long" %]
+    [% title = "Produktnamnet är för långt" %]
+    Namnet på en produkt är begränsat till [% constants.MAX_PRODUCT_SIZE FILTER html %]
+    tecken. ”[% name FILTER html %]” är för långt ([% name.length %] tecken).
+
+  [% ELSIF error == "product_must_define_defaultmilestone" %]
+    [% title = "Ny standardmilstolpe måste anges" %]
+    [% admindocslinks = {'categorization.html#products'   => 'Administrera produkter',
+                         'categorization.html#milestones' => 'Om milstolpar'} %]
+    Du måste <a href="editmilestones.cgi?action=add&amp;product=[% product FILTER uri %]">
+    skapa milstolpen ”[% milestone FILTER html %]”</a> innan den kan
+    användas som standardmilstolpe för produkten ”[% product FILTER html %]”.
+
+  [% ELSIF error == "product_admin_denied" %]
+    [% title = "Åtkomst till produkten nekad" %]
+    Du får inte ändra egenskaper för produkten ”[% product FILTER html %]”.
+
+  [% ELSIF error == "product_blank_name" %]
+    [% title = "Tomt produktnamn är inte tillåtet" %]
+    [% admindocslinks = {'categorization.html#products' => 'Administrera produkter'} %]
+    Du måste ange ett namn för produkten.
+  
+  [% ELSIF error == "product_disabled" %]
+    [% title = BLOCK %]Produkten är stängd för registrering av [% terms.bug %][% END %]
+    [% admindocslinks = {'categorization.html#products' => 'Administrera produkter'} %]
+    Det går inte att registrera [% terms.abug %] i produkten
+    <em>[% product.name FILTER html %]</em>.
+
+  [% ELSIF error == "product_edit_denied" %]
+    [% title = "Åtkomst för att ändra produkt nekad" %]
+    [% admindocslinks = {'categorization.html#products' => 'Administrera produkter',
+                         'categorization.html#assigning-group-controls-to-products' => 'Gruppsäkerhet'} %]
+    Du får inte ändra [% terms.bugs %] i produkten
+    [%+ product FILTER html %].
+
+  [% ELSIF error == "product_has_bugs" %]
+    [% title = BLOCK %]Produkten har [% terms.Bugs %][% END %]
+    [% admindocslinks = {'categorization.html#products' => 'Administrera produkter'} %]
+    Det finns [% nb FILTER html %] [%+ terms.bugs %] registrerade för produkten.
+    Du måste flytta dessa [% terms.bugs %] till en annan produkt innan
+    du kan ta bort den här.
+
+  [% ELSIF error == "product_must_have_description" %]
+    [% title = "Produkten behöver en beskrivning" %]
+    [% admindocslinks = {'categorization.html#products' => 'Administrera produkter'} %]
+    Du måste ange en beskrivning för produkten.
+
+  [% ELSIF error == "product_must_have_version" %]
+    [% title = "Produkten behöver en version" %]
+    [% admindocslinks = {'categorization.html#products' => 'Administrera produkter',
+                         'categorization.html#versions' => 'Administrera versioner'} %]
+    Du måste ange en giltig version för att skapa en ny produkt.
+
+  [% ELSIF error == "product_unknown_component" %]
+    [% title = "Okänd komponent" %]
+    Produkten ”[% product FILTER html %]” har ingen komponent
+    [% IF comp_id %]
+      med ID [% comp_id FILTER html %].
+    [% ELSE %]
+      med namnet ”[% comp FILTER html %]”.
+    [% END %]
+
+  [% ELSIF error == "query_name_missing" %]
+    [% title = "Inget söknamn har angetts" %]
+    [% docslinks = {'using/finding.html#bug-lists' => "Listor med $terms.bugs"} %]
+    Du måste ange ett namn för sökningen.
+
+  [% ELSIF error == "query_name_too_long" %]
+    [% title = "Söknamnet är för långt" %]
+    Sökningens namn måste vara kortare än [% constants.MAX_LEN_QUERY_NAME FILTER html %]
+    tecken.
+
+  [% ELSIF error == "quicksearch_invalid_query" %]
+    [% title = "Ogiltig sökning" %]
+    Sökningen är ogiltig.
+    [% IF operators %]
+      Operatorn [% operators.shift FILTER html %] kan inte följas av
+      [%+ operators.shift FILTER html %].
+    [% ELSE %]
+      En sökning kan inte börja med AND eller OR, och inte heller sluta med AND,
+      OR eller NOT. De är reserverade operatorer och måste omges av citattecken
+      om du vill söka efter dessa strängar.
+    [% END %]
+
+  [% ELSIF error == "quicksearch_unbalanced_quotes" %]
+    [% title = "Felaktigt formaterad sökning" %]
+    [% terms.Bugzilla %] kan inte tolka sökningen korrekt:
+    <em>[% string FILTER html %]</em>.<br>
+    Om du använder citattecken för att avgränsa strängar måste båda finnas med.
+    Om du vill söka efter ett citattecken i en sträng skriver du \" i stället för ".
+    Exempelvis tolkas <em>"I'm so \"special\", really"</em> (med citattecken) som
+    <em>I'm so "special", really</em>.
+
+  [% ELSIF error == "quicksearch_unknown_field" %]
+    [% title = "QuickSearch-fel" %]
+    Det finns ett problem med sökningen:
+    [% FOREACH field = unknown %]
+      <p><code>[% field FILTER html %]</code> är inte ett giltigt fältnamn.</p>
+    [% END %]
+    [% FOREACH field = ambiguous.keys %]
+      <p><code>[% field FILTER html %]</code> matchar fler än ett fält:
+        [%+ ambiguous.${field}.join(', ') FILTER html %]</p>
+    [% END %]
+
+    [% IF unknown.size %]
+      <p>De giltiga fältnamnen
+        <a href="page.cgi?id=quicksearch.html#fields">finns här</a>.</p>
+    [% END %]
+
+  [% ELSIF error == "quip_too_long" %]
+    [% title = "Citatet är för långt" %]
+    Du angav ett citat med [% length FILTER none %] tecken, men högsta tillåtna
+    längd är [% constants.MAX_QUIP_LENGTH FILTER none %] tecken.
+
+  [% ELSIF error == "reassign_to_empty" %]
+    [% title = "Ogiltig omtilldelning" %]
+    För att tilldela om [% terms.abug %] måste du ange en adress till
+    den nya ansvariga personen.
+
+  [% ELSIF error == "report_axis_invalid" %]
+    [% title = "Ogiltig axel" %]
+    <em>[% val FILTER html %]</em> är inte ett giltigt värde för fältet
+    [%+ IF    fld == "x" %]horisontell axel
+    [%+ ELSIF fld == "y" %]vertikal axel
+    [%+ ELSIF fld == "z" %]flera tabeller/bilder
+    [%+ ELSE %]rapportaxel[% END %].
+
+  [% ELSIF error == "report_name_missing" %]
+    [% title = "Inget rapportnamn har angetts" %]
+    Du måste ange ett namn för rapporten.
+
+  [% ELSIF error == "report_access_denied" %]
+    [% title = "Åtkomst till rapport nekad" %]
+    Du kan inte komma åt rapporten.
+
+  [% ELSIF error == "require_component" %]
+    [% title = "Komponent krävs" %]
+    För att rapportera [% terms.bug %] måste du först välja en komponent.
+    Gissa om det behövs.
+
+  [% ELSIF error == "relationship_loop_single" %]
+    [% title = "Relationship Loop Detected" %]
+    [% field_descs.$field_name FILTER html %]
+    for [% terms.bug %] [%+ bug_id FILTER html %]
+    har ett cirkulärt beroende av [% terms.bug %] [%+ dep_id FILTER html %].
+
+  [% ELSIF error == "request_queue_group_invalid" %]
+    Gruppfältet <em>[% group FILTER html %]</em> är ogiltigt.
+
+  [% ELSIF error == "require_new_password" %]
+    [% title = "Nytt lösenord krävs" %]
+    Du kan inte ändra lösenordet utan att välja ett nytt.
+
+  [% ELSIF error == "required_field" %]
+    [% title = "Fältet måste anges" %]
+    Ett värde måste anges för fältet ”[% field_descs.${field.name} FILTER html %]”.
+
+  [% ELSIF error == "require_summary" %]
+    [% title = "Sammanfattning krävs" %]
+    Du måste ange en sammanfattning för [% terms.bug %].
+
+  [% ELSIF error == "resolution_cant_clear" %]
+    [% terms.Bug %] [%+ bug_id FILTER bug_link(bug_id) FILTER none %]
+    är stängd och därför kan du inte rensa dess lösning.
+
+  [% ELSIF error == "resolution_not_allowed" %]
+    [% title = "Lösning är inte tillåten" %]
+    Du kan inte ange en lösning för öppna [% terms.bugs %].
+
+  [% ELSIF error == "saved_search_used_by_whines" %]
+    [% title = "Den sparade sökningen används" %]
+    [% docslinks = {'administering/whining.html' => 'Om bevakningar'} %]
+    Den sparade sökningen <em>[% search_name FILTER html %]</em> används
+    av <a href="editwhines.cgi">bevakningar</a> med följande ämnen:
+    [%+ subjects FILTER html %]
+
+  [% ELSIF error == "search_content_without_matches" %]
+    [% title = "Ogiltig sökning" %]
+    Fältet ”content” kan endast användas med sökningen ”matches”,
+    och sökningen ”matches” kan endast användas med fältet ”content”.
+
+  [% ELSIF error == "search_grouped_field_invalid" %]
+    [% terms.Bugzilla %] har inte stöd för att använda fältet
+    "[%+ field_descs.$field FILTER html %]" ([% field FILTER html %])
+    med grupperade sökvillkor.
+
+  [% ELSIF error == "search_grouped_invalid_nesting" %]
+    Du kan inte nästla satser i grupperade sökvillkor.
+
+  [% ELSIF error == "search_grouped_field_mismatch" %]
+    Alla villkor i en grupperad sökning måste använda samma fält.
+
+  [% ELSIF error == "search_field_operator_invalid" %]
+    [% terms.Bugzilla %] har inte stöd för att använda fältet
+    "[%+ field_descs.$field FILTER html %]" ([% field FILTER html %])
+    med söktypen ”[% search_descs.$operator FILTER html %]”
+    ([% operator FILTER html %]).
+
+  [% ELSIF error == "see_also_self_reference" %]
+    Du kan inte lägga [% terms.bug %] i dess eget fält
+    [%+ field_descs.see_also FILTER html %].
+
+  [% ELSIF error == "series_already_exists" %]
+    [% title = "Serien finns redan" %]
+    [% docslinks = {'using/reports-and-charts.html' => 'Rapportering'} %]
+      En serie med namnet <em>[% series.category FILTER html %] /
+      [%+ series.subcategory FILTER html %] / 
+      [%+ series.name FILTER html %]</em>
+      finns redan.
+    
+  [% ELSIF error == "still_unresolved_bugs" %]
+    [% title = "Olösta beroenden" %]
+    [% IF bug_id %]
+      [% terms.Bug %] [%+ bug_id FILTER bug_link(bug_id) FILTER none %]
+    [% ELSE %]
+       Den här [% terms.bug %]
+    [% END %]
+    har [% dep_count FILTER none %] olösta
+    [% IF dep_count == 1 %]
+      beroende
+    [% ELSE %]
+      beroenden
+    [% END %].
+    De måste antingen lösas eller tas bort från fältet
+    ”[% field_descs.dependson FILTER html %]” innan du kan markera
+    [% terms.bug %] som [% display_value("resolution", "FIXED") FILTER html %].
+
+  [% ELSIF error == "sudo_invalid_cookie" %]
+    [% title = "Ogiltig sudo-kaka" %]
+    Sudo-kakan är ogiltig. Den har antingen gått ut eller så startades inte
+    sudo-sessionen korrekt. Uppdatera sidan eller läs in en annan sida för
+    att fortsätta som dig själv.
+
+  [% ELSIF error == "sudo_illegal_action" %]
+    [% title = "Imitation är inte tillåten" %]
+    [% IF NOT sudoer.in_group("bz_sudoers") %]
+      Du får inte agera som andra användare.
+    [% ELSIF target_user AND target_user.in_group("bz_sudo_protect") %]
+      Du får inte agera som [% target_user.identity FILTER html %].
+    [% ELSE %]
+      Användaren du försökte agera som finns inte.
+    [% END %]
+
+  [% ELSIF error == "sudo_in_progress" %]
+    [% title = "En session pågår" %]
+    En sudo-session där du agerar som [% target FILTER html %] pågår.
+    Avsluta sessionen med länken i sidfoten innan du startar en ny.
+
+  [% ELSIF error == "sudo_password_required" %]
+    [% title = "Lösenord krävs" %]
+    Ditt lösenord för [% terms.Bugzilla %] krävs för att starta en sudo-
+    session. <a href="relogin.cgi?action=prepare-sudo&amp;target_login=
+    [%- target_login FILTER uri %]&amp;reason=
+    [%- reason FILTER uri %]">Gå tillbaka</a> och ange lösenordet.
+    
+  [% ELSIF error == "sudo_preparation_required" %]
+    [% title = "Förberedelse krävs" %]
+    Du får inte starta en sudo-session direkt.
+    <a href="relogin.cgi?action=prepare-sudo&amp;target_login=
+    [%- target_login FILTER uri %]&amp;reason=
+    [%- reason FILTER uri %]">Starta sessionen på vanligt sätt</a>.
+
+  [% ELSIF error == "sudo_protected" %]
+    [% title = "Användaren är skyddad" %]
+    Användaren [% login FILTER html %] får inte imiteras av sudo-användare.
+
+  [% ELSIF error == "tag_name_too_long" %]
+    [% title = "Etikettnamnet är för långt" %]
+    Etiketten måste vara kortare än [% constants.MAX_LEN_QUERY_NAME FILTER html %]
+    tecken.
+
+  [% ELSIF error == "token_does_not_exist" %]
+    [% title = "Tokenet finns inte" %]
+    Tokenet du skickade in finns inte, har gått ut eller har
+    återkallats.
+
+  [% ELSIF error == "too_soon_for_new_token" %]
+    [% title = "För tidigt för nytt token" %]
+    Du har begärt
+    [% IF type == "password" %]
+      ett lösenords-
+    [% ELSIF type == "account" %]
+      ett konto-
+    [% END %]
+    token för nyligen för att kunna begära ett till.
+    Vänta [% constants.ACCOUNT_CHANGE_INTERVAL FILTER html %] minuter och försök igen.
+
+  [% ELSIF error == "unknown_action" %]
+    [% title = "Okänd åtgärd" %]
+    [% IF action %]
+      Okänd åtgärd ”[% action.truncate(20, "...") FILTER html %]”.
+    [% ELSE %]
+      Det gick inte att avgöra vad du ville göra.
+    [% END %]
+
+  [% ELSIF error == "unknown_tab" %]
+    [% title = "Okänd flik" %]
+    Det finns ingen flik med namnet <code>[% current_tab_name FILTER html %]</code>.
+
+  [% ELSIF error == "value_inactive" %]
+    [% title = "Värdet är inte aktivt" %]
+    [% type = BLOCK %][% INCLUDE object_name class = class %][% END %]
+    Värdet ”[% value FILTER html %]” för [% type FILTER html %] är inte aktivt.
+
+  [% ELSIF error == "version_already_exists" %]
+    [% title = "Versionen finns redan" %]
+    [% admindocslinks = {'categorization.html#versions' => 'Administrera versioner'} %]
+    Versionen ”[% name FILTER html %]” finns redan för produkten ”
+    [%- product FILTER html %]”.
+
+  [% ELSIF error == "version_blank_name" %]
+    [% title = "Tomt versionsnamn är inte tillåtet" %]
+    Du måste ange ett namn för versionen.
+
+  [% ELSIF error == "version_has_bugs" %]
+    [% title = BLOCK %]Versionen har [% terms.Bugs %][% END %]
+    Det finns [% nb FILTER html %] [%+ terms.bugs %] som är kopplade till versionen.
+    Du måste tilldela om dessa [% terms.bugs %] till en annan version innan
+    du kan ta bort den här.
+
+  [% ELSIF error == "version_is_last" %]
+    [% title = BLOCK %]Sista versionen i produkten[% END %]
+    ”[% version.name FILTER html %]” är den sista versionen i produkten
+    ”[% version.product.name FILTER html %]”. Du kan inte ta bort den.
+
+  [% ELSIF error == "users_deletion_disabled" %]
+    [% title = "Borttagning är inte aktiverad" %]
+    [% admindocslinks = {'users.html#deleting-users' => 'Användaradministration'} %]
+    Det går inte att ta bort användarkonton.
+
+  [% ELSIF error == "user_has_responsibility" %]
+    [% title = "Det går inte att ta bort användarkontot" %]
+    [% admindocslinks = {'users.html#deleting-users' => 'Användaradministration'} %]
+    Användaren du vill ta bort är angiven som standardansvarig för [% terms.bug %]
+    [% IF Param('useqacontact') %]
+      eller QA-kontakt
+    [% END %]
+    för minst en komponent. Därför kan kontot inte tas bort just nu.
+
+  [% ELSIF error == "user_access_by_id_denied" %]
+    [% title = "Åtkomst till användare via ID nekad" %]
+    Utloggade användare kan inte använda argumentet ”ids” för den här funktionen
+    för att komma åt användaruppgifter.
+
+  [% ELSIF error == "user_access_by_match_denied" %]
+    [% title = "Användarmatchning nekad" %]
+    Utloggade användare kan inte använda argumentet ”match” för den här funktionen
+    för att komma åt användaruppgifter.
+
+  [% ELSIF error == "user_login_required" %]
+    [% title = "Inloggningsnamn krävs" %]
+    [% admindocslinks = {'users.html' => 'Användaradministration'} %]
+    Du måste ange ett inloggningsnamn för den nya användaren.
+
+  [% ELSIF error == "user_match_failed" %]
+    [% title = "Matchning misslyckades" %]
+    <kbd>[% name FILTER html %]</kbd> finns inte eller så får du inte
+    se användaren.
+
+  [% ELSIF error == "user_match_too_many" %]
+    [% title = "Ingen entydig matchning" %]
+    [% terms.Bugzilla %] kan inte göra en entydig matchning för ett eller flera
+    av namnen eller e-postadresserna du angav i fältet eller fälten
+    [% fields.join(', ') FILTER html %].
+
+  [% ELSIF error == "user_not_insider" %]
+    [% title = "Användaren finns inte i intern grupp" %]
+    Du får inte markera eller avmarkera kommentarer eller bilagor som privata.
+
+  [% ELSIF error == "user_not_involved" %]
+    [% title = "Användaren är inte involverad i $terms.Bug" %]
+    Du är inte involverad i [% terms.Bug %] [%+
+        bug_id FILTER bug_link(bug_id) FILTER none %].
+
+  [% ELSIF error == "webdot_too_large" %]
+    [% title = "Beroendediagrammet är för stort" %]
+    Beroendediagrammet innehåller för många [% terms.bugs %] för att visas (fler
+    än [% constants.MAX_WEBDOT_BUGS FILTER html %] [%+ terms.bugs %]).
+
+  [% ELSIF error == "wrong_token_for_cancelling_email_change" %]
+    [% title = "Fel token" %]
+    Tokenet kan inte användas för att avbryta en ändring av e-postadress.
+
+  [% ELSIF error == "wrong_token_for_changing_passwd" %]
+    [% title = "Fel token" %]
+    Tokenet kan inte användas för att ändra lösenordet.
+
+  [% ELSIF error == "wrong_token_for_confirming_email_change" %]
+    [% title = "Fel token" %]
+    Tokenet kan inte användas för att ändra e-postadressen.
+
+  [% ELSIF error == "wrong_token_for_creating_account" %]
+    [% title = "Fel token" %]
+    Tokenet kan inte användas för att skapa ett användarkonto.
+
+  [% ELSIF error == "xmlrpc_invalid_value" %]
+    ”[% value FILTER html %]” är inte ett giltigt värde för ett
+    &lt;[% type FILTER html %]&gt;-fält. Se XML-RPC-specifikationen
+    för mer information.
+
+  [% ELSIF error == "xmlrpc_illegal_content_type" %]
+    När XML-RPC används kan du inte skicka data som
+    [%+ content_type FILTER html %]. Tillåtna innehållstyper är
+    [% constants.XMLRPC_CONTENT_TYPE_WHITELIST.join(', ') FILTER html %].
+
+  [% ELSIF error == "zero_length_file" %]
+    [% title = "Filen är tom" %]
+    Filen du försöker bifoga är tom, finns inte eller så har du inte
+    behörighet att läsa den.
+
+  [% ELSIF error == "illegal_user_id" %]
+    [% title = "Ogiltigt användar-ID" %]
+    Användar-ID:t ”[% userid FILTER html %]” är inte ett giltigt heltal.
+
+  [% ELSIF error == "extern_id_exists" %]
+    [% title = "Kontot finns redan" %]
+    Det finns redan ett konto
+    [% IF existing_login_name %]
+      ([% existing_login_name FILTER html %])
+    [% END %]
+    med externt inloggnings-ID ”[% extern_id FILTER html %]”.
+
+  [% ELSE %]
+
+    [%# Try to find hooked error messages %]
+    [% error_message = Hook.process("errors") %]
+
+    [% IF not error_message %]
+      [% title = "Felsträngen hittades inte" %]
+      Användarfelsträngen <code>[% error FILTER html %]</code> hittades inte.
+      Skicka e-post till [% Param("maintainer") %] och beskriv stegen som
+      ledde till meddelandet.
+    [% ELSE %]
+      [% error_message FILTER none %]
+    [% END %]
+  [% END %]
+[% END %]
+
+[%# We only want HTML error messages for ERROR_MODE_WEBPAGE %]
+[% USE Bugzilla %]
+[% IF Bugzilla.error_mode != constants.ERROR_MODE_WEBPAGE %]
+  [% IF Bugzilla.usage_mode == constants.USAGE_MODE_BROWSER %]
+    [% error_message FILTER none %]
+  [% ELSE %]
+    [% error_message FILTER txt %]
+  [% END %]
+  [% RETURN %]
+[% END %]
+
+[% UNLESS header_done %]
+  [% PROCESS global/header.html.tmpl %]
+[% END %]
+
+[% PROCESS global/docslinks.html.tmpl
+   docslinks      = docslinks
+   admindocslinks = admindocslinks
+%]
+
+<div id="error_msg" class="throw_error">
+  [% error_message FILTER none %]
+</div>
+
+<p id="post_err_msg">
+  Tryck på <b>Tillbaka</b> och försök igen.
+</p>
+
+[%# If a saved search fails, people want the ability to edit or delete it. 
+  # This is the best way of getting information about that possible saved
+  # search from any error call location. %]
+
+[% namedcmd = Bugzilla.cgi.param("namedcmd") %]
+[% sharer_id = Bugzilla.cgi.param("sharer_id") %]
+[% IF namedcmd AND error != "missing_query" 
+               AND error != "saved_search_used_by_whines"
+               AND !sharer_id %]
+  <p>  
+    Du kan också
+    <a href="buglist.cgi?cmdtype=dorem&amp;remaction=forget&amp;namedcmd=
+                  [% namedcmd FILTER uri %]">glömma</a>
+                  
+    [% FOREACH q = Bugzilla.user.queries %]
+      [% IF q.name == namedcmd %]
+        eller <a href="query.cgi?[% q.url FILTER html %]">redigera</a>
+      [% END %]
+    [% END %]
+    
+    den sparade sökningen ”[% namedcmd FILTER html %]”.
+  </p>
+[% END %]            
+
+[% PROCESS global/footer.html.tmpl %]
+
+[% BLOCK object_name %]
+  [% IF class == "Bugzilla::Attachment" %]
+    bilaga
+  [% ELSIF class == "Bugzilla::User" %]
+    användare
+  [% ELSIF class == "Bugzilla::Classification" %]
+    klassificering
+  [% ELSIF class == "Bugzilla::Product" %]
+    produkt
+  [% ELSIF class == "Bugzilla::Component" %]
+    komponent
+  [% ELSIF class == "Bugzilla::Version" %]
+    version
+  [% ELSIF class == "Bugzilla::Milestone" %]
+    milstolpe
+  [% ELSIF class == "Bugzilla::Status" %]
+    status
+  [% ELSIF class == "Bugzilla::Flag" %]
+    flagga
+  [% ELSIF class == "Bugzilla::FlagType" %]
+    flaggtyp
+  [% ELSIF class == "Bugzilla::Field" %]
+    fält
+  [% ELSIF class == "Bugzilla::Group" %]
+    grupp
+  [% ELSIF class == "Bugzilla::Keyword" %]
+    nyckelord
+  [% ELSIF class == "Bugzilla::Search::Recent" %]
+    senaste sökning
+  [% ELSIF class == "Bugzilla::Search::Saved" %]
+    sparad sökning
+  [% ELSIF ( matches = class.match('^Bugzilla::Field::Choice::(.+)') ) %]
+    [% SET field_name = matches.0 %]
+    [% field_descs.$field_name FILTER html %]
+  [% END %]
+  [% Hook.process('end_object_name', 'global/user-error.html.tmpl') %]
+[% END %]

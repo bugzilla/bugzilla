@@ -1,0 +1,20 @@
+Content-Type: text/plain
+From: [% Param('mailfrom') %]
+To: [% user.email %]
+Subject: [[% terms.Bugzilla %]] Ditt konto [% user.login -%] används av en annan användare
+X-Bugzilla-Type: admin
+
+    [%+ sudoer.identity %] har använt funktionen "sudo" för att komma åt
+[%+ terms.Bugzilla %] med ditt konto.
+
+[% IF reason %]
+    [%+ sudoer.identity %] angav följande skäl:
+
+[% reason FILTER wrap_comment %]
+[% ELSE %]
+    [%+ sudoer.identity %] angav inget skäl.
+[% END %]
+
+    Om du anser att åtgärden var olämplig kontaktar du
+[%+ Param("maintainer") %]. Mer information finns på
+<[% urlbase %]page.cgi?id=sudo.html>.

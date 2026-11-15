@@ -1,0 +1,26 @@
+[%# This Source Code Form is subject to the terms of the Mozilla Public
+  # License, v. 2.0. If a copy of the MPL was not distributed with this
+  # file, You can obtain one at http://mozilla.org/MPL/2.0/.
+  #
+  # This Source Code Form is "Incompatible With Secondary Licenses", as
+  # defined by the Mozilla Public License, v. 2.0.
+  #%]
+
+[% PROCESS global/header.html.tmpl
+  title = "Bokmärke för att registrera $terms.Bug"
+  header = "Mall skapad"
+%]
+
+<p>
+  Du kan bokmärka länken:
+  &ldquo;<a href="enter_bug.cgi?[% url FILTER html %]">
+  [% IF short_desc %]
+    [% short_desc FILTER html %]
+  [% ELSE %]
+    mall för att registrera [% terms.Bug %]
+  [% END %]</a>&rdquo;.
+  Bokmärket öppnar sidan <em>Registrera [% terms.Bug %]</em> med fälten
+  förifyllda enligt dina önskemål.
+</p>
+
+[% PROCESS global/footer.html.tmpl %]

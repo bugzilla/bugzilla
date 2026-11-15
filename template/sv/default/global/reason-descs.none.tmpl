@@ -1,0 +1,21 @@
+[%# This Source Code Form is subject to the terms of the Mozilla Public
+  # License, v. 2.0. If a copy of the MPL was not distributed with this
+  # file, You can obtain one at http://mozilla.org/MPL/2.0/.
+  #%]
+
+[% SET reason_descs = {
+  ${constants.REL_ASSIGNEE} => "Du är ansvarig för ${terms.bug}et.",
+  ${constants.REL_REPORTER} => "Du rapporterade ${terms.bug}et.",
+  ${constants.REL_QA}       => "Du är kontakt för kvalitetskontroll för ${terms.bug}et.",
+  ${constants.REL_CC}       => "Du finns i kopielistan för ${terms.bug}et.",
+  ${constants.REL_GLOBAL_WATCHER} => "Du bevakar alla ändringar av ${terms.bug}et.",
+} %]
+
+[% SET watch_reason_descs => {
+  ${constants.REL_ASSIGNEE} => "Du bevakar den som är ansvarig för ${terms.bug}et.",
+  ${constants.REL_REPORTER} => "Du bevakar den som rapporterat ${terms.bug}et.",
+  ${constants.REL_QA}       => "Du bevakar kontakten för kvalitetskontroll för ${terms.bug}et.",
+  ${constants.REL_CC}       => "Du bevakar någon i kopielistan för ${terms.bug}et.",
+} %]
+
+[% Hook.process('end') %]

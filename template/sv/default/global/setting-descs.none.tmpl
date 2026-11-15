@@ -1,0 +1,50 @@
+[%# This Source Code Form is subject to the terms of the Mozilla Public
+  # License, v. 2.0. If a copy of the MPL was not distributed with this
+  # file, You can obtain one at http://mozilla.org/MPL/2.0/.
+  #
+  # This Source Code Form is "Incompatible With Secondary Licenses", as
+  # defined by the Mozilla Public License, v. 2.0.
+  #%]
+
+[%# Remember to PROCESS rather than INCLUDE this template. %]
+
+[% setting_descs = {
+   "comment_sort_order"               => "Visa kommentarer i den här ordningen när du visar $terms.abug",
+   "csv_colsepchar"                   => "Fältavgränsare för CSV-filer",
+   "display_quips"                    => "Visa ett citat högst upp i varje lista med $terms.bugs",
+   "zoom_textareas"                   => "Förstora textfält medan de används (kräver JavaScript)",
+   "newest_to_oldest"                 => "Nyaste till äldsta",
+   "newest_to_oldest_desc_first"      => "Nyaste till äldsta, men behåll beskrivningen överst",
+   "off"                              => "Av",
+   "oldest_to_newest"                 => "Äldsta till nyaste",
+   "on"                               => "På",
+   "post_bug_submit_action"           => "Efter att ha ändrat $terms.abug",
+   "next_bug"                         => "Visa nästa $terms.bug i min lista",
+   "same_bug"                         => "Visa det uppdaterade $terms.bug",
+   "standard"                         => "Klassiskt",
+   "skin"                             => "$terms.Bugzilla:s allmänna utseende (skal)",
+   "nothing"                          => "Gör ingenting",
+   "state_addselfcc"                  => "Lägg automatiskt till mig i CC-listan för $terms.bugs som jag ändrar",
+   "always"                           => "Alltid",
+   "never"                            => "Aldrig",
+   "cc_unless_role"                   => "Endast om jag inte har någon roll i dem",
+   "lang"                             => "Språk som används i e-post",
+   "quote_replies"                    => "Citera den tillhörande kommentaren när du klickar på dess svarslänk",
+   "quoted_reply"                     => "Citera hela kommentaren",
+   "simple_reply"                     => "Hänvisa endast till kommentarnumret",
+   "comment_box_position"             => "Placering av rutan för ytterligare kommentarer",
+   "before_comments"                  => "Före övriga kommentarer",
+   "after_comments"                   => "Efter övriga kommentarer",
+   "timezone"                         => "Tidszon som används för att visa datum och tider",
+   "local"                            => "Samma som servern",
+   "quicksearch_fulltext"             => "Ta med kommentarer vid snabbsökning (långsammare)",
+   "email_format"                     => "Föredraget e-postformat",
+   "html"                             => "HTML",
+   "text_only"                        => "Endast text",
+   "requestee_cc"                     => "Lägg automatiskt till mig i CC-listan för $terms.bugs som jag har ombetts granska",
+   "bugmail_new_prefix"               => "Lägg till ”Ny:” i ämnesraden för e-post när ett nytt $terms.bug registreras",
+   "possible_duplicates"              => "Visa möjliga dubbletter när ett nytt $terms.bug rapporteras",
+                   }
+%]
+
+[% Hook.process('settings') %]

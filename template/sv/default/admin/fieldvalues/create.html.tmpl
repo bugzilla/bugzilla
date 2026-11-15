@@ -1,0 +1,89 @@
+[%# This Source Code Form is subject to the terms of the Mozilla Public
+  # License, v. 2.0. If a copy of the MPL was not distributed with this
+  # file, You can obtain one at http://mozilla.org/MPL/2.0/.
+  #
+  # This Source Code Form is "Incompatible With Secondary Licenses", as
+  # defined by the Mozilla Public License, v. 2.0.
+  #%]
+  
+[% title = BLOCK %]
+  Lägg till värde för fältet '[% field.description FILTER html %]' ([% field.name FILTER html %])
+[% END %]
+[% PROCESS global/header.html.tmpl
+  title = title
+  style_urls = ['skins/standard/admin.css']
+%]
+
+<p>
+  Här kan du lägga till ett nytt värde för fältet
+  '[% field.description FILTER html %]'.
+</p>
+
+<form method="post" action="editvalues.cgi">
+  <table id="admin_table_edit">
+    <tr>
+      <th><label for="value">Värde:</label></th>
+      <td>
+        <input id="value" name="value" size="30"
+               maxlength="[% constants.MAX_FIELD_VALUE_SIZE FILTER none %]" required>
+      </td>
+    </tr>
+    <tr>
+      <th><label for="sortkey">Sorteringsnyckel:</label></th>
+      <td><input id="sortkey" name="sortkey" size="6" maxlength="6"></td>
+    </tr>
+    [% IF field.name == "bug_status" %]
+      <tr>
+        <th><label for="is_open">Statustyp:</label></th>
+        <td>
+          <input type="radio" id="open_status" name="is_open" value="1"
+                 checked="checked">
+          <label for="open_status">Öppen</label><br>
+          <input type="radio" id="closed_status" name="is_open" value="0">
+          <label for="closed_status">Stängd (kräver en lösning)</label>
+        </td>
+      </tr>
+      <tr>
+        <th>&nbsp;</th>
+        <td>
+          Observera: attributet öppen/stängd kan bara anges när statusen skapas.
+          Det går inte att redigera senare.
+        </td>
+      </tr>
+    [% END %]
+    [% IF field.value_field %]
+      <tr>
+        <th>
+          <label for="visibility_value_id">Visas bara när
+           [%+ field.value_field.description FILTER html %] har värdet:
+          </label>
+        </th>
+        <td>
+          <select name="visibility_value_id" id="visibility_value_id">
+            <option></option>
+            [% FOREACH field_value = field.value_field.legal_values %]
+              [% NEXT IF field_value.name == '' %]
+              <option value="[% field_value.id FILTER none %]">
+                [% IF field.value_field.name == 'component' %]
+                  [% field_value.product.name FILTER html %]:
+                [% END %]
+                [%- field_value.name FILTER html -%]
+              </option>
+            [% END %]
+          </select>
+          <span class="bz_info">(Lämna tomt om värdet alltid ska visas.)</span>
+        </td>
+      </tr>
+    [% END %]
+  </table>
+  <input type="submit" id="create" value="Lägg till">
+  <input type="hidden" name="action" value="new">
+  <input type="hidden" name='field' value="[% field.name FILTER html %]">
+  <input type="hidden" name="token" value="[% token FILTER html %]">
+</form>
+
+[% PROCESS admin/fieldvalues/footer.html.tmpl
+    no_add_link = 1
+ %]
+
+[% PROCESS global/footer.html.tmpl %]

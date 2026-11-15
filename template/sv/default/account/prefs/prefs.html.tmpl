@@ -1,0 +1,95 @@
+[%# This Source Code Form is subject to the terms of the Mozilla Public
+  # License, v. 2.0. If a copy of the MPL was not distributed with this
+  # file, You can obtain one at http://mozilla.org/MPL/2.0/.
+  #
+  # This Source Code Form is "Incompatible With Secondary Licenses", as
+  # defined by the Mozilla Public License, v. 2.0.
+  #%]
+
+[% filtered_login = user.login FILTER html %]
+
+[% tabs = [{ name => "settings", label => "Allmänna inställningar",
+              link => "userprefs.cgi?tab=settings", saveable => "1",
+              doc_section => "using/preferences.html#general-preferences" },
+            { name => "email", label => "E-postinställningar",
+              link => "userprefs.cgi?tab=email", saveable => "1",
+              doc_section => "using/preferences.html#email-preferences" },
+            { name => "saved-searches", label => "Sparade sökningar",
+              link => "userprefs.cgi?tab=saved-searches", saveable => "1",
+              doc_section => "using/preferences.html#saved-searches" },
+            { name => "account", label => "Kontouppgifter",
+              link => "userprefs.cgi?tab=account", saveable => "1",
+              doc_section => "using/preferences.html#account-information" },
+            { name => "apikey", label => "API-nycklar",
+              link => "userprefs.cgi?tab=apikey", saveable => "1",
+              doc_section => "using/preferences.html#api-keys" },
+            { name => "permissions", label => "Behörigheter",
+              link => "userprefs.cgi?tab=permissions", saveable => "0",
+              doc_section => "using/preferences.html#permissions" } ] %]
+
+[% Hook.process('tabs') %]
+
+[% FOREACH tab IN tabs %]
+  [% IF tab.name == current_tab_name %]
+    [% current_tab = tab %]
+    [% LAST %]
+  [% END %]
+[% END %]
+
+[% PROCESS global/header.html.tmpl
+   title = current_tab.label
+   subheader = filtered_login
+   generate_api_token = 1
+   style_urls = ['skins/standard/admin.css']
+   javascript_urls = ['js/util.js', 'js/field.js', 'js/TUI.js']
+   doc_section = current_tab.doc_section
+   yui = ['autocomplete']
+ %]
+
+[% WRAPPER global/tabs.html.tmpl
+   tabs        = tabs
+   current_tab = current_tab
+%]
+
+[% IF changes_saved %]
+  <div id="message">
+    Ändringarna i [% current_tab.label FILTER lower %] har sparats.
+
+    [% IF email_changes_saved %]
+      <p>
+        För att bekräfta din begäran har vi skickat ett e-postmeddelande till
+        din nya e-postadress. Som en säkerhetsåtgärd har vi också skickat ett
+        meddelande till din gamla adress där du kan avbryta ändringen vid behov.
+        Om du inte får meddelandet kan du
+        <a href="token.cgi?t=[% email_token FILTER uri %]&amp;a=cxlem">
+        avbryta ändringen av e-postadressen</a> härifrån om du vill, särskilt
+        om du råkade skriva fel i den nya e-postadressen.
+      </p>
+    [% END %]
+  </div>
+[% END %]
+
+<h3>[% current_tab.label %]</h3>
+
+[% IF current_tab.saveable %]
+  <form name="userprefsform" method="post" action="userprefs.cgi">
+    <input type="hidden" name="tab" value="[% current_tab.name %]">
+    <input type="hidden" name="token" value="[% token FILTER html %]">
+[% END %]
+
+[% PROCESS "account/prefs/${current_tab.name}.html.tmpl" 
+                                     IF current_tab.name.defined %]
+
+[% IF current_tab.saveable %]
+    <input type="hidden" name="dosave" value="1">
+    [% UNLESS dont_show_button %]
+      <p>
+        <input type="submit" id="update" value="Spara ändringar">
+      </p>
+    [% END %]
+  </form>
+[% END %]
+
+[% END %]
+
+[% PROCESS global/footer.html.tmpl %]

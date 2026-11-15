@@ -1,0 +1,53 @@
+[%# This Source Code Form is subject to the terms of the Mozilla Public
+  # License, v. 2.0. If a copy of the MPL was not distributed with this
+  # file, You can obtain one at http://mozilla.org/MPL/2.0/.
+  #
+  # This Source Code Form is "Incompatible With Secondary Licenses", as
+  # defined by the Mozilla Public License, v. 2.0.
+  #%]
+
+[% INCLUDE global/header.html.tmpl title = "sudo: användarväxling" %]
+
+<p>
+  Bugzilla har stöd för att en användare kan agera som en annan i en
+så kallad <i>sudo-session</i>, så länge användaren har rätt behörighet.
+</p>
+
+<p>
+  Medan sessionen pågår agerar Bugzilla som om den personifierade användaren
+  utför allt. Det är särskilt användbart vid testning och vid kritiskt arbete
+  när användaren inte är tillgänglig. Den personifierade användaren får e-post
+  från [% terms.Bugzilla %] när sessionen börjar, men får ingen annan information.
+</p>
+
+<p>
+  För att använda funktionen måste du vara medlem i rätt grupp. Gruppen innehåller
+  som standard alla administratörer. Andra användare och medlemmar i andra grupper
+  kan få åtkomst till funktionen efter individuell bedömning. Kontakta
+  installationens ansvariga för att begära åtkomst: 
+  <a href="mailto:[% Param("maintainer") %]">
+  [%- Param("maintainer") %]</a>.
+</p>
+
+<p>
+  Om du vill skyddas från användarväxling bör du kontakta installationens
+  ansvariga för att se om det är möjligt. Personer med åtkomst till funktionen
+  är automatiskt skyddade.
+</p>
+
+<p id="message">
+  [% IF user.in_group('bz_sudoers') %]
+    Du är medlem i gruppen <b>bz_sudoers</b>. Du kan använda funktionen för
+    att agera som andra användare.
+  [% ELSE %]
+    Du är inte medlem i en behörig grupp. Du kan inte använda funktionen.
+  [% END %]
+  [% IF user.in_group('bz_sudo_protect') %]
+    <br>
+    Du är medlem i gruppen <b>bz_sudo_protect</b>. Andra kan inte använda
+    funktionen för att agera som du.
+  [% END %]
+</p>
+
+[% INCLUDE global/footer.html.tmpl %]
+

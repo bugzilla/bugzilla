@@ -1,0 +1,66 @@
+[%# This Source Code Form is subject to the terms of the Mozilla Public
+  # License, v. 2.0. If a copy of the MPL was not distributed with this
+  # file, You can obtain one at http://mozilla.org/MPL/2.0/.
+  #%]
+
+[% PROCESS global/header.html.tmpl title = "$terms.Bugzilla: startsida" header = "Startsida" header_addl_info = "version $constants.BUGZILLA_VERSION" %]
+
+[% IF release %]
+  <div id="new_release">
+    [% IF release.data %]
+      [% IF release.eos_date %]
+        <p>[% terms.Bugzilla %] [%+ release.branch_version FILTER html %] får inga fler säkerhetsuppdateringar efter [% release.eos_date FILTER html %]. Uppgradera för att hålla systemet säkert.</p>
+      [% END %]
+      [% IF release.deprecated %]
+        <p>Bugzilla [%+ release.deprecated FILTER html %] stöds inte längre. Uppgradera för att hålla systemet säkert.</p>
+      [% END %]
+      <p>En ny version av Bugzilla ([% release.data.latest_ver FILTER html %]) finns på <a href="[% release.data.url FILTER html %]">[% release.data.url FILTER html %]</a>.<br>Utgivningsdatum: [% release.data.date FILTER html %]</p>
+      <p class="notice">Det här meddelandet visas bara för inloggade användare med administratörsbehörighet. Du kan ändra aviseringen på sidan <a href="editparams.cgi?section=general#upgrade_notification_desc">Parametrar</a>.</p>
+    [% ELSIF release.error == "cannot_download" %]
+      <p>Fjärrfilen <a href="[% constants.REMOTE_FILE FILTER html %]">[%~ constants.REMOTE_FILE FILTER html %]</a> kan inte hämtas (orsak: [% release.reason FILTER html %]). Antingen är fjärrservern tillfälligt otillgänglig eller så kan webbservern inte nå webben. Om du använder en proxy anger du parametern <a href="editparams.cgi?section=advanced#proxy_url_desc">proxy_url</a> korrekt.</p>
+    [% ELSIF release.error == "no_write" %]
+      <p>Den lokala XML-filen '[% constants.LOCAL_FILE FILTER html %]' kan inte skapas (orsak: [% release.reason FILTER html %]). Kontrollera att webbservern kan skriva i katalogen.</p>
+    [% ELSIF release.error == "no_update" %]
+      <p>Den lokala XML-filen '[% constants.LOCAL_FILE FILTER html %]' kan inte uppdateras. Kontrollera att webbservern kan redigera filen.</p>
+    [% ELSIF release.error == "no_access" %]
+      <p>Den lokala XML-filen '[% constants.LOCAL_FILE FILTER html %]' kan inte läsas. Kontrollera att filen har rätt behörigheter.</p>
+    [% ELSIF release.error == "corrupted" %]
+      <p>Den lokala XML-filen '[% constants.LOCAL_FILE FILTER html %]' har ett ogiltigt XML-format. Ta bort den och försök sedan öppna sidan igen.</p>
+    [% ELSIF release.error == "unknown_parameter" %]
+      <p>'[% Param("upgrade_notification") FILTER html %]' är inte en giltig aviseringsparameter. Kontrollera parametern på sidan <a href="editparams.cgi?section=general#upgrade_notification_desc">Parametrar</a>.</p>
+    [% END %]
+  </div>
+[% END %]
+
+<div id="page-index">
+  <h1 id="welcome">Välkommen till [% terms.Bugzilla %]</h1>
+  <div class="intro">[% Hook.process('intro') %]</div>
+  <div class="bz_common_actions"><ul>
+    <li><a id="enter_bug" href="enter_bug.cgi"><span>Rapportera [% terms.abug %]</span></a></li>
+    <li><a id="query" href="query.cgi"><span>Sök</span></a></li>
+    <li><a id="account" [% IF user.id %]href="userprefs.cgi"><span>Inställningar</span></a>
+      [% ELSIF Param('createemailregexp') && user.authorizer.user_can_create_account %]href="createaccount.cgi"><span>Skapa ett nytt konto</span></a>
+      [% ELSE %]href="?GoAheadAndLogIn=1"><span>Logga in</span></a>[% END %]</li>
+    <li><a id="help" href="[% docs_urlbase FILTER html %]using/index.html"><span>Dokumentation</span></a></li>
+  </ul></div>
+  <div>
+    <form id="quicksearchForm" name="quicksearchForm" action="buglist.cgi">
+      <input id="quicksearch_main" name="quicksearch" title="Snabbsökning" placeholder="Ange ett felnummer eller söktermer" aria-labelledby="find" autofocus required>
+      <input id="find" type="submit" value="Snabbsökning">
+      <a href="page.cgi?id=quicksearch.html" title="Hjälp om snabbsökning">[?]</a>
+    </form>
+    <ul class="additional_links">[% Hook.process('additional_links') %]</ul>
+  </div>
+  <div id="common_queries"><h4>Vanliga sökningar:</h4><ul>
+    [% IF user.id %]
+      <li>[% title = BLOCK %]Öppna [% terms.bugs %] som är tilldelade mig[% END %]<a href="buglist.cgi?f1=assigned_to&amp;o1=equals&amp;v1=%25user%25&amp;resolution=---">[% title FILTER html %]</a> ([% assignee_count FILTER html %]) <a href="buglist.cgi?f1=assigned_to&amp;o1=equals&amp;v1=%25user%25&amp;resolution=---&amp;ctype=atom&amp;title=[% title FILTER uri %]" class="rss">&nbsp;</a></li>
+      <li>[% title = BLOCK %]Öppna [% terms.bugs %] som jag har rapporterat[% END %]<a href="buglist.cgi?f1=reporter&amp;o1=equals&amp;v1=%25user%25&amp;resolution=---">[% title FILTER html %]</a> ([% reporter_count FILTER html %]) <a href="buglist.cgi?f1=reporter&amp;o1=equals&amp;v1=%25user%25&amp;resolution=---&amp;ctype=atom&amp;title=[% title FILTER uri %]" class="rss">&nbsp;</a></li>
+      [% IF Bugzilla.has_flags %]<li>[% title = BLOCK %]Förfrågningar riktade till mig[% END %]<a href="request.cgi?action=queue&amp;requestee=[% user.login FILTER uri %]&amp;group=type&amp;do_union=0">[% title FILTER html %]</a> ([% requestee_count FILTER html %]) <a href="buglist.cgi?f1=requestees.login_name&amp;o1=equals&amp;v1=%25user%25&amp;ctype=atom&amp;title=[% title FILTER uri %]" class="rss">&nbsp;</a></li>[% END %]
+    [% END %]
+    <li>[% terms.Bugs %] som rapporterats de <a href="buglist.cgi?chfield=%5BBug%20creation%5D&amp;chfieldfrom=24h">senaste 24 timmarna</a> [% title = BLOCK %][% terms.Bugs %] som rapporterats de senaste 24 timmarna[% END %]<a href="buglist.cgi?chfield=%5BBug%20creation%5D&amp;chfieldfrom=24h&amp;ctype=atom&amp;title=[% title FILTER uri %]" aria-label="Fel som rapporterats de senaste 24 timmarna: RSS-flöde" class="rss">&nbsp;</a> | <a href="buglist.cgi?chfield=%5BBug%20creation%5D&amp;chfieldfrom=7d">senaste 7 dagarna</a> [% title = BLOCK %][% terms.Bugs %] som rapporterats de senaste 7 dagarna[% END %]<a href="buglist.cgi?chfield=%5BBug%20creation%5D&amp;chfieldfrom=7d&amp;ctype=atom&amp;title=[% title FILTER uri %]" aria-label="Fel som rapporterats de senaste 7 dagarna: RSS-flöde" class="rss">&nbsp;</a></li>
+    <li>[% terms.Bugs %] som ändrats de <a href="buglist.cgi?chfieldfrom=24h">senaste 24 timmarna</a> [% title = BLOCK %][% terms.Bugs %] som ändrats de senaste 24 timmarna[% END %]<a href="buglist.cgi?chfieldfrom=24h&amp;ctype=atom&amp;title=[% title FILTER uri %]" aria-label="Fel som ändrats de senaste 24 timmarna: RSS-flöde" class="rss">&nbsp;</a> | <a href="buglist.cgi?chfieldfrom=7d">senaste 7 dagarna</a> [% title = BLOCK %][% terms.Bugs %] som ändrats de senaste 7 dagarna[% END %]<a href="buglist.cgi?chfieldfrom=7d&amp;ctype=atom&amp;title=[% title FILTER uri %]" aria-label="Fel som ändrats de senaste 7 dagarna: RSS-flöde" class="rss">&nbsp;</a></li>
+  </ul></div>
+  <div class="outro">[% Hook.process('outro') %]</div>
+</div>
+
+[% PROCESS global/footer.html.tmpl %]

@@ -1,0 +1,32 @@
+[%# This Source Code Form is subject to the terms of the Mozilla Public
+  # License, v. 2.0. If a copy of the MPL was not distributed with this
+  # file, You can obtain one at http://mozilla.org/MPL/2.0/.
+  #
+  # This Source Code Form is "Incompatible With Secondary Licenses", as
+  # defined by the Mozilla Public License, v. 2.0.
+  #%]
+
+[% USE Bugzilla %]
+[% cgi = Bugzilla.cgi %]
+
+[% PROCESS global/header.html.tmpl
+  title = "Vilket fälts värden vill du redigera?"
+  style_urls = ['skins/standard/admin.css']
+%]
+
+[% columns = [
+     {
+       name => "name"
+       heading => "Redigera fältvärden för ..."
+       content_use_field = 1
+       contentlink => "editvalues.cgi?field=%%name%%"
+     }
+   ]
+%]
+
+[% PROCESS admin/table.html.tmpl
+     columns = columns
+     data = fields
+%]
+
+[% PROCESS global/footer.html.tmpl %]

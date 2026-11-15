@@ -1,0 +1,23 @@
+[%# This Source Code Form is subject to the terms of the Mozilla Public
+  # License, v. 2.0. If a copy of the MPL was not distributed with this
+  # file, You can obtain one at http://mozilla.org/MPL/2.0/.
+  #
+  # This Source Code Form is "Incompatible With Secondary Licenses", as
+  # defined by the Mozilla Public License, v. 2.0.
+  #%]
+[%
+   title = "Skuggdatabas"
+   desc = "Ett valfritt sätt att förbättra databasens prestanda"
+%]
+
+[% param_descs = {
+  shadowdbhost => "Värden där skuggdatabasen finns.",
+  shadowdbport => "Porten där skuggdatabasen finns. Ignoreras om <var>shadowdbhost</var> är tom. " _
+                  "Om värden är den lokala datorn ignorerar MySQL inställningen; ange i stället en socket nedan.",
+  shadowdbsock => "Socketen för anslutning till skuggdatabasen när värden är den lokala datorn. " _
+                  "Den krävs eftersom MySQL använder sin inbyggda socketsökväg vid anslutning till en lokal server. " _
+                  "Om fältet lämnas tomt och databasen finns på localhost ignoreras <var>shadowdbport</var>.",
+  shadowdb => "Om värdet inte är tomt är detta namnet på en annan databas som $terms.Bugzilla använder som skrivskyddad kopia. " _
+              "Långsamma läsoperationer kan då köras mot den utan att blockera andra. Databasen ska finnas på " _
+              "<var>shadowdbhost</var>. $terms.Bugzilla uppdaterar den inte; du måste själv ställa in databasreplikering." }
+%]

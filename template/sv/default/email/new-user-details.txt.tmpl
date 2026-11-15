@@ -1,0 +1,17 @@
+From: [% Param('mailfrom') %]
+To: [% new_user.email %]
+Subject: [% terms.Bugzilla %]: nytt konto har skapats
+X-Bugzilla-Type: admin
+
+[Det här e-postmeddelandet har skapats automatiskt]
+
+Ett nytt användarkonto i [% terms.Bugzilla %] har skapats på [% urlbase %]:
+
+Inloggningsnamn: [% new_user.login %]
+[% IF new_user.realname %]
+Riktigt namn: [% new_user.realname %]
+[% END %]
+
+Av säkerhetsskäl finns ditt nya lösenord inte med i meddelandet. Om du inte fått det på annat sätt kan du använda länken "Glömt lösenordet?" för att ange ett nytt lösenord.
+
+Om du har frågor om kontot kontaktar du [% Param('maintainer') %].

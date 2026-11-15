@@ -1,0 +1,59 @@
+[%# This Source Code Form is subject to the terms of the Mozilla Public
+  # License, v. 2.0. If a copy of the MPL was not distributed with this
+  # file, You can obtain one at http://mozilla.org/MPL/2.0/.
+  #
+  # This Source Code Form is "Incompatible With Secondary Licenses", as
+  # defined by the Mozilla Public License, v. 2.0.
+  #%]
+[%
+   title = "Bilagor"
+   desc = "Ställ in alternativ för bilagor"
+%]
+
+[% param_descs = {
+  allow_attachment_display =>
+    "Om alternativet är aktiverat kan användare visa bilagor direkt i"
+    _ " webbläsaren, om den har stöd för bilagans MIME-typ."
+    _ " Om alternativet är inaktiverat tvingas användare hämta bilagor,"
+    _ " även om webbläsaren kan visa dem."
+    _ "<p>Detta är en säkerhetsbegränsning för installationer där användare"
+    _ " som inte är betrodda kan läsa in bilagor som kan vara skadliga om"
+    _ " de visas direkt i webbläsaren.</p>"
+    _ "<p>Vi rekommenderar starkt att du anger parametern <var>attachment_base</var>"
+    _ " om du aktiverar denna parameter.",
+
+  attachment_base => 
+    "När parametern <var>allow_attachment_display</var> är aktiverad kan "
+    _ "en skadlig bilaga stjäla dina kakor eller utföra en attack mot Bugzilla"
+    _ " med dina behörigheter."
+    _ "<p>Om du vill ha extra säkerhet för bilagor bör du ange en alternativ URL"
+    _ " för din Bugzilla-installation som inte är samma som <var>urlbase</var>"
+    _ " eller <var>sslbase</var>. Det vill säga ett annat domännamn som leder till"
+    _ " just denna Bugzilla-installation.</p>"
+    _ "<p>Observera att om du har angett parametern"
+    _ " <a href=\"editparams.cgi?section=advanced#cookiedomain_desc\"><var>cookiedomain</var>"
+    _" bör du ange <var>attachment_base</var> så att den använder en domän som <em>inte</em>"
+    _ " matchas av <var>cookiedomain</var>.</p>"
+    _ "<p>För ytterligare säkerhet kan du lägga in <var>%bugid%</var> i URL:en."
+    _ " Det ersätts med ID:t för det aktuella $terms.bug när du öppnar en bilaga."
+    _ " Det begränsar bilagans åtkomst till andra bilagor för samma ${terms.bug}."
+    _ " Kom dock ihåg att alla sådana möjliga domännamn, till exempel"
+    _ " <kbd>1234.your.domain.com</kbd>, måste peka på samma"
+    _ " Bugzilla-instans.",
+
+  allow_attachment_deletion => "Om alternativet är aktiverat kan administratörer radera " _
+                               "innehållet i bilagor.",
+
+  maxattachmentsize => "Den största storleken, i kilobyte, för bilagor som lagras " _
+                       "i databasen. Om en fil som är större än detta bifogas " _
+                       "${terms.abug} kontrollerar Bugzilla parametern " _
+                       "<a href=\"#maxlocalattachment\"><var>maxlocalattachment</var></a> " _
+                       "för att avgöra om filen kan lagras lokalt på webbservern. " _
+                       "Om filstorleken överskrider båda gränserna avvisas bilagan. " _
+                       "Om båda parametrarna anges som 0 går det inte att bifoga filer till ${terms.bugs}.",
+
+  maxlocalattachment => "Den största storleken, i megabyte, för bilagor som lagras " _
+                        "lokalt på webbservern. Om värdet är lägre än parametern " _
+                        "<a href=\"#maxattachmentsize\"><var>maxattachmentsize</var></a> " _
+                        "lagras bilagor aldrig i det lokala filsystemet." }
+%]

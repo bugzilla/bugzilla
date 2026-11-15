@@ -1,0 +1,16 @@
+From: [% Param('mailfrom') %]
+To: [% Param('maintainer') %]
+Subject: [[% terms.Bugzilla %]] Kontolåsning: [% locked_user.login %] ([% address %])
+X-Bugzilla-Type: admin
+
+Adressen [% address %] har misslyckats med för många inloggningsförsök
+([%- constants.MAX_LOGIN_ATTEMPTS +%]) för kontot [% locked_user.login %].
+
+Inloggningsförsöken gjordes vid följande tidpunkter:
+
+[% FOREACH login = attempts %]
+  [%+ login.login_time FILTER time %]
+[% END %]
+
+Den här IP-adressen kan logga in igen med kontot vid
+[%+ unlock_at FILTER time %].

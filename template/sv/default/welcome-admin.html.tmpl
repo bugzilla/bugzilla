@@ -1,0 +1,71 @@
+[%# This Source Code Form is subject to the terms of the Mozilla Public
+  # License, v. 2.0. If a copy of the MPL was not distributed with this
+  # file, You can obtain one at http://mozilla.org/MPL/2.0/.
+  #
+  # This Source Code Form is "Incompatible With Secondary Licenses", as
+  # defined by the Mozilla Public License, v. 2.0.
+  #%]
+
+[% title = BLOCK %]Välkommen till Bugzilla[% END %]
+
+[% PROCESS global/header.html.tmpl
+   title = title
+   header_addl_info = "version $constants.BUGZILLA_VERSION"
+%]
+
+<div id="welcome-admin">
+  <p>Välkommen, [% user.identity FILTER html %].</p>
+
+  <p>Du ser den här sidan eftersom vissa grundläggande parametrar ännu inte har
+  konfigurerats. Här får du information om de sista stegen för att konfigurera
+  installationen korrekt.</p>
+
+  <p>Som administratör har du åtkomst till alla administrationssidor via länken
+  <a href="admin.cgi">Administration</a> längst ned på sidan. Länken visas alltid
+  på alla sidor. Därifrån måste du åtminstone öppna sidan
+  <a href="editparams.cgi">Parametrar</a>, där du kan ange alla viktiga parametrar
+  för installationen, bland annat:</p>
+
+  <ul>
+    <li><a href="editparams.cgi?section=core#urlbase_desc">urlbase</a>, webbadressen
+    till installationen, som används i e-postmeddelanden. Det är också skälet till
+    att du ser den här sidan: så länge parametern inte är angiven visas sidan
+    varje gång.</li>
+
+    <li><a href="editparams.cgi?section=core#cookiepath_desc">cookiepath</a>, som
+    är viktig för att webbläsaren ska kunna hantera kakor korrekt.</li>
+
+    <li><a href="editparams.cgi?section=general#maintainer_desc">maintainer</a>,
+    personen som ansvarar för installationen om något inte fungerar som det ska.</li>
+  </ul>
+
+  <p>Följande parametrar är också viktiga:</p>
+
+  <ul>
+    <li><a href="editparams.cgi?section=auth#requirelogin_desc">requirelogin</a>
+    skyddar, när den är aktiverad, installationen från användare som saknar konto.
+    Med andra ord kan användare som inte uttryckligen har autentiserats med ett
+    giltigt konto inte se några data. Det här ska du använda om data ska hållas
+    privata.</li>
+
+    <li><a href="editparams.cgi?section=auth#createemailregexp_desc">createemailregexp</a>
+    anger vilka användare som får skapa konto i installationen. Om värdet är ”.*”
+    (standardvärdet) kan alla skapa egna konton. Om värdet är ”@mycompany.com$”
+    får endast användare med ett konto på @mycompany.com skapa konto. Om fältet
+    lämnas tomt kan användarna inte själva skapa konton, utan bara en administratör
+    kan göra det åt dem. För en privat installation måste parametern ändras från
+    standardvärdet.</li>
+
+    <li><a href="editparams.cgi?section=mta#mail_delivery_method_desc">mail_delivery_method</a>
+    anger vilken metod som används för att skicka e-post, till exempel sendmail
+    eller SMTP. Den måste vara korrekt angiven för att e-post ska kunna skickas.</li>
+  </ul>
+
+  <p>
+    När detta är klart rekommenderar vi att du även går igenom Bugzillas övriga
+    parametrar för att förstå deras funktion och avgöra om deras inställningar
+    behöver ändras för installationen.
+  </p>
+</div>
+
+[% PROCESS global/footer.html.tmpl %]

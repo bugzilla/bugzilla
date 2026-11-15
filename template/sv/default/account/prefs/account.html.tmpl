@@ -1,0 +1,31 @@
+[%# This Source Code Form is subject to the terms of the Mozilla Public
+  # License, v. 2.0. If a copy of the MPL was not distributed with this
+  # file, You can obtain one at http://mozilla.org/MPL/2.0/.
+  #%]
+
+<table>
+  [% IF user.authorizer.can_change_password || (user.authorizer.can_change_email && Param('allowemailchange')) %]
+    <tr><td colspan="3">Ange ditt nuvarande lösenord för att bekräfta ändringar av kontot.</td></tr>
+    <tr><th>Lösenord:</th><td><input type="hidden" name="old_login" value="[% user.login FILTER html %]"><input type="password" name="old_password"></td></tr>
+    <tr><td colspan="2"><hr></td></tr>
+  [% END %]
+  [% IF user.authorizer.can_change_password %]
+    <tr><th>Nytt lösenord:</th><td><input type="password" name="new_password1"></td></tr>
+    <tr><th>Bekräfta nytt lösenord:</th><td><input type="password" name="new_password2"></td></tr>
+  [% END %]
+  <tr><th>Ditt riktiga namn (valfritt, men rekommenderas):</th><td><input size="35" name="realname" value="[% realname FILTER html %]"></td></tr>
+  [% IF user.authorizer.can_change_email && Param('allowemailchange') %]
+    [% IF login_change_date %]
+      [% IF new_login_name %]
+        <tr><th>Väntande e-postadress:</th><td>[% new_login_name FILTER html %]</td></tr>
+        <tr><th>Begäran upphör att gälla:</th><td>[% login_change_date FILTER time %]</td></tr>
+      [% ELSE %]
+        <tr><th>Bekräftad e-postadress:</th><td>[% user.login FILTER html %]</td></tr>
+        <tr><th>Slutdatum:</th><td>[% login_change_date FILTER time %]</td></tr>
+      [% END %]
+    [% ELSE %]
+      <tr><th>[% IF Param('emailsuffix') %]Nytt inloggningsnamn:[% ELSE %]Ny e-postadress:[% END %]</th><td><input size="35" id="new_login_name" name="new_login_name" [%- ' type="email"' UNLESS Param('emailsuffix') %]></td></tr>
+    [% END %]
+  [% END %]
+  [% Hook.process('field') %]
+</table>

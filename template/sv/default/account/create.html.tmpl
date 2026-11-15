@@ -1,0 +1,35 @@
+[%# This Source Code Form is subject to the terms of the Mozilla Public
+  # License, v. 2.0. If a copy of the MPL was not distributed with this
+  # file, You can obtain one at http://mozilla.org/MPL/2.0/.
+  #%]
+
+[% PROCESS global/header.html.tmpl title = "Skapa ett nytt konto i $terms.Bugzilla" %]
+
+<p>För att skapa ett konto i [% terms.Bugzilla %] behöver du bara ange
+[% IF Param('emailsuffix') == '' %]
+  en giltig e-postadress.
+[% ELSE %]
+  ett kontonamn som tillsammans med [% Param('emailsuffix') %] motsvarar en e-postadress där du tar emot e-post.
+[% END %]
+  Du får ett e-postmeddelande till adressen för att bekräfta att kontot skapas. <b>Du kan inte logga in förrän du har fått meddelandet.</b>
+  Om det inte kommer inom rimlig tid kan du kontakta ansvarig för denna Bugzilla-installation på <a href="mailto:[% Param("maintainer") %]">[% Param("maintainer") %]</a>.</p>
+
+[% IF Param('allowemailchange') %]
+<p>Om du redan har ett konto och vill ändra [% IF Param('emailsuffix') == '' %]e-postadress,[% ELSE %]inloggningsnamn,[% END %] kan du göra det på sidan Inställningar efter inloggning.</p>
+[% END %]
+
+<p>Du behöver ett konto för att rapportera nya [% terms.bugs %] eller kommentera befintliga. Det gör också att andra användare kan se vem som har skrivit kommentarer eller gjort ändringar. <b>Din e-postadress visas <em>aldrig</em> för utloggade användare. Bara registrerade användare kan se den.</b></p>
+
+[% IF Param('createemailregexp') == '.*' && Param('emailsuffix') == '' %]
+<p><b>INTEGRITETSINFORMATION:</b> [% terms.Bugzilla %] är ett öppet system för felhantering. Aktivitet i de flesta [% terms.bugs %], inklusive e-postadresser, syns för registrerade användare. Vi <b>rekommenderar</b> att du använder ett sekundärt konto eller en kostnadsfri e-posttjänst för att undvika skräppost i din primära inkorg.</p>
+[% END %]
+
+<form id="account_creation_form" method="get" action="createaccount.cgi">
+  <label for="login"><span class="label">[% IF Param('emailsuffix') %]Inloggningsnamn:[% ELSE %]E-postadress:[% END %]</span></label>
+  <input size="35" id="login" name="login" autofocus [%- ' type="email"' UNLESS Param('emailsuffix') %] required>
+  [% Param('emailsuffix') FILTER html %]
+  <input type="hidden" id="token" name="token" value="[% issue_hash_token(['create_account']) FILTER html %]">
+  <input type="submit" id="send" value="Skicka">
+</form>
+
+[% PROCESS global/footer.html.tmpl %]

@@ -1,0 +1,86 @@
+[%# This Source Code Form is subject to the terms of the Mozilla Public
+  # License, v. 2.0. If a copy of the MPL was not distributed with this
+  # file, You can obtain one at http://mozilla.org/MPL/2.0/.
+  #
+  # This Source Code Form is "Incompatible With Secondary Licenses", as
+  # defined by the Mozilla Public License, v. 2.0.
+  #%]
+
+From: [% Param('mailfrom') %]
+To: [% emailaddress %]
+Subject: [% PROCESS subject %]
+X-Bugzilla-Type: admin
+
+[% PROCESS subject %] från [% remoteaddress %].
+
+Om du inte begärde detta kan det vara ett ärligt misstag eller ett försök att
+ta sig in på ditt [% terms.Bugzilla %]-konto.
+
+Granska uppgifterna nedan och vidarebefordra meddelandet till
+[% Param('maintainer') %] om du misstänker otillbörlig aktivitet.
+
+            Token: [% token %]
+       Tokentyp: [% tokentype %]
+       Användare: [% emailaddress %]
+      Utfärdad: [% issuedate FILTER time("%Y-%m-%d %H:%M:%S %Z", timezone) %]
+  Händelsedata: [% eventdata %]
+Avbruten eftersom: [% PROCESS cancelactionmessage %]
+
+[% BLOCK subject %]
+  [% IF tokentype == 'new_account' %]
+    Begäran om att skapa användarkonto avbröts
+  [% ELSIF tokentype == 'password' %]
+    Begäran om lösenordsbyte avbröts
+  [% ELSIF tokentype == 'emailnew' OR tokentype == 'emailold' %]
+    Begäran om byte av e-postadress avbröts
+  [% ELSE %]
+    Token av typen [% tokentype %] avbröts
+  [% END %]
+[% END %]
+
+[% BLOCK cancelactionmessage %]
+  [% IF    cancelaction == 'account_exists' %]
+    Kontot [% email %] finns redan.
+
+  [% ELSIF cancelaction == 'email_change_canceled' %]
+    Begäran om att ändra e-postadressen för kontot [% old_email %]
+    till [% new_email %] har avbrutits.
+
+  [% ELSIF cancelaction == 'email_change_canceled_reinstated' %]
+    Begäran om att ändra e-postadressen för ditt konto till [% new_email %]
+    har avbrutits. Kontots tidigare inställningar har återställts.
+
+  [% ELSIF cancelaction == 'emailold_change_canceled' %]
+    Begäran om att ändra e-postadressen för ditt konto till [% new_email %]
+    har avbrutits.
+
+  [% ELSIF cancelaction == 'password_change_canceled' %]
+    Du har begärt att detta ska avbrytas.
+
+  [% ELSIF cancelaction == 'account_creation_canceled' %]
+    Skapandet av användarkontot [% emailaddress %] har avbrutits.
+
+  [% ELSIF cancelaction == 'user_logged_in' %]
+    Du har loggat in.
+
+  [% ELSIF cancelaction == 'wrong_token_for_changing_passwd' %]
+    Du försökte använda token för att ändra lösenordet.
+
+  [% ELSIF cancelaction == 'wrong_token_for_cancelling_email_change' %]
+    Du försökte använda token för att avbryta ändringen av e-postadressen.
+
+  [% ELSIF cancelaction == 'wrong_token_for_confirming_email_change' %]
+    Du försökte använda token för att bekräfta ändringen av e-postadressen.
+
+  [% ELSIF cancelaction == 'wrong_token_for_creating_account' %]
+    Du försökte använda token för att skapa ett användarkonto.
+
+  [% ELSE %]
+    Du använder [% terms.Bugzilla %]:s funktion för att avbryta token på fel
+    sätt. Du angav strängen "[% cancelaction %]". Rätt användning är att ange
+    en tagg och definiera den taggen i filen <kbd>cancel-token.txt.tmpl</kbd>.
+
+    Om du är slutanvändare av [% terms.Bugzilla %] och ser detta meddelande,
+    vidarebefordra e-postmeddelandet till [% Param('maintainer') %].
+  [% END %]
+[% END %]

@@ -1,0 +1,73 @@
+[%# This Source Code Form is subject to the terms of the Mozilla Public
+  # License, v. 2.0. If a copy of the MPL was not distributed with this
+  # file, You can obtain one at http://mozilla.org/MPL/2.0/.
+  #%]
+
+[% field_labels = {
+  "initialcc" => "Standardlista för kopior",
+  "initialowner" => "Standardansvarig",
+  "initialqacontact" => "Standardkontakt för kvalitetskontroll",
+  "masscc" => "Kopielista",
+  "requester" => "Begärande",
+  "requestee" => "Mottagare",
+  "new_watchedusers" => "Bevakningslista",
+} %]
+
+[% IF matchsuccess == 1 %]
+  [% PROCESS global/header.html.tmpl title="Bekräfta träff" %]
+  [% USE Bugzilla %]
+  <form method="post" [% IF script -%]action="[% script %]"[%- END -%] [% IF Bugzilla.cgi.param("data") %]enctype="multipart/form-data"[% END %]>
+  <p>[% IF matchmultiple %]
+      Bugzilla kan inte avgöra träffen för ett eller flera av namnen eller e-postadresserna från föregående sida. Gå igenom listorna med möjliga träffar nedan och välj dem du vill använda,
+    [% ELSE %]
+      [% terms.Bugzilla %] är inställt på att kräva kontroll när du anger ett namn eller en del av en e-postadress. Nedan visas namnen eller adresserna du angav och de konton som matchar dem. Kontrollera att de stämmer,
+    [% END %]
+    eller gå tillbaka till föregående sida och ändra namnen du angav.</p>
+[% ELSE %]
+  [% PROCESS global/header.html.tmpl title="Ingen träff" %]
+  <p>Bugzilla kunde inte hitta någon träff för ett eller flera av namnen eller e-postadresserna från föregående sida. [% IF !user.id %]<b>Observera: Du är inte inloggad. Bara exakta träffar mot e-postadresser utförs.</b>[% END %]</p>
+  <p>Gå tillbaka och försök med andra namn eller e-postadresser.</p>
+[% END %]
+
+<table id="user_match_table">
+  [% FOREACH field = matches %]
+    <tr><td>[% PROCESS field_names field_name=field.key %]:</td><td>
+      [% FOREACH query = field.value %]
+        <div class="user_match"><b>[% query.key FILTER html %]</b>
+          [% IF query.value.users.size %]
+            [% IF query.value.users.size > 1 %]
+              [% IF query.value.status == 'fail' %]
+                <span class="warning">matchar flera användare.</span> Gå tillbaka och försök igen med ett mer specifikt namn eller en mer specifik adress.
+              [% ELSE %]
+                [% IF query.value.status == 'trunc' %]matchade fler än det högsta antalet på [% query.value.users.size %] användare:<br>[% ELSE %]matchade:<br>[% END %]
+                <select name="[% field.key FILTER html %]" id="[% field.key FILTER html %]" [% IF fields.${field.key}.type == 'multi' %]multiple="multiple" [% IF query.value.users.size > 5 %]size="5"[% ELSE %]size="[% query.value.users.size %]"[% END %][% END %]>
+                  [% FOREACH match = query.value.users %]<option value="[% match.login FILTER html %]">[%- match.identity FILTER html -%]</option>[% END %]
+                </select>
+              [% END %]
+            [% ELSE %]matchade <b>[% query.value.users.0.identity FILTER html %]</b>[% END %]
+          [% ELSE %]
+            <span class="warning">[% IF query.key.length < 3 %]är för kort för delsträngsmatchning (minst 3 tecken)[% ELSE %]matchar ingenting[% END %]</span>
+          [% END %]
+        </div>
+      [% END %]
+    </td></tr>
+  [% END %]
+</table>
+
+[% IF matchsuccess == 1 %]
+  [% SET exclude_these = ['Bugzilla_login', 'Bugzilla_password'] %]
+  [% FOREACH key IN matches.keys %][% exclude_these.push(key) IF Bugzilla.cgi.param(key) == '' %][% END %]
+  [% SET exclude = '^' _ exclude_these.join('|') _ '$' %]
+  [% PROCESS "global/hidden-fields.html.tmpl" exclude = exclude %]
+  <p><input type="submit" id="continue" value="Fortsätt"></p>
+  </form>
+[% END %]
+
+[% PROCESS global/footer.html.tmpl %]
+
+[% BLOCK field_names %]
+  [% IF field_descs.$field_name %][% field_descs.$field_name FILTER html %]
+  [% ELSIF field_labels.$field_name %][% field_labels.$field_name FILTER html %]
+  [% ELSIF field_name.match("^requestee") %][% fields.${field_name}.flag_type.name FILTER html %] mottagare
+  [% ELSE %][% field_name FILTER html %][% END %]
+[% END %]

@@ -1,0 +1,55 @@
+[%# This Source Code Form is subject to the terms of the Mozilla Public
+  # License, v. 2.0. If a copy of the MPL was not distributed with this
+  # file, You can obtain one at http://mozilla.org/MPL/2.0/.
+  #
+  # This Source Code Form is "Incompatible With Secondary Licenses", as
+  # defined by the Mozilla Public License, v. 2.0.
+  #%]
+[%
+   title = "Gruppsäkerhet"
+   desc = "Avgör hur säkerhetsgrupper ska användas"
+%]
+
+[% param_descs = {
+  makeproductgroups => "Om detta är aktiverat kopplar Bugzilla en grupp för $terms.abug " _
+                       "till varje produkt i databasen och använder den när ${terms.bugs} efterfrågas.",
+
+  chartgroup => "Namnet på gruppen med användare som får använda funktionen " _
+                "'Nya diagram'. Administratörer bör säkerställa att publika kategorier " _
+                "och seriedefinitioner inte avslöjar konfidentiell information innan funktionen " _
+                "aktiveras för användare som inte är betrodda. Om fältet lämnas tomt kan inga " _
+                "användare använda Nya diagram.",
+
+  insidergroup => "Namnet på gruppen med användare som får se och ändra privata " _
+                  "kommentarer och bilagor.",
+
+  timetrackinggroup => "Namnet på gruppen med användare som får se och ändra information " _
+                       "om tidsuppföljning.",
+
+  querysharegroup => "Namnet på gruppen med användare som får dela sina " _
+                     "sparade sökningar med andra.",
+
+  comment_taggers_group => "Namnet på gruppen med användare som får tagga kommentarer. " _
+                           "Om fältet lämnas tomt stängs taggning av kommentarer av.",
+
+  debug_group => "Namnet på gruppen med användare som får se den faktiska " _
+                 "SQL-frågan som skapas när listor och rapporter för $terms.bugs visas.",
+
+  usevisibilitygroups => "Vill du begränsa synligheten för användare till medlemmar i " _
+                         "vissa grupper?",
+
+  strict_isolation => "Tillåt inte att användare tilldelas, " _
+                      "är QA-kontakter för, " _
+                      "läggs till i CC-listan, " _
+                      "eller skapar eller tar bort beroenden " _
+                      "som berör ett fel i en produkt som användaren " _
+                      "inte har behörighet att redigera.",
+
+ or_groups => "Ange synligheten för $terms.abug som tillhör flera " _
+              "grupper. Om detta är aktiverat (rekommenderas) behöver en användare bara " _
+              "vara medlem i en av de grupper som $terms.bug tillhör för att kunna se det. Om det är " _
+              "inaktiverat måste användaren vara medlem i alla grupper för ${terms.bug}. " _
+              "Observera att användarens roll för felet (t.ex. rapportör) också kan " _
+              "påverka behörigheterna."
+ }
+%]

@@ -1,0 +1,52 @@
+[%# This Source Code Form is subject to the terms of the Mozilla Public
+  # License, v. 2.0. If a copy of the MPL was not distributed with this
+  # file, You can obtain one at http://mozilla.org/MPL/2.0/.
+  #
+  # This Source Code Form is "Incompatible With Secondary Licenses", as
+  # defined by the Mozilla Public License, v. 2.0.
+  #%]
+
+[% PROCESS global/header.html.tmpl title="Dubblettvarning" %]
+[% orig_bug = "$terms.bug $original_bug_id"
+     FILTER bug_link(original_bug_id) %]
+
+<p>
+  När [% terms.abug %] markeras som en dubblett läggs rapportören normalt till
+  i CC-listan för originalet. Behörigheterna för [% orig_bug FILTER none %]
+  är för närvarande sådana att rapportören normalt inte kan se det.
+</p>
+
+<p>
+  <b>Om rapportören läggs till i CC-listan för [% orig_bug FILTER none %]
+  [% IF cclist_accessible %]
+    får hen genast
+  [% ELSE %]
+    kan hen i framtiden få
+  [% END %]
+  åtkomst till att visa detta [% terms.bug %].</b>
+  Vill du göra detta?
+</p>
+
+<form method="post" action="process_bug.cgi">
+
+[% PROCESS "global/hidden-fields.html.tmpl" exclude="^Bugzilla_(login|password)$" %]
+
+<p>
+  <input type="radio" name="confirm_add_duplicate" value="1">
+    Ja, lägg till rapportören i CC-listan för [% orig_bug FILTER none %]
+</p>
+<p>
+  <input type="radio" name="confirm_add_duplicate" value="0" checked="checked">
+    Nej, lägg inte till rapportören i CC-listan för [% orig_bug FILTER none %]
+</p>
+<p>
+  [% "Kasta bort mina ändringar och återgå till $terms.bug $duplicate_bug_id"
+     FILTER bug_link(duplicate_bug_id) FILTER none %]
+</p>
+<p>
+  <input type="submit" id="process" value="Skicka">
+</p>
+
+</form>
+
+[% PROCESS global/footer.html.tmpl %]

@@ -1,0 +1,163 @@
+[%# This Source Code Form is subject to the terms of the Mozilla Public
+  # License, v. 2.0. If a copy of the MPL was not distributed with this
+  # file, You can obtain one at http://mozilla.org/MPL/2.0/.
+  #
+  # This Source Code Form is "Incompatible With Secondary Licenses", as
+  # defined by the Mozilla Public License, v. 2.0.
+  #%]
+
+[%# INTERFACE:
+  # sortby: string. the column on which we are sorting the buglist.
+  # reverse: boolean. True if we are reversing the current sort.
+  # maxrows: integer. Max number of rows to display.
+  # changedsince: integer. The number of dagarna ago for the changedsince column.
+  # openonly: boolean. True if we are only showing open bugs.
+  # product: array of strings. The set of products we check for dups.
+  #
+  # Additionally, you need to fulfill the interface to
+  # duplicates-table.html.tmpl.
+  #%]
+
+[% IF product.size %]
+  [% title = BLOCK %]
+    Oftast rapporterade [% terms.Bugs %] för 
+    [%+ product.join(', ') FILTER html %]
+  [% END %]
+[% ELSE %]
+  [% title = "Oftast rapporterade $terms.Bugs" %]
+[% END%]
+
+[% PROCESS global/header.html.tmpl title = title %]
+
+<p>
+  <a href="#explanation">Vad visar uppgifterna?</a>
+  <br>
+  <a href="#params">Ändra parametrar</a>
+</p>
+
+[% PROCESS "reports/duplicates-table.html.tmpl" %]
+
+[%# *** Parameters *** %]
+
+[% bug_ids_string = bug_ids.join(',') %]
+
+<h3 id="params">Ändra parametrar</h3>
+
+<form method="get" action="duplicates.cgi">
+  <input type="hidden" name="sortby" value="[% sortby FILTER html %]">
+  <input type="hidden" name="reverse" value="[% reverse FILTER html %]">
+  <input type="hidden" name="bug_id" value="[% bug_ids_string FILTER html %]">
+  <table>
+    <tr>
+      <td>Begränsa till produkter:</td>
+      <td>
+        [% INCLUDE "global/product-select.html.tmpl"
+          id       => "product"
+          name     => "product"
+          multiple => 5
+          value    => product
+        %]
+      </td>
+    </tr>
+
+    <tr>
+      <td>Använd följande vid sortering eller begränsning:</td>
+      <td>
+        <input type="radio" name="sortvisible" id="entirelist" value="0"
+          [% ' checked="checked"' IF NOT sortvisible %]>
+        <label for="entirelist">
+          hela listan
+        </label>
+        <br>
+        <input type="radio" name="sortvisible" id="visiblelist" value="1"
+          [% ' checked="checked"' IF sortvisible %]>
+        <label for="visiblelist">
+          den synliga listan
+        </label>
+      </td>
+     </tr>
+
+    <tr>
+      <td><label for="maxrows">Maximalt antal rader:</label></td>
+      <td>
+        <input size="4" name="maxrows" id="maxrows" 
+               value="[% maxrows FILTER html %]">
+      </td>
+    </tr>
+
+    <tr>
+      <td>
+        <label for="changedsince">Kolumnen Förändring visar de senaste:</label>
+      </td>
+      <td>
+        <input size="4" name="changedsince" id="changedsince"
+               value="[% changedsince FILTER html %]"> dagar
+      </td>
+    </tr>
+
+    <tr>
+      <td>
+        <label for="openonly">
+          Endast öppna [% terms.bugs %]:
+        </label>
+      </td>
+      <td>
+        <input type="checkbox" name="openonly" id="openonly" value="1"
+          [% ' checked="checked"' IF openonly %]>
+      </td>
+    </tr>
+
+  </table>
+
+  <input type="submit" id="change" value="Ändra">
+</form>
+
+<form method="post" action="buglist.cgi">
+  <input type="hidden" name="bug_id" value="[% bug_ids_string FILTER html %]">
+  Eller visa bara en <input type="submit" id="list"
+                                      value="lista över [% terms.bugs %]">.
+  (Obs! Ordningen kan vara en annan.)
+</form>
+
+<hr>
+
+<h3 id="explanation">
+  Vad är ”Oftast rapporterade [% terms.Bugs %]”?
+</h3>
+
+<p>
+  Sidan Oftast rapporterade [% terms.Bugs %] visar kända öppna
+  [%+ terms.bugs %] som rapporteras oftast, räknat efter antalet direkta och
+  indirekta dubbletter av [% terms.bugs %]. Uppgifterna hjälper till att
+  minska antalet dubbletter som registreras i [% terms.Bugzilla %], vilket
+  sparar tid för dem som behöver bedöma [% terms.bugs %].
+</p>
+
+<b>Hur använder jag listan?</b>
+
+<ul>
+  <li>Granska listan över de oftast rapporterade [% terms.bugs %].</li>
+  <li>Om ditt problem finns i listan:</li>
+
+  <ul>
+    <li>Klicka på numret för [% terms.bug %] för att bekräfta att du har hittat
+      samma [% terms.bug %]. Kommentera om du har mer information eller
+      fortsätt att testa produkten.
+    </li>
+  </ul>
+
+  <li>Om ditt problem inte finns i listan:</li>
+
+  <ul>
+    <li><a href="query.cgi">Försök hitta ett liknande [% terms.bug %]</a>
+      som redan har registrerats.</li>
+    <li>Om du hittar ditt [% terms.bug %] i [% terms.Bugzilla %],
+      får du gärna kommentera med nya eller ytterligare uppgifter.</li>
+    <li>Om du inte hittar ditt problem dokumenterat i
+      [%+ terms.Bugzilla %],
+      <a href="enter_bug.cgi">registrera ett nytt [% terms.bug %]</a>.</li>
+  </ul>
+</ul>
+
+[% PROCESS global/footer.html.tmpl %]
+

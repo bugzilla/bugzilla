@@ -1,0 +1,27 @@
+[%# This Source Code Form is subject to the terms of the Mozilla Public
+  # License, v. 2.0. If a copy of the MPL was not distributed with this
+  # file, You can obtain one at http://mozilla.org/MPL/2.0/.
+  #
+  # This Source Code Form is "Incompatible With Secondary Licenses", as
+  # defined by the Mozilla Public License, v. 2.0.
+  #%]
+
+[% filtered_desc = bug.short_desc FILTER html %]
+[% PROCESS global/header.html.tmpl
+  title = "Ändringar i $terms.bug $bug.bug_id"
+  header = "Aktivitetslogg för $terms.bug $bug.bug_id: $filtered_desc"
+ %]
+
+<p>
+  Tillbaka till [% "$terms.bug $bug.bug_id" FILTER bug_link(bug) FILTER none %]
+</p>
+
+[% PROCESS bug/activity/table.html.tmpl %]
+
+[% IF operations.size > 0 %]
+  <p>
+    Tillbaka till [% "$terms.bug $bug.bug_id" FILTER bug_link(bug) FILTER none %]
+  </p>
+[% END %]
+
+[% PROCESS global/footer.html.tmpl %]

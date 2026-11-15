@@ -1,0 +1,51 @@
+[%# This Source Code Form is subject to the terms of the Mozilla Public
+  # License, v. 2.0. If a copy of the MPL was not distributed with this
+  # file, You can obtain one at http://mozilla.org/MPL/2.0/.
+  #
+  # This Source Code Form is "Incompatible With Secondary Licenses", as
+  # defined by the Mozilla Public License, v. 2.0.
+  #%]
+
+From: [% Param("mailfrom") %]
+To: [% email %][% Param("emailsuffix") %]
+Subject: Din lista över [% terms.Bugzilla %]-[%+ terms.bugs %] behöver uppmärksammas.
+X-Bugzilla-Type: whine
+
+[Det här e-postmeddelandet har genererats automatiskt.]
+
+Du har ett eller flera [% terms.bugs %] tilldelade till dig i
+[% terms.Bugzilla %] ([% urlbase %]) som behöver uppmärksammas.
+
+Alla dessa [% terms.bugs %] har statusen [% display_value("bug_status", "CONFIRMED") %]
+och har inte ändrats på minst [% Param("whinedays") %] dagar.
+Du behöver titta på dem och besluta om en första åtgärd.
+
+Det innebär vanligtvis något av följande:
+
+(1) Du avgör att detta [% terms.bug %] snabbt kan hanteras, till exempel eftersom
+    det är [% display_value("resolution", "INVALID") %], och åtgärdar det direkt.
+(2) Du avgör att [% terms.bug %] inte hör till dig och tilldelar det till någon
+    annan. Om du inte vet vem som ska tilldelas det kontrollerar du att
+    komponentfältet är rimligt och använder sedan alternativet
+    ”Återställ tilldelad till standardvärdet”.
+(3) Du avgör att [% terms.bug %] hör till dig men inte kan lösas just nu.
+    Acceptera [% terms.bug %] genom att ange statusen [% display_value("bug_status", "IN_PROGRESS") %].
+
+Använd denna URL för att få en lista över alla [% display_value("bug_status", "CONFIRMED") %]
+[%+ terms.bugs %] (lägg gärna till den som bokmärke):
+
+ [% urlbase %]buglist.cgi?bug_status=CONFIRMED&assigned_to=[% email %]
+
+Du kan också använda den allmänna söksidan på 
+[%+ urlbase %]query.cgi
+
+Nedan finns enskilda URL:er till alla dina [% display_value("bug_status", "CONFIRMED") %]
+[%+ terms.bugs %] som inte har ändrats på minst [% Param("whinedays") %] dagar.
+
+Du får meddelandet en gång om dagen tills du har hanterat dessa [% terms.bugs %]!
+
+[% FOREACH bug = bugs %]
+ [%+ bug.summary %]
+    -> [% urlbase %]show_bug.cgi?id=[% bug.id %]
+[% END %]
+

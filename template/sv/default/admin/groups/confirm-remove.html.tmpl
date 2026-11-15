@@ -1,0 +1,44 @@
+[%# This Source Code Form is subject to the terms of the Mozilla Public
+  # License, v. 2.0. If a copy of the MPL was not distributed with this
+  # file, You can obtain one at http://mozilla.org/MPL/2.0/.
+  #
+  # This Source Code Form is "Incompatible With Secondary Licenses", as
+  # defined by the Mozilla Public License, v. 2.0.
+  #%]
+
+[% IF regexp %]
+  [% title = "Bekräfta: ta bort uttryckliga medlemmar i det reguljära uttrycket?" %]
+[% ELSE %]
+  [% title = "Bekräfta: ta bort alla uttryckliga medlemmar?" %]
+[% END %]
+
+[% PROCESS global/header.html.tmpl
+  title = title
+  doc_section = "administering/groups.html"
+%]
+
+[% IF regexp %]
+  <p>Detta alternativ tar bort alla användare från '[% group.name FILTER html %]'
+    vars inloggningsnamn matchar det reguljära uttrycket:
+    '[% regexp FILTER html %]'</p>
+[% ELSE %]
+  <p>Detta alternativ tar bort alla uttryckligen angivna användare
+    från '[% group.name FILTER html %].'</p>
+[% END %]
+  
+<p>Vanligtvis behöver du bara göra detta när du uppgraderar grupper
+  som skapades med Bugzilla 2.16 eller äldre. Använd alternativet med
+  <b>yttersta försiktighet</b> och läs dokumentationen för mer information.
+</p>
+    
+<form method="post" action="editgroups.cgi">
+  <input type="hidden" name="group_id" value="[% group.id FILTER html %]">
+  <input type="hidden" name="regexp" value="[% regexp FILTER html %]">
+  <input type="hidden" name="action" value="remove_regexp">
+  
+  <input name="token" type="hidden" value="[% token FILTER html %]">
+  <input id="confirm" name="confirm" type="submit" value="Bekräfta">
+  <p>Eller <a href="editgroups.cgi">återgå till sidan Redigera grupper</a>.</p>
+</form>
+    
+[% PROCESS global/footer.html.tmpl %]

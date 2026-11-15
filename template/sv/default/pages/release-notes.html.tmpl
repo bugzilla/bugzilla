@@ -1,0 +1,313 @@
+[%# This Source Code Form is subject to the terms of the Mozilla Public
+  # License, v. 2.0. If a copy of the MPL was not distributed with this
+  # file, You can obtain one at http://mozilla.org/MPL/2.0/.
+  #
+  # This Source Code Form is "Incompatible With Secondary Licenses", as
+  # defined by the Mozilla Public License, v. 2.0.
+  #%]
+
+[% SET title = "Versionsinformation för Bugzilla 5.2" %]
+[% INCLUDE global/header.html.tmpl
+  title = title
+  bodyclasses = ['narrow_page']
+%]
+
+<h1>[% title FILTER html %]</h1>
+
+<ul class="bz_toc">
+  <li><a href="#introduction">Introduktion</a></li>
+  <li><a href="#point">Uppdateringar sedan 5.0.4</a></li>
+  <li><a href="#req">Minimikrav</a></li>
+  <li><a href="#feat">Nya funktioner och förbättringar</a></li>
+  <li><a href="#issues">Kända problem</a></li>
+  <li><a href="#code_changes">Kodändringar som kan påverka
+    anpassningar och tillägg</a></li>
+  <li><a href="https://bugzilla.readthedocs.org/en/latest/installing/upgrading.html">
+    Anvisningar för uppgradering från en tidigare version</a></li>
+  <li><a href="http://www.bugzilla.org/releases/">Versionsinformation för tidigare versioner</a></li>
+</ul>
+
+<h2 id="introduction">Introduktion</h2>
+
+<p>Välkommen till [% terms.Bugzilla %] 5.2! Den här utgåvan behöver en förklaring.
+I början av 2019 släpptes 5.0.5 och 5.0.6 för grenen 5.0.x, men de innehöll
+omfattande ändringar av databasschema och kodformatering som egentligen inte borde
+ha hamnat i en stabil gren. En del märkte detta och uppgraderade inte från 5.0.4,
+eftersom 5.0.5 och 5.0.6 saknade säkerhetsrättningar. Version 5.2 fortsätter där
+5.0.6 slutade, eftersom 5.0.5 tekniskt sett borde ha varit 5.2. Den som fortfarande
+använder 5.0.4 kan uppgradera till 5.0.4.1 om en fullständig versionsuppgradering
+inte är aktuell ännu.</p>
+
+<p><strong>OBS:</strong> På grund av situationen ovan innehåller utvecklingsutgåvan
+5.1.x faktiskt NYARE kod än 5.2 och kan inte ”uppgraderas” till 5.2. Serien 5.1.x
+har i efterhand bytt namn till 5.3.x.</p>
+
+<p>[% terms.Bugzilla %] strävar efter full tillgänglighet, men är inte där ännu.
+Vi har förbättrat tillgängligheten men vet att mycket återstår. Om du hittar problem
+som fält utan etiketter, dålig kontrast eller sådant som fungerar dåligt med
+skärmläsare, rapportera en ny [% terms.bug %] som blockerar vår
+<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=bugzilla-section508">Section 508 Compliance [% terms.bug %]</a>.</p>
+
+<p>Om du uppgraderar ska du läsa
+  <a href="https://bugzilla.readthedocs.org/en/latest/installing/upgrading.html">
+  Anvisningar för uppgradering från en tidigare version</a>. Om du uppgraderar från
+  en version äldre än 4.4 ska du läsa versionsinformationen för alla
+  <a href="http://www.bugzilla.org/releases/">mellanliggande versioner</a>, särskilt
+  avsnittet om uppgradering i varje versionsinformation.</p>
+
+<h2 id="point">Uppdateringar i denna 5.2.x-utgåva</h2>
+
+<p>Framtida utgåvor på den här grenen innehåller i detta avsnitt en lista över
+uppdateringar sedan senaste punktutgåvan.</p>
+
+<p>Eftersom versionerna 5.0.5 och 5.0.6 släpptes på ett ovanligt sätt ingår
+ändringarna från dem <a href="#point504">nedan</a> för den som uppgraderar från
+grenen 5.0.4.x.</p>
+
+<h2 id="req">Minimikrav</h2>
+
+<p>Krav som är nya sedan 5.0 ser ut så här:
+  <span class="req_new">this</span>.</p>
+
+<ul>
+  <li><a href="#req_perl">Perl</a></li>
+  <li><a href="#req_mysql">För MySQL-användare</a></li>
+  <li><a href="#req_mariadb">För MariaDB-användare</a></li>
+  <li><a href="#req_pg">För PostgreSQL-användare</a></li>
+  <li><a href="#req_oracle">För Oracle-användare</a></li>
+  <li><a href="#req_sqlite">För SQLite-användare</a></li>
+  <li><a href="#req_modules">Obligatoriska Perl-moduler</a></li>
+  <li><a href="#req_optional_mod">Valfria Perl-moduler</a></li>
+  <li><a href="#req_apache">Valfria Apache-moduler</a></li>
+</ul>
+
+<h3 id="req_perl">Perl</h3>
+
+<p>Perl <span class="req_new">v5.14</span></p>
+
+[% INCLUDE db_req db='mariadb' %]
+
+[% INCLUDE db_req db='mysql' %]
+
+[% INCLUDE db_req db='pg' %]
+
+[% INCLUDE db_req db='oracle' %]
+
+[% INCLUDE db_req db='sqlite' %]
+
+<h3 id="req_modules">Obligatoriska Perl-moduler</h3>
+
+[% INCLUDE req_table reqs = REQUIRED_MODULES
+                     new = ['JSON-XS', 'Email-Sender']
+                     updated = ['DateTime', 'DateTime-TimeZone',
+                                'Template-Toolkit', 'URI'] %]
+
+<h3 id="req_optional_mod">Valfria Perl-moduler</h3>
+
+<p>Följande Perl-moduler aktiverar, om de är installerade, olika funktioner
+i [% terms.Bugzilla %]:</p>
+
+[% INCLUDE req_table reqs = OPTIONAL_MODULES
+                     new  = ['Cache-Memcached','File-Copy-Recursive']
+                     updated = ['Chart', 'Test-Taint']
+                     include_feature = 1 %]
+
+<h3 id="req_apache">Valfria Apache-moduler</h3>
+
+<p>Om du använder Apache som webbserver kan [% terms.Bugzilla %] använda vissa
+  Apache-funktioner om modulerna nedan är installerade och aktiverade.</p>
+
+<ul>
+  <li>mod_headers</li>
+  <li>mod_expires</li>
+  <li>mod_env</li>
+</ul>
+
+<p>På de flesta system, men inte Windows, kan <kbd>checksetup.pl</kbd> avgöra
+  om modulerna är installerade och meddela dig.</p>
+
+
+<a name="v52_feat"></a>
+<h2 id="feat">Nya funktioner och förbättringar</h2>
+
+<ul>
+  <li><a href="#feat_mobilerender">Förbättrad återgivning på mobil</a></li>
+  <li><a href="#feat_mariadb">Uttryckligt stöd för MariaDB</a></li>
+  <li><a href="#feat_mysql8">Stöd för MySQL 8+</a></li>
+  <li><a href="#feat_utf8mb4">Bättre Unicode-stöd i MySQL och MariaDB</a></li>
+  <li><a href="#feat_docker">Demokonfiguration för Docker</a></li>
+  <li><a href="#feat_other">Andra förbättringar och ändringar</a></li>
+</ul>
+
+<h3 id="feat_mobilerender">Förbättrad återgivning på mobil</h3>
+
+<p>
+Metadata som hjälper webbläsare att återge [% terms.Bugzilla %] korrekt i mobilwebbläsare har lagts till. Utan metadata skulle Googles sökverktyg rapportera att sidorna inte lämpar sig för mobila enheter. [% terms.Bugzilla %] behöver fortfarande arbete för att faktiskt se bra ut på mobiler, men detta är en bra början. (<a href="https://github.com/bugzilla/bugzilla/pull/78">PR #78</a>)
+</p>
+
+<h3 id="feat_mariadb">Uttryckligt stöd för MariaDB</h3>
+
+<p>Nyare versioner av MariaDB, 10.6 och senare, har avvikit så mycket från MySQL
+att de inte längre kan ses som en direkt ersättning. Nu finns databasdrivrutinen
+”mariadb” för alla versioner av MariaDB. <code>checksetup.pl</code> föreslår att
+du byter till den om den upptäcker anslutning till en MariaDB-databasserver.
+[%+ INCLUDE buglink id=1467006 %]</p> 
+
+<h3 id="feat_mysql8">Stöd för MySQL 8+</h3>
+
+<p>Bugzilla fungerade tidigare inte med MySQL 8 eller senare. Det gör det nu.
+[%+ INCLUDE buglink id=1592129 %]</p>
+
+<h3 if="feat_utf8mb4">Bättre Unicode-stöd i MySQL och MariaDB</h3>
+
+<p>Teckenuppsättningen <b>utf8mb4</b> används nu som standard vid nya installationer med MariaDB eller MySQL. Det bör lösa många problem med teckenkodning i äldre versioner.
+[%+ INCLUDE buglink id=1891882 %]</p>
+
+<h3 id="feat_docker">Demokonfiguration för Docker</h3>
+
+<p>[% terms.Bugzilla %] levereras nu med en Docker Compose-konfiguration som ger
+en färdig [% terms.Bugzilla %]-installation med standardinställningar för testning.
+Skriv <code>docker compose up</code> i rotkatalogen för [% terms.bugzilla %] för
+att starta den. Anvisningar för anslutning visas i konsolen när den har startat.
+Docker måste redan vara installerat. Konfigurationen är inte lämplig för produktion,
+utan avsedd för experiment och testning utan en fullständig installation.
+[%+ INCLUDE buglink id=1888068 %]</p>
+
+<h3 id="feat_other">Andra förbättringar och ändringar</h3>
+
+<h4>Förbättringar för användare</h4>
+
+<ul>
+  <li><strong>Gränssnitt:</strong> Länkar till WineHQ Forum godtas nu i fältet Se även för [% terms.bugs %]. [% INCLUDE buglink id=1523814 %]</li>
+  <li><strong>Tillgänglighet:</strong> Färgkontrasten i standardtemat har justerats för att uppfylla rekommendationerna i WCAG AA 2.0. [% INCLUDE buglink id=1798166 %]</li>
+  <li><strong>E-post:</strong> E-post om [% terms.bugs %] innehåller nu huvudet <code>X-Bugzilla-ID</code> med ID för [% terms.Bug %], som kan användas för filtrering. [% INCLUDE buglink id=1403169 %]</li>
+</ul>
+
+<h4>Förbättringar för administratörer och utvecklare</h4>
+
+<ul>
+  <li><strong>Databas:</strong> <strong>UTF8-kodning av data är nu obligatorisk.</strong>
+    Äldre versioner av [% terms.Bugzilla %] gjorde konvertering av äldre data till UTF8
+    valfri. Dina data konverteras när du kör <kbd>checksetup.pl</kbd>. Om data inte redan
+    är UTF8-kodade bör du före uppgradering kontrollera konverteringen på en säkerhetskopia
+    av databasen.</li>
+  <li><strong>Databas:</strong>Med MySQL konverteras dessutom merparten av databastabellerna
+    till lagringsmotorn InnoDB. Det effektiviserar sökningen och ger verklig referensintegritet.</li>
+  <li><strong>Installation:</strong> [% terms.Bugzilla %] stöder nu Email::MIME version 1.949
+    och senare, som tidigare kunde få [%+ terms.Bugzilla %] att krascha vid e-postutskick.
+    [%+ INCLUDE buglink id=1657496 %]</li>
+  <li><strong>Installation:</strong> Skriptet <code>testserver.pl</code> fungerar nu med
+    självsignerade SSL-certifikat om alternativet <code>--self-signed</code> anges på kommandoraden. [% INCLUDE buglink id=1851398 %]</li>
+  <li><strong>Installation:</strong> Ett fel med främmande nyckel vid uppgradering från
+    versioner före 3.0 till 5.0.6 eller senare har åtgärdats. [% INCLUDE buglink id=1902375 %]</li>
+</ul>
+
+<h4 id="feat_webservices_other">Ändringar i webbtjänsten</h4>
+
+<ul>
+  <li>Metoden <strong>Group.get</strong> är nu korrekt markerad som skrivskyddad. [% INCLUDE buglink id=1584477 %]</li>
+</ul>
+
+<h4 id="code_changes">Kodändringar som kan påverka anpassningar och tillägg</h4>
+
+<ul>
+  <li>Objektet Bugzilla::DB har nu attributet qi, som returnerar en särskild hashreferens
+    för databashänvisningar i dubbelt citerade strängar.<br>
+    <code>
+  my $q = Bugzilla-&gt;dbh-&gt;qi;
+  Bugzilla-&gt;dbh-&gt;do("SELECT COUNT(*) FROM $q-&gt;{groups}");
+    </code><br>
+    [% INCLUDE buglink id=1592129 %]
+  </li>
+  <li>[% terms.Bugzilla %] använder nu Email::Address::XS i stället för Email::Address för tolkning av e-postadresser. Den som använder Email::Address direkt bör uppdatera till Email::Address::XS. [% INCLUDE buglink id=1853138 %]</li>
+</ul>
+
+<h3 id="point504">Ändringar sedan version 5.0.4</h3>
+
+<p>På grund av det ovanliga sättet som grenen skapades för att lösa numreringsproblemet
+med 5.0.5, finns ändringarna från 5.0.5 och 5.0.6 med här vid uppgradering från
+grenen 5.0.4.x.</p>
+
+<h3>5.0.6</h3>
+
+<ul>
+<li><strong>Administration:</strong> Det går nu att skapa fler än 255 flaggor,
+upp till 65 535. [% INCLUDE buglink id=1526703 %]</li>
+</ul>
+
+<h3>5.0.5</h3>
+
+<ul>
+<li><strong>Användargränssnitt:</strong> E-postadresser med apostrofer, som är
+giltiga, gör inte längre att knappen ”Skicka e-post till tilldelade för [% terms.Bug %]”
+i listor över [% terms.bugs %] slutar fungera. [% INCLUDE buglink id=1226123 %]</li>
+<li><strong>Installation/uppgradering:</strong> Med MySQL använder tabellen
+<code>bugs_fulltext</code> nu InnoDB i stället för MyISAM. Det kan göra att
+uppgraderingen tar längre tid. [% INCLUDE buglink id=981487 %]</li>
+<li><strong>Utvecklare:</strong> Denna utgåva formaterar koden enligt samma
+konventioner som Mojolicious och innehåller <code>.perltidyrc</code> för detta.
+Valfri kodstil får användas, men alla filer som skickas in till arkivet måste
+formateras enligt dessa regler.</li>
+<li><strong>Utvecklare:</strong> Den nya kroken <code>template_after_create</code>
+kan användas för att manipulera mallobjektet före återgivning. Den kan användas för
+att definiera nya virtuella metoder eller filter i Template Toolkit för tillägg.
+(<a href="https://github.com/bugzilla/bugzilla/pull/60">PR #60</a>)</li>
+</ul>
+
+<ul>[% INCLUDE global/footer.html.tmpl %]
+
+[% BLOCK buglink %]
+(<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=[%- id FILTER html -%]">[% terms.Bug %] [%+ id FILTER html -%]</a>)
+[% END %]
+
+[% BLOCK db_req %]
+  [% SET m = DB_MODULE.$db %]
+  <h3 id="req_[% db FILTER html %]">För användare av [% m.name FILTER html %]</h3>
+
+  <ul>
+    <li>[% m.name FILTER html %]
+       [%+ '<span class="req_new">' IF db_new %]v[% m.db_version FILTER html %]
+       [% '</span>' IF db_new %]
+       </li>
+    [% IF m.db_blklst_str %]
+    <li><strong>men inte versionerna:</strong> [% m.db_blklst_str FILTER html %]</li>
+    [% END %]
+    <li><strong>Perl-modul:</strong>
+      [%+ m.dbd.module FILTER html %]
+      [%+ '<span class="req_new">' IF dbd_new %]
+        [% SWITCH m.dbd.version -%]
+        [%   CASE '' %]valfri version
+        [%   CASE DEFAULT %]v[% m.dbd.version FILTER html %]
+        [% END %]
+      [% '</span>' IF dbd_new %]</li>
+  </ul>
+[% END %]
+
+
+[% BLOCK req_table %]
+  <table class="req_table">
+    <tr>
+      <th>Modul</th> <th>Version</th>
+      [% IF include_feature %]
+        <th>Aktiverar funktion</th>
+      [% END %]
+    </tr>
+    [% FOREACH req = reqs %]
+      <tr>
+        <td [% ' class="req_new"' IF new.contains(req.package) %]>
+          [%- req.module FILTER html %]</td>
+        <td [% ' class="req_new"' IF updated.contains(req.package)
+                                     OR new.contains(req.package) %]>
+          [%- IF req.version == 0 %]
+            (Valfri)
+          [% ELSE %]
+            [%- req.version FILTER html %]
+          [% END %]
+        </td>
+        [% IF include_feature %]
+          <td>[% req.feature.join(', ') FILTER html %]</td>
+        [% END %]
+      </tr>
+    [% END %]
+</table>
+[% END %]

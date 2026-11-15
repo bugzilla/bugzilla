@@ -1,0 +1,15 @@
+From: [% Param('mailfrom') %]
+To: [% addressee %]
+Subject: [[% terms.Bugzilla %]] Resultat från rimlighetskontroll
+X-Bugzilla-Type: sanitycheck
+
+[%+ urlbase %]sanitycheck.cgi
+
+Nedan finns resultatet från rimlighetskontrollen.
+[% IF error_found %]
+Fel har hittats.
+[% ELSE %]
+Inga fel har hittats.
+[% END %]
+
+[% output %]

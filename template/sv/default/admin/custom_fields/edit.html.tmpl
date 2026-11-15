@@ -1,0 +1,51 @@
+[%# This Source Code Form is subject to the terms of the Mozilla Public
+  # License, v. 2.0. If a copy of the MPL was not distributed with this
+  # file, You can obtain one at http://mozilla.org/MPL/2.0/.
+  #
+  # This Source Code Form is "Incompatible With Secondary Licenses", as
+  # defined by the Mozilla Public License, v. 2.0.
+  #%]
+
+[% title = BLOCK %]
+  Redigera det anpassade fältet ”[% field.name FILTER html %]” ([% field.description FILTER html %])
+[% END %]
+
+[% javascript = BLOCK %]
+  [% INCLUDE "admin/custom_fields/cf-js.js.tmpl" %]
+[% END %]
+
+[% PROCESS global/header.html.tmpl
+           title = title
+           onload = "toggleCheckbox(document.getElementById('enter_bug'), 'new_bugmail');"
+           javascript_urls = [ 'js/util.js' ]
+           doc_section = "administering/custom-fields.html#editing-custom-fields"
+           style_urls = ['skins/standard/admin.css']
+%]
+
+<p>
+  Beskrivningar är korta texter som beskriver fältet och används som etikett
+  för fältet i användargränssnittet.
+</p>
+
+<form id="edit_field" action="editfields.cgi" method="GET">
+  [% PROCESS "admin/custom_fields/edit-common.html.tmpl" field = field %]
+  <input type="hidden" name="action" value="update">
+  <input type="hidden" name="name" value="[% field.name FILTER html %]">
+  <input type="hidden" name="token" value="[% token FILTER html %]">
+  <input type="submit" id="edit" value="Skicka">
+</form>
+
+[% IF field.obsolete %]
+<p>
+  <a href="editfields.cgi?action=del&amp;name=[% field.name FILTER html %]">Ta bort
+    detta anpassade fält från databasen.</a><br>
+  Åtgärden lyckas bara om det anpassade fältet aldrig har använts
+  i [% terms.abug %].<br>
+</p>
+[% END %]
+
+<p>
+  <a href="editfields.cgi">Tillbaka till listan över befintliga anpassade fält</a>
+</p>
+
+[% PROCESS global/footer.html.tmpl %]

@@ -1,0 +1,19 @@
+[%# This Source Code Form is subject to the terms of the Mozilla Public
+  # License, v. 2.0. If a copy of the MPL was not distributed with this
+  # file, You can obtain one at http://mozilla.org/MPL/2.0/.
+  #
+  # This Source Code Form is "Incompatible With Secondary Licenses", as
+  # defined by the Mozilla Public License, v. 2.0.
+  #%]
+
+[% USE String('#') %]
+[% name %]
+[%+ String.repeat(name.length) %]
+
+Detta är en exempelsida för administratörsdokumentationen till tillägget
+[% name %]. Precis som övrig Bugzilla-dokumentation är den skriven i
+formatet `reStructured Text (reST) <http://sphinx-doc.org/latest/rest.html>`_
+och byggs med `Sphinx <http://sphinx-doc.org/>`_.
+
+Om du bygger dokumentationen själv med :file:`makedocs.pl` läggs den här
+filen till i kapitlet om installerade tillägg i administrationshandboken.

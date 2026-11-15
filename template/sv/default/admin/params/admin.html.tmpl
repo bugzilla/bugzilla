@@ -1,0 +1,30 @@
+[%# This Source Code Form is subject to the terms of the Mozilla Public
+  # License, v. 2.0. If a copy of the MPL was not distributed with this
+  # file, You can obtain one at http://mozilla.org/MPL/2.0/.
+  #
+  # This Source Code Form is "Incompatible With Secondary Licenses", as
+  # defined by the Mozilla Public License, v. 2.0.
+  #%]
+[%
+   title = "Administrativa policyer"
+   desc = "Ställ in policyer för konton"
+%]
+
+[% param_descs = {
+  allowbugdeletion => "Sidorna för att redigera produkter och komponenter kan ta bort alla " _
+                      "tillhörande $terms.bugs när du tar bort en produkt eller komponent. " _
+                      "Eftersom det är en ganska riskfylld åtgärd måste du aktivera " _
+                      "det här alternativet innan några sådana borttagningar kan genomföras.",
+
+  allowemailchange => "Användare kan ändra sin egen e-postadress i inställningarna. " _
+                      "Ändringen valideras genom e-post till båda adresserna. Att aktivera " _
+                      "alternativet innebär alltså inte att användare kan använda en ogiltig adress.",
+
+  allowuserdeletion => "Sidorna för att redigera användare kan ta bort användarkonton. " _
+                       "$terms.Bugzilla visar en varning om borttagningen kan leda till inkonsekvenser, " _
+                       "men sådana borttagningar är fortfarande riskfyllda. Därför måste du aktivera " _
+                       "det här alternativet innan några sådana borttagningar kan genomföras.",
+
+  last_visit_keep_days => "Det här alternativet styr hur många dagar $terms.Bugzilla ska " _
+                          "komma ihåg när användare besöker enskilda ${terms.bugs}."}
+%]

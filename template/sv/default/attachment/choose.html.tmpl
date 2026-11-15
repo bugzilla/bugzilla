@@ -1,0 +1,34 @@
+[%# This Source Code Form is subject to the terms of the Mozilla Public
+  # License, v. 2.0. If a copy of the MPL was not distributed with this
+  # file, You can obtain one at http://mozilla.org/MPL/2.0/.
+  #
+  # This Source Code Form is "Incompatible With Secondary Licenses", as
+  # defined by the Mozilla Public License, v. 2.0.
+  #%]
+
+[% PROCESS global/header.html.tmpl
+   title = "Hitta eller skapa bilaga"
+%]
+
+<form name="choose-id" method="get" action="attachment.cgi">
+  <p>Öppna en bilaga genom att ange dess ID i formuläret nedan:</p>
+  <p>Bilage-ID: <input name="id" size="6" autofocus required>
+  <button name="action" value="edit" id="edit">Detaljer</button>
+  <button name="action" value="view" id="view">Visa</button>
+  </p>
+</form>
+
+<form method="get" action="show_bug.cgi">
+  <p>Du kan också öppna den från listan över bilagor i den tillhörande [% terms.bug %]-rapporten:</p>
+  <p>[% terms.Bug %]-ID: <input name="id" size="6" required>
+  <input type="submit" name="action" value="Visa" id="action">
+  </p>
+</form>
+
+<form method="get" action="attachment.cgi">
+  <p>Du kan också skapa en ny bilaga genom att ange [% terms.bug %]-ID nedan:</p>
+  <p>[% terms.Bug %]-ID: <input name="bugid" size="6" required>
+    <button name="action" value="enter" id="action">Ny bilaga</button>
+  </p>
+</form>
+[% PROCESS global/footer.html.tmpl %]

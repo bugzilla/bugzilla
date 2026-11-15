@@ -1,0 +1,95 @@
+[%# This Source Code Form is subject to the terms of the Mozilla Public
+  # License, v. 2.0. If a copy of the MPL was not distributed with this
+  # file, You can obtain one at http://mozilla.org/MPL/2.0/.
+  #%]
+
+[% DEFAULT qs_suffix = "" %]
+[% USE Bugzilla %]
+
+<ul class="links">
+  <li><a href="./">Startsida</a></li>
+  <li><span class="separator">| </span><a href="enter_bug.cgi">Nytt</a></li>
+  <li><span class="separator">| </span><a href="describecomponents.cgi">Bläddra</a></li>
+  <li><span class="separator">| </span><a href="query.cgi">Sök</a></li>
+
+  <li class="form">
+    <span class="separator">| </span>
+    <form action="buglist.cgi" method="get"
+        onsubmit="if (this.quicksearch.value == '')
+                  { alert('Ange minst en sökterm först.');
+                    return false; } return true;">
+    <input type="hidden" id="no_redirect[% qs_suffix FILTER html %]" name="no_redirect" value="0">
+    <script type="text/javascript">
+      if (history && history.replaceState) {
+        var no_redirect = document.getElementById("no_redirect[% qs_suffix FILTER js %]");
+        no_redirect.value = 1;
+      }
+    </script>
+    <input class="txt" type="text" id="quicksearch[% qs_suffix FILTER html %]"
+           name="quicksearch" aria-labelledby="find[% qs_suffix FILTER html %]"
+           title="Snabbsökning" value="[% quicksearch FILTER html %]">
+    <input class="btn" type="submit" value="Sök"
+           id="find[% qs_suffix FILTER html %]">
+    [%-# Work around FF bug: keep this on one line %]</form>
+  <a href="page.cgi?id=quicksearch.html" title="Hjälp om snabbsökning">[?]</a></li>
+
+  <li><span class="separator">| </span><a href="report.cgi">Rapporter</a></li>
+
+  <li>
+    [% IF Param('shutdownhtml') || Bugzilla.has_flags %]
+      <span class="separator">| </span>
+      [% IF user.id %]
+        <a href="request.cgi?requester=[% user.login FILTER uri %]&amp;requestee=
+                 [% user.login FILTER uri %]&amp;do_union=1&amp;group=type&amp;action=queue">Mina förfrågningar</a>
+      [% ELSE %]
+        <a href="request.cgi">Förfrågningar</a>
+      [% END %]
+    [% END %]
+  [%-# Work around FF bug: keep this on one line %]</li>
+
+  [% Hook.process('action-links') %]
+
+  [% IF user.login %]
+    <li><span class="separator">| </span><a href="userprefs.cgi">Inställningar</a></li>
+    [% IF user.can_administer %]
+      <li><span class="separator">| </span><a href="admin.cgi">Administration</a></li>
+    [% END %]
+    [% PROCESS link_to_documentation %]
+    <li>
+      <span class="separator">| </span>
+      [% IF user.authorizer.can_logout %]
+        <a href="index.cgi?logout=1">Logga&nbsp;ut</a>
+      [% ELSE %]
+        Inloggad&nbsp;som
+      [% END %]
+      [% IF sudoer %]
+        [%+ sudoer.login FILTER html %] (<b>uppträder som
+        [%+ user.login FILTER html %]</b>
+        <a href="relogin.cgi?action=end-sudo">avsluta sessionen</a>)
+      [% ELSE %]
+        [%+ user.login FILTER html %]
+      [% END %]
+    [%-# Work around FF bug: keep this on one line %]</li>
+  [% ELSE %]
+    [% PROCESS link_to_documentation %]
+    [% IF Param('createemailregexp') && user.authorizer.user_can_create_account %]
+      <li id="new_account_container[% qs_suffix FILTER html %]">
+        <span class="separator">| </span>
+        <a href="createaccount.cgi">Nytt&nbsp;konto</a>
+      </li>
+    [% END %]
+    [% IF user.authorizer.can_login && !Bugzilla.page_requires_login %]
+      [% PROCESS "account/auth/login-small.html.tmpl" %]
+    [% END %]
+  [% END %]
+</ul>
+
+[% Hook.process("link-row") %]
+[% BLOCK link_to_documentation %]
+    [% IF doc_section %]
+      <li>
+        <span class="separator">| </span>
+        <a href="[% docs_urlbase _ doc_section FILTER html %]" target="_blank">Hjälp</a>
+      </li>
+    [% END %]
+[% END %]

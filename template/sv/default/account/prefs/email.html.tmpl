@@ -1,0 +1,294 @@
+[%# This Source Code Form is subject to the terms of the Mozilla Public
+  # License, v. 2.0. If a copy of the MPL was not distributed with this
+  # file, You can obtain one at http://mozilla.org/MPL/2.0/.
+  #
+  # This Source Code Form is "Incompatible With Secondary Licenses", as
+  # defined by the Mozilla Public License, v. 2.0.
+  #%]
+
+[%# INTERFACE:
+  # watchedusers: string.
+  #               Comma-separated list of email addresses this user watches.
+  # watchers:     array.
+  #               Array of users watching this user's account.
+  # excludeself:  boolean.
+  #               True if user is not receiving self-generated mail.
+  # <rolename>:   Multiple hashes, one for each rolename (e.g. assignee; see
+  #               below), keyed by reasonname (e.g. comments; again, see
+  #               below). The value is a boolean - true if the user is
+  #               receiving mail for that reason when in that role.
+  #%]
+
+[%# If the user's bugmail has been disabled by admins, show a warning. %]
+[% IF user.email_disabled %]
+  <div class="warningmessages">
+    E-post för [% terms.bug %] har inaktiverats av administratören för [% terms.Bugzilla %].
+    Kontakta [% Param('maintainer') %] för att aktivera
+    e-post för [%+ terms.bugs %].
+  </div>
+[% END %]
+
+[% IF user.authorizer.can_change_email && Param('allowemailchange') %]
+  <p>
+    Om du vill ändra e-postadressen <b>[% user.email FILTER html %]</b> som
+    [% terms.Bugzilla %] skickar aviseringar till, väljer du fliken
+    "Kontoinformation" ovan.
+  </p>
+[% END %]
+
+<p>
+  Om du inte vill få aviseringar om mindre
+  ändringar i [% terms.bugs %] kan du använda inställningarna nedan för att
+  filtrera bort vissa eller alla aviseringar.
+</p>
+
+<script type="text/javascript">
+<!--
+function SetCheckboxes(setting) {
+  for (var count = 0; count < document.userprefsform.elements.length; count++) {
+    var theinput = document.userprefsform.elements[count];
+    if (theinput.type == "checkbox"
+        && !theinput.disabled
+        && !theinput.name.match("remove_ignored_bug"))
+    {
+      if (theinput.name.match("neg")) {
+        theinput.checked = !setting;
+      }
+      else {
+        theinput.checked = setting;
+      }
+    }
+  }
+}
+// -->
+</script>
+
+<input type="button" value="Aktivera all e-post" onclick="SetCheckboxes(true); return false;">
+<input type="button" value="Inaktivera all e-post" onclick="SetCheckboxes(false); return false;">
+
+<hr>
+
+<h3>Globala alternativ</h3>
+
+[% prefname = "email-$constants.REL_ANY-$constants.EVT_FLAG_REQUESTED" %]
+<input type="checkbox" name="[% prefname %]" id="[% prefname %]" value="1"
+       [%+ 'checked="checked"' IF user.mail_settings.${constants.REL_ANY}.${constants.EVT_FLAG_REQUESTED} %]>
+<label for="[% prefname %]">Skicka e-post när någon ber mig ange en flagga</label>
+<br>
+[% prefname = "email-$constants.REL_ANY-$constants.EVT_REQUESTED_FLAG" %]
+<input type="checkbox" name="[% prefname %]" id="[% prefname %]" value="1"
+       [%+ 'checked="checked"' IF user.mail_settings.${constants.REL_ANY}.${constants.EVT_REQUESTED_FLAG} %]>
+<label for="[% prefname %]">Skicka e-post när någon anger en flagga som jag har begärt</label>
+
+[% IF user.is_global_watcher %]
+  <p>
+    Du bevakar alla [% terms.bugs %]. Kontakta
+    <a href="mailto:[% Param("maintainer") %]">[% Param("maintainer") %]</a>.
+  </p>
+[% END %]
+
+<hr>
+
+<h3>Fält- och mottagarspecifika alternativ</h3>
+
+[% events = [
+    { id = constants.EVT_ADDED_REMOVED,
+      description = "Jag läggs till eller tas bort i den här rollen" },
+    { id = constants.EVT_BUG_CREATED,
+      description = "En ny $terms.bug skapas" },
+    { id = constants.EVT_OPENED_CLOSED,
+      description = "$terms.Bug löses eller öppnas igen" },
+    { id = constants.EVT_COMPONENT,
+      description = "Produkten eller komponenten ändras" },
+    { id = constants.EVT_PROJ_MANAGEMENT,
+      description = "Prioritet, status, allvarlighetsgrad eller milstolpe ändras" },
+    { id = constants.EVT_COMMENT,
+      description = "Nya kommentarer läggs till" },
+    { id = constants.EVT_ATTACHMENT,
+      description = "Nya bilagor läggs till" },
+    { id = constants.EVT_ATTACHMENT_DATA,
+      description = "Bilageuppgifter ändras" },
+    { id = constants.EVT_KEYWORD,
+      description = "Fältet för nyckelord ändras" },
+    { id = constants.EVT_CC,
+      description = "CC-fältet ändras" },
+    { id = constants.EVT_DEPEND_BLOCK,
+      description = "Beroendeträdet ändras" },
+    { id = constants.EVT_OTHER,
+      description = "Ett fält som inte nämns ovan ändras" },
+] %]
+
+[% neg_events = [
+    { id = constants.EVT_UNCONFIRMED,
+      description = "$terms.Bug har statusen UNCONFIRMED" },
+    { id = constants.EVT_CHANGED_BY_ME,
+      description = "Ändringen gjordes av mig" },
+] %]
+
+[% relationships = [
+    { id = constants.REL_ASSIGNEE,
+      description = "Tilldelad" },
+    { id = constants.REL_REPORTER,
+      description = "Rapportör" },
+    { id = constants.REL_CC,
+      description = "Kopiemottagare" },
+] %]
+
+[% IF Param('useqacontact') %]
+  [% relationships.push({ id = constants.REL_QA, 
+                          description = "Kontakt för kvalitetssäkring" }) %]
+[% END %]
+
+
+[%# This is up here so that the "relationships" hook can modify it. %]
+[% no_added_removed = [constants.REL_REPORTER] %]
+
+[% Hook.process('relationships') %]
+
+[% num_columns = relationships.size %]
+
+<table id="email_prefs">
+  <tr class="column_header">
+    <th colspan="[% num_columns FILTER html %]">
+      När min relation till den här [% terms.bug %] är:
+    </th>
+    <th>Jag vill få e-post när:</th>
+  </tr>
+
+  <tr>
+    [% FOREACH relationship = relationships %]
+      <th class="role_header">[% relationship.description FILTER html %]</th>
+    [% END %]
+  </tr>
+
+  [% FOREACH event = events %]  
+    [% count = loop.count() %]
+    <tr class="bz_row_[% count % 2 == 1 ? "odd" : "even" %]">
+      [% FOREACH relationship = relationships %]
+        <td class="center">
+          <input type="checkbox" value="1"
+                 name="email-[% relationship.id %]-[% event.id %]"
+                 [%# The combinations don't always make sense; disable a couple %]
+                 [% IF event.id == constants.EVT_ADDED_REMOVED
+                       AND no_added_removed.contains(relationship.id) %]
+                   disabled="disabled"
+                 [% ELSIF user.mail_settings.${relationship.id}.${event.id} %]
+                   checked="checked"
+                 [% END %]>
+        </td>
+      [% END %]
+      <td>
+        [% event.description FILTER html %]
+      </td>
+    </tr>
+  [% END %]
+
+  <tr class="column_header">
+    <th colspan="[% num_columns FILTER html %]">&nbsp;</th>
+    <th>men inte när, vilket åsidosätter ovanstående:</th>
+  </tr>
+
+  [% FOREACH event = neg_events %]  
+    [% count = loop.count() %]
+    <tr class="bz_row_[% count % 2 == 1 ? "odd" : "even" %]">
+      [% FOREACH relationship = relationships %]
+        <td class="center">
+          <input type="checkbox" value="1"
+                 name="neg-email-[% relationship.id %]-[% event.id %]"
+                 [%+ 'checked="checked"' IF NOT user.mail_settings.${relationship.id}.${event.id} %]>
+        </td>
+      [% END %]
+      <td>[% event.description FILTER html %]</td>
+    </tr>
+  [% END %]
+</table>
+
+<hr>
+
+<h3>Användarbevakning</h3>
+
+<p>
+När du bevakar en användare gäller deras relation till [% terms.bug %]
+för dina e-postaviseringar. E-post skickas enligt <em>dina</em>
+inställningar för <em>deras</em> relation till [% terms.bug %],
+till exempel Tilldelad.
+</p>
+
+[% IF watchedusers.size %]
+  <p>Du bevakar alla användare i följande lista:</p>
+  <p>
+    <select id="watched_by_you" name="watched_by_you" multiple="multiple" size="5">
+        [% FOREACH w = watchedusers %]
+           <option value="[% w FILTER html %]">[% w FILTER html %]</option>
+        [% END %]
+    </select>
+    <br>
+    <input type="checkbox" id="remove_watched_users" name="remove_watched_users">
+    <label for="remove_watched_users">Ta bort valda användare från min bevakningslista</label>
+  </p>
+[% ELSE %]
+  <p>Du bevakar för närvarande inga användare.</p>
+[% END %]
+
+
+<p id="new_watched_by_you">Lägg till användare i min bevakningslista (kommaseparerad lista):
+  [% INCLUDE global/userselect.html.tmpl
+     id => "new_watchedusers"
+     name => "new_watchedusers"
+     value => ""
+     size => 60
+     multiple => 5
+  %]
+</p>
+
+<p id="watching_you">Användare som bevakar dig:<br>
+  [% IF watchers.size %]
+    [% FOREACH watcher = watchers %]
+      [% watcher FILTER html %] <br>
+    [% END %]
+  [% ELSE %]
+    <i>Ingen</i>
+  [% END %]
+</p>
+
+<hr>
+
+<h3>Ignorera [% terms.bugs %]</h3>
+
+<p>
+  Du kan ange en lista över [% terms.bugs %] som du aldrig vill få
+  e-postaviseringar om genom att lägga till deras id:n som en kommaseparerad
+  lista. Om du tar bort [% terms.abug %] från den aktuella ignoreringslistan
+  aktiveras e-postaviseringar igen för [% terms.bug %].
+</p>
+[% IF user.bugs_ignored.size %]
+  <p>
+    Du ignorerar för närvarande:
+    <table>
+    [% FOREACH bug = user.bugs_ignored %]
+      <tr>
+        <td>
+          <input type="checkbox" name="remove_ignored_bug_[% bug.id FILTER html %]" value="1">
+        </td>
+        <td><a href="[% urlbase FILTER html %]show_bug.cgi?id=[% bug.id FILTER uri %]">
+          [% bug.id FILTER html %]</a>
+        </td>
+        <td>[% bug.status FILTER html %]</td>
+        <td>
+          [% IF user.can_see_bug(bug.id) %]
+            - [% bug.summary FILTER html %]
+          [% ELSE %]
+            (privat)
+          [% END %]
+        </td>
+      </tr>
+    [% END %]
+    </table>
+  </p>
+[% END %]
+
+<p>
+  Lägg till [% terms.bugs %]:<br>
+  <input type="text" id="add_ignored_bugs" 
+         name="add_ignored_bugs" size="60">
+</p>

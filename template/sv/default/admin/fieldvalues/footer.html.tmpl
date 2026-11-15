@@ -1,0 +1,36 @@
+[%# This Source Code Form is subject to the terms of the Mozilla Public
+  # License, v. 2.0. If a copy of the MPL was not distributed with this
+  # file, You can obtain one at http://mozilla.org/MPL/2.0/.
+  #
+  # This Source Code Form is "Incompatible With Secondary Licenses", as
+  # defined by the Mozilla Public License, v. 2.0.
+  #%]
+
+<hr>
+
+<p>
+
+[% UNLESS no_add_link %]
+  <a title="Lägg till ett värde för fältet '[% field.description FILTER html %]'."
+     href="editvalues.cgi?action=add&amp;field=
+          [%- field.name FILTER uri %]">Lägg till</a> ett värde.
+[% END %]
+
+[% IF value.defined && !no_edit_link %]
+  Redigera värdet <a
+  title="Redigera värdet '[% value.name FILTER html %]' för fältet '
+         [%- field.name FILTER html %]'"
+  href="editvalues.cgi?action=edit&amp;field=
+        [%- field.name FILTER uri %]&amp;value=
+        [%- value.name FILTER uri %]">
+        '[% value.name FILTER html %]'</a>.
+[% END %]
+
+[% UNLESS no_edit_other_link %]
+  Redigera andra värden för fältet <a
+  href="editvalues.cgi?field=
+        [%- field.name FILTER uri %]">'[% field.description FILTER html %]'</a>.
+
+[% END %]
+
+</p>

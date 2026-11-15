@@ -1,0 +1,969 @@
+[%# This Source Code Form is subject to the terms of the Mozilla Public
+  # License, v. 2.0. If a copy of the MPL was not distributed with this
+  # file, You can obtain one at http://mozilla.org/MPL/2.0/.
+  #
+  # This Source Code Form is "Incompatible With Secondary Licenses", as
+  # defined by the Mozilla Public License, v. 2.0.
+  #%]
+
+[%# This is a list of all the possible messages. Please keep them in
+  # alphabetical order by message tag, and leave a blank line between messages.
+  #%]
+
+[% message_tag = message %]
+
+[% message = BLOCK %]
+  [% IF    message_tag == "account_created" %]
+    Användarkontot [% otheruser.login FILTER html %] har skapats.
+    [% IF groups.size %]
+      Du kan nu redigera gruppinställningarna med formuläret nedan.
+    [% END %]
+
+  [% ELSIF message_tag == "account_creation_canceled" %]
+    [% title = "Skapande av användarkonto avbröts" %]
+    Skapandet av användarkontot [% account FILTER html %] har
+    avbrutits.
+
+  [% ELSIF message_tag == "account_updated" %]
+    [% IF changes.size %]
+      [% title = "Användaren $loginold har uppdaterats" %]
+      Följande ändringar har gjorts i användarkontot
+      [%+ loginold FILTER html %]:
+      <ul>
+        [% FOREACH field = changes.keys %]
+          <li>
+            [% IF    field == 'login_name' %]
+              Inloggningsnamnet är nu [% otheruser.login FILTER html %].
+            [% ELSIF field == 'realname' %]
+              Det verkliga namnet har uppdaterats.
+            [% ELSIF field == 'cryptpassword' %]
+              Ett nytt lösenord har angetts.
+            [% ELSIF field == 'disabledtext' %]
+              Texten för ”inloggning avstängd” har ändrats.
+            [% ELSIF field == 'is_enabled' %]
+              Inloggning med användarkontot har [% otheruser.is_enabled ? 'aktiverats' : 'inaktiverats' %].
+            [% ELSIF field == 'extern_id' %]
+              Användarens externa inloggnings-ID har ändrats.
+            [% ELSIF field == 'disable_mail' %]
+              [% IF otheruser.email_disabled %]
+                [% terms.Bug %]-e-post har inaktiverats.
+              [% ELSE %]
+                [% terms.Bug %]-e-post har aktiverats.
+              [% END %]
+            [% ELSIF field == 'groups' %]
+              [% IF changes.groups.1.size %]
+                Kontot har lagts till i grupp
+                [%+ changes.groups.1.join(', ') FILTER html %]
+                [% 'erna' IF changes.groups.1.size > 1 %].
+              [% END %]
+              [% IF changes.groups.0.size %]
+                Kontot har tagits bort från grupp
+                [%+ changes.groups.0.join(', ') FILTER html %]
+                [% 'erna' IF changes.groups.0.size > 1 %].
+              [% END %]
+            [% ELSIF field == 'bless_groups' %]
+              [% IF changes.bless_groups.1.size %]
+                Kontot har fått rättighet att lägga till användare i grupp
+                [%+ changes.bless_groups.1.join(', ') FILTER html %]
+                [% 'erna' IF changes.bless_groups.1.size > 1 %].
+              [% END %]
+              [% IF changes.bless_groups.0.size %]
+                Kontot har inte längre rättighet att lägga till användare i grupp
+                [%+ changes.bless_groups.0.join(', ') FILTER html %]
+                [% 'erna' IF changes.bless_groups.0.size > 1 %].
+              [% END %]
+            [% END %]
+          </li>
+        [% END %]
+      </ul>
+    [% ELSE %]
+      [% title = "Användaren $otheruser.login har inte ändrats" %]
+      Du begärde inga ändringar av användarkontot
+      [%+ otheruser.login FILTER html %].
+    [% END %]
+
+  [% ELSIF message_tag == "account_deleted" %]
+    [% title = "Användaren $otheruser.login har tagits bort" %]
+    Användarkontot [% otheruser.login FILTER html %] har tagits bort.
+
+  [% ELSIF message_tag == "account_disabled" %]
+    Inloggning med användarkontot [% account FILTER html %] är inaktiverad, så
+    du kan inte ändra dess lösenord.
+
+  [% ELSIF message_tag == "attachment_creation_failed" %]
+    [% terms.Bug %] skapades, men det gick inte att skapa bilagan.
+    Lägg till bilagan genom att klicka på länken ”Lägg till bilaga”
+    nedan.
+
+  [% ELSIF message_tag == "bug_group_description" %]
+    Access to [% terms.bugs %] in the [% product.name FILTER html %] product
+
+  [% ELSIF message_tag == "buglist_adding_field" %]
+    [% title = "Lägger till fält på söksidan …" %]
+    [% link  = "Klicka här om sidan inte visas igen automatiskt." %]
+
+  [% ELSIF message_tag == "buglist_updated_named_query" %]
+    [% title = "Sökningen har uppdaterats" %]
+    Din sökning med namnet <code><a
+     href="buglist.cgi?cmdtype=runnamed&amp;namedcmd=[% queryname FILTER uri %]"
+    >[% queryname FILTER html %]</a></code> har uppdaterats.
+
+  [% ELSIF message_tag == "buglist_new_default_query" %]
+    Du har nu en ny standardsökning. Du kan också
+    skapa bokmärken till resultaten från enskilda sökningar.
+
+  [% ELSIF message_tag == "buglist_new_named_query" %]
+    [% title = "Sökning skapad" %]
+    Du har en ny sökning med namnet <code><a
+     href="buglist.cgi?cmdtype=runnamed&amp;namedcmd=[% queryname FILTER uri %]"
+    >[% queryname FILTER html %]</a></code>.
+
+  [% ELSIF message_tag == "buglist_query_gone" %]
+    [% title = "Sökningen har tagits bort" %]
+    [% link  = "Återställ sökningen" %]
+    Sökningen <b>[% namedcmd FILTER html %]</b> har tagits bort.
+
+  [% ELSIF message_tag == "buglist_sorted_by_relevance" %]
+    [% terms.Bugs %] i listan är sorterade efter relevans, med de mest
+    relevanta [% terms.bugs %] överst.
+
+  [% ELSIF message_tag == "change_columns" %]
+    [% title = "Ändra kolumner" %]
+    Skickar sökningen igen med nya kolumner …
+    Klicka <a href="[% redirect_url FILTER html %]">här</a>
+    om sidan inte uppdateras automatiskt.
+
+  [% ELSIF message_tag == "classification_created" %]
+    [% title = "Klassificering skapad" %]
+    Klassificeringen <em>[% classification.name FILTER html %]</em> har skapats.
+
+  [% ELSIF message_tag == "classification_deleted" %]
+    [% title = "Klassificering borttagen" %]
+    Klassificeringen <em>[% classification.name FILTER html %]</em> har tagits bort.
+
+  [% ELSIF message_tag == "classification_updated" %]
+    [% title = "Klassificering uppdaterad" %]
+    [% IF changes.keys.size %]
+      Ändringar av klassificeringen <em>[% classification.name FILTER html %]</em>
+      har sparats:
+      <ul>
+        [% IF changes.name.defined %]
+          <li>Namnet har uppdaterats till ”[% classification.name FILTER html %]”</li>
+        [% END %]
+        [% IF changes.description.defined %]
+          [% IF classification.description %]
+            <li>Beskrivningen har uppdaterats till ”[% classification.description FILTER html %]”</li>
+          [% ELSE %]
+            <li>Beskrivningen har tagits bort</li>
+          [% END %]
+        [% END %]
+        [% IF changes.sortkey.defined %]
+          <li>Sorteringsnyckeln har uppdaterats till ”[% classification.sortkey FILTER html %]”</li>
+        [% END %]
+        [% Hook.process('classification_updated_fields') %]
+      </ul>
+    [% ELSE %]
+      Inga ändringar gjordes av <em>[% classification.name FILTER html %]</em>.
+    [% END %]
+
+  [% ELSIF message_tag == "component_created" %]
+    [% title = "Komponent skapad" %]
+    Komponenten <em>[% comp.name FILTER html %]</em> har skapats.
+
+  [% ELSIF message_tag == "component_deleted" %]
+    [% title = "Komponent borttagen" %]
+    Komponenten <em>[% comp.name FILTER html %]</em> har tagits bort.
+    [% IF comp.bug_count %]
+      Alla [% terms.bugs %] i komponenten och alla hänvisningar
+      till dem har också tagits bort.
+    [% END %]
+
+  [% ELSIF message_tag == "component_updated" %]
+    [% title = "Komponent uppdaterad" %]
+    [% IF changes.keys.size %]
+      Ändringar av komponenten <em>[% comp.name FILTER html %]</em> har sparats:
+      <ul>
+      [% IF changes.name.defined %]
+        <li>Namnet har uppdaterats till ”[% comp.name FILTER html %]”</li>
+      [% END %]
+      [% IF changes.description.defined %]
+        <li>Beskrivningen har uppdaterats till ”[% comp.description FILTER html_light %]”</li>
+      [% END %]
+      [% IF changes.initialowner.defined %]
+        <li>Standardtilldelad har uppdaterats till ”[% comp.default_assignee.login FILTER html %]”</li>
+      [% END %]
+      [% IF changes.initialqacontact.defined %]
+        [% IF comp.default_qa_contact %]
+          <li>Standardkontakt för kvalitetssäkring har uppdaterats till ”[% comp.default_qa_contact.login FILTER html %]”</li>
+        [% ELSE %]
+          <li>Standardkontakt för kvalitetssäkring har tagits bort</li>
+        [% END %]
+      [% END %]
+      [% IF changes.cc_list.defined %]
+        [% IF comp.initial_cc.size %]
+          [% cc_list = [] %]
+          [% FOREACH cc_user = comp.initial_cc %]
+            [% cc_list.push(cc_user.login) %]
+          [% END %]
+          <li>Standard-CC-listan har uppdaterats till [% cc_list.join(", ") FILTER html %]</li>
+        [% ELSE %]
+          <li>Standard-CC-listan har tagits bort</li>
+        [% END %]
+      [% END %]
+      [% IF changes.isactive.defined %]
+          <li>[% comp.is_active ? "Aktiverad" : "Inaktiverad" %] för [% terms.bugs %]</li>
+      [% END %]
+      [% Hook.process('component_updated_fields') %]
+      </ul>
+    [% ELSE %]
+      Inga ändringar gjordes av <em>[% comp.name FILTER html %]</em>.
+    [% END %]
+
+  [% ELSIF message_tag == "custom_field_created" %]
+    [% title = "Anpassat fält skapat" %]
+    Det nya anpassade fältet ”[% field.name FILTER html %]” har
+    skapats.
+
+  [% ELSIF message_tag == "custom_field_deleted" %]
+    [% title = "Anpassat fält borttaget" %]
+    Det anpassade fältet ”[% field.name FILTER html %]” har
+    tagits bort.
+
+  [% ELSIF message_tag == "custom_field_updated" %]
+    [% title = "Anpassat fält uppdaterat" %]
+    Egenskaperna för fältet ”[% field.name FILTER html %]” har
+    uppdaterats.
+
+  [% ELSIF message_tag == "default_settings_updated" %]
+    [% IF changes_saved %]
+      Ändringarna av standardinställningarna har sparats.
+    [% ELSE %]
+      Inga ändringar gjordes.
+    [% END %]
+
+  [% ELSIF message_tag == "emailold_change_canceled" %]
+    [% title = "Avbryt begäran om byte av e-postadress" %]
+    Begäran om att ändra e-postadressen för ditt konto till
+    [%+ new_email FILTER html %] har avbrutits.
+
+  [% ELSIF message_tag == "email_change_canceled" %]
+    [% title = "Avbryt begäran om byte av e-postadress" %]
+    Begäran om att ändra e-postadressen för
+    kontot [%+ old_email FILTER html %] till
+    [%+ new_email FILTER html %] har avbrutits.
+
+  [% ELSIF message_tag == "email_change_canceled_reinstated" %]
+    [% title = "Avbryt begäran om byte av e-postadress" %]
+    Begäran om att ändra e-postadressen för
+    kontot [%+ old_email FILTER html %] till
+    [%+ new_email FILTER html %] har avbrutits.
+    Dina tidigare kontoinställningar har återställts.
+
+  [% ELSIF message_tag == "extension_created" %]
+    Ett tillägg med namnet [% name FILTER html %] har skapats
+    i [% path FILTER html %].
+
+  [% ELSIF message_tag == "field_value_created" %]
+    [% title = "Nytt fältvärde skapat" %]
+    Värdet <em>[% value.name FILTER html %]</em> har lagts till som ett
+    giltigt val för fältet <em>[% field.description FILTER html %]</em>
+    (<em>[% field.name FILTER html %]</em>) field.
+    [% IF field.name == "bug_status" %]
+      Du bör nu gå till <a href="editworkflow.cgi">sidan för statusflöden</a>
+      för att inkludera den nya [% terms.bug %]-statusen.
+    [% END %]
+
+  [% ELSIF message_tag == "field_value_deleted" %]
+    [% title = "Fältvärde borttaget" %]
+    Värdet <em>[% value.name FILTER html %]</em> för
+    <em>[% field.description FILTER html %]</em>
+    fältet (<em>[% field.name FILTER html %]</em>) har tagits bort.
+
+  [% ELSIF message_tag == "field_value_updated" %]
+    [% title = "Fältvärde uppdaterat" %]
+    [% IF changes.keys.size %]
+      Värdet <em>[% value_old FILTER html %]</em> för
+      <em>[% field.description FILTER html %]</em>
+      fältet (<em>[% field.name FILTER html %]</em>) har ändrats:
+      <ul>
+        [% IF changes.value %]
+          <li>Fältvärdet har uppdaterats till
+            <em>[% changes.value.1 FILTER html %]</em>.
+            [% IF value.is_default %]
+              (Observera att detta värde är standardvärdet för fältet. Alla
+              hänvisningar till standardvärdet pekar nu på det nya värdet.)
+            [% END %]
+          </li>
+        [% END %]
+        [% IF changes.sortkey %]
+          <li>Sorteringsnyckeln har uppdaterats till
+            <em>[% changes.sortkey.1 FILTER html %]</em>.</li>
+        [% END %]
+        [% IF changes.visibility_value_id %]
+          [% IF value.visibility_value.defined %]
+            <li>Det visas endast när
+              [%+ value.field.value_field.description FILTER html %] är inställt på
+              ”[%+ value.visibility_value.name FILTER html %]”.</li>
+          [% ELSE %]
+            <li>Det visas nu alltid, oavsett vilket värde
+              [%+ value.field.value_field.description FILTER html %] är inställt på.
+            </li>
+          [% END %]
+        [% END %]
+      </ul>
+    [% ELSE %]
+      Inga ändringar gjordes av fältvärdet <em>[% value_old FILTER html %]</em>.
+    [% END %]
+
+  [% ELSIF message_tag == "flag_cleared" %]
+    Vissa flaggor gällde inte i den nya produkten/komponenten
+    och har rensats.
+
+  [% ELSIF message_tag == "flag_creation_failed" %]
+    [% title = "Det gick inte att skapa flaggor" %]
+    Ett fel uppstod när flaggor validerades:
+    [%+ flag_creation_error FILTER none %]
+
+  [% ELSIF message_tag == "get_field_desc" %]
+    [% field_descs.$field_name FILTER html %]
+
+  [% ELSIF message_tag == "get_resolution" %]
+    [% display_value("resolution", resolution) FILTER html %]
+
+  [% ELSIF message_tag == "get_status" %]
+    [% display_value("bug_status", status) FILTER html %]
+
+  [% ELSIF message_tag == "group_created" %]
+    [% title = "Ny grupp skapad" %]
+    Gruppen <em>[% group.name FILTER html %]</em> har skapats.
+
+  [% ELSIF message_tag == "group_deleted" %]
+    [% title = "Grupp borttagen" %]
+    Gruppen <em>[% name FILTER html %]</em> har tagits bort.
+
+  [% ELSIF message_tag == "group_membership_removed" %]
+    [% title = "Gruppmedlemskap borttaget" %]
+    [% IF users.size %]
+      Direkt medlemskap i gruppen <em>[% group FILTER html %]</em> har tagits bort
+      [% IF regexp %] för användare som matchar ”[% regexp FILTER html %]”[% END %]:
+      [% FOREACH user = users %]
+        [%+ user.login FILTER html %]
+      [% END %]
+    [% ELSE %]
+      Din åtgärd påverkar inga användare.
+    [% END %]
+
+  [% ELSIF message_tag == "group_updated" %]
+    [% IF changes.keys.size %]
+      Följande ändringar har gjorts i gruppen ”[% group.name FILTER html %]”:
+      <ul>
+      [% FOREACH field = changes.keys.sort %]
+        [% SWITCH field %]
+          [% CASE 'name' %]
+            <li>Namnet ändrades till ”[% changes.name.1 FILTER html %]”</li>
+          [% CASE 'description' %]
+            <li>Beskrivningen har uppdaterats.</li>
+          [% CASE 'userregexp' %]
+            <li>Det reguljära uttrycket har uppdaterats.</li>
+          [% CASE 'isactive' %]
+            [% IF changes.isactive.1 %]
+              <li>Gruppen används nu för [% terms.bugs %].</li>
+            [% ELSE %]
+              <li>Gruppen används inte längre för [% terms.bugs %].</li>
+            [% END %]
+          [% CASE 'icon_url' %]
+            <li>URL:en för gruppikonen har uppdaterats.</li>
+          [% CASE 'members_add' %]
+            <li>Följande grupper är nu medlemmar i denna grupp:
+              [%+ changes.members_add.join(', ') FILTER html %]</li>
+          [% CASE 'members_remove' %]
+            <li>Följande grupper är inte längre medlemmar i denna grupp:
+              [%+ changes.members_remove.join(', ') FILTER html %]</li>
+          [% CASE 'member_of_add' %]
+            <li>Denna grupp är nu medlem i följande grupper:
+              [%+ changes.member_of_add.join(', ') FILTER html %]</li>
+          [% CASE 'member_of_remove' %]
+            <li>Denna grupp är inte längre medlem i följande grupper:
+              [%+ changes.member_of_remove.join(', ') FILTER html %]</li>
+          [% CASE 'bless_from_add' %]
+            <li>Följande grupper kan nu lägga till användare i denna grupp:
+              [%+ changes.bless_from_add.join(', ') FILTER html %]</li>
+          [% CASE 'bless_from_remove' %]
+            <li>Följande grupper kan inte längre lägga till användare i denna grupp:
+              [%+ changes.bless_from_remove.join(', ') FILTER html %]</li>
+          [% CASE 'bless_to_add' %]
+            <li>Denna grupp kan nu lägga till användare i följande grupper:
+              [%+ changes.bless_to_add.join(', ') FILTER html %]</li>
+          [% CASE 'bless_to_remove' %]
+            <li>Denna grupp kan inte längre lägga till användare i följande grupper:
+              [%+ changes.bless_to_remove.join(', ') FILTER html %]</li>
+          [% CASE 'visible_from_add' %]
+            <li>Följande grupper kan nu se användare i denna grupp:
+              [%+ changes.visible_from_add.join(', ') FILTER html %]</li>
+          [% CASE 'visible_from_remove' %]
+            <li>Följande grupper kan inte längre se användare i denna grupp:
+              [%+ changes.visible_from_remove.join(', ') FILTER html %]</li>
+          [% CASE 'visible_to_me_add' %]
+            <li>Denna grupp kan nu se användare i följande grupper:
+              [%+ changes.visible_to_me_add.join(', ') FILTER html %]</li>
+          [% CASE 'visible_to_me_remove' %]
+            <li>Denna grupp kan inte längre se användare i följande grupper:
+              [%+ changes.visible_to_me_remove.join(', ') FILTER html %]</li>
+          [% CASE %]
+            [% Hook.process('group_updated_fields') %]
+        [% END %]
+      [% END %]
+      </ul>
+    [% ELSE %]
+      Du begärde inga ändringar för gruppen ”[% group.name FILTER html %]”.
+    [% END %]
+
+  [% ELSIF message_tag == "invalid_column_name" %]
+    Den angivna anpassade sorteringsordningen innehåller ett eller flera ogiltiga
+    kolumnnamn: <em>[% invalid_fragments.join(', ') FILTER html %]</em>.
+    De har tagits bort från sorteringslistan.
+
+  [% ELSIF message_tag == "job_queue_depth" %]
+    [% count FILTER html %] jobb i kön.
+
+  [% ELSIF message_tag == "keyword_created" %]
+    [% title = "Nytt nyckelord skapat" %]
+    Nyckelordet <em>[% name FILTER html %]</em> har skapats.
+
+  [% ELSIF message_tag == "keyword_deleted" %]
+    [% title = "Nyckelord borttaget" %]
+    Nyckelordet <em>[% keyword.name FILTER html %]</em> har tagits bort.
+
+  [% ELSIF message_tag == "keyword_updated" %]
+    [% title = "Nyckelord uppdaterat" %]
+    [% IF changes.keys.size %]
+      Ändringar av nyckelordet <em>[% keyword.name FILTER html %]</em> har
+      sparats:
+      <ul>
+        [% IF changes.name.defined %]
+          <li>Nyckelordet har bytt namn till <em>[% keyword.name FILTER html %]</em>.</li>
+        [% END %]
+        [% IF changes.description.defined %]
+          <li>Beskrivningen har uppdaterats till <em>[% keyword.description FILTER html %]</em></li>
+        [% END %]
+      </ul>
+    [% ELSE %]
+      Inga ändringar gjordes.
+    [% END %]
+
+  [% ELSIF message_tag == "logged_out" %]
+    [% title = "Utloggad" %]
+    [% url = "index.cgi?GoAheadAndLogIn=1" %]
+    [% link = "Logga in igen." %]
+    <b>Du har loggats ut</b>.
+    Kakan som sparade din inloggning har tagits bort. Du kommer att
+    uppmanas att logga in nästa gång det krävs.
+
+  [% ELSIF message_tag == "mail_delivery_warnings" %]
+    [% title = "Problem med e-postleverans" %]
+    [% IF mail_warnings.size == 1 %]
+      Bugzilla kunde inte skicka e-post i kö.
+    [% ELSE %]
+      Bugzilla kunde inte skicka e-post i kö för [% mail_warnings.size %] meddelanden.
+    [% END %]
+    Granska dina
+    <a href="editparams.cgi?section=mta#mail_delivery_method_desc">inställningar för e-postleverans</a>.
+    <ul>
+      [% FOREACH warning = mail_warnings %]
+        <li>[% warning.method FILTER html %]: [% warning.error FILTER html %]</li>
+      [% END %]
+    </ul>
+
+  [% ELSIF message_tag == "login_changed" %]
+    [% title = "$terms.Bugzilla-inloggning har ändrats" %]
+    Din [% terms.Bugzilla %]-inloggning har ändrats.
+
+  [% ELSIF message_tag == "migrate_component_created" %]
+    Komponent skapad: [% comp.name FILTER html %]
+    (i [% product.name FILTER html %])
+
+  [% ELSIF message_tag == "migrate_creating_bugs" %]
+    Skapar [% terms.bugs %] …
+
+  [% ELSIF message_tag == "migrate_field_created" %]
+    Nytt anpassat fält: [% field.description FILTER html %]
+    ([% field.name FILTER html %])
+
+  [% ELSIF message_tag == "migrate_product_created" %]
+    Produkt skapad: [% created.name FILTER html %]
+
+  [% ELSIF message_tag == "migrate_reading_bugs" %]
+    Läser in [% terms.bugs %] …
+
+  [% ELSIF message_tag == "migrate_reading_products" %]
+    Läser in produkter …
+
+  [% ELSIF message_tag == "migrate_reading_users" %]
+    Läser in användare …
+
+  [% ELSIF message_tag == "migrate_translating_bugs" %]
+    Konverterar [% terms.bug %]-värden för
+    [%+ terms.Bugzilla %] …
+
+  [% ELSIF message_tag == "migrate_user_created" %]
+    Användare skapad: [% created.email FILTER html %]
+    [% IF password %] Lösenord: [% password FILTER html %][% END %]
+
+  [% ELSIF message_tag == "migrate_value_created" %]
+    [% IF product.defined %]
+      [% product.name FILTER html %]
+    [% END %]
+    Värde för [%+ field_descs.${field.name} FILTER html %]
+    skapat: [% value FILTER html %]
+
+  [% ELSIF message_tag == "milestone_created" %]
+    [% title = "Milstolpe skapad" %]
+    Milstolpen <em>[% milestone.name FILTER html %]</em> har skapats.
+
+  [% ELSIF message_tag == "milestone_deleted" %]
+    [% title = "Milstolpe borttagen" %]
+    Milstolpen <em>[% milestone.name FILTER html %]</em> har tagits bort.
+    [% IF milestone.bug_count %]
+      [%+ terms.Bugs %] som hade denna milstolpe har fått standardmilstolpen
+      <em>[% product.default_milestone FILTER html %]</em> i stället.
+    [% END %]
+
+  [% ELSIF message_tag == "milestone_updated" %]
+    [% title = "Milstolpe uppdaterad" %]
+    [% IF changes.size %]
+      Ändringar av milstolpen <em>[% milestone.name FILTER html %]</em>
+      har sparats:
+      <ul>
+        [% IF changes.value.defined %]
+          <li>Milstolpens namn har uppdaterats till <em>[% milestone.name FILTER html %]</em></li>
+        [% END %]
+        [% IF changes.sortkey.defined %]
+          <li>Sorteringsnyckeln har uppdaterats till <em>[% milestone.sortkey FILTER html %]</em>
+        [% END %]
+        [% IF changes.isactive.defined %]
+          <li>[% milestone.is_active ? "Aktiverad" : "Inaktiverad" %] för [% terms.bugs %]</li>
+        [% END %]
+      </ul>
+    [% ELSE %]
+      Inga ändringar gjordes av milstolpen <em>[% milestone.name FILTER html %]</em>.
+    [% END %]
+
+  [% ELSIF message_tag == "parameters_updated" %]
+    [% title = "Parametrar uppdaterade" %]
+    [% IF param_changed.size > 0 %]
+      [% FOREACH param = param_changed %]
+        Ändrade <em>[% param FILTER html %]</em><br>
+        [% IF param == 'utf8' && Param('utf8') %]
+          <strong>Du måste nu köra <kbd>checksetup.pl</kbd> igen.</strong><br>
+        [% END %]
+      [% END %]
+    [% ELSE %]
+      Inga ändringar gjordes.
+    [% END %]
+
+    [% IF shutdown_is_active == 1 %]
+      <hr>
+      [% terms.Bugzilla %] har nu stängts av. Töm fältet <em>shutdownhtml</em>
+      för att återaktivera systemet.
+    [% END%]
+
+  [% ELSIF message_tag == "password_change_canceled" %]
+    [% title = "Avbryt begäran om lösenordsbyte" %]
+    Din begäran har avbrutits.
+
+  [% ELSIF message_tag == "password_change_request" %]
+    [% title = "Begäran om lösenordsbyte" %]
+    En token för att ändra ditt lösenord har skickats via e-post till
+    <em>[% login_name FILTER html %]</em>.
+    Följ anvisningarna i meddelandet för att ändra lösenordet.
+
+  [% ELSIF message_tag == "password_changed" %]
+    [% title = "Lösenord ändrat" %]
+    Ditt lösenord har ändrats.
+
+  [% ELSIF message_tag == "flag_type_created" %]
+    [% title = BLOCK %]Flaggtypen ”[% name FILTER html %]” har skapats[% END %]
+    Flaggtypen <em>[% name FILTER html %]</em> har skapats.
+
+  [% ELSIF message_tag == "flag_type_updated" %]
+    [% title = BLOCK %]Flaggtypen ”[% flagtype.name FILTER html %]” har uppdaterats[% END %]
+    [% IF changes.size %]
+      Ändringar av flaggtypen <em>[% flagtype.name FILTER html %]</em>
+      har sparats:
+      <ul>
+        [% IF changes.is_active.defined %]
+          <li>Flaggtypen är nu [% flagtype.is_active ? "aktiv" : "inaktiv" %]</li>
+        [% END %]
+        [% IF changes.name.defined %]
+          <li>Flaggtypen har bytt namn till <em>[% flagtype.name FILTER html %]</em></li>
+        [% END %]
+        [% IF changes.description.defined %]
+          <li>Beskrivningen har uppdaterats till <em>[% flagtype.description FILTER html %]</em></li>
+        [% END %]
+        [% IF changes.cc_list.defined %]
+          [% IF flagtype.cc_list %]
+            <li>CC-listan har uppdaterats till <em>[% flagtype.cc_list FILTER html %]</em></li>
+          [% ELSE %]
+            <li>CC-listan är nu tom</li>
+          [% END %]
+        [% END %]
+        [% IF changes.sortkey.defined %]
+          <li>Sorteringsnyckeln har uppdaterats till <em>[% flagtype.sortkey FILTER html %]</em></li>
+        [% END %]
+        [% IF changes.is_requestable.defined %]
+          <li>Flaggtypen kan [% "inte längre" UNLESS flagtype.is_requestable %] begäras</li>
+        [% END %]
+        [% IF changes.is_requesteeble.defined AND flagtype.is_requestable %]
+          <li>
+            Flaggtypen kan [% "inte längre" UNLESS flagtype.is_requesteeble %]
+            begäras särskilt
+          </li>
+        [% END %]
+        [% IF changes.is_multiplicable.defined %]
+          <li>Flaggtypen kan [% "inte längre" UNLESS flagtype.is_multiplicable %] förekomma flera gånger</li>
+        [% END %]
+        [% IF changes.grant_group_id.defined %]
+          [% IF flagtype.grant_group_id %]
+            <li>Beviljande grupp har uppdaterats till <em>[% flagtype.grant_group.name FILTER html %]</em></li>
+          [% ELSE %]
+            <li>Beviljande grupp har tagits bort</li>
+          [% END %]
+        [% END %]
+        [% IF changes.request_group_id.defined %]
+          [% IF flagtype.request_group_id %]
+            <li>Begärande grupp har uppdaterats till <em>[% flagtype.request_group.name FILTER html %]</em></li>
+          [% ELSE %]
+            <li>Begärande grupp har tagits bort</li>
+          [% END %]
+        [% END %]
+        [% IF changes.inclusions.defined || changes.exclusions.defined %]
+          <li>Listorna över inkluderingar och exkluderingar har uppdaterats</li>
+        [% END %]
+     </ul>
+    [% ELSE %]
+      Inga ändringar gjordes av flaggtypen <em>[% flagtype.name FILTER html %]</em>.
+    [% END %]
+
+  [% ELSIF message_tag == "flag_type_deleted" %]
+    [% title = BLOCK %]Flaggtypen ”[% name FILTER html %]” har tagits bort[% END %]
+    Flaggtypen <em>[% name FILTER html %]</em> har tagits bort.
+
+  [% ELSIF message_tag == "flag_type_deactivated" %]
+    [% title = BLOCK %]Flaggtypen ”[% flag_type.name FILTER html %]” har inaktiverats[% END %]
+    Flaggtypen <em>[% flag_type.name FILTER html %]</em> har inaktiverats.
+
+  [% ELSIF message_tag == "install_admin_get_email" %]
+    Ange administratörens e-postadress:
+
+  [% ELSIF message_tag == "install_admin_get_name" %]
+    Ange administratörens verkliga namn:
+
+  [% ELSIF message_tag == "install_admin_get_password" %]
+    Ange ett lösenord för administratörskontot:
+
+  [% ELSIF message_tag == "install_admin_created" %]
+    [% user.login FILTER html %] har nu konfigurerats som administratör.
+
+  [% ELSIF message_tag == "install_admin_setup" %]
+    Det verkar som om ingen administratör har konfigurerats ännu.
+    Antingen använder du [% terms.Bugzilla %] för första gången eller så kan
+    administratörens behörigheter ha tagits bort av misstag.
+
+  [% ELSIF message_tag == "install_column_add" %]
+    Lägger till den nya kolumnen ”[% column FILTER html %]” i tabellen ”[% table FILTER html %]” …
+
+  [% ELSIF message_tag == "install_column_drop" %]
+    Tar bort kolumnen ”[% column FILTER html %]” från tabellen ”[% table FILTER html %]” …
+
+  [% ELSIF message_tag == "install_column_rename" %]
+    Byter namn på kolumnen ”[% old FILTER html %]” till ”[% new FILTER html %]” …
+
+  [% ELSIF message_tag == "install_confirm_password" %]
+    Skriv lösenordet igen för att bekräfta:
+
+  [% ELSIF message_tag == "install_default_classification" %]
+    Skapar standardklassificeringen ”[% name FILTER html %]” …
+
+  [% ELSIF message_tag == "install_default_product" %]
+    Skapar den första platshållarprodukten ”[% name FILTER html %]” …
+
+  [% ELSIF message_tag == "install_file_perms_fix" %]
+    Åtgärdar filbehörigheter …
+
+  [% ELSIF message_tag == "install_fk_add" %]
+    Lägger till främmande nyckel: [% table FILTER html %].[% column FILTER html %] -&gt; [% fk.TABLE FILTER html %].[% fk.COLUMN FILTER html %] …
+
+  [% ELSIF message_tag == "install_fk_drop" %]
+    Tar bort främmande nyckel: [% table FILTER html %].[% column FILTER html %] -&gt; [% fk.TABLE FILTER html %].[% fk.COLUMN FILTER html %] …
+
+  [% ELSIF message_tag == "install_fk_invalid" %]
+    FEL: Det finns ogiltiga värden för kolumnen [% column FILTER html %] i tabellen [% table FILTER html %].
+    (Värdena finns inte i kolumnen [%+ foreign_column FILTER html %]
+    i tabellen [% foreign_table FILTER html %].)
+
+    Innan du fortsätter med checksetup måste du åtgärda värdena,
+    antingen genom att ta bort raderna från databasen eller genom att ändra
+    värdena för [% column FILTER html %] i [% table FILTER html %] så att de pekar på giltiga värden i [% foreign_table FILTER html %].[% foreign_column FILTER html %].
+
+    De felaktiga värdena i kolumnen [% table FILTER html %].[% column FILTER html %] är:
+    [%+ values.join(', ') FILTER html %]
+
+  [% ELSIF message_tag == "install_fk_invalid_fixed" %]
+    VARNING: Det fanns ogiltiga värden i [% table FILTER html %].[% column FILTER html %]
+    som har [% IF action == 'delete' %]tagits bort[% ELSE %]satts till NULL[% END %]:
+    [%+ values.join(', ') FILTER html %]
+
+  [% ELSIF message_tag == "install_fk_setup" %]
+    Konfigurerar främmande nycklar …
+
+  [% ELSIF message_tag == "install_group_create" %]
+    Skapar gruppen [% name FILTER html %] …
+
+  [% ELSIF message_tag == "install_groups_setup" %]
+    Skapar standardgrupper …
+
+  [% ELSIF message_tag == "install_setting_new" %]
+    Lägger till en ny användarinställning med namnet ”[% name FILTER html %]”
+
+  [% ELSIF message_tag == "install_setting_setup" %]
+    Konfigurerar användarinställningar …
+
+  [% ELSIF message_tag == "install_success" %]
+    checksetup.pl är klart.
+
+  [% ELSIF message_tag == "install_table_drop" %]
+    Tar bort tabellen ”[% name FILTER html %]” …
+
+  [% ELSIF message_tag == "install_table_rename" %]
+    Byter namn på tabellen ”[% old FILTER html %]” till ”[% new FILTER html %]” …
+
+  [% ELSIF message_tag == "install_urlbase_default" %]
+    När du har installerat Bugzilla bör du besöka sidan
+    ”Parametrar” (med länk i sidfoten för administratörskontot)
+    för att säkerställa att allt är konfigurerat som du vill. Detta omfattar
+    bland annat att ange rätt URL för alternativet ”urlbase”.
+
+  [% ELSIF message_tag == "install_reset_password" %]
+    Ange ett nytt lösenord för [% user.login FILTER html %]:
+
+  [% ELSIF message_tag == "install_reset_password_done" %]
+    Nytt lösenord har angetts.
+
+  [% ELSIF message_tag == "install_webservergroup_empty" %]
+    ****************************************************************************
+    VARNING! Du har inte angett något värde för parametern ”webservergroup”
+    i localconfig. Det innebär att vissa filer och kataloger som behöver kunna
+    redigeras av både dig och webbservern måste vara skrivbara för alla, och
+    att andra filer (inklusive localconfig-filen som lagrar databaslösenordet)
+    måste vara läsbara för alla. Det innebär att _vem som helst_ som får
+    lokal åtkomst till datorn kan göra vad de vill med din
+    Bugzilla-installation och sannolikt också köra godtycklig Perl-kod
+    som användaren webbservern kör som.
+
+    Du måste verkligen ändra denna inställning.
+    ****************************************************************************
+
+  [% ELSIF message_tag == "install_webservergroup_not_in" %]
+    Varning: du har angett ett värde för parametern ”webservergroup” i
+    localconfig, men du kör antingen inte detta skript som [% constants.ROOT_USER FILTER html %]
+    eller är inte medlem i gruppen. Det kan leda till behörighetsproblem och
+    sämre säkerhet. Om du får problem med att köra Bugzilla-skript,
+    logga in som [% constants.ROOT_USER FILTER html %] och kör skriptet igen, bli
+    medlem i gruppen eller ta bort värdet för parametern ”webservergroup”.
+
+  [% ELSIF message_tag == "install_webservergroup_windows" %]
+    Varning: Du har angett webservergroup i [% constants.bz_locations.localconfig FILTER html %].
+    Observera att detta inte ger någon säkerhet när Bugzilla körs
+    under Windows.
+    Kontrollera att filbehörigheterna i din Bugzilla-katalog är
+    lämpliga för systemet. Undvik onödig skrivåtkomst.
+
+  [% ELSIF message_tag == "install_workflow_init" %]
+    Konfigurerar standardflödet för status …
+
+  [% ELSIF message_tag == "product_created" %]
+    [% title = "Produkt skapad" %]
+    Produkten <em>[% product.name FILTER html %]</em> har skapats.
+
+  [% ELSIF message_tag == "product_deleted" %]
+    [% title = "Produkt borttagen" %]
+    Produkten <em>[% product.name FILTER html %]</em> och alla dess versioner,
+    komponenter, milstolpar och gruppstyrningar har tagits bort.
+    [% IF product.bug_count %]
+      Alla [% terms.bugs %] i produkten och alla hänvisningar till
+      dem har också tagits bort.
+    [% END %]
+
+  [% ELSIF message_tag == "product_invalid" %]
+    [% title = "$terms.Bugzilla Komponentbeskrivningar" %]
+    Produkten <em>[% product FILTER html %]</em> finns inte
+    eller så har du inte åtkomst till den. Följande är en lista över
+    produkter du kan välja bland.
+
+  [% ELSIF message_tag == "quips_added" %]
+    Din kommentar <em>[% added_quip FILTER html %]</em> har lagts till.
+    [% IF Param("quip_list_entry_control") == "moderated" AND
+          !user.in_group('bz_quip_moderators') %]
+      Den används så snart den har godkänts.
+    [% END %]
+
+  [% ELSIF message_tag == "quips_deleted" %]
+    Kommentaren <em>[% deleted_quip FILTER html %]</em> har tagits bort.
+
+  [% ELSIF message_tag == "quips_approved_unapproved" %]
+    [% IF approved.size == 1 %]
+      En kommentar
+    [% ELSE %]
+      [% approved.size %] kommentarer
+    [% END %]
+    har godkänts och
+    [% IF unapproved.size == 1 %]
+      en kommentar
+    [% ELSE %]
+      [%+ unapproved.size %] kommentarer
+    [% END %]
+    har fått indraget godkännande.
+
+  [% ELSIF message_tag == "report_created" %]
+    Du har en ny sparad rapport med namnet <em>[% reportname FILTER html %]</em>.
+
+  [% ELSIF message_tag == "report_deleted" %]
+    Rapporten <em>[% reportname FILTER html %]</em> har tagits bort.
+
+  [% ELSIF message_tag == "report_updated" %]
+    Den sparade rapporten <em>[% reportname FILTER html %]</em> har uppdaterats.
+
+  [% ELSIF message_tag == "remaining_time_zeroed" %]
+    Fältet [% field_descs.remaining_time FILTER html %] har
+    automatiskt satts till noll som en del av att stänga denna [% terms.bug %]
+    eller flytta den från ett stängt läge till ett annat.
+
+  [% ELSIF message_tag == "sanitycheck" %]
+    [%# We use this way to call sanitycheck-specific messages so that
+      # we can still use get_text(). %]
+    [% PROCESS "admin/sanitycheck/messages.html.tmpl" %]
+
+  [% ELSIF message_tag == "series_all_open" %]
+    Alla öppna
+
+  [% ELSIF message_tag == "series_all_closed" %]
+    Alla stängda
+
+  [% ELSIF message_tag == "series_subcategory" %]
+    -Alla-
+
+  [% ELSIF message_tag == "sudo_started" %]
+    [% title = "Sudo-session startad" %]
+      Sudo-sessionen har startats. De kommande 6 timmarna, eller tills du
+      avslutar sessionen, utförs allt du gör som användaren du
+      efterliknar ([% target FILTER html %]).
+  
+  [% ELSIF message_tag == "sudo_ended" %]
+    [% title = "Sudo-session avslutad" %]
+      Din sudo-session har avslutats. Alla framtida åtgärder tillskrivs
+      ditt eget konto.
+
+  [% ELSIF message_tag == "series_created" %]
+    [% title = "Serie skapad" %]
+      Serien <em>[% series.category FILTER html %] /
+      [%+ series.subcategory FILTER html %] / 
+      [%+ series.name FILTER html %]</em>
+      har skapats. Observera att du kan behöva vänta upp till
+      [%+ series.frequency * 2 %] dagar innan det finns tillräckligt med data för
+      att skapa ett diagram för serien.
+
+  [% ELSIF message_tag == "series_deleted" %]
+    [% title = "Serie borttagen" %]
+    Serien <em>[% series.category FILTER html %] /
+      [%+ series.subcategory FILTER html %] /
+      [%+ series.name FILTER html %]</em>
+      har tagits bort.
+
+  [% ELSIF message_tag == "series_updated" %]
+    [% title = "Serie uppdaterad" %]
+    Serien <em>[% default.category FILTER html %] /
+    [%+ default.subcategory FILTER html %] /
+    [%+ default.name FILTER html %]</em> har uppdaterats.
+
+  [% ELSIF message_tag == "shutdown" %]
+    [% title = "$terms.Bugzilla är avstängt" %]
+    [% Param("shutdownhtml") %]
+    [% IF userid %]
+      <p>
+        Av säkerhetsskäl har du loggats ut automatiskt.
+        Kakan som sparade din inloggning har tagits bort.
+      </p>
+    [% END %]
+    <p>
+      Om du är administratör kan du
+      <a href="editparams.cgi?section=general">återaktivera [% terms.Bugzilla %]</a>
+      genom att tömma parametern <kbd>shutdownhtml</kbd>.
+    </p>
+
+  [% ELSIF message_tag == "term" %]
+    [% terms.$term FILTER html %]
+
+  [% ELSIF message_tag == "unexpected_flag_types" %]
+    Vissa flaggor kunde inte anges. Kontrollera dina ändringar.
+
+  [% ELSIF message_tag == "user_match_failed" %]
+    Du angav ett användarnamn som inte matchade någon känd
+    [% terms.Bugzilla %]-användare, så fältet
+    [% match_field FILTER html %] har lämnats tomt.
+
+  [% ELSIF message_tag == "user_match_multiple" %]
+    Du angav ett användarnamn som matchade fler än en
+    användare, så fältet [% match_field FILTER html %]
+    har lämnats tomt.
+
+  [% ELSIF message_tag == "version_created" %]
+    [% title = "Version skapad" %]
+    Versionen <em>[% version.name FILTER html %]</em> för produkten
+    <em>[% product.name FILTER html %]</em> har skapats.
+
+  [% ELSIF message_tag == "version_deleted" %]
+    [% title = "Version borttagen" %]
+    Versionen <em>[% version.name FILTER html %]</em> för produkten
+    <em>[% product.name FILTER html %]</em> har tagits bort.
+
+  [% ELSIF message_tag == "version_updated" %]
+    [% title = "Version uppdaterad" %]
+    [% IF changes.size %]
+      Ändringar av versionen <em>[% version.name FILTER html %]</em>
+      har sparats:
+      <ul>
+        [% IF changes.value.defined %]
+          <li>Versionen har bytt namn till <em>[% version.name FILTER html %]</em></li>
+        [% END %]
+        [% IF changes.isactive.defined %]
+          <li>[% version.is_active ? "Aktiverad" : "Inaktiverad" %] för [% terms.bugs %]</li>
+        [% END %]
+      </ul>
+    [% ELSE %]
+      Inga ändringar gjordes av versionen <em>[% version.name FILTER html %]</em>.
+    [% END %]
+
+  [% ELSIF message_tag == "whine_query_failed" %]
+    Frågan ”[% query_name FILTER html %]” från [% author.login FILTER html %]
+    misslyckades: [% reason FILTER html %]
+
+  [% ELSIF message_tag == "workflow_updated" %]
+    Arbetsflödet har uppdaterats.
+  [% END %]
+[% END %]
+
+[% IF !message %]
+  [% message = Hook.process('messages') %]
+[% END %]
+
+[%# Give sensible error if the message function is used incorrectly. #%]
+[% IF !message %]
+  [% message = BLOCK %]
+    Du använder Bugzillas meddelandefunktioner felaktigt. Du
+    skickade strängen ”[% message_tag FILTER html %]”. Rätt användning är att skicka
+    en etikett och definiera den etiketten i filen <kbd>messages.html.tmpl</kbd>.<br>
+    <br>
+    Om du använder [% terms.Bugzilla %] och ser detta meddelande, spara
+    sidan och skicka den till [% Param('maintainer') %].
+  [% END %]
+[% END %]

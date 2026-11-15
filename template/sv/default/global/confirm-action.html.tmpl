@@ -1,0 +1,29 @@
+[%# This Source Code Form is subject to the terms of the Mozilla Public
+  # License, v. 2.0. If a copy of the MPL was not distributed with this
+  # file, You can obtain one at http://mozilla.org/MPL/2.0/.
+  #%]
+
+[% PROCESS global/header.html.tmpl title = "Misstänkt åtgärd"
+                                   style_urls = ['skins/standard/global.css'] %]
+
+<div class="throw_error">
+<!--reason=[%reason FILTER html %]-->
+  [% IF reason == "expired_token" %]
+    Dina ändringar har avvisats eftersom tidsgränsen på [% constants.MAX_TOKEN_AGE FILTER html %] dagar har passerat innan ändringarna skickades till [% script_name FILTER html %]. Sidan kan ha varit öppen för länge, eller så kan gamla ändringar ha skickats igen av misstag.
+  [% ELSIF reason == "missing_token" %]
+    Det verkar som att du inte kom från rätt sida. En möjlig orsak är att du skrev in URL:en direkt i webbläsarens adressfält, vilket ska vara säkert. En annan är att du följde en URL som omdirigerade dig hit <b>utan ditt medgivande</b>.
+  [% ELSIF reason == "invalid_token" %]
+    Du skickade ändringar till [% script_name FILTER html %] med en ogiltig token. Det kan tyda på att någon försökte lura dig, till exempel genom att få dig att följa en URL som omdirigerade dig hit <b>utan ditt medgivande</b>.
+  [% END %]
+  <p>Vill du verkligen spara ändringarna?</p>
+</div>
+
+<form name="check" id="check" method="post" action="[% script_name FILTER html %]">
+  [% PROCESS "global/hidden-fields.html.tmpl" exclude="^(Bugzilla_login|Bugzilla_password|token)$" %]
+  <input type="hidden" name="token" value="[% token FILTER html %]">
+  <input type="submit" id="confirm" value="Ja, bekräfta ändringarna">
+</form>
+
+<p><a href="index.cgi">Nej, kasta ändringarna</a> (du omdirigeras till startsidan).</p>
+
+[% PROCESS global/footer.html.tmpl %]

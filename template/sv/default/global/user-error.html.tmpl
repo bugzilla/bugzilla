@@ -106,121 +106,120 @@
     API-nyckeln du angav har återkallats av användaren som skapade den.
 
   [% ELSIF error == "attachment_bug_id_mismatch" %]
-    [% title = "Invalid Attachments" %]
-    You tried to perform an action on attachments from different [% terms.bugs %].
-    This operation requires all attachments to be from the same [% terms.bug %].
+    [% title = "Ogiltiga bilagor" %]
+    Du försökte utföra en åtgärd på bilagor från olika [% terms.bugs %].
+    Åtgärden kräver att alla bilagor hör till samma [% terms.bug %].
 
   [% ELSIF error == "auth_cant_create_account" %]
-    [% title = "Can't create accounts" %]
-    This site is using an authentication scheme which does not permit
-    account creation. Please contact an administrator to get a new account
-    created.
+    [% title = "Det går inte att skapa konton" %]
+    Den här webbplatsen använder en autentiseringsmetod som inte tillåter
+    att konton skapas. Kontakta en administratör för att få ett nytt konto.
 
   [% ELSIF error == "auth_failure" %]
-    [% title = "Authorization Required" %]
-    [% admindocslinks = {'groups.html#groups' => 'Group Security'} %]
-    Sorry,
+    [% title = "Behörighet krävs" %]
+    [% admindocslinks = {'groups.html#groups' => 'Gruppsäkerhet'} %]
+    Tyvärr
     [% IF group %]
-      you aren't a member of the '[% group FILTER html %]' group,
+      är du inte medlem i gruppen ”[% group FILTER html %]”,
     [% END %]
 
     [% IF reason %]
-      [% IF group %] and [% END %]
+      [% IF group %] och [% END %]
       [% IF reason == "cant_bless" %]
-        you don't have permissions to add or remove people from a group,
+        saknar du behörighet att lägga till eller ta bort personer från en grupp,
       [% ELSIF reason == "not_visible" %]
-        there are visibility restrictions on certain user groups,
+        finns det synlighetsbegränsningar för vissa användargrupper,
       [% END %]
     [% END %]
 
-    [% IF group || reason %] and so [% END %] you are not authorized to
+    [% IF group || reason %] och därför [% END %] har du inte behörighet att
     [% IF action == "access" %]
-      access
+      komma åt
     [% ELSIF action == "add" %]
-      add new
+      lägga till nya
     [% ELSIF action == "begin" %]
-      begin
+      påbörja
     [% ELSIF action == "modify" %]
-      modify
+      ändra
     [% ELSIF action == "delete" %]
-      delete
+      ta bort
     [% ELSIF action == "edit" %]
-      add, modify or delete
+      lägga till, ändra eller ta bort
     [% ELSIF action == "run" %]
-      run
+      köra
     [% ELSIF action == "schedule" %]
-      schedule
+      schemalägga
     [% ELSIF action == "search" %]
-      search
+      söka i
     [% ELSIF action == "use" %]
-      use
+      använda
     [% ELSIF action == "approve" %]
-      approve
+      godkänna
     [% ELSE %]
       [%+ Hook.process('auth_failure_action') %]
     [% END %]
 
     [% IF object == "administrative_pages" %]
-      administrative pages
+      administrativa sidor
     [% ELSIF object == "attachment" %]
       [% IF attach_id %]
-        attachment #[% attach_id FILTER html %]
+        bilaga #[% attach_id FILTER html %]
       [% ELSE %]
-        this attachment
+        den här bilagan
       [% END %]
     [% ELSIF object == "bugs" %]
       [%+ terms.bugs %]
     [% ELSIF object == "bug_fields" %]
-      the [% field_descs.$field FILTER html %] field
+      fältet [% field_descs.$field FILTER html %]
     [% ELSIF object == "charts" %]
-      the "New Charts" feature
+      funktionen ”Nya diagram”
     [% ELSIF object == "classifications" %]
-      classifications
+      klassificeringar
     [% ELSIF object == "components" %]
-      components
+      komponenter
     [% ELSIF object == "comment_tags" %]
-      comment tags
+      kommentaretiketter
     [% ELSIF object == "custom_fields" %]
-      custom fields
+      anpassade fält
     [% ELSIF object == "field_values" %]
-      field values
+      fältvärden
     [% ELSIF object == "flagtypes" %]
-      flag types
+      flaggtyper
     [% ELSIF object == "group_access" %]
-      group access
+      gruppåtkomst
     [% ELSIF object == "groups" %]
-      groups
+      grupper
     [% ELSIF object == "keywords" %]
-      keywords
+      nyckelord
     [% ELSIF object == "milestones" %]
-      milestones
+      milstolpar
     [% ELSIF object == "multiple_bugs" %]
-      multiple [% terms.bugs %] at once
+      flera [% terms.bugs %] samtidigt
     [% ELSIF object == "parameters" %]
-      parameters
+      parametrar
     [% ELSIF object == "products" %]
-      products
+      produkter
     [% ELSIF object == "quips" %]
-      quips
+      citat
     [% ELSIF object == "reports" %]
-      whine reports
+      bevakningsrapporter
     [% ELSIF object == "sanity_check" %]
-      a sanity check
+      en rimlighetskontroll
     [% ELSIF object == "settings" %]
-      settings
+      inställningar
     [% ELSIF object == "sudo_session" %]
-      a sudo session
+      en sudo-session
     [% ELSIF object == "timetracking_summaries" %]
-      time-tracking summary reports
+      sammanfattningsrapporter för tidsspårning
     [% ELSIF object == "user" %]  
-      the user [% IF userid %] with ID '[% userid FILTER html %]'
-      [% ELSE %]you specified [% END %]
+      användaren [% IF userid %] med ID ”[% userid FILTER html %]”
+      [% ELSE %]du angav [% END %]
     [% ELSIF object == "users" %]
-      users
+      användare
     [% ELSIF object == "versions" %]
-      versions
+      versioner
     [% ELSIF object == "workflow" %]
-      the workflow
+      arbetsflödet
     [% ELSE %]
       [%+ Hook.process('auth_failure_object') %]
     [% END %].
@@ -228,123 +227,121 @@
     [% Hook.process("auth_failure") %]
 
   [% ELSIF error == "auth_invalid_token" %]
-    [% title = 'A token error occurred' %]
-    The token '[% token FILTER html %]' is not valid. It could be because
-    you loaded this page more than 3 days ago.
+    [% title = "Ett tokenfel inträffade" %]
+    Tokenet ”[% token FILTER html %]” är inte giltigt. Det kan bero på att
+    du läste in sidan för mer än tre dagar sedan.
 
   [% ELSIF error == "auth_untrusted_request" %]
-    [% title = "Untrusted Authentication Request" %]
-    You tried to log in using the <em>[% login FILTER html %]</em> account,
-    but [% terms.Bugzilla %] is unable to trust your request. Make sure
-    your web browser accepts cookies and that you haven't been redirected
-    here from an external web site.
-    <a href="index.cgi?GoAheadAndLogIn=1">Click here</a> if you really want
-    to log in.
+    [% title = "Otillförlitlig autentiseringsbegäran" %]
+    Du försökte logga in med kontot <em>[% login FILTER html %]</em>, men
+    [% terms.Bugzilla %] kan inte lita på din begäran. Kontrollera att
+    webbläsaren accepterar kakor och att du inte har omdirigerats hit från en
+    extern webbplats. <a href="index.cgi?GoAheadAndLogIn=1">Klicka här</a> om
+    du ändå vill logga in.
 
   [% ELSIF error == "attachment_deletion_disabled" %]
-    [% title = "Attachment Deletion Disabled" %]
-    Attachment deletion is disabled on this installation.
+    [% title = "Borttagning av bilagor är avstängd" %]
+    Det går inte att ta bort bilagor i den här installationen.
 
   [% ELSIF error == "attachment_removed" %]
-    [% title = "Attachment Removed" %]
-    The attachment you are attempting to access has been removed.
+    [% title = "Bilagan har tagits bort" %]
+    Bilagan du försöker komma åt har tagits bort.
 
   [% ELSIF error == "bad_page_cgi_id" %]
-    [% title = "Invalid Page ID" %]
-    The ID <code>[% page_id FILTER html %]</code> is not a
-    valid page identifier.
+    [% title = "Ogiltigt sid-ID" %]
+    ID:t <code>[% page_id FILTER html %]</code> är inte en
+    giltig sididentifierare.
 
   [% ELSIF error == "bug_access_denied" %]
-    [% title = "$terms.Bug Access Denied" %]
-    [% admindocslinks = {'groups.html#groups' => 'Group Security'} %]
-    You are not authorized to access [% terms.bug %] #[% bug_id FILTER html %].
+    [% title = "$terms.Bug: åtkomst nekad" %]
+    [% admindocslinks = {'groups.html#groups' => 'Gruppsäkerhet'} %]
+    Du har inte behörighet att komma åt [% terms.bug %] #[% bug_id FILTER html %].
 
   [% ELSIF error == "bug_access_query" %]
-    [% title = "$terms.Bug Access Denied" %]
-    [% docslinks = {'administering/users.html#creating-new-users' => 'Creating an account'} %]
-    You are not authorized to access [% terms.bug %] #[% bug_id FILTER html %].
-    To see this [% terms.bug %], you must
+    [% title = "$terms.Bug: åtkomst nekad" %]
+    [% docslinks = {'administering/users.html#creating-new-users' => 'Skapa ett konto'} %]
+    Du har inte behörighet att komma åt [% terms.bug %] #[% bug_id FILTER html %].
+    För att se [% terms.bug %] måste du först
     first <a href="show_bug.cgi?id=
-                   [% bug_id FILTER uri %]&amp;GoAheadAndLogIn=1">log
-    in to an account</a> with the appropriate permissions.
+                   [% bug_id FILTER uri %]&amp;GoAheadAndLogIn=1">logga
+    in på ett konto</a> med rätt behörighet.
 
   [% ELSIF error == "bug_url_invalid" %]
-    [% title = "Invalid $terms.Bug URL" %]
-    <code>[% url FILTER html %]</code> is not a valid URL to [% terms.abug %].
+    [% title = "Ogiltig URL till $terms.bug" %]
+    <code>[% url FILTER html %]</code> är inte en giltig URL till [% terms.abug %].
     [% IF reason == 'http' %]
-      URLs must start with "http" or "https".
+      URL:er måste börja med ”http” eller ”https”.
     [% ELSIF reason == 'path_only' %]
-      You must specify a full URL.
+      Du måste ange en fullständig URL.
     [% ELSIF reason == 'id' %]
-      There is no valid [% terms.bug %] id in that URL.
+      Det finns inget giltigt ID för [% terms.bug %] i URL:en.
     [% ELSE %]
-      [%+ field_descs.see_also FILTER html %] URLs should point to one of:
+      URL:er i [%+ field_descs.see_also FILTER html %] ska peka på något av följande:
       <ul>
-        <li><code>show_bug.cgi</code> in a Bugzilla
-          installation.</li>
-        <li>A b[% %]ug on launchpad.net</li>
-        <li>An issue on code.google.com.</li>
-        <li>A b[% %]ug on b[% %]ugs.debian.org.</li>
-        <li>An issue in a JIRA installation.</li>
-        <li>A ticket in a Trac installation.</li>
-        <li>A b[% %]ug in a MantisBT installation.</li>
-        <li>A b[% %]ug on sourceforge.net.</li>
-        <li>An issue/pull request on github.com.</li>
+        <li><code>show_bug.cgi</code> i en Bugzilla-installation.</li>
+        <li>En b[% %]ug på launchpad.net.</li>
+        <li>Ett ärende på code.google.com.</li>
+        <li>En b[% %]ug på b[% %]ugs.debian.org.</li>
+        <li>Ett ärende i en JIRA-installation.</li>
+        <li>En biljett i en Trac-installation.</li>
+        <li>En b[% %]ug i en MantisBT-installation.</li>
+        <li>En b[% %]ug på sourceforge.net.</li>
+        <li>Ett ärende eller en pull-begäran på github.com.</li>
         [% Hook.process('bug_url_invalid_tracker') %]
       </ul>
     [% END %]
 
   [% ELSIF error == "bug_url_too_long" %]
-    [% title = "Invalid $terms.Bug URL" %]
-    [% terms.Bug %] URLs cannot be longer than 
-    [%+ constants.MAX_BUG_URL_LENGTH FILTER none %] characters long.
-    <code>[% url FILTER html %]</code> is too long.
+    [% title = "Ogiltig URL till $terms.bug" %]
+    URL:er till [% terms.Bug %] får inte vara längre än
+    [%+ constants.MAX_BUG_URL_LENGTH FILTER none %] tecken.
+    <code>[% url FILTER html %]</code> är för lång.
 
   [% ELSIF error == "buglist_parameters_required" %]
-    [% title = "Parameters Required" %]
-    [% docslinks = {'using/finding.html' => "Searching for $terms.bugs",
-                    'using/finding.html#bug-lists' => "$terms.Bug lists"} %]
-    You may not search, or create saved searches, without any search terms.
+    [% title = "Parametrar krävs" %]
+    [% docslinks = {'using/finding.html' => "Söka efter $terms.bugs",
+                    'using/finding.html#bug-lists' => "Listor med $terms.bugs"} %]
+    Du kan inte söka eller skapa sparade sökningar utan några sökvillkor.
 
   [% ELSIF error == "cc_remove_denied" %]
-    [% title = "Change Denied" %]
-    You do not have permission to remove other people from the CC list.
+    [% title = "Ändring nekad" %]
+    Du har inte behörighet att ta bort andra personer från CC-listan.
 
   [% ELSIF error == "chart_too_large" %]
-    [% title = "Chart Too Large" %]
-    Sorry, but 2000 x 2000 is the maximum size for a chart.
+    [% title = "Diagrammet är för stort" %]
+    Ett diagram får högst vara 2 000 × 2 000.
 
   [% ELSIF error == "comment_id_invalid" %]
-    [% id FILTER html %] is not a valid comment id.
+    [% id FILTER html %] är inte ett giltigt kommentar-ID.
 
   [% ELSIF error == "comment_invalid_isprivate" %]
-    You tried to modify the privacy of comment id [% id FILTER html %],
-    but that is not a valid comment on this [% terms.bug %].
+    Du försökte ändra sekretessen för kommentaren med ID [% id FILTER html %],
+    men den kommentaren är inte giltig för [% terms.bug %].
 
   [% ELSIF error == "comment_is_private" %]
-    Comment id [% id FILTER html %] is private.
+    Kommentaren med ID [% id FILTER html %] är privat.
 
   [% ELSIF error == "comment_required" %]
-    [% title = "Comment Required" %]
-    You have to specify a
+    [% title = "Kommentar krävs" %]
+    Du måste ange en
     [% IF old.defined && new.defined %]
-      <b>comment</b> when changing the [% field_descs.$field FILTER html %]
-      of [% terms.abug %] from [% (old || "(empty)") FILTER html %]
-      to [% (new || "(empty)") FILTER html %].
+      <b>kommentar</b> när du ändrar [% field_descs.$field FILTER html %]
+      för [% terms.abug %] från [% (old || "(tomt)") FILTER html %]
+      till [% (new || "(tomt)") FILTER html %].
     [% ELSIF new %]
-      description for this [% terms.bug %].
+      beskrivning för [% terms.bug %].
     [% ELSE %]
-      <b>comment</b> on this change.
+      <b>kommentar</b> till ändringen.
     [% END %]
 
   [% ELSIF error == "comment_too_long" %]
-    [% title = "Comment Too Long" %]
-    Comments cannot be longer than 
-    [%+ constants.MAX_COMMENT_LENGTH FILTER html %] characters.
+    [% title = "Kommentaren är för lång" %]
+    Kommentarer får inte vara längre än
+    [%+ constants.MAX_COMMENT_LENGTH FILTER html %] tecken.
 
   [% ELSIF error == "comment_tag_disabled" %]
-    [% title = "Comment Tagging Disabled" %]
-    The comment tagging is not enabled.
+    [% title = "Kommentaretiketter är avstängda" %]
+    Kommentaretiketter är inte aktiverade.
 
   [% ELSIF error == "comment_tag_invalid" %]
     [% title = "Ogiltig kommentaretikett" %]

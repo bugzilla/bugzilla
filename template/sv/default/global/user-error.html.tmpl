@@ -1219,139 +1219,136 @@
     slutdatumet ([% dateto FILTER html %]).
 
   [% ELSIF error == "mismatched_bug_ids_on_obsolete" %]
-    Attachment [% attach_id FILTER html %] is attached to another [% terms.bug %],
-    but you tried to flag it as obsolete while creating a new attachment to
+    Bilagan [% attach_id FILTER html %] hör till en annan [% terms.bug %],
+    men du försökte markera den som föråldrad samtidigt som du skapade en ny bilaga för
     [%+ terms.bug %] [%+ my_bug_id FILTER html %].
 
   [% ELSIF error == "missing_attachment_description" %]
-    [% title = "Missing Attachment Description" %]
-    You must enter a description for the attachment.
+    [% title = "Bilagebeskrivning saknas" %]
+    Du måste ange en beskrivning för bilagan.
 
   [% ELSIF error == "missing_bug_id" %]
-    [% title = "Missing $terms.Bug ID" %]
-    No [% terms.bug %] ID was given.
+    [% title = "$terms.Bug-ID saknas" %]
+    Inget ID för [% terms.bug %] angavs.
 
   [% ELSIF error == "missing_category" %]
-    [% title = "Missing Category" %]
-    You did not specify a category for this series.
+    [% title = "Kategori saknas" %]
+    Du angav ingen kategori för serien.
 
   [% ELSIF error == "missing_component" %]
-    [% title = "Missing Component" %]
-    [% admindocslinks = {'categorization.html#products'   => 'Administering products',
-                         'categorization.html#milestones' => 'Creating a component'} %]
-    Sorry, the product <em>[% product.name FILTER html %]</em>
-    has to have at least one active component in order for you to
-    enter [% terms.abug %] into it.<br>
+    [% title = "Komponent saknas" %]
+    [% admindocslinks = {'categorization.html#products'   => 'Administrera produkter',
+                         'categorization.html#milestones' => 'Skapa en komponent'} %]
+    Produkten <em>[% product.name FILTER html %]</em> måste ha minst en aktiv
+    komponent för att du ska kunna registrera [% terms.abug %] i den.<br>
     [% IF user.in_group("editcomponents", product.id) %]
-      <a href="editcomponents.cgi?action=add&amp;product=[% product.name FILTER uri %]">Create
-      a new component</a>.
+      <a href="editcomponents.cgi?action=add&amp;product=[% product.name FILTER uri %]">Skapa
+      en ny komponent</a>.
     [% ELSE %]
-      Please contact [% Param("maintainer") %] and ask them
-      to add a component to this product.
+      Kontakta [% Param("maintainer") %] och be dem
+      lägga till en komponent i produkten.
     [% END %]
 
   [% ELSIF error == "missing_content_type" %]
-    [% title = "Missing Content-Type" %]
-     You asked [% terms.Bugzilla %] to auto-detect the content type, but
-     your browser did not specify a content type when uploading the file, 
-     so you must enter a content type manually.
+    [% title = "Innehållstyp saknas" %]
+     Du bad [% terms.Bugzilla %] att fastställa innehållstypen automatiskt, men
+     webbläsaren angav ingen innehållstyp när filen skickades upp.
+     Du måste därför ange en innehållstyp manuellt.
 
   [% ELSIF error == "missing_cookie" %]
-    [% title = "Missing Cookie" %]
-    Sorry, I seem to have lost the cookie that recorded
-    the results of your last search. I'm afraid you will have to start
-    again from the <a href="query.cgi">search page</a>.
+    [% title = "Kaka saknas" %]
+    Kakan som lagrade resultatet av din senaste sökning verkar ha försvunnit.
+    Du behöver börja om från <a href="query.cgi">söksidan</a>.
 
   [% ELSIF error == "missing_datasets" %]
-    [% title = "No Datasets Selected" %]
-    [% docslinks = {'using/reports-and-charts.html' => 'Reporting'} %]
-    You must specify one or more datasets to plot.
+    [% title = "Inga datauppsättningar har valts" %]
+    [% docslinks = {'using/reports-and-charts.html' => 'Rapportering'} %]
+    Du måste ange en eller flera datauppsättningar att rita.
 
   [% ELSIF error == "missing_frequency" %]
-    [% title = "Missing Frequency" %]
-    [% docslinks = {'using/reports-and-charts.html' => 'Reporting'} %]
-    You did not specify a valid frequency for this series.
+    [% title = "Frekvens saknas" %]
+    [% docslinks = {'using/reports-and-charts.html' => 'Rapportering'} %]
+    Du angav ingen giltig frekvens för serien.
 
   [% ELSIF error == "missing_name" %]
-    [% title = "Missing Name" %]
-    [% docslinks = {'using/reports-and-charts.html' => 'Reporting'} %]
-    You did not specify a name for this series.
+    [% title = "Namn saknas" %]
+    [% docslinks = {'using/reports-and-charts.html' => 'Rapportering'} %]
+    Du angav inget namn för serien.
 
   [% ELSIF error == "missing_query" %]
-    [% title = "Missing Search" %]
-    [% docslinks = {'using/finding.html' => "Searching for $terms.bugs",
-                    'using/finding.html#bug-lists' => "$terms.Bug lists"} %]
-    The search named <em>[% name FILTER html %]</em>
+    [% title = "Sökning saknas" %]
+    [% docslinks = {'using/finding.html' => "Söka efter $terms.bugs",
+                    'using/finding.html#bug-lists' => "Listor med $terms.bugs"} %]
+    Sökningen med namnet <em>[% name FILTER html %]</em>
     [% IF sharer_id && sharer_id != user.id %]
-      has not been made visible to you.
+      har inte gjorts synlig för dig.
     [% ELSE %]
-      does not exist.
+      finns inte.
     [% END %]
 
   [% ELSIF error == "need_quipid" %]
-    [% title = "Missing Quip ID" %]
-    A valid quip ID is needed.
+    [% title = "Citat-ID saknas" %]
+    Ett giltigt citat-ID krävs.
 
   [% ELSIF error == "missing_resolution" %]
-    [% title = "Resolution Required" %]
-    A valid resolution is required to mark [% terms.bugs %] as
+    [% title = "Lösning krävs" %]
+    En giltig lösning krävs för att markera [% terms.bugs %] som
     [%+ status FILTER upper FILTER html %].
 
   [% ELSIF error == "missing_subcategory" %]
-    [% title = "Missing Subcategory" %]
-    You did not specify a subcategory for this series.
+    [% title = "Underkategori saknas" %]
+    Du angav ingen underkategori för serien.
                 
   [% ELSIF error == "missing_version" %]
-    [% title = "Missing Version" %]
-    [% admindocslinks = {'categorization.html#versions' => 'Defining versions'} %]
-    Sorry, the product <em>[% product.name FILTER html %]</em>
-    has to have at least one active version in order for you to
-    enter [% terms.abug %] into it.<br>
+    [% title = "Version saknas" %]
+    [% admindocslinks = {'categorization.html#versions' => 'Definiera versioner'} %]
+    Produkten <em>[% product.name FILTER html %]</em> måste ha minst en aktiv
+    version för att du ska kunna registrera [% terms.abug %] i den.<br>
     [% IF user.in_group("editcomponents", product.id) %]
-      <a href="editversions.cgi?action=add&amp;product=[% product.name FILTER uri %]">Create
-      a new version</a>.
+      <a href="editversions.cgi?action=add&amp;product=[% product.name FILTER uri %]">Skapa
+      en ny version</a>.
     [% ELSE %]
-      Please contact [% Param("maintainer") %] and ask them
-      to add a version to this product.
+      Kontakta [% Param("maintainer") %] och be dem
+      lägga till en version i produkten.
     [% END %]
 
   [% ELSIF error == "multiple_alias_not_allowed" %]
-    You cannot set aliases when modifying multiple [% terms.bugs %]
-    at once.
+    Du kan inte ange alias när du ändrar flera [% terms.bugs %]
+    samtidigt.
 
   [% ELSIF error == "need_quip" %]
-    [% title = "Quip Required" %]
-    [% docslinks = {'administering/quips.html' => 'About quips'} %]
-    Please enter a quip in the text field.
+    [% title = "Citat krävs" %]
+    [% docslinks = {'administering/quips.html' => 'Om citat'} %]
+    Ange ett citat i textfältet.
 
   [% ELSIF error == "new_password_missing" %]
-    [% title = "New Password Missing" %]
-    You must enter a new password.
+    [% title = "Nytt lösenord saknas" %]
+    Du måste ange ett nytt lösenord.
 
   [% ELSIF error == "no_axes_defined" %]
-    [% title = "No Axes Defined" %]
-    [% docslinks = {'using/reports-and-charts.html' => 'Reporting'} %]
-    You didn't define any axes to plot.
+    [% title = "Inga axlar har angetts" %]
+    [% docslinks = {'using/reports-and-charts.html' => 'Rapportering'} %]
+    Du angav inga axlar att rita.
 
   [% ELSIF error == "no_bugs_chosen" %]
-    [% title = BLOCK %]No [% terms.Bugs %] Selected[% END %]
-    You apparently didn't choose any [% terms.bugs %]
+    [% title = BLOCK %]Inga [% terms.Bugs %] har valts[% END %]
+    Du har inte valt några [% terms.bugs %]
     [% IF action == "modify" %]
-      to modify.
+      att ändra.
     [% ELSIF action == "view" %]
-      to view.
+      att visa.
     [% ELSIF action == 'summarize' %]
-      for viewing time summaries.
+      för att visa tidssammanfattningar.
     [% END %]
 
   [% ELSIF error == "no_tag_to_edit" %]
-    [% title = "No Tag Selected" %]
-    You tried to create or remove a tag with no name.
+    [% title = "Ingen etikett har valts" %]
+    Du försökte skapa eller ta bort en etikett utan namn.
 
   [% ELSIF error == "no_initial_bug_status" %]
-    [% title = "No Initial $terms.Bug Status" %]
-    No [% terms.bug %] status is available on [% terms.bug %] creation.
-    Please report the problem to [% Param("maintainer") %].
+    [% title = "Ingen ursprunglig status för $terms.bug" %]
+    Ingen status för [% terms.bug %] är tillgänglig när [% terms.bug %] skapas.
+    Rapportera problemet till [% Param("maintainer") %].
     
   [% ELSIF error == "no_keywords" %]
     [% title = "Inga nyckelord" %]

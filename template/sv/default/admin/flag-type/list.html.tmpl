@@ -1,0 +1,153 @@
+[%# This Source Code Form is subject to the terms of the Mozilla Public
+  # License, v. 2.0. If a copy of the MPL was not distributed with this
+  # file, You can obtain one at http://mozilla.org/MPL/2.0/.
+  #
+  # This Source Code Form is "Incompatible With Secondary Licenses", as
+  # defined by the Mozilla Public License, v. 2.0.
+  #%]
+
+[% PROCESS "global/js-products.html.tmpl" %]
+
+[% PROCESS global/header.html.tmpl
+  title = 'Administrera flaggtyper'
+  style_urls = ['skins/standard/admin.css']
+  onload="var f = document.flagtype_form; selectProduct(f.product, f.component, '__All__');"
+  javascript_urls=["js/productform.js"]
+  doc_section = "administering/flags.html"
+%]
+
+<p>
+  Flaggor är markeringar som visar om [% terms.abug %] eller en bilaga har
+  beviljats eller nekats en viss status. Flaggor visas i gränssnittet som ett
+  namn och en statussymbol: ”+” för beviljad, ”-” för nekad och ”?” för en
+  status som har begärts av en användare.
+</p>
+
+<p>
+  Du kan till exempel definiera statusen ”review” för att användare ska kunna
+  begära granskning av sina korrigeringar. När en korrigeringsförfattare begär
+  granskning visas strängen ”review?” vid bilagan. När granskaren granskar
+  korrigeringen visas antingen ”review+” eller ”review-”, beroende på om
+  korrigeringen godkändes eller inte.
+</p>
+
+<p>
+  Du kan begränsa listan över flaggtyper till de som är tillgängliga för en viss
+  produkt och komponent. Om en produkt väljs utan komponent visas bara de
+  flaggtyper som är tillgängliga för minst en av produktens komponenter.
+</p>
+
+<form id="flagtype_form" name="flagtype_form" action="editflagtypes.cgi" method="get">
+  <div class="inline">
+    <label for="product">Produkt:</label>
+    [% INCLUDE "global/product-select.html.tmpl"
+      id       => "product"
+      name     => "product"
+      add      => "__Any__"
+      onchange => "selectProduct(this, this.form.component, '__Any__');"
+      products => products
+    %]
+  </div>
+
+  <div class="inline">
+    <label for="component">Komponent:</label>
+    <select name="component">
+      <option value="">__Any__</option>
+      [% FOREACH comp = components %]
+        <option value="[% comp FILTER html %]"
+          [%+ 'selected="selected"' IF selected_component == comp %]>
+          [%- comp FILTER html %]</option>
+      [% END %]
+    </select>
+  </div>
+
+  <div class="inline">
+    <input type="checkbox" id="show_flag_counts" name="show_flag_counts" value="1"
+      [%+ 'checked="checked"' IF show_flag_counts %]>
+    <label for="show_flag_counts">Visa antal flaggor</label>
+  </div>
+
+  <input type="submit" id="submit" value="Filtrera">
+</form>
+
+<h3>Flaggtyper för [% terms.Bugs %]</h3>
+
+[% PROCESS display_flag_types types=bug_types types_id='bugs' %]
+
+<p>
+  <a href="editflagtypes.cgi?action=enter&amp;target_type=bug">Skapa flaggtyp för [% terms.Bugs %]</a>
+</p>
+
+<h3>Flaggtyper för bilagor</h3>
+
+[% PROCESS display_flag_types types=attachment_types types_id='attachments' %]
+
+<p>
+  <a href="editflagtypes.cgi?action=enter&amp;target_type=attachment">Skapa flaggtyp för bilagor</a>
+</p>
+
+[% PROCESS global/footer.html.tmpl %]
+
+[% BLOCK display_flag_types %]
+  <table id="flag_types_[% types_id FILTER html %]">
+
+    <tr class="column_header">
+      <th>Redigera namn ...</th>
+      <th>Beskrivning</th>
+      <th>Sorteringsnyckel</th>
+      <th>Egenskaper</th>
+      <th>Beviljande grupp</th>
+      <th>Begärande grupp</th>
+      [% IF show_flag_counts %]
+        <th>Flaggor</th>
+        [% state_desc = {granted = 'beviljade' denied = 'nekade' pending = 'väntande'} %]
+      [% END %]
+      <th>Åtgärder</th>
+    </tr>
+
+    [% FOREACH type = types %]
+
+      <tr class="[% IF type.is_active %]active[% ELSE %]inactive[% END %]">
+        <td class="nowrap">
+          <a href="editflagtypes.cgi?action=edit&amp;id=[% type.id %]">[% type.name FILTER html %]</a>
+        </td>
+        <td>[% type.description FILTER html %]</td>
+        <td class="right">[% type.sortkey FILTER html %]</td>
+        <td>
+          [% IF type.is_requestable %]
+            <span class="requestable">kan begäras</span>
+          [% END %]
+          [% IF type.is_requestable && type.is_requesteeble %]
+            <span class="requesteeble">(specifikt)</span>
+          [% END %]
+          [% IF type.is_multiplicable %]
+            <span class="multiplicable">kan förekomma flera gånger</span>
+          [% END %]
+        </td>
+        <td>[% IF type.grant_group %][% type.grant_group.name FILTER html %][% END %]</td>
+        <td>[% IF type.request_group %][% type.request_group.name FILTER html %][% END %]</td>
+        [% IF show_flag_counts %]
+          <td>
+            [% FOREACH state = ['granted', 'pending', 'denied'] %]
+              [% bug_list = bug_lists.${type.id}.$state || [] %]
+              [% IF bug_list.size %]
+                <a href="buglist.cgi?bug_id=[% bug_list.unique.nsort.join(",") FILTER html %]">
+                  [% bug_list.size FILTER html %] [%+ state_desc.$state FILTER html %]
+                </a>
+                <br>
+              [% ELSE %]
+                0 [% state_desc.$state FILTER html %]<br>
+              [% END %]
+            [% END %]
+          </td>
+        [% END %]
+        <td>
+          <a href="editflagtypes.cgi?action=copy&amp;id=[% type.id %]">Kopiera</a>
+          | <a href="editflagtypes.cgi?action=confirmdelete&amp;id=[% type.id %]">Ta bort</a>
+        </td>
+      </tr>
+
+    [% END %]
+
+  </table>
+[% END %]

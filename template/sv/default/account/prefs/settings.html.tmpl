@@ -1,0 +1,24 @@
+[%# This Source Code Form is subject to the terms of the Mozilla Public
+  # License, v. 2.0. If a copy of the MPL was not distributed with this
+  # file, You can obtain one at http://mozilla.org/MPL/2.0/.
+  #%]
+
+[% PROCESS "global/setting-descs.none.tmpl" %]
+[% IF settings.size %]
+  [% UNLESS has_settings_enabled %]<p class="criticalmessages">Alla användarinställningar har stängts av av <a href="mailto:[% Param("maintainer") %]">ansvarig</a> för installationen. Du kan därför inte anpassa några inställningar.</p>[% END %]
+  <table id="user_prefs">
+    [% FOREACH name = setting_names %]
+      [% default_name = name _ '-isdefault' %]
+      [% default_val = settings.${name}.default_value %]
+      <tr><td class="right">[% setting_descs.$name OR name FILTER html %]</td><td>
+        [% IF settings.${name}.is_enabled %]
+          <select name="[% name FILTER html %]" id="[% name FILTER html %]"><option value="[% default_name FILTER html %]" [% ' selected="selected"' IF settings.${name}.is_default %]>Webbplatsens standard ([% setting_descs.${default_val} OR default_val FILTER html %])</option>
+          [% FOREACH x = settings.${name}.legal_values %]<option value="[% x FILTER html %]" [% ' selected="selected"' IF x == settings.${name}.value AND NOT settings.${name}.is_default %]>[% setting_descs.${x} OR x FILTER html %]</option>[% END %]</select>
+        [% ELSE %]
+          <select name="[% name FILTER html %]" id="[% name FILTER html %]" disabled="disabled"><option value="[% default_name FILTER html %]">Webbplatsens standard ([% setting_descs.${default_val} OR default_val FILTER html %])</option></select>
+        [% END %]
+      </td></tr>
+    [% END %]
+  </table>
+[% END %]
+<br>

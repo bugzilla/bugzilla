@@ -1,0 +1,472 @@
+[%# This Source Code Form is subject to the terms of the Mozilla Public
+  # License, v. 2.0. If a copy of the MPL was not distributed with this
+  # file, You can obtain one at http://mozilla.org/MPL/2.0/.
+  #
+  # This Source Code Form is "Incompatible With Secondary Licenses", as
+  # defined by the Mozilla Public License, v. 2.0.
+  #%]
+
+[%# INTERFACE:
+  # header_done: boolean. True if the header has already been printed.
+  # error: string. The tag of the error.
+  # variables: hash. Useful data about the problem. The keys are the variable
+  #  names, and the values the variable values.
+  #%]
+
+[%# This is a list of all the possible code errors. Please keep them in
+  # alphabetical order by error tag, and leave a blank line between errors.
+  #
+  # Note that you must explicitly filter every single template variable
+  # in this file; if you do not wish to change it, use the "none" filter.
+  #%]
+
+[% DEFAULT title = "Internt fel" %]
+
+[% error_message = BLOCK %]
+  [% IF error == "auth_invalid_email" %]
+    [% title = "Ogiltig e-postadress" %]
+    Vi tog emot en e-postadress (<b>[% addr FILTER html %]</b>)
+    som inte godkändes av vår syntaxkontroll för giltiga e-postadresser
+    när ditt konto skulle skapas eller uppdateras.
+    [% IF default %]
+      En giltig adress måste innehålla exakt ett ”@”
+      och minst en punkt efter @-tecknet.
+    [% ELSE %]
+      [%+ Param('emailregexpdesc') FILTER html_light %]
+    [% END %]
+    Den får inte heller innehålla otillåtna tecken.
+
+  [% ELSIF error == "authres_unhandled" %]
+    Resultatvärdet [% value FILTER html %] hanterades inte av
+    inloggningskoden.
+
+  [% ELSIF error == "bad_arg" %]
+    Det felaktiga argumentet <code>[% argument FILTER html %]</code> skickades till
+    funktionen <code>[% function FILTER html %]</code>.
+
+  [% ELSIF error == "bug_error" %]
+    När [% terms.bug %] [%+ bug.bug_id FILTER html %] skulle hämtas uppstod
+    felet [% bug.error FILTER html %].
+    
+  [% ELSIF error == "chart_data_not_generated" %]
+    [% docslinks = {'using/reports-and-charts.html' => 'Setting up Charting'} %]
+    [% IF product.id %]
+      Diagram för produkten <em>[% product.name FILTER html %]</em> är ännu inte
+      tillgängliga eftersom inga diagramdata har samlats in sedan den
+      skapades.
+    [% ELSE %]
+      Inga diagramdata har samlats in ännu.
+    [% END %]
+    Vänta en dag och försök igen.
+    Om meddelandet visas även efter en dag bör du kontakta
+    <a href="mailto:[% Param('maintainer') %]">[% Param('maintainer') %]</a>
+    och hänvisa till detta fel.
+
+  [% ELSIF error == "chart_datafile_corrupt" %]
+    Diagramdatafilen [% file FILTER html %] är skadad.
+
+  [% ELSIF error == "chart_dir_nonexistent" %]
+    En av katalogerna <kbd>[% dir FILTER html %]</kbd> och
+    <kbd>[% graph_dir FILTER html %]</kbd> finns inte.
+
+  [% ELSIF error == "chart_file_open_fail" %]
+    Det gick inte att öppna diagramdatafilen <kbd>[% filename FILTER html %]</kbd>.
+ 
+  [% ELSIF error == "column_alter_nonexistent_fk" %]
+    Du försökte ändra den främmande nyckeln för
+    [%+ table FILTER html %].[% column FILTER html %], men kolumnen
+    har ingen främmande nyckel.
+ 
+  [% ELSIF error == "column_not_null_without_default" %]
+    Det gick inte att lägga till kolumnen [% name FILTER html %]:
+    Du kan inte lägga till en NOT NULL-kolumn utan standardvärde i en befintlig tabell
+    utan att ange något för argumentet <code>$init_value</code>.
+
+  [% ELSIF error == "column_not_null_no_default_alter" %]
+    Du kan inte ändra kolumnen [% name FILTER html %] till NOT NULL
+    utan att ange ett standardvärde eller något för $set_nulls_to, eftersom
+    den för närvarande innehåller NULL-värden.
+
+  [% ELSIF error == "comment_extra_data_not_allowed" %]
+    Du försökte ange fältet <code>extra_data</code> till
+    ”[% extra_data FILTER html %]”, men kommentarer av typen [% type FILTER html %]
+    accepterar inte argumentet <code>extra_data</code>.
+
+  [% ELSIF error == "comment_extra_data_required" %]
+    Kommentarer av typen [% type FILTER html %] kräver att argumentet
+    <code>extra_data</code> anges.
+
+  [% ELSIF error == "comment_extra_data_not_numeric" %]
+    Du försökte ange fältet <code>extra_data</code> till
+    ”[% extra_data FILTER html %]”, men kommentarer av typen [% type FILTER html %]
+    kräver ett numeriskt <code>extra_data</code>-argument.
+
+  [% ELSIF error == "comment_type_invalid" %]
+    ”[% type FILTER html %]” är inte en giltig kommentartyp.
+
+  [% ELSIF error == "db_rename_conflict" %]
+    Namnkonflikt: Det går inte att byta namn från [% old FILTER html %] till
+    [%+ new FILTER html %] eftersom [% new FILTER html %] redan finns.
+
+  [% ELSIF error == "cookies_need_value" %]
+    Varje kaka måste ha ett värde.
+
+  [% ELSIF error == "env_no_email" %]
+    Bugzilla tog inte emot någon e-postadress från
+    miljön.
+    [% IF Param("auth_env_email") %]
+      Det innebär att miljövariabeln ”[% Param("auth_env_email") FILTER html %]”
+      var tom eller inte fanns.
+    [% ELSE %]
+      Du måste ange parametern ”auth_env_email” som namnet på
+      miljövariabeln som ska innehålla användarens e-postadress.
+    [% END %]
+
+  [% ELSIF error == "extension_must_be_subclass" %]
+    <code>[% package FILTER html %]</code> från
+    <code>[% filename FILTER html %]</code> är inte en underklass till
+    <code>[% class FILTER html %]</code>.
+
+  [% ELSIF error == "extension_must_return_name" %]
+    <code>[% extension FILTER html %]</code> returnerade
+    <code>[% returned FILTER html %]</code>, som inte är ett giltigt namn
+    för ett tillägg. Tillägg måste returnera sitt namn, inte <code>1</code>
+    eller ett tal. Se dokumentationen för
+    <a href="[% docs_urlbase FILTER html %]api/Bugzilla/Extension.html">Bugzilla::Extension</a>
+    för mer information.
+
+  [% ELSIF error == "extension_no_name" %]
+    Vi hittade ingen <code>NAME</code>-metod i
+    <code>[% package FILTER html %]</code> (inläst från
+    <code>[% filename FILTER html %]</code>). Det innebär att
+    tillägget har ett eller flera av följande problem:
+
+    <ul>
+      <li><code>[% filename FILTER html %]</code> definierade inte paketet
+        <code>[% package FILTER html %]</code>.</li>
+      <li><code>[% package FILTER html %]</code> definierade inte någon
+        <code>NAME</code>-metod (eller så returnerade <code>NAME</code>-metoden
+        en tom sträng).</li>
+    </ul>
+
+  [% ELSIF error == "extern_id_conflict" %]
+    Det externa ID:t ”[% extern_id FILTER html %]” finns redan
+    i databasen för ”[% username FILTER html %]”, men din
+    kontokälla anger att ”[% extern_user FILTER html %]” har det ID:t.
+
+  [% ELSIF error == "field_choice_must_use_type" %]
+    När du anropar en klassmetod på <code>Bugzilla::Field::Choice</code>
+    måste du anropa <code>Bugzilla::Field::Choice-&gt;type('some_field')</code>
+    för att skapa rätt klass (du kan inte anropa klassmetoder direkt
+    på Bugzilla::Field::Choice).
+
+  [% ELSIF error == "field_not_custom" %]
+    '[% field.description FILTER html %]' ([% field.name FILTER html %])
+    är inte ett anpassat fält.
+
+  [% ELSIF error == "field_type_not_specified" %]
+    [% title = "Fälttyp har inte angetts" %]
+    Du måste ange en typ när du skapar ett anpassat fält.
+
+  [% ELSIF error == "illegal_field" %]
+    Ett giltigt [% field FILTER html %] har inte angetts.
+
+  [% ELSIF error == "invalid_customfield_type" %]
+    [% title = "Ogiltig fälttyp" %]
+    Typen <em>[% type FILTER html %]</em> är inte en giltig fälttyp.
+
+  [% ELSIF error == "invalid_feature" %]
+    [% title = "Ogiltigt funktionsnamn" %]
+    [% feature FILTER html %] är inte ett giltigt funktionsnamn. Se
+    <code>OPTIONAL_MODULES</code> in 
+    <code>Bugzilla::Install::Requirements</code> för giltiga namn.
+
+  [% ELSIF error == "invalid_flag_association" %]
+    [% title = "Ogiltig flaggkoppling" %]
+    Vissa flaggor hör inte till
+    [% IF attach_id %]
+      bilagan [% attach_id FILTER html %].
+    [% ELSE %]
+      [%+ terms.bug %] [%+ bug_id FILTER html %].
+    [% END %]
+
+  [% ELSIF error == "invalid_series_id" %]
+    [% title = "Ogiltig serie" %]
+    series_id [% series_id FILTER html %] är inte giltigt. Serien kan ha
+    tagits bort.
+
+  [% ELSIF error == "invalid_timestamp" %]
+    Den angivna tidsstämpeln <code>[% timestamp FILTER html %]</code> kunde inte
+    tolkas som ett giltigt datum och en giltig tid.
+
+  [% ELSIF error == "invalid_webservergroup" %]
+    Det finns ingen sådan grupp: [% group FILTER html %]. Kontrollera inställningen
+    $webservergroup i [% constants.bz_locations.localconfig FILTER html %].
+
+  [% ELSIF error == "flag_unexpected_object" %]
+    [% title = "Objektet känns inte igen" %]
+    Flaggor kan inte anges för objekt av typen [% caller FILTER html %].
+    De kan endast anges för [% terms.bugs %] och bilagor.
+
+  [% ELSIF error == "flag_type_inactive" %]
+    [% title = "Inaktiv flaggtyp" %]
+    Flaggtypen [% type FILTER html %] är inaktiv och kan inte användas
+    för att skapa nya flaggor.
+
+  [% ELSIF error == "flag_type_target_type_invalid" %]
+    Måltypen var varken <em>[% terms.bug %]</em> eller <em>bilaga</em>
+    utan <em>[% target_type FILTER html %]</em>.
+  
+  [% ELSIF error == "invalid_field_name" %]
+    [% title = "Ogiltigt fältnamn" %]
+    ”[% field.truncate(30, "...") FILTER html %]” kan inte användas som fältnamn.
+
+  [% ELSIF error == "jobqueue_insert_failed" %]
+   [% title = "Fel i jobbkö" %]
+    Det gick inte att lägga in jobbet <code>[% job FILTER html %]</code> i jobb-
+    kön: [% errmsg FILTER html %]
+
+  [% ELSIF error == "jobqueue_no_job_mapping" %]
+    <code>Bugzilla::JobQueue</code> har inte konfigurerats för att hantera
+    jobbet ”[% job FILTER html %]”. Du måste lägga till denna jobbtyp
+    till konstanten <code>JOB_MAP</code> i <code>Bugzilla::JobQueue</code>,
+    eventuellt med kroken ”job_map”.
+
+  [% ELSIF error == "ldap_bind_failed" %]
+    Det gick inte att binda till LDAP-servern. Felmeddelandet var:
+    <code>[% errstr FILTER html %]</code>
+
+  [% ELSIF error == "ldap_cannot_retreive_attr" %]
+    Det angivna LDAP-attributet [% attr FILTER html %] hittades inte.
+
+  [% ELSIF error == "ldap_connect_failed" %]
+    Det gick inte att ansluta till LDAP-servern/-servrarna <code>[% server FILTER html %]</code>.
+
+  [% ELSIF error == "ldap_start_tls_failed" %]
+    Det gick inte att starta TLS med LDAP-servern: <code>[% error FILTER html %]</code>.
+
+  [% ELSIF error == "ldap_search_error" %]
+    Ett fel uppstod när LDAP skulle sökas efter
+    &quot;[% username FILTER html %]&quot;: 
+    [% IF errstr %]
+      <code>[% errstr FILTER html %]</code>
+    [% ELSE %]
+      Det gick inte att hitta användaren i LDAP
+    [% END %]
+
+  [% ELSIF error == "ldap_server_not_defined" %]
+    LDAP-servern för autentisering har inte angetts.
+
+  [% ELSIF error == "mail_send_error" %]
+    Ett fel uppstod när e-post skickades från ”[% mail.header('From') FILTER html %]”
+    till ”[% mail.header('To') FILTER html %]”:
+    [%+ msg FILTER html %]
+
+  [% ELSIF error == "missing_series_id" %]
+    En serie har lagts in i databasen, men inget series_id returnerades för
+    den. Serie: [% series.category FILTER html %] /
+    [%+ series.subcategory FILTER html %] / 
+    [%+ series.name FILTER html %].
+
+  [% ELSIF error == "object_dep_sort_loop" %]
+    Det finns en slinga i VALIDATOR_DEPENDENCIES som omfattar
+    ”[%+ field FILTER html %]”. Här är fälten som beaktades:
+    [%+ considered.join(', ') FILTER html %].
+
+  [% ELSIF error == "param_invalid" %]
+    [% title = "Ogiltig parameter" %]
+    <code>[% param FILTER html %]</code> är inte en giltig parameter
+    för funktionen [% function FILTER html %].
+
+  [% ELSIF error == "param_must_be_numeric" %]
+    [% title = "Ogiltig parameter" %]
+    Den ogiltiga parametern <code>[% param FILTER html %]</code> skickades till
+    <code>[% function FILTER html %]</code>: Den måste vara numerisk.
+
+  [% ELSIF error == "param_required" %]
+    [% title = "Parameter saknas" %]
+    Funktionen <code>[% function FILTER html %]</code> kräver
+    argumentet <code>[% param FILTER html %]</code>, men argumentet
+    har inte angetts.
+
+  [% ELSIF error == "param_integer_required" %]
+    Funktionen <code>[% function FILTER html %]</code> kräver
+    att <code>[% param FILTER html %]</code> är ett heltal.
+
+  [% ELSIF error == "param_scalar_array_required" %]
+    Parametern <code>[% param FILTER html %]</code> måste vara en skalärmatris
+    (heltal och/eller strängar).
+
+  [% ELSIF error == "params_required" %]
+    [% title = "Parameter saknas" %]
+    Funktionen <code>[% function FILTER html %]</code> kräver
+    att du anger en av följande parametrar:
+    <code>[% params.join(', ') FILTER html %]</code>
+
+  [% ELSIF error == "product_empty_group_controls" %]
+    [% title = "Gruppstyrning saknas" %]
+    Nya inställningar måste anges för att redigera gruppstyrning för
+    gruppen [% group.name FILTER html %].
+
+  [% ELSIF error == "product_illegal_group_control" %]
+    [% title = "Otillåten gruppstyrning" %]
+    ”[% value FILTER html %]” är inte ett giltigt värde för
+    fältet ”[% field FILTER html %]”.
+
+  [% ELSIF error == "protection_violation" %]
+    Funktionen <code>[% function FILTER html %]</code> anropades
+
+    [% IF argument %]
+        med argumentet <code>[% argument FILTER html %]</code>
+    [% END %]
+
+    från
+   
+    [% IF caller %]
+        <code>[%+ caller FILTER html %]</code>, som ligger
+    [% END %]
+
+    utanför paketet. Funktionen får endast anropas från
+    en underklass till <code>[% superclass FILTER html %]</code>.
+
+  [% ELSIF error == "radius_preparation_error" %]
+    Ett fel uppstod när en RADIUS-autentiseringsbegäran förbereddes:
+    <code>[% errstr FILTER html %]</code>.
+
+  [% ELSIF error == "search_cp_without_op" %]
+    Sökargumentet f[% id FILTER html %] är ”CP”, men saknar
+    motsvarande ”OP” före sig.
+
+  [% ELSIF error == "search_invalid_joiner" %]
+    ”[% joiner FILTER html %]” är inte en giltig kopplare för en sökning.
+
+  [% ELSIF error == "setting_info_invalid" %]
+    För att skapa en ny inställning måste du ange ett inställningsnamn, en lista
+    med värde-/sorteringsindexpar och standardvärdet.
+
+  [% ELSIF error == "setting_name_invalid" %]
+    Inställningsnamnet <em>[% name FILTER html %]</em> är inte ett giltigt
+    alternativ. Inställningsnamn måste börja med en bokstav och får endast innehålla
+    bokstäver, siffror eller symbolerna ”_”, ”-”, ”.” eller ”:”.
+
+  [% ELSIF error == "setting_subclass_invalid" %]
+    Det finns ingen sådan underklass till Setting som
+    <code>[% subclass FILTER html %]</code>.
+
+  [% ELSIF error == "setting_value_invalid" %]
+    Värdet ”<code>[% value FILTER html %]</code>” finns inte i listan över
+    giltiga värden för inställningen <em>[% name FILTER html %]</em>.
+
+  [% ELSIF error == "token_generation_error" %]
+    Något är allvarligt fel med systemet för att skapa token.
+
+  [% ELSIF error == "cancel_token_does_not_exist" %]
+    Token som ska avbrytas finns inte.
+
+  [% ELSIF error == "template_error" %]
+    [% template_error_msg FILTER html %]
+
+  [% ELSIF error == "template_invalid" %]
+    En mall med ogiltigt filnamn hittades i krok-anropet: [% name FILTER html %].
+
+  [% ELSIF error == "unable_to_retrieve_password" %]
+     Det gick inte att hämta ditt gamla lösenord från databasen.
+
+  [% ELSIF error == "undefined_field" %]
+    Formulärfältet [% field FILTER html %] har inte definierats.
+    
+  [% ELSIF error == "unknown_method" %]
+    Den begärda metoden ”[% method FILTER html %]” hittades inte.
+
+  [% ELSIF error == "usage_mode_invalid" %]
+    ”[% invalid_usage_mode FILTER html %]” är inte ett giltigt användningsläge.
+
+  [% ELSIF error == "must_be_patch" %]
+    [% title = "Bilagan måste vara en patch" %]
+    Bilaga #[% attach_id FILTER html %] måste vara en patch.
+
+  [% ELSIF error == "not_in_transaction" %]
+    Försök att avsluta en transaktion som inte har startats.
+
+  [% ELSIF error == "invalid_post_bug_submit_action" %]
+    Ogiltig inställning för post_bug_submit_action
+
+  [% ELSIF error == "search_field_operator_unsupported" %]
+    [% title = "Ogiltig söktyp" %]
+    Bugzilla har inte stöd för söktypen
+    "[% operator.truncate(30, "...") FILTER html %]".
+
+  [% ELSIF error == "bz51_attempted_upgrade" %]
+    [% title = "Ogiltig uppgraderingsväg" %]
+    Det verkar som om du försöker ”uppgradera” från
+    Bugzilla 5.1. Det stöds inte eftersom 5.2 bygger
+    på Bugzilla 5.0.6 och inte 5.1, så det är i själva
+    verket en nedgradering.
+
+  [% ELSE %]
+    [%# Try to find hooked error messages %]
+    [% error_message = Hook.process("errors") %]
+    [% IF NOT error_message %]
+      [% title = "Internt fel" %]
+      Ett internt fel har uppstått, men Bugzilla vet inte
+      vad <code>[% error FILTER html %]</code> betyder.
+
+      Om du använder [% terms.Bugzilla %] och ser detta meddelande, spara
+      sidan och skicka den till [% Param('maintainer') %].
+    [% ELSE %]
+      [% error_message FILTER none %]
+    [% END %]
+  [% END %]
+[% END %]
+
+[%# We only want HTML error messages for ERROR_MODE_WEBPAGE %]
+[% USE Bugzilla %]
+[% IF Bugzilla.error_mode != constants.ERROR_MODE_WEBPAGE %]
+  [% IF Bugzilla.usage_mode == constants.USAGE_MODE_BROWSER %]
+    [% error_message FILTER none %]
+  [% ELSE %]
+    [% error_message FILTER txt %]
+  [% END %]
+  [% RETURN %]
+[% END %]
+
+[% UNLESS header_done %]
+  [% PROCESS global/header.html.tmpl %]
+[% END %]
+
+[% PROCESS global/docslinks.html.tmpl
+   docslinks      = docslinks
+   admindocslinks = admindocslinks
+%]
+
+<p>
+  Ett oväntat fel uppstod. Det kan vara ett tillfälligt problem eller bero på att
+  någon kod inte fungerar korrekt. Om problemet kvarstår, skicka sidan via e-post
+  to <a href="mailto:[% Param("maintainer") %]">[% Param("maintainer") %]</a>
+  tillsammans med information om vad du gjorde när meddelandet visades.
+</p>
+
+<p>
+  <samp>URL: [% Bugzilla.cgi.self_url FILTER html %]</samp>
+</p>
+
+<div id="error_msg" class="throw_error">
+  [% error_message FILTER none %]
+</div>
+
+<p id="post_err_msg">
+  Stackspårning:
+</p>
+
+<pre>[% traceback FILTER html %]</pre>
+
+[% IF variables %]
+  <pre>
+Variabler:
+  [% FOREACH key = variables.keys %]
+    [%+ key FILTER html %]: [%+ variables.$key FILTER html %]
+  [% END %]
+  </pre>
+[% END %]
+
+[% PROCESS global/footer.html.tmpl %]

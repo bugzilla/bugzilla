@@ -1,0 +1,43 @@
+[%# This Source Code Form is subject to the terms of the Mozilla Public
+  # License, v. 2.0. If a copy of the MPL was not distributed with this
+  # file, You can obtain one at http://mozilla.org/MPL/2.0/.
+  #
+  # This Source Code Form is "Incompatible With Secondary Licenses", as
+  # defined by the Mozilla Public License, v. 2.0.
+  #%]
+[%
+   title = "RADIUS"
+   desc = "Konfigurera detta innan du väljer RADIUS som autentiseringsmetod"
+%]
+
+[% param_descs = {
+  RADIUS_server => "Namnet på din RADIUS-server och, om det behövs, dess port " _
+                   "(t.ex. <code>radius.company.com</code> eller " _
+                   "<code>radius.company.com:portnummer</code>).<br>" _
+                   "Krävs bara om " _
+                   "<a href=\"?section=auth#user_verify_class_desc\">parametern " _
+                   "<code>user_verify_class</code></a> innehåller " _
+                   "<code>RADIUS</code>.",
+
+  RADIUS_secret => "Din RADIUS-servers hemlighet.<br>" _
+                   "Krävs bara om " _
+                   "<a href=\"?section=auth#user_verify_class_desc\">parametern " _
+                   "<code>user_verify_class</code></a> innehåller " _
+                   "<code>RADIUS</code>.",
+
+  RADIUS_NAS_IP => "Attributet NAS-IP-Address som ska användas vid utbyte av " _
+                   "data med din RADIUS-server. Om det inte anges används " _
+                   "<code>127.0.0.1</code>.<br>" _
+                   "Har betydelse bara om " _
+                   "<a href=\"?section=auth#user_verify_class_desc\">parametern " _
+                   "<code>user_verify_class</code></a> innehåller " _
+                   "<code>RADIUS</code>.",
+
+  RADIUS_email_suffix => "Suffix som läggs till ett RADIUS-användarnamn för att " _
+                         "bilda en e-postadress.<br>" _
+                         "Har betydelse bara om " _
+                         "<a href=\"?section=auth#user_verify_class_desc\">parametern " _
+                         "<code>user_verify_class</code></a> innehåller " _
+                         "<code>RADIUS</code>.",
+  }
+%]

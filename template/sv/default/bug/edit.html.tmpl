@@ -634,8 +634,8 @@
         [% emitted_description = 1 %]
           <div id="bz_restrict_group_visibility_help">
             <b>Endast användare i
-              [%+ IF Param('or_groups') %]at least one[% ELSE %]all[% END %]
-              of the selected groups can view this [% terms.bug %]:</b>
+              [%+ IF Param('or_groups') %]minst en[% ELSE %]alla[% END %]
+              av de valda grupperna kan se [% terms.bug %]:</b>
              <p class="instructions">
                Om du avmarkerar alla rutor blir [% terms.bug %] mer offentlig.
              </p>
@@ -658,15 +658,15 @@
 
     [% IF emitted_description %]
       [% IF NOT inallgroups %]
-        <p class="instructions">Only members of a group can change the 
-          visibility of [% terms.abug %] for that group.</p>
+        <p class="instructions">Endast medlemmar i en grupp kan ändra
+          synligheten för [% terms.abug %] för gruppen.</p>
       [% END %]
     [% END %]
 
     [% IF inagroup %]
       <div id="bz_enable_role_visibility_help">
-        <b>Users in the roles selected below can always view 
-          this [% terms.bug %]:</b>
+        <b>Användare i rollerna nedan kan alltid se
+          [% terms.bug %]:</b>
       </div>
       <div id="bz_enable_role_visibility">
         <div>
@@ -696,13 +696,12 @@
           <label for="cclist_accessible">CC-lista</label>
         </div>
         <p class="instructions">
-          The assignee
+          Den ansvariga personen
           [% IF (Param('useqacontact')) %]
-             and QA contact
+             och QA-kontakten
           [% END %]
-          can always see [% terms.abug %], and this section does not
-          få effekt om inte [% terms.bug %] begränsas till minst
-          least one group.
+          kan alltid se [% terms.abug %], och det här avsnittet börjar inte
+          gälla förrän [% terms.bug %] begränsas till minst en grupp.
         </p>
       </div>
     [% END %]
@@ -716,16 +715,16 @@
 [% BLOCK section_dates %]
   <tr>
     <th class="field_label">
-      Reported:
+      Rapporterad:
     </th>
     <td>
-     [% bug.creation_ts FILTER time("%Y-%m-%d %H:%M %Z") %] by [% INCLUDE global/user.html.tmpl who = bug.reporter %]
+     [% bug.creation_ts FILTER time("%Y-%m-%d %H:%M %Z") %] av [% INCLUDE global/user.html.tmpl who = bug.reporter %]
     </td>
   </tr>
   
   <tr>
     <th class="field_label">
-      Modified:
+      Ändrad:
     </th>
     <td>
       [% bug.delta_ts FILTER time("%Y-%m-%d %H:%M %Z") %]
@@ -742,7 +741,7 @@
     <tr>
       <th class="field_label">
         <label [% IF user.id %]for="newcc"[% END %] accesskey="a">
-          CC List:
+          CC-lista:
         </label>
       </th>
       <td>
@@ -803,9 +802,9 @@
               <input type="checkbox" id="removecc" name="removecc">
               <label for="removecc">
                 [% IF bug.user.canedit %]
-                  Remove selected CCs
+                  Ta bort valda från CC-listan
                 [% ELSE %]
-                  Remove me from the CC list
+                  Ta bort mig från CC-listan
                 [% END %]
               </label>
               <br>
@@ -1106,8 +1105,8 @@
     <tr>
       <td colspan="7" class="bz_summarize_time">
         <a href="summarize_time.cgi?id=[% bug.bug_id %]&amp;do_depends=1">
-        Summarize time (including time for [% terms.bugs %]
-        blocking this [% terms.bug %])</a>
+        Sammanfatta tid (även tiden för [% terms.bugs %] som
+        blockerar [% terms.bug %])</a>
       </td>
     </tr>
   </table> 
@@ -1174,10 +1173,10 @@
           <td>
             <fieldset>
               <legend>Obs</legend>
-              You need to
+              Du måste
               <a href="show_bug.cgi?id=
-                      [%- bug.bug_id %]&amp;GoAheadAndLogIn=1">log in</a>
-              before you can comment on or make changes to this [% terms.bug %].
+                      [%- bug.bug_id %]&amp;GoAheadAndLogIn=1">logga in</a>
+              innan du kan kommentera eller ändra [% terms.bug %].
             </fieldset>
           </td>
         </tr> 

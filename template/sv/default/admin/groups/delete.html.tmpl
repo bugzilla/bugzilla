@@ -1,0 +1,180 @@
+[%# This Source Code Form is subject to the terms of the Mozilla Public
+  # License, v. 2.0. If a copy of the MPL was not distributed with this
+  # file, You can obtain one at http://mozilla.org/MPL/2.0/.
+  #
+  # This Source Code Form is "Incompatible With Secondary Licenses", as
+  # defined by the Mozilla Public License, v. 2.0.
+  #%]
+
+[%# INTERFACE:
+  # group: A Bugzilla::Group object representing the group that is
+  #        about to be deleted.
+  # shared_queries: int; The number of queries being shared with this
+  #                 group.
+  #%]
+
+[% title = BLOCK %]Ta bort gruppen '[% group.name FILTER html %]'[% END %]
+[% PROCESS global/header.html.tmpl
+  title = title
+  style_urls = ['skins/standard/admin.css']
+  doc_section = "administering/groups.html"
+%]
+
+<table id="admin_table">
+  <tr class="column_header">
+    <th>Fält</th>
+    <th>Värde</th>
+  </tr>
+  <tr>
+    <td>Id</td>
+    <td>[% group.id FILTER html %]</td>
+  </tr>
+  <tr>
+    <td>Namn</td>
+    <td>[% group.name FILTER html %]</td>
+  </tr>
+  <tr>
+    <td>Beskrivning</td>
+    <td>[% group.description FILTER html_light %]</td>
+  </tr>
+</table>
+
+<form method="post" action="editgroups.cgi">
+  [% IF group.members_non_inherited.size %]
+    <p><b>[% group.members_non_inherited.size FILTER html %] användare är
+      direkt medlemmar i den här gruppen. Du kan inte ta bort gruppen så länge
+      den har användare.</b>
+
+    <br><a href="editusers.cgi?action=list&amp;groupid=
+                 [%- group.id FILTER uri %]&amp;grouprestrict=1">Visa
+    vilka användare</a>. <label><input type="checkbox" name="removeusers">Ta bort
+    alla användare från den här gruppen.</label></p>
+  [% END %]
+
+  [% IF group.granted_by_direct(constants.GROUP_MEMBERSHIP).size %]
+    <p><b>Medlemmar i den här gruppen ärver medlemskap i följande grupper:</b></p>
+    <ul>
+      [% FOREACH grantor = group.granted_by_direct(constants.GROUP_MEMBERSHIP) %]
+        <li>[% grantor.name FILTER html %]</li>
+      [% END %]
+    </ul>
+  [% END %]
+
+  [% IF group.bugs.size %]
+    <p><b>[% group.bugs.size FILTER html %] [%+ terms.bug %] är
+     synliga endast för den här gruppen. Du kan inte ta bort gruppen medan
+     någon [%+ terms.bugs %] använder den.</b>
+
+    <br><a href="buglist.cgi?field0-0-0=bug_group&amp;type0-0-0=equals&amp;value0-0-0=
+                 [%- group.name FILTER uri %]">Visa
+    vilka [% terms.bugs %]</a>.
+    <label><input type="checkbox" name="removebugs">Ta bort
+    gruppbegränsningen från alla [% terms.bugs %].</label></p>
+
+    <p><b>OBS!</b> Genom att kryssa i rutan kan du göra konfidentiella
+    [% terms.bugs %] offentliga. Du bör <b>noggrant</b> granska
+    [% terms.bugs %] i gruppen innan du kryssar i rutan.</p>
+  [% END %]
+
+  [% IF group.products.size %]
+    <p><b>Den här gruppen är kopplad till följande produkter:</b></p>
+    [% SET any_hidden = 0 %]
+    <ul>
+      [% FOREACH data = group.products %]
+
+        [% SET active = [] %]
+        [% FOREACH control = data.controls.keys.sort %]
+          [% NEXT IF !data.controls.$control %]
+          [% IF control == 'othercontrol' OR control == 'membercontrol' %]
+            [% SWITCH data.controls.$control %]
+              [% CASE constants.CONTROLMAPMANDATORY %]
+                [% SET type = "Obligatorisk" %]
+              [% CASE constants.CONTROLMAPSHOWN %]
+                [% SET type = "Visas" %]
+              [% CASE constants.CONTROLMAPDEFAULT %]
+                [% SET type = "Standard" %]
+            [% END %]
+            [% active.push("$control: $type") %]
+          [% ELSE %]
+            [% active.push(control) %]
+          [% END %]
+        [% END %]
+
+        [% SET hidden = 0 %]
+        [% IF data.controls.othercontrol == constants.CONTROLMAPMANDATORY
+              AND data.controls.membercontrol == constants.CONTROLMAPMANDATORY
+              AND data.controls.entry 
+        %]
+          [% SET hidden = 1 %]
+        [% END %]
+
+        <li><a href="editproducts.cgi?action=editgroupcontrols&amp;product=
+                    [%- data.product.name FILTER uri %]">
+          [%- data.product.name FILTER html %]</a>
+          ([% active.join(', ') FILTER html %])
+          [% IF hidden %]
+            <strong>VARNING: Produkten är för närvarande dold.
+            Om du tar bort gruppen kan produkten bli offentligt synlig
+            om ingen annan grupp gäller.
+            </strong>
+          [% END %]</li>
+      [% END %]
+    </ul>
+
+    <p><label><input type="checkbox" name="unbind">Ta ändå bort gruppen
+      och ta bort dessa inställningar.</label></p>
+  [% END %]
+  
+  [% IF group.flag_types.size %]
+    <p><b>Den här gruppen begränsar vem som kan ändra flaggor av vissa typer.
+    Du kan inte ta bort gruppen så länge den används av flaggtyper.</b>
+
+    <br><a href="editflagtypes.cgi?action=list&amp;group=
+                 [%- group.id FILTER uri %]">Visa
+    vilka typer</a>.
+    <label><input type="checkbox" name="removeflags">Ta bort alla
+    flaggtyper från den här gruppen.</label></p>
+  [% END %]
+
+  [% IF shared_queries %]
+    <p>
+      <b>Det
+      [% IF shared_queries > 1 %]
+        finns [% shared_queries %] sparade sökningar
+      [% ELSE %]
+        finns en sparad sökning
+      [% END %]
+      som delas med den här gruppen.</b>
+      Om du tar bort gruppen blir
+      [% IF shared_queries > 1 %]
+        de här sparade sökningarna
+      [% ELSE %]
+        den här sparade sökningen
+      [% END %]
+      privat igen.
+    </p>
+  [% END %]
+
+  <h2>Bekräftelse</h2>
+
+  <p class="confirmation">
+    Vill du verkligen ta bort den här gruppen?
+  </p>
+  [% IF group.users.size || group.bugs.size || group.products.size 
+        || group.flags.size
+  %]
+    <p><b>Du måste kryssa i alla rutorna ovan eller först rätta
+          de angivna problemen innan du kan fortsätta.</b></p>
+  [% END %]
+
+  <p>
+    <input type="submit" id="delete" value="Ja, ta bort">
+    <input type="hidden" name="action" value="delete">
+    <input type="hidden" name="group" value="[% group.id FILTER html %]">
+    <input type="hidden" name="token" value="[% token FILTER html %]">
+  </p>
+</form>
+
+Gå tillbaka till <a href="editgroups.cgi">grupplistan</a>.
+
+[% PROCESS global/footer.html.tmpl %] 

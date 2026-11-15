@@ -1,0 +1,47 @@
+[%# This Source Code Form is subject to the terms of the Mozilla Public
+  # License, v. 2.0. If a copy of the MPL was not distributed with this
+  # file, You can obtain one at http://mozilla.org/MPL/2.0/.
+  #
+  # This Source Code Form is "Incompatible With Secondary Licenses", as
+  # defined by the Mozilla Public License, v. 2.0.
+  #%]
+
+[% series_name = BLOCK %]
+  [% series.category FILTER html %] /
+  [%+ series.subcategory FILTER html %] /
+  [%+ series.name FILTER html %]
+[% END %]
+
+[% PROCESS global/header.html.tmpl title = "Radera serie"
+                                   style_urls = ['skins/standard/admin.css'] %]
+
+<p>
+  Du håller på att helt ta bort serien <b>[% series_name FILTER none %]</b>
+  från databasen. All data som hör till serien raderas permanent.
+</p>
+<p>
+  [% IF series.creator %]
+    Serien skapades av <a href="mailto:[% series.creator.email FILTER html %]">
+    [% series.creator.email FILTER html %]</a>
+  [% ELSE %]
+    Serien skapades automatiskt av Bugzilla
+  [% END %]
+
+  [% IF series.public %]
+    och är offentlig.
+  [% ELSIF series.creator %]
+    och är endast synlig för denna användare.
+  [% ELSE %]
+    och kan inte visas av någon.
+  [% END %]
+</p>
+
+<p class="areyoureallyreallysure">Är du säker på att du vill radera denna serie?</p>
+
+<p>
+  <a href="chart.cgi?action=delete&amp;series_id=[% series.series_id FILTER html %]&amp;token=
+           [%- issue_hash_token([series.id, series.name]) FILTER uri %]">Ja, radera</a> |
+  <a href="chart.cgi">Nej, gå tillbaka till diagramsidan</a>
+</p>
+
+[% PROCESS global/footer.html.tmpl %]

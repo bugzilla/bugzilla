@@ -1,0 +1,70 @@
+[%# This Source Code Form is subject to the terms of the Mozilla Public
+  # License, v. 2.0. If a copy of the MPL was not distributed with this
+  # file, You can obtain one at http://mozilla.org/MPL/2.0/.
+  #
+  # This Source Code Form is "Incompatible With Secondary Licenses", as
+  # defined by the Mozilla Public License, v. 2.0.
+  #%]
+
+[% PROCESS global/header.html.tmpl
+  title = "Rapporter och diagram"
+  doc_section = "using/reports-and-charts.html"
+  style_urls = ['skins/standard/buglist.css']
+%]
+
+<p>
+  Bugzilla låter dig visa och följa tillståndet i databasen med [% terms.bugs %]
+  på många olika sätt.
+</p>
+
+<h2>Nuvarande tillstånd</h2>
+
+<ul>
+  <li id="report_search">
+    <strong><a href="query.cgi">Sök</a></strong> -
+    lista uppsättningar av [% terms.bugs %].
+  </li>
+  <li id="report_tabular">
+    <strong>
+      <a href="query.cgi?format=report-table">Tabellrapporter</a>
+    </strong> -
+    tabeller med antal [% terms.bugs %] i en, två eller tre dimensioner, som HTML eller CSV.
+  </li>
+  [% IF feature_enabled('graphical_reports') %]
+    <li id="report_graphical">
+      <strong>
+        <a href="query.cgi?format=report-graph">Grafiska rapporter</a>
+      </strong> -
+      linjediagram, stapeldiagram och cirkeldiagram.
+    </li>
+  [% END %]
+  <li id="report_duplicates">
+    <strong><a href="duplicates.cgi">Dubbletter</a></strong> -
+    lista över de mest rapporterade [% terms.bugs %].
+  </li>
+  [% Hook.process('current_state') %]
+</ul>
+
+[% IF feature_enabled('new_charts') OR feature_enabled('old_charts') %]
+  <h2>Förändring över tid</h2>
+
+  <ul>
+    [% IF feature_enabled('old_charts') %]
+      <li id="old_charts">
+        <strong><a href="reports.cgi">Gamla diagram</a></strong> -
+        rita upp status och/eller lösning för [% terms.bugs %] över
+        tid för varje produkt i databasen.
+      </li>
+    [% END %]
+    [% IF feature_enabled('new_charts') AND user.in_group(Param("chartgroup")) %]
+      <li id="new_charts">
+        <strong><a href="chart.cgi">Nya diagram</a></strong> -
+        rita upp en valfri sökning över tid. Betydligt kraftfullare.
+      </li>
+    [% END %]
+  </ul>
+[% END %]
+
+[% Hook.process('end') %]
+
+[% PROCESS global/footer.html.tmpl %]

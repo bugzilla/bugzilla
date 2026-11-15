@@ -1,0 +1,34 @@
+[%# This Source Code Form is subject to the terms of the Mozilla Public
+  # License, v. 2.0. If a copy of the MPL was not distributed with this
+  # file, You can obtain one at http://mozilla.org/MPL/2.0/.
+  #
+  # This Source Code Form is "Incompatible With Secondary Licenses", as
+  # defined by the Mozilla Public License, v. 2.0.
+  #%]
+
+[%
+   title = "Obligatoriska inställningar"
+   desc = "Inställningar som krävs för att $terms.Bugzilla ska fungera korrekt"
+%]
+
+[% param_descs = {
+  urlbase => "Den URL som utgör den gemensamma inledande delen av alla URL:er " _
+             "för ${terms.Bugzilla}.",
+
+  sslbase => "Den URL som utgör den gemensamma inledande delen av alla HTTPS-URL:er " _
+             "(SSL) för ${terms.Bugzilla}.",
+
+  ssl_redirect =>
+    "När alternativet är aktiverat ser $terms.Bugzilla till att varje sida " _
+    "används över SSL genom att omdirigera vanliga HTTP-begäranden till HTTPS " _
+    "med parametern <var>sslbase</var>. Då använder $terms.Bugzilla också länkar " _
+    "med <var>sslbase</var> i e-post i stället för <var>urlbase</var>.",
+
+  cookiepath => "Sökvägen, relativt webbserverns dokumentrot, som begränsar var " _
+                "$terms.Bugzilla-kakor kan användas. Vanligen är detta URI-delen " _
+                "av URL-basen. Börja med ett snedstreck (/). Om $terms.Bugzilla " _
+                "till exempel körs från ”http://www.exempel.se/bugzilla/” anger du " _
+                "parametern som /bugzilla/. Värdet / gör att alla webbplatser som " _
+                "betjänas av webbservern eller den virtuella webbplatsen kan läsa " _
+                "$terms.Bugzilla-kakor.",
+} %]

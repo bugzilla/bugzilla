@@ -1,0 +1,75 @@
+[%# This Source Code Form is subject to the terms of the Mozilla Public
+  # License, v. 2.0. If a copy of the MPL was not distributed with this
+  # file, You can obtain one at http://mozilla.org/MPL/2.0/.
+  #
+  # This Source Code Form is "Incompatible With Secondary Licenses", as
+  # defined by the Mozilla Public License, v. 2.0.
+  #%]
+
+[% title = BLOCK %]
+  Ta bort bilaga [% a.id FILTER html %] till [% terms.Bug %] [%+ a.bug_id FILTER html %]
+[% END %]
+
+[% PROCESS global/header.html.tmpl
+  title = title
+  style_urls = ['skins/standard/admin.css']
+  doc_section = "using/editing.html#attachments"
+%]
+
+<table id="admin_table">
+  <tr class="column_header">
+    <th>Fält</th>
+    <th>Värde</th>
+  </tr>
+  <tr>
+    <td>Bilage-ID</td>
+    <td>
+      <a href="attachment.cgi?id=[% a.id FILTER html %]">[% a.id FILTER html %]</a>
+    </td>
+  </tr>
+  <tr>
+    <td>Filnamn</td>
+    <td>[% a.filename FILTER html %]</td>
+  </tr>
+  <tr>
+    <td>Beskrivning</td>
+    <td>[% a.description FILTER html %]</td>
+  </tr>
+  <tr>
+    <td>Ingår i [% terms.Bug %]</td>
+    <td>[% a.bug_id FILTER bug_link(a.bug_id) FILTER none %]</td>
+  </tr>
+  <tr>
+    <td>Skapare</td>
+    <td>[% a.attacher.identity FILTER html %]</td>
+  </tr>
+  <tr>
+    <td>Skapad</td>
+    <td>[% a.attached FILTER time %]</td>
+  </tr>
+</table>
+
+<h2>Bekräfta</h2>
+
+<p class="confirmation">
+  Innehållet i bilagan tas bort <b>oåterkalleligt</b>.
+</p>
+
+<p>Vill du verkligen ta bort bilagan?</p>
+
+<form action="attachment.cgi" method="POST">
+  <label for="reason">Orsak till borttagningen:</label>
+  <input type="text" id="reason" name="reason" value="" size="80" maxlength="200">
+  <br>
+  <input type="submit" value="Ja, ta bort" id="delete">
+  <input type="hidden" name="action" value="delete">
+  <input type="hidden" name="id" value="[% a.id FILTER html %]">
+  <input type="hidden" name="token" value="[% token FILTER html %]">
+</form>
+
+<p>
+  Nej, avbryt borttagningen och återgå till
+  [%+ "$terms.bug " _ a.bug_id FILTER bug_link(a.bug_id) FILTER none %].
+</p>
+
+[% PROCESS global/footer.html.tmpl %]

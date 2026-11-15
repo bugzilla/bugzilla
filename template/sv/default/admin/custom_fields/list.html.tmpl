@@ -1,0 +1,94 @@
+[%# This Source Code Form is subject to the terms of the Mozilla Public
+  # License, v. 2.0. If a copy of the MPL was not distributed with this
+  # file, You can obtain one at http://mozilla.org/MPL/2.0/.
+  #
+  # This Source Code Form is "Incompatible With Secondary Licenses", as
+  # defined by the Mozilla Public License, v. 2.0.
+  #%]
+
+[% PROCESS "global/field-descs.none.tmpl" %]
+
+[% PROCESS global/header.html.tmpl
+  title = "Anpassade fält"
+  style_urls = ['skins/standard/admin.css']
+  doc_section = "administering/custom-fields.html"
+%]
+
+[% delete_contentlink = BLOCK %]editfields.cgi?action=del&amp;name=%%name%%[% END %]
+
+[% columns = [
+     {
+       name => "name"
+       heading => "Redigera anpassat fält ..."
+       contentlink => "editfields.cgi?action=edit&amp;name=%%name%%"
+     },
+     {
+       name => "description"
+       heading => "Beskrivning"
+     },
+     {
+       name => "sortkey"
+       heading => "Sorteringsnyckel"
+     },
+     {
+       name => "type"
+       heading => "Typ"
+     },
+     {
+       name => "enter_bug"
+       heading => "Redigerbart när $terms.Bug skapas"
+     },
+     {
+       name => "mailhead"
+       heading => "I ${terms.Bug}mail när $terms.Bug skapas"
+     },
+     {
+       name => "obsolete"
+       heading => "Är inaktuellt"
+     },
+     {
+       name => "is_mandatory"
+       heading => "Är obligatoriskt"
+     },
+     {
+       name => "action"
+       heading => "Åtgärd"
+       content => ""
+     }
+   ]
+%]
+
+[% USE Bugzilla %]
+[% custom_fields = Bugzilla.fields({ custom => 1 }) %]
+
+[% overrides.type = {} %]
+
+[% FOREACH field_type = field_types.keys %]
+  [% overrides.type.type.${field_type} = {
+       override_content => 1
+       content => field_types.${field_type}
+    }
+  %]
+[% END %]
+
+[% overrides.action.obsolete = {
+     "1" => {
+       override_content => 1
+       content => "Ta bort"
+       override_contentlink => 1
+       contentlink => delete_contentlink
+     }
+   }
+%]
+
+[% PROCESS admin/table.html.tmpl
+     columns = columns
+     overrides = overrides
+     data = custom_fields
+%]
+
+<p>
+  <a href="editfields.cgi?action=add">Lägg till ett nytt anpassat fält</a>
+</p>
+
+[% PROCESS global/footer.html.tmpl %]

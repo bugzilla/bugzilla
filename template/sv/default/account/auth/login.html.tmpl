@@ -1,0 +1,47 @@
+[%# This Source Code Form is subject to the terms of the Mozilla Public
+  # License, v. 2.0. If a copy of the MPL was not distributed with this
+  # file, You can obtain one at http://mozilla.org/MPL/2.0/.
+  #%]
+
+[% IF !target %]
+ [% target = "index.cgi" %]
+[% END %]
+
+[% PROCESS global/header.html.tmpl title = "Logga in på $terms.Bugzilla" %]
+[% USE Bugzilla %]
+
+<p>Du måste ha ett giltigt inloggningsnamn och lösenord för att fortsätta.</p>
+
+<form name="login" action="[% urlbase FILTER html %][% target FILTER html %]" method="POST"
+[%- IF Bugzilla.cgi.param("data") %] enctype="multipart/form-data"[% END %]>
+  <table>
+    <tr><th><label for="Bugzilla_login">[% IF login_not_email %]Inloggningsnamn:[% ELSE %]Din e-postadress:[% END %]</label></th>
+      <td><input size="35" id="Bugzilla_login" name="Bugzilla_login" [%- ' type="email"' UNLESS login_not_email %] autofocus required>[% Param('emailsuffix') FILTER html %]</td></tr>
+    <tr><th><label for="Bugzilla_password">Lösenord:</label></th><td><input type="password" size="35" id="Bugzilla_password" name="Bugzilla_password" required></td></tr>
+    [% IF Param('rememberlogin') == 'defaulton' || Param('rememberlogin') == 'defaultoff' %]
+      <tr><th>&nbsp;</th><td><input type="checkbox" id="Bugzilla_remember" name="Bugzilla_remember" value="on" [%+ "checked" IF Param('rememberlogin') == "defaulton" %]><label for="Bugzilla_remember">Kom ihåg mitt inloggningsnamn</label></td></tr>
+    [% END %]
+    <tr><th>&nbsp;</th><td><input type="checkbox" id="Bugzilla_restrictlogin" name="Bugzilla_restrictlogin" checked="checked"><label for="Bugzilla_restrictlogin">Begränsa sessionen till den här IP-adressen (det förbättrar säkerheten)</label></td></tr>
+  </table>
+  [% PROCESS "global/hidden-fields.html.tmpl" exclude="^Bugzilla_(login|password|restrictlogin)$" %]
+  <input type="hidden" name="Bugzilla_login_token" value="[% get_login_request_token() FILTER html %]">
+  <input type="submit" name="GoAheadAndLogIn" value="Logga in" id="log_in">
+  <p>Kontrollera att kakor är aktiverade för den här webbplatsen. Annars behöver du logga in ofta.</p>
+</form>
+
+[% Hook.process('additional_methods') %]
+
+[% IF Param("createemailregexp") && user.authorizer.user_can_create_account %]
+  <hr><p>Har du inget konto i [% terms.Bugzilla %]? <a href="createaccount.cgi">Skapa ett nytt konto</a>.
+  [% IF Param("requirelogin") %]Du behöver ett konto eftersom den här installationen av Bugzilla bara är tillgänglig för autentiserade användare.
+  [% ELSIF target.match("_bug\\.cgi$") %]Du behöver ett konto för att rapportera ett nytt [% terms.bug %] eller kommentera ett befintligt, så att du kan kontaktas om mer information behövs.[% END %]</p>
+[% END %]
+
+[% IF user.authorizer.can_change_password %]
+  <hr><form id="forgot" method="get" action="token.cgi"><input type="hidden" name="a" value="reqpw">
+    Har du glömt lösenordet? Ange ditt inloggningsnamn nedan och begär att få lösenordet återställt.<br>
+    <input size="35" name="loginname" required><input type="hidden" id="token" name="token" value="[% issue_hash_token(['reqpw']) FILTER html %]">
+    <input type="submit" id="request" value="Återställ lösenordet"></form>
+[% END %]
+
+[% PROCESS global/footer.html.tmpl %]

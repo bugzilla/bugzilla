@@ -1,0 +1,27 @@
+[%# This Source Code Form is subject to the terms of the Mozilla Public
+  # License, v. 2.0. If a copy of the MPL was not distributed with this
+  # file, You can obtain one at http://mozilla.org/MPL/2.0/.
+  #
+  # This Source Code Form is "Incompatible With Secondary Licenses", as
+  # defined by the Mozilla Public License, v. 2.0.
+  #%]
+
+[%# Svenska benämningar för grundläggande Bugzilla-termer. %]
+[% terms = {
+  "bug" => "fel",
+  "Bug" => "Fel",
+  "abug" => "ett fel",
+  "Abug" => "Ett fel",
+  "aBug" => "ett fel",
+  "ABug" => "Ett fel",
+  "bugs" => "fel",
+  "Bugs" => "Fel",
+  "comment" => "kommentar",
+  "comments" => "kommentarer",
+  "zeroSearchResults" => "Inga fel hittades",
+  "Bugzilla" => "Bugzilla"
+  }
+%]
+
+[% USE Hook %]
+[% Hook.process("end") %]

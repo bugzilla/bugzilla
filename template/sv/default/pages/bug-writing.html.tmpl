@@ -1,0 +1,159 @@
+[%# This Source Code Form is subject to the terms of the Mozilla Public
+  # License, v. 2.0. If a copy of the MPL was not distributed with this
+  # file, You can obtain one at http://mozilla.org/MPL/2.0/.
+  #
+  # This Source Code Form is "Incompatible With Secondary Licenses", as
+  # defined by the Mozilla Public License, v. 2.0.
+  #%]
+
+[% INCLUDE global/header.html.tmpl title = "Riktlinjer för att skriva " _ terms.bugs %]
+
+  <p>Välskrivna [% terms.bug %]rapporter har störst chans att åtgärdas.
+  Här förklaras hur du skriver en sådan rapport.
+
+<h3>Grundprinciper</h3>
+
+  <ul>
+    <li>Var noggrann</li>
+    <li>Var tydlig. Förklara så att andra kan återskapa [% terms.bug %]</li>
+    <li>En [% terms.bug %] per rapport</li>
+    <li>Ingen [% terms.bug %] är för obetydlig att rapportera.
+    Små [% terms.bugs %] kan dölja stora [% terms.bugs %]</li>
+    <li>Skilj tydligt mellan fakta och antaganden</li>
+  </ul>
+
+<h3>Innan du börjar</h3>
+
+<ol>
+  <li>Återskapa [% terms.bug %] med en aktuell version av programmet
+  för att se om den redan har åtgärdats.
+  </li>
+
+  <li><a href="query.cgi?format=specific">Sök i</a>
+  [% terms.Bugzilla %] för att se om [% terms.bug %] redan har
+  rapporterats.</li>
+</ol>
+
+<h3>Rapportera en ny [% terms.bug %]</h3>
+
+<p>Om du har återskapat [% terms.bug %] i en aktuell version och
+ingen annan verkar ha rapporterat den:</p>
+
+<ol>
+ <li>Välj
+ "<a href="enter_bug.cgi">Rapportera en ny [% terms.bug %]</a>"</li>
+ <li>Välj produkten där du har hittat [% terms.bug %]</li>
+ <li>Fyll i formuläret. Här följer några förklaringar:</li>
+</ol>
+
+  <blockquote>
+    <p><b>Komponent:</b> I vilken del av programmet finns problemet?<br>
+    Det här fältet är obligatoriskt.
+    Klicka på ordet "Komponent" för att se en beskrivning av varje
+    komponent. Om ingen passar kan du leta efter en komponent som heter "General".</p>
+
+    <p><b>[% field_descs.op_sys FILTER html %]:</b> I vilket operativsystem hittade du
+          problemet?
+    (till exempel Linux, Windows XP eller Mac OS X.)<br>
+    Om du vet att [% terms.bug %] inträffar i fler än ett slags
+    operativsystem väljer du <em>[% display_value("op_sys", "All") FILTER html %]</em>.
+    Om ditt [% field_descs.op_sys FILTER html %] inte finns med väljer du
+    <em>[% display_value("op_sys", "Other") FILTER html %]</em>.</p>
+
+    <p><b>Sammanfattning:</b> Hur beskriver du [% terms.bug %] med
+    ungefär 60 tecken eller färre?<br>
+     En bra sammanfattning ska <b>snabbt och entydigt identifiera [% terms.abug %]rapport</b>.
+    Den ska förklara problemet, inte den lösning du föreslår.<br>
+    <ul>
+     <li>Bra: "<kbd>Avbrytning av fildialog får filhanteraren att krascha</kbd>"</li>
+     <li>Dåligt: "<kbd>Programmet kraschar</kbd>"</li>
+     <li>Dåligt: "<kbd>Webbläsaren borde fungera med min webbplats</kbd>"</li>
+    </ul>
+    
+    <b>Beskrivning:</b>
+    Detaljer om problemrapporten, bland annat:</p>
+
+    <blockquote>
+      <p><b>Översikt:</b> En mer utförlig beskrivning av
+      sammanfattningen.</p>
+
+      <blockquote>
+<pre>
+Att dra över text på en sida får Mac-versioner att krascha i funktionen NSGetFactory.
+</pre>
+      </blockquote>
+
+      <p><b>Steg för att återskapa:</b> Så korta och lättföljda steg som
+      möjligt för att framkalla [% terms.bug %]. Ta med särskilda förberedelser.</p>
+
+      <blockquote>
+<pre>
+1) Visa valfri webbsida. (Här användes exempelsidan som är standard,
+resource:/res/samples/test0.html)
+
+2) Dra över sidan med musen. (Håll ner musknappen och dra muspekaren
+nedåt från valfri punkt i webbläsarens innehållsområde till nedre kanten
+av innehållsområdet.)
+</pre>
+      </blockquote>
+
+      <p><b>Faktiskt resultat:</b> Vad programmet gjorde efter stegen
+      ovan.</p>
+
+      <blockquote>
+<pre>
+Programmet kraschade.
+</pre>
+      </blockquote>
+
+      <p><b>Förväntat resultat:</b> Vad programmet skulle ha gjort
+      om [% terms.bug %] inte fanns.</p>
+
+      <blockquote>
+<pre>
+Fönstret borde rulla nedåt och det rullade innehållet borde markeras.
+(Programmet ska åtminstone inte krascha.)
+</pre>
+      </blockquote>
+
+      <p><b>Datum för versionen och [% field_descs.rep_platform FILTER html %]:</b>
+      Datum och [% field_descs.rep_platform FILTER lower FILTER html %] för den version
+      där du först stötte på [% terms.bug %].</p>
+
+      <blockquote>
+<pre>
+Version 2006-08-10 på Mac OS 10.4.3
+</pre>
+      </blockquote>
+
+      <p><b>Andra versioner och plattformar:</b> Om [% terms.bug %]
+      uppstår på andra plattformar, eller i andra webbläsare när det är relevant.</p>
+
+      <blockquote>
+<pre>
+Inträffar inte i version 2006-08-10 på Windows XP Home (Service Pack 2)
+</pre>
+      </blockquote>
+
+      <p><b>Ytterligare information:</b> Annan användbar information.
+      <br><br>För [% terms.bugs %] som orsakar krascher:</p>
+
+      <ul>
+        <li><b>Windows:</b> Ange typen av krasch och modulen där programmet
+        kraschade, till exempel åtkomstfel i apprunner.exe.</li>
+
+        <li><b>Mac OS X:</b> Bifoga loggen från "Crash Reporter" som visas
+        vid kraschen.
+        Ta bara med avsnittet direkt under den tråd som kraschade, vanligtvis
+        med rubriken "Thread 0 Crashed". Klistra inte in hela loggen.</li>
+      </ul>
+    </blockquote>
+
+  <p>Kontrollera rapporten en gång till så att inga fel eller utelämnanden finns
+  kvar, och välj sedan "Verkställ".
+  Din [% terms.bug %]rapport sparas då i
+  databasen för [% terms.Bugzilla %].<br>
+  </p>
+</blockquote>
+
+[% INCLUDE global/footer.html.tmpl %]

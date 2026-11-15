@@ -1,0 +1,114 @@
+[%# This Source Code Form is subject to the terms of the Mozilla Public
+  # License, v. 2.0. If a copy of the MPL was not distributed with this
+  # file, You can obtain one at http://mozilla.org/MPL/2.0/.
+  #
+  # This Source Code Form is "Incompatible With Secondary Licenses", as
+  # defined by the Mozilla Public License, v. 2.0.
+  #%]
+
+<script type="text/javascript">
+  var disable_mail_manually_set = [% (otheruser.email_disabled ? 1 : 0) FILTER js %];
+</script>
+
+<tr>
+  <th><label for="login">Inloggningsnamn:</label></th>
+  <td>
+    [% IF editusers %]
+      <input size="64" maxlength="255" id="login" name="login"
+             value="[% otheruser.login FILTER html %]"
+             [%- " autofocus" UNLESS editform %] required>
+      [% IF editform %]
+        [% IF !otheruser.in_group('bz_sudo_protect') %]
+          <br>
+          <a href="relogin.cgi?action=prepare-sudo&amp;target_login=
+          [%- otheruser.login FILTER uri %]">Agera som den här användaren</a>
+        [% END %]
+      [% END %]
+    [% ELSE %]
+      [% otheruser.login FILTER html %]
+    [% END %]
+  </td>
+</tr>
+[% IF default_authorizer.extern_id_used %]
+  <tr>
+    <th><label for="extern_id">Externt inloggnings-id:</label></th>
+    <td>
+      [% IF editusers %]
+        <input size="64" maxlength="64" name="extern_id"
+               id="extern_id" value="[% otheruser.extern_id FILTER html %]">
+      [% ELSE %]
+        [% otheruser.extern_id FILTER html %]
+      [% END %]
+    </td>
+  </tr>
+[% END %]
+<tr>
+  <th><label for="name">Riktigt namn:</label></th>
+  <td>
+    [% IF editusers %]
+      <input size="64" maxlength="255" id="name" name="name"
+             autocomplete="off" value="[% otheruser.name FILTER html %]">
+    [% ELSE %]
+      [% otheruser.name FILTER html %]
+    [% END %]
+  </td>
+</tr>
+
+[% password_complexity = Param('password_complexity') %]
+[% IF editusers %]
+  [% IF user.authorizer.can_change_password %]
+  <tr>
+    <th><label for="password">Lösenord:</label></th>
+    <td>
+      <input type="password" size="16" name="password" id="password"
+             value="" autocomplete="off" [% 'required' IF !editform %]>
+      [% IF password_complexity == "mixed_letters" %]
+        (Lösenordet måste innehålla minst en versal och en gemen.)
+      [% ELSIF password_complexity == "letters_numbers" %]
+        (Lösenordet måste innehålla minst en versal, en gemen och en siffra.)
+      [% ELSIF password_complexity == "letters_numbers_specialchars" %]
+        (Lösenordet måste innehålla minst en bokstav, en siffra och ett specialtecken.)
+      [% END %]
+      [% IF editform %]<br>
+        (Ange ett nytt lösenord för att ändra det.)
+      [% END %]
+    </td>
+  </tr>
+  [% END %]
+  <tr>
+    <th><label for="disable_mail">[% terms.Bug %]mail inaktiverad:</label></th>
+    <td>
+      <input type="checkbox" name="disable_mail" id="disable_mail" value="1"
+             [% IF otheruser.email_disabled %] checked="checked" [% END %]
+             onchange="disable_mail_manually_set=1;">
+      (Påverkar [% terms.bug %]mail och påminnelsemejl, inte återställning av
+      lösenord eller andra e-postmeddelanden som inte gäller [% terms.bugs %].)
+    </td>
+  </tr>
+  <tr>
+    <th><label for="disabledtext">Text vid inaktivering:</label></th>
+    <td>
+      [% INCLUDE global/textarea.html.tmpl
+         name           = 'disabledtext'
+         id             = 'disabledtext'
+         minrows        = 2
+         maxrows        = 10
+         defaultrows    = 10
+         cols           = 60
+         defaultcontent = otheruser.disabledtext
+         onchange       = "userDisabledTextOnChange(this);"
+       %]<br>
+      (Om fältet inte är tomt går det inte att logga in med kontot, och texten
+      bör förklara varför.)
+    </td>
+  </tr>
+[% END %]
+[% UNLESS editform %]
+  <tr>
+    <th><label for="notify_user">Meddela användaren:</label></th>
+    <td>
+      <input type="checkbox" name="notify_user" id="notify_user" value="1">
+      (Skicka kontoinformationen till användaren med e-post. Lösenordet ingår inte.)
+    </td>
+  </tr>
+[% END %]

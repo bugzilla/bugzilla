@@ -1,0 +1,58 @@
+[%# This Source Code Form is subject to the terms of the Mozilla Public
+  # License, v. 2.0. If a copy of the MPL was not distributed with this
+  # file, You can obtain one at http://mozilla.org/MPL/2.0/.
+  #
+  # This Source Code Form is "Incompatible With Secondary Licenses", as
+  # defined by the Mozilla Public License, v. 2.0.
+  #%]
+
+[% RETURN IF !bug %]
+
+[% IF bottom_navigator == 1 %]
+  <ul class="related_actions">
+    <li><a href="show_bug.cgi?format=multiple&amp;id=[% bug.bug_id FILTER uri %]">Utskriftsformat</a></li>
+    <li>&nbsp;-&nbsp;<a href="show_bug.cgi?ctype=xml&amp;id=[% bug.bug_id FILTER uri %]">XML</a></li>
+    <li>&nbsp;-&nbsp;<a href="enter_bug.cgi?cloned_bug_id=[% bug.bug_id FILTER uri %]">Klona detta [% terms.Bug %]</a></li>
+    [% Hook.process("links") %]
+    <li>&nbsp;-&nbsp;<a href="#">Överst på sidan</a></li>
+    </ul>
+[% END %]
+
+[% SET my_search = user.recent_search_for(bug) %]
+[% IF my_search %]
+  <div class="navigation">
+  [% SET last_bug_list = my_search.bug_list %]
+  [% SET this_bug_idx = lsearch(last_bug_list, bug.id) %]
+  <b>Lista över [% terms.bugs %]:</b>
+
+  ([% this_bug_idx + 1 %] av [% last_bug_list.size %])
+
+  [% IF this_bug_idx > 0 %]
+    <a href="show_bug.cgi?id=[%- last_bug_list.first FILTER uri %]&amp;list_id=[%- my_search.id FILTER uri %]">Första</a>
+  [% ELSE %]
+    <span class="navigation_link">Första</span>
+  [% END %]
+
+  [% IF this_bug_idx + 1 < last_bug_list.size %]
+    <a href="show_bug.cgi?id=[%- last_bug_list.last FILTER uri %]&amp;list_id=[%- my_search.id FILTER uri %]">Sista</a>
+  [% ELSE %]
+    <span class="navigation_link">Sista</span>
+  [% END %]
+
+  [% IF this_bug_idx > 0 %]
+    [% prev_bug = this_bug_idx - 1 %]
+    <a href="show_bug.cgi?id=[%- last_bug_list.$prev_bug FILTER uri %]&amp;list_id=[%- my_search.id FILTER uri %]">Föregående</a>
+  [% ELSE %]
+    <span class="navigation_link">Föregående</span>
+  [% END %]
+
+  [% IF this_bug_idx + 1 < last_bug_list.size %]
+    [% next_bug = this_bug_idx + 1 %]
+    <a href="show_bug.cgi?id=[%- last_bug_list.$next_bug FILTER uri %]&amp;list_id=[%- my_search.id FILTER uri %]">Nästa</a>
+  [% ELSE %]
+    <span class="navigation_link">Nästa</span>
+  [% END %]
+
+  &nbsp;&nbsp;<a href="buglist.cgi?regetlastlist=[%- my_search.id FILTER uri %]">Visa senaste sökresultat</a>
+  </div>
+[% END %]

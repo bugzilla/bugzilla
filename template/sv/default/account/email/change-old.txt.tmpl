@@ -1,0 +1,18 @@
+From: [% Param('mailfrom') %]
+To: [% user.email %]
+Subject: Begäran om byte av e-postadress i [% terms.Bugzilla %]
+Importance: High
+X-MSMail-Priority: High
+X-Priority: 1
+X-Bugzilla-Type: admin
+
+[%+ terms.Bugzilla %] har tagit emot en begäran om att ändra e-postadressen
+för ditt konto till [%+ newemailaddress %].
+
+Om du inte gjorde begäran eller vill avbryta den öppnar du följande länk:
+
+[%+ urlbase %]token.cgi?t=[% token FILTER uri %]&a=cxlem
+
+Om du inte gör något och [%+ newemailaddress %] bekräftar begäran blir bytet
+permanent efter [% constants.MAX_TOKEN_AGE %] dagar
+(den [% expiration_ts FILTER time("%e %B %Y kl. %H:%M %Z") %]).

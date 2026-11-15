@@ -1,0 +1,9 @@
+[%# This Source Code Form is subject to the terms of the Mozilla Public
+  # License, v. 2.0. If a copy of the MPL was not distributed with this
+  # file, You can obtain one at http://mozilla.org/MPL/2.0/.
+  #%]
+
+[% title = BLOCK %]Begäran om nytt användarkonto för '[% login FILTER html %]' har skickats[% END %]
+[% PROCESS global/header.html.tmpl title = title %]
+<p>Ett bekräftelsemeddelande med en länk för att fortsätta skapa kontot har skickats. Länken upphör att gälla om kontot inte skapas inom [% constants.MAX_TOKEN_AGE FILTER html %] dagar.</p>
+[% PROCESS global/footer.html.tmpl %]

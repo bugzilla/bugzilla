@@ -1,0 +1,43 @@
+[%# This Source Code Form is subject to the terms of the Mozilla Public
+  # License, v. 2.0. If a copy of the MPL was not distributed with this
+  # file, You can obtain one at http://mozilla.org/MPL/2.0/.
+  #
+  # This Source Code Form is "Incompatible With Secondary Licenses", as
+  # defined by the Mozilla Public License, v. 2.0.
+  #%]
+[%
+   title = "LDAP"
+   desc = "Konfigurera detta innan du väljer LDAP som autentiseringsmetod"
+%]
+
+[% param_descs = {
+  LDAPserver => "Namnet på din LDAP-server och, om det behövs, dess port " _
+                "(t.ex. ldap.company.com eller ldap.company.com:portnummer). " _
+                "URI-syntax kan också användas, till exempel "_
+                "ldaps://ldap.company.com (för en säker anslutning) eller " _
+                "ldapi://%2fvar%2flib%2fldap_sock (för en lokal socket-anslutning). " _
+                "Flera värdnamn eller URI:er kan separeras med kommatecken; " _
+                "de provas i tur och ordning tills en anslutning har upprättats.",
+
+  LDAPstarttls => "Om krypterad kommunikation ska krävas när en vanlig " _
+                  "LDAP-anslutning till servern har upprättats.",
+
+  LDAPbinddn => "Om LDAP-servern kräver att du använder ett binddn och lösenord " _
+                "i stället för anonym bindning anger du dem här " _
+                "(t.ex. cn=default,cn=user:password). " _
+                "Lämna tomt för den vanliga anonyma bindningen.",
+
+  LDAPBaseDN => "BaseDN som används för att autentisera användare mot katalogen " _
+                "(t.ex. ou=People,o=Company).",
+
+  LDAPuidattribute => "Namnet på attributet som innehåller användarens inloggningsnamn.",
+
+  LDAPmailattribute => "Namnet på attributet för en användare i katalogen som innehåller " _
+                       "e-postadressen som ska användas som användarnamn i Bugzilla. Om " _
+                       "parametern är tom använder Bugzilla LDAP-användarnamnet som "_
+                       "användarnamn i Bugzilla. I så fall kan du också vilja ange " _
+                       "parametern \"emailsuffix\".",
+
+  LDAPfilter => "LDAP-filter som kombineras med AND med <var>LDAPuidattribute</var> " _
+                "för att filtrera listan över giltiga användare." }
+%]

@@ -464,172 +464,170 @@
     som en dubblett.
 
   [% ELSIF error == "dupe_not_allowed" %]
-    [% title = "Cannot mark $terms.bugs as duplicates" %]
-    You cannot mark [% terms.bugs %] as duplicates when
-    changing several [% terms.bugs %] at once.
+    [% title = "Det går inte att markera " _ terms.bugs _ " som dubbletter" %]
+    Du kan inte markera [% terms.bugs %] som dubbletter när
+    du ändrar flera [% terms.bugs %] samtidigt.
 
   [% ELSIF error == "dupe_loop_detected" %]
-    [% title = "Loop detected among duplicates" %]
-    You cannot mark [% terms.bug %] [%+ bug_id FILTER html %] as
-    a duplicate of
+    [% title = "Slinga upptäckt bland dubbletter" %]
+    Du kan inte markera [% terms.bug %] [%+ bug_id FILTER html %] som
+    en dubblett av
     [% IF dupe_of == bug_id %]
-      itself
+      sig själv
     [% ELSE %]
-      [%+ terms.bug %] [%+ dupe_of FILTER html %], because it
-      would create a duplicate loop
+      [%+ terms.bug %] [%+ dupe_of FILTER html %], eftersom det
+      skulle skapa en dubblettslinga
     [% END %].
 
   [% ELSIF error == "email_change_in_progress" %]
-    [% title = "Email Change Already In Progress" %]
-    Email change already in progress; please check your email.
+    [% title = "Byte av e-postadress pågår redan" %]
+    Byte av e-postadress pågår redan. Kontrollera din e-post.
 
   [% ELSIF error == "email_no_body" %]
-    Your message did not contain any text, as far as we could tell.
+    Ditt meddelande innehöll ingen text, så långt vi kunde avgöra.
 
   [% ELSIF error == "empty_group_description" %]
-    [% title = "The group description cannot be empty" %]
-    You must enter a description for the group.
+    [% title = "Gruppbeskrivningen får inte vara tom" %]
+    Du måste ange en beskrivning för gruppen.
 
   [% ELSIF error == "empty_group_name" %]
-    [% title = "The group name cannot be empty" %]
-    You must enter a name for the group.
+    [% title = "Gruppnamnet får inte vara tomt" %]
+    Du måste ange ett namn för gruppen.
   
   [% ELSIF error == "entry_access_denied" %]
-    [% title = "Permission Denied" %]
+    [% title = "Åtkomst nekad" %]
     [% admindocslinks = {'categorization.html#product-group-controls' => 'Group Security'} %]
-    Sorry, either the product <em>[% product FILTER html %]</em>
-    does not exist or you aren't authorized to
-    enter [% terms.abug %] into it.
+    Produkten <em>[% product FILTER html %]</em> finns antingen inte
+    eller så har du inte behörighet att
+    rapportera [% terms.abug %] i den.
 
   [% ELSIF error == "extension_create_no_name" %]
-    You must specify a name for your extension, as an argument to this script.
+    Du måste ange ett namn på tillägget som argument till skriptet.
 
   [% ELSIF error == "extension_disabled" %]
-    [% title = "Extension Disabled" %]
-    You cannot access this page because the extension '[% name FILTER html %]'
-    is disabled.
+    [% title = "Tillägget är inaktiverat" %]
+    Du kan inte öppna sidan eftersom tillägget ”[% name FILTER html %]”
+    är inaktiverat.
 
   [% ELSIF error == "extension_first_letter_caps" %]
-    The first letter of your extension's name must be a capital letter.
-    (You specified '[% name FILTER html %]'.)
+    Den första bokstaven i tilläggets namn måste vara en versal.
+    (Du angav ”[% name FILTER html %]”.)
 
   [% ELSIF error == "feature_disabled" %]
-    The [% install_string("feature_$feature") FILTER html %] feature is not
-    available in this Bugzilla.
+    Funktionen [% install_string("feature_$feature") FILTER html %] är inte
+    tillgänglig i denna Bugzilla.
     [% IF user.in_group('admin') %]
-      If you would like to enable this feature, please run
-      <kbd>checksetup.pl</kbd> to see how to install the necessary
-      requirements for this feature.
+      Kör <kbd>checksetup.pl</kbd> om du vill aktivera funktionen för att se
+      hur de nödvändiga kraven installeras.
     [% END %]
 
   [% ELSIF error == "field_already_exists" %]
-    [% title = "Field Already Exists" %]
-    The field '[% field.name FILTER html %]'     
-    ([% field.description FILTER html %]) already exists. Please
-    choose another name.
+    [% title = "Fältet finns redan" %]
+    Fältet ”[% field.name FILTER html %]”
+    ([% field.description FILTER html %]) finns redan. Välj
+    ett annat namn.
 
   [% ELSIF error == "field_cant_control_self" %]
-    [% title = "Field Can't Control Itself" %]
-    The [% field.description FILTER html %] field can't be set to control 
-    itself.
+    [% title = "Fältet kan inte styra sig självt" %]
+    Fältet [% field.description FILTER html %] kan inte ställas in för att styra
+    sig självt.
 
   [% ELSIF error == "field_control_must_be_select" %]
-    [% title = "Invalid Field Type Selected" %]
-    Only drop-down and multi-select fields can be used to control
-    the visibility/values of other fields. [% field.description FILTER html %]
-    is not the right type of field.
+    [% title = "Ogiltig fälttyp har valts" %]
+    Endast rullgardins- och flervalsfält kan användas för att styra
+    synligheten/värdena för andra fält. [% field.description FILTER html %]
+    har fel fälttyp.
 
   [% ELSIF error == "field_invalid_name" %]
-    [% title = "Invalid Field Name" %]
-    '[% name FILTER html %]' is not a valid name for a field.
-    A name may contain only letters, numbers, and the underscore character.
+    [% title = "Ogiltigt fältnamn" %]
+    ”[% name FILTER html %]” är inte ett giltigt namn för ett fält.
+    Ett namn får bara innehålla bokstäver, siffror och understreck.
 
   [% ELSIF error == "field_invalid_sortkey" %]
-    [% title = "Invalid Sortkey for Field" %]
-    The sortkey [% sortkey FILTER html %] that you have provided for
-    this field is not a valid positive integer.
+    [% title = "Ogiltig sorteringsnyckel för fält" %]
+    Sorteringsnyckeln [% sortkey FILTER html %] som du angav för
+    fältet är inte ett giltigt positivt heltal.
 
   [% ELSIF error == "field_missing_description" %]
-    [% title = "Missing Description for Field" %]
-    You must enter a description for this field.
+    [% title = "Beskrivning saknas för fältet" %]
+    Du måste ange en beskrivning för fältet.
 
   [% ELSIF error == "field_long_desc_too_long" %]
-    [% title = "Long Description for Field too long" %]
-    The long description you have provided for this field is longer than 
-    [% constants.MAX_FIELD_LONG_DESC_LENGTH FILTER html %] characters.
+    [% title = "Lång beskrivning för fältet är för lång" %]
+    Den långa beskrivning du angav för fältet är längre än
+    [% constants.MAX_FIELD_LONG_DESC_LENGTH FILTER html %] tecken.
 
   [% ELSIF error == "field_missing_name" %]
-    [% title = "Missing Name for Field" %]
-    You must enter a name for this field.
+    [% title = "Namn saknas för fältet" %]
+    Du måste ange ett namn för fältet.
 
   [% ELSIF error == "field_value_control_select_only" %]
-    [% title = "Invalid Value Control Field" %]
-    Only Drop-Down or Multi-Select fields can have a field that
-    controls their values.
+    [% title = "Ogiltigt värdestyrande fält" %]
+    Endast rullgardins- eller flervalsfält kan ha ett fält som
+    styr deras värden.
 
   [% ELSIF error == "field_visibility_values_must_be_selected" %]
-    [% title = "Missing visibility field values" %]
-    At least one value must be selected for the visibility field
-    '[% field.name FILTER html %]'.
+    [% title = "Värden saknas för synlighetsfältet" %]
+    Minst ett värde måste väljas för synlighetsfältet
+    ”[% field.name FILTER html %]”.
 
   [% ELSIF error == "fieldname_invalid" %]
-    [% title = "Specified Field Does Not Exist" %]
-    The field '[% field.name FILTER html %]' does not exist or 
-    cannot be edited with this interface.
+    [% title = "Det angivna fältet finns inte" %]
+    Fältet ”[% field.name FILTER html %]” finns inte eller
+    kan inte redigeras med detta gränssnitt.
 
   [% ELSIF error == "fieldvalue_already_exists" %]
-    [% title = "Field Value Already Exists" %]
-    The value '[% value.name FILTER html %]' already exists for the
-    [%+ field.description FILTER html %] field.
+    [% title = "Fältvärdet finns redan" %]
+    Värdet ”[% value.name FILTER html %]” finns redan för
+    fältet [%+ field.description FILTER html %].
 
   [% ELSIF error == "fieldvalue_is_controller" %]
-    [% title = "Value Controls Other Fields" %]
-    You cannot delete the [% value.field.description FILTER html %]
-    '[% value.name FILTER html %]' because
+    [% title = "Värdet styr andra fält" %]
+    Du kan inte ta bort [% value.field.description FILTER html %]
+    ”[% value.name FILTER html %]” eftersom det
     [% IF fields.size %]
-      it controls the visibility of the following fields:
+      styr synligheten för följande fält:
       [%+ fields.join(', ') FILTER html %].
     [% END %]
-    [% ' Also, ' IF fields.size AND vals.size %]
+    [% ' Dessutom ' IF fields.size AND vals.size %]
     [% IF vals.size %]
-      it controls the visibility of the following field values:
+      styr det synligheten för följande fältvärden:
       <ul>
         [% FOREACH field_name = vals.keys %]
           [% FOREACH val = vals.${field_name} %]
             <li>[% val.field.name FILTER html %]:
-              '[% val.name FILTER html %]'</li>
+              ”[% val.name FILTER html %]”</li>
           [% END %]
         [% END %]
       </ul>
     [% END %]
 
   [% ELSIF error == "fieldvalue_is_default" %]
-    [% title = "Specified Field Value Is Default" %]
-    '[% value.name FILTER html %]' is the default value for
-    the '[% field.description FILTER html %]' field and cannot be deleted
-    or disabled.
+    [% title = "Angivet fältvärde är standardvärde" %]
+    ”[% value.name FILTER html %]” är standardvärdet för
+    fältet ”[% field.description FILTER html %]” och kan inte tas bort
+    eller inaktiveras.
     [% IF user.in_group('tweakparams') %]
-      You have to <a href="editparams.cgi?section=bugfields#
-      [%- param_name FILTER uri %]">change</a> the default value first.
+      Du måste först <a href="editparams.cgi?section=bugfields#
+      [%- param_name FILTER uri %]">ändra</a> standardvärdet.
     [% END %]
 
   [% ELSIF error == "fieldvalue_name_too_long" %]
-    [% title = "Field Value Is Too Long" %]
-    The value of a field is limited to 
-    [%+ constants.FIELD_VALUE_MAX_SIZE FILTER none %] characters. 
-    '[% value FILTER html %]' is too long ([% value.length %] characters).
+    [% title = "Fältvärdet är för långt" %]
+    Värdet för ett fält är begränsat till
+    [%+ constants.FIELD_VALUE_MAX_SIZE FILTER none %] tecken.
+    ”[% value FILTER html %]” är för långt ([% value.length %] tecken).
 
   [% ELSIF error == "fieldvalue_not_editable" %]
-    [% title = "Field Value Not Editable" %]
-    The value '[% old_value.name FILTER html %]' cannot be renamed because
-    it plays some special role for the '[% field.description FILTER html %]'
-    field.
+    [% title = "Fältvärdet kan inte redigeras" %]
+    Värdet ”[% old_value.name FILTER html %]” kan inte byta namn eftersom
+    det har en särskild funktion för fältet ”[% field.description FILTER html %]”.
 
   [% ELSIF error == "fieldvalue_not_deletable" %]
-    [% title = "Field Value Not Deletable" %]
-    The value '[% value.name FILTER html %]' cannot be removed or
-    disabled, because it plays some special role for the 
-    '[% field.description FILTER html %]' field.
+    [% title = "Fältvärdet kan inte tas bort" %]
+    Värdet ”[% value.name FILTER html %]” kan inte tas bort eller
+    inaktiveras eftersom det har en särskild funktion för
+    fältet ”[% field.description FILTER html %]”.
 
   [% ELSIF error == "fieldvalue_reserved_word" %]
     [% title = "Reserved Word Not Allowed" %]

@@ -1,0 +1,48 @@
+[%# This Source Code Form is subject to the terms of the Mozilla Public
+  # License, v. 2.0. If a copy of the MPL was not distributed with this
+  # file, You can obtain one at http://mozilla.org/MPL/2.0/.
+  #
+  # This Source Code Form is "Incompatible With Secondary Licenses", as
+  # defined by the Mozilla Public License, v. 2.0.
+  #%]
+
+[% title = BLOCK %]Ta bort milstolpe för produkten ”[% product.name FILTER html %]”[% END %]
+
+[% PROCESS global/header.html.tmpl title = title style_urls = ['skins/standard/admin.css'] %]
+
+<table id="admin_table">
+  <tr class="column_header"><th>Fält</th><th>Värde</th></tr>
+  <tr><td>Milstolpe</td><td>[% milestone.name FILTER html %]</td></tr>
+  <tr><td>Milstolpe för produkt</td><td>[% product.name FILTER html %]</td></tr>
+  <tr><td>[% terms.Bugs %]</td><td>
+      [% IF milestone.bug_count %]
+        <a title="Lista över [% terms.bugs %] riktade mot milstolpen ”[% milestone.name FILTER html %]”"
+           href="buglist.cgi?target_milestone=[% milestone.name FILTER uri %]&amp;product=[%- product.name FILTER uri %]">[% milestone.bug_count FILTER none %]</a>
+      [% ELSE %]Inga[% END %]
+  </td></tr>
+</table>
+
+<h2>Bekräftelse</h2>
+
+[% IF milestone.bug_count %]
+  <p class="confirmation">
+    Det finns
+    [% IF milestone.bug_count > 1 %][% milestone.bug_count FILTER none %] [%+ terms.bugs %][% ELSE %]1 [% terms.bug %][% END %]
+    för den här milstolpen. När du tar bort milstolpen riktas <b>alla</b> dessa
+    [% terms.bugs %] om till [% product.default_milestone FILTER html %], standardmilstolpen
+    för produkten [% product.name FILTER html %].
+  </p>
+[% END %]
+
+<p>Vill du verkligen ta bort den här milstolpen?</p>
+
+<form method="post" action="editmilestones.cgi">
+  <input type="submit" id="delete" value="Ja, ta bort">
+  <input type="hidden" name="action" value="delete">
+  <input type="hidden" name="product" value="[% product.name FILTER html %]">
+  <input type="hidden" name="milestone" value="[% milestone.name FILTER html %]">
+  <input type="hidden" name="token" value="[% token FILTER html %]">
+</form>
+
+[% PROCESS admin/milestones/footer.html.tmpl %]
+[% PROCESS global/footer.html.tmpl %]

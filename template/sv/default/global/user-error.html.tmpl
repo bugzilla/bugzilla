@@ -1358,154 +1358,154 @@
     Please report the problem to [% Param("maintainer") %].
     
   [% ELSIF error == "no_keywords" %]
-    [% title = "No Keywords" %]
+    [% title = "Inga nyckelord" %]
     [% admindocslinks = {'keywords.html' => 'Setting up a keyword'} %]
-    No keywords have been defined for this installation.
+    Inga nyckelord har definierats för installationen.
 
   [% ELSIF error == "no_new_quips" %]
-    [% title = "No New Quips" %]
+    [% title = "Inga nya kommentarer" %]
     [% admindocslinks = {'quips.html' => 'Controlling quip usage'} %]
-    This site does not permit the addition of new quips.
+    Denna webbplats tillåter inte att nya kommentarer läggs till.
 
   [% ELSIF error == "no_page_specified" %]
-    [% title = "No Page Specified" %]
-    You did not specify the id of a page to display.
+    [% title = "Ingen sida har angetts" %]
+    Du angav inte ID:t för en sida som ska visas.
 
   [% ELSIF error == "no_products" %]
-    [% title = "No Products" %]
+    [% title = "Inga produkter" %]
     [% admindocslinks = {
       'categorization.html#creating-new-products'  => 'Setting up a product',
       'categorization.html#components'             => 'Adding components to products',
       'categorization.html#product-group-controls' => 'Groups security'
     } %]
-    Either no products have been defined to enter [% terms.bugs %] against or you have not
-    been given access to any.
+    Antingen har inga produkter definierats för att rapportera [% terms.bugs %] i eller så
+    har du inte åtkomst till någon.
 
   [% ELSIF error == "number_not_integer" %]
-    [% title = "Integer Value Required" %]
-    The value '[% num FILTER html %]' in the
-    <em>[% field_descs.$field FILTER html %]</em> field
-    is not an integer value (i.e. a whole number).
+    [% title = "Heltalsvärde krävs" %]
+    Värdet ”[% num FILTER html %]” i fältet
+    <em>[% field_descs.$field FILTER html %]</em>
+    är inte ett heltalsvärde.
 
   [% ELSIF error == "number_not_numeric" %]
-    [% title = "Numeric Value Required" %]
-    The value '[% num FILTER html %]' in the 
-    <em>[% field_descs.$field FILTER html %]</em> field 
-    is not a numeric value.
+    [% title = "Numeriskt värde krävs" %]
+    Värdet ”[% num FILTER html %]” i fältet
+    <em>[% field_descs.$field FILTER html %]</em>
+    är inte ett numeriskt värde.
 
   [% ELSIF error == "number_too_large" %]
-    [% title = "Number Too Large" %]
-    The value '[% num FILTER html %]' in the 
-    <em>[% field_descs.$field FILTER html %]</em> field 
-    is more than the maximum allowable value of '[% max_num FILTER html %]'.
+    [% title = "Talet är för stort" %]
+    Värdet ”[% num FILTER html %]” i fältet
+    <em>[% field_descs.$field FILTER html %]</em>
+    är större än det högsta tillåtna värdet ”[% max_num FILTER html %]”.
 
   [% ELSIF error == "number_too_small" %]
-    [% title = "Number Too Small" %]
-    The value '[% num FILTER html %]' 
-    in the <em>[% field_descs.$field FILTER html %]</em> field 
-    is less than the minimum allowable value of '[% min_num FILTER html %]'.
+    [% title = "Talet är för litet" %]
+    Värdet ”[% num FILTER html %]” i fältet
+    <em>[% field_descs.$field FILTER html %]</em>
+    är mindre än det lägsta tillåtna värdet ”[% min_num FILTER html %]”.
 
   [% ELSIF error == "object_not_specified" %]
     [% type = BLOCK %][% INCLUDE object_name class = class %][% END %]
-    [% title = BLOCK %][% type FILTER ucfirst FILTER html %] Not 
-    Specified[% END %]
-    You must select/enter a [% type FILTER html %].
+    [% title = BLOCK %][% type FILTER ucfirst FILTER html %] har inte
+    angetts[% END %]
+    Du måste välja/ange en [% type FILTER html %].
 
   [% ELSIF error == "object_does_not_exist" %]
     [% type = BLOCK %][% INCLUDE object_name class = class %][% END %]
-    [% title = BLOCK %]Invalid [% type FILTER ucfirst FILTER html %][% END %]
-    There is no [% type FILTER html %] 
+    [% title = BLOCK %]Ogiltig [% type FILTER ucfirst FILTER html %][% END %]
+    Det finns ingen [% type FILTER html %]
     [% IF id.defined %]
-      with the id '[% id FILTER html %]'
+      med ID:t ”[% id FILTER html %]”
     [% ELSE %]
-      named '[% name FILTER html %]'
+      med namnet ”[% name FILTER html %]”
     [% END %]
     [% IF product.defined %]
-      in the '[% product.name FILTER html %]' product
+      i produkten ”[% product.name FILTER html %]”
     [% END %].
     [% IF class == "Bugzilla::User" %]
-      Either you mis-typed the name or that user has not yet registered
-      for a [% terms.Bugzilla %] account.
+      Antingen skrev du namnet fel eller så har användaren ännu inte registrerat
+      ett konto hos [% terms.Bugzilla %].
     [% ELSIF class == "Bugzilla::Keyword" %]
-      See the list of available <a href="describekeywords.cgi">keywords</a>.
+      Se listan över tillgängliga <a href="describekeywords.cgi">nyckelord</a>.
     [% END %]
 
   [% ELSIF error == "old_password_incorrect" %]
-    [% title = "Incorrect Password" %]
-    You did not enter your current password correctly.
+    [% title = "Fel lösenord" %]
+    Du angav inte ditt nuvarande lösenord korrekt.
 
   [% ELSIF error == "old_password_required" %]
-    [% title = "Old Password Required" %]
-    You must enter your old password to change your email address.
+    [% title = "Tidigare lösenord krävs" %]
+    Du måste ange ditt tidigare lösenord för att ändra e-postadressen.
 
   [% ELSIF error == "password_change_requests_not_allowed" %]
-    [% title = "Password Change Requests Not Allowed" %]
-    The system is not configured to allow password change requests.
+    [% title = "Begäran om lösenordsbyte är inte tillåten" %]
+    Systemet är inte konfigurerat för att tillåta begäran om lösenordsbyte.
 
   [% ELSIF error == "passwords_dont_match" %]
-    [% title = "Passwords Don't Match" %]
-    The two passwords you entered did not match.
+    [% title = "Lösenorden stämmer inte överens" %]
+    De två lösenorden du angav stämmer inte överens.
 
   [% ELSIF error == "password_too_short" %]
-    [% title = "Password Too Short" %]
-    The password must be at least
-    [%+ constants.USER_PASSWORD_MIN_LENGTH FILTER html %] characters long.
+    [% title = "Lösenordet är för kort" %]
+    Lösenordet måste vara minst
+    [%+ constants.USER_PASSWORD_MIN_LENGTH FILTER html %] tecken långt.
     [% IF locked_user %]
       You must <a href="token.cgi?a=reqpw&amp;loginname=[% locked_user.email FILTER uri %]&amp;token=[% issue_hash_token(['reqpw']) FILTER uri %]">
-      request a new password</a> in order to log in again.
+      begära ett nytt lösenord</a> för att kunna logga in igen.
     [% END %]
 
   [% ELSIF error == "password_not_complex" %]
-    [% title = "Password Fails Requirements" %]
+    [% title = "Lösenordet uppfyller inte kraven" %]
     [% passregex = Param('password_complexity') %]
-    The password must contain at least one:
+    Lösenordet måste innehålla minst en:
     <ul>
       [% IF passregex == 'letters_numbers_specialchars' %]
-        <li>letter</li>
-        <li>special character</li>
+        <li>bokstav</li>
+        <li>specialtecken</li>
       [% ELSIF passregex.search('letters') %]
-        <li>UPPERCASE letter</li>
-        <li>lowercase letter</li>
+        <li>VERSAL</li>
+        <li>gemen</li>
       [% END %]
       [% IF passregex.search('numbers') %]
-        <li>digit</li>
+        <li>siffra</li>
       [% END %]
     </ul>
     [% IF locked_user %]
       You must <a href="token.cgi?a=reqpw&amp;loginname=[% locked_user.email FILTER uri %]&amp;token=[% issue_hash_token(['reqpw']) FILTER uri %]">
-      request a new password</a> in order to log in again.
+      begära ett nytt lösenord</a> för att kunna logga in igen.
     [% END %]
 
   [% ELSIF error == "product_access_denied" %]
-    [% title = "Product Access Denied" %]
-    Either the product 
+    [% title = "Åtkomst till produkten nekad" %]
+    Antingen finns produkten
     [%+ IF id.defined %]
-      with the id [% id FILTER html %]
+      med ID:t [% id FILTER html %]
     [% ELSE %]
-      '[% name FILTER html %]'
+      ”[% name FILTER html %]”
     [% END %]
-    does not exist or you don't have access to it.
+    inte eller så har du inte åtkomst till den.
 
   [% ELSIF error == "product_illegal_group" %]
-    [% title = "Illegal Group" %]
-    [% group.name FILTER html %] is not an active [% terms.bug %] group
-    and so you cannot edit group controls for it.
+    [% title = "Ogiltig grupp" %]
+    [% group.name FILTER html %] är inte en aktiv [% terms.bug %]-grupp
+    och därför kan du inte redigera dess gruppstyrningar.
 
   [% ELSIF error == "product_name_already_in_use" %]
-    [% title = "Product name already exists" %]
+    [% title = "Produktnamnet finns redan" %]
     [% admindocslinks = {'categorization.html#products' => 'Administering products'} %]
-    The product name '[% product FILTER html %]' already exists.
+    Produktnamnet ”[% product FILTER html %]” finns redan.
   
   [% ELSIF error == "product_name_diff_in_case" %]
-    [% title = "Product name differs only in case" %]
+    [% title = "Produktnamnet skiljer endast i skiftläge" %]
     [% admindocslinks = {'categorization.html#products' => 'Administering products'} %]
-    The product name '[% product FILTER html %]' differs from existing 
-    product '[% existing_product FILTER html %]' only in case.
+    Produktnamnet ”[% product FILTER html %]” skiljer sig från den befintliga
+    produkten ”[% existing_product FILTER html %]” endast i skiftläge.
 
   [% ELSIF error == "product_name_too_long" %]
-    [% title = "Product name too long" %]
-    The name of a product is limited to [% constants.MAX_PRODUCT_SIZE FILTER html %]
-    characters. '[% name FILTER html %]' is too long ([% name.length %] characters).
+    [% title = "Produktnamnet är för långt" %]
+    Namnet på en produkt är begränsat till [% constants.MAX_PRODUCT_SIZE FILTER html %]
+    tecken. ”[% name FILTER html %]” är för långt ([% name.length %] tecken).
 
   [% ELSIF error == "product_must_define_defaultmilestone" %]
     [% title = "Must define new default milestone" %]

@@ -1,0 +1,65 @@
+[%# This Source Code Form is subject to the terms of the Mozilla Public
+  # License, v. 2.0. If a copy of the MPL was not distributed with this
+  # file, You can obtain one at http://mozilla.org/MPL/2.0/.
+  #
+  # This Source Code Form is "Incompatible With Secondary Licenses", as
+  # defined by the Mozilla Public License, v. 2.0.
+  #%]
+[%
+   title = "E-post"
+   desc = "Hur ska utgående e-post levereras?"
+%]
+
+[% param_descs = {
+  mail_delivery_method => "Anger hur e-post ska skickas, eller om den alls ska skickas.<br>
+                           <ul>
+                             <li>
+                               'SMTP' innebär att SMTP-protokollet används för att kommunicera med en fjärransluten e-postserver.
+                             </li>
+                             <li>
+                               'Sendmail' innebär att den sendmail-kompatibla MTA som är installerad på Bugzilla-maskinen används.
+                               Du måste installera en sendmail-ersättare från tredje part om du vill använda sendmail i Windows.
+                             </li>
+                             <li>
+                               'Test' är användbart vid felsökning: all e-post sparas i 'data/mailer.testfile' i stället för att skickas.
+                             </li>
+                             <li>
+                               'None' stänger av e-post helt. Bugzilla fortsätter att agera som om e-post skickas, men inget skickas eller sparas.
+                             </li>
+                           </ul>",
+
+  mailfrom => "E-postadressen till $terms.Bugzilla e-postdemon. Vissa e-postsystem " _
+              "kräver att detta är en giltig e-postadress.",
+
+  use_mailer_queue => "I en stor Bugzilla-installation kan uppdatering av"
+    _ " $terms.bugs gå mycket långsamt eftersom Bugzilla skickar all"
+    _ " e-post på en gång. Om du aktiverar den här parametern köar Bugzilla"
+    _ " all e-post och skickar den sedan i bakgrunden. Det kräver att vissa"
+    _ " Perl-moduler är installerade (de anges av <kbd>checksetup.pl</kbd>"
+    _ " för denna funktion) och att demonen <code>jobqueue.pl</code> körs"
+    _ " (annars skickas inte din e-post). Detta påverkar all e-post som"
+    _ " Bugzilla skickar, inte bara uppdateringar av ${terms.bug}.",
+
+  smtpserver => "SMTP-serverns adress, med valfritt portnummer (när SMTP används " _
+                "för e-postleverans), t.ex. example.com eller example.com:1234",
+
+  smtp_username => "Användarnamnet som ska skickas till SMTP-servern för SMTP-autentisering. " _
+                   "Lämna fältet tomt om SMTP-servern inte kräver autentisering.",
+
+  smtp_password => "Lösenordet som ska skickas till SMTP-servern för SMTP-autentisering. " _
+                   "Fältet har ingen effekt om parametern smtp_username lämnas tom.",
+
+  smtp_ssl => "Aktivera SSL-stöd för SMTP.",
+
+  smtp_debug => "Om det är aktiverat skrivs detaljerad information om kommunikationen mellan" _
+                " Bugzilla och SMTP-servern ut i webbserverns fellogg. Använd detta för att" _
+                " felsöka e-postproblem.",
+
+  whinedays => "Antalet dagar som ett $terms.bug får ligga orört i tillståndet CONFIRMED " _
+               "innan cronjobbet påminner ägaren.<br> " _
+               "Ange 0 för att stänga av påminnelser.",
+
+  globalwatchers => "En kommaseparerad lista med användare som ska få en " _
+                    "kopia av varje e-postmeddelande som systemet skickar." }
+
+%]

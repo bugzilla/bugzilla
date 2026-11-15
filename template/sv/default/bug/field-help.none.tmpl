@@ -1,0 +1,242 @@
+[%# This Source Code Form is subject to the terms of the Mozilla Public
+  # License, v. 2.0. If a copy of the MPL was not distributed with this
+  # file, You can obtain one at http://mozilla.org/MPL/2.0/.
+  #
+  # This Source Code Form is "Incompatible With Secondary Licenses", as
+  # defined by the Mozilla Public License, v. 2.0.
+  #%]
+
+[%# This file describes both bug fields and search fields.
+  # As calling this template once per label is very expensive,
+  # it is called only by Template.pm. %]
+
+[% RETURN UNLESS in_template_var %]
+
+[% vars.help_html = {
+
+# Note that all these keys here are in alphabetical order, though
+# search-specific fields are at the bottom.
+
+##############
+# Bug Fields #
+##############
+
+alias =>
+  "Ett kort och unikt namn som ges till $terms.abug för att underlätta
+   sökning efter den och hänvisningar till den på andra ställen i Bugzilla.",
+
+assigned_to =>
+  "Personen som ansvarar för att lösa ${terms.bug}.",
+
+blocked =>
+  "Den här $terms.bug måste lösas innan de $terms.bugs som anges i
+   fältet kan lösas.",
+
+bug_file_loc =>
+  "$terms.Bugs kan ha en webbadress kopplad till sig, till exempel en"
+  _ " hänvisning till en webbplats där problemet kan ses.",
+
+bug_id =>
+  "Det numeriska id:t för $terms.abug, unikt i hela den här installationen"
+  _ " av Bugzilla.",
+
+bug_severity =>
+  "Hur allvarlig $terms.bug är eller om den är en förbättring.",
+
+bug_status =>
+  "$terms.Abug kan ha ett av flera tillstånd.",
+
+cc =>
+  "Användare som kanske inte har någon direkt roll i den här $terms.bug, men
+   som är intresserade av dess utveckling.",
+
+classification => 
+  "$terms.Bugs delas in i klassificeringar, produkter och"
+  _ " komponenter. Klassificeringar är den översta indelningsnivån.",
+
+component => 
+  "Komponenter är kategorier på den andra nivån. Varje komponent tillhör en"
+  _ " viss produkt. Välj en produkt för att begränsa listan.",
+
+creation_ts =>
+  "När $terms.bug rapporterades.",
+
+deadline =>
+  "Datumet när den här $terms.bug måste vara löst, angivet i formatet ÅÅÅÅ-MM-DD.",
+
+delta_ts =>
+  "När den här $terms.bug uppdaterades senast.",
+
+dependson =>
+  "De $terms.bugs som anges här måste lösas innan den här $terms.bug
+   kan lösas.",
+
+estimated_time =>
+  "Den uppskattade tidsåtgången för att lösa
+   ${terms.bug}.",
+
+importance =>
+  "Betydelsen för $terms.abug beskrivs som kombinationen av
+   dess $vars.field_descs.priority och ${vars.field_descs.bug_severity}.",
+
+keywords =>
+   "Du kan lägga till nyckelord från en definierad lista för $terms.bugs för"
+   _ " att enkelt identifiera och gruppera dem.",
+
+longdesc =>
+  "Bugzilla-användare kan lägga till kommentarer till ${terms.bugs}."
+  _ " Du kan söka efter text i kommentarerna.",
+
+op_sys =>
+  "Operativsystemet där $terms.bug observerades.",
+
+percentage_complete =>
+  "Hur nära 100 % klar den här $terms.bug är, beräknat genom att jämföra
+   $vars.field_descs.work_time med ${vars.field_descs.estimated_time}.",
+
+priority =>
+  "Utvecklare prioriterar sina $terms.bugs med det här fältet.",
+
+# Note that this has extra text added below if useclassification is on.
+product =>
+  "$terms.Bugs delas in i produkter och komponenter.",
+
+qa_contact =>
+  "Personen som ansvarar för att bekräfta den här $terms.bug om den är"
+  _ " obekräftad och för att verifiera korrigeringen när $terms.bug"
+  _ " har lösts.",
+
+remaining_time =>
+  "Antalet arbetstimmar som återstår för den här $terms.bug, beräknat genom"
+  _ " att dra av $vars.field_descs.work_time från"
+  _ " ${vars.field_descs.estimated_time}.",
+
+rep_platform => 
+  "Maskinvaruplattformen där $terms.bug observerades.",
+
+reporter =>
+  "Personen som rapporterade ${terms.bug}.",
+
+resolution =>
+  "Om $terms.abug har statusen löst anges en av följande orsaker"
+  _ " till lösningen.",
+
+see_also =>
+  "Med det här fältet kan du hänvisa till $terms.bugs i andra installationer.
+   Du kan ange en webbadress till $terms.abug i fältet 'Lägg till webbadresser
+   för $terms.Bug' för att ange att $terms.bug hör ihop med den här. Du kan
+   ange flera webbadresser samtidigt genom att skilja dem åt med blanksteg.
+
+   <p>Normalt använder du fältet för att hänvisa till $terms.bugs i
+     <em>andra</em> installationer. För $terms.bugs i den här
+     installationen är det bättre att använda fälten $vars.field_descs.dependson och
+     ${vars.field_descs.blocked}.</p>",
+
+short_desc =>
+  "Sammanfattningen för $terms.bug är en kort mening som koncist"
+  _ " beskriver vad $terms.bug gäller.",
+
+status_whiteboard =>
+  "Varje $terms.bug har ett fritt enradsfält där du kan"
+  _ " lägga till taggar och statusinformation.",
+
+tag =>
+  "Till skillnad från ${vars.field_descs.keywords}, som är gemensamma och synliga för
+   alla användare, är ${vars.field_descs.tag} personliga och kan bara
+   visas och redigeras av sin upphovsperson.
+   När du redigerar dem skickas ingen avisering till andra användare. Använd dem
+   för att tagga och hålla reda på ${terms.bugs}.",
+
+target_milestone =>
+   "Fältet $vars.field_descs.target_milestone används för att ange när"
+   _ " utvecklaren som $terms.bug har tilldelats förväntar sig att lösa den.",
+
+version =>
+  "Versionsfältet anger vilken version av programmet"
+  _ " som $terms.bug hittades i.",
+
+votes =>
+  "Det går att rösta på vissa $terms.bugs och du kan begränsa sökningen till"
+  _ " $terms.bugs med fler än ett visst antal röster.",
+
+work_time =>
+  "Den sammanlagda tiden som hittills har lagts på den här ${terms.bug}.",
+
+##########################
+# Search-specific fields #
+##########################
+
+chfield =>
+  "Du kan söka efter särskilda ändringstyper. Det här fältet anger"
+  _" vilket fält du vill se ändringar för.",
+
+# Duplicated to chfieldto below, also.
+chfieldfrom =>
+  "Ange start- och slutdatum antingen i formatet ÅÅÅÅ-MM-DD, eventuellt
+   följt av HH:mm enligt 24-timmarsformatet, eller som relativa datum
+   såsom 1h, 2d, 3w, 4m och 5y. De betyder en timme, två dagar, tre veckor,
+   fyra månader respektive fem år sedan. 0d är senaste midnatt och
+   0h, 0w, 0m och 0y är början av den här timmen, veckan, månaden
+   respektive året.",
+
+chfieldvalue =>
+  "Värdet som fältet ovan ändrades till under den perioden.",
+
+content =>
+  "Det här är ett sökfält som gör en Google-liknande"
+  _ " fritextsökning i fälten $vars.field_descs.short_desc och"
+  _ " ${vars.field_descs.longdesc}.",
+
+# Duplicated to email2 below, also.
+email1 =>
+  "Till varje $terms.bug är personer knutna i olika"
+  _ " roller. Här kan du söka efter vilken roll en person har.",
+
+} %]
+
+[% vars.help_html.email2 = vars.help_html.email1 %]
+[% vars.help_html.chfieldto = vars.help_html.chfieldfrom %]
+[% vars.help_html.deadlinefrom = vars.help_html.deadline %]
+[% vars.help_html.deadlineto = vars.help_html.deadline %]
+
+[% help_all_note = BLOCK %]
+  <strong>Obs!</strong> När du söker hittar valet "Alla"
+  endast [% terms.bugs %] där värdet i fältet bokstavligen är
+  ordet "Alla".
+[% END %]
+[% FOREACH all_field = ['op_sys', 'rep_platform'] %]
+  [% vars.help_html.$all_field = vars.help_html.$all_field _ ' ' _ help_all_note %]
+[% END %]
+
+[% IF Param('useclassification') %]
+  [% vars.help_html.product = vars.help_html.product 
+      _ " Välj en klassificering för att begränsa listan." %]
+[% END %]
+
+[% FOREACH help_field = bug_fields.keys %]
+
+  [%# Add help for custom fields. %]
+  [% IF !vars.help_html.${help_field}.defined %]
+    [% IF bug_fields.${help_field}.long_desc %]
+      [% vars.help_html.${help_field} = bug_fields.${help_field}.long_desc %]
+    [% ELSE %]
+      [% SET field_type = bug_fields.${help_field}.type %]
+      [% field_type_desc = BLOCK -%]
+        [% field_types.$field_type FILTER html %]
+      [%- END %]
+      [% vars.help_html.${help_field} = 
+        "Ett anpassat fält av typen $field_type_desc i den här installationen"
+        _ " av Bugzilla." %]
+    [% END %]
+  [% END %]
+
+  [%# Add help for the search types, for query.cgi. %]
+  [% type_desc = BLOCK %]
+    Vilken typ av sökning i [% vars.field_descs.${help_field} FILTER html %] du
+    vill göra.
+  [% END %]
+  [% SET type_name = help_field _ '_type' %]
+  [% vars.help_html.$type_name = type_desc %]
+[% END %]
+
+[% Hook.process("end") %]

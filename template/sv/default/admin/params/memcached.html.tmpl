@@ -1,0 +1,22 @@
+[%# This Source Code Form is subject to the terms of the Mozilla Public
+  # License, v. 2.0. If a copy of the MPL was not distributed with this
+  # file, You can obtain one at http://mozilla.org/MPL/2.0/.
+  #
+  # This Source Code Form is "Incompatible With Secondary Licenses", as
+  # defined by the Mozilla Public License, v. 2.0.
+  #%]
+[%
+   title = "Memcached"
+   desc = "Ställ in Memcached-integrering"
+%]
+
+[% param_descs = {
+    memcached_servers =>
+      "Om alternativet är aktiverat integreras $terms.Bugzilla med Memcached. " _
+      "Ange en eller flera servrar, separerade med blanksteg, med notationen " _
+      "värdnamn:port, till exempel 127.0.0.1:11211.",
+
+    memcached_namespace =>
+      "Ange en sträng som ska läggas före varje nyckel i Memcached.",
+  }
+%]

@@ -1821,77 +1821,74 @@
     ”[% version.product.name FILTER html %]”. Du kan inte ta bort den.
 
   [% ELSIF error == "users_deletion_disabled" %]
-    [% title = "Deletion not activated" %]
-    [% admindocslinks = {'users.html#deleting-users' => 'User administration'} %]
-    Sorry, the deletion of user accounts is not allowed.
+    [% title = "Borttagning är inte aktiverad" %]
+    [% admindocslinks = {'users.html#deleting-users' => 'Användaradministration'} %]
+    Det går inte att ta bort användarkonton.
 
   [% ELSIF error == "user_has_responsibility" %]
-    [% title = "Can't Delete User Account" %]
-    [% admindocslinks = {'users.html#deleting-users' => 'User administration'} %]
-    The user you want to delete is set up as the default [% terms.bug %]
-    assignee
+    [% title = "Det går inte att ta bort användarkontot" %]
+    [% admindocslinks = {'users.html#deleting-users' => 'Användaradministration'} %]
+    Användaren du vill ta bort är angiven som standardansvarig för [% terms.bug %]
     [% IF Param('useqacontact') %]
-      or QA contact
+      eller QA-kontakt
     [% END %]
-    for at least one component.
-    For this reason, you cannot delete the account at this time.
+    för minst en komponent. Därför kan kontot inte tas bort just nu.
 
   [% ELSIF error == "user_access_by_id_denied" %]
-    [% title = "User Access By Id Denied" %]
-    Logged-out users cannot use the "ids" argument to this function
-    to access any user information.
+    [% title = "Åtkomst till användare via ID nekad" %]
+    Utloggade användare kan inte använda argumentet ”ids” för den här funktionen
+    för att komma åt användaruppgifter.
 
   [% ELSIF error == "user_access_by_match_denied" %]
-    [% title = "User-Matching Denied" %]
-    Logged-out users cannot use the "match" argument to this function
-    to access any user information.
+    [% title = "Användarmatchning nekad" %]
+    Utloggade användare kan inte använda argumentet ”match” för den här funktionen
+    för att komma åt användaruppgifter.
 
   [% ELSIF error == "user_login_required" %]
-    [% title = "Login Name Required" %]
-    [% admindocslinks = {'users.html' => 'User administration'} %]
-    You must enter a login name for the new user.
+    [% title = "Inloggningsnamn krävs" %]
+    [% admindocslinks = {'users.html' => 'Användaradministration'} %]
+    Du måste ange ett inloggningsnamn för den nya användaren.
 
   [% ELSIF error == "user_match_failed" %]
-    [% title = "Match Failed" %]
-    <kbd>[% name FILTER html %]</kbd> does not exist or you are not allowed
-    to see that user.
+    [% title = "Matchning misslyckades" %]
+    <kbd>[% name FILTER html %]</kbd> finns inte eller så får du inte
+    se användaren.
 
   [% ELSIF error == "user_match_too_many" %]
-    [% title = "No Conclusive Match" %]
-    Bugzilla cannot make a conclusive match for one or more
-    of the names and/or email addresses you entered for
-    the [% fields.join(', ') FILTER html %] field(s).
+    [% title = "Ingen entydig matchning" %]
+    [% terms.Bugzilla %] kan inte göra en entydig matchning för ett eller flera
+    av namnen eller e-postadresserna du angav i fältet eller fälten
+    [% fields.join(', ') FILTER html %].
 
   [% ELSIF error == "user_not_insider" %]
-    [% title = "User Not In Insidergroup" %]
-    Sorry, but you are not allowed to (un)mark comments or attachments
-    as private.
+    [% title = "Användaren finns inte i intern grupp" %]
+    Du får inte markera eller avmarkera kommentarer eller bilagor som privata.
 
   [% ELSIF error == "user_not_involved" %]
-    [% title = "User Not Involved with $terms.Bug" %]
-    Sorry, but you are not involved with [% terms.Bug %] [%+
+    [% title = "Användaren är inte involverad i $terms.Bug" %]
+    Du är inte involverad i [% terms.Bug %] [%+
         bug_id FILTER bug_link(bug_id) FILTER none %].
 
   [% ELSIF error == "webdot_too_large" %]
-    [% title = "Dependency Graph Too Large" %]
-    The dependency graph contains too many [% terms.bugs %] to display (more
-    than [% constants.MAX_WEBDOT_BUGS FILTER html %] [%+ terms.bugs %]).
+    [% title = "Beroendediagrammet är för stort" %]
+    Beroendediagrammet innehåller för många [% terms.bugs %] för att visas (fler
+    än [% constants.MAX_WEBDOT_BUGS FILTER html %] [%+ terms.bugs %]).
 
   [% ELSIF error == "wrong_token_for_cancelling_email_change" %]
-    [% title = "Wrong Token" %]
-    That token cannot be used to cancel an email address change.
+    [% title = "Fel token" %]
+    Tokenet kan inte användas för att avbryta en ändring av e-postadress.
 
   [% ELSIF error == "wrong_token_for_changing_passwd" %]
-    [% title = "Wrong Token" %]
-    That token cannot be used to change your password.
+    [% title = "Fel token" %]
+    Tokenet kan inte användas för att ändra lösenordet.
 
   [% ELSIF error == "wrong_token_for_confirming_email_change" %]
-    [% title = "Wrong Token" %]
-    That token cannot be used to change your email address.
+    [% title = "Fel token" %]
+    Tokenet kan inte användas för att ändra e-postadressen.
 
   [% ELSIF error == "wrong_token_for_creating_account" %]
-    [% title = "Wrong Token" %]
-    That token cannot be used to create a user account.
+    [% title = "Fel token" %]
+    Tokenet kan inte användas för att skapa ett användarkonto.
 
   [% ELSIF error == "xmlrpc_invalid_value" %]
     "[% value FILTER html %]" is not a valid value for a

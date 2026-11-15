@@ -736,50 +736,50 @@
     produkter som du inte kan se och därför får du inte ta bort den.
 
   [% ELSIF error == "flag_type_cc_list_invalid" %]
-    [% title = "Flag Type CC List Invalid" %]
-    [% admindocslinks = {'flags.html' => 'Administering Flags'} %]
-    The CC list [% cc_list FILTER html %] must be less than 200 characters long.
+    [% title = "Ogiltig CC-lista för flaggtyp" %]
+    [% admindocslinks = {'flags.html' => 'Administrera flaggor'} %]
+    CC-listan [% cc_list FILTER html %] måste vara kortare än 200 tecken.
 
   [% ELSIF error == "flag_type_component_without_product" %]
-    [% title = "Product Missing" %]
-    A component was selected without a product being selected.
+    [% title = "Produkt saknas" %]
+    En komponent valdes utan att någon produkt valdes.
 
   [% ELSIF error == "flag_type_description_invalid" %]
-    [% title = "Flag Type Description Invalid" %]
-    [% admindocslinks = {'flags.html' => 'Administering Flags'} %]
-    You must enter a description for this flag type.
+    [% title = "Ogiltig beskrivning av flaggtyp" %]
+    [% admindocslinks = {'flags.html' => 'Administrera flaggor'} %]
+    Du måste ange en beskrivning för flaggtypen.
 
   [% ELSIF error == "flag_type_name_invalid" %]
-    [% title = "Flag Type Name Invalid" %]
-    [% admindocslinks = {'flags.html' => 'Administering Flags'} %]
-    The name <em>[% name FILTER html %]</em> must be 1-50 characters long
-    and must not contain any spaces or commas.
+    [% title = "Ogiltigt namn på flaggtyp" %]
+    [% admindocslinks = {'flags.html' => 'Administrera flaggor'} %]
+    Namnet <em>[% name FILTER html %]</em> måste innehålla 1–50 tecken
+    och får inte innehålla mellanslag eller kommatecken.
 
   [% ELSIF error == "flag_type_not_editable" %]
-    [% title = "Flag Type Not Editable" %]
-    You are not allowed to edit properties of the '[% flagtype.name FILTER html %]'
-    flag type, because this flag type is not available for the products you can administer.
+    [% title = "Flaggtypen kan inte ändras" %]
+    Du får inte ändra egenskaper för flaggtypen ”[% flagtype.name FILTER html %]”,
+    eftersom flaggtypen inte är tillgänglig för de produkter du kan administrera.
 
   [% ELSIF error == "flag_not_unique" %]
-    [% title = "Flag not Unique" %]
-    The flag '[% value FILTER html %]' has been set multiple times.
-    You must specify the id value to update the flag.
+    [% title = "Flaggan är inte unik" %]
+    Flaggan ”[% value FILTER html %]” har angetts flera gånger.
+    Du måste ange ID-värdet för att uppdatera flaggan.
 
   [% ELSIF error == "flag_type_not_unique" %]
-    [% title = "Flag Type not Unique" %]
-    The flag type '[% value FILTER html %]' matches several flag types.
-    You must specify the type id value to update or add a flag.
+    [% title = "Flaggtypen är inte unik" %]
+    Flaggtypen ”[% value FILTER html %]” matchar flera flaggtyper.
+    Du måste ange typ-ID:t för att uppdatera eller lägga till en flagga.
 
   [% ELSIF error == "flag_type_not_multiplicable" %]
-    [% docslinks = {'using/understanding.html#flags' => 'Using Flags'} %]
-    You cannot have several <em>[% type.name FILTER html %]</em> flags
-    for this [% IF attachment %] attachment [% ELSE %] [%+ terms.bug %] [% END %].
+    [% docslinks = {'using/understanding.html#flags' => 'Använda flaggor'} %]
+    Du kan inte ha flera flaggor av typen <em>[% type.name FILTER html %]</em>
+    för [% IF attachment %] den här bilagan [% ELSE %] [%+ terms.bug %] [% END %].
 
   [% ELSIF error == "flag_update_denied" %]
     [% title = "Ändring av flagga nekad" %]
-    [% admindocslinks = {'flags.html' => 'Administering Flags',
-                         'categorization.html#assigning-group-controls-to-products' => 'Group Security'} %]
-    [% docslinks = {'using/understanding.html#flags' => 'Using Flags'} %]
+    [% admindocslinks = {'flags.html' => 'Administrera flaggor',
+                         'categorization.html#assigning-group-controls-to-products' => 'Gruppsäkerhet'} %]
+    [% docslinks = {'using/understanding.html#flags' => 'Använda flaggor'} %]
     Du försökte [% IF status == "+" %] bevilja [% ELSIF status == "-" %] neka
     [% ELSIF status == "X" %] rensa [% ELSE %] begära [% END %]
     <code>[% name FILTER html %]

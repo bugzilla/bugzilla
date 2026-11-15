@@ -1,0 +1,312 @@
+[%# This Source Code Form is subject to the terms of the Mozilla Public
+  # License, v. 2.0. If a copy of the MPL was not distributed with this
+  # file, You can obtain one at http://mozilla.org/MPL/2.0/.
+  #
+  # This Source Code Form is "Incompatible With Secondary Licenses", as
+  # defined by the Mozilla Public License, v. 2.0.
+  #%]
+
+[% san_message = BLOCK %]
+  [% IF san_tag == "checks_start" %]
+    OK, kör nu rimlighetskontroller.
+
+  [% ELSIF san_tag == "checks_completed" %]
+    Rimlighetskontrollen är klar.
+
+  [% ELSIF san_tag == "attachment_reference_deletion_start" %]
+    OK, tar nu bort alla hänvisningar till borttagna bilagor.
+
+  [% ELSIF san_tag == "attachment_reference_deletion_end" %]
+    Alla hänvisningar till borttagna bilagor har tagits bort.
+
+  [% ELSIF san_tag == "bug_check_alert" %]
+    [% errortext FILTER html %]: [% INCLUDE bug_list badbugs = badbugs %]
+
+  [% ELSIF san_tag == "bug_check_repair" %]
+    <a href="sanitycheck.cgi?[% param FILTER uri %]=1&amp;token=
+       [%- issue_hash_token(['sanitycheck']) FILTER uri %]">[% text FILTER html %]</a>.
+
+  [% ELSIF san_tag == "bug_check_creation_date" %]
+    Kontrollerar [% terms.bugs %] utan skapandedatum (de blir osynliga).
+
+  [% ELSIF san_tag == "bug_check_creation_date_error_text" %]
+    [% terms.Bugs %] utan skapandedatum
+
+  [% ELSIF san_tag == "bug_check_creation_date_repair_text" %]
+    Reparera saknade skapandedatum för dessa [% terms.bugs %]
+
+  [% ELSIF san_tag == "bug_check_bugs_fulltext" %]
+    Kontrollerar [% terms.bugs %] utan post för fulltextsökning.
+
+  [% ELSIF san_tag == "bug_check_bugs_fulltext_error_text" %]
+    [% terms.Bugs %] utan post för fulltextsökning
+
+  [% ELSIF san_tag == "bug_check_bugs_fulltext_repair_text" %]
+    Reparera saknade poster för fulltextsökning för dessa [% terms.bugs %]
+
+  [% ELSIF san_tag == "bug_check_res_dupl" %]
+    Kontrollerar upplösning/duplicering
+
+  [% ELSIF san_tag == "bug_check_res_dupl_error_text" %]
+    [% terms.Bugs %] i duplikattabellen som inte är markerade som dubbletter
+
+  [% ELSIF san_tag == "bug_check_res_dupl_error_text2" %]
+    [% terms.Bugs %] markerade som lösta dubbletter som saknas i duplikattabellen
+
+  [% ELSIF san_tag == "bug_check_status_res" %]
+    Kontrollerar statusar/upplösningar
+
+  [% ELSIF san_tag == "bug_check_status_res_error_text" %]
+    [% terms.Bugs %] med öppen status och en upplösning
+
+  [% ELSIF san_tag == "bug_check_status_res_error_text2" %]
+    [% terms.Bugs %] med annan status än öppen och utan upplösning
+
+  [% ELSIF san_tag == "bug_check_status_everconfirmed" %]
+    Kontrollerar statusar/everconfirmed
+
+  [% ELSIF san_tag == "bug_check_status_everconfirmed_error_text" %]
+    [% terms.Bugs %] som är UNCONFIRMED men har everconfirmed angivet
+
+  [% ELSIF san_tag == "bug_check_status_everconfirmed_error_text2" %]
+    [% terms.Bugs %] med bekräftad status men utan everconfirmed
+
+  [% ELSIF san_tag == "bug_check_control_values" %]
+    Kontrollerar felaktiga värden i group_control_map
+
+  [% ELSIF san_tag == "bug_check_control_values_alert" %]
+    Hittade [% entries FILTER html %] felaktiga poster i group_control_map
+
+  [% ELSIF san_tag == "bug_check_control_values_violation" %]
+    Kontrollerar [% terms.bugs %] med grupper som bryter mot produktens gruppstyrning
+
+  [% ELSIF san_tag == "bug_check_control_values_error_text" %]
+    Har grupper som inte är tillåtna för produkterna
+
+  [% ELSIF san_tag == "bug_check_control_values_repair_text" %]
+    Tillåt de saknade grupperna för berörda produkter
+    (ange medlemsstyrning till <code>SHOWN</code>)
+
+  [% ELSIF san_tag == "bug_check_control_values_error_text2" %]
+    Saknar obligatoriska grupper för produkterna
+
+  [% ELSIF san_tag == "bug_creation_date_start" %]
+    OK, reparerar nu saknade skapandedatum för [% terms.bug %].
+
+  [% ELSIF san_tag == "bug_creation_date_fixed" %]
+    [% bug_count FILTER html %] [%+ terms.bugs %] har reparerats.
+
+  [% ELSIF san_tag == "bugs_fulltext_start" %]
+    OK, reparerar nu poster för [% terms.bug %] i fulltextsökningen.
+
+  [% ELSIF san_tag == "bugs_fulltext_fixed" %]
+    [% bug_count FILTER html %] [%+ terms.bugs %] have been fixed.
+
+  [% ELSIF san_tag == "bug_reference_deletion_start" %]
+    OK, tar nu bort alla hänvisningar till borttagna [% terms.bugs %].
+
+  [% ELSIF san_tag == "bug_reference_deletion_end" %]
+    Alla hänvisningar till borttagna [% terms.bugs %] har tagits bort.
+
+  [% ELSIF san_tag == "cross_check_to" %]
+    Kontrollerar hänvisningar till [% table FILTER html %].[% field FILTER html %] …
+
+  [% ELSIF san_tag == "cross_check_from" %]
+    … från [% table FILTER html %].[% field FILTER html %].
+
+  [% ELSIF san_tag == "cross_check_alert" %]
+    Felaktigt värde ”[% value FILTER html %]” hittades i
+    [%+ table FILTER html %].[% field FILTER html %]
+    [% IF keyname %]
+      [% IF keyname == "bug_id" %]
+        ([% PROCESS bug_link bug_id = key %])
+      [% ELSE %]
+        ([% keyname FILTER html %] == '[% key FILTER html %]')
+      [% END %]
+    [% END %]
+
+  [% ELSIF san_tag == "cross_check_attachment_has_references" %]
+    <a href="sanitycheck.cgi?remove_invalid_attach_references=1&amp;token=
+       [%- issue_hash_token(['sanitycheck']) FILTER uri %]">Ta bort
+    ogiltiga hänvisningar till obefintliga bilagor.</a>
+
+  [% ELSIF san_tag == "cross_check_bug_has_references" %]
+    <a href="sanitycheck.cgi?remove_invalid_bug_references=1&amp;token=
+       [%- issue_hash_token(['sanitycheck']) FILTER uri %]">Ta bort
+    ogiltiga hänvisningar till obefintliga [% terms.bugs %].</a>
+
+  [% ELSIF san_tag == "double_cross_check_to" %]
+    Kontrollerar hänvisningar till [% table FILTER html %].[% field1 FILTER html %] /
+    [%+ table FILTER html %].[% field2 FILTER html %]...
+
+  [% ELSIF san_tag == "double_cross_check_from" %]
+    … från [% table FILTER html %].[% field1 FILTER html %] /
+    [%+ table FILTER html %].[% field2 FILTER html %].
+
+  [% ELSIF san_tag == "double_cross_check_alert" %]
+    Felaktiga värden ”[% value1 FILTER html %]”, ”[% value2 FILTER html %]” hittades
+    in [% table FILTER html %].[% field1 FILTER html %] /
+    [%+ table FILTER html %].[% field2 FILTER html %].
+    [% IF keyname %]
+      [% IF keyname == "bug_id" %]
+        ([% PROCESS bug_link bug_id = key %])
+      [% ELSE %]
+        ([% keyname FILTER html %] == '[% key FILTER html %]')
+      [% END %]
+    [% END %]
+
+  [% ELSIF san_tag == "everconfirmed_start" %]
+    OK, reparerar nu everconfirmed.
+
+  [% ELSIF san_tag == "everconfirmed_end" %]
+    everconfirmed har reparerats.
+
+  [% ELSIF san_tag == "flag_check_start" %]
+    Kontrollerar flaggor i fel produkt/komponent.
+
+  [% ELSIF san_tag == "flag_deletion_start" %]
+    OK, tar nu bort ogiltiga flaggor.
+
+  [% ELSIF san_tag == "flag_deletion_end" %]
+    Ogiltiga flaggor har tagits bort.
+
+  [% ELSIF san_tag == "flag_alert" %]
+    Ogiltig flagga [% flag_id FILTER html %] för
+    [% IF attach_id %]
+      bilaga [% attach_id FILTER html %] i
+    [% END %]
+    [%+ PROCESS bug_link bug_id = bug_id %].
+
+  [% ELSIF san_tag == "flag_fix" %]
+    <a href="sanitycheck.cgi?remove_invalid_flags=1&amp;token=
+       [%- issue_hash_token(['sanitycheck']) FILTER uri %]">Klicka
+    här för att ta bort ogiltiga flaggor</a>
+
+  [% ELSIF san_tag == "group_control_map_entries_creation" %]
+    OK, skapar nu <code>SHOWN</code>-poster för medlemsstyrning
+    för kombinationer av produkt och grupp som saknar en sådan.
+
+  [% ELSIF san_tag == "group_control_map_entries_update" %]
+    Uppdaterar gruppstyrningsinställningen <code>NA/<em>xxx</em></code>
+    för gruppen <em>[% group_name FILTER html %]</em> till
+    <code>SHOWN/<em>xxx</em></code> i produkten
+    <em>[% product_name FILTER html %]</em>.
+
+  [% ELSIF san_tag == "group_control_map_entries_generation" %]
+    Skapar gruppstyrningsinställningen <code>SHOWN/NA</code>
+    för gruppen <em>[% group_name FILTER html %]</em> i produkten
+    <em>[% product_name FILTER html %]</em>.
+
+  [% ELSIF san_tag == "group_control_map_entries_repaired" %]
+    Reparerade [% counter FILTER html %] felaktiga gruppstyrningsinställningar.
+
+  [% ELSIF san_tag == "keyword_check_start" %]
+    Kontrollerar nyckelordstabellen.
+
+  [% ELSIF san_tag == "keyword_check_alert" %]
+    Dubblettpost i keyworddefs för id [% id FILTER html %].
+
+  [% ELSIF san_tag == "keyword_check_invalid_name" %]
+    Ogiltigt namn i keyworddefs för id [% id FILTER html %].
+
+  [% ELSIF san_tag == "keyword_check_invalid_id" %]
+    Ogiltiga keywordids [% id FILTER html %] hittades i nyckelordstabellen.
+
+  [% ELSIF san_tag == "keyword_check_duplicated_ids" %]
+    Dubbla nyckelords-ID:n hittades i [% PROCESS bug_link bug_id = id %].
+
+  [% ELSIF san_tag == "profile_login_start" %]
+    Kontrollerar profilinloggningar.
+
+  [% ELSIF san_tag == "product_alert" %]
+    Produkten <a href="editproducts.cgi?product=[% name FILTER html%]">
+    [%- name FILTER html %]</a> saknar komponenter eller versioner.
+
+  [% ELSIF san_tag == "product_check_start" %]
+    Kontrollerar produkter utan komponenter eller versioner.
+
+  [% ELSIF san_tag == "profile_login_alert" %]
+    Felaktig e-postadress för profil, id=[% id FILTER html %],
+    &lt;[% email FILTER html %]&gt;.
+
+  [% ELSIF san_tag == "repair_bugs" %]
+    Reparera dessa [% terms.bugs %].
+
+  [% ELSIF san_tag == "send_bugmail_start" %]
+    OK, försöker nu skicka oskickad e-post.
+
+  [% ELSIF san_tag == "send_bugmail_status" %]
+    Hittade [% bug_count FILTER html %] [%+ terms.bugs %] med
+    eventuellt oskickad e-post.
+
+  [% ELSIF san_tag == "send_bugmail_end" %]
+    Oskickad e-post har skickats.
+
+  [% ELSIF san_tag == "unsent_bugmail_check" %]
+    Kontrollerar oskickad e-post
+
+  [% ELSIF san_tag == "unsent_bugmail_alert" %]
+    [% terms.Bugs %] med ändringar men utan skickad e-post på minst
+    en halvtimme: [% INCLUDE bug_list badbugs = badbugs %]
+
+  [% ELSIF san_tag == "unsent_bugmail_fix" %]
+    <a href="sanitycheck.cgi?rescanallBugMail=1&amp;token=
+       [%- issue_hash_token(['sanitycheck']) FILTER uri %]">Skicka dessa meddelanden</a>.
+
+  [% ELSIF san_tag == "whines_obsolete_target_deletion_start" %]
+    OK, tar nu bort obefintliga användare/grupper från påminnelser.
+
+  [% ELSIF san_tag == "whines_obsolete_target_deletion_end" %]
+    Obefintliga användare/grupper har tagits bort från påminnelser.
+
+  [% ELSIF san_tag == "whines_obsolete_target_start" %]
+    Kontrollerar påminnelser med obefintliga användare/grupper.
+
+  [% ELSIF san_tag == "whines_obsolete_target_alert" %]
+    [% FOREACH schedule = schedules %]
+      Obefintlig [% (type == constants.MAILTO_USER) ? "användare" : "grupp" FILTER html %]
+      [%+ schedule.1 FILTER html %] för påminnelseschema [% schedule.0 FILTER html %]<br>
+    [% END %]
+
+  [% ELSIF san_tag == "whines_obsolete_target_fix" %]
+    <a href="sanitycheck.cgi?remove_old_whine_targets=1&amp;token=
+       [%- issue_hash_token(['sanitycheck']) FILTER uri %]">Klicka här för att
+    ta bort gamla användare/grupper</a>
+
+  [% ELSE %]
+    [% message = Hook.process("statuses") %]
+
+    [% IF message %]
+      [% message FILTER none %]
+    [% ELSE %]
+      Statusmeddelandet <code>[% san_tag FILTER html %]</code> hittades inte.
+      Skicka e-post till [% Param("maintainer") %] med en beskrivning av stegen
+      som ledde till meddelandet.
+    [% END %]
+
+  [% END %]
+[% END %]
+
+[% USE Bugzilla %]
+[% IF Bugzilla.usage_mode == constants.USAGE_MODE_CMDLINE %]
+  [% san_message FILTER none %]
+[% ELSE %]
+  [%# Avoid the txt filter in message.txt.tmpl. %]
+  [% san_message FILTER html %]
+[% END %]
+
+[% BLOCK bug_list %]
+  [% FOREACH bug_id = badbugs %]
+    [%# Do not use FILTER bug_link() here, because bug_link() calls get_text()
+     # which itself calls this template again, generating a recursion error.
+     # I doubt having a tooltip with the bug status and summary is so
+     # important here anyway, as you can click the "(as buglist)" link. %]
+    <a href="show_bug.cgi?id=[% bug_id FILTER uri %]">[% bug_id FILTER html %]</a>
+    [% ", " IF !loop.last %]
+  [% END %]
+  (<a href="buglist.cgi?bug_id=[% badbugs.join(",") FILTER uri %]">som [% terms.bug %]lista</a>).
+[% END %]
+
+[% BLOCK bug_link %]
+  <a href="show_bug.cgi?id=[% bug_id FILTER uri %]">[% terms.bug %] [%+ bug_id FILTER html %]</a>
+[% END %]

@@ -1,0 +1,411 @@
+[%# This Source Code Form is subject to the terms of the Mozilla Public
+  # License, v. 2.0. If a copy of the MPL was not distributed with this
+  # file, You can obtain one at http://mozilla.org/MPL/2.0/.
+  #
+  # This Source Code Form is "Incompatible With Secondary Licenses", as
+  # defined by the Mozilla Public License, v. 2.0.
+  #%]
+
+[%# INTERFACE:
+  # events: hash, keyed by event_id number.  Values are anonymous hashes of:
+  #     schedule: array of hashes containing schedule info:
+  #         day:    value in day column
+  #         time:   value selected in time column
+  #         mailto_type: 0=user 1=group
+  #         mailto: recipient's id (profile or group)
+  #     queries:  as with schedule, an anonymous array containing hashes of:
+  #         name:  the named query's name
+  #         title: title to be displayed on the results
+  #         sort:  integer that sets execution order on named queries
+  #%]
+
+[% title = "Ställ in påminnelser" %]
+[% PROCESS global/header.html.tmpl
+  title = title
+  style_urls = ['skins/standard/admin.css']
+  doc_section = "using/index.html"
+%]
+
+<p>
+  En påminnelse innebär att Bugzilla kör en sparad sökning med jämna mellanrum
+  och skickar den resulterande listan med [% terms.bugs %] via e-post.
+</p>
+
+<p>
+  För att ställa in en ny påminnelsehändelse klickar du på ”Lägg till ny händelse”.
+  Ange ämnesrad för meddelandet och en text som följer med [% terms.bug %]listan
+  i meddelandetexten.
+</p>
+
+<p>
+  Scheman läggs till i en händelse genom att klicka på ”Lägg till nytt schema”. Ett
+  schema består av en dag, en tid på dagen eller ett tidsintervall
+  (till exempel var femtonde minut) samt en mottagaradress som du kanske kan ändra,
+  beroende på dina behörigheter. Händelser kan ha flera scheman för att köras vid
+  flera tillfällen eller för olika användare.
+</p>
+
+<p>
+  Sökningar kommer från sparade sökningar. De skapar du genom att köra en <a
+  href="query.cgi">sökning</a> och be Bugzilla att spara den under ett visst namn.
+  Lägg till en sökning genom att klicka på ”Lägg till sökning”, välj den sparade
+  sökningen under ”Sökning” och ange en rubrik för [% terms.bug %]tabellen. Det
+  valfria talet under ”Sortering” bestämmer körordningen, från lägst till högst,
+  när flera sökningar finns i listan. Om du väljer ”Ett meddelande per [% terms.bug %]”
+  skickas varje [% terms.bug %] som matchar sökningen i ett eget e-postmeddelande.
+</p>
+
+<p>
+  Alla tider anges i serverns lokala tid ([% local_timezone FILTER html %]).
+</p>
+
+<form method="post" action="editwhines.cgi">
+[%# This hidden submit button must be here to set default behavior when
+    the user presses return on a form input field #%]
+<input type="submit" value="Uppdatera" id="commit" name="commit"
+       class="bz_default_hidden">
+<input type="hidden" name="update" value="1">
+<input type="hidden" name="token" value="[% token FILTER html %]">
+
+[% FOREACH event = events %]
+
+<table class="whining_list">
+  <tr>
+    <th class="subtitle">Händelse:</th>
+    <th colspan="2">
+      <input type="submit" value="Ta bort händelse"
+             name="remove_event_[% event.key %]"
+             id="remove_event_[% event.key %]">
+    </th>
+  </tr>
+
+  <tr>
+    <th>Ämnesrad:</th>
+    <td colspan="2">
+      <input type="text" name="event_[% event.key %]_subject"
+             size="60" maxlength="128" value="
+             [%- event.value.subject FILTER html %]">
+    </td>
+  </tr>
+
+  <tr>
+    <th>Beskrivande text i påminnelsemeddelandet:</th>
+    <td colspan="2">
+      [% INCLUDE global/textarea.html.tmpl
+         name           = "event_${event.key}_body"
+         minrows        = 3
+         maxrows        = 10
+         defaultrows    = 5
+         cols           = 80
+         defaultcontent = event.value.body
+       %]
+    </td>
+  </tr>
+
+  <tr>
+    <th>Skicka ett meddelande även om sökresultatet inte innehåller några [% terms.bugs %]:</th>
+    <td colspan="2">
+      <input type="checkbox" name="event_[% event.key %]_mailifnobugs"
+        [%- IF event.value.mailifnobugs == 1 %] checked [% END %]>
+    </td>
+  </tr>
+
+  [% IF event.value.schedule.size == 0 %]
+
+    <tr>
+      <th>Schema:</th>
+      <td class="unset" colspan="2">
+        Inte schemalagd<br>
+        <input type="submit" value="Lägg till nytt schema"
+               name="add_schedule_[% event.key %]"
+               id="add_schedule_[% event.key %]">
+      </td>
+    </tr>
+
+  [% ELSE %]
+
+    <tr>
+      <th>Schema:</th>
+      <td class="set" colspan="2">
+
+        <table class="schedule_list">
+          <tr>
+            <th>Intervall</th>
+            <th>
+              [% IF mail_others %]
+                Skicka till
+              [% END %]
+            </th>
+            <th></th>
+          </tr>
+
+          [% FOREACH schedule = event.value.schedule %]
+            <tr>
+              <td>
+                [%# these hidden fields allow us to compare old values instead
+                    of reading the database to tell if a field has changed %]
+
+                <input type="hidden" value="[% schedule.day FILTER html %]"
+                       name="orig_day_[% schedule.id %]">
+                <input type="hidden" value="[% schedule.time FILTER html %]"
+                       name="orig_time_[% schedule.id %]">
+                [% PROCESS day_field val=schedule.day %]
+                [% PROCESS time_field val=schedule.time %]
+              </td>
+              <td>
+                [% IF mail_others %]
+                  <input type="hidden" name="orig_mailto_type_[% schedule.id %]"
+                         value="[% schedule.mailto_type FILTER html %]">
+                  <select name="mailto_type_[% schedule.id %]">
+                    <option value="0" [% IF schedule.mailto_type == 0 %]
+                                        selected
+                                      [% END %]>Användare</option>
+                    <option value="1" [% IF schedule.mailto_type == 1 %]
+                                        selected
+                                      [% END %]>Grupp</option>
+                  </select>
+                  <input type="hidden" name="orig_mailto_[% schedule.id %]"
+                         value="[% schedule.mailto FILTER html %]">
+                  <input type="text" name="mailto_[% schedule.id %]"
+                         value="[% schedule.mailto FILTER html %]" size="30">
+                [% END %]
+              </td>
+              <td>
+                <input type="submit" value="Ta bort"
+                       name="remove_schedule_[% schedule.id %]"
+                       id="remove_schedule_[% schedule.id %]">
+              </td>
+            </tr>
+          [% END %]
+
+          <tr>
+            <td colspan="3">
+              <input type="submit" value="Lägg till nytt schema"
+                     name="add_schedule_[% event.key %]"
+                     id="add_schedule_[% event.key %]">
+            </td>
+          </tr>
+        </table>
+
+      </td>
+    </tr>
+
+  [% END %]
+
+  [% IF event.value.queries.size == 0 %]
+
+    <tr>
+      <th>Sökningar:</th>
+      <td>
+        Inga sökningar <br>
+        <input type="submit" value="Lägg till sökning"
+               name="add_query_[% event.key %]"
+               id="add_query_[% event.key %]">
+      </td>
+      <td class="right">
+        <input type="submit" value="Uppdatera" name="commit" id="update">
+      </td>
+    </tr>
+
+  [% ELSE %]
+
+    <tr>
+      <th>Sökningar:</th>
+      <td colspan="2">
+
+        <table class="search_list">
+          <tr>
+            <th>Sortering</th>
+            <th>Sökning</th>
+            <th>Rubrik</th>
+            <th colspan="2"></th>
+          </tr>
+
+          [% FOREACH query = event.value.queries %]
+
+            <tr>
+              <td>
+                <input type="text" name="query_sort_[% query.id %]"
+                       size="3" value="[% query.sort %]">
+                <input type="hidden" value="[% query.sort %]"
+                       name="orig_query_sort_[% query.id %]">
+              </td>
+              <td>
+                <input type="hidden" value="[% query.name FILTER html %]"
+                       name="orig_query_name_[% query.id %]">
+                [% PROCESS query_field thisquery=query.name %]
+              </td>
+              <td>
+                <input type="hidden" value="[% query.title FILTER html %]"
+                       name="orig_query_title_[% query.id %]">
+                <input type="text" name="query_title_[% query.id %]"
+                       size="50" value="[% query.title FILTER html %]"
+                       maxlength="64">
+              </td>
+              <td>
+                <input type="hidden" value="[% query.onemailperbug FILTER html %]"
+                       name="orig_query_onemailperbug_[% query.id %]">
+                <input type="checkbox" [% IF query.onemailperbug == 1 %] checked [% END %]
+                       id="query_onemailperbug_[% query.id %]"
+                       name="query_onemailperbug_[% query.id %]">
+                <label for="query_onemailperbug_[% query.id %]">Ett meddelande per [% terms.bug %]</label>
+              </td>
+              <td>
+                <input type="submit" value="Ta bort"
+                       name="remove_query_[% query.id %]"
+                       id="remove_query_[% query.id %]">
+              </td>
+            </tr>
+
+          [% END %]
+
+          <tr>
+            <td colspan="3">
+              <input type="submit" value="Lägg till sökning"
+                     name="add_query_[% event.key %]"
+                     id="add_query_[% event.key %]">
+            </td>
+            <td colspan="2" class="right">
+              <input type="submit" value="Uppdatera" name="commit" id="update">
+            </td>
+          </tr>
+        </table>
+
+      </td>
+    </tr>
+
+  [% END %]
+
+</table>
+
+[% END %]
+
+<p>
+  <input type="submit" value="Lägg till ny händelse" name="add_event" id="add_event">
+</p>
+
+</form>
+
+[% PROCESS global/footer.html.tmpl %]
+
+[% BLOCK query_field +%]
+
+  [% IF available_queries.size > 0 %]
+
+    <select name="query_name_[% query.id %]">
+      [% FOREACH q = available_queries %]
+        <option [% "selected" IF q == thisquery %] value="[% q FILTER html %]">
+            [% q FILTER html %]
+        </option>
+      [% END %]
+    </select>
+
+  [% ELSE %]
+    Gå till sidan <a href="query.cgi">Sökning</a> och spara en sökning
+  [% END %]
+
+[%+ END %]
+
+[% BLOCK day_field +%]
+  <select name="day_[% schedule.id %]">
+      [%
+        options = [
+            ['All',  'Varje dag',                ],
+            ['MF',   'Måndag till fredag',       ],
+            ['Sun',  'Söndag',                   ],
+            ['Mon',  'Måndag',                   ],
+            ['Tue',  'Tisdag',                   ],
+            ['Wed',  'Onsdag',                   ],
+            ['Thu',  'Torsdag',                  ],
+            ['Fri',  'Fredag',                   ],
+            ['Sat',  'Lördag',                   ],
+            ['1',    'Den 1:a i månaden',        ],
+            ['2',    'Den 2:a i månaden',        ],
+            ['3',    'Den 3:e i månaden',        ],
+            ['4',    'Den 4:e i månaden',        ],
+            ['5',    'Den 5:e i månaden',        ],
+            ['6',    'Den 6:e i månaden',        ],
+            ['7',    'Den 7:e i månaden',        ],
+            ['8',    'Den 8:e i månaden',        ],
+            ['9',    'Den 9:e i månaden',        ],
+            ['10',   'Den 10:e i månaden',       ],
+            ['11',   'Den 11:e i månaden',       ],
+            ['12',   'Den 12:e i månaden',       ],
+            ['13',   'Den 13:e i månaden',       ],
+            ['14',   'Den 14:e i månaden',       ],
+            ['15',   'Den 15:e i månaden',       ],
+            ['16',   'Den 16:e i månaden',       ],
+            ['17',   'Den 17:e i månaden',       ],
+            ['18',   'Den 18:e i månaden',       ],
+            ['19',   'Den 19:e i månaden',       ],
+            ['20',   'Den 20:e i månaden',       ],
+            ['21',   'Den 21:a i månaden',       ],
+            ['22',   'Den 22:a i månaden',       ],
+            ['23',   'Den 23:e i månaden',       ],
+            ['24',   'Den 24:e i månaden',       ],
+            ['25',   'Den 25:e i månaden',       ],
+            ['26',   'Den 26:e i månaden',       ],
+            ['27',   'Den 27:e i månaden',       ],
+            ['28',   'Den 28:e i månaden',       ],
+            ['29',   'Den 29:e i månaden',       ],
+            ['30',   'Den 30:e i månaden',       ],
+            ['31',   'Den 31:a i månaden',       ],
+            ['last', 'Sista dagen i månaden',    ],
+        ]
+      %]
+
+      [% FOREACH option = options %]
+        <option value="[% option.0 %]" 
+                [%- IF val == option.0 +%] selected[% END %]>
+                [%- option.1 -%]
+        </option>
+      [% END %]
+
+  </select>
+[%+ END %]
+
+[% BLOCK time_field +%]
+<select name="time_[% schedule.id %]">
+
+  [%
+    options = [
+        [ '0',     'vid midnatt',      ],
+        [ '1',     'kl. 01:00',        ],
+        [ '2',     'kl. 02:00',        ],
+        [ '3',     'kl. 03:00',        ],
+        [ '4',     'kl. 04:00',        ],
+        [ '5',     'kl. 05:00',        ],
+        [ '6',     'kl. 06:00',        ],
+        [ '7',     'kl. 07:00',        ],
+        [ '8',     'kl. 08:00',        ],
+        [ '9',     'kl. 09:00',        ],
+        [ '10',    'kl. 10:00',        ],
+        [ '11',    'kl. 11:00',        ],
+        [ '12',    'kl. 12:00',        ],
+        [ '13',    'kl. 13:00',        ],
+        [ '14',    'kl. 14:00',        ],
+        [ '15',    'kl. 15:00',        ],
+        [ '16',    'kl. 16:00',        ],
+        [ '17',    'kl. 17:00',        ],
+        [ '18',    'kl. 18:00',        ],
+        [ '19',    'kl. 19:00',        ],
+        [ '20',    'kl. 20:00',        ],
+        [ '21',    'kl. 21:00',        ],
+        [ '22',    'kl. 22:00',        ],
+        [ '23',    'kl. 23:00',        ],
+        [ '60min', 'varje timme',      ],
+        [ '30min', 'var 30:e minut',   ],
+        [ '15min', 'var 15:e minut',   ],
+    ]
+  %]
+
+      [% FOREACH option = options %]
+        <option value="[% option.0 %]" 
+                [%- IF val == option.0 +%] selected[% END %]>
+                [%- option.1 -%]
+        </option>
+      [% END %]
+
+</select>
+
+[%+ END %]

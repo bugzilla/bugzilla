@@ -1,0 +1,58 @@
+[%# This Source Code Form is subject to the terms of the Mozilla Public
+  # License, v. 2.0. If a copy of the MPL was not distributed with this
+  # file, You can obtain one at http://mozilla.org/MPL/2.0/.
+  #
+  # This Source Code Form is "Incompatible With Secondary Licenses", as
+  # defined by the Mozilla Public License, v. 2.0.
+  #%]
+[%
+   title = "Standardsökningar"
+   desc = "Standardalternativ för sökningar och listor med $terms.bugs"
+%]
+
+[% param_descs = {
+  quip_list_entry_control => "Styr hur enkelt användare kan lägga till poster i listan med skämt.
+                              <ul>
+                                <li>
+                                  open - användare kan fritt lägga till i listan med skämt och
+                                  deras poster blir omedelbart tillgängliga att visa.
+                                </li>
+                                <li>
+                                  moderated - skämt kan läggas till, men måste godkännas av
+                                  en moderator innan de visas.
+                                </li>
+                                <li>
+                                  closed - det går inte att lägga till fler skämt i listan.
+                                </li>
+                              </ul>",
+
+  mybugstemplate => "Detta är URL:en som används för att visa en enkel lista över användarens " _
+                    "alla ${terms.bugs}. %userid% ersätts med användarens inloggningsnamn. " _
+                    "Specialtecken måste URL-kodas.",
+
+  defaultquery => "Detta är standardsökningen som först visas när du öppnar sidan " _
+                  "för avancerad sökning. Den har formatet för URL-parametrar.",
+
+  search_allow_no_criteria =>
+    "Om koden inte uttryckligen tillåter att alla $terms.bugs returneras gör den här " _
+    "parametern det möjligt att blockera sökningar utan kriterier. När den är avstängd " _
+    "måste en sökning ha kriterier som begränsar antalet $terms.bugs som returneras till " _
+    "användaren. När den är aktiverad får användaren köra en sökning utan kriterier och " _
+    "få alla $terms.bugs som hen får se i sin lista. Parametern bör inte aktiveras i stora " _
+    "installationer.",
+
+  default_search_limit =>
+    "Som standard begränsar Bugzilla sökningar i webbgränssnittet"
+    _ " till att bara returnera detta antal resultat av prestandaskäl."
+    _ " (Detta påverkar bara sökresultat i HTML-format; CSV, XML och andra"
+    _ " format påverkas inte.) Användare kan klicka på en länk på"
+    _ " sökresultatsidan för att se alla resultat."
+    _ "<p>Vanligtvis behöver du inte ändra detta. Standardvärdet"
+    _ " fungerar för de flesta installationer.</p>",
+
+  max_search_results =>
+    "Det största antalet $terms.bugs som en sökning"
+    _ " <strong>någonsin</strong> kan returnera. Tabell- och diagramrapporter"
+    _ " omfattas dock inte av den här begränsningen.",
+
+} %]

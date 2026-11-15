@@ -779,199 +779,197 @@
     for this [% IF attachment %] attachment [% ELSE %] [%+ terms.bug %] [% END %].
 
   [% ELSIF error == "flag_update_denied" %]
-    [% title = "Flag Modification Denied" %]
+    [% title = "Ändring av flagga nekad" %]
     [% admindocslinks = {'flags.html' => 'Administering Flags',
                          'categorization.html#assigning-group-controls-to-products' => 'Group Security'} %]
     [% docslinks = {'using/understanding.html#flags' => 'Using Flags'} %]
-    You tried to [% IF status == "+" %] grant [% ELSIF status == "-" %] deny
-    [% ELSIF status == "X" %] clear [% ELSE %] request [% END %]
+    Du försökte [% IF status == "+" %] bevilja [% ELSIF status == "-" %] neka
+    [% ELSIF status == "X" %] rensa [% ELSE %] begära [% END %]
     <code>[% name FILTER html %]
           [% IF status == "X" %][% old_status FILTER html %][% END %]</code>.
 
-    Only a user with the required permissions may make this change.
+    Endast en användare med nödvändig behörighet kan göra ändringen.
 
   [% ELSIF error == "format_not_found" %]
-    [% title = "Format Not Found" %]
-    The requested format <em>[% format FILTER html %]</em> does not exist with
-    a content type of <em>[% ctype FILTER html %]</em>.
+    [% title = "Formatet hittades inte" %]
+    Det begärda formatet <em>[% format FILTER html %]</em> finns inte med
+    innehållstypen <em>[% ctype FILTER html %]</em>.
     [% IF invalid %]
-      Both parameters must contain letters and hyphens only.
+      Båda parametrarna får endast innehålla bokstäver och bindestreck.
     [% END %]
 
   [% ELSIF error == "flag_type_sortkey_invalid" %]
-    [% title = "Flag Type Sort Key Invalid" %]
-    The sort key <em>[% sortkey FILTER html %]</em> must be an integer
-    between 0 and [% constants.MAX_SMALLINT FILTER none %].
+    [% title = "Ogiltig sorteringsnyckel för flaggtyp" %]
+    Sorteringsnyckeln <em>[% sortkey FILTER html %]</em> måste vara ett heltal
+    mellan 0 och [% constants.MAX_SMALLINT FILTER none %].
 
   [% ELSIF error == "freetext_too_long" %]
-    [% title = "Text Too Long" %]
-    The text you entered in the [% field_descs.$field FILTER html %]
-    field is too long ([% text.length FILTER html %] characters,
-    above the maximum length allowed of
-    [%+ constants.MAX_FREETEXT_LENGTH FILTER none %] characters).
+    [% title = "Texten är för lång" %]
+    Texten du angav i fältet [% field_descs.$field FILTER html %]
+    är för lång ([% text.length FILTER html %] tecken,
+    över den högsta tillåtna längden på
+    [%+ constants.MAX_FREETEXT_LENGTH FILTER none %] tecken).
 
   [% ELSIF error == "group_cannot_delete" %]
-    [% title = "Cannot Delete Group" %]
-    The <em>[% group.name FILTER html %]</em> group cannot be deleted because
-    there are
+    [% title = "Gruppen kan inte tas bort" %]
+    Gruppen <em>[% group.name FILTER html %]</em> kan inte tas bort eftersom det finns
     <a href="editgroups.cgi?action=del&amp;group=
-             [%- group.id FILTER uri %]">records</a>
-    in the database which refer to it. All references to this group must
-    be removed before you can remove it.
+             [%- group.id FILTER uri %]">poster</a>
+    i databasen som hänvisar till den. Alla hänvisningar till gruppen måste
+    tas bort innan du kan ta bort den.
 
   [% ELSIF error == "group_cannot_view" %]
-    [% title = "Cannot View Groups" %]
-    In order to view groups, you need to be a member of the 'editusers' or
-    'creategroups' group, or have bless privileges to at least one group.
+    [% title = "Det går inte att visa grupper" %]
+    För att visa grupper måste du vara medlem i gruppen ”editusers” eller
+    ”creategroups” eller ha behörighet att lägga till användare i minst en grupp.
 
   [% ELSIF error == "group_exists" %]
-    [% title = "The group already exists" %]
-    The group [% name FILTER html %] already exists.
+    [% title = "Gruppen finns redan" %]
+    Gruppen [% name FILTER html %] finns redan.
 
   [% ELSIF error == "group_has_special_role" %]
-    [% title = "Group not deletable" %]
+    [% title = "Gruppen kan inte tas bort" %]
     [% IF groups.size == 1 %]
-      [% attr = "it" %]
-      [% param = "parameter" %]
+      [% attr = "den" %]
+      [% param = "parametern" %]
     [% ELSE %]
-      [% attr = "them" %]
-      [% param = "parameters" %]
+      [% attr = "dem" %]
+      [% param = "parametrarna" %]
     [% END %]
-    The group '[% name FILTER html %]' is used by the
-    '[% groups.join("' and '") FILTER html %]' [% param FILTER html %].
-    In order to delete this group, you first have to change the
-    [%+ param FILTER html %] to make [% attr FILTER html %] point to another group.
+    Gruppen ”[% name FILTER html %]” används av
+    [% param FILTER html %] ”[% groups.join("” och ”") FILTER html %]”.
+    För att ta bort gruppen måste du först ändra
+    [%+ param FILTER html %] så att [% attr FILTER html %] pekar på en annan grupp.
 
 
   [% ELSIF error == "group_invalid_removal" %]
-    You tried to remove [% terms.bug %] [%+ bug_id FILTER html %]
-    from the '[% name FILTER html %]' group, but either this group does not exist,
-    or you are not allowed to remove [% terms.bugs %] from this group in the
-    '[% product FILTER html %]' product.
+    Du försökte ta bort [% terms.bug %] [%+ bug_id FILTER html %]
+    från gruppen ”[% name FILTER html %]”, men antingen finns gruppen inte
+    eller så får du inte ta bort [% terms.bugs %] från gruppen i
+    produkten ”[% product FILTER html %]”.
 
   [% ELSIF error == "group_restriction_not_allowed" %]
-    [% title = "Group Restriction Not Allowed" %]
-    You tried to restrict [% bug_id ? "$terms.bug $bug_id" : terms.abug FILTER html %]
-    to the '[% name FILTER html %]' group, but either this group does not exist,
-    or you are not allowed to restrict [% terms.bugs %] to this group in the
-    '[% product FILTER html %]' product.
+    [% title = "Gruppbegränsning är inte tillåten" %]
+    Du försökte begränsa [% bug_id ? "$terms.bug $bug_id" : terms.abug FILTER html %]
+    till gruppen ”[% name FILTER html %]”, men antingen finns gruppen inte
+    eller så får du inte begränsa [% terms.bugs %] till gruppen i
+    produkten ”[% product FILTER html %]”.
 
   [% ELSIF error == "group_not_specified" %]
-    [% title = "Group not specified" %]
-    No group was specified.
+    [% title = "Ingen grupp har angetts" %]
+    Ingen grupp har angetts.
 
   [% ELSIF error == "group_not_visible" %]
-    [% title = "Group Not Allowed" %]
-    You are not allowed to see members of the [% group.name FILTER html %]
-    group.
+    [% title = "Gruppen är inte tillåten" %]
+    Du får inte se medlemmar i gruppen [% group.name FILTER html %].
 
   [% ELSIF error == "system_group_not_deletable" %]
-    [% title = "System Groups not deletable" %]
-    <em>[% name FILTER html %]</em> is a system group.
-    This group cannot be deleted.
+    [% title = "Systemgrupper kan inte tas bort" %]
+    <em>[% name FILTER html %]</em> är en systemgrupp.
+    Gruppen kan inte tas bort.
 
   [% ELSIF error == "illegal_attachment_edit" %]
-    [% title = "Unauthorized Action" %]
-    You are not authorized to edit attachment [% attach_id FILTER html %].
+    [% title = "Obehörig åtgärd" %]
+    Du har inte behörighet att redigera bilaga [% attach_id FILTER html %].
 
   [% ELSIF error == "illegal_attachment_edit_bug" %]
-    [% title = "Unauthorized Action" %]
-    You are not authorized to edit attachments on [% terms.bug %] 
+    [% title = "Obehörig åtgärd" %]
+    Du har inte behörighet att redigera bilagor i [% terms.bug %]
     [%+ bug_id FILTER html %].
          
   [% ELSIF error == "illegal_bug_status_transition" %]
-    [% title = "Illegal $terms.Bug Status Change" %]
+    [% title = "Otillåten ändring av $terms.Bug-status" %]
     [% IF old.defined %]
-      You are not allowed to change the [% terms.bug %] status from
-      [%+ old.name FILTER html %] to [% new.name FILTER html %].
+      Du får inte ändra statusen för [% terms.bug %] från
+      [%+ old.name FILTER html %] till [% new.name FILTER html %].
     [% ELSE %]
-      You are not allowed to file new [% terms.bugs %] with the
-      [%+ new.name FILTER html %] status. 
+      Du får inte rapportera nya [% terms.bugs %] med
+      statusen [%+ new.name FILTER html %].
     [% END %]
 
   [% ELSIF error == "illegal_change" %]
-    [% title = "Not allowed" %]
-    You tried to change the
-    <strong>[% field_descs.$field FILTER html %]</strong> field 
+    [% title = "Inte tillåtet" %]
+    Du försökte ändra fältet
+    <strong>[% field_descs.$field FILTER html %]</strong>
     [% IF oldvalue.defined AND oldvalue != "" %]
-      from <em>[% oldvalue.join(', ') FILTER html %]</em>
+      från <em>[% oldvalue.join(', ') FILTER html %]</em>
     [% END %]
     [% IF newvalue.defined AND newvalue != "" %]
-      to <em>[% newvalue.join(', ') FILTER html %]</em>
+      till <em>[% newvalue.join(', ') FILTER html %]</em>
     [% END %],
-    but only
+    men endast
     [% IF privs < constants.PRIVILEGES_REQUIRED_EMPOWERED %]
-      the assignee
-      [% IF privs < constants.PRIVILEGES_REQUIRED_ASSIGNEE %] or reporter [% END %]
-      of the [% terms.bug %], or
+      den tilldelade
+      [% IF privs < constants.PRIVILEGES_REQUIRED_ASSIGNEE %] eller rapportören [% END %]
+      för [% terms.bug %], eller
     [% END %]
-    a user with the required permissions may change that field.
+    en användare med nödvändig behörighet får ändra fältet.
 
   [% ELSIF error == "illegal_change_deps" %]
-    [% title = "Not allowed" %]
-    You tried to change the 
-    <strong>[% field_descs.$field FILTER html %]</strong> field 
-    but only a user allowed to edit 
-    both related [% terms.bugs %] may change that field.
+    [% title = "Inte tillåtet" %]
+    Du försökte ändra fältet
+    <strong>[% field_descs.$field FILTER html %],</strong>
+    men endast en användare som får redigera
+    båda berörda [% terms.bugs %] får ändra fältet.
 
   [% ELSIF error == "illegal_date" %]
-    [% title = "Illegal Date" %]
-    '<kbd>[% date FILTER html %]</kbd>' is not a legal date.
+    [% title = "Ogiltigt datum" %]
+    ”<kbd>[% date FILTER html %]</kbd>” är inte ett giltigt datum.
     [% IF format %]
-      Please use the format '<code>[% format FILTER html %]</code>'.
+      Använd formatet ”<code>[% format FILTER html %]</code>”.
     [% END %]
     
   [% ELSIF error == "illegal_email_address" %]
-    [% title = "Invalid Email Address" %]
-    The e-mail address you entered (<b>[% addr FILTER html %]</b>) 
-    didn't pass our syntax checking for a legal email address.
+    [% title = "Ogiltig e-postadress" %]
+    E-postadressen du angav (<b>[% addr FILTER html %]</b>)
+    godkändes inte av vår syntaxkontroll för giltiga e-postadresser.
     [% IF default %]
-      A legal address must contain exactly one '@',
-      and at least one '.' after the @.
+      En giltig adress måste innehålla exakt ett ”@”
+      och minst en punkt efter @-tecknet.
     [% ELSE %]
       [%+ Param('emailregexpdesc') FILTER html_light %]
     [% END %]
-    It also must not contain any illegal characters.
+    Den får inte heller innehålla otillåtna tecken.
 
   [% ELSIF error == "illegal_frequency" %]
-    [% title = "Too Frequent" %]
-    Unless you are an administrator, you may not create series which are 
-    run more often than once every [% minimum FILTER html %] days.
+    [% title = "För ofta" %]
+    Om du inte är administratör får du inte skapa serier som
+    körs oftare än en gång var [% minimum FILTER html %]:e dag.
     
   [% ELSIF error == "illegal_group_control_combination" %]
-    [% title = "Your Group Control Combination Is Illegal" %]
+    [% title = "Din kombination av gruppstyrningar är otillåten" %]
     [% admindocslinks = {'categorization.html#assigning-group-controls-to-products' => 'Assigning Group Controls to Products'} %]
-    Your group control combination for group &quot;
-    [% groupname FILTER html %]&quot; is illegal.
+    Din kombination av gruppstyrningar för gruppen ”[% groupname FILTER html %]”
+    är otillåten.
 
   [% ELSIF error == "illegal_pronoun" %]
-    [% title = "Illegal Pronoun" %]
-    The pronoun you used ([% pronoun FILTER html %]) is illegal. You must use
-    one of the approved pronouns. Please see
-    <a href="[% docs_urlbase FILTER html %]query.html#pronouns">Pronoun Substitution</a>
-    for a complete list.
+    [% title = "Otillåtet pronomen" %]
+    Pronomenet du använde ([% pronoun FILTER html %]) är otillåtet. Du måste använda
+    ett av de godkända pronomenen. Se
+    <a href="[% docs_urlbase FILTER html %]query.html#pronouns">pronomenersättning</a>
+    för en fullständig lista.
 
   [% ELSIF error == "illegal_query_name" %]
-    [% title = "Illegal Search Name" %]
-    The name of your search cannot contain any of the following characters: 
+    [% title = "Otillåtet söknamn" %]
+    Namnet på sökningen får inte innehålla följande tecken:
     &lt;, &gt;, &amp;.
 
   [% ELSIF error == "illegal_series_creation" %]
     [% admindocslinks = {'categorization.html#assigning-group-controls-to-products' => 'Group security'} %]
     [% docslinks = {'using/reports-and-charts.html' => 'Reporting'} %]
-    You are not authorized to create series.
+    Du har inte behörighet att skapa serier.
         
   [% ELSIF error == "illegal_series_edit" %]
     [% admindocslinks = {'categorization.html#assigning-group-controls-to-products' => 'Group security'} %]
     [% docslinks = {'using/reports-and-charts.html' => 'Reporting'} %]
-    You are not authorized to edit this series. To do this, you must either
-    be its creator, or an administrator.
+    Du har inte behörighet att redigera serien. För att göra det måste du vara
+    dess skapare eller administratör.
 
   [% ELSIF error == "illegal_time" %]
-    [% title = "Illegal Time" %]
-    '<kbd>[% time FILTER html %]</kbd>' is not a legal time.
+    [% title = "Ogiltig tid" %]
+    ”<kbd>[% time FILTER html %]</kbd>” är inte en giltig tid.
     [% IF format %]
-      Please use the format '<code>[% format FILTER html %]</code>'.
+      Använd formatet ”<code>[% format FILTER html %]</code>”.
     [% END %]
 
   [% ELSIF error == "illegal_regexp" %]

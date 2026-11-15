@@ -1,0 +1,60 @@
+[%# This Source Code Form is subject to the terms of the Mozilla Public
+  # License, v. 2.0. If a copy of the MPL was not distributed with this
+  # file, You can obtain one at http://mozilla.org/MPL/2.0/.
+  #
+  # This Source Code Form is "Incompatible With Secondary Licenses", as
+  # defined by the Mozilla Public License, v. 2.0.
+  #%]
+
+[%# INTERFACE:
+  # operations: array; bug activity since the user last displayed the attachment form.
+  # attachment: object; the attachment being changed.
+  #%]
+
+[% USE Bugzilla %]
+[% cgi = Bugzilla.cgi %]
+
+[% PROCESS global/header.html.tmpl title = "Samtidig ändring!" %]
+
+<h1>Samtidig ändring upptäcktes!</h1>
+
+<p>
+  Någon annan har ändrat
+  <a href="attachment.cgi?id=[% attachment.id %]&amp;action=edit">bilaga [% attachment.id %]</a>
+  till [% "$terms.bug $attachment.bug_id" FILTER bug_link(attachment.bug_id) FILTER none %]
+  samtidigt som du försökte ändra den. Följande ändringar har gjorts:
+</p>
+
+<p>
+  [% PROCESS "bug/activity/table.html.tmpl" incomplete_data=0 %]
+</p>
+
+[% IF cgi.param("comment") %]
+<p>
+  Din kommentar var:<br>
+  <blockquote><pre class="bz_comment_text">
+    [% cgi.param("comment") FILTER html %]
+  </pre></blockquote>
+</p>
+[% END %]
+
+<p>
+Du kan välja något av följande:
+</p>
+
+<ul>
+  <li>
+    <form method="post" action="attachment.cgi">
+      [% PROCESS "global/hidden-fields.html.tmpl" exclude="^Bugzilla_(login|password)$" %]
+      <input type="submit" id="process" value="Skicka mina ändringar ändå">
+        Då skrivs alla ändringarna ovan över.
+    </form>
+  </li>
+  <li>
+    Kasta bort mina ändringar och
+    <a href="attachment.cgi?id=[% attachment.id %]&amp;action=edit">gå tillbaka till
+    bilaga [% attachment.id %]</a>
+  </li>
+</ul>
+
+[% PROCESS global/footer.html.tmpl %]

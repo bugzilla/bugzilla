@@ -1,0 +1,24 @@
+[%# This Source Code Form is subject to the terms of the Mozilla Public
+  # License, v. 2.0. If a copy of the MPL was not distributed with this
+  # file, You can obtain one at http://mozilla.org/MPL/2.0/.
+  #
+  # This Source Code Form is "Incompatible With Secondary Licenses", as
+  # defined by the Mozilla Public License, v. 2.0.
+  #%]
+
+[% BLOCK select %]
+  [% Hook.process('rep_fields', 'search/search-report-select.html.tmpl') %]
+
+  <select name="[% name FILTER html %]">
+    <option value="">&lt;ingen&gt;</option>
+
+    [% FOREACH field = report_columns.keys.sort_by_field_name(field_descs) %]
+      [% NEXT IF field == "classification" AND !Param('useclassification') %]
+      [% NEXT IF field == "target_milestone" AND !Param('usetargetmilestone') %]
+      [% NEXT IF field == "qa_contact" AND !Param('useqacontact') %]
+      <option value="[% field FILTER html %]"
+        [% " selected" IF default.$name.0 == field %]>
+        [% field_descs.$field || field FILTER html %]</option>
+    [% END %]
+  </select>
+[% END %]

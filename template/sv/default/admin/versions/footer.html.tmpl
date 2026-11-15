@@ -1,0 +1,40 @@
+[%# This Source Code Form is subject to the terms of the Mozilla Public
+  # License, v. 2.0. If a copy of the MPL was not distributed with this
+  # file, You can obtain one at http://mozilla.org/MPL/2.0/.
+  #
+  # This Source Code Form is "Incompatible With Secondary Licenses", as
+  # defined by the Mozilla Public License, v. 2.0.
+  #%]
+
+<hr>
+
+<p>
+
+[% UNLESS no_add_version_link %]
+  <a title="Lägg till en version i produkten '[% product.name FILTER html %]'"
+     href="editversions.cgi?action=add&amp;product=
+          [%- product.name FILTER uri %]">Lägg till</a> en version.
+[% END %]
+
+[% IF version.name && !no_edit_version_link %]
+  Redigera versionen <a
+  title="Redigera versionen '[% version.name FILTER html %]' för produkten '
+         [%- product.name FILTER html %]'"
+  href="editversions.cgi?action=edit&amp;product=
+        [%- product.name FILTER uri %]&amp;version=
+        [%- version.name FILTER uri %]">
+        '[% version.name FILTER html %]'</a>.
+[% END %]
+
+[% UNLESS no_edit_other_versions_link %]
+  Redigera andra versioner av produkten <a
+  href="editversions.cgi?product=
+        [%- product.name FILTER uri %]">'[% product.name FILTER html %]'</a>.
+
+[% END %]
+
+  Redigera produkten <a
+  href="editproducts.cgi?action=edit&amp;product=
+        [%- product.name FILTER uri %]">'[% product.name FILTER html %]'</a>.
+
+</p>

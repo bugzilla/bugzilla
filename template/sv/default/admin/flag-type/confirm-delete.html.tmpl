@@ -1,0 +1,39 @@
+[%# This Source Code Form is subject to the terms of the Mozilla Public
+  # License, v. 2.0. If a copy of the MPL was not distributed with this
+  # file, You can obtain one at http://mozilla.org/MPL/2.0/.
+  #
+  # This Source Code Form is "Incompatible With Secondary Licenses", as
+  # defined by the Mozilla Public License, v. 2.0.
+  #%]
+
+[% title = BLOCK %]Bekräfta radering av flaggtypen '[% flag_type.name FILTER html %]'[% END %]
+
+[% PROCESS global/header.html.tmpl
+  title = title
+  style_urls = ['skins/standard/admin.css']
+  doc_section = "administering/flags.html#deleting-a-flag"
+%]
+
+<p>
+  [% IF flag_type.flag_count %]
+    Det finns [% flag_type.flag_count %] flaggor av typen [% flag_type.name FILTER html %].
+    Om du raderar denna typ raderas även de flaggorna.
+  [% END %]
+
+  Observera att du kan <a href="editflagtypes.cgi?action=deactivate&amp;id=[% flag_type.id %]&amp;token=
+           [%- token FILTER html %]">inaktivera den</a> i stället för att radera typen.
+   Då finns typen [% IF flag_type.flag_count %] och dess flaggor [% END %] kvar
+   i databasen men visas inte i Bugzillas gränssnitt.
+</p>
+
+<p class="confirmation">
+  Vill du verkligen radera denna typ?
+</p>
+
+<p>
+  <a href="editflagtypes.cgi?action=delete&amp;id=[% flag_type.id %]&amp;token=
+           [%- token FILTER html %]">Ja, radera</a> -
+  <a href="editflagtypes.cgi">Nej, radera inte</a>
+</p>
+
+[% PROCESS global/footer.html.tmpl %]

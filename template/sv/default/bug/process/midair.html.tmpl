@@ -1,0 +1,50 @@
+[%# This Source Code Form is subject to the terms of the Mozilla Public
+  # License, v. 2.0. If a copy of the MPL was not distributed with this
+  # file, You can obtain one at http://mozilla.org/MPL/2.0/.
+  #
+  # This Source Code Form is "Incompatible With Secondary Licenses", as
+  # defined by the Mozilla Public License, v. 2.0.
+  #%]
+
+[% USE Bugzilla %]
+[% cgi = Bugzilla.cgi %]
+[% UNLESS header_done %][% PROCESS bug/process/header.html.tmpl %][% END %]
+
+<h1>Samtidig ändring upptäcktes</h1>
+<p>
+  Någon annan har ändrat [%+ "$terms.bug $bug.id" FILTER bug_link(bug) FILTER none %]
+  samtidigt som du försökte göra ändringar. Följande har ändrats:
+</p>
+<p>[% PROCESS "bug/activity/table.html.tmpl" incomplete_data=0 %]</p>
+
+[% IF comments.size %]
+<p>Följande kommentarer har lagts till:<blockquote>[% PROCESS "bug/comments.html.tmpl" %]</blockquote></p>
+[% END %]
+
+[% IF cgi.param("comment") %]
+<p>Din kommentar var:<br><blockquote><pre class="bz_comment_text">
+  [% cgi.param("comment") FILTER html %]
+</pre></blockquote></p>
+[% END %]
+
+<p>Du kan välja något av följande:</p>
+<ul>
+  <li><form method="post" action="process_bug.cgi">
+      <input type="hidden" name="delta_ts" value="[% bug.delta_ts FILTER html %]">
+      [% PROCESS "global/hidden-fields.html.tmpl" exclude="^Bugzilla_login|Bugzilla_password|delta_ts$" %]
+      <input type="submit" id="process" value="Skicka ändå mina ändringar">
+      Då skrivs alla ändringar ovan över[% ", utom de tillagda kommentarerna" IF comments.size %].
+    </form></li>
+  [% IF cgi.param("comment") %]
+    <li><form method="post" action="process_bug.cgi">
+        <input type="hidden" name="id" value="[% cgi.param("id") FILTER html %]">
+        <input type="hidden" name="delta_ts" value="[% bug.delta_ts FILTER html %]">
+        <input type="hidden" name="comment" value="[% cgi.param("comment") FILTER html %]">
+        <input type="hidden" name="comment_is_private" value="[% cgi.param("comment_is_private") FILTER html %]">
+        <input type="hidden" name="token" value="[% cgi.param("token") FILTER html %]">
+        <input type="submit" id="process_comment" value="Skicka bara min nya kommentar">
+      </form></li>
+  [% END %]
+  <li>Kasta bort mina ändringar och [%+ "gå tillbaka till $terms.bug $bug.id" FILTER bug_link(bug) FILTER none %]</li>
+</ul>
+[% PROCESS global/footer.html.tmpl %]

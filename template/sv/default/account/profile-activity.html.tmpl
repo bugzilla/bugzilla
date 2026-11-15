@@ -1,0 +1,73 @@
+[%# This Source Code Form is subject to the terms of the Mozilla Public
+  # License, v. 2.0. If a copy of the MPL was not distributed with this
+  # file, You can obtain one at http://mozilla.org/MPL/2.0/.
+  #
+  # This Source Code Form is "Incompatible With Secondary Licenses", as
+  # defined by the Mozilla Public License, v. 2.0.
+  #%]
+
+[%# INTERFACE:
+  # otheruser: Bugzilla User Object; The user whose profile activity
+  #                                  we are viewing.
+  #
+  # listselectionvalues: selection values to recreate the current user list.
+  #
+  # profile_changes: An array of hashes containing the following fields:
+  #
+  #   who: string; login name of who made the change
+  #   activity_when: string; when the change was made
+  #   what: string; the description of the field which was changed
+  #   removed: string; the removed value (maybe empty string)
+  #   added: string; the added value (maybe empty string)
+  #%]
+
+[% title = BLOCK %]
+  Kontohistorik för ”[% otheruser.identity FILTER html %]”
+[% END %]
+
+[% PROCESS global/header.html.tmpl
+  title = title
+  style_urls = ['skins/standard/admin.css']
+%]
+
+[% PROCESS admin/users/listselectvars.html.tmpl
+  listselectionvalues = listselectionvalues
+%]
+
+[% columns =
+  [{name               => 'who'
+    heading            => 'Vem'
+   }
+   {name               => 'activity_when'
+    heading            => 'När'
+   }
+   {name               => 'what'
+    heading            => 'Vad'
+    content_use_field  => 1
+   }
+   {name               => 'removed'
+    heading            => 'Borttaget'
+   }
+   {name               => 'added'
+    heading            => 'Tillagt'
+   }
+  ]
+%]
+
+[% PROCESS admin/table.html.tmpl
+  columns = columns
+  data    = profile_changes
+%]
+
+<p><a href="editusers.cgi?action=edit&amp;userid=
+  [%- otheruser.id FILTER uri %]"
+  title="Redigera användaren ”[% otheruser.login FILTER html %]”">Redigera användaren</a> eller
+  <a title="Sök efter användare" href="editusers.cgi">sök efter andra konton</a>
+  [% IF listselectionvalues.matchtype != 'exact' %]
+    eller gå <a title="Återgå till användarlistan"
+       href="editusers.cgi?action=list[% INCLUDE listselectionurlparams %]">tillbaka
+    till användarlistan</a>
+  [% END %]
+</p>
+
+[% PROCESS global/footer.html.tmpl %]

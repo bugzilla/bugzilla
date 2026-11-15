@@ -1,0 +1,66 @@
+[%# This Source Code Form is subject to the terms of the Mozilla Public
+  # License, v. 2.0. If a copy of the MPL was not distributed with this
+  # file, You can obtain one at http://mozilla.org/MPL/2.0/.
+  #
+  # This Source Code Form is "Incompatible With Secondary Licenses", as
+  # defined by the Mozilla Public License, v. 2.0.
+  #%]
+
+[% 
+   title = "Avancerat"
+   desc = "Inställningar för avancerade konfigurationer."
+%]
+
+[% sts_desc = BLOCK %]
+  Aktiverar att HTTP-huvudet
+  <a href="http://en.wikipedia.org/wiki/Strict_Transport_Security">Strict-Transport-Security</a>
+  skickas tillsammans med HTTP-svar över SSL-anslutningar. Det gör SSL-anslutningarna
+  säkrare genom att tvinga webbläsaren att alltid ansluta till domänen via SSL och aldrig
+  acceptera ett ogiltigt certifikat. Detta bör dock bara användas om parametern
+  <code>ssl_redirect</code> är aktiverad, Bugzilla är det enda som körs på domänen
+  (det vill säga att <code>urlbase</code> liknar <code>http://bugzilla.example.com/</code>)
+  och du aldrig planerar att inaktivera parametern <code>ssl_redirect</code>.
+  <ul>
+    <li>
+      off - skicka inte huvudet Strict-Transport-Security med förfrågningar.
+    </li>
+    <li>
+      this_domain_only - skicka huvudet Strict-Transport-Security med alla
+      förfrågningar, men använd det bara för den aktuella domänen.
+    </li>
+    <li>
+      include_subdomains - skicka huvudet Strict-Transport-Security tillsammans
+      med flaggan <code>includeSubDomains</code>, som tillämpar säkerhetsändringen
+      på alla underdomäner. Detta är särskilt användbart tillsammans med en
+      <code>attachment_base</code> som är en eller flera underdomäner till
+      Bugzillas huvuddomän.
+    </li>
+  </ul>
+[% END %]
+
+[% param_descs = {
+  cookiedomain => 
+    "Om webbplatsen ligger på 'www.foo.com' gör värdet"
+    _ " '.foo.com' att även 'bar.foo.com' får åtkomst till"
+    _ " Bugzilla-kakor. Detta är användbart om fler än ett"
+    _ " värdnamn pekar på samma webbserver och du vill att de"
+    _ " ska dela Bugzilla-kakan.",
+
+  inbound_proxies =>
+    "När inkommande trafik till Bugzilla går via en proxy"
+    _ " tror Bugzilla att varje användares IP-adress är proxyns"
+    _ " IP-adress. Om du anger en kommaseparerad lista med IP-adresser"
+    _ " i parametern litar Bugzilla på alla <code>X-Forwarded-For</code>-huvuden"
+    _ " som skickas från dessa IP-adresser och använder värdet i huvudet"
+    _ " som slutanvändarens IP-adress.",
+
+  proxy_url => 
+    "Bugzilla kan behöva komma åt webben för att hämta meddelanden om"
+    _ " nya utgåvor (se parametern <var>upgrade_notification</var>)."
+    _ " Om Bugzilla-servern finns bakom en proxy kan det vara"
+    _ " nödvändigt att ange dess URL om webbservern inte kan läsa"
+    _ " miljövariabeln HTTP_PROXY. Om autentisering krävs använder du"
+    _ " syntaxen <code>http://user:pass@proxy_url/</code>.",
+
+  strict_transport_security => sts_desc,
+} %]

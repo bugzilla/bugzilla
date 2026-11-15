@@ -1723,103 +1723,102 @@
     [% terms.bug %] som [% display_value("resolution", "FIXED") FILTER html %].
 
   [% ELSIF error == "sudo_invalid_cookie" %]
-    [% title = "Invalid Sudo Cookie" %]
-    Your sudo cookie is invalid. Either it expired or you didn't start
-    a sudo session correctly. Refresh the page or load another page
-    to continue what you are doing as yourself.
+    [% title = "Ogiltig sudo-kaka" %]
+    Sudo-kakan är ogiltig. Den har antingen gått ut eller så startades inte
+    sudo-sessionen korrekt. Uppdatera sidan eller läs in en annan sida för
+    att fortsätta som dig själv.
 
   [% ELSIF error == "sudo_illegal_action" %]
-    [% title = "Impersonation Not Authorized" %]
+    [% title = "Imitation är inte tillåten" %]
     [% IF NOT sudoer.in_group("bz_sudoers") %]
-      You are not allowed to impersonate users.
+      Du får inte agera som andra användare.
     [% ELSIF target_user AND target_user.in_group("bz_sudo_protect") %]
-      You are not allowed to impersonate [% target_user.identity FILTER html %].
+      Du får inte agera som [% target_user.identity FILTER html %].
     [% ELSE %]
-      The user you tried to impersonate doesn't exist.
+      Användaren du försökte agera som finns inte.
     [% END %]
 
   [% ELSIF error == "sudo_in_progress" %]
-    [% title = "Session In Progress" %]
-    A sudo session (impersonating [% target FILTER html %]) is in progress.  
-    End that session (using the link in the footer) before starting a new one.
+    [% title = "En session pågår" %]
+    En sudo-session där du agerar som [% target FILTER html %] pågår.
+    Avsluta sessionen med länken i sidfoten innan du startar en ny.
 
   [% ELSIF error == "sudo_password_required" %]
-    [% title = "Password Required" %]
-    Your [% terms.Bugzilla %] password is required to begin a sudo 
-    session. Please <a href="relogin.cgi?action=prepare-sudo&amp;target_login=
+    [% title = "Lösenord krävs" %]
+    Ditt lösenord för [% terms.Bugzilla %] krävs för att starta en sudo-
+    session. <a href="relogin.cgi?action=prepare-sudo&amp;target_login=
     [%- target_login FILTER uri %]&amp;reason=
-    [%- reason FILTER uri %]">go back</a> and enter your password.
+    [%- reason FILTER uri %]">Gå tillbaka</a> och ange lösenordet.
     
   [% ELSIF error == "sudo_preparation_required" %]
-    [% title = "Preparation Required" %]
-    You may not start a sudo session directly.  Please
+    [% title = "Förberedelse krävs" %]
+    Du får inte starta en sudo-session direkt.
     <a href="relogin.cgi?action=prepare-sudo&amp;target_login=
     [%- target_login FILTER uri %]&amp;reason=
-    [%- reason FILTER uri %]">start your session normally</a>.
+    [%- reason FILTER uri %]">Starta sessionen på vanligt sätt</a>.
 
   [% ELSIF error == "sudo_protected" %]
-    [% title = "User Protected" %]
-    The user [% login FILTER html %] may not be impersonated by sudoers.
+    [% title = "Användaren är skyddad" %]
+    Användaren [% login FILTER html %] får inte imiteras av sudo-användare.
 
   [% ELSIF error == "tag_name_too_long" %]
-    [% title = "Tag Name Too Long" %]
-    The tag must be less than [% constants.MAX_LEN_QUERY_NAME FILTER html %]
-    characters long.
+    [% title = "Etikettnamnet är för långt" %]
+    Etiketten måste vara kortare än [% constants.MAX_LEN_QUERY_NAME FILTER html %]
+    tecken.
 
   [% ELSIF error == "token_does_not_exist" %]
-    [% title = "Token Does Not Exist" %]
-    The token you submitted does not exist, has expired, or has
-    been canceled.
+    [% title = "Tokenet finns inte" %]
+    Tokenet du skickade in finns inte, har gått ut eller har
+    återkallats.
 
   [% ELSIF error == "too_soon_for_new_token" %]
-    [% title = "Too Soon For New Token" %]
-    You have requested
+    [% title = "För tidigt för nytt token" %]
+    Du har begärt
     [% IF type == "password" %]
-      a password
+      ett lösenords-
     [% ELSIF type == "account" %]
-      an account
+      ett konto-
     [% END %]
-    token too recently to request another. 
-    Please wait [% constants.ACCOUNT_CHANGE_INTERVAL FILTER html %] minutes
-    then try again.
+    token för nyligen för att kunna begära ett till.
+    Vänta [% constants.ACCOUNT_CHANGE_INTERVAL FILTER html %] minuter och försök igen.
 
   [% ELSIF error == "unknown_action" %]
-    [% title = "Unknown Action" %]
+    [% title = "Okänd åtgärd" %]
     [% IF action %]
-      Unknown action "[% action.truncate(20, "...") FILTER html %]"!
+      Okänd åtgärd ”[% action.truncate(20, "...") FILTER html %]”.
     [% ELSE %]
-      I could not figure out what you wanted to do.
+      Det gick inte att avgöra vad du ville göra.
     [% END %]
 
   [% ELSIF error == "unknown_tab" %]
-    [% title = "Unknown Tab" %]
-    There is no tab named <code>[% current_tab_name FILTER html %]</code>.
+    [% title = "Okänd flik" %]
+    Det finns ingen flik med namnet <code>[% current_tab_name FILTER html %]</code>.
 
   [% ELSIF error == "value_inactive" %]
-    [% title = "Value is Not Active" %]
+    [% title = "Värdet är inte aktivt" %]
     [% type = BLOCK %][% INCLUDE object_name class = class %][% END %]
-    The [% type FILTER html %] value '[% value FILTER html %]' is not active.
+    Värdet ”[% value FILTER html %]” för [% type FILTER html %] är inte aktivt.
 
   [% ELSIF error == "version_already_exists" %]
-    [% title = "Version Already Exists" %]
-    [% admindocslinks = {'categorization.html#versions' => 'Administering versions'} %]
-    The version '[% name FILTER html %]' already exists for product '
-    [%- product FILTER html %]'.
+    [% title = "Versionen finns redan" %]
+    [% admindocslinks = {'categorization.html#versions' => 'Administrera versioner'} %]
+    Versionen ”[% name FILTER html %]” finns redan för produkten ”
+    [%- product FILTER html %]”.
 
   [% ELSIF error == "version_blank_name" %]
-    [% title = "Blank Version Name Not Allowed" %]
-    You must enter a name for this version.
+    [% title = "Tomt versionsnamn är inte tillåtet" %]
+    Du måste ange ett namn för versionen.
 
   [% ELSIF error == "version_has_bugs" %]
-    [% title = BLOCK %]Version has [% terms.Bugs %][% END %]
-    There are [% nb FILTER html %] [%+ terms.bugs %] associated with this
-    version! You must reassign those [% terms.bugs %] to another version
-    before you can delete this one.
+    [% title = BLOCK %]Versionen har [% terms.Bugs %][% END %]
+    Det finns [% nb FILTER html %] [%+ terms.bugs %] som är kopplade till versionen.
+    Du måste tilldela om dessa [% terms.bugs %] till en annan version innan
+    du kan ta bort den här.
 
   [% ELSIF error == "version_is_last" %]
-    [% title = BLOCK %]Last Version in this Product[% END %]
-    '[% version.name FILTER html %]' is the last version of the
-    '[% version.product.name FILTER html %]' product. You cannot delete it.
+    [% title = BLOCK %]Sista versionen i produkten[% END %]
+    ”[% version.name FILTER html %]” är den sista versionen i produkten
+    ”[% version.product.name FILTER html %]”. Du kan inte ta bort den.
 
   [% ELSIF error == "users_deletion_disabled" %]
     [% title = "Deletion not activated" %]

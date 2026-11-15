@@ -974,98 +974,98 @@
 
   [% ELSIF error == "illegal_regexp" %]
     [% title = "Illegal Regular Expression" %]
-    The regular expression you provided [% value FILTER html %] is not valid.
-    The error was: [% dberror FILTER html %].
+    Det reguljära uttryck du angav, [% value FILTER html %], är inte giltigt.
+    Felet var: [% dberror FILTER html %].
         
   [% ELSIF error == "insufficient_data_points" %]
     [% docslinks = {'using/reports-and-charts.html' => 'Reporting'} %]
-    We don't have enough data points to make a graph (yet).
+    Det finns inte tillräckligt med datapunkter för att skapa ett diagram ännu.
         
   [% ELSIF error == "invalid_attach_id" %]
-    [% title = "Invalid Attachment ID" %]
-    The attachment id [% attach_id FILTER html %] is invalid.
+    [% title = "Ogiltigt bilage-ID" %]
+    Bilage-ID:t [% attach_id FILTER html %] är ogiltigt.
 
   [% ELSIF error == "bug_id_does_not_exist" %]
-    [% title = BLOCK %]Invalid [% terms.Bug %] ID[% END %]
-    [% terms.Bug %] #[% bug_id FILTER html %] does not exist.
+    [% title = BLOCK %]Ogiltigt [% terms.Bug %]-ID[% END %]
+    [% terms.Bug %] #[% bug_id FILTER html %] finns inte.
     
   [% ELSIF error == "improper_bug_id_field_value" %]
     [% title = BLOCK %]
-      [% IF bug_id %]Invalid [% ELSE %]Missing [% END %] [% terms.Bug %] ID
+      [% IF bug_id %]Ogiltigt [% ELSE %]Saknat [% END %] [% terms.Bug %]-ID
     [% END %]
     [% IF bug_id %]
-      '[% bug_id FILTER html %]' is not a valid [% terms.bug %] number
-      nor an alias to [% terms.abug %].
+      ”[% bug_id FILTER html %]” är inte ett giltigt nummer för [% terms.bug %]
+      eller ett alias till [% terms.abug %].
     [% ELSE %]
       [% IF field %]
-        The '[% field_descs.$field FILTER html %]' field
-        cannot be empty.
+        Fältet ”[% field_descs.$field FILTER html %]”
+        får inte vara tomt.
       [% END %]
-      You must enter a valid [% terms.bug %] number!
+      Du måste ange ett giltigt nummer för [% terms.bug %].
     [% END %]
 
   [% ELSIF error == "invalid_changedsince" %]
-    [% title = "Invalid 'Changed Since'" %]
-    The 'changed since' value, '[% changedsince FILTER html %]', must be an
-    integer >= 0.
+    [% title = "Ogiltigt ”Ändrad sedan”" %]
+    Värdet för ”ändrad sedan”, ”[% changedsince FILTER html %]”, måste vara ett
+    heltal >= 0.
 
   [% ELSIF error == "invalid_content_type" %]
-    [% title = "Invalid Content-Type" %]
-    The content type <em>[% contenttype FILTER html %]</em> is invalid.
-    Valid types must be of the form <em>foo/bar</em> where <em>foo</em>
-    is one of <em>[% constants.LEGAL_CONTENT_TYPES.join(', ') FILTER html %]</em>
-    and <em>bar</em> must not contain any special characters (such as "=", "?", ...).
+    [% title = "Ogiltig innehållstyp" %]
+    Innehållstypen <em>[% contenttype FILTER html %]</em> är ogiltig.
+    Giltiga typer måste ha formen <em>foo/bar</em>, där <em>foo</em>
+    är en av <em>[% constants.LEGAL_CONTENT_TYPES.join(', ') FILTER html %]</em>
+    och <em>bar</em> inte får innehålla specialtecken (som ”=”, ”?”, …).
 
   [% ELSIF error == "invalid_datasets" %]
-    [% title = "Invalid Datasets" %]
-    Invalid datasets <em>[% datasets.join(":") FILTER html %]</em>. Only digits,
-    letters and colons are allowed.
+    [% title = "Ogiltiga datauppsättningar" %]
+    Ogiltiga datauppsättningar <em>[% datasets.join(":") FILTER html %]</em>. Endast siffror,
+    bokstäver och kolon är tillåtna.
 
   [% ELSIF error == "invalid_dimensions" %]
-    [% title = "Invalid Dimensions" %]
-    The width or height specified is not a positive integer.
+    [% title = "Ogiltiga dimensioner" %]
+    Angiven bredd eller höjd är inte ett positivt heltal.
 
   [% ELSIF error == "invalid_format" %]
-    [% title = "Invalid Format" %]
-    The format "[% format FILTER html %]" is invalid (must be one of
+    [% title = "Ogiltigt format" %]
+    Formatet ”[% format FILTER html %]” är ogiltigt (måste vara ett av
     [% FOREACH my_format = formats %]
       "[% my_format FILTER html %]"
     [% END %]
     ).
 
   [% ELSIF error == "invalid_group_ID" %]
-    [% title = "Invalid group ID" %]
-    The group you specified doesn't exist.
+    [% title = "Ogiltigt grupp-ID" %]
+    Gruppen du angav finns inte.
 
   [% ELSIF error == "invalid_group_name" %]
-    [% title = "Invalid group name" %]
-    The group you specified, [% name FILTER html %], is not valid here.
+    [% title = "Ogiltigt gruppnamn" %]
+    Gruppen du angav, [% name FILTER html %], är inte giltig här.
 
   [% ELSIF error == "invalid_keyword_id" %]
-    The keyword ID <em>[% id FILTER html %]</em> couldn't be found.
+    Nyckelords-ID:t <em>[% id FILTER html %]</em> kunde inte hittas.
 
   [% ELSIF error == "invalid_maxrows" %]
-    [% title = "Invalid Max Rows" %]
-    The maximum number of rows, '[% maxrows FILTER html %]', must be
-    a positive integer.
+    [% title = "Ogiltigt högsta antal rader" %]
+    Det högsta antalet rader, ”[% maxrows FILTER html %]”, måste vara
+    ett positivt heltal.
 
   [% ELSIF error == "invalid_parameter" %]
-    [% title = "Invalid Parameter" %]
-    The new value for [% name FILTER html %] is invalid: [% err FILTER html %].
+    [% title = "Ogiltig parameter" %]
+    Det nya värdet för [% name FILTER html %] är ogiltigt: [% err FILTER html %].
 
   [% ELSIF error == "invalid_regexp" %]
-    [% title = "Invalid regular expression" %]
-    The regular expression you entered is invalid.
+    [% title = "Ogiltigt reguljärt uttryck" %]
+    Det reguljära uttryck du angav är ogiltigt.
 
   [% ELSIF error == "invalid_user" %]
-    [% title = "Invalid User" %]
-    There is no user account
+    [% title = "Ogiltig användare" %]
+    Det finns inget användarkonto
     [% IF user_id %]
-      with ID <em>[% user_id FILTER html %]</em>.
+      med ID <em>[% user_id FILTER html %]</em>.
     [% ELSIF user_login %]
-      with login name <em>[% user_login FILTER html %]</em>.
+      med inloggningsnamnet <em>[% user_login FILTER html %]</em>.
     [% ELSE %]
-      given.
+      angivet.
     [% END %]
 
   [% ELSIF error == "invalid_user_group" %]
@@ -1087,24 +1087,23 @@
     [% END %]
 
   [% ELSIF error == "invalid_username" %]
-    [% title = "Invalid Username" %]
-    The name <kbd>[% name FILTER html %]</kbd> is not a valid username.
-    Either you misspelled it, or the person has not
-    registered for a [% terms.Bugzilla %] account.
+    [% title = "Ogiltigt användarnamn" %]
+    Namnet <kbd>[% name FILTER html %]</kbd> är inte ett giltigt användarnamn.
+    Antingen stavade du det fel eller så har personen inte
+    registrerat ett konto hos [% terms.Bugzilla %].
 
   [% ELSIF error == "invalid_login_or_password" %]
-    [% title = "Invalid Login Or Password" %]
-    The login or password you entered is not valid.
+    [% title = "Ogiltigt inloggningsnamn eller lösenord" %]
+    Inloggningsnamnet eller lösenordet du angav är inte giltigt.
     [%# People get two login attempts before being warned about
       # being locked out.
       #%]
     [% IF remaining <=  2 %]
-      If you do not enter the correct password after 
-      [%+ remaining FILTER html %] more attempt(s), you will be
-      locked out of this account for 
-      [%+ constants.LOGIN_LOCKOUT_INTERVAL FILTER html %] minutes.
-      To avoid being locked out, you can reset your password using
-      the "Forgot Password" link.
+      Om du inte anger rätt lösenord inom
+      [%+ remaining FILTER html %] ytterligare försök låses du ute från
+      kontot i [%+ constants.LOGIN_LOCKOUT_INTERVAL FILTER html %] minuter.
+      Du kan återställa lösenordet med länken ”Glömt lösenordet”
+      för att undvika att låsas ute.
     [% END %]
 
   [% ELSIF error == "invalid_cookies_or_token" %]

@@ -1657,7 +1657,7 @@
     Du måste ange en sammanfattning för [% terms.bug %].
 
   [% ELSIF error == "resolution_cant_clear" %]
-    [% terms.Bug %] [%+ bug_id FILTER bug_link(bug_id) FILTER none %] is 
+    [% terms.Bug %] [%+ bug_id FILTER bug_link(bug_id) FILTER none %]
     är stängd och därför kan du inte rensa dess lösning.
 
   [% ELSIF error == "resolution_not_allowed" %]
@@ -1665,63 +1665,62 @@
     Du kan inte ange en lösning för öppna [% terms.bugs %].
 
   [% ELSIF error == "saved_search_used_by_whines" %]
-    [% title = "Saved Search In Use" %]
-    [% docslinks = {'administering/whining.html' => 'About Whining'} %]
-    The saved search <em>[% search_name FILTER html %]</em> is being used 
-    by <a href="editwhines.cgi">Whining events</a> with the following subjects:
+    [% title = "Den sparade sökningen används" %]
+    [% docslinks = {'administering/whining.html' => 'Om bevakningar'} %]
+    Den sparade sökningen <em>[% search_name FILTER html %]</em> används
+    av <a href="editwhines.cgi">bevakningar</a> med följande ämnen:
     [%+ subjects FILTER html %]
 
   [% ELSIF error == "search_content_without_matches" %]
-    [% title = "Illegal Search" %]
-    The "content" field can only be used with "matches" search 
-    and the "matches" search can only be used with the "content"
-    field.
+    [% title = "Ogiltig sökning" %]
+    Fältet ”content” kan endast användas med sökningen ”matches”,
+    och sökningen ”matches” kan endast användas med fältet ”content”.
 
   [% ELSIF error == "search_grouped_field_invalid" %]
-    Bugzilla does not support using the
+    [% terms.Bugzilla %] har inte stöd för att använda fältet
     "[%+ field_descs.$field FILTER html %]" ([% field FILTER html %])
-    field with grouped search conditions.
+    med grupperade sökvillkor.
 
   [% ELSIF error == "search_grouped_invalid_nesting" %]
-    You cannot nest clauses within grouped search conditions.
+    Du kan inte nästla satser i grupperade sökvillkor.
 
   [% ELSIF error == "search_grouped_field_mismatch" %]
-    All conditions under a groups search must use the same field.
+    Alla villkor i en grupperad sökning måste använda samma fält.
 
   [% ELSIF error == "search_field_operator_invalid" %]
-    Bugzilla does not support using the
+    [% terms.Bugzilla %] har inte stöd för att använda fältet
     "[%+ field_descs.$field FILTER html %]" ([% field FILTER html %])
-    field with the "[% search_descs.$operator FILTER html %]" 
-    ([% operator FILTER html %]) search type.
+    med söktypen ”[% search_descs.$operator FILTER html %]”
+    ([% operator FILTER html %]).
 
   [% ELSIF error == "see_also_self_reference" %]
-    You cannot put this [% terms.bug %] into its own
-    [%+ field_descs.see_also FILTER html %] field.
+    Du kan inte lägga [% terms.bug %] i dess eget fält
+    [%+ field_descs.see_also FILTER html %].
 
   [% ELSIF error == "series_already_exists" %]
-    [% title = "Series Already Exists" %]
-    [% docslinks = {'using/reports-and-charts.html' => 'Reporting'} %]
-      A series named <em>[% series.category FILTER html %] /
+    [% title = "Serien finns redan" %]
+    [% docslinks = {'using/reports-and-charts.html' => 'Rapportering'} %]
+      En serie med namnet <em>[% series.category FILTER html %] /
       [%+ series.subcategory FILTER html %] / 
       [%+ series.name FILTER html %]</em>
-      already exists.
+      finns redan.
     
   [% ELSIF error == "still_unresolved_bugs" %]
-    [% title = "Unresolved Dependencies" %]
+    [% title = "Olösta beroenden" %]
     [% IF bug_id %]
       [% terms.Bug %] [%+ bug_id FILTER bug_link(bug_id) FILTER none %]
     [% ELSE %]
-       This [% terms.bug %]
+       Den här [% terms.bug %]
     [% END %]
-    has [% dep_count FILTER none %] unresolved
+    har [% dep_count FILTER none %] olösta
     [% IF dep_count == 1 %]
-      dependency
+      beroende
     [% ELSE %]
-      dependencies
+      beroenden
     [% END %].
-    They must either be resolved or removed from the
-    "[% field_descs.dependson FILTER html %]" field before you can resolve
-    this [% terms.bug %] as [% display_value("resolution", "FIXED") FILTER html %].
+    De måste antingen lösas eller tas bort från fältet
+    ”[% field_descs.dependson FILTER html %]” innan du kan markera
+    [% terms.bug %] som [% display_value("resolution", "FIXED") FILTER html %].
 
   [% ELSIF error == "sudo_invalid_cookie" %]
     [% title = "Invalid Sudo Cookie" %]

@@ -1,0 +1,148 @@
+[%# This Source Code Form is subject to the terms of the Mozilla Public
+  # License, v. 2.0. If a copy of the MPL was not distributed with this
+  # file, You can obtain one at http://mozilla.org/MPL/2.0/.
+  #
+  # This Source Code Form is "Incompatible With Secondary Licenses", as
+  # defined by the Mozilla Public License, v. 2.0.
+  #%]
+
+[%# Remember to PROCESS rather than INCLUDE this template. %]
+
+[% SET search_descs = {
+  "noop"           => "---",
+  "equals"         => "är lika med",
+  "notequals"      => "är inte lika med",
+  "anyexact"       => "är lika med någon av strängarna",
+  "substring"      => "innehåller strängen",
+  "casesubstring"  => "innehåller strängen (exakt skiftläge)",
+  "notsubstring"   => "innehåller inte strängen",
+  "anywordssubstr" => "innehåller någon av strängarna",
+  "allwordssubstr" => "innehåller alla strängarna",
+  "nowordssubstr"  => "innehåller ingen av strängarna",
+  "regexp"         => "matchar reguljärt uttryck",
+  "notregexp"      => "matchar inte reguljärt uttryck",
+  "lessthan"       => "är mindre än",
+  "lessthaneq"     => "är mindre än eller lika med",
+  "greaterthan"    => "är större än",
+  "greaterthaneq"  => "är större än eller lika med",
+  "anywords"       => "innehåller något av orden",
+  "allwords"       => "innehåller alla orden",
+  "nowords"        => "innehåller inget av orden",
+  "changedbefore"  => "ändrades före",
+  "changedafter"   => "ändrades efter",
+  "changedfrom"    => "ändrades från",
+  "changedto"      => "ändrades till",
+  "changedby"      => "ändrades av",
+  "matchar"        => "matchar",
+  "notmatches"     => "matchar inte",
+  "isempty"        => "är tom",
+  "isnotempty"     => "är inte tom",
+} %]
+
+[% field_types = { ${constants.FIELD_TYPE_UNKNOWN}       => "Okänd typ",
+                   ${constants.FIELD_TYPE_FREETEXT}      => "Fritext",
+                   ${constants.FIELD_TYPE_INTEGER}       => "Heltal",
+                   ${constants.FIELD_TYPE_SINGLE_SELECT} => "Rullgardinsmeny",
+                   ${constants.FIELD_TYPE_MULTI_SELECT}  => "Flervalsruta",
+                   ${constants.FIELD_TYPE_TEXTAREA}      => "Stor textruta",
+                   ${constants.FIELD_TYPE_DATETIME}      => "Datum/tid",
+                   ${constants.FIELD_TYPE_DATE}          => "Datum",
+                   ${constants.FIELD_TYPE_BUG_ID}        => "$terms.Bug ID",
+                } %]
+
+[% IF in_template_var %]
+  [% PROCESS "global/value-descs.none.tmpl" %]
+  [% SET vars.value_descs = value_descs %]
+  [% SET vars.terms = terms %]
+
+  [%# field_descs is loaded as a global template variable and cached
+    # across all templates--see VARIABLES in Bugzilla/Template.pm.
+    #%]
+  [% vars.field_descs = {
+    "[Bug creation]"          => "[$terms.Bug creation]",
+     "actual_time"             => "Faktiska timmar",
+     "alias"                   => "Alias",
+     "assigned_to"             => "Tilldelad",
+     "assigned_to_realname"    => "Tilldelads riktiga namn",
+     "attach_data.thedata"     => "Bilagedata",
+     "attachments.description" => "Bilagebeskrivning",
+     "attachments.filename"    => "Bilagans filnamn",
+     "attachments.mimetype"    => "Bilagans MIME-typ",
+     "attachments.ispatch"     => "Bilagan är en patch",
+     "attachments.isobsolete"  => "Bilagan är föråldrad",
+     "attachments.isprivate"   => "Bilagan är privat",
+     "attachments.submitter"   => "Bilagans skapare",
+     "blocked"                 => "Blockerar",
+     "bug_file_loc"            => "URL",
+     "bug_group"               => "Grupp",
+     "bug_id"                  => "$terms.Bug ID",
+     "bug_severity"            => "Allvarlighetsgrad",
+     "bug_status"              => "Status",
+     "changeddate"             => "Ändrad",
+     "cc"                      => "CC",
+     "classification"          => "Classification",
+     "cclist_accessible"       => "CC-lista tillgänglig",
+     "commenter"               => "Kommentator",
+     "component_id"            => "Komponent-ID",
+     "component"               => "Komponent",
+     "content"                 => "Innehåll",
+     "creation_ts"             => "Skapad datum",
+     "days_elapsed"            => "Dagar sedan $terms.bug ändrades",
+     "deadline"                => "Tidsgräns",
+     "delta_ts"                => "Ändrad",
+     "dependson"               => "Beror på",
+     "dup_id"                  => "Dubblett",
+     "estimated_time"          => "Ursprunglig uppskattning",
+     "everconfirmed"           => "Någonsin bekräftad",
+     "flagtypes.name"          => "Flaggor",
+     "keywords"                => "Nyckelord",
+     "last_visit_ts"           => "Senaste besök",
+     "longdesc"                => "Kommentar",
+     "longdescs.count"         => "Antal kommentarer",
+     "longdescs.isprivate"     => "Kommentaren är privat",
+     "newcc"                   => "CC",
+     "op_sys"                  => "Operativsystem",
+     "opendate"                => "Öppnad",
+     "owner_idle_time"         => "Tid sedan tilldelad ändrade",
+     "percentage_complete"     => "% klart",
+     "priority"                => "Prioritet",
+     "product_id"              => "Produkt-ID",
+     "product"                 => "Produkt",
+     "qa_contact"              => "QA-kontakt",
+     "qa_contact_realname"     => "QA-kontaktens riktiga namn",
+     "remaining_time"          => "Timmar kvar",
+     "rep_platform"            => "Maskinvara",
+     "reporter"                => "Rapportör",
+     "reporter_accessible"     => "Rapportör tillgänglig",
+     "reporter_realname"       => "Rapportörens riktiga namn",
+     "requestees.login_name"   => "Flaggbegärans mottagare",
+     "resolution"              => "Lösning",
+     "see_also"                => "Se även",
+     "setters.login_name"      => "Flaggans skapare",
+     "setting"                 => "Inställning",
+     "settings"                => "Inställningar",
+     "short_desc"              => "Sammanfattning",
+     "short_short_desc"        => "Sammanfattning",
+     "status_whiteboard"       => "Anslagstavla",
+     "tag"                     => "Personliga taggar",
+     "target_milestone"        => "Målmilstolpe",
+     "version"                 => "Version",
+     "work_time"               => "Arbetade timmar",
+  } %]
+
+  [%# Also include any custom fields or fields which don't have a
+      Description here, by copying their Description from the
+      database. If you want to override this for your language
+      or your installation, just use a hook. %]
+  [% UNLESS Param('shutdownhtml') %]
+    [% FOREACH bz_field = bug_fields.values %]
+      [% SET vars.field_descs.${bz_field.name} = bz_field.description
+         IF !vars.field_descs.${bz_field.name}.defined %]
+    [% END %]
+  [% END %]
+
+  [% PROCESS "bug/field-help.none.tmpl" %]
+[% END %]
+
+[% Hook.process("end") %]
+

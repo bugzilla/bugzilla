@@ -1,0 +1,336 @@
+[%# This Source Code Form is subject to the terms of the Mozilla Public
+  # License, v. 2.0. If a copy of the MPL was not distributed with this
+  # file, You can obtain one at http://mozilla.org/MPL/2.0/.
+  #
+  # This Source Code Form is "Incompatible With Secondary Licenses", as
+  # defined by the Mozilla Public License, v. 2.0.
+  #%]
+
+[% INCLUDE global/header.html.tmpl
+  title = "$terms.Bugzilla snabbsökning"
+  bodyclasses = ['narrow_page']
+ %]
+
+[% USE Bugzilla %]
+
+<p><label for="quicksearch">Skriv ett eller flera ord (eller delar av ord)
+  att söka efter:</label></p>
+
+<form name="f" action="buglist.cgi" method="get">
+  <input size="40" name="quicksearch" id="quicksearch"
+         aria-labelledby="find" autofocus required>
+  <input type="submit" value="Sök" id="find">
+</form>
+
+<ul>
+  <li><a href="#basics">Grunderna</a></li>
+  <li><a href="#basic_examples">Exempel på enkla sökfrågor</a></li>
+  <li><a href="#fields">Fält du kan söka i</a></li>
+  <li><a href="#advanced_features">Avancerade funktioner</a></li>
+  <li><a href="#shortcuts">Avancerade genvägar</a></li>
+  <li><a href="#advanced_examples">Exempel på komplexa sökfrågor</a></li>
+</ul>
+
+<h2 id="basics">Grunderna</h2>
+
+<ul class="qs_help">
+  <li>Om du bara skriver ett ord eller en följd av ord i sökrutan söker
+    Bugzilla i fälten
+    [%+ field_descs.product FILTER html %],
+    [%+ field_descs.component FILTER html %], 
+    [%+ IF use_keywords %][%+ field_descs.keywords FILTER html %],[% END %]
+    [%+ field_descs.alias FILTER html %],
+    [%+ field_descs.short_desc FILTER html %], 
+    [%+ IF Param('usestatuswhiteboard') %][% field_descs.status_whiteboard FILTER html %],[% END %]
+    och [% field_descs.longdesc FILTER html %] efter dina ord.</li>
+
+  <li>Om du bara skriver ett <strong>nummer</strong> i sökrutan går du direkt
+    till [% terms.bug %] med det ID:t. Om du bara skriver <strong>aliaset</strong>
+    för [% terms.abug %] går du också direkt till den [% terms.bug %].
+  </li>
+
+  <li>Fler sökord <strong>begränsar</strong> sökningen, de utökar den inte.
+     (Bugzilla söker alltså efter [%+ terms.bugs %] som uppfyller <em>alla</em>
+     kriterier, inte [%+ terms.bugs %] som uppfyller <em>något</em> kriterium.)</li>
+
+  <li>Sökningen är <strong>inte skiftlägeskänslig</strong>. Alltså är <kbd>table</kbd>,
+    <kbd>Table</kbd> och <kbd>TABLE</kbd> samma sak.</li>
+
+  <li>Bugzilla söker inte bara efter det exakta ordet, utan även efter ord som
+    <strong>innehåller</strong> det. En sökning efter ”cat” hittar exempelvis
+    [% terms.bugs %] där det ingår i andra ord, som ”<strong>cat</strong>ch” eller
+    ”certifi<strong>cat</strong>e”. Delar av ord hittas däremot inte i fälten
+    [% field_descs.longdesc FILTER html %] och [% field_descs.keywords FILTER html %];
+    där matchas bara hela ord.</li>
+
+  <li>Som standard söks bara <strong>öppna</strong> [% terms.bugs %]. Om du även
+    vill söka bland stängda [% terms.bugs %], se avsnittet <a href="#shortcuts">Avancerade genvägar</a>.</li>
+
+  <li>Om du vill söka i <strong>bestämda fält</strong> använder du formatet
+    <kbd>fält:värde</kbd>, där <kbd>fält</kbd> är ett av <a href="#fields">fältnamnen</a>
+    längre ner på sidan och <kbd>värde</kbd> är det du söker efter i fältet. Kommatecken
+    i <kbd>värde</kbd> tolkas som en lista med värden och söker efter [% terms.bugs %]
+    som matchar <em>något</em> av dem.</li>
+</ul>
+
+<h2 id="basic_examples">Exempel på enkla sökfrågor</h2>
+
+<p>Här är några exempel på enkla sökfrågor.
+  <a href="#advanced_examples">Exempel på mer komplexa sökfrågor</a> finns längre ner på sidan.</p>
+
+<ul class="qs_help">
+  <li>Alla öppna [% terms.bugs %] där userA@company.com finns i CC-listan
+    (du behöver inte ange öppna [% terms.bugs %], eftersom det är standard):<br>
+    <kbd>cc:userA@company.com</kbd></li>
+  <li>Alla obekräftade [% terms.bugs %] i produkten productA (om status för
+    [%+ terms.bug %] anges först tolkas den automatiskt som status):<br>
+    <kbd>UNCONFIRMED product:productA</kbd>
+  <li>Alla öppna och stängda [% terms.bugs %] som rapporterats av userB@company.com
+    (ALL måste anges först, annars tas bara öppna [% terms.bugs %] med):<br>
+    <kbd>ALL reporter:userB@company.com</kbd>
+  <li>Alla öppna [% terms.bugs %] med allvarlighetsgrad blockerande eller kritisk
+    och milstolpen 2.5:<br>
+    <kbd>severity:blocker,critical milestone:2.5</kbd>
+  <li>Alla öppna [% terms.bugs %] i komponenten Research & Development med
+    prioritet P1 eller P2 (komponentens namn omges av citattecken eftersom det innehåller blanksteg):<br>
+    <kbd>component:"Research & Development" priority:P1,P2</kbd></li>
+</ul>
+
+<h2 id="fields">Fält du kan söka i</h2>
+
+<p>Du kan ange valfritt av dessa fält som <kbd>fält:värde</kbd> i sökrutan.
+  Du kan även förkorta fältnamnet så länge förkortningen bara matchar ett fält.
+  Sökningen <kbd>stat:VERIFIED</kbd> hittar exempelvis alla [%+ terms.bugs %]
+  med statusen <kbd>VERIFIED</kbd>. Vissa fält har flera namn och alla kan användas.</p>
+
+[% IF Bugzilla.active_custom_fields.size %]
+  [% SET first_field = Bugzilla.active_custom_fields.0 %]
+  <p>Egna fält kan, utöver sitt vanliga namn som börjar med <kbd>cf_</kbd>, användas
+    och förkortas utifrån den del av namnet som kommer <em>efter</em> <kbd>cf_</kbd>.
+    Exempelvis kan
+    <kbd>[% first_field.name FILTER html %]</kbd> can be
+    referred to as 
+    <kbd>[% first_field.name.replace('^cf_') FILTER html %]</kbd>,
+    också användas. Om det uppstår en konflikt mellan Bugzillas vanliga fältnamn och
+    egna fältnamn har de vanliga fältnamnen alltid företräde.</p>
+[% END %]
+
+[% SET field_table = {} %]
+[% FOREACH field = quicksearch_field_names.keys %]
+  [% description = field_descs.$field %]
+  [% field_table.$description = quicksearch_field_names.${field} %]
+[% END %]
+
+
+<table class="qs_fields">
+  <thead>
+    <tr>
+      <th class="field_name">Fält</th>
+      <th class="field_nickname">Fältnamn för sökning</th>
+    </tr>
+  </thead>
+  <tbody>
+    [% FOREACH desc = field_table.keys.sort %]
+      <tr>
+        <td class="field_name">[% desc FILTER html %]</td>
+        <td class="field_nickname">
+          [% FOREACH nickname = field_table.$desc %]
+            <kbd>[% nickname FILTER html %]</kbd>
+            [% ",&nbsp; " UNLESS loop.last %]
+          [% END %]
+      </tr>
+    [% END %]
+  </tbody>
+</table>
+
+<h2 id="advanced_features">Avancerade funktioner</h2>
+
+<ul class="qs_help">
+  <li>Om du vill söka efter en <strong>fras</strong>, eller något som innehåller
+    blanksteg, kommatecken, kolon eller citattecken, måste du omge det med citattecken:
+    <kbd>"yes, this is a phrase"</kbd>. Citattecken krävs också för tecken som annars
+    tolkas särskilt av snabbsökningen. <kbd>"this|that"</kbd> söker exempelvis efter
+    den bokstavliga strängen <em>this|that</em>, inte <kbd>"this OR that"</kbd>. På samma
+    sätt söker <kbd>"-field:value"</kbd> efter frasen <em>-field:value</em>, inte
+    <kbd>"NOT field:value"</kbd>.</li>
+
+  <li>Du kan använda <strong>AND</strong>, <strong>NOT</strong> och <strong>OR</strong> i sökningar.
+
+    Du kan även använda <kbd>-</kbd> för ”NOT” och <kbd>|</kbd> för ”OR”. Det finns inget
+    särskilt tecken för ”AND”, eftersom sökord som skiljs åt med blanksteg som standard binds ihop med ”AND”.
+    Exempel:
+    <ul>
+      <li>
+        <strong>NOT</strong>:<br>
+        Använd <kbd><strong>-</strong><em>summary:foo</em></kbd> för att utesluta
+        [%+ terms.bugs %] med <kbd>foo</kbd> i sammanfattningen.<br>
+        <kbd><em>NOT summary:foo</em></kbd> har samma effekt.
+      </li>
+      <li>
+        <strong>AND</strong>:<br>
+        <kbd><em>foo bar</em></kbd> söker efter [% terms.bugs %] som innehåller både
+        <kbd>foo</kbd> och <kbd>bar</kbd>.<br>
+        <kbd><em>foo AND bar</em></kbd> har samma effekt.
+      </li>
+      <li>
+        <strong>OR</strong>:<br>
+        <kbd><em>foo<strong>|</strong>bar</em></kbd> söker efter [% terms.bugs %]
+        som innehåller <kbd>foo</kbd> OR <kbd>bar</kbd>.<br>
+        <kbd><em>foo OR bar</em></kbd> har samma effekt.<br>
+      </li>
+    </ul>
+
+    <p>Du kan inte använda | eller OR för att räkna upp värden för ett fält. Använd
+      kommatecken i stället. <kbd>field:value1,value2</kbd> fungerar därför som väntat,
+      medan <kbd>field:value1|value2</kbd> tolkas som <kbd>field:value1 OR value2</kbd>;
+      value2 är då inte knutet till fältet.</p>
+
+    <p>OR har högre prioritet än AND; AND är operationen på högsta nivån. Exempel:</p>
+    <p>Sökningen <em><kbd>url|location bar|field -focus</kbd></em> betyder
+      (<kbd>url</kbd> OR <kbd>location</kbd>) AND (<kbd>bar</kbd> OR 
+      <kbd>field</kbd>) AND (NOT <kbd>focus</kbd>)</p>
+  </li>
+
+  <li>
+    Standardoperatorn, kolon (:), matchar en <strong>delsträng</strong> av värdet.
+    Följande operatorer stöds:
+    <ul>
+      <li>
+        <strong>:</strong> (delsträng):<br>
+        <kbd><em>summary:foo</em></kbd> söker efter [% terms.bugs %] där
+        <kbd>summary</kbd> innehåller <kbd>foo</kbd>.
+      </li>
+      <li>
+        <strong>=</strong> (lika med):<br>
+        <kbd><em>summary=foo</em></kbd> söker efter [% terms.bugs %] där
+        <kbd>summary</kbd> är exakt <kbd>foo</kbd>.
+      </li>
+      <li>
+        <strong>!=</strong> (inte lika med):<br>
+        <kbd><em>summary!=foo</em></kbd> söker efter [% terms.bugs %] där
+        <kbd>summary</kbd> inte är <kbd>foo</kbd>.
+      </li>
+      <li>
+        <strong>&gt;</strong> (större än):<br>
+        <kbd><em>creation_ts&gt;-2w</em></kbd> söker efter [% terms.bugs %] som skapades
+        mellan två veckor sedan och nu, men inte [% terms.bugs %] som är exakt två veckor gamla.
+      </li>
+      <li>
+        <strong>&gt;=</strong> (större än eller lika med):<br>
+        <kbd><em>creation_ts&gt;=-2w</em></kbd> söker efter [% terms.bugs %] som skapades
+        mellan två veckor sedan och nu, även [% terms.bugs %] som är exakt två veckor gamla.
+      </li>
+      <li>
+        <strong>&lt;</strong> (mindre än):<br>
+        <kbd><em>creation_ts&lt;-2w</em></kbd> söker efter [% terms.bugs %] som skapades
+        för mer än två veckor sedan, men inte [% terms.bugs %] som är exakt två veckor gamla.
+      </li>
+      <li>
+        <strong>&lt;=</strong> (mindre än eller lika med):<br>
+        <kbd><em>creation_ts&lt;=-2w</em></kbd> söker efter [% terms.bugs %] som skapades
+        för mer än två veckor sedan, även [% terms.bugs %] som är exakt två veckor gamla.
+      </li>
+    </ul>
+  </li>
+</ul>
+
+<h2 id="shortcuts">Avancerade genvägar</h2>
+
+<p>Utöver <a href="#fields">fältnamn</a> för att söka i bestämda fält finns
+  särskilda tecken och ord som kan användas som genvägar:</p>
+
+<table class="qs_fields">
+  <thead>
+    <tr>
+      <th class="field_name">Fält</th>
+      <th class="field_nickname">Genväg(ar)</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td class="field_name">[% field_descs.bug_status FILTER html %]</td>
+      <td class="field_nickname">
+        Använd namnet eller förkortningen för en status som <strong>första ord</strong>
+        i sökningen för att söka efter [% terms.bugs %] med den statusen.
+        <strong><kbd>ALL</kbd></strong> betyder ”alla statusar”, och
+        <strong><kbd>OPEN</kbd></strong> betyder ”alla öppna statusar”.
+      </td>
+    </tr>
+    <tr>
+      <td class="field_name">[% field_descs.resolution FILTER html %]</td>
+      <td class="field_nickname">
+        Använd namnet eller förkortningen för en upplösning som <strong>första ord</strong>
+        i sökningen för att söka efter [%+ terms.bugs %] med den upplösningen. Exempelvis
+        hittar <kbd>FIX</kbd> alla [%+ terms.bugs %] med upplösningen <kbd>FIXED</kbd>.
+    </tr>
+    <tr>
+      <td class="field_name">[% field_descs.priority FILTER html %]</td>
+      <td class="field_nickname">”<strong>P1</strong>” (som ord var som helst i
+        sökningen) betyder ”hitta [% terms.bugs %] med högsta prioritet”.
+        ”P2” betyder näst högsta prioritet, och så vidare.
+        <p>Sökningen ”<strong>P1-3</strong>” hittar [% terms.bugs %] med någon av de
+        tre högsta prioriteterna, och så vidare.</p>
+      </td>
+    </tr>
+    <tr>
+      <td class="field_name">[% field_descs.assigned_to FILTER html %]</td>
+      <td class="field_nickname"><strong>@</strong><em>value</em></td>
+    </tr>
+    <tr>
+      <td class="field_name">[% field_descs.product FILTER html %] eller
+        [%+ field_descs.component FILTER html %]</td>
+      <td class="field_nickname"><strong>:</strong><em>value</em></td>
+    </tr>
+    [% IF use_keywords %]
+      <tr>
+        <td class="field_name">[% field_descs.keywords FILTER html %]</td>
+        <td class="field_nickname"><strong>!</strong><em>value</em></td>
+      </tr>
+    [% END %]
+    <tr>
+      [% SET key = "flagtypes.name" %]
+      <td class="field_name">[% field_descs.$key FILTER html %]</td>
+      <td class="field_nickname">
+        <em>flag</em><strong>?</strong><em>requestee</em>
+      </td>
+    </tr>
+    <tr>
+      <td class="field_name">[% field_descs.longdesc FILTER html %]
+        eller [% field_descs.short_desc FILTER html %]</td>
+      <td class="field_nickname">
+        <strong>#</strong><em>value</em>
+      </td>
+    </tr>
+    [% IF Param('usestatuswhiteboard') %]
+      <tr>
+        <td class="field_name">[% field_descs.short_desc FILTER html %]
+          eller [% field_descs.status_whiteboard FILTER html %]</td>
+        <td class="field_nickname"><strong>[</strong><em>value</em></td>
+      </tr>
+    [% END %]
+  </tbody>
+</table>
+
+<h2 id="advanced_examples">Exempel på komplexa sökfrågor</h2>
+
+<p>Det är ganska enkelt att skriva komplexa sökfrågor. För mycket komplexa frågor
+  behöver du använda formuläret <a href="query.cgi?format=advanced">Avancerad sökning</a>.</p>
+
+<ul class="qs_help">
+  <li>Alla [% terms.bugs %] som rapporterats av userA@company.com eller tilldelats dem
+    (inledande @ är en genväg för den tilldelade, se <a href="#shortcuts">Avancerade genvägar</a>):<br>
+    <kbd>ALL @userA@company.com OR reporter:userA@company.com</kbd></li>
+  <li>Alla öppna [% terms.bugs %] i produkten productA med allvarlighetsgraden
+    blockerande, kritisk eller stor, med prioritet P1 eller med flaggan blocker+,
+    och som inte är tilldelade userB@company.com eller userC@company.com (här antas
+    att bara två användare matchar userB och userC):<br>
+    <kbd>:productA sev:blocker,critical,major OR pri:P1 OR flag:blocker+ -assign:userB,userC</kbd></li>
+  <li>Alla FIXED [% terms.bugs %] med flaggan blocker+, men utan flaggorna
+    approval+ och approval?:<br>
+    <kbd>FIXED flag:blocker+ -flag:approval+ -flag:approval?</kbd></li>
+  <li>[% terms.Bugs %] med <em>That's a "unusual" issue</em> i
+    [%+ terms.bug %]sammanfattningen (dubbla citattecken skrivs som <em>\"</em>):<br>
+    <kbd>summary:"That's a \"unusual\" issue"</kbd></li>
+</ul>
+
+[% PROCESS global/footer.html.tmpl %]

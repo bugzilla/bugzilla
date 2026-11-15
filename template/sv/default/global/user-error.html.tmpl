@@ -1444,7 +1444,7 @@
     Lösenordet måste vara minst
     [%+ constants.USER_PASSWORD_MIN_LENGTH FILTER html %] tecken långt.
     [% IF locked_user %]
-      You must <a href="token.cgi?a=reqpw&amp;loginname=[% locked_user.email FILTER uri %]&amp;token=[% issue_hash_token(['reqpw']) FILTER uri %]">
+      Du måste <a href="token.cgi?a=reqpw&amp;loginname=[% locked_user.email FILTER uri %]&amp;token=[% issue_hash_token(['reqpw']) FILTER uri %]">
       begära ett nytt lösenord</a> för att kunna logga in igen.
     [% END %]
 
@@ -1465,7 +1465,7 @@
       [% END %]
     </ul>
     [% IF locked_user %]
-      You must <a href="token.cgi?a=reqpw&amp;loginname=[% locked_user.email FILTER uri %]&amp;token=[% issue_hash_token(['reqpw']) FILTER uri %]">
+      Du måste <a href="token.cgi?a=reqpw&amp;loginname=[% locked_user.email FILTER uri %]&amp;token=[% issue_hash_token(['reqpw']) FILTER uri %]">
       begära ett nytt lösenord</a> för att kunna logga in igen.
     [% END %]
 
@@ -1486,12 +1486,12 @@
 
   [% ELSIF error == "product_name_already_in_use" %]
     [% title = "Produktnamnet finns redan" %]
-    [% admindocslinks = {'categorization.html#products' => 'Administering products'} %]
+    [% admindocslinks = {'categorization.html#products' => 'Administrera produkter'} %]
     Produktnamnet ”[% product FILTER html %]” finns redan.
   
   [% ELSIF error == "product_name_diff_in_case" %]
     [% title = "Produktnamnet skiljer endast i skiftläge" %]
-    [% admindocslinks = {'categorization.html#products' => 'Administering products'} %]
+    [% admindocslinks = {'categorization.html#products' => 'Administrera produkter'} %]
     Produktnamnet ”[% product FILTER html %]” skiljer sig från den befintliga
     produkten ”[% existing_product FILTER html %]” endast i skiftläge.
 
@@ -1501,87 +1501,87 @@
     tecken. ”[% name FILTER html %]” är för långt ([% name.length %] tecken).
 
   [% ELSIF error == "product_must_define_defaultmilestone" %]
-    [% title = "Must define new default milestone" %]
-    [% admindocslinks = {'categorization.html#products'   => 'Administering products',
-                         'categorization.html#milestones' => 'About Milestones'} %]
-    You must <a href="editmilestones.cgi?action=add&amp;product=[% product FILTER uri %]">
-    create the milestone '[% milestone FILTER html %]'</a> before
-    it can be made the default milestone for product '[% product FILTER html %]'.
+    [% title = "Ny standardmilstolpe måste anges" %]
+    [% admindocslinks = {'categorization.html#products'   => 'Administrera produkter',
+                         'categorization.html#milestones' => 'Om milstolpar'} %]
+    Du måste <a href="editmilestones.cgi?action=add&amp;product=[% product FILTER uri %]">
+    skapa milstolpen ”[% milestone FILTER html %]”</a> innan den kan
+    användas som standardmilstolpe för produkten ”[% product FILTER html %]”.
 
   [% ELSIF error == "product_admin_denied" %]
-    [% title = "Product Access Denied" %]
-    You are not allowed to edit properties of product '[% product FILTER html %]'.
+    [% title = "Åtkomst till produkten nekad" %]
+    Du får inte ändra egenskaper för produkten ”[% product FILTER html %]”.
 
   [% ELSIF error == "product_blank_name" %]
-    [% title = "Blank Product Name Not Allowed" %]
-    [% admindocslinks = {'categorization.html#products' => 'Administering products'} %]
-    You must enter a name for the product.
+    [% title = "Tomt produktnamn är inte tillåtet" %]
+    [% admindocslinks = {'categorization.html#products' => 'Administrera produkter'} %]
+    Du måste ange ett namn för produkten.
   
   [% ELSIF error == "product_disabled" %]
-    [% title = BLOCK %]Product closed for [% terms.Bug %] Entry[% END %]
-    [% admindocslinks = {'categorization.html#products' => 'Administering products'} %]
-    Sorry, entering [% terms.abug %] into the
-    product <em>[% product.name FILTER html %]</em> has been disabled.
+    [% title = BLOCK %]Produkten är stängd för registrering av [% terms.bug %][% END %]
+    [% admindocslinks = {'categorization.html#products' => 'Administrera produkter'} %]
+    Det går inte att registrera [% terms.abug %] i produkten
+    <em>[% product.name FILTER html %]</em>.
 
   [% ELSIF error == "product_edit_denied" %]
-    [% title = "Product Edit Access Denied" %]
-    [% admindocslinks = {'categorization.html#products' => 'Administering products',
-                         'categorization.html#assigning-group-controls-to-products' => 'Group security'} %]
-    You are not permitted to edit [% terms.bugs %] in product 
+    [% title = "Åtkomst för att ändra produkt nekad" %]
+    [% admindocslinks = {'categorization.html#products' => 'Administrera produkter',
+                         'categorization.html#assigning-group-controls-to-products' => 'Gruppsäkerhet'} %]
+    Du får inte ändra [% terms.bugs %] i produkten
     [%+ product FILTER html %].
 
   [% ELSIF error == "product_has_bugs" %]
-    [% title = BLOCK %]Product has [% terms.Bugs %][% END %]
-    [% admindocslinks = {'categorization.html#products' => 'Administering products'} %]
-    There are [% nb FILTER html %] [%+ terms.bugs %] entered for this product!
-    You must move those [% terms.bugs %] to another product before you
-    can delete this one.
+    [% title = BLOCK %]Produkten har [% terms.Bugs %][% END %]
+    [% admindocslinks = {'categorization.html#products' => 'Administrera produkter'} %]
+    Det finns [% nb FILTER html %] [%+ terms.bugs %] registrerade för produkten.
+    Du måste flytta dessa [% terms.bugs %] till en annan produkt innan
+    du kan ta bort den här.
 
   [% ELSIF error == "product_must_have_description" %]
-    [% title = "Product needs Description" %]
-    [% admindocslinks = {'categorization.html#products' => 'Administering products'} %]
-    You must enter a description for this product.
+    [% title = "Produkten behöver en beskrivning" %]
+    [% admindocslinks = {'categorization.html#products' => 'Administrera produkter'} %]
+    Du måste ange en beskrivning för produkten.
 
   [% ELSIF error == "product_must_have_version" %]
-    [% title = "Product needs Version" %]
-    [% admindocslinks = {'categorization.html#products' => 'Administering products',
-                         'categorization.html#versions' => 'Administering versions'} %]
-    You must enter a valid version to create a new product.
+    [% title = "Produkten behöver en version" %]
+    [% admindocslinks = {'categorization.html#products' => 'Administrera produkter',
+                         'categorization.html#versions' => 'Administrera versioner'} %]
+    Du måste ange en giltig version för att skapa en ny produkt.
 
   [% ELSIF error == "product_unknown_component" %]
-    [% title = "Unknown Component" %]
-    Product '[% product FILTER html %]' has no component
+    [% title = "Okänd komponent" %]
+    Produkten ”[% product FILTER html %]” har ingen komponent
     [% IF comp_id %]
-      with ID [% comp_id FILTER html %].
+      med ID [% comp_id FILTER html %].
     [% ELSE %]
-      named '[% comp FILTER html %]'.
+      med namnet ”[% comp FILTER html %]”.
     [% END %]
 
   [% ELSIF error == "query_name_missing" %]
-    [% title = "No Search Name Specified" %]
-    [% docslinks = {'using/finding.html#bug-lists' => "$terms.Bug lists"} %]
-    You must enter a name for your search.
+    [% title = "Inget söknamn har angetts" %]
+    [% docslinks = {'using/finding.html#bug-lists' => "Listor med $terms.bugs"} %]
+    Du måste ange ett namn för sökningen.
 
   [% ELSIF error == "query_name_too_long" %]
-    [% title = "Query Name Too Long" %]
-    The name of the query must be less than [% constants.MAX_LEN_QUERY_NAME FILTER html %]
-    characters long.
+    [% title = "Söknamnet är för långt" %]
+    Sökningens namn måste vara kortare än [% constants.MAX_LEN_QUERY_NAME FILTER html %]
+    tecken.
 
   [% ELSIF error == "quicksearch_invalid_query" %]
-    [% title = "Invalid Query" %]
-    Your query is invalid.
+    [% title = "Ogiltig sökning" %]
+    Sökningen är ogiltig.
     [% IF operators %]
-      The [% operators.shift FILTER html %] operator cannot be followed by
+      Operatorn [% operators.shift FILTER html %] kan inte följas av
       [%+ operators.shift FILTER html %].
     [% ELSE %]
-      A query cannot start with AND or OR, nor can it end with AND, OR or NOT.
-      They are reserved operators and must be quoted if you want to look for
-      these strings.
+      En sökning kan inte börja med AND eller OR, och inte heller sluta med AND,
+      OR eller NOT. De är reserverade operatorer och måste omges av citattecken
+      om du vill söka efter dessa strängar.
     [% END %]
 
   [% ELSIF error == "quicksearch_unbalanced_quotes" %]
-    [% title = "Badly Formatted Query" %]
-    Bugzilla is unable to parse your query correctly:
+    [% title = "Felaktigt formaterad sökning" %]
+    [% terms.Bugzilla %] kan inte tolka sökningen korrekt:
     <em>[% string FILTER html %]</em>.<br>
     If you use quotes to enclose strings, make sure both quotes are present.
     If you really want to look for a quote in a string, type \" instead of ".

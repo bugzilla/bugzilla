@@ -1,0 +1,467 @@
+[%# This Source Code Form is subject to the terms of the Mozilla Public
+  # License, v. 2.0. If a copy of the MPL was not distributed with this
+  # file, You can obtain one at http://mozilla.org/MPL/2.0/.
+  #
+  # This Source Code Form is "Incompatible With Secondary Licenses", as
+  # defined by the Mozilla Public License, v. 2.0.
+  #%]
+
+[%# INTERFACE:
+  #
+  # listselectionvalues:      selection values to recreate the current user
+  #                           list.
+  # editusers:                is viewing user member of editusers?
+  # otheruser:                Bugzilla::User object of the viewed user.
+  # reporter:                 number of bugs reported by the user
+  # assignee_or_qa:           number of bugs the user is either the assignee
+  #                           or the QA contact
+  # bugs_activity:            number of bugs the viewed user has activity
+  #                           entries on
+  # cc                        number of bugs the viewed user is cc list member
+  #                           of
+  # flags.requestee:          number of flags the viewed user is being asked for
+  # flags.setter:             number of flags the viewed user has set
+  # longdescs:                number of bug comments the viewed user has written
+  # namedqueries:             number of named queries the user has created
+  # namedquery_group_map:     number of named queries the user has shared
+  # profiles_activity:        number of changes made to other users' profiles
+  # series:                   number of series the viewed user has created
+  # watch.watched:            number of users the viewed user is being watched
+  #                           by
+  # watch.watcher:            number of users the viewed user is watching
+  # whine_events:             number of whine events the viewed user has created
+  # whine_schedules:          number of whine schedules the viewed user has
+  #                           created
+  #%]
+
+[% title = BLOCK %]Bekräfta borttagning av användaren [% otheruser.login FILTER html %][% END %]
+
+[% PROCESS global/header.html.tmpl
+  title = title
+  style_urls = ['skins/standard/admin.css']
+  doc_section = "administering/users.html#deleting-users"
+%]
+
+[% PROCESS admin/users/listselectvars.html.tmpl
+  listselectionvalues = listselectionvalues
+%]
+
+<table id="admin_table">
+  <tr class="column_header">
+    <th>Fält</th>
+    <th>Värde</th>
+  </tr>
+  <tr>
+    <th>Inloggningsnamn:</th>
+    <td>[% otheruser.login FILTER html %]</td>
+  </tr>
+  <tr>
+    <th>Riktigt namn:</th>
+    <td>[% otheruser.name FILTER html %]</td>
+  </tr>
+  <tr>
+    <th>Grupper:</th>
+    <td>
+      [% IF otheruser.groups.size %]
+        <ul>
+          [% FOREACH group = otheruser.groups %]
+            <li>[% group.name FILTER html %]</li>
+          [% END %]
+        </ul>
+      [% ELSE %]
+        Inga
+      [% END %]
+    </td>
+  </tr>
+  [% IF otheruser.product_responsibilities.size %]
+    <tr>
+      <th>Produktansvar:</th>
+      <td>
+        [% PROCESS admin/users/responsibilities.html.tmpl otheruser = otheruser %]
+      </td>
+    </tr>
+  [% END %]
+</table>
+
+[% IF otheruser.product_responsibilities.size %]
+  <p>
+    Du kan inte ta bort användaren nu eftersom
+    [%+ otheruser.login FILTER html %] har ansvar för minst en produkt.
+  </p>
+  <p>
+    [% IF user.in_group("editcomponents", component.product_id) %]
+      Ändra detta genom att klicka på länkarna för produktredigering ovan,
+    [% ELSE %]
+      Du kan för närvarande
+    [% END %]
+[% ELSE %]
+  [% accept_deletion = 1 %]
+
+  [% IF attachments || reporter || bugs_activity || flags.setter || longdescs || profiles_activity %]
+    <div class="criticalmessages">
+      <p>Följande borttagningar är <b>osäkra</b> och skulle skapa inkonsekvenser
+      i referensintegriteten.</p>
+
+      <ul>
+        [% IF attachments %]
+          <li>
+            [% otheruser.login FILTER html %]
+            <a href="buglist.cgi?field0-0-0=attachments.submitter&type0-0-0=equals&value0-0-0=
+               [%- otheruser.login FILTER uri %]">har skickat in
+            [% IF attachments == 1 %]
+              en bilaga
+            [% ELSE %]
+              [%+ attachments %] bilagor
+            [% END %]</a>.
+            Om du tar bort användarkontot blir databasposterna inkonsekventa, vilket gör att
+            [% IF attachments == 1 %]
+              den här bilagan
+            [% ELSE %]
+              de här bilagorna
+            [% END %]
+            inte längre visas i [% terms.bugs %].
+          </li>
+        [% END %]
+        [% IF reporter %]
+          <li>
+            [% otheruser.login FILTER html %]
+            <a href="buglist.cgi?emailreporter1=1&amp;emailtype1=exact&amp;email1=
+               [%- otheruser.login FILTER uri %]">har rapporterat
+            [% IF reporter == 1 %]
+              en [% terms.bug %]
+            [% ELSE %]
+              [%+ reporter %] [%+ terms.bugs %]
+            [% END %]</a>.
+            Om du tar bort användarkontot blir databasposterna inkonsekventa, vilket gör att
+            [% IF reporter == 1 %]
+              den här [% terms.bug %]
+            [% ELSE %]
+              de här [% terms.bugs %]
+            [% END %]
+            inte längre visas i listor över [% terms.bugs %].
+          </li>
+        [% END %]
+        [% IF bugs_activity %]
+          <li>
+            [% otheruser.login FILTER html %] har gjort
+            [% IF bugs_activity == 1 %]
+              en ändring i [% terms.abug %]
+            [% ELSE %]
+              ändringar i [% terms.bugs %]
+            [% END %].
+            Om du tar bort användarkontot blir aktivitetstabellen för [% terms.bugs %]
+            i databasen inkonsekvent, vilket gör att
+            [% IF bugs_activity == 1 %]
+              den här ändringen
+            [% ELSE %]
+              de här ändringarna
+            [% END %]
+            inte längre visas i aktivitetsloggen för [% terms.bugs %].
+          </li>
+        [% END %]
+        [% IF flags.setter %]
+          <li>
+            [% otheruser.login FILTER html %] har
+            <a href="buglist.cgi?field0-0-0=setters.login_name&amp;type0-0-0=equals&amp;value0-0-0=
+               [%- otheruser.login FILTER uri %]">angett
+            eller begärt
+            [% IF flags.setter == 1 %]
+              en flagga
+            [% ELSE %]
+              [%+ flags.setter %] flaggor
+            [% END %]</a>.
+            Om du tar bort användarkontot blir flaggtabellen i databasen
+            inkonsekvent, vilket gör att
+            [% IF flags.setter == 1 %]
+              den här flaggan
+            [% ELSE %]
+              de här flaggorna
+            [% END %]
+            inte längre visas korrekt.
+          </li>
+        [% END %]
+        [% IF longdescs %]
+          <li>
+            [% otheruser.login FILTER html %] har
+            <a href="buglist.cgi?emaillongdesc1=1&amp;emailtype1=exact&amp;email1=
+               [%- otheruser.login FILTER uri %]">kommenterat
+            [% IF longdescs == 1 %]
+              en gång i [% terms.abug %]
+            [% ELSE %]
+              [%+ longdescs %] gånger i [% terms.bugs %]
+            [% END %]</a>.
+            Om du tar bort användarkontot blir kommentartabellen i databasen
+            inkonsekvent, vilket gör att
+            [% IF longdescs == 1 %]
+              den här kommentaren
+            [% ELSE %]
+              de här kommentarerna
+            [% END %]
+            inte längre är synliga.
+          </li>
+        [% END %]
+        [% IF profiles_activity %]
+          <li>
+            [% otheruser.login FILTER html %] har gjort
+            [% IF bugs_activity == 1 %]
+              en ändring i en annan användares profil
+            [% ELSE %]
+              ändringar i andra användares profiler
+            [% END %].
+            Om du tar bort användarkontot blir aktivitetstabellen för användarprofiler
+            i databasen inkonsekvent.
+          </li>
+        [% END %]
+      </ul>
+    </div>
+    [% accept_deletion = 0 %]
+  [% END %]
+
+  [% IF assignee_or_qa || cc || component_cc || email_setting || flags.requestee ||
+        namedqueries || profile_setting || quips || series || watch.watched ||
+        watch.watcher || whine_events || whine_schedules || otheruser.has_audit_entries ||
+        other_safe %]
+    <div class="warningmessages">
+      <p>Följande borttagningar är <b>säkra</b> och skapar inga inkonsekvenser
+      i referensintegriteten.</p>
+
+      <ul>
+        [% IF assignee_or_qa %]
+          <li>
+            [% otheruser.login FILTER html %]
+            <a href="buglist.cgi?emailassigned_to1=1&amp;emailqa_contact1=1&amp;emailtype1=exact&amp;email1=
+               [%- otheruser.login FILTER uri %]">är
+            tilldelad eller kontakt för kvalitetssäkring för
+            [% IF assignee_or_qa == 1 %]
+              en [% terms.bug %]
+            [% ELSE %]
+              [%+ assignee_or_qa %] [%+ terms.bugs %]
+            [% END %]</a>.
+            Om du tar bort användarkontot återgår rollerna till standardvärdet
+            för tilldelad eller kontakt för kvalitetssäkring.
+          </li>
+        [% END %]
+        [% IF cc %]
+          <li>
+            [% otheruser.login FILTER html %]
+            <a href="buglist.cgi?emailcc1=1&amp;emailtype1=exact&amp;email1=
+               [%- otheruser.login FILTER uri %]">finns
+            i CC-listan för
+            [% IF cc == 1 %]
+              [%+ terms.abug %]
+            [% ELSE %]
+              [%+ cc %] [%+ terms.bugs %]
+            [% END %]</a>.
+            Om du tar bort användarkontot tas det bort från dessa CC-listor.
+          </li>
+        [% END %]
+        [% IF component_cc %]
+          <li>
+            [% otheruser.login FILTER html %] finns i standard-CC-listan för
+            [% IF component_cc == 1 %]
+              en komponent
+            [% ELSE %]
+              [%+ component_cc %] komponenter
+            [% END %].
+            Om du tar bort användarkontot tas det bort från dessa CC-listor.
+          </li>
+        [% END %]
+        [% IF email_setting %]
+          <li>
+            Användarens e-postinställningar tas bort tillsammans med användarkontot.
+          </li>
+        [% END %]
+        [% IF flags.requestee %]
+          <li>
+            [% otheruser.login FILTER html %] har blivit
+            <a href="buglist.cgi?field0-0-0=requestees.login_name&amp;type0-0-0=equals&amp;value0-0-0=
+               [%- otheruser.login FILTER uri %]">ombedd
+            att ange
+            [% IF flags.requestee == 1 %]
+              en flagga
+            [% ELSE %]
+              [% flags.requestee %] flaggor
+            [% END %]</a>.
+            Om du tar bort användarkontot blir
+            [% IF flags.requestee == 1 %]
+              den här flaggan
+            [% ELSE %]
+              de här flaggorna
+            [% END %]
+            ospecifikt begärd.
+          </li>
+        [% END %]
+        [% IF namedqueries %]
+          <li>
+            [% otheruser.login FILTER html %] har
+            [% IF namedqueries == 1 %]
+              en [% 'delad' IF namedquery_group_map %] namngiven sökning
+            [% ELSE %]
+              [%+ namedqueries FILTER html %] namngivna sökningar
+            [% END %].
+            [% IF namedqueries == 1 %]
+              Den här namngivna sökningen
+            [% ELSE %]
+              De här namngivna sökningarna
+            [% END %]
+            tas bort tillsammans med användarkontot.
+            [% IF namedquery_group_map %]
+              [% IF namedqueries > 1 %]
+                Av dessa
+                [% IF namedquery_group_map > 1 %]
+                  är [%+ namedquery_group_map FILTER html %]
+                [% ELSE %]
+                  en
+                [% END %]
+                delad.
+              [% END %]
+              Andra användare kan inte längre använda
+              [% IF namedquery_group_map > 1 %]
+                dessa delade namngivna sökningar
+              [% ELSE %]
+                den här delade namngivna sökningen
+              [% END %]
+              .
+            [% END %]
+          </li>
+        [% END %]
+        [% IF profile_setting %]
+          <li>
+            Användarens inställningar tas bort tillsammans med användarkontot.
+          </li>
+        [% END %]
+        [% IF series %]
+          <li>
+            [% otheruser.login FILTER html %] har skapat
+            [% IF series == 1 %]
+              en serie
+            [% ELSE %]
+              [%+ series %] serier
+            [% END %].
+            [% IF series == 1 %]
+              Den här serien
+            [% ELSE %]
+              De här serierna
+            [% END %]
+            tas bort tillsammans med användarkontot.
+          </li>
+        [% END %]
+        [% IF quips %]
+          <li>
+            [% otheruser.login FILTER html %] har skickat in
+            [% IF quips == 1 %]
+              en formulering
+            [% ELSE %]
+              [%+ quips %] formuleringar
+            [% END %].
+            Om du tar bort användarkontot får
+            [% IF quips == 1 %]
+              den här formuleringen
+            [% ELSE %]
+              de här formuleringarna
+            [% END %]
+            ingen författare, men är fortsatt tillgängliga.
+          </li>
+        [% END %]
+        [% IF watch.watched || watch.watcher %]
+          <li>
+            [% otheruser.login FILTER html %]
+            [% IF watch.watched %]
+              bevakas av
+              [% IF watch.watched == 1 %]
+                en användare
+              [% ELSE %]
+                [%+ watch.watched %] användare
+              [% END %]
+            [% END %]
+            [% IF watch.watcher %]
+              [%+ 'och' IF watch.watched %]
+              bevakar
+              [% IF watch.watcher == 1 %]
+                en användare
+              [% ELSE %]
+                [%+ watch.watcher %] användare
+              [% END %]
+            [% END %].
+            [% IF watch.watched + watch.watcher == 1 %]
+              Den här bevakningen
+            [% ELSE %]
+              De här bevakningarna
+            [% END %]
+            upphör när användarkontot tas bort.
+          </li>
+        [% END %]
+        [% IF whine_events %]
+          <li>
+            [% otheruser.login FILTER html %] har schemalagt
+            [% IF whine_events == 1 %]
+              en påminnelse
+            [% ELSE %]
+              [%+ whine_events %] påminnelser
+            [% END %].
+            [% IF whine_events == 1 %]
+              Den här påminnelsen
+            [% ELSE %]
+              De här påminnelserna
+            [% END %]
+            tas bort tillsammans med användarkontot.
+          </li>
+        [% END %]
+        [% IF whine_schedules %]
+          <li>
+            [% otheruser.login FILTER html %] är mottagare av
+            [% IF whine_schedules == 1 %]
+              en påminnelse
+            [% ELSE %]
+              [%+ whine_schedules %] påminnelser
+            [% END %].
+            Motsvarande scheman tas bort tillsammans med användarkontot, men själva
+            påminnelserna lämnas oförändrade.
+          </li>
+        [% END %]
+        [% IF otheruser.has_audit_entries %]
+          <li>
+            Användaren har utfört granskade administrativa uppgifter som loggas i databasen.
+            Om du tar bort användarkontot går posterna i granskningsloggen inte längre att identifiera.
+          </li>
+        [% END %]
+        [% Hook.process('warn_safe') %]
+      </ul>
+    </div>
+
+    [% IF accept_deletion %]
+      <p class="areyoureallyreallysure">
+        Var medveten om konsekvenserna innan du fortsätter.
+      </p>
+      <p>Vill du verkligen ta bort användarkontot?</p>
+
+      <form method="post" action="editusers.cgi">
+        <p>
+          <input type="submit" id="delete" value="Ja, ta bort">
+          <input type="hidden" name="action" value="delete">
+          <input type="hidden" name="userid" value="[% otheruser.id %]">
+          <input type="hidden" name="token" value="[% token FILTER html %]">
+          [% INCLUDE listselectionhiddenfields %]
+        </p>
+      </form>
+      <p>Om du inte vill ta bort användarkontot nu,
+    [% ELSE %]
+      <p><b>Du kan inte ta bort användarkontot</b> på grund av osäkra åtgärder ovan. Du kan
+    [% END %]
+
+  [% END %]
+[% END %]
+
+  <a href="editusers.cgi?action=edit&amp;userid=[% otheruser.id %]
+           [% INCLUDE listselectionurlparams %]">redigera användaren</a>,
+  gå
+ <a href="editusers.cgi?action=list[% INCLUDE listselectionurlparams %]">tillbaka
+  till användarlistan</a>,
+  [% IF editusers %]
+    <a href="editusers.cgi?action=add[% INCLUDE listselectionurlparams %]">lägg till
+    en ny användare</a>,
+  [% END %]
+  eller <a href="editusers.cgi">hitta andra användare</a>.
+</p>
+
+[% PROCESS global/footer.html.tmpl %]

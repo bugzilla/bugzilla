@@ -1,0 +1,23 @@
+[%# This Source Code Form is subject to the terms of the Mozilla Public
+  # License, v. 2.0. If a copy of the MPL was not distributed with this
+  # file, You can obtain one at http://mozilla.org/MPL/2.0/.
+  #
+  # This Source Code Form is "Incompatible With Secondary Licenses", as
+  # defined by the Mozilla Public License, v. 2.0.
+  #%]
+[%
+   title = "Policyer för ändring av $terms.Bug"
+   desc = "Ställ in policyer för ändringar av $terms.bug"
+%]
+
+[% accept_status = display_value('bug_status', 'IN_PROGRESS') FILTER html %]
+
+[% param_descs = {
+  duplicate_or_move_bug_status => "När $terms.abug markeras som dubblett eller flyttas till en annan installation används den här statusen.",
+  letsubmitterchoosepriority => "Om alternativet är aktiverat kan den som registrerar $terms.bugs välja första prioritet för ${terms.bug}. Annars får alla $terms.bugs standardprioriteten nedan.",
+  letsubmitterchoosemilestone => "Om alternativet är aktiverat kan den som registrerar $terms.bugs välja målversion för ${terms.bug}. Annars får alla $terms.bugs produktens standardmålversion.",
+  musthavemilestoneonaccept => "Om du använder ${field_descs.target_milestone}, ska målversion krävas för att en användare ska kunna ändra status för ${terms.abug} till ${accept_status}?",
+  commentonchange_resolution => "Om alternativet är aktiverat måste användaren skriva en kort kommentar när lösningen för $terms.bug ändras.",
+  commentonduplicate => "Om alternativet är aktiverat måste användaren skriva en kort kommentar när $terms.bug markeras som dubblett.",
+  noresolveonopenblockers => "Tillåt inte att $terms.bugs markeras som lösta om de har olösta beroenden." }
+%]

@@ -1,0 +1,26 @@
+[%# This Source Code Form is subject to the terms of the Mozilla Public
+  # License, v. 2.0. If a copy of the MPL was not distributed with this
+  # file, You can obtain one at http://mozilla.org/MPL/2.0/.
+  #
+  # This Source Code Form is "Incompatible With Secondary Licenses", as
+  # defined by the Mozilla Public License, v. 2.0.
+  #%]
+
+[% PROCESS global/header.html.tmpl title = "Systemkontroll"
+                                   style_urls = ['skins/standard/admin.css'] %]
+
+<div>
+  <p>
+    [% terms.Bugzilla %] kontrollerar databasens referensintegritet.
+    Det kan ta flera minuter.
+  </p>
+
+  <p>
+    Eventuella fel <span class="alert">markeras så här</span>.
+    Beroende på vilka fel som hittas visas länkar som gör det enkelt att
+    åtgärda dem. När ett fel åtgärdas körs skriptet automatiskt igen, så
+    kontrollen kan ta längre tid än första körningen.
+  </p>
+</div>
+
+<hr>

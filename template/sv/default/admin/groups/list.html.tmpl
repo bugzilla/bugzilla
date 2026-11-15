@@ -1,0 +1,143 @@
+[%# This Source Code Form is subject to the terms of the Mozilla Public
+  # License, v. 2.0. If a copy of the MPL was not distributed with this
+  # file, You can obtain one at http://mozilla.org/MPL/2.0/.
+  #
+  # This Source Code Form is "Incompatible With Secondary Licenses", as
+  # defined by the Mozilla Public License, v. 2.0.
+  #%]
+
+[% PROCESS global/header.html.tmpl
+  title = "Redigera grupper"
+  subheader = "Här redigerar du de grupper som användare kan tillhöra."
+  style_urls = ['skins/standard/admin.css']
+  doc_section = "administering/groups.html"
+%]
+
+[% edit_contentlink = "editgroups.cgi?action=changeform&amp;group=%%id%%" %]
+[% del_contentlink = "editgroups.cgi?action=del&amp;group=%%id%%" %]
+
+[% columns =
+  [{name               => 'name'
+    heading            => 'Namn'
+    contentlink        => edit_contentlink
+   }
+   {name               => 'description'
+    heading            => 'Beskrivning'
+    allow_html_content => 1
+   }
+   {name               => 'userregexp'
+    heading            => 'Reguljärt uttryck för användare'
+   }
+   {name               => 'is_active_bug_group'
+    heading            => "Använd för $terms.Bugs"
+    class              => 'center'
+   }
+   {name               => 'type'
+    heading            => 'Typ'
+    class              => 'center'
+   }
+   {name               => 'action'
+    heading            => 'Åtgärd'
+   }
+  ]
+%]
+
+[% overrides.is_active_bug_group = {
+     'is_active_bug_group' => {
+       "0" => {
+          override_content => 1
+          content => "&nbsp;"
+       }
+       "1" => {
+          override_content => 1
+          content => "X"
+       }
+     }
+   }
+
+   overrides.userregexp = {
+     'userregexp' => {
+       "" => {
+         override_content => 1
+         content => "&nbsp;"
+       }
+     }
+   }
+%]
+
+[% FOREACH group IN ["chartgroup", "comment_taggers_group", "debug_group",
+                     "insidergroup", "querysharegroup", "timetrackinggroup"] %]
+  [% special_group = Param(group) %]
+
+  [% IF special_group %]
+    [% overrides.action.name.${special_group} = {
+         override_content => 1
+         content => "(används som ”$group”)"
+       }
+    %]
+  [% END %]
+[% END %]
+
+[% overrides.action.isbuggroup = {
+     "1" => {
+         override_content => 1
+         content => "Ta bort"
+         override_contentlink => 1
+         contentlink => del_contentlink
+     }
+   }
+
+   overrides.type.isbuggroup = {
+     "0" => {
+         override_content => 1
+         content => "system"
+     }
+     "1" => {
+         override_content => 1
+         content => "användare"
+     }
+   }
+%]
+
+[% PROCESS admin/table.html.tmpl
+  columns = columns
+  data    = groups
+  overrides = overrides
+%]
+
+<p><a href="editgroups.cgi?action=add">Lägg till grupp</a></p>
+
+<p>
+  <b>Namn</b> används med funktionen B<!-- blah -->ugzilla->user->in_group() i
+  anpassade CGI-filer som använder en viss grupp. Det kan också användas av
+  personer som skickar in [% terms.bugs %] via e-post för att begränsa
+  [% terms.abug %] till en viss uppsättning grupper.
+</p>
+
+<p>
+  <b>Beskrivning</b> visas i [% terms.bug %]-rapporter för gruppens medlemmar,
+  där de kan välja om [% terms.bug %] ska begränsas till andra i samma grupp.
+</p>
+
+<p>
+  <b>Reguljärt uttryck för användare</b> är valfritt. Om det fylls i beviljas
+  medlemskap i gruppen automatiskt till alla vars e-postadress matchar det
+  reguljära Perl-uttrycket. Glöm inte avslutande ”$”. Exempel:
+  ”@mycompany\.com$”
+</p>
+
+<p>
+  Flaggan <b>Använd för [% terms.Bugs %]</b> avgör om gruppen kan användas för
+  [% terms.bugs %]. Om du avmarkerar den kan användare inte längre lägga till
+  [% terms.bugs %] i gruppen, men [% terms.bugs %] som redan ingår i gruppen
+  finns kvar. Det är ett betydligt mindre drastiskt sätt att hindra gruppen
+  från att växa än att ta bort den, och låter dig samtidigt behålla
+  användarlistor utan att belamra listorna över grupper som används för att
+  begränsa [% terms.bug %].
+</p>
+
+<p>
+  Fältet <b>Typ</b> identifierar systemgrupper.
+</p>
+
+[% PROCESS global/footer.html.tmpl %]

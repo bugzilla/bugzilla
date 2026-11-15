@@ -1,0 +1,125 @@
+[%# This Source Code Form is subject to the terms of the Mozilla Public
+  # License, v. 2.0. If a copy of the MPL was not distributed with this
+  # file, You can obtain one at http://mozilla.org/MPL/2.0/.
+  #
+  # This Source Code Form is "Incompatible With Secondary Licenses", as
+  # defined by the Mozilla Public License, v. 2.0.
+  #%]
+
+[% title = BLOCK %]Välj komponent för produkten
+                   ”[% product.name FILTER html %]”[% END %]
+[% PROCESS global/header.html.tmpl
+  title = title
+  style_urls = ['skins/standard/admin.css']
+%]
+
+[% edit_contentlink = BLOCK %]editcomponents.cgi?action=edit&amp;product=
+  [%- product.name FILTER uri %]&amp;component=%%name%%[% END %]
+[% delete_contentlink = BLOCK %]editcomponents.cgi?action=del&amp;product=
+  [%- product.name FILTER uri %]&amp;component=%%name%%[% END %]
+[% bug_count_contentlink = BLOCK %]buglist.cgi?component=%%name%%&amp;product=
+  [%- product.name FILTER uri %][% END %]
+
+[% columns = [
+     {
+       name => "name"
+       heading => "Redigera komponent ..."
+       contentlink => edit_contentlink
+     },
+     {
+       name => "description"
+       heading => "Beskrivning"
+       allow_html_content => 1
+     },
+     {
+       name => "initialowner"
+       heading => "Standardtilldelad"
+     },
+   ]
+%]
+
+[% IF Param('useqacontact') %]
+
+  [% columns.push({
+       name => 'initialqacontact'
+       heading => 'Standard-QA-kontakt'
+     }) %]
+
+[% END %]
+
+[% columns.push({
+     name => "initial_cc_names"
+     heading => "Standard-CC-lista"
+   },
+   {
+     name => "isactive"
+     heading => "Aktiv"
+     yesno_field => 1
+   }) %]
+
+[% IF showbugcounts %]
+
+  [% columns.push({
+       name => 'bug_count'
+       heading => "$terms.Bugs"
+       class => "right"
+       contentlink => bug_count_contentlink
+     }) %]
+
+[% END %]
+
+[% columns.push({
+     heading => "Åtgärd"
+     content => "Ta bort"
+     contentlink => delete_contentlink
+   }) %]
+
+[% overrides.initialowner = {} %]
+[% overrides.initialqacontact = {} %]
+[% overrides.initial_cc_names = {} %]
+
+[% FOREACH my_component = product.components %]
+  [% overrides.initialowner.name.${my_component.name} = {
+       override_content => 1
+       content => my_component.default_assignee.login
+     }
+  %]
+  [% overrides.initialqacontact.name.${my_component.name} = {
+       override_content => 1
+       content => my_component.default_qa_contact.login
+     }
+  %]
+  [% SET initial_cc_list = [] %]
+  [% FOREACH cc_user = my_component.initial_cc %]
+    [% initial_cc_list.push(cc_user.login) %]
+  [% END %]
+  [% overrides.initial_cc_names.name.${my_component.name} = {
+       override_content => 1
+       content => initial_cc_list.join(', ')
+     }
+  %]
+[% END %]
+
+[% Hook.process('before_table') %]
+
+[% PROCESS admin/table.html.tmpl
+     columns = columns
+     data = product.components
+     overrides = overrides
+%]
+
+<p><a href="editcomponents.cgi?action=add&amp;product=[% product.name FILTER uri %]">Lägg till</a>
+    en ny komponent i produkten ”[% product.name FILTER html %]”</p>
+
+[% IF ! showbugcounts %]
+
+  <p><a href="editcomponents.cgi?product=[% product.name FILTER uri %]&amp;showbugcounts=1">
+      Visa tabellen igen med antal [% terms.bugs %] (långsammare)</a></p>
+
+[% END %]
+
+[% PROCESS admin/components/footer.html.tmpl
+  no_edit_other_components_link = 1
+ %]
+
+[% PROCESS global/footer.html.tmpl %]

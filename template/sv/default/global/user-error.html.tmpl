@@ -630,113 +630,113 @@
     fältet ”[% field.description FILTER html %]”.
 
   [% ELSIF error == "fieldvalue_reserved_word" %]
-    [% title = "Reserved Word Not Allowed" %]
-    You cannot use the value '[% value FILTER html %]' for the
-    '[% field.description FILTER html %]' field. This value is used internally.
-    Please choose another one.
+    [% title = "Reserverat ord är inte tillåtet" %]
+    Du kan inte använda värdet ”[% value FILTER html %]” för
+    fältet ”[% field.description FILTER html %]”. Värdet används internt.
+    Välj ett annat.
 
   [% ELSIF error == "fieldvalue_sortkey_invalid" %]
-    [% title = "Invalid Field Value Sortkey" %]
-    The sortkey '[% sortkey FILTER html %]' for the
-    [%+ field.description FILTER html %] field must be an integer
-    between 0 and [% constants.MAX_SMALLINT FILTER none %].
+    [% title = "Ogiltig sorteringsnyckel för fältvärde" %]
+    Sorteringsnyckeln ”[% sortkey FILTER html %]” för
+    fältet [%+ field.description FILTER html %] måste vara ett heltal
+    mellan 0 och [% constants.MAX_SMALLINT FILTER none %].
 
   [% ELSIF error == "fieldvalue_still_has_bugs" %]
-    [% title = "You Cannot Delete This Field Value" %]
-    You cannot delete the value '[% value.name FILTER html %]' from the 
-    [%+ field.description FILTER html %] field, because there are still
-    [%+ value.bug_count FILTER html %] [%+ terms.bugs %] using it.
+    [% title = "Du kan inte ta bort detta fältvärde" %]
+    Du kan inte ta bort värdet ”[% value.name FILTER html %]” från
+    fältet [%+ field.description FILTER html %], eftersom det fortfarande används av
+    [%+ value.bug_count FILTER html %] [%+ terms.bugs %].
 
   [% ELSIF error == "fieldvalue_undefined" %]
-    [% title = "Undefined Value Not Allowed" %]
-    You must specify a value.
+    [% title = "Odefinierat värde är inte tillåtet" %]
+    Du måste ange ett värde.
 
   [% ELSIF error == "file_not_specified" %]
-    [% title = "No File Specified" %]
-    You did not specify a file to attach.
+    [% title = "Ingen fil har angetts" %]
+    Du angav ingen fil att bifoga.
 
   [% ELSIF error == "filename_not_specified" %]
-    [% title = "No Filename Specified" %]
-    You must specify a filename for this attachment.
+    [% title = "Inget filnamn har angetts" %]
+    Du måste ange ett filnamn för bilagan.
 
   [% ELSIF error == "file_too_large" %]
-    [% title = "File Too Large" %]
+    [% title = "Filen är för stor" %]
     [%# Convert maxlocalattachment from Mb to Kb %]
     [% max_local = Param('maxlocalattachment') * 1024 %]
     [% max_limit = [Param('maxattachmentsize'), max_local] %]
-    The file you are trying to attach is [% filesize FILTER html %] 
-    kilobytes (KB) in size. Attachments cannot be more than
+    Filen du försöker bifoga är [% filesize FILTER html %]
+    kilobyte (KB) stor. Bilagor får inte vara större än
     [%# Hack to get the max value between both limits %]
     [%+ max_limit.nsort.last FILTER html %] KB. <br>
-    We recommend that you store your attachment elsewhere
-    and then paste the URL to this file on the attachment
-    creation page in the appropriate text field, which you can access by
-    clicking the "paste text as attachment" link.
-    <br>Alternately, if your attachment is an image, you could convert
-    it to a compressible format like JPG or PNG and try again.
+    Vi rekommenderar att du lagrar bilagan någon annanstans
+    och sedan klistrar in URL:en till filen i lämpligt textfält på
+    sidan för att skapa bilagor. Fältet öppnas genom att klicka på
+    länken ”klistra in text som bilaga”.
+    <br>Om bilagan är en bild kan du också konvertera den till ett
+    komprimerbart format som JPG eller PNG och försöka igen.
 
   [% ELSIF error == "flag_type_requestee_disabled" %]
-    [% title = "Flag not Requestable from Specific Person" %]
-    You can't ask a specific person for <em>[% type.name FILTER html %]</em>.
+    [% title = "Flaggan kan inte begäras från en viss person" %]
+    Du kan inte begära <em>[% type.name FILTER html %]</em> från en viss person.
 
   [% ELSIF error == "flag_requestee_disabled" %]
-    [% title = "Flag Requestee Disabled" %]
-    You can't ask <em>[% requestee.identity FILTER html %]</em> because that
-    account is disabled.
+    [% title = "Den begärda flaggmottagaren är inaktiverad" %]
+    Du kan inte fråga <em>[% requestee.identity FILTER html %]</em> eftersom
+    kontot är inaktiverat.
 
   [% ELSIF error == "flag_requestee_needs_privs" %]
-    [% title = "Flag Requestee Needs Privileges" %]
-    [% requestee.identity FILTER html %] does not have permission to set the
-    <em>[% flagtype.name FILTER html %]</em> flag. Please select a user who is
-    a member of the <em>[% flagtype.grant_group.name FILTER html %]</em> group.
+    [% title = "Flaggmottagaren behöver behörighet" %]
+    [% requestee.identity FILTER html %] har inte behörighet att ange
+    flaggan <em>[% flagtype.name FILTER html %]</em>. Välj en användare som är
+    medlem i gruppen <em>[% flagtype.grant_group.name FILTER html %]</em>.
 
   [% ELSIF error == "flag_requestee_unauthorized" %]
-    [% title = "Flag Requestee Not Authorized" %]
+    [% title = "Flaggmottagaren saknar behörighet" %]
     [% admindocslinks = {'flags.html' => 'Administering Flags',
                          'categorization.html#assigning-group-controls-to-products' => 'Group Security'} %]
     [% docslinks = {'using/understanding.html#flags' => 'Using Flags'} %]
 
-    You asked [% requestee.identity FILTER html %]
-    for <code>[% flag_type.name FILTER html %]</code> on [% terms.bug %] 
+    Du bad [% requestee.identity FILTER html %]
+    om <code>[% flag_type.name FILTER html %]</code> för [% terms.bug %]
     [%+ bug_id FILTER html -%]
-    [% IF attach_id && attach_id > 0 %], attachment [% attach_id FILTER html %][% END %],
-    but that [% terms.bug %] has been restricted to users in certain groups, 
-    and the user you asked isn't in all the groups to which 
-    the [% terms.bug %] has been restricted.
-    Please choose someone else to ask, or make the [% terms.bug %] accessible
-    to users on its CC: list and add that user to the list.
+    [% IF attach_id && attach_id > 0 %], bilaga [% attach_id FILTER html %][% END %],
+    men [% terms.bug %] har begränsats till användare i vissa grupper,
+    och användaren du frågade finns inte i alla grupper som
+    [% terms.bug %] har begränsats till.
+    Välj någon annan att fråga, eller ge användare på [% terms.bug %]s CC-lista
+    åtkomst och lägg till användaren i listan.
 
   [% ELSIF error == "flag_requestee_unauthorized_attachment" %]
-    [% title = "Flag Requestee Not Authorized" %]
+    [% title = "Flaggmottagaren saknar behörighet" %]
     [% admindocslinks = {'flags.html' => 'Administering Flags',
                          'categorization.html#assigning-group-controls-to-products' => 'Group Security'} %]
     [% docslinks = {'using/understanding.html#flags' => 'Using Flags'} %]
 
-    You asked [% requestee.identity FILTER html %]
-    for <code>[% flag_type.name FILTER html %]</code> on 
+    Du bad [% requestee.identity FILTER html %]
+    om <code>[% flag_type.name FILTER html %]</code> för
     [%+ terms.bug %] [%+ bug_id FILTER html %],
-    attachment [% attach_id FILTER html %], but that attachment
-    is restricted to users in the [% Param("insidergroup") FILTER html %] group,
-    and the user you asked isn't in that group.  Please choose someone else
-    to ask, or ask an administrator to add the user to the group.
+    bilaga [% attach_id FILTER html %], men bilagan
+    är begränsad till användare i gruppen [% Param("insidergroup") FILTER html %],
+    och användaren du frågade är inte med i gruppen. Välj någon annan
+    att fråga eller be en administratör att lägga till användaren i gruppen.
 
   [% ELSIF error == "flag_status_invalid" %]
-    [% title = "Flag Status Invalid" %]
-    The flag status <em>[% status FILTER html %]</em>
+    [% title = "Ogiltig flaggstatus" %]
+    Flaggstatusen <em>[% status FILTER html %]</em>
     [% IF id %]
-      for flag ID #[% id FILTER html %]
+      för flagg-ID #[% id FILTER html %]
     [% END %]
-    is invalid.
+    är ogiltig.
 
   [% ELSIF error == "flag_type_cannot_deactivate" %]
-    [% title = "Cannot Deactivate Flag Type" %]
-    Sorry, but the flag type '[% flagtype.name FILTER html %]' also applies to some
-    products you cannot see, and so you are not allowed to deactivate it.
+    [% title = "Flaggtypen kan inte inaktiveras" %]
+    Flaggtypen ”[% flagtype.name FILTER html %]” gäller även vissa
+    produkter som du inte kan se och därför får du inte inaktivera den.
 
   [% ELSIF error == "flag_type_cannot_delete" %]
-    [% title = "Flag Type Deletion Not Allowed" %]
-    Sorry, but the flag type '[% flagtype.name FILTER html %]' also applies to some
-    products you cannot see, and so you are not allowed to delete it.
+    [% title = "Flaggtypen får inte tas bort" %]
+    Flaggtypen ”[% flagtype.name FILTER html %]” gäller även vissa
+    produkter som du inte kan se och därför får du inte ta bort den.
 
   [% ELSIF error == "flag_type_cc_list_invalid" %]
     [% title = "Flag Type CC List Invalid" %]

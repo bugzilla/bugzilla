@@ -1,0 +1,52 @@
+[%# This Source Code Form is subject to the terms of the Mozilla Public
+  # License, v. 2.0. If a copy of the MPL was not distributed with this
+  # file, You can obtain one at http://mozilla.org/MPL/2.0/.
+  #
+  # This Source Code Form is "Incompatible With Secondary Licenses", as
+  # defined by the Mozilla Public License, v. 2.0.
+  #%]
+
+[% DEFAULT width = 600
+           height = 350
+%]
+
+[% time = time FILTER time('%Y-%m-%d %H:%M:%S') FILTER html %]
+
+[% PROCESS global/header.html.tmpl
+  title = "Diagram"
+  header_addl_info = time
+%]
+
+<div class="center">
+
+  [% imageurl = BLOCK %]chart.cgi?
+    [% imagebase FILTER html %]&amp;ctype=png&amp;action=plot&amp;width=
+    [% width %]&amp;height=[% height -%]
+  [% END %]
+
+  <img alt="Resultat av grafisk rapport" src="[% imageurl %]"
+    width="[% width %]" height="[% height %]">
+  <p>
+    [% sizeurl = BLOCK %]chart.cgi?
+      [% imagebase FILTER html %]&amp;action=wrap
+    [% END %]
+    <a href="[% sizeurl %]&amp;width=[% width %]&amp;height=
+             [% height + 100 %]">Högre</a><br>
+    <a href="[% sizeurl %]&amp;width=[% width - 100 %]&amp;height=
+             [% height %]">Smalare</a> |
+    <a href="[% sizeurl %]&amp;width=[% width + 100 %]&amp;height=
+             [% height %]">Bredare</a>&nbsp;&nbsp;&nbsp;&nbsp;<br>
+    <a href="[% sizeurl %]&amp;width=[% width %]&amp;height=
+             [% height - 100 %]">Lägre</a><br>
+  </p>
+
+  <p>
+    <a href="chart.cgi?
+      [% imagebase FILTER html %]&amp;ctype=csv&amp;action=plot">CSV</a> |
+    <a href="chart.cgi?[% imagebase FILTER html %]&amp;action=assemble">Redigera
+    det här diagrammet</a>
+  </p>
+
+</div>
+
+[% PROCESS global/footer.html.tmpl %]

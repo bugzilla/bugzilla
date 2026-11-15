@@ -1,0 +1,35 @@
+[%# This Source Code Form is subject to the terms of the Mozilla Public
+  # License, v. 2.0. If a copy of the MPL was not distributed with this
+  # file, You can obtain one at http://mozilla.org/MPL/2.0/.
+  #
+  # This Source Code Form is "Incompatible With Secondary Licenses", as
+  # defined by the Mozilla Public License, v. 2.0.
+  #%]
+
+[% SET comment_body = comment.body %]
+
+[% IF comment.type == constants.CMT_DUPE_OF %]
+X[% comment_body %]
+
+*** Detta [% terms.bug %] har markerats som en dubblett av [% terms.bug %] [%+ comment.extra_data %] ***
+[% ELSIF comment.type == constants.CMT_HAS_DUPE %]
+*** [% terms.Bug %] [%+ comment.extra_data %] har markerats som en dubblett av detta [% terms.bug %]. ***
+[% ELSIF comment.type == constants.CMT_ATTACHMENT_CREATED %]
+Bilaga [% comment.extra_data %] har skapats
+[% IF is_bugmail %]
+  --> [% urlbase _ "attachment.cgi?id=" _ comment.extra_data _ "&action=edit" %]
+[% END %]
+[%+ comment.attachment.description %]
+
+[%+ comment.body %]
+[% ELSIF comment.type == constants.CMT_ATTACHMENT_UPDATED %]
+Kommentar om bilaga [% comment.extra_data %]
+[% IF is_bugmail %]
+  --> [% urlbase _ "attachment.cgi?id=" _ comment.extra_data %]
+[% END %]
+[%+ comment.attachment.description %]
+
+[%+ comment.body %]
+[% ELSE %]
+X[% Hook.process('type') %]
+[% END %]

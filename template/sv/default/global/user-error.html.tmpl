@@ -1104,120 +1104,119 @@
     [% END %]
 
   [% ELSIF error == "invalid_cookies_or_token" %]
-    [% title = "Invalid Cookies or Token" %]
-    The cookies or token provide were not valid or have expired.
-    You may login again to get new cookies or a new token.
+    [% title = "Ogiltiga eller utgångna kakor eller token" %]
+    Kakorna eller tokenet som angavs var inte giltiga eller har gått ut.
+    Du kan logga in igen för att få nya kakor eller ett nytt token.
 
   [% ELSIF error == "json_rpc_get_method_required" %]
-    When using JSON-RPC over GET, you must specify a 'method'
-    parameter. See the documentation at
+    När JSON-RPC används över GET måste du ange parametern ”method”.
+    Se dokumentationen på
     [%+ docs_urlbase FILTER html %]api/Bugzilla/WebService/Server/JSONRPC.html
 
   [% ELSIF error == "json_rpc_illegal_content_type" %]
-    When using JSON-RPC over POST, you cannot send data as
-    [%+ content_type FILTER html %]. Only application/json and
-    application/json-rpc are allowed.
+    När JSON-RPC används över POST kan du inte skicka data som
+    [%+ content_type FILTER html %]. Endast application/json och
+    application/json-rpc tillåts.
 
   [% ELSIF error == "json_rpc_invalid_params" %]
-    Could not parse the 'params' argument as valid JSON.
-    Error: [% err_msg FILTER html %]
-    Value: [% params FILTER html %]
+    Argumentet ”params” kunde inte tolkas som giltig JSON.
+    Fel: [% err_msg FILTER html %]
+    Värde: [% params FILTER html %]
 
   [% ELSIF error == "json_rpc_invalid_callback" %]
-    You cannot use '[% callback FILTER html %]' as your 'callback' parameter.
-    For security reasons, only letters, numbers, and the following
-    characters are allowed in the 'callback' parameter: <code>[]._</code>
+    Du kan inte använda ”[% callback FILTER html %]” som parametern ”callback”.
+    Av säkerhetsskäl är endast bokstäver, siffror och följande tecken
+    tillåtna i parametern ”callback”: <code>[]._</code>
 
   [% ELSIF error == "json_rpc_post_only" %]
-    For security reasons, you must use HTTP POST to call the
-    '[% method FILTER html %]' method.
+    Av säkerhetsskäl måste du använda HTTP POST för att anropa
+    metoden ”[% method FILTER html %]”.
 
   [% ELSIF error == "rest_invalid_resource" %]
-    A REST API resource was not found for '[% method FILTER html +%] [%+ path FILTER html %]'.
+    Ingen REST API-resurs hittades för ”[% method FILTER html +%] [%+ path FILTER html %]”.
 
   [% ELSIF error == "get_products_invalid_type" %]
-    The product type '[% type FILTER html %]' is invalid. Valid choices
-    are 'accessible', 'selectable', and 'enterable'.
+    Produkttypen ”[% type FILTER html %]” är ogiltig. Giltiga val är
+    ”accessible”, ”selectable” och ”enterable”.
 
   [% ELSIF error == "keyword_already_exists" %]
-    [% title = "Keyword Already Exists" %]
-    A keyword with the name [% name FILTER html %] already exists.
+    [% title = "Nyckelordet finns redan" %]
+    Ett nyckelord med namnet [% name FILTER html %] finns redan.
 
   [% ELSIF error == "keyword_blank_description" %]
-    [% title = "Blank Keyword Description Not Allowed" %]
-    You must enter a non-blank description for the keyword.
+    [% title = "Tom nyckelordsbeskrivning är inte tillåten" %]
+    Du måste ange en beskrivning för nyckelordet.
      
   [% ELSIF error == "keyword_blank_name" %]
-    [% title = "Blank Keyword Name Not Allowed" %]
-    You must enter a non-blank name for the keyword.
+    [% title = "Tomt nyckelordsnamn är inte tillåtet" %]
+    Du måste ange ett namn för nyckelordet.
      
   [% ELSIF error == "keyword_invalid_name" %]
-    [% title = "Invalid Keyword Name" %]
-    You may not use commas or whitespace in a keyword name.
+    [% title = "Ogiltigt nyckelordsnamn" %]
+    Du får inte använda kommatecken eller mellanslag i ett nyckelordsnamn.
      
   [% ELSIF error == "login_needed_for_password_change" %]
-    [% title = "Login Name Required" %]
-    You must enter a login name when requesting to change your password.
+    [% title = "Inloggningsnamn krävs" %]
+    Du måste ange ett inloggningsnamn när du begär att få ändra lösenordet.
 
   [% ELSIF error == "login_required_for_pronoun" %]
-    [% title = "Login Name Required" %]
-    You can't use %user% without being logged in, because %user% refers
-    to your login name, which we don't know.
+    [% title = "Inloggningsnamn krävs" %]
+    Du kan inte använda %user% utan att vara inloggad, eftersom %user% syftar
+    på ditt inloggningsnamn, som vi inte känner till.
 
   [% ELSIF error == "login_required" %]
     [%# Used for non-web-based LOGIN_REQUIRED situations. %]
-    You must log in before using this part of [% terms.Bugzilla %].
+    Du måste logga in innan du kan använda den här delen av [% terms.Bugzilla %].
 
   [% ELSIF error == "migrate_config_created" %]
-    The file <kbd>[% file FILTER html %]</kbd> contains configuration
-    variables that must be set before continuing with the migration.
+    Filen <kbd>[% file FILTER html %]</kbd> innehåller konfigurationsvariabler
+    som måste anges innan migreringen kan fortsätta.
 
   [% ELSIF error == "migrate_from_invalid" %]
-    '[% from FILTER html %]' is not a valid type of [% terms.bug %]-tracker
-    to migrate from. See the contents of the <kbd>Bugzilla/Migrate/</kbd>
-    directory for a list of valid [% terms.bug %]-trackers.
+    ”[% from FILTER html %]” är inte en giltig typ av [% terms.bug %]-spårare
+    att migrera från. I katalogen <kbd>Bugzilla/Migrate/</kbd> finns en lista
+    över giltiga [% terms.bug %]-spårare.
 
   [% ELSIF error == "milestone_already_exists" %]
-    [% title = "Milestone Already Exists" %]
-    [% admindocslinks = {'categorization.html#products'   => 'Administering products',
-                         'categorization.html#milestones' => 'About Milestones'} %]
-    The milestone '[% name FILTER html %]' already exists for product '
-    [%- product FILTER html %]'.
+    [% title = "Milstolpen finns redan" %]
+    [% admindocslinks = {'categorization.html#products'   => 'Administrera produkter',
+                         'categorization.html#milestones' => 'Om milstolpar'} %]
+    Milstolpen ”[% name FILTER html %]” finns redan för produkten ”
+    [%- product FILTER html %]”.
 
   [% ELSIF error == "milestone_blank_name" %]
-    [% title = "Blank Milestone Name Not Allowed" %]
-    You must enter a name for this milestone.
+    [% title = "Tomt milstolpsnamn är inte tillåtet" %]
+    Du måste ange ett namn för milstolpen.
 
   [% ELSIF error == "milestone_is_default" %]
-    [% title = "Default milestone not deletable" %]
-    [% admindocslinks = {'categorization.html#products'   => 'Administering products',
-                         'categorization.html#milestones' => 'About Milestones'} %]
-    Sorry, but [% milestone.name FILTER html %] is the default milestone
-    for the '[% milestone.product.name FILTER html %]' product, and so
-    it cannot be deleted.
+    [% title = "Standardmilstolpen kan inte tas bort" %]
+    [% admindocslinks = {'categorization.html#products'   => 'Administrera produkter',
+                         'categorization.html#milestones' => 'Om milstolpar'} %]
+    [% milestone.name FILTER html %] är standardmilstolpe för produkten
+    ”[% milestone.product.name FILTER html %]” och kan därför inte tas bort.
 
   [% ELSIF error == "milestone_name_too_long" %]
-    [% title = "Milestone Name Is Too Long" %]
-    The name of a milestone is limited to [% constants.MAX_MILESTONE_SIZE FILTER html %]
-    characters. '[% name FILTER html %]' is too long ([% name.length %] characters).
+    [% title = "Milstolpsnamnet är för långt" %]
+    Namnet på en milstolpe får vara högst [% constants.MAX_MILESTONE_SIZE FILTER html %]
+    tecken. ”[% name FILTER html %]” är för långt ([% name.length %] tecken).
 
   [% ELSIF error == "milestone_required" %]
-    [% title = "Milestone Required" %]
-    You must select a target milestone for [% terms.bug %]
+    [% title = "Milstolpe krävs" %]
+    Du måste välja en målmilstolpe för [% terms.bug %]
     [%+ bug.id FILTER html %]
-    if you are going to accept it.  Part of accepting 
-    [%+ terms.abug %] is giving an estimate of when it will be fixed.
+    om du ska acceptera den. En del av att acceptera
+    [%+ terms.abug %] är att uppskatta när den ska åtgärdas.
 
   [% ELSIF error == "milestone_sortkey_invalid" %]
-    [% title = "Invalid Milestone Sortkey" %]
-    The sortkey '[% sortkey FILTER html %]' is not in the range
+    [% title = "Ogiltig sorteringsnyckel för milstolpe" %]
+    Sorteringsnyckeln ”[% sortkey FILTER html %]” ligger inte inom intervallet
     [%+ constants.MIN_SMALLINT FILTER html %] &le; sortkey &le;
     [%+ constants.MAX_SMALLINT FILTER html %].
 
   [% ELSIF error == "misarranged_dates" %]
-    [% title = "Misarranged Dates" %]
-    Your start date ([% datefrom FILTER html %]) is after 
-    your end date ([% dateto FILTER html %]).
+    [% title = "Datumen är i fel ordning" %]
+    Startdatumet ([% datefrom FILTER html %]) ligger efter
+    slutdatumet ([% dateto FILTER html %]).
 
   [% ELSIF error == "mismatched_bug_ids_on_obsolete" %]
     Attachment [% attach_id FILTER html %] is attached to another [% terms.bug %],

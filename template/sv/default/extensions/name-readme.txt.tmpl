@@ -1,0 +1,24 @@
+[%# This Source Code Form is subject to the terms of the Mozilla Public
+  # License, v. 2.0. If a copy of the MPL was not distributed with this
+  # file, You can obtain one at http://mozilla.org/MPL/2.0/.
+  #
+  # This Source Code Form is "Incompatible With Secondary Licenses", as
+  # defined by the Mozilla Public License, v. 2.0.
+  #%]
+
+Vanliga mallar placeras i den här katalogen. Du kan läsa in dem i koden
+så här:
+
+use Bugzilla::Error;
+my $template = Bugzilla->template;
+$template->process('[% name FILTER lower %]/some-template.html.tmpl')
+  or ThrowTemplateError($template->error());
+
+Så här läser du in filen <kbd>some-template.html.tmpl</kbd> från den här
+katalogen.
+
+Tänk på att mallens fullständiga sökväg aldrig får kollidera med en mall
+som finns i Bugzilla eller i ett annat tillägg, eftersom din mall då kan
+åsidosätta den andra. Därför har katalogen '[% name FILTER lower %]' skapats
+åt dig, så att du kan lägga mallarna här och undvika kollisioner.
+

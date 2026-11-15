@@ -1,0 +1,89 @@
+[%# This Source Code Form is subject to the terms of the Mozilla Public
+  # License, v. 2.0. If a copy of the MPL was not distributed with this
+  # file, You can obtain one at http://mozilla.org/MPL/2.0/.
+  #
+  # This Source Code Form is "Incompatible With Secondary Licenses", as
+  # defined by the Mozilla Public License, v. 2.0.
+  #%]
+
+[% PROCESS global/header.html.tmpl
+   title = "Starta sudo-session"
+   generate_api_token = 1
+   style_urls = ['skins/standard/admin.css']
+   doc_section = "administering/users.html#impersonating-users"
+ %]
+
+[% DEFAULT target_login = "" %]
+
+<p>
+  Med Bugzillas <b>sudo</b>-funktion kan du tillfälligt agera som en annan
+  användare. Medan en sudo-session pågår utförs varje åtgärd som om du vore
+  inloggad som användaren du agerar som.
+</p>
+
+<p class="areyoureallyreallysure">
+  Detta är en mycket kraftfull funktion. Var mycket försiktig när du använder
+  den. Dina åtgärder kan loggas mer noggrant än vanligt.
+</p>
+
+<form action="relogin.cgi" method="POST">
+  <p>
+    Börja med att
+    [% IF Param('usemenuforusers') %]
+      välja
+    [% ELSE %]
+      ange inloggningsnamnet för
+    [% END %]
+    <label for="target_login">den <u>a</u>nvändare du vill agera som</label>:
+    [% INCLUDE global/userselect.html.tmpl
+       id => "target_login"
+       name => "target_login"
+       value => target_login_default
+       accesskey => "a"
+       size => 30
+       mandatory => 1
+    %]
+  </p>
+
+  [% IF !Param('usemenuforusers') %]
+    <p>
+      Användarnamnet måste anges exakt. Ingen matchning utförs.
+    </p>
+  [% END %]
+
+  <p>
+    Förklara sedan kort <label for="reason">varför du gör detta:<br>
+    <input type="text" id="reason" name="reason" size="80" maxlength="200"
+           value="[% reason_default FILTER html %]">
+  </p>
+
+  <p>
+    Meddelandet du anger här skickas med e-post till användaren du agerar som.
+    Du kan lämna fältet tomt, men användaren får ändå veta att du agerar som hen.
+  </p>
+
+  [% IF user.authorizer.can_login %]
+    <p>
+      Ange slutligen <label for="Bugzilla_password">ditt lösenord för
+      [% terms.Bugzilla %]</label>:
+      <input type="hidden" name="Bugzilla_login" value="[% user.login FILTER html %]">
+      <input type="password" id="Bugzilla_password" name="Bugzilla_password" size="20" required>
+      <input type="hidden" name="Bugzilla_login_token"
+             value="[% login_request_token FILTER html %]">
+      <br>
+      Detta görs av två skäl. För det första minskar det risken att någon
+      orsakar stor skada med ditt redan inloggade konto. För det andra tvingar
+      det dig att fundera över om du verkligen behöver använda funktionen.
+    </p>
+  [% END %]
+
+  <p>
+    Klicka på knappen för att starta sessionen:
+    <input type="submit" id="begin_sudo" value="Starta session">
+    <input type="hidden" name="action" value="begin-sudo">
+    <input type="hidden" name="token" value="[% token FILTER html %]">
+  </p>
+
+</form>
+
+[% PROCESS global/footer.html.tmpl %]

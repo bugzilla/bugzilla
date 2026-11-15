@@ -347,121 +347,121 @@
     The comment tagging is not enabled.
 
   [% ELSIF error == "comment_tag_invalid" %]
-    [% title = "Invalid Comment Tag" %]
-    The comment tag "[% tag FILTER html %]" contains invalid characters or
-    words.
+    [% title = "Ogiltig kommentaretikett" %]
+    Kommentaretiketten ”[% tag FILTER html %]” innehåller ogiltiga tecken eller
+    ord.
 
   [% ELSIF error == "comment_tag_too_long" %]
-    [% title = "Comment Tag Too Long" %]
-    Comment tags cannot be longer than
-    [%+ constants.MAX_COMMENT_TAG_LENGTH FILTER html %] characters.
+    [% title = "Kommentaretiketten är för lång" %]
+    Kommentaretiketter får inte vara längre än
+    [%+ constants.MAX_COMMENT_TAG_LENGTH FILTER html %] tecken.
 
   [% ELSIF error == "comment_tag_too_short" %]
-    [% title = "Comment Tag Too Short" %]
-    Comment tags must be at least
-    [%+ constants.MIN_COMMENT_TAG_LENGTH FILTER html %] characters.
+    [% title = "Kommentaretiketten är för kort" %]
+    Kommentaretiketter måste innehålla minst
+    [%+ constants.MIN_COMMENT_TAG_LENGTH FILTER html %] tecken.
 
   [% ELSIF error == "auth_classification_not_enabled" %]
-    [% title = "Classification Not Enabled" %]
-    Sorry, classification is not enabled.
+    [% title = "Klassificering är inte aktiverad" %]
+    Klassificering är inte aktiverad.
 
   [% ELSIF error == "classification_name_too_long" %]
-    [% title = "Classification Name Too Long" %]
-    The name of a classification is limited to [% constants.MAX_CLASSIFICATION_SIZE FILTER html %]
-    characters. '[% name FILTER html %]' is too long ([% name.length %] characters).
+    [% title = "Klassificeringsnamnet är för långt" %]
+    Namnet på en klassificering är begränsat till [% constants.MAX_CLASSIFICATION_SIZE FILTER html %]
+    tecken. ”[% name FILTER html %]” är för långt ([% name.length %] tecken).
 
 [% ELSIF error == "classification_not_specified" %]
-    [% title = "You Must Supply A Classification Name" %]
-    You must enter a classification name.
+    [% title = "Du måste ange ett klassificeringsnamn" %]
+    Du måste ange ett klassificeringsnamn.
 
   [% ELSIF error == "classification_already_exists" %]
-    [% title = "Classification Already Exists" %]
-    A classification with the name '[% name FILTER html %]' already exists.
+    [% title = "Klassificeringen finns redan" %]
+    En klassificering med namnet ”[% name FILTER html %]” finns redan.
 
   [% ELSIF error == "classification_invalid_sortkey" %]
-    [% title = "Invalid Sortkey for Classification" %]
-    The sortkey '[% sortkey FILTER html %]' is invalid. It must be an
-    integer between 0 and [% constants.MAX_SMALLINT FILTER html %].
+    [% title = "Ogiltig sorteringsnyckel för klassificering" %]
+    Sorteringsnyckeln ”[% sortkey FILTER html %]” är ogiltig. Den måste vara ett
+    heltal mellan 0 och [% constants.MAX_SMALLINT FILTER html %].
 
   [% ELSIF error == "classification_not_deletable" %]
-    [% title = "Default Classification Cannot Be Deleted" %]
-    You cannot delete the default classification
+    [% title = "Standardklassificeringen kan inte tas bort" %]
+    Du kan inte ta bort standardklassificeringen.
 
   [% ELSIF error == "classification_has_products" %]
-     Sorry, there are products for this classification. You
-     must reassign those products to another classification before you
-     can delete this one.
+     Det finns produkter för denna klassificering. Du
+     måste tilldela produkterna till en annan klassificering innan du
+     kan ta bort den här.
 
   [% ELSIF error == "component_already_exists" %]
-    [% title = "Component Already Exists" %]
-    The <em>[% product.name FILTER html %]</em> product already has
-    a component named <em>[% name FILTER html %]</em>.
+    [% title = "Komponenten finns redan" %]
+    Produkten <em>[% product.name FILTER html %]</em> har redan
+    en komponent med namnet <em>[% name FILTER html %]</em>.
 
   [% ELSIF error == "component_blank_description" %]
-    [% title = "Blank Component Description Not Allowed" %]
-    You must enter a non-blank description for this component.
+    [% title = "Komponentbeskrivningen får inte vara tom" %]
+    Du måste ange en beskrivning för komponenten.
 
   [% ELSIF error == "component_blank_name" %]
-    [% title = "Blank Component Name Not Allowed" %]
-    You must enter a name for this new component.
+    [% title = "Komponentnamnet får inte vara tomt" %]
+    Du måste ange ett namn för den nya komponenten.
 
   [% ELSIF error == "component_has_bugs" %]
-    [% title = BLOCK %]Component has [% terms.Bugs %][% END %]
-    There are [% nb FILTER html %] [%+ terms.bugs %] entered for this component!
-    You must reassign those [% terms.bugs %] to another component before you
-    can delete this one.
+    [% title = BLOCK %]Komponenten har [% terms.Bugs %][% END %]
+    Det finns [% nb FILTER html %] [%+ terms.bugs %] för denna komponent.
+    Du måste tilldela [% terms.bugs %] till en annan komponent innan du
+    kan ta bort den här.
 
   [% ELSIF error == "component_is_last" %]
-    [% title = BLOCK %]Last Component in this Product[% END %]
-    '[% comp.name FILTER html %]' is the last component of the
-    '[% comp.product.name FILTER html %]' product. You cannot delete it.
+    [% title = BLOCK %]Sista komponenten i produkten[% END %]
+    ”[% comp.name FILTER html %]” är den sista komponenten i
+    produkten ”[% comp.product.name FILTER html %]”. Du kan inte ta bort den.
 
   [% ELSIF error == "component_name_too_long" %]
-    [% title = "Component Name Is Too Long" %]
-    The name of a component is limited to [% constants.MAX_COMPONENT_SIZE FILTER html %]
-    characters. '[% name FILTER html %]' is too long ([% name.length %] characters).
+    [% title = "Komponentnamnet är för långt" %]
+    Namnet på en komponent är begränsat till [% constants.MAX_COMPONENT_SIZE FILTER html %]
+    tecken. ”[% name FILTER html %]” är för långt ([% name.length %] tecken).
 
   [% ELSIF error == "component_need_initialowner" %]
-    [% title = "Component Requires Default Assignee" %]
-    A default assignee is required for this component.
+    [% title = "Komponenten kräver en standardtilldelad" %]
+    Komponenten kräver en standardtilldelad.
 
   [% ELSIF error == "customfield_nonexistent" %]
-    [% title = "Unknown Custom Field" %]
-    There is no custom field with the name '[% name FILTER html %]'.
+    [% title = "Okänt anpassat fält" %]
+    Det finns inget anpassat fält med namnet ”[% name FILTER html %]”.
 
   [% ELSIF error == "customfield_not_obsolete" %]
-    [% title = "Custom Field Not Obsolete" %]
-    The custom field '[% name FILTER html %]' is not obsolete.
-    Please obsolete a custom field before attempting to delete it.
+    [% title = "Det anpassade fältet är inte föråldrat" %]
+    Det anpassade fältet ”[% name FILTER html %]” är inte föråldrat.
+    Markera ett anpassat fält som föråldrat innan du försöker ta bort det.
 
   [% ELSIF error == "customfield_has_activity" %]
-    [% title = "Custom Field Has Activity" %]
-    The custom field '[% name FILTER html %]' cannot be deleted because
-    it has recorded activity.
+    [% title = "Det anpassade fältet har aktivitet" %]
+    Det anpassade fältet ”[% name FILTER html %]” kan inte tas bort eftersom
+    det har registrerad aktivitet.
 
   [% ELSIF error == "customfield_has_contents" %]
-    [% title = "Custom Field Has Contents" %]
-    The custom field '[% name FILTER html %]' cannot be deleted because
-    at least one [% terms.bug %] has a non empty value for this field.
+    [% title = "Det anpassade fältet har innehåll" %]
+    Det anpassade fältet ”[% name FILTER html %]” kan inte tas bort eftersom
+    minst en [% terms.bug %] har ett värde i fältet.
 
   [% ELSIF error == "dependency_loop_multi" %]
-    [% title = "Dependency Loop Detected" %]
-    The following [% terms.bug %](s) would appear on both the "depends on"
-    and "blocks" parts of the dependency tree if these changes
-    are committed:
+    [% title = "Beroendeslinga upptäckt" %]
+    Följande [% terms.bug %] skulle visas i både delarna ”beror på”
+    och ”blockerar” av beroendeträdet om dessa ändringar
+    sparas:
     [% FOREACH dep = deps %]
       [%+ dep FILTER bug_link(dep) FILTER none %]
     [% END %].
-    This would create a circular dependency, which is not allowed.
+    Det skulle skapa ett cirkulärt beroende, vilket inte är tillåtet.
 
   [% ELSIF error == "dependency_loop_single" %]
-    [% title = "Dependency Loop Detected" %]
-    You can't make [% terms.abug %] block itself or depend on itself.
+    [% title = "Beroendeslinga upptäckt" %]
+    Du kan inte låta [% terms.abug %] blockera sig själv eller bero på sig själv.
 
   [% ELSIF error == "dupe_id_required" %]
-    [% title = "Duplicate $terms.Bug Id Required" %]
-    You must specify [% terms.abug %] id to mark this [% terms.bug %]
-    as a duplicate of.
+    [% title = "ID för dubblett-" _ terms.Bug _ " krävs" %]
+    Du måste ange ID:t för [% terms.abug %] för att markera denna [% terms.bug %]
+    som en dubblett.
 
   [% ELSIF error == "dupe_not_allowed" %]
     [% title = "Cannot mark $terms.bugs as duplicates" %]

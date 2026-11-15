@@ -1,0 +1,48 @@
+[%# This Source Code Form is subject to the terms of the Mozilla Public
+  # License, v. 2.0. If a copy of the MPL was not distributed with this
+  # file, You can obtain one at http://mozilla.org/MPL/2.0/.
+  #
+  # This Source Code Form is "Incompatible With Secondary Licenses", as
+  # defined by the Mozilla Public License, v. 2.0.
+  #%]
+
+[% PROCESS global/header.html.tmpl
+  title = "Välj klassificering"
+  style_urls = ['skins/standard/admin.css']
+%]
+
+[% columns = [
+     {
+       name => "name"
+       heading => "Redigera produkter i ..."
+       contentlink => 'editproducts.cgi?classification=%%name%%'
+     },
+     {
+       name => "description"
+       heading => "Beskrivning"
+       allow_html_content => 1
+     },
+     {
+       name => "product_count"
+       class => "right"
+       heading => "Antal produkter"
+     }
+   ]
+%]
+
+[% IF user.in_group('editcomponents') %]
+  [% columns.push({
+       heading => "Åtgärd ..."
+       content => "Lägg till produkt"
+       contentlink => 'editproducts.cgi?action=add&amp;classification=%%name%%' })
+  %]
+[% END %]
+
+[% Hook.process('before_table') %]
+
+[% PROCESS admin/table.html.tmpl
+     columns = columns
+     data = classifications
+%]
+
+[% PROCESS global/footer.html.tmpl %]

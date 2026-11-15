@@ -1,0 +1,51 @@
+[%# This Source Code Form is subject to the terms of the Mozilla Public
+  # License, v. 2.0. If a copy of the MPL was not distributed with this
+  # file, You can obtain one at http://mozilla.org/MPL/2.0/.
+  #
+  # This Source Code Form is "Incompatible With Secondary Licenses", as
+  # defined by the Mozilla Public License, v. 2.0.
+  #%]
+
+[% title = BLOCK %]
+  Bekräfta ändring av gruppstyrning för produkten '[%- product.name FILTER html %]'
+[% END %]
+
+[% PROCESS global/header.html.tmpl title = title %]
+
+[% FOREACH group = mandatory_groups %]
+  <p>
+    Gruppen '[% group.name FILTER html %]' berör
+    [% IF group.count == 1 %]
+       ett [%+ terms.bug %]
+    [% ELSE %]
+      [% group.count %] [%+ terms.bugs %]
+    [% END %]
+    där gruppen är obligatorisk och kommer att läggas till.
+  </p>
+[% END %]
+
+[% FOREACH group = na_groups %]
+  <p>
+    Gruppen '[% group.name FILTER html %]' berör
+    [% IF group.count == 1 %]
+       ett [%+ terms.bug %]
+    [% ELSE %]
+      [% group.count %] [%+ terms.bugs %]
+    [% END %]
+    där gruppen inte längre är tillämplig och kommer att tas bort.
+  </p>
+[% END %]
+
+<form action="editproducts.cgi" method="post" >
+  [% PROCESS "global/hidden-fields.html.tmpl" exclude="^Bugzilla_(login|password)$" %]
+  <p>
+    <br>
+    Klicka på "Fortsätt" för att genomföra ändringen, inklusive de ändringar
+    som anges ovan. Om du inte vill göra ändringarna använder du "Tillbaka" för
+    att återgå till föregående sida.
+  </p>
+  <input type="hidden" name="confirmed" value="confirmed">
+  <input type="submit" id="update" value="Fortsätt">
+</form>
+
+[% PROCESS global/footer.html.tmpl %]

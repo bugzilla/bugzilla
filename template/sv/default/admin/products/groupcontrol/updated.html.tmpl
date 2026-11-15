@@ -1,0 +1,49 @@
+[%# This Source Code Form is subject to the terms of the Mozilla Public
+  # License, v. 2.0. If a copy of the MPL was not distributed with this
+  # file, You can obtain one at http://mozilla.org/MPL/2.0/.
+  #
+  # This Source Code Form is "Incompatible With Secondary Licenses", as
+  # defined by the Mozilla Public License, v. 2.0.
+  #%]
+
+[% title = BLOCK %]
+    Uppdatera gruppstyrning för [% product.name FILTER html %]
+[% END %]
+
+[% PROCESS global/header.html.tmpl
+  title = title
+%]
+
+[% IF changes._group_controls.now_na.size %]
+  [% FOREACH g = changes._group_controls.now_na %]
+    <p>
+    Tar bort [% terms.bugs %] från gruppen '[% g.name FILTER html %]', som
+    inte längre är tillämplig på denna produkt.<br>
+    [% IF g.bug_count == 1 %]
+      Ett [% terms.bug %] togs bort.
+    [% ELSE %]
+      [% g.bug_count FILTER html %] [%+ terms.bugs %] togs bort.
+    [% END %]
+    </p>
+  [% END %]
+[% END %]
+
+[% IF changes._group_controls.now_mandatory.size %]
+  [% FOREACH g = changes._group_controls.now_mandatory %]
+    <p>
+    Lägger till [% terms.bugs %] i gruppen '[% g.name FILTER html %]', som
+    nu är obligatorisk för denna produkt.<br>
+    [% IF g.bug_count == 1 %]
+      Ett [% terms.bug %] lades till.
+    [% ELSE %]
+      [% g.bug_count FILTER html %] [%+ terms.bugs %] lades till.
+    [% END %]
+    </p>
+  [% END %]
+[% END %]
+
+<p>Gruppstyrningen uppdaterades.</p>
+
+[% PROCESS admin/products/footer.html.tmpl %]
+
+[% PROCESS global/footer.html.tmpl %]

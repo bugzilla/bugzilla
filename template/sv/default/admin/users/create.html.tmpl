@@ -1,0 +1,44 @@
+[%# This Source Code Form is subject to the terms of the Mozilla Public
+  # License, v. 2.0. If a copy of the MPL was not distributed with this
+  # file, You can obtain one at http://mozilla.org/MPL/2.0/.
+  #
+  # This Source Code Form is "Incompatible With Secondary Licenses", as
+  # defined by the Mozilla Public License, v. 2.0.
+  #%]
+
+[% PROCESS global/header.html.tmpl
+  title = "Lägg till användare"
+  style_urls = ['skins/standard/admin.css']
+  doc_section = "administering/users.html#creating-new-users"
+%]
+
+[% PROCESS admin/users/listselectvars.html.tmpl
+  listselectionvalues = listselectionvalues
+%]
+
+<form method="post" action="editusers.cgi">
+  <table id="admin_table_edit">
+    [% PROCESS admin/users/userdata.html.tmpl
+      editform  = 0
+      editusers = editusers
+      otheruser = []
+    %]
+  </table>
+  <p>
+    <input type="submit" id="add" value="Lägg till">
+    <input type="hidden" name="action" value="new">
+    <input type="hidden" name="token" value="[% token FILTER html %]">
+    [% INCLUDE listselectionhiddenfields %]
+  </p>
+</form>
+
+<p>
+  Du kan också <a href="editusers.cgi">söka efter en användare</a>
+  [% IF listselectionvalues %],
+    eller
+    <a href="editusers.cgi?action=list[% INCLUDE listselectionurlparams %]">gå
+    tillbaka till användarlistan</a>
+  [% END %].
+</p>
+
+[% PROCESS global/footer.html.tmpl %]

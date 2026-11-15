@@ -728,7 +728,7 @@
     </th>
     <td>
       [% bug.delta_ts FILTER time("%Y-%m-%d %H:%M %Z") %]
-      (<a href="show_activity.cgi?id=[% bug.bug_id %]">[%# terms.Bug %]History</a>)
+      (<a href="show_activity.cgi?id=[% bug.bug_id %]">Historik</a>)
     </td>
   
   </tr>
@@ -837,7 +837,7 @@
       </th>
       <td>
         <input type="hidden" name="defined_bug_ignored" value="1">
-        <span title="You will still receive emails for flag requests directed at you.">
+        <span title="Du får fortfarande e-post om flaggbegäranden som riktas till dig.">
           <input type="checkbox" name="bug_ignored" id="bug_ignored" value="1"
                  [% ' checked="checked"' IF user.is_bug_ignored(bug.id) %]>
           (never email me about this [% terms.bug %])

@@ -493,7 +493,7 @@
   
   [% ELSIF error == "entry_access_denied" %]
     [% title = "Åtkomst nekad" %]
-    [% admindocslinks = {'categorization.html#product-group-controls' => 'Group Security'} %]
+    [% admindocslinks = {'categorization.html#product-group-controls' => 'Gruppsäkerhet'} %]
     Produkten <em>[% product FILTER html %]</em> finns antingen inte
     eller så har du inte behörighet att
     rapportera [% terms.abug %] i den.
@@ -689,9 +689,9 @@
 
   [% ELSIF error == "flag_requestee_unauthorized" %]
     [% title = "Flaggmottagaren saknar behörighet" %]
-    [% admindocslinks = {'flags.html' => 'Administering Flags',
-                         'categorization.html#assigning-group-controls-to-products' => 'Group Security'} %]
-    [% docslinks = {'using/understanding.html#flags' => 'Using Flags'} %]
+    [% admindocslinks = {'flags.html' => 'Administrera flaggor',
+                         'categorization.html#assigning-group-controls-to-products' => 'Gruppsäkerhet'} %]
+    [% docslinks = {'using/understanding.html#flags' => 'Använda flaggor'} %]
 
     Du bad [% requestee.identity FILTER html %]
     om <code>[% flag_type.name FILTER html %]</code> för [% terms.bug %]
@@ -705,9 +705,9 @@
 
   [% ELSIF error == "flag_requestee_unauthorized_attachment" %]
     [% title = "Flaggmottagaren saknar behörighet" %]
-    [% admindocslinks = {'flags.html' => 'Administering Flags',
-                         'categorization.html#assigning-group-controls-to-products' => 'Group Security'} %]
-    [% docslinks = {'using/understanding.html#flags' => 'Using Flags'} %]
+    [% admindocslinks = {'flags.html' => 'Administrera flaggor',
+                         'categorization.html#assigning-group-controls-to-products' => 'Gruppsäkerhet'} %]
+    [% docslinks = {'using/understanding.html#flags' => 'Använda flaggor'} %]
 
     Du bad [% requestee.identity FILTER html %]
     om <code>[% flag_type.name FILTER html %]</code> för
@@ -935,7 +935,7 @@
     
   [% ELSIF error == "illegal_group_control_combination" %]
     [% title = "Din kombination av gruppstyrningar är otillåten" %]
-    [% admindocslinks = {'categorization.html#assigning-group-controls-to-products' => 'Assigning Group Controls to Products'} %]
+    [% admindocslinks = {'categorization.html#assigning-group-controls-to-products' => 'Tilldela gruppstyrningar till produkter'} %]
     Din kombination av gruppstyrningar för gruppen ”[% groupname FILTER html %]”
     är otillåten.
 
@@ -952,13 +952,13 @@
     &lt;, &gt;, &amp;.
 
   [% ELSIF error == "illegal_series_creation" %]
-    [% admindocslinks = {'categorization.html#assigning-group-controls-to-products' => 'Group security'} %]
-    [% docslinks = {'using/reports-and-charts.html' => 'Reporting'} %]
+    [% admindocslinks = {'categorization.html#assigning-group-controls-to-products' => 'Gruppsäkerhet'} %]
+    [% docslinks = {'using/reports-and-charts.html' => 'Rapportering'} %]
     Du har inte behörighet att skapa serier.
         
   [% ELSIF error == "illegal_series_edit" %]
-    [% admindocslinks = {'categorization.html#assigning-group-controls-to-products' => 'Group security'} %]
-    [% docslinks = {'using/reports-and-charts.html' => 'Reporting'} %]
+    [% admindocslinks = {'categorization.html#assigning-group-controls-to-products' => 'Gruppsäkerhet'} %]
+    [% docslinks = {'using/reports-and-charts.html' => 'Rapportering'} %]
     Du har inte behörighet att redigera serien. För att göra det måste du vara
     dess skapare eller administratör.
 
@@ -975,7 +975,7 @@
     Felet var: [% dberror FILTER html %].
         
   [% ELSIF error == "insufficient_data_points" %]
-    [% docslinks = {'using/reports-and-charts.html' => 'Reporting'} %]
+    [% docslinks = {'using/reports-and-charts.html' => 'Rapportering'} %]
     Det finns inte tillräckligt med datapunkter för att skapa ett diagram ännu.
         
   [% ELSIF error == "invalid_attach_id" %]
@@ -1352,12 +1352,12 @@
     
   [% ELSIF error == "no_keywords" %]
     [% title = "Inga nyckelord" %]
-    [% admindocslinks = {'keywords.html' => 'Setting up a keyword'} %]
+    [% admindocslinks = {'keywords.html' => 'Ställa in ett nyckelord'} %]
     Inga nyckelord har definierats för installationen.
 
   [% ELSIF error == "no_new_quips" %]
     [% title = "Inga nya kommentarer" %]
-    [% admindocslinks = {'quips.html' => 'Controlling quip usage'} %]
+    [% admindocslinks = {'quips.html' => 'Styra användningen av citat'} %]
     Denna webbplats tillåter inte att nya kommentarer läggs till.
 
   [% ELSIF error == "no_page_specified" %]
@@ -1367,9 +1367,9 @@
   [% ELSIF error == "no_products" %]
     [% title = "Inga produkter" %]
     [% admindocslinks = {
-      'categorization.html#creating-new-products'  => 'Setting up a product',
-      'categorization.html#components'             => 'Adding components to products',
-      'categorization.html#product-group-controls' => 'Groups security'
+      'categorization.html#creating-new-products'  => 'Ställa in en produkt',
+      'categorization.html#components'             => 'Lägga till komponenter i produkter',
+      'categorization.html#product-group-controls' => 'Gruppsäkerhet'
     } %]
     Antingen har inga produkter definierats för att rapportera [% terms.bugs %] i eller så
     har du inte åtkomst till någon.

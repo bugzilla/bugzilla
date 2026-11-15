@@ -1,0 +1,89 @@
+[%# This Source Code Form is subject to the terms of the Mozilla Public
+  # License, v. 2.0. If a copy of the MPL was not distributed with this
+  # file, You can obtain one at http://mozilla.org/MPL/2.0/.
+  #
+  # This Source Code Form is "Incompatible With Secondary Licenses", as
+  # defined by the Mozilla Public License, v. 2.0.
+  #%]
+
+[% PROCESS bug/time.html.tmpl %]
+
+[% IF incomplete_data %]
+  <p>
+    Det fanns tidigare ett fel i <a href="http://www.bugzilla.org/">Bugzilla</a>
+    som kunde leda till att aktivitetsdata gick förlorade om det fanns många
+    CC-mottagare eller beroenden. Felet är rättat, men vissa uppgifter hade redan
+    försvunnit ur aktivitetstabellen och kan inte återskapas. Ändringar som skriptet
+    inte kan fastställa säkert har frågetecknet ”?” först.
+  </p>
+[% END %]
+
+[% IF operations.size > 0 %]
+  <table id="bug_activity">
+    <tr class="column_header">
+      <th>Vem</th>
+      <th>När</th>
+      <th>Vad</th>
+      <th>Borttaget</th>
+      <th>Tillagt</th>
+    </tr>
+
+    [% FOREACH operation = operations %]
+      <tr>
+        <td rowspan="[% operation.changes.size %]">
+          [% operation.who FILTER email FILTER html %]
+        </td>
+        <td rowspan="[% operation.changes.size %]">
+          [% operation.when FILTER time %]
+        </td>
+        [% FOREACH change = operation.changes %]
+          [% "</tr><tr>" IF loop.index > 0 %]
+            <td>
+              [% IF change.attachid %]
+                <a href="attachment.cgi?id=[% change.attachid %]">
+                Bilaga #[% change.attachid %]</a>
+              [% END %]
+              [% IF change.comment.defined %]
+                 [% comment_desc = field_descs.${change.fieldname} %]
+                 [% comment_num = "Kommentar $change.comment.count" FILTER bug_link(bug.bug_id, comment_num => change.comment.count) %]
+                 [% comment_desc.replace('^(Kommentar )?', "$comment_num ") FILTER none %]
+              [% ELSE %]
+                [%+ field_descs.${change.fieldname} FILTER html %]
+              [% END %]
+            </td>
+            [% PROCESS change_column change_type = change.removed %]
+            [% PROCESS change_column change_type = change.added %]
+        [% END %]
+      </tr>
+    [% END %]
+  </table>
+[% ELSE %]
+  <p>
+    Inga ändringar har gjorts i detta [% terms.bug %] ännu.
+  </p>
+[% END %]
+
+[% BLOCK change_column %]
+  <td>
+    [% IF change_type.defined %]
+      [% IF change.fieldname == 'estimated_time' ||
+            change.fieldname == 'remaining_time' ||
+            change.fieldname == 'work_time' %]
+        [% PROCESS formattimeunit time_unit=change_type %]
+      [% ELSIF change.fieldname == 'blocked' ||
+               change.fieldname == 'dependson' %]
+        [% change_type FILTER bug_list_link FILTER none %]
+      [% ELSIF change.fieldname == 'assigned_to' ||
+               change.fieldname == 'reporter' ||
+               change.fieldname == 'qa_contact' ||
+               change.fieldname == 'cc' ||
+               change.fieldname == 'flagtypes.name' %]
+        [% display_value(change.fieldname, change_type) FILTER email FILTER html %]
+      [% ELSE %]
+        [% display_value(change.fieldname, change_type) FILTER html FILTER html_line_break %]
+      [% END %]
+    [% ELSE %]
+      &nbsp;
+    [% END %]
+  </td>
+[% END %]

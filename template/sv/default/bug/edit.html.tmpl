@@ -332,7 +332,7 @@
       <th class="field_label">
         [% can_edit_priority = bug.check_can_change_field('priority', 0, 1) %]
         <label [% IF can_edit_priority %]for="priority"[% END %] accesskey="i">
-          <a href="page.cgi?id=fields.html#importance"><u>I</u>mportance</a></label>:
+          <a href="page.cgi?id=fields.html#importance"><u>V</u>ikt</a></label>:
       </th>
       <td>
        [% INCLUDE bug/field.html.tmpl
@@ -360,7 +360,7 @@
     [% IF Param("timetrackinggroup") && bug.deadline %]
       <tr>
         <th class="field_label">
-          <a href="page.cgi?id=fields.html#deadline">Deadline</a>:
+          <a href="page.cgi?id=fields.html#deadline">Tidsgräns</a>:
         </th>
         <td>[% bug.deadline FILTER html %]</td>
       </tr>
@@ -454,7 +454,7 @@
             %]
             <br>
             <input type="checkbox" id="set_default_qa_contact" name="set_default_qa_contact" value="1">
-            <label for="set_default_qa_contact" id="set_default_qa_contact_label">Reset QA Contact to default</label>
+            <label for="set_default_qa_contact" id="set_default_qa_contact_label">Återställ QA-kontakt till standardvärdet</label>
           </div>
           <script type="text/javascript">
             hideEditableField('bz_qa_contact_edit_container', 
@@ -567,7 +567,7 @@
   [% RETURN UNLESS bug.duplicates.size %]
   <tr>
     <th class="field_label">
-      <label>Duplicates ([% bug.duplicates.size %])</label>:
+      <label>Dubbletter ([% bug.duplicates.size %])</label>:
     </th>
     <td class="field_value">
       <span id="duplicates">
@@ -601,10 +601,10 @@
       <th>&nbsp;</th>
 
       <td id="show_dependency_tree_or_graph">
-        Show dependency <a href="showdependencytree.cgi?id=[% bug.bug_id %]&amp;hide_resolved=1">tree</a>
+        Visa <a href="showdependencytree.cgi?id=[% bug.bug_id %]&amp;hide_resolved=1">beroendeträd</a>
 
         [% IF Param('webdotbase') %]
-          /&nbsp;<a href="showdependencygraph.cgi?id=[% bug.bug_id %]">graph</a>
+          /&nbsp;<a href="showdependencygraph.cgi?id=[% bug.bug_id %]">diagram</a>
         [% END %]
       </td>
     </tr>
@@ -633,11 +633,11 @@
       [% IF NOT emitted_description %]
         [% emitted_description = 1 %]
           <div id="bz_restrict_group_visibility_help">
-            <b>Only users in
+            <b>Endast användare i
               [%+ IF Param('or_groups') %]at least one[% ELSE %]all[% END %]
               of the selected groups can view this [% terms.bug %]:</b>
              <p class="instructions">
-               Unchecking all boxes makes this a more public [% terms.bug %].
+               Om du avmarkerar alla rutor blir [% terms.bug %] mer offentlig.
              </p>
           </div>
       [% END %]
@@ -693,7 +693,7 @@
                  name="cclist_accessible" id="cclist_accessible"
                  [% " checked" IF bug.cclist_accessible %]
                  [% " disabled=\"disabled\"" UNLESS user_can_edit_accessible %]>
-          <label for="cclist_accessible">CC List</label>
+          <label for="cclist_accessible">CC-lista</label>
         </div>
         <p class="instructions">
           The assignee
@@ -701,7 +701,7 @@
              and QA contact
           [% END %]
           can always see [% terms.abug %], and this section does not
-          take effect unless the [% terms.bug %] is restricted to at
+          få effekt om inte [% terms.bug %] begränsas till minst
           least one group.
         </p>
       </div>
@@ -753,19 +753,19 @@
                    IF user.settings.state_addselfcc.value == 'always'
                       || (!bug.user.has_any_role
                           && user.settings.state_addselfcc.value == 'cc_unless_role') %]>
-            <label for="addselfcc">Add me to CC list</label>
+            <label for="addselfcc">Lägg till mig i CC-listan</label>
             <br> 
           [% END %]
         [% END %]
         [% bug.cc.size FILTER html %] 
         [% IF bug.cc.size == 1 %]
-          user
+          användare
         [% ELSE %]
-          users
+          användare
         [% END %]
         [% IF user.id %]
           [% IF bug.cc.contains( user.email ) %]
-            including you
+            inklusive dig
           [% END %]
         [% END %]
         [% IF user.id || bug.cc.size %]
@@ -777,7 +777,7 @@
           <br>
           [% IF user.id %]
             <div>
-              <div><label for="cc"><b>Add</b></label></div>
+              <div><label for="cc"><b>Lägg till</b></label></div>
               [% INCLUDE global/userselect.html.tmpl
                   id => "newcc"
                   name => "newcc"
@@ -870,7 +870,7 @@
       [% IF bug.alias.size %]
         [% bug.alias.join(', ') FILTER html %]
       [% ELSE %]
-        None
+        Inga
       [% END %]
       [% IF bug.check_can_change_field('alias', 0, 1) %]
         <span id="alias_edit_area_showhide_container" class="bz_default_hidden">
@@ -892,7 +892,7 @@
             <br>
 
             <input type="checkbox" id="removealias" name="removealias">
-            <label for="removealias">Remove selected aliases</label>
+            <label for="removealias">Ta bort valda alias</label>
           [% END %]
         </div>
         <script type="text/javascript">
@@ -941,8 +941,8 @@
         [% END %]
         [% IF show_more_flags %]
           <span id="bz_flags_more_container" class="bz_default_hidden">
-            [% IF !bug_flags_set %]<em>None yet set</em>[% END %]
-            (<a href="#" id="bz_flags_more_action">[% IF !bug_flags_set %]set[% ELSE %]more[% END %] flags</a>)
+            [% IF !bug_flags_set %]<em>Inga har angetts ännu</em>[% END %]
+            (<a href="#" id="bz_flags_more_action">[% IF !bug_flags_set %]ange[% ELSE %]fler[% END %] flaggor</a>)
           </span>
           <script type="text/javascript">
             YAHOO.util.Dom.removeClass('bz_flags_more_container', 'bz_default_hidden');
@@ -1120,16 +1120,16 @@
 [% BLOCK comment_box %]
   <div id="add_comment" class="bz_section_additional_comments">
     [% IF user.id %]
-      <label for="comment" accesskey="c"><b>Additional 
-        <u>C</u>omments</b></label>:
+      <label for="comment" accesskey="c"><b>Ytterligare
+        <u>k</u>ommentarer</b></label>:
 
       [% IF user.is_insider && bug.check_can_change_field('longdesc', 0, 1) %]
         <input type="checkbox" name="comment_is_private" value="1"
                id="newcommentprivacy"
                onClick="updateCommentTagControl(this, 'comment')">
         <label for="newcommentprivacy">
-          Make comment private (visible only to members of the
-          <strong>[% Param('insidergroup') FILTER html %]</strong> group)
+          Gör kommentaren privat (synlig endast för medlemmar i gruppen
+          <strong>[% Param('insidergroup') FILTER html %]</strong>)
         </label>
       [% END %]
 
@@ -1173,7 +1173,7 @@
         <tr>
           <td>
             <fieldset>
-              <legend>Note</legend>
+              <legend>Obs</legend>
               You need to
               <a href="show_bug.cgi?id=
                       [%- bug.bug_id %]&amp;GoAheadAndLogIn=1">log in</a>
@@ -1245,7 +1245,7 @@
 [% BLOCK commit_button %]
   [% IF user.id %]
     <div class="knob-buttons">
-      <input type="submit" value="Save Changes" 
+      <input type="submit" value="Spara ändringar"
              id="commit[% id FILTER css_class_quote %]">
     </div>
   [% END %]

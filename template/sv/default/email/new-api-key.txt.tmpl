@@ -1,0 +1,33 @@
+[%# This Source Code Form is subject to the terms of the Mozilla Public
+  # License, v. 2.0. If a copy of the MPL was not distributed with this
+  # file, You can obtain one at http://mozilla.org/MPL/2.0/.
+  #
+  # This Source Code Form is "Incompatible With Secondary Licenses", as
+  # defined by the Mozilla Public License, v. 2.0.
+  #%]
+
+[%# INTERFACE:
+  # user: The Bugzilla::User object of the user being created
+  # new_key: The API key created
+  #%]
+
+From: [% Param('mailfrom') %]
+To: [% user.email %]
+Subject: [% terms.Bugzilla %]: ny API-nyckel skapad
+X-Bugzilla-Type: admin
+
+[Det här e-postmeddelandet har skapats automatiskt]
+
+En ny API-nyckel för [% terms.Bugzilla %][% IF new_key.description %], med
+beskrivningen ”[% new_key.description %]”[% END %], har skapats. Du kan visa
+eller ändra nyckeln på följande adress:
+
+[%+ urlbase %]userprefs.cgi?tab=apikey
+
+VIKTIGT: Om du inte begärde en ny nyckel kan ditt [% terms.Bugzilla %]-konto
+ha utsatts för intrång. Inaktivera i så fall nyckeln på adressen ovan och byt
+lösenord omedelbart.
+
+Av säkerhetsskäl har vi inte tagit med den nya nyckeln i detta e-postmeddelande.
+
+Kontakta [% Param('maintainer') %] om du har frågor om ditt konto.

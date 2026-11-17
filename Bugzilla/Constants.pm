@@ -151,6 +151,7 @@ use Memoize;
   ON_ACTIVESTATE
 
   MAX_TOKEN_AGE
+  MAX_SHORT_TOKEN_HOURS
   MAX_LOGINCOOKIE_AGE
   MAX_SUDO_TOKEN_AGE
   MAX_LOGIN_ATTEMPTS
@@ -438,6 +439,9 @@ use constant TIMETRACKING_FIELDS =>
 # The maximum number of days a token will remain valid.
 use constant MAX_TOKEN_AGE => 3;
 
+# The maximum number of hours a short-lived token will remain valid.
+use constant MAX_SHORT_TOKEN_HOURS => 1;
+
 # How many days a logincookie will remain valid if not used.
 use constant MAX_LOGINCOOKIE_AGE => 30;
 
@@ -483,6 +487,7 @@ use constant contenttypes => {
   "csv"  => "text/csv",
   "png"  => "image/png",
   "ics"  => "text/calendar",
+  "txt"  => "text/plain",
 };
 
 # Usage modes. Default USAGE_MODE_BROWSER. Use with Bugzilla->usage_mode.

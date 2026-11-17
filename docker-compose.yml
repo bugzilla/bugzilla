@@ -13,6 +13,8 @@ services:
     volumes:
       - bugzilla5-data-dir:/var/www/html/data
       - .:/mnt/sync
+      # Optional: create ./custom-scripts and uncomment to run startup scripts.
+      # - ./custom-scripts:/custom-scripts:ro
     tmpfs:
       - /tmp
       - /run/lock
@@ -48,3 +50,4 @@ services:
 volumes:
   bugzilla5-mysql-db:
   bugzilla5-data-dir:
+

@@ -29,6 +29,32 @@ interactive confirmation, you can explicitly allow that conversion with:
 
 Only do this if you understand the warning and have a backup of your data.
 
+Custom Docker startup scripts
+-----------------------------
+
+To run custom scripts at container startup, create a `custom-scripts`
+directory next to docker-compose.yml and uncomment the example read-only
+mount under bugzilla5.web in that file. For example:
+
+    mkdir -p custom-scripts
+    cat > custom-scripts/10-example.sh <<'EOF'
+    #!/bin/bash
+    echo "Running custom Bugzilla setup"
+    EOF
+    docker compose up
+
+On every container start, Bugzilla runs each non-hidden regular file in
+/custom-scripts in shell glob order using /bin/bash, before Apache starts and
+before waiting for the database. Files need not be executable or have a
+particular extension; subdirectories are ignored. Use numbered filenames to
+control the order and make scripts safe to run more than once.
+
+Scripts run as root and inherit the container environment, which may include
+credentials. Only mount scripts from a trusted source. Each script's exit
+status is logged; a nonzero status stops startup and prevents later scripts
+from running. Scripts that need to stop on a failed command must handle that
+failure themselves (for example, with an appropriate `set -e`).
+
 Reporting Bugs
 ==============
 
@@ -65,3 +91,4 @@ defined by the Mozilla Public License, v. 2.0.
 However, this is all only relevant to you if you want to modify the code and
 redistribute it. As with all open source software, there are no restrictions
 on running it, or on modifying it for your own purposes.
+
